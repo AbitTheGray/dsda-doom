@@ -562,6 +562,9 @@ function(AddGameExecutable TARGET SOURCES)
     set_target_properties(${TARGET} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${DSDA_OUTPUT_PATH}
         C_STANDARD 99
+        CXX_STANDARD 26
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
     )
 
     add_dependencies(${TARGET} dsda-doom-wad)
