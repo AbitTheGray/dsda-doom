@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: BSD-3-Clause
+
 // Copyright (c) 2010, Braden "Blzut3" Obrzut <admin@maniacsvault.net>
 // All rights reserved.
 //

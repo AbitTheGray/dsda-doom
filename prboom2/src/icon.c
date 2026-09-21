@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
 static int icon_w = 32;
 static int icon_h = 32;
 

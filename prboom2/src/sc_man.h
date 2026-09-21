@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
 #ifndef __SC_MAN__
 #define __SC_MAN__
 

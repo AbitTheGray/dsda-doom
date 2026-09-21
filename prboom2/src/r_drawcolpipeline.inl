@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 
 // no color mapping
 #define R_DRAWCOLUMN_FUNCNAME R_DRAWCOLUMN_FUNCNAME_COMPOSITE(_PointUV)

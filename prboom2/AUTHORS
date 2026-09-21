@@ -1,3 +1,100 @@
+dsda-doom - authors, contributors and credits
+=============================================
+
+This file is the single place where the copyright notices and the credits for
+dsda-doom live.
+
+The source files used to carry a full copyright and licence header each, some
+thirty lines of it. They no longer do. The C++ rewrite moves code between
+files constantly, which made those per-file headers drift out of date almost
+immediately and impossible to keep honest. Collecting them here changes
+nothing about the licensing - it only puts the notices somewhere they can stay
+correct, and it means nobody has to read 480 files to find out who built this.
+
+The licence itself is in COPYING: the GNU General Public License, version 2 or
+(at your option) any later version. Everything in this repository is covered
+by it unless the file itself says otherwise. The files that say otherwise are
+listed under "Third-party code" at the end of this file - those keep their own
+notice in the source because their licences require it.
+
+Each source file still states its own licence, in one machine-readable line at
+the top:
+
+  // SPDX-License-Identifier: GPL-2.0-or-later
+
+That is the whole header. It is enough for licence scanners and for anyone
+reading the file, and unlike the old boilerplate it stays true when code moves
+between files. Eight files carry no tag, because their terms have no standard
+SPDX identifier and inventing one would be worse than saying nothing; they
+keep their full notice in the source instead:
+
+  gl_sky.c, gl_vertex.c          BSD-style, with an extra non-standard clause
+  md5.c, md5.h                   public domain
+  win_opendir.c, win_opendir.h   public domain
+  xs_Float.h                     terms not stated by the author
+  textscreen/fonts/normal.h      see textscreen/fonts/README
+
+If you are listed here and the description of your work is wrong or too thin,
+please correct it. If you are not listed here and should be, please say so.
+
+
+=============================================================================
+Copyright holders
+=============================================================================
+
+These are the copyright notices that the source files used to carry, gathered
+into one list. Where the old headers claimed overlapping date ranges for the
+same set of people, the ranges have been merged into the widest one.
+
+  Copyright (C) 1993-1996 id Software, Inc.
+  Copyright (C) 1993-2008 Raven Software
+  Copyright (C) 1999      id Software, Chi Hoang, Lee Killough, Jim Flynn,
+                          Rand Phares, Ty Halderman
+  Copyright (C) 1999-2006 Jess Haas, Nicolas Kalkhof, Colin Phipps,
+                          Florian Schulze, Andrey Budko
+  Copyright (C) 2005-2006 Florian Schulze, Colin Phipps, Neil Stevens,
+                          Andrey Budko
+  Copyright (C) 2005-2014 Simon Howard
+  Copyright (C) 2006      Ben Ryves
+  Copyright (C) 2006-2008 G Jackson, Jaakko Keranen
+  Copyright (C) 2007      Andrey Budko, Roman Marchenko
+  Copyright (C) 2009      Andrey Budko
+  Copyright (C) 2011      Nicholai Main
+  Copyright (C) 2018      Simon Howard
+  Copyright (C) 2020-2024 Ryan Krafnick
+  Copyright (C) 2023      Fabian Greffrath
+  Copyright (C) 2023      Pierre Wendling
+  Copyright (C) 2025      ceski
+  Copyright (C) 2025-2026 Andrik Powell
+
+Third-party components under their own licences carry their own copyright
+lines; see "Third-party code" below.
+
+
+=============================================================================
+dsda-doom
+=============================================================================
+
+Ryan Krafnick (kraflab)
+Author of dsda-doom, the successor to PrBoom+. Practically everything under
+src/dsda - the in-game console and scripting, the configurable HUD and its
+components, demo analysis and the DSDA demo format, brute force and build
+mode for TASing, rewind, strict mode, the MAPINFO/UMAPINFO handling, key
+frames, and the command line argument system - plus the integration work that
+holds Heretic, Hexen, MBF21 and UDMF support together.
+
+Andrik Powell
+Heretic and Hexen fixes, UMAPINFO work for Heretic, game info handling
+(src/dsda/gameinfo) and the mouse input code (src/m_mouse.inl).
+
+Pierre Wendling
+Zip file handling (src/dsda/zipfile), and portability fixes.
+
+
+=============================================================================
+PrBoom and PrBoom+
+=============================================================================
+
 This file is now the amalgamated list of authors, contributors and credits
 for PrBoom. Hopefully by keeping these all in one place, they will remain
 more accurate.
@@ -31,7 +128,11 @@ one. The current authors of PrBoom are:
 Florian Schulze <florian.schulze@gmx.net>
 Colin Phipps <cph@moria.org.uk>
 Neil Stevens <neil@hakubi.us> - Mac OS X porting
-Andrey Budko <andrey.budko@gmail.com>
+Andrey Budko <andrey.budko@gmail.com> - author of PrBoom+, from which
+dsda-doom descends. The OpenGL renderer in its current shape, the uncapped
+framerate and interpolation (r_fps), the overflow emulation (g_overflow),
+demo and compatibility work, the wad table handling (wadtbl), and the
+e6y.c/e6y.h grab bag that carries his handle.
 Rob Young (RjY) <rjy@users.sourceforge.net>
 
 Our thanks go to all the authors of the ports mentioned above, and also the
@@ -46,7 +147,14 @@ Much work on the OpenGL renderer.
 James "Quasar" Haley <haleyjd@concentric.net>
 Ever willing to talk about source ideas, and has pointed me in the direction of
 a lot of Boom and MBF bugs; also various bits code from his port Eternity have
-been used, such as the BEX enhancements.
+been used, such as the BEX enhancements. Also the POSIX opendir implementation
+for Visual C++ (win_opendir) and some of the utility functions in tables.h.
+
+Roman Marchenko
+OpenGL renderer work in gl_main.
+
+G Jackson and Jaakko Keranen
+The OpenGL automap (gl_map).
 
 Bob Aman (sporkmonger.com)
 Created the RMUDAnsiTextView class used in the Mac launcher.
@@ -160,3 +268,109 @@ Another bug spotter.
 
 Everyone who contributed indirectly to MBF and Boom and Doom; see the
 respective documentation files.
+
+
+=============================================================================
+Heretic and Hexen
+=============================================================================
+
+Raven Software
+The original Heretic and Hexen game code, everything under src/heretic and
+src/hexen. Also the original script parser (sc_man), written for Heretic 2 by
+Ben Gokey.
+
+Simon "fraggle" Howard
+Chocolate Heretic and Chocolate Hexen, which is the basis of the src/heretic
+and src/hexen trees here. Also, from Chocolate Doom: the text mode screen
+emulation (src/textscreen), the OPL emulation layer and MIDI file parsing
+(MUSIC/opl, MUSIC/opl_queue, MUSIC/midifile, MUSIC/oplplayer), the in-memory
+IO shim (memio), MUS to MIDI conversion (mus2mid), and the file globbing API
+(i_glob).
+
+
+=============================================================================
+Sound and music
+=============================================================================
+
+Nicholai Main (haleyjd's "Chocolate Strife" collaborator, natt)
+The music player backends: FluidSynth (flplayer), libmad (madplayer),
+PortMidi (portmidiplayer) and Ogg Vorbis (vorbisplayer), the player interface
+they share (musicplayer.h), and the video/audio capture support (i_capture).
+
+Ben Ryves <benryves@benryves.com>
+The MUS to MIDI converter (mus2mid), written for Chocolate Doom.
+
+ceski
+Tracker music playback through libxmp (MUSIC/xmpplayer).
+
+Fabian Greffrath
+Sound loading through libsndfile (SDL/i_sndfile).
+
+
+=============================================================================
+Third-party code
+=============================================================================
+
+These files are not under the GPL, or are under a different copyright, and
+they keep their own notice in the source because their licences require the
+notice to travel with the code. Do not strip these headers.
+
+BSD-style licences
+------------------
+  src/scanner.cpp, src/scanner.h
+    Copyright (c) 2010 Braden "Blzut3" Obrzut <admin@maniacsvault.net>
+    3-clause BSD. The lexer used by the UMAPINFO and UDMF parsers.
+
+  src/gl_sky.c
+    Copyright 2003 Tim Stump, 2005 Christoph Oelckers, 2009 Andrey Budko
+    BSD-style with a mandatory source disclosure clause. Sky rendering,
+    loosely based on the JDoom and ZDoomGL skies.
+
+  src/gl_clipper.c
+    Copyright 2003 Tim Stump
+    BSD-style. Visibility checks, loosely based on the JDoom clipper.
+
+  src/gl_vertex.c
+    Copyright 2006 Christoph Oelckers
+    BSD-style, with a GZDoom-specific clause. Vertex handling.
+
+  src/r_patch.c
+    Copyright 2004-2006 Randy Heit
+    BSD-style. Patch and composite texture handling.
+
+GNU Lesser General Public License
+---------------------------------
+  src/umapinfo.cpp, src/umapinfo.h
+    Copyright 2017 Christoph Oelckers
+    LGPL v2 or later. The UMAPINFO parser.
+
+  src/MUSIC/opl3.c, src/MUSIC/opl3.h, src/MUSIC/wf_rom.h
+    Copyright (C) 2013-2020 Nuke.YKT
+    Copyright (C) 2026 Tony Gies (Nuked-OPL3-fast modifications)
+    LGPL v2.1 or later. The Nuked OPL3 emulator, in Tony Gies' bit-exact
+    performance-optimised fork (Nuked-OPL3-fast). The header of opl3.c also
+    documents the fork's changes and thanks the MAME development team
+    (Jarek Burczynski, Tatsuyuki Satoh), carbon14 and opl3 of
+    forums.submarine.org.uk, Matthew Gambrell and Olli Niemitalo of OPLx
+    decapsulated, and John McMaster and digshadow of siliconpr0n.org.
+
+Public domain
+-------------
+  src/md5.c, src/md5.h
+    The MD5 message-digest algorithm, due to Ron Rivest, written by
+    Colin Plumb in 1993 and placed in the public domain, with later changes
+    by Ian Jackson <ian@chiark.greenend.org.uk>.
+
+  src/win_opendir.c, src/win_opendir.h
+    POSIX opendir for Visual C++, James Haley, 2006. Public domain, derived
+    from the MinGW C Library Extensions Source (also public domain).
+
+Other
+-----
+  src/xs_Float.h
+    Fast float-to-int conversion, from Sree Kotay's article
+    "Know Your FPU: Fixing Floating Fast"
+    (http://www.stereopsis.com/sree/fpu2006.html).
+
+  src/textscreen/fonts/normal.h
+    Generated font data. See src/textscreen/fonts/README for its copyright.

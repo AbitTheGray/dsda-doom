@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 /* Nuked-OPL3-fast: logsin waveform lookup table.
  *
  * Copyright (C) 2013-2020 Nuke.YKT (source logsin data and waveform helpers)

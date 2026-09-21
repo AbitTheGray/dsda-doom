@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
 //**************************************************************************
 //**
 //** sc_man.c : Heretic 2 : Raven Software, Corp.
