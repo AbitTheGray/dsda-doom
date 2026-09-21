@@ -2,8 +2,7 @@
 
 // Text mode emulation in SDL
 
-#ifndef TXT_SDL_H
-#define TXT_SDL_H
+#pragma once
 
 // The textscreen API itself doesn't need SDL; however, SDL needs its
 // headers included where main() is defined.
@@ -30,6 +29,3 @@ typedef struct
 // GL stuff
 extern int GL_TXT_Init(void);
 extern void GL_TXT_UpdateScreen(void);
-
-#endif /* #ifndef TXT_SDL_H */
-

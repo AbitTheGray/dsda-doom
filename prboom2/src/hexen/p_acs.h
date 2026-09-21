@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef __HEXEN_P_ACS__
-#define __HEXEN_P_ACS__
+#pragma once
 
 #include "r_defs.h"
 #include "p_mobj.h"
@@ -75,5 +74,3 @@ extern acsInfo_t *ACSInfo;
 extern int MapVars[MAX_ACS_MAP_VARS];
 extern int WorldVars[MAX_ACS_WORLD_VARS];
 extern acsstore_t ACSStore[MAX_ACS_STORE + 1];  // +1 for termination marker
-
-#endif

@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //     MIDI file parsing.
 
-#ifndef MIDIFILE_H
-#define MIDIFILE_H
+#pragma once
 
 #include "doomtype.h"
 
@@ -169,5 +168,3 @@ void MIDI_DestroyFlatList (midi_event_t **evs);
 
 // NSM: timing calculator
 double MIDI_spmc (const midi_file_t *file, const midi_event_t *ev, unsigned sndrate);
-
-#endif /* #ifndef MIDIFILE_H */

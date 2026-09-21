@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //  DSDA GAMEINFO
 
-#ifndef __GAMEINFO__
-#define __GAMEINFO__
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,6 +13,4 @@ void dsda_LoadGameInfo(void);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

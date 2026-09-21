@@ -4,8 +4,7 @@
  *      Map Objects, MObj, definition and handling.
  */
 
-#ifndef __P_MOBJ__
-#define __P_MOBJ__
+#pragma once
 
 // Basics.
 #include "tables.h"
@@ -548,5 +547,3 @@ dboolean P_SpawnThing(short thing_id, mobj_t *source, int type,
 dboolean P_SpawnProjectile(short thing_id, mobj_t *source, int spawn_num, angle_t angle,
 	                         fixed_t speed, fixed_t vspeed, short dest_id, mobj_t *forcedest,
                            int gravity, short new_thing_id);
-
-#endif

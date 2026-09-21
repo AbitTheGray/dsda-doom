@@ -6,8 +6,7 @@
  *      that are associated with states/frames.
  */
 
-#ifndef __P_ENEMY__
-#define __P_ENEMY__
+#pragma once
 
 #include "p_mobj.h"
 
@@ -137,5 +136,3 @@ void A_NoBlocking(mobj_t * actor);
 // zdoom
 
 dboolean P_RaiseThing(mobj_t *corpse, mobj_t *raiser);
-
-#endif // __P_ENEMY__

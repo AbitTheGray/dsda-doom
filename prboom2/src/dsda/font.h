@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Font
 
-#ifndef __DSDA_FONT__
-#define __DSDA_FONT__
+#pragma once
 
 #include "r_defs.h"
 
@@ -26,5 +25,3 @@ extern dsda_font_t hud_font;
 extern dsda_font_t exhud_font;
 
 void dsda_InitFont(void);
-
-#endif

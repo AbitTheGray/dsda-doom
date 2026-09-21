@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Extended Cmd
 
-#ifndef __DSDA_EXCMD__
-#define __DSDA_EXCMD__
+#pragma once
 
 #include "d_ticcmd.h"
 
@@ -35,5 +34,3 @@ void dsda_QueueExCmdSave(int slot);
 void dsda_QueueExCmdLoad(int slot);
 void dsda_QueueExCmdGod(void);
 void dsda_QueueExCmdNoClip(void);
-
-#endif

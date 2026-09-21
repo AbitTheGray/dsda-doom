@@ -3,11 +3,8 @@
 // DESCRIPTION:
 //	DSDA Map Totals HUD Component
 
-#ifndef __DSDA_HUD_COMPONENT_MAP_TOTALS__
-#define __DSDA_HUD_COMPONENT_MAP_TOTALS__
+#pragma once
 
 void dsda_InitMapTotalsHC(int x_offset, int y_offset, int vpt_flags, int* args, int arg_count, void** data);
 void dsda_UpdateMapTotalsHC(void* data);
 void dsda_DrawMapTotalsHC(void* data);
-
-#endif

@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA MapInfo U
 
-#ifndef __DSDA_MAPINFO_U__
-#define __DSDA_MAPINFO_U__
+#pragma once
 
 #include "p_mobj.h"
 
@@ -54,5 +53,3 @@ int dsda_UGravity(fixed_t* gravity);
 int dsda_UAirControl(fixed_t* air_control);
 int dsda_UInitSky(void);
 int dsda_UMapColorMap(int* colormap);
-
-#endif

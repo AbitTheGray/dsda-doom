@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA MapInfo Legacy
 
-#ifndef __DSDA_MAPINFO_LEGACY__
-#define __DSDA_MAPINFO_LEGACY__
+#pragma once
 
 #include "p_mobj.h"
 #include "dsda/utility.h"
@@ -52,5 +51,3 @@ int dsda_LegacyGravity(fixed_t* gravity);
 int dsda_LegacyAirControl(fixed_t* air_control);
 int dsda_LegacyInitSky(void);
 int dsda_LegacyMapColorMap(int* colormap);
-
-#endif

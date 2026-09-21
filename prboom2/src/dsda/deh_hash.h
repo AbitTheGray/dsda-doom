@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Dehacked Hash
 
-#ifndef __DSDA_DEH_HASH__
-#define __DSDA_DEH_HASH__
+#pragma once
 
 #define DEH_INDEX_HASH_SIZE 128
 #define DEH_INDEX_NOT_FOUND -1
@@ -23,5 +22,3 @@ typedef struct {
 
 int dsda_FindDehIndex(int index, deh_index_hash_t* hash);
 int dsda_GetDehIndex(int index, deh_index_hash_t* hash);
-
-#endif

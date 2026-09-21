@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA MSecNode Management
 
+#pragma once
+
 #include "r_defs.h"
 
 void dsda_ArchiveMSecNodes(void);

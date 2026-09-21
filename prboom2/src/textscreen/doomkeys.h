@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //       Key definitions
 
-#ifndef __DOOMKEYS__
-#define __DOOMKEYS__
+#pragma once
 
 //
 // DOOM keyboard definition.
@@ -219,5 +218,3 @@ enum
 
     NUM_GYRO_AXES
 };
-
-#endif // __DOOMKEYS__

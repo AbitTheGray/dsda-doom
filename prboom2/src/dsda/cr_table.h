@@ -3,11 +3,8 @@
 // DESCRIPTION:
 //	DSDA CR Table
 
-#ifndef __DSDA_CR_TABLE__
-#define __DSDA_CR_TABLE__
+#pragma once
 
 #include "doomtype.h"
 
 byte* dsda_GenerateCRTable(void);
-
-#endif

@@ -4,8 +4,7 @@
  *      System specific interface stuff.
  */
 
-#ifndef __I_VIDEO__
-#define __I_VIDEO__
+#pragma once
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -85,5 +84,3 @@ void UpdateGrab(void);
 
 void I_SetWindowRect(void);
 void I_SetViewportRect(void);
-
-#endif

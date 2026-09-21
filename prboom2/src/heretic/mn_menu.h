@@ -2,8 +2,7 @@
 
 // MN_menu.h
 
-#ifndef __HERETIC_MN_MENU__
-#define __HERETIC_MN_MENU__
+#pragma once
 
 void MN_Init(void);
 void MN_Ticker(void);
@@ -31,5 +30,3 @@ void MN_DrawEpisode(void);
 void MN_UpdateClass(int choice);
 void MN_DrTextAYellow(const char *text, int x, int y);
 void MN_DrawSkillMenu(void);
-
-#endif

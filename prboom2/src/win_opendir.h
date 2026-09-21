@@ -13,8 +13,7 @@
 //  public domain).
 //
 
-#ifndef I_OPNDIR_H__
-#define I_OPNDIR_H__
+#pragma once
 
 #include <io.h>
 
@@ -67,7 +66,5 @@ void rewinddir(DIR *);
 long telldir(DIR *);
 void seekdir(DIR *, long);
 
-#endif
 
 // EOF
-

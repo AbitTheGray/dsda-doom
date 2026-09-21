@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Save
 
-#ifndef __DSDA_SAVE__
-#define __DSDA_SAVE__
+#pragma once
 
 void dsda_ArchiveAll(void);
 void dsda_UnArchiveAll(void);
@@ -20,5 +19,3 @@ int dsda_AllowAnyMenuSave(void);
 int dsda_AllowMenuLoad(int slot);
 int dsda_AllowAnyMenuLoad(void);
 void dsda_UpdateAutoSaves(void);
-
-#endif

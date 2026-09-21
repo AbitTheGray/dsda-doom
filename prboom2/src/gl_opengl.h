@@ -4,8 +4,7 @@
  *   Thanks Roman "Vortex" Marchenko
  */
 
-#ifndef _GL_OPENGL_H
-#define _GL_OPENGL_H
+#pragma once
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -129,5 +128,3 @@ typedef enum
   TM_INVERTOPAQUE = TMF_INVERTBIT | TMF_OPAQUEBIT,
 } tex_mode_e;
 void SetTextureMode(tex_mode_e type);
-
-#endif // _GL_OPENGL_H

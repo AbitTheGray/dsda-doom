@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Music
 
-#ifndef __DSDA_MUSIC__
-#define __DSDA_MUSIC__
+#pragma once
 
 #include "sounds.h"
 
@@ -16,5 +15,3 @@ void dsda_FreeDehMusic(void);
 void dsda_ArchiveMusic(void);
 void dsda_UnArchiveMusic(void);
 dboolean dsda_StartQueuedMusic(void);
-
-#endif

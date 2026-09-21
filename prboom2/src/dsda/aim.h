@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Aim
 
-#ifndef __DSDA_AIM__
-#define __DSDA_AIM__
+#pragma once
 
 #include "d_player.h"
 
@@ -21,5 +20,3 @@ angle_t dsda_LookDirToPitch(int lookdir);
 int dsda_PlayerLookDir(player_t* player);
 void dsda_PlayerAim(mobj_t* source, angle_t angle, aim_t* aim, uint64_t target_mask);
 void dsda_PlayerAimBad(mobj_t* source, angle_t angle, aim_t* aim, uint64_t target_mask);
-
-#endif

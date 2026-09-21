@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Tracker
 
-#ifndef __DSDA_TRACKER__
-#define __DSDA_TRACKER__
+#pragma once
 
 #include "p_mobj.h"
 
@@ -38,5 +37,3 @@ dboolean dsda_UntrackPlayer(int id);
 void dsda_WipeTrackers(void);
 void dsda_ResetTrackers(void);
 mobj_t* dsda_FindMobj(int id);
-
-#endif

@@ -3,9 +3,6 @@
 // DESCRIPTION:
 //	DSDA Memory
 
-#ifndef __DSDA_MEMORY__
-#define __DSDA_MEMORY__
+#pragma once
 
 void dsda_CacheSoundLumps(void);
-
-#endif

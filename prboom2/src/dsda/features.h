@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Features
 
+#pragma once
+
 #include "doomtype.h"
 
 typedef enum {

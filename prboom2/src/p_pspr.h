@@ -4,8 +4,7 @@
  *  Sprite animation.
  */
 
-#ifndef __P_PSPR__
-#define __P_PSPR__
+#pragma once
 
 #include "p_mobj.h"
 
@@ -129,5 +128,3 @@ void P_UpdateBeak(struct player_s * player, pspdef_t * psp);
 void P_SetPspriteNF(struct player_s * player, int position, statenum_t stnum);
 void P_PostMorphWeapon(struct player_s * player, weapontype_t weapon);
 void P_ActivateMorphWeapon(struct player_s * player);
-
-#endif

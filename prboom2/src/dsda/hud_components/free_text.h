@@ -3,11 +3,8 @@
 // DESCRIPTION:
 //	DSDA Free Text HUD Component
 
-#ifndef __DSDA_HUD_COMPONENT_FREE_TEXT__
-#define __DSDA_HUD_COMPONENT_FREE_TEXT__
+#pragma once
 
 void dsda_InitFreeTextHC(int x_offset, int y_offset, int vpt_flags, int* args, int arg_count, void** data);
 void dsda_UpdateFreeTextHC(void* data);
 void dsda_DrawFreeTextHC(void* data);
-
-#endif

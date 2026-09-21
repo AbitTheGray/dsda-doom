@@ -6,8 +6,7 @@
  *      This one is the original DOOM version, preserved.
  */
 
-#ifndef __INFO__
-#define __INFO__
+#pragma once
 
 /* Needed for action function pointer handling. */
 #include "d_think.h"
@@ -6651,5 +6650,3 @@ extern int ZMT_MAPSPOT_GRAVITY;
 extern int ZMT_TELEPORTDEST2;
 extern int ZMT_TELEPORTDEST3;
 extern int ZMT_AMBIENTSOUND;
-
-#endif

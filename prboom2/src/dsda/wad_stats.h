@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Wad Stats
 
-#ifndef __DSDA_WAD_STATS__
-#define __DSDA_WAD_STATS__
+#pragma once
 
 typedef struct {
   char lump[9];
@@ -38,5 +37,3 @@ void dsda_WadStatsExitMap(int missed_monsters);
 void dsda_WadStatsKill(void);
 void dsda_SaveWadStats(void);
 void dsda_InitWadStats(void);
-
-#endif

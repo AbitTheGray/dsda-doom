@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Text Color
 
-#ifndef __DSDA_TEXT_COLOR__
-#define __DSDA_TEXT_COLOR__
+#pragma once
 
 typedef enum {
   dsda_tc_exhud_time_label,
@@ -106,5 +105,3 @@ void dsda_LoadTextColor(void);
 const char* dsda_TextColor(dsda_text_color_index_t i);
 int dsda_TextCR(dsda_text_color_index_t i);
 int dsda_ColorNameToIndex(const char* name);
-
-#endif

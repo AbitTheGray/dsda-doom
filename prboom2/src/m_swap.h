@@ -4,8 +4,7 @@
  *      Endianess handling, swapping 16bit and 32bit.
  */
 
-#ifndef __M_SWAP__
-#define __M_SWAP__
+#pragma once
 
 /* CPhipps - now the endianness handling, converting input or output to/from
  * the machine's endianness to that wanted for this type of I/O
@@ -98,5 +97,3 @@
 
 #define LittleLong(x) doom_wtohl(x)
 #define LittleShort(x) doom_htows(x)
-
-#endif

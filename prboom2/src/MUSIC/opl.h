@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //     OPL interface.
 
-#ifndef OPL_OPL_H
-#define OPL_OPL_H
+#pragma once
 
 typedef void (*opl_callback_t)(void *data);
 
@@ -105,5 +104,3 @@ void OPL_SetCallback(uint64_t us, opl_callback_t callback, void *data);
 void OPL_ClearCallbacks(void);
 
 void OPL_AdjustCallbacks(float tempo);
-
-#endif

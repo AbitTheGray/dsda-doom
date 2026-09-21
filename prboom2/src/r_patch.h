@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef R_PATCH_H
-#define R_PATCH_H
+#pragma once
 
 // Used to specify the sloping of the top and bottom of a column post
 typedef enum {
@@ -82,5 +81,3 @@ void R_FlushAllPatches();
 
 extern int playpal_darkest;
 extern int playpal_lightest;
-
-#endif

@@ -4,6 +4,8 @@
 //	Data for rendering non-exclusive fullscreen in OpenGL
 //  Original Author: elim
 
+#pragma once
+
 #include "SDL.h"
 
 extern int gl_statusbar_height;

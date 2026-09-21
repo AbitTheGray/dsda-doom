@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Render Stats
 
-#ifndef __RENDER_STATS__
-#define __RENDER_STATS__
+#pragma once
 
 typedef struct {
   int visplanes;
@@ -20,5 +19,3 @@ void dsda_RecordVisPlanes(int n);
 void dsda_RecordDrawSeg(void);
 void dsda_RecordDrawSegs(int n);
 void dsda_UpdateRenderStats(void);
-
-#endif

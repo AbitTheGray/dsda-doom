@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Pause Mode
 
+#pragma once
+
 #include "doomtype.h"
 
 #define PAUSE_COMMAND   1

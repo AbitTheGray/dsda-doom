@@ -19,8 +19,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __UMAPINFO_H
-#define __UMAPINFO_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C"
@@ -96,6 +95,4 @@ struct MapProperty *FindProperty(struct MapEntry *map, const char *name);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

@@ -3,9 +3,6 @@
 // DESCRIPTION:
 //	DSDA Line Tracker HUD Component
 
-#ifndef __DSDA_HUD_COMPONENT_LINE_TRACKER__
-#define __DSDA_HUD_COMPONENT_LINE_TRACKER__
+#pragma once
 
 void dsda_LineTrackerHC(char* str, size_t max_size, int id);
-
-#endif

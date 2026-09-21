@@ -3,10 +3,7 @@
 // DESCRIPTION:
 //	DSDA SndInfo
 
-#ifndef __DSDA_SNDINFO__
-#define __DSDA_SNDINFO__
+#pragma once
 
 const char* dsda_SndInfoMapSongLumpName(int map);
 void dsda_LoadSndInfo(void);
-
-#endif

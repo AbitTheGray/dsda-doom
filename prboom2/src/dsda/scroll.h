@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Scroll
 
-#ifndef __DSDA_SCROLL__
-#define __DSDA_SCROLL__
+#pragma once
 
 #include "d_think.h"
 
@@ -73,5 +72,3 @@ void dsda_AddControlFloorCarryScroller(fixed_t dx, fixed_t dy,
 void dsda_AddZDoomFloorScroller(fixed_t dx, fixed_t dy, int affectee, int flags);
 void dsda_AddZDoomCeilingScroller(fixed_t dx, fixed_t dy, int affectee, int flags);
 void dsda_AddThruster(fixed_t dx, fixed_t dy, int affectee, int flags);
-
-#endif

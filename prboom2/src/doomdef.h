@@ -5,8 +5,7 @@
  *   key definitions, lots of other stuff.
  */
 
-#ifndef __DOOMDEF__
-#define __DOOMDEF__
+#pragma once
 
 /* use config.h if autoconf made one -- josh */
 #ifdef HAVE_CONFIG_H
@@ -533,5 +532,3 @@ typedef enum
 #define TXT_USEPUZZLEFAILED    "YOU CANNOT USE THIS HERE"
 
 extern dboolean hexen;
-
-#endif          // __DOOMDEF__

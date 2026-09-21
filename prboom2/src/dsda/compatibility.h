@@ -3,9 +3,6 @@
 // DESCRIPTION:
 //	DSDA Compatibility
 
-#ifndef __DSDA_COMPATIBILITY__
-#define __DSDA_COMPATIBILITY__
+#pragma once
 
 void dsda_ApplyLevelCompatibility(int lump);
-
-#endif

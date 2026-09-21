@@ -6,8 +6,7 @@
  *      Does palette indicators as well (red pain/berserk, bright pickup)
  */
 
-#ifndef __STSTUFF_H__
-#define __STSTUFF_H__
+#pragma once
 
 #include "doomtype.h"
 #include "d_event.h"
@@ -68,5 +67,3 @@ extern int st_palette;    // cph 2006/04/06 - make palette visible
 // e6y: makes sense for wide resolutions
 extern patchnum_t grnrock;
 extern patchnum_t brdr_b;
-
-#endif

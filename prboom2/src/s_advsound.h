@@ -4,8 +4,7 @@
  *      Support MUSINFO lump (dynamic music changing)
  */
 
-#ifndef __S_ADVSOUND__
-#define __S_ADVSOUND__
+#pragma once
 
 #include "p_mobj.h"
 #include "sounds.h"
@@ -31,5 +30,3 @@ extern musinfo_t musinfo;
 void S_ParseMusInfo(const char *mapid);
 void MusInfoThinker(mobj_t *thing);
 void T_MAPMusic(void);
-
-#endif

@@ -4,8 +4,7 @@
  *   Fake networking stuff.
  */
 
-#ifndef __D_NET__
-#define __D_NET__
+#pragma once
 
 #include "d_player.h"
 
@@ -17,5 +16,3 @@ void TryRunTics (void);
 
 // CPhipps - move to header file
 void D_InitFakeNetGame (void); // This does the setup
-
-#endif

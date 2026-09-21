@@ -2,8 +2,7 @@
 
 // SB_bar.h
 
-#ifndef __SB_BAR__
-#define __SB_BAR__
+#pragma once
 
 #include "d_event.h"
 
@@ -26,5 +25,3 @@ void SB_PaletteFlash(dboolean forceChange);
 // hexen
 
 void SB_SetClassData(void);
-
-#endif

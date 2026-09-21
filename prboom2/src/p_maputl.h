@@ -4,8 +4,7 @@
  *      Map utility functions
  */
 
-#ifndef __P_MAPUTL__
-#define __P_MAPUTL__
+#pragma once
 
 #include "r_defs.h"
 
@@ -116,5 +115,3 @@ typedef struct
 #define NUMAMRECTTRACES 64
 extern amrecttrace_t amrecttraces[NUMAMRECTTRACES];
 extern unsigned int cur_amrecttrace;
-
-#endif  /* __P_MAPUTL__ */

@@ -6,8 +6,7 @@
  *  See dstrings.h for suggestions about foreign language BEX support
  */
 
-#ifndef __D_ENGLSH__
-#define __D_ENGLSH__
+#pragma once
 
 /* m_menu.c */
 #define PRESSKEY    "press a key."
@@ -663,6 +662,3 @@
 #define CC_SPIDER "THE SPIDER MASTERMIND"
 #define CC_CYBER  "THE CYBERDEMON"
 #define CC_HERO "OUR HERO"
-
-
-#endif

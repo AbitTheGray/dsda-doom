@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Brute Force
 
+#pragma once
+
 #include "doomtype.h"
 
 typedef enum {

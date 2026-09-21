@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Global - define top level globals for doom vs heretic
 
-#ifndef __DSDA_GLOBAL__
-#define __DSDA_GLOBAL__
+#pragma once
 
 #include "doomtype.h"
 
@@ -107,5 +106,3 @@ extern int g_mf_shadow;
 extern const char* g_skyflatname;
 
 void dsda_InitGlobal(void);
-
-#endif

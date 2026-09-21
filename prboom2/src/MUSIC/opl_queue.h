@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //     OPL callback queue.
 
-#ifndef OPL_QUEUE_H
-#define OPL_QUEUE_H
+#pragma once
 
 #include "opl.h"
 
@@ -22,5 +21,3 @@ int OPL_Queue_Pop(opl_callback_queue_t *queue,
 uint64_t OPL_Queue_Peek(opl_callback_queue_t *queue);
 void OPL_Queue_AdjustCallbacks(opl_callback_queue_t *queue,
                                uint64_t time, float factor);
-
-#endif /* #ifndef OPL_QUEUE_H */

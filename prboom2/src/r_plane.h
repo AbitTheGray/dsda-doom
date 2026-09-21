@@ -4,8 +4,7 @@
  *      Refresh, visplane stuff (floor, ceilings).
  */
 
-#ifndef __R_PLANE__
-#define __R_PLANE__
+#pragma once
 
 #include "r_data.h"
 
@@ -44,5 +43,3 @@ visplane_t *R_FindPlane(
 
 visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop);
 visplane_t *R_DupPlane(const visplane_t *pl, int start, int stop);
-
-#endif

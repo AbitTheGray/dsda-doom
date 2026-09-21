@@ -6,8 +6,7 @@
  *      Pending weapon.
  */
 
-#ifndef __P_USER__
-#define __P_USER__
+#pragma once
 
 #include "d_player.h"
 
@@ -39,5 +38,3 @@ dboolean P_UndoPlayerMorph(player_t * player);
 void P_MorphPlayerThink(player_t * player);
 
 void P_PlayerEndFlight(player_t * player);
-
-#endif  /* __P_USER__ */

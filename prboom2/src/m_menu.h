@@ -4,8 +4,7 @@
  *   Menu widget stuff, episode selection and such.
  */
 
-#ifndef __M_MENU__
-#define __M_MENU__
+#pragma once
 
 #include "d_event.h"
 
@@ -183,5 +182,3 @@ void M_ClearMenus(void);
 extern dboolean delete_verify;
 
 dboolean M_ConsoleOpen(void);
-
-#endif

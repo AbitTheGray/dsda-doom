@@ -4,8 +4,7 @@
  *      System interface, sound.
  */
 
-#ifndef __G_OVERFLOW__
-#define __G_OVERFLOW__
+#pragma once
 
 #include "doomtype.h"
 #include "doomdata.h"
@@ -108,5 +107,3 @@ int DonutOverrun(fixed_t *pfloorheight, short *pfloorpic);
 
 int MissedBackSideOverrun(line_t *line);
 sector_t* GetSectorAtNullAddress(void);
-
-#endif // __G_OVERFLOW__

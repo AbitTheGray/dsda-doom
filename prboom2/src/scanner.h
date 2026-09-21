@@ -25,8 +25,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef __SCANNER_H__
-#define __SCANNER_H__
+#pragma once
 
 #include <cstdlib>
 
@@ -142,5 +141,3 @@ class Scanner
 
 		static void		(*error)(const char* message, ...);
 };
-
-#endif /* __SCANNER_H__ */

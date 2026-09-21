@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef __HEXEN_SN_SONIX__
-#define __HEXEN_SN_SONIX__
+#pragma once
 
 #include "p_mobj.h"
 
@@ -30,5 +29,3 @@ void SN_UpdateActiveSequences(void);
 void SN_StopAllSequences(void);
 int SN_GetSequenceOffset(int sequence, int *sequencePtr);
 void SN_ChangeNodeData(int nodeNum, int seqOffset, int delayTics, int volume, int currentSoundID);
-
-#endif

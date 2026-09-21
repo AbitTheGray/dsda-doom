@@ -5,8 +5,7 @@
  *      Kept as a sample, DOOM2 sounds. Frozen.
  */
 
-#ifndef __SOUNDS__
-#define __SOUNDS__
+#pragma once
 
 #include "doomtype.h"
 
@@ -1032,5 +1031,3 @@ extern sfxinfo_t* S_sfx;
 extern int num_sfx;
 extern musicinfo_t* S_music;
 extern int num_music;
-
-#endif

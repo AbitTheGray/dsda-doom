@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Game Controller
 
-#ifndef __DSDA_GAME_CONTROLLER__
-#define __DSDA_GAME_CONTROLLER__
+#pragma once
 
 // Must match SDL
 typedef enum {
@@ -38,5 +37,3 @@ const char* dsda_GameControllerButtonName(int button);
 void dsda_PollGameController(void);
 void dsda_PollGameControllerButtons(void);
 void dsda_InitGameController(void);
-
-#endif

@@ -4,8 +4,7 @@
  *      Smooth demo playback
  */
 
-#ifndef __SMOOTH__
-#define __SMOOTH__
+#pragma once
 
 #include "doomtype.h"
 #include "tables.h"
@@ -20,5 +19,3 @@ void R_SmoothPlaying_Reset(player_t *player);
 void R_SmoothPlaying_Add(int delta);
 angle_t R_SmoothPlaying_Get(player_t *player);
 void R_ResetAfterTeleport(player_t *player);
-
-#endif

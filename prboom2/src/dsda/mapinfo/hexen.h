@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //  DSDA MapInfo Hexen
 
-#ifndef __DSDA_MAPINFO_HEXEN__
-#define __DSDA_MAPINFO_HEXEN__
+#pragma once
 
 #include "p_mobj.h"
 #include "dsda/utility.h"
@@ -52,5 +51,3 @@ int dsda_HexenGravity(fixed_t* gravity);
 int dsda_HexenAirControl(fixed_t* air_control);
 int dsda_HexenInitSky(void);
 int dsda_HexenMapColorMap(int* colormap);
-
-#endif

@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Settings
 
-#ifndef __DSDA_SETTINGS__
-#define __DSDA_SETTINGS__
+#pragma once
 
 #include "doomtype.h"
 
@@ -65,5 +64,3 @@ dboolean dsda_AllowMouse(void);
 void dsda_WatchGameControllerEvent(void);
 void dsda_WatchMouseEvent(void);
 void dsda_LiftInputRestrictions(void);
-
-#endif

@@ -4,8 +4,7 @@
  *  AutoMap module.
  */
 
-#ifndef __AMMAP_H__
-#define __AMMAP_H__
+#pragma once
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -163,5 +162,3 @@ extern map_trail_mode_t map_trail_mode;
 
 void AM_updatePlayerTrail(fixed_t x, fixed_t y);
 void AM_RefreshMinimap(void);
-
-#endif

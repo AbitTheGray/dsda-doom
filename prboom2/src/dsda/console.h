@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Console
 
-#ifndef __DSDA_CONSOLE__
-#define __DSDA_CONSOLE__
+#pragma once
 
 #include "doomtype.h"
 #include "m_menu.h"
@@ -19,5 +18,3 @@ void dsda_UpdateConsoleText(char* text);
 void dsda_UpdateConsole(int action);
 void dsda_ExecuteConsoleScript(int i);
 void dsda_InterpretConsoleCommands(const char* str, dboolean noise, dboolean raise_errors);
-
-#endif

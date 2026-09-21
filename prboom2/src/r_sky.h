@@ -4,8 +4,7 @@
  *      Sky rendering.
  */
 
-#ifndef __R_SKY__
-#define __R_SKY__
+#pragma once
 
 #include "m_fixed.h"
 
@@ -22,5 +21,3 @@ extern fixed_t freelookviewheight;
 
 /* Called whenever the view size changes. */
 void R_InitSkyMap(void);
-
-#endif

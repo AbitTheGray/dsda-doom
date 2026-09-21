@@ -4,8 +4,7 @@
  *      Savegame I/O, archiving, persistence.
  */
 
-#ifndef __P_SAVEG__
-#define __P_SAVEG__
+#pragma once
 
 #include "doomtype.h"
 
@@ -95,5 +94,3 @@ void P_ArchiveSounds(void);
 void P_UnArchiveSounds(void);
 void P_ArchiveMisc(void);
 void P_UnArchiveMisc(void);
-
-#endif

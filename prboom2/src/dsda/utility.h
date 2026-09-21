@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Utility
 
-#ifndef __DSDA_UTILITY__
-#define __DSDA_UTILITY__
+#pragma once
 
 #include <string.h>
 
@@ -73,5 +72,3 @@ angle_t dsda_DegreesToAngle(float x);
 
 #define DO_ONCE { static int do_once = true; if (do_once) {
 #define END_ONCE do_once = false; } }
-
-#endif

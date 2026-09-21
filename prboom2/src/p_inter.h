@@ -4,8 +4,7 @@
  *  Thing events, and dehacked specified numbers controlling them.
  */
 
-#ifndef __P_INTER__
-#define __P_INTER__
+#pragma once
 
 #include "d_player.h"
 #include "p_mobj.h"
@@ -76,5 +75,3 @@ void P_PoisonDamage(player_t * player, mobj_t * source, int damage, dboolean pla
 dboolean P_GiveMana(player_t * player, manatype_t mana, int count);
 dboolean Hexen_P_GiveArmor(player_t *player, armortype_t armortype, int amount);
 dboolean P_MorphPlayer(player_t * player);
-
-#endif

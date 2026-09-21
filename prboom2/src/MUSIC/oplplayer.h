@@ -3,10 +3,6 @@
 // DESCRIPTION:
 //  System interface for music.
 
-#ifndef OPLPLAYER_H
-#define OPLPLAYER_H
+#pragma once
 
 extern const music_player_t opl_synth_player;
-
-
-#endif

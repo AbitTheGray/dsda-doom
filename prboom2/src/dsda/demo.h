@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Demo
 
-#ifndef __DSDA_DEMO__
-#define __DSDA_DEMO__
+#pragma once
 
 #include "d_ticcmd.h"
 
@@ -41,5 +40,3 @@ void dsda_StoreDemoData(byte complete);
 void dsda_RestoreDemoData(byte complete);
 int dsda_DemoTicsCount(const byte* p, const byte* demobuffer, int demolength);
 const byte* dsda_DemoMarkerPosition(byte* buffer, size_t file_size);
-
-#endif

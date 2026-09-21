@@ -5,8 +5,7 @@
  *  simple file handling, and saving screnshots.
  */
 
-#ifndef __M_MISC__
-#define __M_MISC__
+#pragma once
 
 #include "doomtype.h"
 
@@ -39,5 +38,3 @@ typedef struct array_s
 } array_t;
 void M_ArrayClear(array_t *data);
 void* M_ArrayGetNewItem(array_t *data, int itemsize);
-
-#endif

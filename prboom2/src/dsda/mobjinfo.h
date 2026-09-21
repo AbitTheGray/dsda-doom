@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Mobj Info
 
-#ifndef __DSDA_MOBJ_INFO__
-#define __DSDA_MOBJ_INFO__
+#pragma once
 
 #include "info.h"
 
@@ -22,5 +21,3 @@ dsda_deh_mobjinfo_t dsda_GetDehMobjInfo(int index);
 void dsda_InitializeMobjInfo(int zero, int max, int count);
 void dsda_FreeDehMobjInfo(void);
 void dsda_AppendZDoomMobjInfo(void);
-
-#endif

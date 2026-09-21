@@ -3,11 +3,8 @@
 // DESCRIPTION:
 //	DSDA Render Stats HUD Component
 
-#ifndef __DSDA_HUD_COMPONENT_RENDER_STATS__
-#define __DSDA_HUD_COMPONENT_RENDER_STATS__
+#pragma once
 
 void dsda_InitRenderStatsHC(int x_offset, int y_offset, int vpt_flags, int* args, int arg_count, void** data);
 void dsda_UpdateRenderStatsHC(void* data);
 void dsda_DrawRenderStatsHC(void* data);
-
-#endif

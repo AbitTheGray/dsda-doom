@@ -4,8 +4,7 @@
  *  External simple file handling.
  */
 
-#ifndef __M_FILE__
-#define __M_FILE__
+#pragma once
 
 #include <stdio.h>
 
@@ -34,5 +33,3 @@ char *ConvertWideToUtf8(const wchar_t *wstr);
 #endif
 char *ConvertSysNativeMBToUtf8(const char *str);
 char *ConvertUtf8ToSysNativeMB(const char *str);
-
-#endif

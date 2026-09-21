@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Analysis
 
-#ifndef __DSDA_ANALYSIS__
-#define __DSDA_ANALYSIS__
+#pragma once
 
 #include "doomtype.h"
 
@@ -41,5 +40,3 @@ extern dboolean dsda_almost_reality_note_shown;
 void dsda_ResetAnalysis(void);
 void dsda_WriteAnalysis(void);
 const char* dsda_DetectCategory(void);
-
-#endif

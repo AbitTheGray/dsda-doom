@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Utility String View
 
-#ifndef __DSDA_UTILITY_STRING_VIEW__
-#define __DSDA_UTILITY_STRING_VIEW__
+#pragma once
 
 #include "doomtype.h"
 
@@ -43,5 +42,3 @@ dboolean dsda_StringViewStartsWith(const dsda_string_view_t* sv, const char* pre
 
 void dsda_StringViewAfterChars(const dsda_string_view_t* sv, const char* chars,
                                dsda_string_view_t* after);
-
-#endif

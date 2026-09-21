@@ -17,8 +17,7 @@
  *        maps tan(angle) to angle fast. Gotta search.
  */
 
-#ifndef __TABLES__
-#define __TABLES__
+#pragma once
 
 #include "m_fixed.h"
 
@@ -113,5 +112,3 @@ inline static fixed_t DegToSlope(fixed_t a)
   else
     return AngleToSlope(-(int)FixedToAngle(-a));
 }
-
-#endif

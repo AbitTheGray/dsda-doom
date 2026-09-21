@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef __SC_MAN__
-#define __SC_MAN__
+#pragma once
 
 void SC_OpenLump(const char *name);
 void SC_OpenLumpByNum(int lump);
@@ -23,5 +22,3 @@ extern int sc_Number;
 extern int sc_Line;
 extern dboolean sc_End;
 extern dboolean sc_Crossed;
-
-#endif // __SC_MAN__

@@ -4,8 +4,7 @@
  *      Mission start screen wipe/melt, special effects.
  */
 
-#ifndef __F_WIPE_H__
-#define __F_WIPE_H__
+#pragma once
 
 // e6y: resolution limitation is removed
 void R_InitMeltRes(void);
@@ -17,5 +16,3 @@ void R_InitMeltRes(void);
 int wipe_ScreenWipe (int ticks);
 int wipe_StartScreen(void);
 int wipe_EndScreen  (void);
-
-#endif

@@ -3,9 +3,6 @@
 // DESCRIPTION:
 //	DSDA Text File
 
-#ifndef __DSDA_TEXT_FILE__
-#define __DSDA_TEXT_FILE__
+#pragma once
 
 void dsda_ExportTextFile(void);
-
-#endif

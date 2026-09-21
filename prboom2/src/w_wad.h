@@ -4,8 +4,7 @@
  *      WAD I/O functions.
  */
 
-#ifndef __W_WAD__
-#define __W_WAD__
+#pragma once
 
 #include <stddef.h>
 
@@ -161,5 +160,3 @@ void ExtractFileBase(const char *, char *);       // killough
 unsigned W_LumpNameHash(const char *s);           // killough 1/31/98
 void W_HashLumps(void);                           // cph 2001/07/07 - made public
 int W_LumpNumInPortWad(int lump);
-
-#endif

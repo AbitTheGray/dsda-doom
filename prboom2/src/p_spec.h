@@ -3,8 +3,7 @@
 /* DESCRIPTION:  definitions, declarations and prototypes for specials
  */
 
-#ifndef __P_SPEC__
-#define __P_SPEC__
+#pragma once
 
 #include "r_defs.h"
 #include "d_player.h"
@@ -1659,5 +1658,3 @@ int EV_TeleportInSector(int tag, short source_tid, short dest_tid,
 #define TELF_ROTATEBOOMINVERSE 0x40
 #define TELF_VANILLA (TELF_SOURCEFOG|TELF_DESTFOG)
 #define TELF_SILENT (TELF_KEEPORIENTATION|TELF_ROTATEBOOM|TELF_KEEPHEIGHT)
-
-#endif

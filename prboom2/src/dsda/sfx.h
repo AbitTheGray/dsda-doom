@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA SFX
 
-#ifndef __DSDA_SFX__
-#define __DSDA_SFX__
+#pragma once
 
 #include "sounds.h"
 
@@ -16,5 +15,3 @@ void dsda_InitializeSFX(sfxinfo_t* source, int count);
 int dsda_TranslateDehSFXIndex(int index);
 void dsda_FreeDehSFX(void);
 dboolean dsda_BlockSFX(sfxinfo_t *sfx);
-
-#endif

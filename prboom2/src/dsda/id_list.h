@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA ID List
 
-#ifndef __DSDA_ID_LIST__
-#define __DSDA_ID_LIST__
+#pragma once
 
 #include "r_main.h"
 
@@ -20,5 +19,3 @@ void dsda_ResetSectorIDList(int size);
 #define FIND_SECTORS2(id_p, tag, line) for (id_p = dsda_FindSectorsFromIDOrLine(tag, line); *id_p >= 0; id_p++)
 
 #define FIND_LINES(id_p, tag) for (id_p = dsda_FindLinesFromID(tag); *id_p >= 0; id_p++)
-
-#endif

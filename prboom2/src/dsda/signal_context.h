@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Signal Context
 
+#pragma once
+
 typedef enum {
   sf_display             = 0x0001,
   sf_player_view         = 0x0002,

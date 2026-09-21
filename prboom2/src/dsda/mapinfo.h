@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA MapInfo
 
-#ifndef __DSDA_MAPINFO__
-#define __DSDA_MAPINFO__
+#pragma once
 
 #include "p_mobj.h"
 
@@ -62,5 +61,3 @@ int dsda_MapCluster(int map);
 short dsda_Sky1Texture(void);
 short dsda_Sky2Texture(void);
 void dsda_InitSky(void);
-
-#endif

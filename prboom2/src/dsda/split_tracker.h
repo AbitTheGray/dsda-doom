@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Split Tracker
 
-#ifndef __DSDA_SPLIT_TRACKER__
-#define __DSDA_SPLIT_TRACKER__
+#pragma once
 
 typedef struct {
   int current;
@@ -31,5 +30,3 @@ dsda_split_t* dsda_CurrentSplit(void);
 void dsda_WriteSplits(void);
 void dsda_ResetSplits(void);
 int dsda_DemoAttempts(void);
-
-#endif

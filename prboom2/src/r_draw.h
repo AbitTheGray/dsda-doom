@@ -4,8 +4,7 @@
  *      System specific interface stuff.
  */
 
-#ifndef __R_DRAW__
-#define __R_DRAW__
+#pragma once
 
 #include "r_defs.h"
 
@@ -127,5 +126,3 @@ void R_ResetFuzzCol(int height);
 void R_CheckFuzzCol(int x, int height);
 
 extern int fuzz_cutoff;
-
-#endif

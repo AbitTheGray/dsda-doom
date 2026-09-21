@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef __I_CAPTURE__
-#define __I_CAPTURE__
+#pragma once
 
 extern int cap_fps;
 extern int cap_frac;
@@ -20,5 +19,3 @@ void I_CaptureFrame (void);
 
 // close pipes, call muxcommand, finalize
 void I_CaptureFinish (void);
-
-#endif

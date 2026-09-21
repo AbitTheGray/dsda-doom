@@ -4,8 +4,7 @@
  *   Setup a game, startup stuff.
  */
 
-#ifndef __P_SETUP__
-#define __P_SETUP__
+#pragma once
 
 #include "p_mobj.h"
 
@@ -54,6 +53,3 @@ typedef struct
 } map_loader_t;
 
 extern map_loader_t map_loader;
-
-
-#endif

@@ -4,8 +4,7 @@
  *      Renderer main interface.
  */
 
-#ifndef __R_MAIN__
-#define __R_MAIN__
+#pragma once
 
 #include "d_player.h"
 #include "r_data.h"
@@ -139,5 +138,3 @@ extern int viewport[4];
 extern float modelMatrix[16];
 extern float projMatrix[16];
 int R_Project(float objx, float objy, float objz, float *winx, float *winy, float *winz);
-
-#endif

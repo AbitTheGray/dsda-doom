@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Skill Info
 
-#ifndef __DSDA_SKILL_INFO__
-#define __DSDA_SKILL_INFO__
+#pragma once
 
 #include "doomdef.h"
 #include "m_fixed.h"
@@ -52,5 +51,3 @@ void dsda_AlterGameFlags(void);
 void dsda_InitGameModifiers(void);
 void dsda_RefreshPistolStart(void);
 void dsda_RefreshAlwaysPistolStart(void);
-
-#endif

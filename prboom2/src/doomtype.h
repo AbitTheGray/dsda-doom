@@ -5,8 +5,7 @@
  *       separating modules.
  */
 
-#ifndef __DOOMTYPE__
-#define __DOOMTYPE__
+#pragma once
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -149,5 +148,3 @@ extern int global_patch_top_offset;
                           (x) == VPT_ALIGN_RIGHT_TOP)
 
 #define arrlen(array) (sizeof(array) / sizeof(*array))
-
-#endif

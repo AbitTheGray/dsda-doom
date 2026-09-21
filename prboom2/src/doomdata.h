@@ -6,8 +6,7 @@
  *  some internal structures shared by many modules are here
  */
 
-#ifndef __DOOMDATA__
-#define __DOOMDATA__
+#pragma once
 
 // The most basic types we use, portability.
 #include "config.h"
@@ -354,5 +353,3 @@ typedef struct {
 #ifdef _MSC_VER
 #pragma pack(pop)
 #endif //_MSC_VER
-
-#endif // __DOOMDATA__

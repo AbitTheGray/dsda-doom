@@ -4,8 +4,7 @@
  *  System specific interface stuff.
  */
 
-#ifndef __D_TICCMD__
-#define __D_TICCMD__
+#pragma once
 
 #include "doomtype.h"
 
@@ -36,5 +35,3 @@ typedef struct
   // dsda extension
   excmd_t ex;
 } ticcmd_t;
-
-#endif

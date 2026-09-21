@@ -4,8 +4,7 @@
  *      Uncapped framerate stuff
  */
 
-#ifndef __R_FPS__
-#define __R_FPS__
+#pragma once
 
 #include "doomstat.h"
 
@@ -32,5 +31,3 @@ void R_RestoreInterpolations();
 void R_ActivateSectorInterpolations();
 void R_ActivateThinkerInterpolations(thinker_t *th);
 void R_StopInterpolationIfNeeded(thinker_t *th);
-
-#endif

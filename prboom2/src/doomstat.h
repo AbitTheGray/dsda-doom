@@ -9,8 +9,7 @@
  *   In practice, things are a bit messy.
  */
 
-#ifndef __D_STATE__
-#define __D_STATE__
+#pragma once
 
 // We need the playr data structure as well.
 #include "d_player.h"
@@ -329,5 +328,3 @@ extern int monster_infighting;
 extern int monkeys;
 
 extern int HelperThing;          // type of thing to use for helper
-
-#endif

@@ -3,12 +3,9 @@
 // DESCRIPTION:
 //	DSDA TRANMAP
 
-#ifndef __DSDA_TRANMAP__
-#define __DSDA_TRANMAP__
+#pragma once
 
 #include "doomtype.h"
 
 const byte* dsda_TranMap(unsigned int alpha);
 const byte* dsda_DefaultTranMap(void);
-
-#endif

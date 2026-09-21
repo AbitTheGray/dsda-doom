@@ -57,8 +57,7 @@
  *     options (parity with older upstream commits).
  */
 
-#ifndef OPL_OPL3_H
-#define OPL_OPL3_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -275,6 +274,4 @@ void OPL3_Generate4ChStream(opl3_chip *chip, int16_t *sndptr1, int16_t *sndptr2,
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

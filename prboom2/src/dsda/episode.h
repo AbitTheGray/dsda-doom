@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Episode
 
-#ifndef __DSDA_EPISODE__
-#define __DSDA_EPISODE__
+#pragma once
 
 #include "doomtype.h"
 
@@ -25,5 +24,3 @@ void dsda_AddOriginalEpisodes(void);
 void dsda_ClearEpisodes(void);
 void dsda_AddEpisode(const char* map_lump, const char* name,
                      const char* pic_name, char key, dboolean vanilla);
-
-#endif

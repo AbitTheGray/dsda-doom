@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Skip Mode
 
+#pragma once
+
 #include "doomtype.h"
 
 dboolean dsda_SkipMode(void);

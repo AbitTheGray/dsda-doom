@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Build Mode
 
+#pragma once
+
 #include "d_event.h"
 #include "d_ticcmd.h"
 #include "tables.h"

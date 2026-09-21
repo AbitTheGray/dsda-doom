@@ -4,8 +4,7 @@
  *      System specific interface stuff.
  */
 
-#ifndef __I_SYSTEM__
-#define __I_SYSTEM__
+#pragma once
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -88,5 +87,3 @@ typedef enum
 typedef void (*atexit_func_t)(void);
 void I_AtExit(atexit_func_t func, dboolean run_if_error,
               const char* name, exit_priority_t priority);
-
-#endif

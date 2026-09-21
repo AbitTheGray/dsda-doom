@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef MUSICPLAYER_H
-#define MUSICPLAYER_H
+#pragma once
 
 /*
 Anything that implements all of these functions can play music in prboomplus.
@@ -54,5 +53,3 @@ typedef struct
   // just about anything for nsamp.  render can be called even during pause+stop.
   void (*render)(void *dest, unsigned nsamp);
 } music_player_t;
-
-#endif // MUSICPLAYER_H

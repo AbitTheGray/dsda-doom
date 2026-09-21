@@ -6,8 +6,7 @@
  *  suffers state changes of more or less violent nature.
  */
 
-#ifndef __D_THINK__
-#define __D_THINK__
+#pragma once
 
 /*
  * Experimental stuff.
@@ -61,5 +60,3 @@ typedef struct thinker_s
    */
   unsigned references;
 } thinker_t;
-
-#endif

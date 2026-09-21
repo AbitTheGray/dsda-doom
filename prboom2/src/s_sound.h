@@ -4,8 +4,7 @@
  *      The not so system specific sound interface.
  */
 
-#ifndef __S_SOUND__
-#define __S_SOUND__
+#pragma once
 
 #include "doomtype.h"
 #include "p_mobj.h"
@@ -111,5 +110,3 @@ dboolean S_GetSoundPlayingInfo(void * mobj, int sound_id);
 int S_GetSoundID(const char *name);
 
 void S_ResetVolume(void);
-
-#endif

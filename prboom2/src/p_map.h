@@ -4,8 +4,7 @@
  *      Map functions
  */
 
-#ifndef __P_MAP__
-#define __P_MAP__
+#pragma once
 
 #include "r_defs.h"
 #include "d_player.h"
@@ -122,5 +121,3 @@ void PIT_ThrustSpike(mobj_t * actor);
 dboolean P_MoveThing(mobj_t *thing, fixed_t x, fixed_t y, fixed_t z, dboolean fog);
 int P_SplashDamage(fixed_t dist);
 void P_AdjustZLimits(mobj_t *thing);
-
-#endif // __P_MAP__

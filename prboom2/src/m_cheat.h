@@ -4,8 +4,7 @@
  *      Cheat code checking.
  */
 
-#ifndef __M_CHEAT__
-#define __M_CHEAT__
+#pragma once
 
 #include "d_event.h"
 
@@ -46,5 +45,3 @@ void M_CheatNoClip(void);
 void M_CheatIDDT(void);
 dboolean M_CheatResponder(event_t *ev);
 dboolean M_CheatEntered(const char* element, const char* value);
-
-#endif

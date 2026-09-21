@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Extended HUD
 
-#ifndef __DSDA_EXHUD__
-#define __DSDA_EXHUD__
+#pragma once
 
 void dsda_InitExHud(void);
 void dsda_UpdateExHud(void);
@@ -20,5 +19,3 @@ void dsda_RefreshMapCoordinates(void);
 void dsda_RefreshMapTotals(void);
 void dsda_RefreshMapTime(void);
 void dsda_RefreshMapTitle(void);
-
-#endif

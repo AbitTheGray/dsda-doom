@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef HERETIC_DEF_H
-#define HERETIC_DEF_H
+#pragma once
 
 #include "doomtype.h"
 
@@ -11,5 +10,3 @@ extern int ArtifactFlash;
 extern dboolean inventory;
 
 #include "dstrings.h"
-
-#endif

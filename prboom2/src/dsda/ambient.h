@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Ambient
 
-#ifndef __DSDA_AMBIENT__
-#define __DSDA_AMBIENT__
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,6 +34,4 @@ void dsda_LoadAmbientSndInfo(void);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

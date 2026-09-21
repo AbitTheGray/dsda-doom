@@ -3,12 +3,9 @@
 // DESCRIPTION:
 //	DSDA Name
 
-#ifndef __DSDA_NAME__
-#define __DSDA_NAME__
+#pragma once
 
 #define NAME_NOT_FOUND (-1)
 
 int dsda_ActorNameToType(const char* name);
 int dsda_ActionNameToNumber(const char* name);
-
-#endif

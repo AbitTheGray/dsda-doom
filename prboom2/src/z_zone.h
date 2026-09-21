@@ -9,8 +9,7 @@
  * Rewritten by Lee Killough, though, since it was not efficient enough.
  */
 
-#ifndef __Z_ZONE__
-#define __Z_ZONE__
+#pragma once
 
 #if !defined(__GNUC__) && !defined(__clang__)
 #define __attribute__(x)
@@ -34,5 +33,3 @@ void *Z_MallocLevel(size_t size);
 void *Z_CallocLevel(size_t n, size_t n2);
 void *Z_ReallocLevel(void *p, size_t n);
 char *Z_StrdupLevel(const char *s);
-
-#endif

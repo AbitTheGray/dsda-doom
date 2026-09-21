@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Playback
 
+#pragma once
+
 #include "doomtype.h"
 
 #define PLAYBACK_NORMAL      0

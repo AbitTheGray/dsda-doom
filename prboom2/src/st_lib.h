@@ -4,8 +4,7 @@
  *  The status bar widget definitions and prototypes
  */
 
-#ifndef __STLIB__
-#define __STLIB__
+#pragma once
 
 // We are referring to patches.
 #include "r_defs.h"
@@ -142,5 +141,3 @@ void STlib_initMultIcon
 void STlib_updateMultIcon
 ( st_multicon_t* mi,
   dboolean refresh );
-
-#endif

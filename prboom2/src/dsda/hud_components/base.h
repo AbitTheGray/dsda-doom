@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA HUD Component Base
 
-#ifndef __DSDA_HUD_COMPONENT_BASE__
-#define __DSDA_HUD_COMPONENT_BASE__
+#pragma once
 
 #include <stdio.h>
 #include <math.h>
@@ -57,5 +56,3 @@ fixed_t dsda_HexenArmor(player_t* player);
 void dsda_DrawBigNumber(int x, int y, int delta_x, int delta_y, int cm, int vpt, int count, int n);
 void dsda_DrawBasicText(dsda_text_t* component);
 void dsda_RefreshHudText(dsda_text_t* component);
-
-#endif

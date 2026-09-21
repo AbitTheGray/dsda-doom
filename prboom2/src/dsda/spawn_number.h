@@ -3,9 +3,6 @@
 // DESCRIPTION:
 //	DSDA Spawn Numbers
 
-#ifndef __DSDA_SPAWN_NUMBER__
-#define __DSDA_SPAWN_NUMBER__
+#pragma once
 
 int dsda_ThingTypeFromSpawnNumber(int spawn_number);
-
-#endif

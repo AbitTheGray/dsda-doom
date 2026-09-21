@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	System specific file globbing interface.
 
-#ifndef __I_GLOB__
-#define __I_GLOB__
+#pragma once
 
 #define GLOB_FLAG_NOCASE  0x01
 #define GLOB_FLAG_SORTED  0x02
@@ -26,6 +25,3 @@ void I_EndGlob(glob_t *glob);
 // Read the name of the next globbed filename. NULL is returned if there
 // are no more found.
 const char *I_NextGlob(glob_t *glob);
-
-#endif
-

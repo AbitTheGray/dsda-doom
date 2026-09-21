@@ -5,8 +5,7 @@
  *  by name.
  */
 
-#ifndef __R_DATA__
-#define __R_DATA__
+#pragma once
 
 #include "r_defs.h"
 #include "r_state.h"
@@ -76,5 +75,3 @@ int R_SetSpriteByIndex(patchnum_t *patchnum, spritenum_t item);
 int R_SetSpriteByName(patchnum_t *patchnum, const char *name);
 int R_SetPatchByName(patchnum_t *patchnum, const char *name);
 int R_NumPatchForSpriteIndex(spritenum_t item);
-
-#endif

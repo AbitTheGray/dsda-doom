@@ -4,8 +4,7 @@
  *  Functions to return random numbers.
  */
 
-#ifndef __M_RANDOM__
-#define __M_RANDOM__
+#pragma once
 
 #include "m_fixed.h"
 #include "doomtype.h"
@@ -132,5 +131,3 @@ int P_RandomHitscanSlope(pr_class_t pr_class, fixed_t spread);
 #define HITDICE(a) ((1+(P_Random(pr_heretic)&7))*a)
 
 int P_SubRandom (void);
-
-#endif

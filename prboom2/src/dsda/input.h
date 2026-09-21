@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Input
 
-#ifndef __DSDA_INPUT__
-#define __DSDA_INPUT__
+#pragma once
 
 #include "doomtype.h"
 #include "d_event.h"
@@ -241,5 +240,3 @@ dboolean dsda_InputActive(int identifer);
 dboolean dsda_InputKeyActive(int identifier);
 dboolean dsda_InputMouseBActive(int identifier);
 dboolean dsda_InputJoyBActive(int identifier);
-
-#endif

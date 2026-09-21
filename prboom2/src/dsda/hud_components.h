@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA HUD Components
 
+#pragma once
+
 #include "hud_components/ammo_text.h"
 #include "hud_components/armor_text.h"
 #include "hud_components/attempts.h"

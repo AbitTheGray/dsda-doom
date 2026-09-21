@@ -3,9 +3,6 @@
 // DESCRIPTION:
 //	DSDA Death
 
-#ifndef __DSDA_DEATH__
-#define __DSDA_DEATH__
+#pragma once
 
 void dsda_DeathUse(player_t* player);
-
-#endif

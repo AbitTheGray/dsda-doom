@@ -4,8 +4,7 @@
  *  Event information structures.
  */
 
-#ifndef __D_EVENT__
-#define __D_EVENT__
+#pragma once
 
 
 #include "doomtype.h"
@@ -91,5 +90,3 @@ typedef enum
 //
 
 extern gameaction_t gameaction;
-
-#endif

@@ -3,8 +3,7 @@
 /* DESCRIPTION: Main game control interface.
  */
 
-#ifndef __G_GAME__
-#define __G_GAME__
+#pragma once
 
 #include "doomdef.h"
 #include "d_event.h"
@@ -106,5 +105,3 @@ extern int pwad_help2_check;
 // hexen
 
 void G_Completed(int map, int position, int flags, angle_t angle);
-
-#endif

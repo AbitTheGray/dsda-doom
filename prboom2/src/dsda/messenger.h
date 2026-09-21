@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Message
 
-#ifndef __DSDA_MESSAGE__
-#define __DSDA_MESSAGE__
+#pragma once
 
 void dsda_AddPlayerAlert(const char* str, player_t* player);
 void dsda_AddAlert(const char* str);
@@ -14,5 +13,3 @@ void dsda_AddUnblockableMessage(const char* str);
 void dsda_UpdateMessenger(void);
 void dsda_InitMessenger(void);
 void dsda_ReplayMessage(void);
-
-#endif

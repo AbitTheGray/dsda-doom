@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Thing ID
 
-#ifndef __DSDA_THING_ID__
-#define __DSDA_THING_ID__
+#pragma once
 
 #include "p_mobj.h"
 
@@ -31,5 +30,3 @@ void dsda_BuildMobjThingIDList(void);
 void dsda_ResetThingIDSearch(thing_id_search_t* search);
 mobj_t* dsda_FindMobjFromThingID(short thing_id, thing_id_search_t* search);
 mobj_t* dsda_FindMobjFromThingIDOrMobj(short thing_id, mobj_t* mo, thing_id_search_t* search);
-
-#endif

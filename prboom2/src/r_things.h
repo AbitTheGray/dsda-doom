@@ -4,8 +4,7 @@
  *      Rendering of moving objects, sprites.
  */
 
-#ifndef __R_THINGS__
-#define __R_THINGS__
+#pragma once
 
 #include "r_draw.h"
 
@@ -50,5 +49,3 @@ void R_ClearSprites(void);
 void R_DrawMasked(void);
 
 void R_SetClipPlanes(void);
-
-#endif

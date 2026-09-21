@@ -12,8 +12,7 @@
  *  work (untested).
  */
 
-#ifndef __D_DEH__
-#define __D_DEH__
+#pragma once
 
 #include "doomtype.h"
 
@@ -1047,5 +1046,3 @@ uint64_t deh_stringToMBF21MobjFlags(char *strval);
 uint64_t deh_stringToMobjFlags(char *strval);
 void deh_changeCompTranslucency(void);
 void deh_applyCompatibility(void);
-
-#endif

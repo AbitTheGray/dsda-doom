@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Tools
 
-#ifndef __DSDA__
-#define __DSDA__
+#pragma once
 
 #include "doomdef.h"
 #include "p_mobj.h"
@@ -80,5 +79,3 @@ int dsda_StartInBuildMode(void);
 
 dboolean dsda_FrozenMode(void);
 void dsda_ToggleFrozenMode(void);
-
-#endif

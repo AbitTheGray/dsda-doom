@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef __HEXEN_P_THINGS__
-#define __HEXEN_P_THINGS__
+#pragma once
 
 #include "info.h"
 
@@ -13,5 +12,3 @@ dboolean EV_ThingRemove(int tid);
 dboolean EV_ThingDestroy(int tid);
 
 extern mobjtype_t TranslateThingType[];
-
-#endif

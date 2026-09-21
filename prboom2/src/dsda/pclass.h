@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Player Class
 
-#ifndef __DSDA_PCLASS__
-#define __DSDA_PCLASS__
+#pragma once
 
 #include "m_fixed.h"
 #include "doomdef.h"
@@ -27,5 +26,3 @@ typedef struct dsda_pclass_s {
 } dsda_pclass_t;
 
 extern dsda_pclass_t pclass[NUMCLASSES];
-
-#endif

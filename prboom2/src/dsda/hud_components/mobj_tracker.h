@@ -3,11 +3,8 @@
 // DESCRIPTION:
 //	DSDA Mobj Tracker HUD Component
 
-#ifndef __DSDA_HUD_COMPONENT_MOBJ_TRACKER__
-#define __DSDA_HUD_COMPONENT_MOBJ_TRACKER__
+#pragma once
 
 #include "p_mobj.h"
 
 void dsda_MobjTrackerHC(char* str, size_t max_size, int id, mobj_t* mobj);
-
-#endif

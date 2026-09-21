@@ -4,8 +4,7 @@
  *  Items: key cards, artifacts, weapon, ammunition.
  */
 
-#ifndef __D_ITEMS__
-#define __D_ITEMS__
+#pragma once
 
 #include "doomdef.h"
 
@@ -53,5 +52,3 @@ extern weaponinfo_t hexen_weaponinfo[HEXEN_NUMWEAPONS][NUMCLASSES];
 // dynamically selected in global.c
 
 extern weaponinfo_t* weaponinfo;
-
-#endif

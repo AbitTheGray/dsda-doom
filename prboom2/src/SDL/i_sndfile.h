@@ -3,12 +3,9 @@
 // DESCRIPTION:
 //      Load sound lumps with libsndfile.
 
-#ifndef I_SNDFILE_H
-#define I_SNDFILE_H
+#pragma once
 
 #include "SDL_audio.h"
 
 void *Load_SNDFile(const void *data, SDL_AudioSpec *sample, void **sampledata,
 				   Uint32 *samplelen);
-
-#endif

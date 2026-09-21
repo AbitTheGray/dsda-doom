@@ -3,8 +3,7 @@
 /* DESCRIPTION:  none
  */
 
-#ifndef __HULIB__
-#define __HULIB__
+#pragma once
 
 #include "v_video.h"  //jff 2/16/52 include color range defs
 
@@ -73,5 +72,3 @@ void HUlib_drawOffsetTextLine(hu_textline_t* l, int offset);
 void HUlib_setTextXCenter(hu_textline_t* t);
 
 char HUlib_Color(int cm);
-
-#endif

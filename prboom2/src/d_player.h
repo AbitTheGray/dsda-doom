@@ -4,8 +4,7 @@
  *  Player state structure.
  */
 
-#ifndef __D_PLAYER__
-#define __D_PLAYER__
+#pragma once
 
 #include "dsda/pclass.h"
 
@@ -291,5 +290,3 @@ typedef struct
 } wbstartstruct_t;
 
 fixed_t P_PlayerSpeed(player_t* player);
-
-#endif

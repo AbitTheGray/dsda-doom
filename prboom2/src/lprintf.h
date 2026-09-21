@@ -4,8 +4,7 @@
  *    Declarations etc. for logical console output
  */
 
-#ifndef __LPRINTF__
-#define __LPRINTF__
+#pragma once
 
 #include <stdarg.h>
 #include <stddef.h>
@@ -34,5 +33,3 @@ void I_DisableMessageBoxes(void);
  * cphipps 01/11- moved from i_system.h */
 NORETURNC11 void I_Error(const char *error, ...) __attribute__((format(printf,1,2))) NORETURN;
 void I_Warn(const char *error, ...) __attribute__((format(printf,1,2)));
-
-#endif

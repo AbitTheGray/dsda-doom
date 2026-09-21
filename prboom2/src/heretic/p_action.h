@@ -2,8 +2,7 @@
 
 // External definitions for action pointer functions.
 
-#ifndef HERETIC_P_ACTION_H
-#define HERETIC_P_ACTION_H
+#pragma once
 
 // in doom
 void A_Scream();
@@ -134,5 +133,3 @@ void A_MinotaurAtk3();
 void A_MinotaurCharge();
 void A_MntrFloorFire();
 void A_ESound();
-
-#endif

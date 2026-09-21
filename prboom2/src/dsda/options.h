@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Options Lump
 
-#ifndef __DSDA_OPTIONS__
-#define __DSDA_OPTIONS__
+#pragma once
 
 typedef struct dsda_options {
   int weapon_recoil;
@@ -57,5 +56,3 @@ const dsda_options_t* dsda_Options(void);
 int dsda_GameOptionSize(void);
 byte* dsda_WriteOptions21(byte* demo_p);
 const byte *dsda_ReadOptions21(const byte *demo_p);
-
-#endif

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef __HEXEN_PO_MAN__
-#define __HEXEN_PO_MAN__
+#pragma once
 
 #include "r_defs.h"
 
@@ -64,5 +63,3 @@ dboolean EV_OpenZDoomPolyDoor(line_t * line, int polyobj, int speed,
 dboolean EV_StopPoly(int polyNum);
 dboolean EV_MovePolyTo(line_t * line, int polyNum, fixed_t speed,
                        fixed_t x, fixed_t y, dboolean overRide);
-
-#endif

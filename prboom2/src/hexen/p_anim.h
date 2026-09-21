@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef __HEXEN_P_ANIM__
-#define __HEXEN_P_ANIM__
+#pragma once
 
 #define MAX_ANIM_DEFS 20
 
@@ -24,5 +23,3 @@ void P_AnimateSurfaces(void);
 void P_ForceLightning(void);
 void P_InitLightning(void);
 void P_InitFTAnims(void);
-
-#endif

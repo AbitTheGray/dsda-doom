@@ -4,8 +4,7 @@
  *  Core thinker processing prototypes.
  */
 
-#ifndef __P_TICK__
-#define __P_TICK__
+#pragma once
 
 #include "d_think.h"
 #include "p_mobj.h"
@@ -44,5 +43,3 @@ extern thinker_t thinkerclasscap[];
 thinker_t* P_NextThinker(thinker_t*,th_class);
 
 void P_CleanThinkers(void);
-
-#endif

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef __E6Y__
-#define __E6Y__
+#pragma once
 
 #include <stdarg.h>
 
@@ -217,5 +216,3 @@ void I_vWarning(const char *message, va_list argList);
 #define PRB_IDYES               6
 #define PRB_IDNO                7
 int I_MessageBox(const char* text, unsigned int type);
-
-#endif

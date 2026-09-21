@@ -4,8 +4,7 @@
  *      Main startup and splash screenstuff.
  */
 
-#ifndef __D_MAIN__
-#define __D_MAIN__
+#pragma once
 
 #include "m_fixed.h"
 #include "d_event.h"
@@ -53,5 +52,3 @@ typedef struct
 } demostate_t;
 
 void D_SetPage(const char* name, int tics, int music);
-
-#endif

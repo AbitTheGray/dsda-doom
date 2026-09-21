@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Config
 
-#ifndef __DSDA_CONFIG__
-#define __DSDA_CONFIG__
+#pragma once
 
 #include <stdio.h>
 
@@ -321,5 +320,3 @@ const char* dsda_StringConfig(dsda_config_identifier_t id);
 char* dsda_ConfigSummary(const char* name);
 int dsda_ConfigIDByName(const char* name);
 dsda_config_type_t dsda_ConfigType(dsda_config_identifier_t id);
-
-#endif

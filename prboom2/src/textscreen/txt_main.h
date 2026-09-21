@@ -2,8 +2,7 @@
 
 // Base interface that abstracts the text mode screen.
 
-#ifndef TXT_MAIN_H
-#define TXT_MAIN_H
+#pragma once
 
 // For the moment, txt_sdl.c is the only implementation of the base 
 // text mode screen API:
@@ -145,6 +144,3 @@ void TXT_GetMousePosition(int *x, int *y);
 // Sleep until an event is received or the screen needs updating
 // Optional timeout in ms (timeout == 0 : sleep forever)
 void TXT_Sleep(int timeout);
-
-#endif /* #ifndef TXT_MAIN_H */
-

@@ -4,8 +4,7 @@
  *   Related to f_finale.c, which is called at the end of a level
  */
 
-#ifndef __F_FINALE__
-#define __F_FINALE__
+#pragma once
 
 #include "doomtype.h"
 #include "d_event.h"
@@ -33,5 +32,3 @@ typedef enum finalestage_e
     FINALE_STAGE_CAST,
     FINALE_STAGE_TITLE
 } finalestage_t;
-
-#endif

@@ -4,8 +4,7 @@
  *      Fixed point arithemtics, implementation.
  */
 
-#ifndef __M_FIXED__
-#define __M_FIXED__
+#pragma once
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -90,5 +89,3 @@ static CONSTFUNC fixed_t Scale(fixed_t a, fixed_t b, fixed_t c)
 {
 	return (fixed_t)(((int64_t)a*b)/c);
 }
-
-#endif

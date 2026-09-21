@@ -3,8 +3,7 @@
 // DESCRIPTION:
 // DSDA Line Special
 
-#ifndef __DSDA_LINE_SPECIAL__
-#define __DSDA_LINE_SPECIAL__
+#pragma once
 
 typedef enum {
   zi_init_gravity     = 0,
@@ -293,5 +292,3 @@ typedef enum {
 
   zl_linespecial_max
 } zl_linespecial_id_t;
-
-#endif

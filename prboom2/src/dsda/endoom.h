@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Endoom
 
+#pragma once
+
 void dsda_CacheEndoom(void);
 void dsda_DumpEndoom(void);
 void dsda_TerminalEndoom(void);

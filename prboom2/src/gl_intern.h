@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef _GL_INTERN_H
-#define _GL_INTERN_H
+#pragma once
 
 #include "v_video.h"
 #include "xs_Float.h"
@@ -469,5 +468,3 @@ void glsl_PopMainShader(void);
 void glsl_PushFuzzShader(int tic, int sprite, float ratio);
 void glsl_PopFuzzShader(void);
 void glsl_SetLightLevel(float lightlevel);
-
-#endif // _GL_INTERN_H

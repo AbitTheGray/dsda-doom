@@ -9,8 +9,7 @@
  *          without recompiling the program.
  */
 
-#ifndef __DSTRINGS__
-#define __DSTRINGS__
+#pragma once
 
 /* All important printed strings.
  * Language selection (message strings).
@@ -49,5 +48,3 @@
 extern const size_t NUM_QUITMESSAGES;  /* Calculated in dstrings.c */
 
 extern const char** endmsg[];   /* killough 1/18/98 const added */
-
-#endif

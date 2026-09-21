@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA (Command Line) Args
 
-#ifndef __DSDA_ARGS__
-#define __DSDA_ARGS__
+#pragma once
 
 #include "doomtype.h"
 
@@ -161,5 +160,3 @@ void dsda_UpdateStringArg(dsda_arg_identifier_t id, const char* param);
 void dsda_AppendStringArg(dsda_arg_identifier_t id, const char* param);
 void dsda_UpdateFlag(dsda_arg_identifier_t id, dboolean found);
 void dsda_PrintArgHelp(void);
-
-#endif

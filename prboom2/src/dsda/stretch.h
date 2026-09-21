@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Stretch
 
-#ifndef __DSDA_STRETCH__
-#define __DSDA_STRETCH__
+#pragma once
 
 typedef struct
 {
@@ -57,5 +56,3 @@ stretch_param_t* dsda_StretchParams(int flags);
 void dsda_SetupStretchParams(void);
 void dsda_EvaluatePatchScale(void);
 void dsda_UpdateStretchParams(void);
-
-#endif

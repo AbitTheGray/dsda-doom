@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Time
 
-#ifndef __DSDA_TIME__
-#define __DSDA_TIME__
+#pragma once
 
 typedef enum {
   dsda_timer_realtime,
@@ -26,5 +25,3 @@ void dsda_PrintElapsedTime(int timer, const char* message);
 void dsda_LimitFPS(void);
 int dsda_GetTickRealTime(void);
 void dsda_ResetTimeFunctions(int fastdemo);
-
-#endif

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#ifndef _GL_STRUCT_H
-#define _GL_STRUCT_H
+#pragma once
 
 #include <SDL_opengl.h>
 
@@ -150,5 +149,3 @@ void gld_DrawNiceThings(int fx, int fy, int fw, int fh);
 void gld_ClearNiceThings(void);
 
 extern int gl_render_fov;
-
-#endif // _GL_STRUCT_H

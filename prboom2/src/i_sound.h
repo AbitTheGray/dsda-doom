@@ -4,8 +4,7 @@
  *      System interface, sound.
  */
 
-#ifndef __I_SOUND__
-#define __I_SOUND__
+#pragma once
 
 #include <stddef.h>
 
@@ -108,5 +107,3 @@ typedef enum
 extern const char *midiplayers[];
 
 void M_ChangeMIDIPlayer(void);
-
-#endif

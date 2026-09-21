@@ -4,8 +4,7 @@
  *  Intermission screens.
  */
 
-#ifndef __WI_STUFF__
-#define __WI_STUFF__
+#pragma once
 
 //#include "v_video.h"
 
@@ -33,5 +32,3 @@ void WI_Start(wbstartstruct_t*   wbstartstruct);
 
 // Release intermission screen memory
 void WI_End(void);
-
-#endif

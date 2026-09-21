@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Key Frame
 
-#ifndef __DSDA_KEY_FRAME__
-#define __DSDA_KEY_FRAME__
+#pragma once
 
 #include "doomtype.h"
 
@@ -47,5 +46,3 @@ void dsda_UpdatePlaybackKeyFrames(void);
 void dsda_StoreTempKeyFrame(void);
 void dsda_StoreQuickKeyFrame(void);
 void dsda_RestoreQuickKeyFrame(void);
-
-#endif

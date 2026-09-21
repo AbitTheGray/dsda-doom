@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Palette Management
 
-#ifndef __DSDA_PALETTE__
-#define __DSDA_PALETTE__
+#pragma once
 
 #include "SDL.h"
 
@@ -49,5 +48,3 @@ void dsda_FreePlayPal(int playpal_i);
 void dsda_FreeAllPlayPals(void);
 void dsda_InitPlayPal(int playpal_i);
 void dsda_InitAllPlayPals(void);
-
-#endif

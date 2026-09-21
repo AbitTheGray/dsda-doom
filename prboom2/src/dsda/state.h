@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA State
 
-#ifndef __DSDA_STATE__
-#define __DSDA_STATE__
+#pragma once
 
 #include "info.h"
 
@@ -17,5 +16,3 @@ typedef struct {
 dsda_deh_state_t dsda_GetDehState(int index);
 void dsda_InitializeStates(state_t* source, int count);
 void dsda_FreeDehStates(void);
-
-#endif

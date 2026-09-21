@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA Map Format
 
-#ifndef __DSDA_MAP_FORMAT__
-#define __DSDA_MAP_FORMAT__
+#pragma once
 
 #include "doomtype.h"
 #include "r_defs.h"
@@ -79,5 +78,3 @@ dboolean dsda_IsTeleportLine(int index);
 void dsda_ApplyZDoomMapFormat(void);
 void dsda_ApplyUDMF(void);
 void dsda_ApplyBinaryMapFormat(void);
-
-#endif

@@ -3,8 +3,7 @@
 // DESCRIPTION:
 //	DSDA UDMF
 
-#ifndef __DSDA_UDMF__
-#define __DSDA_UDMF__
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -286,6 +285,4 @@ void dsda_ParseUDMF(const unsigned char* buffer, size_t length, udmf_errorfunc e
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif
