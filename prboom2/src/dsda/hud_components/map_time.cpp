@@ -23,8 +23,8 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 	total_time = hexen ? players[consoleplayer].worldTimer : totalleveltimes + leveltime;
 	level_time = leveltime;
 
-	total_time /= 35;
-	level_time /= 35;
+	total_time /= TICRATE;
+	level_time /= TICRATE;
 
 	length = snprintf(
 		str,

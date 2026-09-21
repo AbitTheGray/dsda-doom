@@ -4729,11 +4729,11 @@ int AmbSndSeq4[] = {
 int AmbSndSeq5[] = {
 	// Heartbeat
 	afxcmd_play, heretic_sfx_amb5,
-	afxcmd_delay, 35,
+	afxcmd_delay, TICRATE,
 	afxcmd_play, heretic_sfx_amb5,
-	afxcmd_delay, 35,
+	afxcmd_delay, TICRATE,
 	afxcmd_play, heretic_sfx_amb5,
-	afxcmd_delay, 35,
+	afxcmd_delay, TICRATE,
 	afxcmd_play, heretic_sfx_amb5,
 	afxcmd_end
 };
@@ -5816,7 +5816,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			break;
 		case zl_door_close_wait_open:
 			buttonSuccess = EV_DoZDoomDoor(genCdO, line, mo, args[0],
-				args[1], args[2] * 35 / 8, static_cast<zdoom_lock_t>(0), args[3], false, 0);
+				args[1], args[2] * TICRATE / 8, static_cast<zdoom_lock_t>(0), args[3], false, 0);
 			break;
 		case zl_door_wait_raise:
 			buttonSuccess = EV_DoZDoomDoor(waitRaiseDoor, line, mo, args[0],
@@ -5866,7 +5866,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 
 			buttonSuccess = EV_DoZDoomDoor(type, line, mo, tag, args[1],
-				args[3] * 35 / 8, static_cast<zdoom_lock_t>(args[4]), lightTag, boomgen, 0);
+				args[3] * TICRATE / 8, static_cast<zdoom_lock_t>(args[4]), lightTag, boomgen, 0);
 		}
 		break;
 		case zl_pillar_build:
@@ -6490,7 +6490,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 
 			buttonSuccess = EV_DoZDoomPlat(args[0], line, type, args[4] * 8,
-				P_ArgToSpeed(args[1]), args[2] * 35 / 8, 0, 0);
+				P_ArgToSpeed(args[1]), args[2] * TICRATE / 8, 0, 0);
 		}
 		break;
 		case zl_line_set_blocking:

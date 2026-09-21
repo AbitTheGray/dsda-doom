@@ -2163,7 +2163,7 @@ void G_DoCompleted()
 	if(hexen)
 		totalleveltimes = players[consoleplayer].worldTimer;
 	else
-		totalleveltimes += leveltime - leveltime % 35;
+		totalleveltimes += leveltime - leveltime % TICRATE;
 	++levels_completed;
 
 	gameaction = ga_nothing;
@@ -3119,7 +3119,8 @@ void G_ReadOneTick(ticcmd_t* cmd, const byte** data_p)
 	cmd->sidemove = (signed char)(*(*data_p)++);
 	if(!longtics)
 	{
-		cmd->angleturn = ((unsigned char)(at = *(*data_p)++)) << 8;
+		at = *(*data_p)++;
+		cmd->angleturn = static_cast<int16_t>(static_cast<uint32_t>(at) << 8);
 	}
 	else
 	{
@@ -3140,7 +3141,7 @@ void G_ReadOneTick(ticcmd_t* cmd, const byte** data_p)
 		signed char tmp = cmd->forwardmove;
 		cmd->forwardmove = cmd->sidemove;
 		cmd->sidemove = (signed char)at;
-		cmd->angleturn = ((unsigned char)cmd->buttons) << 8;
+		cmd->angleturn = static_cast<int16_t>(static_cast<uint32_t>(cmd->buttons) << 8);
 		cmd->buttons = (byte)tmp;
 	}
 
@@ -3869,9 +3870,6 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 			demo_p += 256 - dsda_GameOptionSize();
 	}
 
-	if(sizeof(comp_lev_str) / sizeof(comp_lev_str[0]) != MAX_COMPATIBILITY_LEVEL)
-		I_Error("G_ReadDemoHeader: compatibility level strings incomplete");
-
 	for(i = 0; i < g_maxplayers; i++)
 		playeringame[i] = 0;
 
@@ -4310,7 +4308,7 @@ static dboolean InventoryMoveLeft()
 		return true;
 	}
 
-	inventoryTics = 5 * 35;
+	inventoryTics = 5 * TICRATE;
 	if(!inventory)
 	{
 		inventory = true;
@@ -4351,7 +4349,7 @@ static dboolean InventoryMoveRight()
 		return true;
 	}
 
-	inventoryTics = 5 * 35;
+	inventoryTics = 5 * TICRATE;
 	if(!inventory)
 	{
 		inventory = true;

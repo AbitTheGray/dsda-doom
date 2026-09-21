@@ -7,6 +7,7 @@
 #include "dsda/utility.hpp"
 
 #include "render_stats.hpp"
+#include "doomdef.hpp"
 
 static dsda_render_stats_t frame_stats;
 static dsda_render_stats_t interval_stats;
@@ -14,7 +15,7 @@ static int frame_count;
 
 dsda_render_stats_t dsda_render_stats;
 dsda_render_stats_t dsda_render_stats_max;
-int dsda_render_stats_fps = 35;
+int dsda_render_stats_fps = TICRATE;
 
 static void dsda_UpdateMaxValues(dsda_render_stats_t* x, dsda_render_stats_t* y)
 {

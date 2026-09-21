@@ -1841,7 +1841,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 
 #include "p_user.hpp"
 
-#define CHICKENTICS (40*35)
+#define CHICKENTICS (40*TICRATE)
 
 extern "C" void A_RestoreArtifact(mobj_t* arti)
 {

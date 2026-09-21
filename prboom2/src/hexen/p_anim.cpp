@@ -280,11 +280,11 @@ static void P_LightningFlash()
 		{
 			if(P_Random(pr_hexen) < 128 && !(leveltime & 32))
 			{
-				NextLightningFlash = ((P_Random(pr_hexen) & 7) + 2) * 35;
+				NextLightningFlash = ((P_Random(pr_hexen) & 7) + 2) * TICRATE;
 			}
 			else
 			{
-				NextLightningFlash = ((P_Random(pr_hexen) & 15) + 5) * 35;
+				NextLightningFlash = ((P_Random(pr_hexen) & 15) + 5) * TICRATE;
 			}
 		}
 	}
@@ -327,7 +327,7 @@ void P_InitLightning()
 		return;
 	}
 	LightningLightLevels = (int*)Z_MallocLevel(secCount * sizeof(int));
-	NextLightningFlash = ((P_Random(pr_hexen) & 15) + 5) * 35; // don't flash at level start
+	NextLightningFlash = ((P_Random(pr_hexen) & 15) + 5) * TICRATE; // don't flash at level start
 }
 
 void P_InitFTAnims()

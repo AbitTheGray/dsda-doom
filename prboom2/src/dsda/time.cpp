@@ -13,6 +13,7 @@
 #include "dsda/configuration.hpp"
 
 #include "time.hpp"
+#include "doomdef.hpp"
 
 // clock_gettime implementation for msvc
 // NOTE: Only supports CLOCK_MONOTONIC
@@ -119,8 +120,6 @@ void dsda_LimitFPS()
 		dsda_Throttle(dsda_timer_fps, target_time);
 	}
 }
-
-#define TICRATE 35
 
 extern "C" int dsda_GameSpeed();
 
