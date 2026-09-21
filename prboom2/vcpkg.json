@@ -5,6 +5,7 @@
   "homepage": "https://github.com/kraflab/dsda-doom",
   "license": "GPL-2.0-only",
   "dependencies": [
+    "gtest",
     "libsndfile",
     {
       "name": "libzip",

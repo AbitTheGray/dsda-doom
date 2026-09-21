@@ -72,6 +72,13 @@ endif()
 add_subdirectory(src)
 add_subdirectory(ICONS)
 
+# The suite lives beside this project rather than inside it, so it needs an
+# explicit binary directory.
+if(BUILD_SPEC)
+    enable_testing()
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../spec" "${CMAKE_CURRENT_BINARY_DIR}/spec")
+endif()
+
 install(FILES
     "${WAD_DATA_PATH}"
     DESTINATION "${DSDAPWADDIR}"

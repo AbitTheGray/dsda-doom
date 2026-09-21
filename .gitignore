@@ -29,5 +29,8 @@ CMakeUserPresets.json
 !/.vscode/extension.json
 CMakePresets.json
 
+# JetBrains
+/.idea
+
 # clangd
 /.cache/
