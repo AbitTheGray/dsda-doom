@@ -23,18 +23,18 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include "umapinfo.h"
-#include "scanner.h"
+#include "umapinfo.hpp"
+#include "scanner.hpp"
 
 extern "C"
 {
-#include "m_misc.h"
-#include "g_game.h"
-#include "doomdef.h"
-#include "doomstat.h"
+#include "m_misc.hpp"
+#include "g_game.hpp"
+#include "doomdef.hpp"
+#include "doomstat.hpp"
 
-#include "dsda/episode.h"
-#include "dsda/name.h"
+#include "dsda/episode.hpp"
+#include "dsda/name.hpp"
 
 	MapList Maps;
 }
@@ -53,7 +53,7 @@ static void FreeMap(MapEntry* mape)
 	if(mape->intertext) Z_Free(mape->intertext);
 	if(mape->intertextsecret) Z_Free(mape->intertextsecret);
 	if(mape->bossactions) Z_Free(mape->bossactions);
-	mape->lumpname = NULL;
+	mape->lumpname = nullptr;
 }
 
 
@@ -66,14 +66,14 @@ void FreeMapList()
 		FreeMap(&Maps.maps[i]);
 	}
 	Z_Free(Maps.maps);
-	Maps.maps = NULL;
+	Maps.maps = nullptr;
 	Maps.mapcount = 0;
 }
 
 
 void ReplaceString(char** pptr, const char* newstring)
 {
-	if(*pptr != NULL) Z_Free(*pptr);
+	if(*pptr != nullptr) Z_Free(*pptr);
 	*pptr = Z_Strdup(newstring);
 }
 
@@ -85,7 +85,7 @@ void ReplaceString(char** pptr, const char* newstring)
 
 static char* ParseMultiString(Scanner& scanner, int error)
 {
-	char* build = NULL;
+	char* build = nullptr;
 
 	if(scanner.CheckToken(TK_Identifier))
 	{
@@ -102,7 +102,7 @@ static char* ParseMultiString(Scanner& scanner, int error)
 	do
 	{
 		scanner.MustGetToken(TK_StringConst);
-		if(build == NULL) build = Z_Strdup(scanner.string);
+		if(build == nullptr) build = Z_Strdup(scanner.string);
 		else
 		{
 			size_t newlen = strlen(build) + strlen(scanner.string) + 2; // strlen for both the existing text and the new line, plus room for one \n and one \0
@@ -186,7 +186,7 @@ static int ParseStandardProperty(Scanner& scanner, MapEntry* mape)
 	else if(!stricmp(pname, "next"))
 	{
 		ParseLumpName(scanner, mape->nextmap);
-		if(!G_ValidateMapName(mape->nextmap, NULL, NULL))
+		if(!G_ValidateMapName(mape->nextmap, nullptr, nullptr))
 		{
 			scanner.ErrorF("Invalid map name %s.", mape->nextmap);
 			return 0;
@@ -195,7 +195,7 @@ static int ParseStandardProperty(Scanner& scanner, MapEntry* mape)
 	else if(!stricmp(pname, "nextsecret"))
 	{
 		ParseLumpName(scanner, mape->nextsecret);
-		if(!G_ValidateMapName(mape->nextsecret, NULL, NULL))
+		if(!G_ValidateMapName(mape->nextsecret, nullptr, nullptr))
 		{
 			scanner.ErrorF("Invalid map name %s", mape->nextsecret);
 			return 0;
@@ -323,7 +323,7 @@ static int ParseStandardProperty(Scanner& scanner, MapEntry* mape)
 		else
 		{
 			char lumpname[9] = {0};
-			char* alttext = NULL;
+			char* alttext = nullptr;
 			char key = 0;
 
 			ParseLumpName(scanner, lumpname);
@@ -350,7 +350,7 @@ static int ParseStandardProperty(Scanner& scanner, MapEntry* mape)
 		{
 			// mark level free of boss actions
 			if(mape->bossactions) Z_Free(mape->bossactions);
-			mape->bossactions = NULL;
+			mape->bossactions = nullptr;
 			mape->numbossactions = 0;
 			mape->flags |= MapInfo_BossActionClear;
 		}
@@ -410,11 +410,11 @@ static int ParseStandardProperty(Scanner& scanner, MapEntry* mape)
 
 static int ParseMapEntry(Scanner& scanner, MapEntry* val)
 {
-	val->lumpname = NULL;
+	val->lumpname = nullptr;
 
 	scanner.MustGetIdentifier("map");
 	scanner.MustGetToken(TK_Identifier);
-	if(!G_ValidateMapName(scanner.string, NULL, NULL))
+	if(!G_ValidateMapName(scanner.string, nullptr, nullptr))
 	{
 		scanner.ErrorF("Invalid map name %s", scanner.string);
 		return 0;
@@ -445,7 +445,7 @@ int ParseUMapInfo(const unsigned char* buffer, size_t length, umapinfo_errorfunc
 
 	while(scanner.TokensLeft())
 	{
-		MapEntry parsed = {0};
+		MapEntry parsed = {nullptr};
 		ParseMapEntry(scanner, &parsed);
 
 		// Set default level progression here to simplify the checks elsewhere.
@@ -542,5 +542,5 @@ int ParseUMapInfo(const unsigned char* buffer, size_t length, umapinfo_errorfunc
 
 MapProperty* FindProperty(MapEntry* map, const char* name)
 {
-	return NULL;
+	return nullptr;
 }

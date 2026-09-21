@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+// DESCRIPTION:
+//	DSDA Ammo Text HUD Component
+
+#pragma once
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+void dsda_InitAmmoTextHC(int x_offset, int y_offset, int vpt_flags, int* args, int arg_count, void** data);
+void dsda_UpdateAmmoTextHC(void* data);
+void dsda_DrawAmmoTextHC(void* data);
+
+#ifdef __cplusplus
+}
+#endif

@@ -6,15 +6,15 @@
 #include <cstring>
 #include <vector>
 
+extern "C" void* Z_MallocLevel(size_t size);
+extern "C" char* Z_StrdupLevel(const char* s);
 extern "C"
 {
-#include "doomdef.h"
-	char* Z_StrdupLevel(const char* s);
-	void* Z_MallocLevel(size_t size);
+#include "doomdef.hpp"
 }
 
-#include "scanner.h"
-#include "udmf.h"
+#include "scanner.hpp"
+#include "udmf.hpp"
 
 udmf_namespace_t udmf_namespace = UDMF_NONE;
 
@@ -573,7 +573,7 @@ static void dsda_ParseUDMFSideDef(Scanner& scanner)
 
 static void dsda_ParseUDMFVertex(Scanner& scanner)
 {
-	udmf_vertex_t vertex = {0};
+	udmf_vertex_t vertex = {nullptr};
 
 	scanner.MustGetToken('{');
 	while(!scanner.CheckToken('}'))

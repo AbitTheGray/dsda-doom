@@ -7,15 +7,15 @@
 
 extern "C"
 {
-#include "d_main.h"
-#include "w_wad.h"
-#include "lprintf.h"
-#include "z_zone.h"
+#include "d_main.hpp"
+#include "w_wad.hpp"
+#include "lprintf.hpp"
+#include "z_zone.hpp"
 }
 
-#include "scanner.h"
+#include "scanner.hpp"
 
-#include "gameinfo.h"
+#include "gameinfo.hpp"
 
 void dsda_ParseGameInfoLine(Scanner& scanner)
 {
@@ -38,7 +38,7 @@ void dsda_ParseGameInfoLine(Scanner& scanner)
 	}
 }
 
-void dsda_LoadGameInfo(void)
+void dsda_LoadGameInfo()
 {
 	int lump;
 

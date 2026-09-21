@@ -52,7 +52,7 @@ static int M_MouseClamp(int value, int low, int high)
 	return BETWEEN(low, high, value);
 }
 
-static void M_MouseBeginSetupNavigation(void)
+static void M_MouseBeginSetupNavigation()
 {
 	setup_menu_layout_t layout;
 
@@ -63,22 +63,22 @@ static void M_MouseBeginSetupNavigation(void)
 	menu_mouse_setup_scroll = layout.scroll_i;
 }
 
-static int M_MouseMenuRowHeight(void)
+static int M_MouseMenuRowHeight()
 {
 	return raven ? 20 : LINEHEIGHT;
 }
 
-static void M_MouseClearMainHover(void)
+static void M_MouseClearMainHover()
 {
 	menu_mouse_hover_main = -1;
 }
 
-static void M_MouseClearTabHover(void)
+static void M_MouseClearTabHover()
 {
 	menu_mouse_hover_tab = -1;
 }
 
-static void M_MouseResetButtons(void)
+static void M_MouseResetButtons()
 {
 	menu_mouse_buttons = 0;
 	menu_mouse_drag_setup = -1;
@@ -117,7 +117,7 @@ static void M_MouseSetLogicalPosition(int x, int y)
 	menu_mouse_y = M_MouseClamp(y, 0, MENU_MOUSE_HEIGHT - 1);
 }
 
-static void M_MouseReadPosition(void)
+static void M_MouseReadPosition()
 {
 	int window_x, window_y;
 	int renderer_x, renderer_y;
@@ -160,7 +160,7 @@ static int M_MouseWheelAction(event_t* ev)
 	}
 }
 
-static dboolean M_MouseBindingCaptureActive(void)
+static dboolean M_MouseBindingCaptureActive()
 {
 	return setup_active && set_keybnd_active && setup_select &&
 		current_setup_menu &&
@@ -339,7 +339,7 @@ static dboolean M_MouseSaveItemAtPointer(int* index)
 	return false;
 }
 
-static dboolean M_MouseUpdateMainHover(void)
+static dboolean M_MouseUpdateMainHover()
 {
 	int index;
 
@@ -361,7 +361,7 @@ static dboolean M_MouseUpdateMainHover(void)
 	return true;
 }
 
-static dboolean M_MouseSelectMainItem(void)
+static dboolean M_MouseSelectMainItem()
 {
 	int index;
 
@@ -615,7 +615,7 @@ static dboolean M_MouseLevelTableRowAtPointer(int y)
 }
 
 // [AR] Allow mouse select for color picker
-static dboolean M_MouseColorChipAtPointer(void)
+static dboolean M_MouseColorChipAtPointer()
 {
 	int x;
 	int y;
@@ -692,7 +692,7 @@ static const char** M_MouseCurrentTabs(int* visible_tabs, int* y,
 {
 	*visible_tabs = 0;
 	*y = 0;
-	*setup_pages = NULL;
+	*setup_pages = nullptr;
 
 	if(currentMenu == &LoadDef || currentMenu == &SaveDef)
 	{
@@ -702,7 +702,7 @@ static const char** M_MouseCurrentTabs(int* visible_tabs, int* y,
 	}
 
 	if(!setup_active)
-		return NULL;
+		return nullptr;
 
 	*y = TABS_Y;
 	*visible_tabs = setup_page_context.visible_tabs;
@@ -779,7 +779,7 @@ static dboolean M_MouseTabAtPointer(const char** pages, int visible_tabs,
 	return false;
 }
 
-static dboolean M_MouseUpdateTabHover(void)
+static dboolean M_MouseUpdateTabHover()
 {
 	const char** pages;
 	setup_menu_t** setup_pages;
@@ -843,7 +843,7 @@ static dboolean M_MouseSwitchSavePage(int target_page)
 	return true;
 }
 
-static dboolean M_MouseActivateTab(void)
+static dboolean M_MouseActivateTab()
 {
 	const char** pages;
 	setup_menu_t** setup_pages;
@@ -882,7 +882,7 @@ static void M_MouseSelectSetupItem(int index)
 	S_StartOptionalSound(g_sfx_mnusel, g_sfx_itemup, false);
 }
 
-static void M_MouseUpdateSetupHover(void)
+static void M_MouseUpdateSetupHover()
 {
 	int index;
 
@@ -1125,12 +1125,12 @@ static dboolean M_MouseBindingCaptureResponder(event_t* ev)
 	return true;
 }
 
-static dboolean M_MouseSoundSliderTitleAtPointer(void)
+static dboolean M_MouseSoundSliderTitleAtPointer()
 {
 	return currentMenu->menuitems[itemOn].status == M_ITEM_THERMO;
 }
 
-static dboolean M_MouseMotionResponder(void)
+static dboolean M_MouseMotionResponder()
 {
 	if(menu_mouse_drag_setup >= 0 && (menu_mouse_buttons & MENU_MOUSE_LEFT))
 		return M_MouseSetSetupThermo(menu_mouse_drag_setup);
@@ -1251,7 +1251,7 @@ static dboolean M_MouseResponder(event_t* ev)
 
 			// [AR] Bring up the menu if mouse is not on demo progressbar
 			if(menu_mouse_in_viewport &&
-				(!demoplayback || !HU_MouseOnDemoProgressBar(NULL)))
+				(!demoplayback || !HU_MouseOnDemoProgressBar(nullptr)))
 			{
 				M_StartControlPanel();
 				S_StartOptionalSound(g_sfx_mnuopn, g_sfx_swtchn, true);

@@ -1,0 +1,248 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+/* DESCRIPTION:
+ *      Transparent access to data in WADs using mmap
+ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#else
+#include <sys/mman.h>
+#endif
+
+#include "doomstat.hpp"
+#include "doomtype.hpp"
+
+#include "w_wad.hpp"
+#include "z_zone.hpp"
+#include "lprintf.hpp"
+#include "i_system.hpp"
+#include "m_file.hpp"
+
+#include "e6y.hpp"//e6y
+
+static void** lump_data;
+
+#ifdef _WIN32
+typedef struct
+{
+	HANDLE hnd;
+	OFSTRUCT fileinfo;
+	HANDLE hnd_map;
+	void* data;
+} mmap_info_t;
+
+mmap_info_t* mapped_wad;
+
+void W_DoneCache()
+{
+	size_t i;
+
+	if(lump_data)
+	{
+		Z_Free(lump_data);
+		lump_data = nullptr;
+	}
+
+	if(!mapped_wad)
+		return;
+	for(i = 0; i < numwadfiles; i++)
+	{
+		if(mapped_wad[i].data)
+		{
+			UnmapViewOfFile(mapped_wad[i].data);
+			mapped_wad[i].data = nullptr;
+		}
+		if(mapped_wad[i].hnd_map)
+		{
+			CloseHandle(mapped_wad[i].hnd_map);
+			mapped_wad[i].hnd_map = nullptr;
+		}
+		if(mapped_wad[i].hnd)
+		{
+			CloseHandle(mapped_wad[i].hnd);
+			mapped_wad[i].hnd = nullptr;
+		}
+	}
+	Z_Free(mapped_wad);
+	mapped_wad = nullptr;
+}
+
+void W_InitCache()
+{
+	// Wipe any existing cache
+	W_DoneCache();
+
+	// set up caching
+	lump_data = static_cast<void**>(Z_Calloc(numlumps, sizeof *lump_data));
+	if(!lump_data)
+		I_Error("W_Init: Couldn't allocate lump data");
+
+	mapped_wad = static_cast<decltype(mapped_wad)>(Z_Calloc(numwadfiles, sizeof(mmap_info_t)));
+	memset(mapped_wad, 0, sizeof(mmap_info_t) * numwadfiles);
+	{
+		int i;
+		for(i = 0; i < numlumps; i++)
+		{
+			int wad_index = (int)(lumpinfo[i].wadfile - wadfiles);
+
+			if(!lumpinfo[i].wadfile)
+				continue;
+#ifdef RANGECHECK
+if ((wad_index<0)||((size_t)wad_index>=numwadfiles))
+I_Error("W_InitCache: wad_index out of range");
+#endif
+if (!mapped_wad[wad_index].data)
+      {
+        wchar_t *wname = ConvertUtf8ToWide(wadfiles[wad_index].name);
+        mapped_wad[wad_index].hnd = CreateFileW(wname,
+          GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+          nullptr, OPEN_EXISTING, 0, nullptr);
+        Z_Free(wname);
+        if (mapped_wad[wad_index].hnd==INVALID_HANDLE_VALUE)
+          I_Error("W_InitCache: CreateFile for memory mapping failed (LastError %li)",GetLastError());
+        mapped_wad[wad_index].hnd_map =
+          CreateFileMapping(
+            mapped_wad[wad_index].hnd,
+            nullptr,
+            PAGE_READONLY,
+            0,
+            0,
+            NULL
+          );
+        if (mapped_wad[wad_index].hnd_map==nullptr)
+          I_Error("W_InitCache: CreateFileMapping for memory mapping failed (LastError %li)",GetLastError());
+        mapped_wad[wad_index].data =
+          MapViewOfFile(
+            mapped_wad[wad_index].hnd_map,
+            FILE_MAP_READ,
+            0,
+            0,
+            0
+          );
+        if (mapped_wad[wad_index].data==nullptr)
+          I_Error("W_InitCache: MapViewOfFile for memory mapping failed (LastError %li)",GetLastError());
+      }
+    }
+  }
+}
+
+const void* W_LumpByNum(int lump)
+{
+	int wad_index = (int)(lumpinfo[lump].wadfile - wadfiles);
+#ifdef RANGECHECK
+if ((wad_index<0)||((size_t)wad_index>=numwadfiles))
+I_Error("W_LumpByNum: wad_index out of range");
+  if ((unsigned)lump>= (unsigned)numlumps)
+I_Error("W_LumpByNum: %i >= numlumps", lump);
+#endif
+if (!lumpinfo[lump].wadfile)
+    return nullptr;
+  return (void*)((unsigned char*)mapped_wad[wad_index].data+lumpinfo[lump].position);
+}
+
+#else
+
+void** mapped_wad;
+
+void W_InitCache()
+{
+	int maxfd = 0;
+	// set up caching
+	lump_data = static_cast<void**>(Z_Calloc(numlumps, sizeof *lump_data));
+	if(!lump_data)
+		I_Error("W_Init: Couldn't allocate lump data");
+
+	{
+		int i;
+		for(i = 0; i < numlumps; i++)
+			if(lumpinfo[i].wadfile)
+				if(lumpinfo[i].wadfile->handle > maxfd) maxfd = lumpinfo[i].wadfile->handle;
+	}
+	mapped_wad = static_cast<decltype(mapped_wad)>(Z_Calloc(maxfd + 1, sizeof *mapped_wad));
+	{
+		int i;
+		for(i = 0; i < numlumps; i++)
+		{
+			if(lumpinfo[i].wadfile)
+			{
+				int fd = lumpinfo[i].wadfile->handle;
+				if(!mapped_wad[fd])
+					if((mapped_wad[fd] = mmap(nullptr, I_Filelength(fd),PROT_READ,MAP_SHARED, fd, 0)) == MAP_FAILED)
+						I_Error("W_InitCache: failed to mmap");
+			}
+		}
+	}
+}
+
+void W_DoneCache()
+{
+	{
+		int i;
+		for(i = 0; i < numlumps; i++)
+			if(lumpinfo[i].wadfile)
+			{
+				int fd = lumpinfo[i].wadfile->handle;
+				if(fd > 0 && mapped_wad[fd])
+				{
+					if(munmap(mapped_wad[fd], I_Filelength(fd)))
+						I_Error("W_DoneCache: failed to munmap");
+					mapped_wad[fd] = nullptr;
+				}
+			}
+	}
+	Z_Free(mapped_wad);
+	mapped_wad = nullptr;
+}
+
+const void* W_LumpByNum(int lump)
+{
+#ifdef RANGECHECK
+	if((unsigned)lump >= (unsigned)numlumps)
+		I_Error("W_LumpByNum: %i >= numlumps", lump);
+#endif
+	if(!lumpinfo[lump].wadfile)
+		return nullptr;
+
+	return
+		(const void*)(
+			((const byte*)(mapped_wad[lumpinfo[lump].wadfile->handle]))
+			+ lumpinfo[lump].position
+		);
+}
+#endif
+
+/*
+ * W_LockLumpNum
+ *
+ * This copies the lump into a malloced memory region and returns its address
+ * instead of returning a pointer into the memory mapped area
+ *
+ */
+const void* W_LockLumpNum(int lump)
+{
+	size_t len = W_LumpLength(lump);
+	const void* data = W_LumpByNum(lump);
+
+	// read the lump in
+	if(!lump_data[lump])
+	{
+		lump_data[lump] = Z_Malloc(len);
+		memcpy(lump_data[lump], data, len);
+	}
+
+	return lump_data[lump];
+}
+
+void* W_GetModifiableLumpData(int lump)
+{
+	return lump_data[lump];
+}

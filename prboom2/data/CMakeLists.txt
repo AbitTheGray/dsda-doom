@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.8...4.0)
+# C stays enabled: CheckBigEndian and the shared warning checks query the C compiler.
 project(dsda-doom-wad
-    LANGUAGES C
+    LANGUAGES C CXX
 )
 
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -13,25 +14,28 @@ endif()
 # PrBoom-Plus WAD creation tool
 
 add_executable(dsda_rdatawad
-    rd_main.c
-    rd_util.c
-    rd_util.h
-    rd_output.c
-    rd_output.h
-    rd_sound.c
-    rd_sound.h
-    rd_palette.c
-    rd_palette.h
-    rd_graphic.c
-    rd_graphic.h
+    rd_main.cpp
+    rd_util.cpp
+    rd_util.hpp
+    rd_output.cpp
+    rd_output.hpp
+    rd_sound.cpp
+    rd_sound.hpp
+    rd_palette.cpp
+    rd_palette.hpp
+    rd_graphic.cpp
+    rd_graphic.hpp
 )
 
 target_compile_features(dsda_rdatawad
-    PRIVATE c_std_99
+    PRIVATE cxx_std_26
 )
 set_target_properties(dsda_rdatawad
     PROPERTIES
     OUTPUT_NAME rdatawad
+    CXX_STANDARD 26
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
 )
 
 include(DsdaTargetFeatures)

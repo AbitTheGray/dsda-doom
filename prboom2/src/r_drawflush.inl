@@ -13,7 +13,7 @@
 // This is used when a quad flush isn't possible.
 // Opaque version -- no remapping whatsoever.
 //
-static void R_FLUSHWHOLE_FUNCNAME(void)
+static void R_FLUSHWHOLE_FUNCNAME()
 {
 	// Scaled software fuzz algorithm
 #if (R_DRAWCOLUMN_PIPELINE & RDC_FUZZ)
@@ -127,7 +127,7 @@ static void R_FLUSHWHOLE_FUNCNAME(void)
 // preparation for a quad flush.
 // Opaque version -- no remapping whatsoever.
 //
-static void R_FLUSHHEADTAIL_FUNCNAME(void)
+static void R_FLUSHHEADTAIL_FUNCNAME()
 {
 	byte* source;
 	byte* dest;
@@ -190,7 +190,7 @@ static void R_FLUSHHEADTAIL_FUNCNAME(void)
 	}
 }
 
-static void R_FLUSHQUAD_FUNCNAME(void)
+static void R_FLUSHQUAD_FUNCNAME()
 {
 	byte* source;
 	byte* dest;

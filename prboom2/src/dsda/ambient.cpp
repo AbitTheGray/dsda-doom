@@ -9,20 +9,20 @@
 
 extern "C"
 {
-#include "m_random.h"
-#include "lprintf.h"
-#include "p_tick.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "w_wad.h"
-#include "z_zone.h"
+#include "m_random.hpp"
+#include "lprintf.hpp"
+#include "p_tick.hpp"
+#include "s_sound.hpp"
+#include "sounds.hpp"
+#include "w_wad.hpp"
+#include "z_zone.hpp"
 
-#include "dsda/sfx.h"
+#include "dsda/sfx.hpp"
 }
 
-#include "scanner.h"
+#include "scanner.hpp"
 
-#include "ambient.h"
+#include "ambient.hpp"
 
 typedef struct
 {
@@ -46,7 +46,7 @@ dboolean dsda_IsLoopingAmbientSFX(int sfx_id)
 
 static ambient_sfx_t* dsda_AmbientSFX(int id)
 {
-	return id_to_ambient_sfx[id].sfx_id ? &id_to_ambient_sfx[id] : NULL;
+	return id_to_ambient_sfx[id].sfx_id ? &id_to_ambient_sfx[id] : nullptr;
 }
 
 static int dsda_AmbientWaitTime(ambient_sfx_t* amb_sfx)
@@ -111,10 +111,10 @@ void dsda_SpawnAmbientSource(mobj_t* mobj)
 		return;
 
 	source = (ambient_source_t*)Z_MallocLevel(sizeof(*source));
-	source->mobj = NULL;
+	source->mobj = nullptr;
 	P_SetTarget(&source->mobj, mobj);
 	source->data = *data;
-	source->data.sound_name = NULL;
+	source->data.sound_name = nullptr;
 	source->wait_tics = dsda_AmbientWaitTime(data);
 	source->thinker.function = (think_t)dsda_UpdateAmbientSource;
 	P_AddThinker(&source->thinker);
@@ -122,7 +122,7 @@ void dsda_SpawnAmbientSource(mobj_t* mobj)
 
 static void dsda_ParseAmbient(Scanner& scanner)
 {
-	ambient_sfx_t amb_sfx = {0};
+	ambient_sfx_t amb_sfx = {nullptr};
 	int id;
 
 	scanner.MustGetInteger();
@@ -228,7 +228,7 @@ static void dsda_ParseSndInfoLine(Scanner& scanner)
 	}
 }
 
-static void dsda_ResolveAmbientSounds(void)
+static void dsda_ResolveAmbientSounds()
 {
 	for(auto& named_sfx : name_to_sfx)
 	{
@@ -259,7 +259,7 @@ static void dsda_ResolveAmbientSounds(void)
 	}
 }
 
-void dsda_LoadAmbientSndInfo(void)
+void dsda_LoadAmbientSndInfo()
 {
 	int lump;
 

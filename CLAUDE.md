@@ -95,3 +95,7 @@ Use `DOOM_NO_COPY` and `DOOM_NO_MOVE` if you want to explicitly disable copy and
 
 ## Not implemented exception
 If we do not have time to implement something, put `NOT_IMPLEMENTED` there. It contains an exception and is an explicit mark for us.
+
+## Do not pre-declare variables
+Do not start procedures with declaring all variables. That is an old thing from C, we do not want that.
+Not even declaring the object for `for` loop, unless it needs to survive the loop's scope.

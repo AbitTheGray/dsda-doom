@@ -42,7 +42,10 @@ function(dsda_internal_setup_warnings_gnu result_var)
       "-Wno-tautological-constant-out-of-range-compare"
       "-Wno-tautological-unsigned-enum-zero-compare"
       "-Wno-misleading-indentation"
-    )
+      # The C designated initialisers we carried over are a Clang extension in
+      # C++. Kept as-is while the rewrite is in progress.
+      "-Wno-c99-designator"
+  )
   endif()
 
   set(GNU_WARNINGS_SET ${GNU_WARNINGS} ${GNU_C_WARNINGS})
