@@ -55,6 +55,27 @@ extern "C"
 
 typedef unsigned angle_t;
 
+// Angles are modular, so the difference between two of them has to be computed
+// in unsigned arithmetic and only then reinterpreted as signed. Casting each
+// angle to int32_t first overflows whenever they are more than half a circle
+// apart - which is exactly the wraparound case this is used for - and signed
+// overflow is undefined behaviour: the optimiser assumes it cannot happen and
+// gets the sign, and so the turn direction, wrong.
+constexpr int32_t AngleDifference(angle_t left, angle_t right)
+{
+	return static_cast<int32_t>(left - right);
+}
+
+// Magnitude of an AngleDifference. abs() is undefined for the exact half
+// circle (INT32_MIN), so negate through uint32_t instead, which reproduces the
+// two's complement result the recorded demos were made against.
+constexpr int32_t AngleAbs(int32_t difference)
+{
+	return difference >= 0
+		? difference
+		: static_cast<int32_t>(0u - static_cast<uint32_t>(difference));
+}
+
 #define ANGLE_T_TO_PITCH_F(x) ((float) ((x) >> ANGLETOFINESHIFT) * 360.0f / FINEANGLES)
 #define ANGLE_T_TO_LOOKDIR(x) ((int) -((int) (x) * M_PI / ANG1))
 

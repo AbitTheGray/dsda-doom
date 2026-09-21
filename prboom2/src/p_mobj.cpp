@@ -429,7 +429,7 @@ static void P_XYMovement(mobj_t* mo)
 					{
 						case HEXEN_MT_CENTAUR:
 						case HEXEN_MT_CENTAURLEADER:
-							if(abs((int)angle - (int)BlockingMobj->angle) >> 24 > 45)
+							if(AngleAbs(AngleDifference(angle, BlockingMobj->angle)) >> 24 > 45)
 								goto explode;
 							if(mo->type == HEXEN_MT_HOLY_FX)
 								goto explode;

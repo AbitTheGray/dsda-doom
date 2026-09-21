@@ -48,6 +48,19 @@ namespace
 
 		return std::string_view(text).substr(text.size() - k_maximumReportedOutput);
 	}
+
+	/**
+	 * One report the game was asked to write, named.
+	 * @note "not written" is the interesting case: it tells us the run never got
+	 *       far enough to produce it, which the report's own contents cannot.
+	 */
+	[[nodiscard]] std::string Report(const std::string_view name, const std::string& contents)
+	{
+		if(contents.empty())
+			return std::format("{}: not written\n", name);
+
+		return std::format("{}:\n{}\n", name, Tail(contents));
+	}
 }
 
 TemporaryDirectory::TemporaryDirectory()
@@ -110,14 +123,25 @@ DemoRun::DemoRun(const DemoOptions& options)
 void DemoRun::Fail(const std::string_view what) const
 {
 	throw std::runtime_error(std::format(
-		"{}\ncommand: {}\nexit code: {}\ngame output:\n{}",
-		what, m_command, m_exitCode, Tail(m_output)
+		"{}\ncommand: {}\nexit code: {}\n{}{}game output:\n{}",
+		what, m_command, m_exitCode,
+		Report(k_levelstatName, m_levelstat), Report(k_analysisName, m_analysis),
+		Tail(m_output)
 	));
 }
 
 std::string DemoRun::TotalTime() const
 {
-	const auto total = Levelstat::Parse(m_levelstat).TotalTime();
+	const Levelstat levelstat = Levelstat::Parse(m_levelstat);
+
+	// Comparing the "00:00" of an empty report against the expected time says
+	// the demo is out of sync, which is the one thing it does not tell us: the
+	// game finished no level at all. That is a run which never reached an exit,
+	// so the failure has to carry what the game did instead.
+	if(levelstat.levels.empty())
+		Fail("the game finished no level, so it wrote no total time");
+
+	const auto total = levelstat.TotalTime();
 
 	if(!total)
 		Fail(std::format("could not read the total time: {}", total.error()));

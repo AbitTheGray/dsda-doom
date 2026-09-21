@@ -19,8 +19,9 @@ struct Levelstat
 
 	/**
 	 * The cumulative time of the final level, e.g. "17:55".
-	 * @note Returns "00:00" when no level was finished, so a desynced demo
-	 *       fails against the expected time instead of erroring out.
+	 * @note Returns "00:00" when no level was finished. `DemoRun::TotalTime`
+	 *       treats that as a failed run rather than a time, because a report
+	 *       with no levels in it says nothing about why.
 	 */
 	[[nodiscard]] std::expected<std::string, std::string> TotalTime() const;
 

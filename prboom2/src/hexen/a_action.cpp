@@ -132,8 +132,9 @@ extern "C" void A_PotteryCheck(mobj_t* actor)
 	{
 		pmo = players[consoleplayer].mo;
 		if(P_CheckSight(actor, pmo)
-			&& (abs((int)R_PointToAngle2(pmo->x, pmo->y, actor->x, actor->y)
-				- (int)pmo->angle) <= ANG45))
+			&& (AngleAbs(AngleDifference(
+				R_PointToAngle2(pmo->x, pmo->y, actor->x, actor->y),
+				pmo->angle)) <= ANG45))
 		{
 			// Previous state (pottery bit waiting state)
 			P_SetMobjState(actor, static_cast<statenum_t>(actor->state - &states[0] - 1));
@@ -153,8 +154,9 @@ extern "C" void A_PotteryCheck(mobj_t* actor)
 			}
 			pmo = players[i].mo;
 			if(P_CheckSight(actor, pmo)
-				&& (abs((int)R_PointToAngle2(pmo->x, pmo->y, actor->x, actor->y)
-					- (int)pmo->angle) <= ANG45))
+				&& (AngleAbs(AngleDifference(
+					R_PointToAngle2(pmo->x, pmo->y, actor->x, actor->y),
+					pmo->angle)) <= ANG45))
 			{
 				// Previous state (pottery bit waiting state)
 				P_SetMobjState(actor, static_cast<statenum_t>(actor->state - &states[0] - 1));

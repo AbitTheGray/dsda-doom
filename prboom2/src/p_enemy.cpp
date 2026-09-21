@@ -3365,7 +3365,7 @@ extern "C" void A_MonsterBulletAttack(mobj_t* actor)
 	for(i = 0; i < numbullets; i++)
 	{
 		damage = (P_Random(pr_mbf21) % damagemod + 1) * damagebase;
-		angle = (int)actor->angle + P_RandomHitscanAngle(pr_mbf21, hspread);
+		angle = actor->angle + static_cast<angle_t>(P_RandomHitscanAngle(pr_mbf21, hspread));
 		slope = aimslope + P_RandomHitscanSlope(pr_mbf21, vspread);
 
 		P_LineAttack(actor, angle, MISSILERANGE, slope, damage);
@@ -6554,9 +6554,8 @@ static void DragonSeek(mobj_t* actor, angle_t thresh, angle_t turnMax)
 		// attack the destination mobj if it's attackable
 		mobj_t* oldTarget;
 
-		if(abs((int)actor->angle - (int)R_PointToAngle2(actor->x, actor->y,
-			target->x,
-			target->y)) < ANG45 / 2)
+		if(AngleAbs(AngleDifference(actor->angle,
+			R_PointToAngle2(actor->x, actor->y, target->x, target->y))) < ANG45 / 2)
 		{
 			oldTarget = actor->target;
 			actor->target = target;
@@ -6606,9 +6605,9 @@ static void DragonSeek(mobj_t* actor, angle_t thresh, angle_t turnMax)
 				}
 				angleToSpot = R_PointToAngle2(actor->x, actor->y,
 					mo_x, mo_y);
-				if(abs((int)angleToSpot - (int)angleToTarget) < bestAngle)
+				if(AngleAbs(AngleDifference(angleToSpot, angleToTarget)) < bestAngle)
 				{
-					bestAngle = abs((int)angleToSpot - (int)angleToTarget);
+					bestAngle = AngleAbs(AngleDifference(angleToSpot, angleToTarget));
 					bestArg = i;
 				}
 			}
@@ -6674,13 +6673,13 @@ extern "C" void A_DragonFlight(mobj_t* actor)
 		}
 		angle = R_PointToAngle2(actor->x, actor->y, actor->target->x,
 			actor->target->y);
-		if(abs((int)actor->angle - (int)angle) < ANG45 / 2
+		if(AngleAbs(AngleDifference(actor->angle, angle)) < ANG45 / 2
 			&& P_CheckMeleeRange(actor))
 		{
 			P_DamageMobj(actor->target, actor, actor, HITDICE(8));
 			S_StartMobjSound(actor, hexen_sfx_dragon_attack);
 		}
-		else if(abs((int)actor->angle - (int)angle) <= ANG1 * 20)
+		else if(AngleAbs(AngleDifference(actor->angle, angle)) <= ANG1 * 20)
 		{
 			P_SetMobjState(actor, static_cast<statenum_t>(actor->info->missilestate));
 			S_StartMobjSound(actor, hexen_sfx_dragon_attack);

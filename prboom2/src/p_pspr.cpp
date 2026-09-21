@@ -1279,7 +1279,7 @@ extern "C" void A_WeaponBulletAttack(player_t* player, pspdef_t* psp)
 	for(i = 0; i < numbullets; i++)
 	{
 		damage = (P_Random(pr_mbf21) % damagemod + 1) * damagebase;
-		angle = (int)player->mo->angle + P_RandomHitscanAngle(pr_mbf21, hspread);
+		angle = player->mo->angle + static_cast<angle_t>(P_RandomHitscanAngle(pr_mbf21, hspread));
 		slope = bulletslope + P_RandomHitscanSlope(pr_mbf21, vspread);
 
 		P_LineAttack(player->mo, angle, MISSILERANGE, slope, damage);
@@ -2678,11 +2678,11 @@ static dboolean P_CheckMana(player_t* player)
 void AdjustPlayerAngle(mobj_t* pmo)
 {
 	angle_t angle;
-	int difference;
+	int32_t difference;
 
 	angle = R_PointToAngle2(pmo->x, pmo->y, linetarget->x, linetarget->y);
-	difference = (int)angle - (int)pmo->angle;
-	if(abs(difference) > MAX_ANGADJUST)
+	difference = AngleDifference(angle, pmo->angle);
+	if(AngleAbs(difference) > MAX_ANGADJUST)
 	{
 		pmo->angle += difference > 0 ? MAX_ANGADJUST : -MAX_ANGADJUST;
 	}
