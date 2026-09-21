@@ -16,27 +16,27 @@
 #include "v_video.h"
 #include "SDL.h"
 
-extern SDL_Window *sdl_window;
-extern SDL_Renderer *sdl_renderer;
+extern SDL_Window* sdl_window;
+extern SDL_Renderer* sdl_renderer;
 
 extern SDL_Rect renderer_rect;
 extern SDL_Rect window_rect;
 extern SDL_Rect viewport_rect;
 
-extern const char *screen_resolutions_list[];
+extern const char* screen_resolutions_list[];
 
-extern const char *sdl_video_window_pos;
+extern const char* sdl_video_window_pos;
 
-void I_PreInitGraphics(void); /* CPhipps - do stuff immediately on start */
+void I_PreInitGraphics(void);      /* CPhipps - do stuff immediately on start */
 void I_InitScreenResolution(void); /* init resolution */
-void I_SetWindowCaption(void); /* Set the window caption */
-void I_SetWindowIcon(void); /* Set the application icon */
-void I_InitGraphics (void);
+void I_SetWindowCaption(void);     /* Set the window caption */
+void I_SetWindowIcon(void);        /* Set the application icon */
+void I_InitGraphics(void);
 void I_UpdateVideoMode(void);
 void I_ShutdownGraphics(void);
 
-void *I_GetSDLWindow(void);
-void *I_GetSDLRenderer(void);
+void* I_GetSDLWindow(void);
+void* I_GetSDLRenderer(void);
 void dsda_Shutdown(void);
 
 /* Takes full 8 bit values. */
@@ -46,11 +46,11 @@ void I_QueueFrameCapture(void);
 void I_QueueScreenshot(void);
 void I_HandleCapture(void);
 
-void I_FinishUpdate (void);
+void I_FinishUpdate(void);
 
-int I_ScreenShot (const char *fname);
+int I_ScreenShot(const char* fname);
 // NSM expose lower level screen data grab for vidcap
-unsigned char *I_GrabScreen (void);
+unsigned char* I_GrabScreen(void);
 
 /* I_StartTic
  * Called by D_DoomLoop,
@@ -58,7 +58,7 @@ unsigned char *I_GrabScreen (void);
  * Quick syncronous operations are performed here.
  * Can call D_PostEvent.
  */
-void I_StartTic (void);
+void I_StartTic(void);
 
 /* I_StartFrame
  * Called by D_DoomLoop,
@@ -69,14 +69,14 @@ void I_StartTic (void);
  * Can call D_PostEvent.
  */
 
-void I_StartFrame (void);
+void I_StartFrame(void);
 
 extern int desired_fullscreen; //e6y
 extern int exclusive_fullscreen;
 
-void I_UpdateRenderSize(void);	// Handle potential
-extern int renderW;		// resolution scaling
-extern int renderH;		// - DTIED
+void I_UpdateRenderSize(void); // Handle potential
+extern int renderW;            // resolution scaling
+extern int renderH;            // - DTIED
 
 extern dboolean window_focused;
 dboolean I_WindowFocused(void);

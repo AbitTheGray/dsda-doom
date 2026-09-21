@@ -37,219 +37,244 @@ extern int demo_tics;
 dboolean demoplayback;
 dboolean userdemo;
 
-void dsda_RestartPlayback(void) {
-  G_StartDemoPlayback(playback_origin_p, playback_length, playback_behaviour);
+void dsda_RestartPlayback(void)
+{
+	G_StartDemoPlayback(playback_origin_p, playback_length, playback_behaviour);
 }
 
-dboolean dsda_JumpToLogicTic(int tic) {
-  if (tic < 0)
-    return false;
+dboolean dsda_JumpToLogicTic(int tic)
+{
+	if(tic < 0)
+		return false;
 
-  if (!dsda_RestoreClosestKeyFrame(tic))
-    return false;
+	if(!dsda_RestoreClosestKeyFrame(tic))
+		return false;
 
-  if (tic != true_logictic)
-    dsda_SkipToLogicTic(tic);
+	if(tic != true_logictic)
+		dsda_SkipToLogicTic(tic);
 
-  return true;
+	return true;
 }
 
-dboolean dsda_JumpToLogicTicFrom(int tic, int from_tic) {
-  if (tic < 0 || tic > true_logictic)
-    return false;
+dboolean dsda_JumpToLogicTicFrom(int tic, int from_tic)
+{
+	if(tic < 0 || tic > true_logictic)
+		return false;
 
-  if (!dsda_RestoreClosestKeyFrame(from_tic))
-    return false;
+	if(!dsda_RestoreClosestKeyFrame(from_tic))
+		return false;
 
-  if (tic != true_logictic)
-    dsda_SkipToLogicTic(tic);
+	if(tic != true_logictic)
+		dsda_SkipToLogicTic(tic);
 
-  return true;
+	return true;
 }
 
-const char* dsda_PlaybackName(void) {
-  return playback_name;
+const char* dsda_PlaybackName(void)
+{
+	return playback_name;
 }
 
-void dsda_ExecutePlaybackOptions(void) {
-  if (playlump_arg) {
-    if (W_CheckNumForName(playback_name) == LUMP_NOT_FOUND)
-      I_Error("Unable to find required internal demo lump \"%s\"", playback_name);
-  }
+void dsda_ExecutePlaybackOptions(void)
+{
+	if(playlump_arg)
+	{
+		if(W_CheckNumForName(playback_name) == LUMP_NOT_FOUND)
+			I_Error("Unable to find required internal demo lump \"%s\"", playback_name);
+	}
 
-  if (playdemo_arg)
-  {
-    G_DeferedPlayDemo(playback_name);
-    userdemo = true;
-  }
-  else if (fastdemo_arg) {
-    G_DeferedPlayDemo(playback_name);
-    fastdemo = true;
-    timingdemo = true;
-    userdemo = true;
-  }
-  else if (timedemo_arg)
-  {
-    G_DeferedPlayDemo(playback_name);
-    singletics = true;
-    timingdemo = true;
-    userdemo = true;
-  }
-  else if (recordfromto_arg) {
-    userdemo = true;
-    G_ContinueDemo(playback_name);
-  }
+	if(playdemo_arg)
+	{
+		G_DeferedPlayDemo(playback_name);
+		userdemo = true;
+	}
+	else if(fastdemo_arg)
+	{
+		G_DeferedPlayDemo(playback_name);
+		fastdemo = true;
+		timingdemo = true;
+		userdemo = true;
+	}
+	else if(timedemo_arg)
+	{
+		G_DeferedPlayDemo(playback_name);
+		singletics = true;
+		timingdemo = true;
+		userdemo = true;
+	}
+	else if(recordfromto_arg)
+	{
+		userdemo = true;
+		G_ContinueDemo(playback_name);
+	}
 }
 
-static void dsda_UpdatePlaybackName(const char* name, dboolean require_file) {
-  if (playback_name)
-    Z_Free(playback_name);
+static void dsda_UpdatePlaybackName(const char* name, dboolean require_file)
+{
+	if(playback_name)
+		Z_Free(playback_name);
 
-  if (playback_filename)
-    Z_Free(playback_filename);
+	if(playback_filename)
+		Z_Free(playback_filename);
 
-  playback_name = Z_Strdup(name);
+	playback_name = Z_Strdup(name);
 
-  if (require_file)
-    playback_filename = I_FindFile(playback_name, ".lmp");
-  else
-    playback_filename = NULL;
+	if(require_file)
+		playback_filename = I_FindFile(playback_name, ".lmp");
+	else
+		playback_filename = NULL;
 }
 
-const char* dsda_ParsePlaybackOptions(void) {
-  dsda_arg_t* arg;
+const char* dsda_ParsePlaybackOptions(void)
+{
+	dsda_arg_t* arg;
 
-  arg = dsda_Arg(dsda_arg_playdemo);
-  if (arg->found) {
-    playdemo_arg = arg;
-    dsda_UpdatePlaybackName(arg->value.v_string, true);
-    // fall back to lump if file not found
-    if (!playback_filename)
-      playlump_arg = arg;
-    return playback_filename;
-  }
+	arg = dsda_Arg(dsda_arg_playdemo);
+	if(arg->found)
+	{
+		playdemo_arg = arg;
+		dsda_UpdatePlaybackName(arg->value.v_string, true);
+		// fall back to lump if file not found
+		if(!playback_filename)
+			playlump_arg = arg;
+		return playback_filename;
+	}
 
-  arg = dsda_Arg(dsda_arg_playlump);
-  if (arg->found) {
-    playlump_arg = arg;
-    dsda_UpdatePlaybackName(arg->value.v_string, false);
-    playdemo_arg = arg;
-    return playback_filename;
-  }
+	arg = dsda_Arg(dsda_arg_playlump);
+	if(arg->found)
+	{
+		playlump_arg = arg;
+		dsda_UpdatePlaybackName(arg->value.v_string, false);
+		playdemo_arg = arg;
+		return playback_filename;
+	}
 
-  arg = dsda_Arg(dsda_arg_fastdemo);
-  if (arg->found) {
-    fastdemo_arg = arg;
-    fastdemo = true;
-    dsda_UpdatePlaybackName(arg->value.v_string, true);
-    // fall back to lump if file not found
-    if (!playback_filename)
-      playlump_arg = arg;
-    return playback_filename;
-  }
+	arg = dsda_Arg(dsda_arg_fastdemo);
+	if(arg->found)
+	{
+		fastdemo_arg = arg;
+		fastdemo = true;
+		dsda_UpdatePlaybackName(arg->value.v_string, true);
+		// fall back to lump if file not found
+		if(!playback_filename)
+			playlump_arg = arg;
+		return playback_filename;
+	}
 
-  arg = dsda_Arg(dsda_arg_timedemo);
-  if (arg->found) {
-    timedemo_arg = arg;
-    dsda_UpdatePlaybackName(arg->value.v_string, true);
-    // fall back to lump if file not found
-    if (!playback_filename)
-      playlump_arg = arg;
-    return playback_filename;
-  }
+	arg = dsda_Arg(dsda_arg_timedemo);
+	if(arg->found)
+	{
+		timedemo_arg = arg;
+		dsda_UpdatePlaybackName(arg->value.v_string, true);
+		// fall back to lump if file not found
+		if(!playback_filename)
+			playlump_arg = arg;
+		return playback_filename;
+	}
 
-  arg = dsda_Arg(dsda_arg_recordfromto);
-  if (arg->found) {
-    recordfromto_arg = arg;
-    dsda_SetDemoBaseName(arg->value.v_string_array[1]);
-    dsda_UpdatePlaybackName(arg->value.v_string_array[0], true);
-    // require a file
-    if (!playback_filename)
-      playback_filename = I_RequireFile(arg->value.v_string_array[0], ".lmp");
-    return playback_filename;
-  }
+	arg = dsda_Arg(dsda_arg_recordfromto);
+	if(arg->found)
+	{
+		recordfromto_arg = arg;
+		dsda_SetDemoBaseName(arg->value.v_string_array[1]);
+		dsda_UpdatePlaybackName(arg->value.v_string_array[0], true);
+		// require a file
+		if(!playback_filename)
+			playback_filename = I_RequireFile(arg->value.v_string_array[0], ".lmp");
+		return playback_filename;
+	}
 
-  return NULL;
+	return NULL;
 }
 
-void dsda_InitDemoPlayback(void) {
-  demoplayback = true;
+void dsda_InitDemoPlayback(void)
+{
+	demoplayback = true;
 }
 
-void dsda_AttachPlaybackStream(const byte* demo_p, int length, int behaviour) {
-  playback_origin_p = demo_p;
-  playback_p = demo_p;
-  playback_length = length;
-  playback_behaviour = behaviour;
-  demo_tics = 0;
+void dsda_AttachPlaybackStream(const byte* demo_p, int length, int behaviour)
+{
+	playback_origin_p = demo_p;
+	playback_p = demo_p;
+	playback_length = length;
+	playback_behaviour = behaviour;
+	demo_tics = 0;
 }
 
-void dsda_StorePlaybackPosition(void) {
-  P_SAVE_X(demo_tics);
-  P_SAVE_X(playback_p);
+void dsda_StorePlaybackPosition(void)
+{
+	P_SAVE_X(demo_tics);
+	P_SAVE_X(playback_p);
 }
 
-void dsda_RestorePlaybackPosition(void) {
-  P_LOAD_X(demo_tics);
-  P_LOAD_X(playback_p);
+void dsda_RestorePlaybackPosition(void)
+{
+	P_LOAD_X(demo_tics);
+	P_LOAD_X(playback_p);
 }
 
-void dsda_ClearPlaybackStream(void) {
-  playback_origin_p = NULL;
-  playback_p = NULL;
-  playback_length = 0;
-  playback_behaviour = 0;
-  demo_tics = 0;
+void dsda_ClearPlaybackStream(void)
+{
+	playback_origin_p = NULL;
+	playback_p = NULL;
+	playback_length = 0;
+	playback_behaviour = 0;
+	demo_tics = 0;
 
-  demoplayback = false;
-  userdemo = false;
+	demoplayback = false;
+	userdemo = false;
 }
 
-static dboolean dsda_EndOfPlaybackStream(void) {
-  return *playback_p == DEMOMARKER ||
-         playback_p + dsda_BytesPerTic() > playback_origin_p + playback_length;
+static dboolean dsda_EndOfPlaybackStream(void)
+{
+	return *playback_p == DEMOMARKER ||
+		playback_p + dsda_BytesPerTic() > playback_origin_p + playback_length;
 }
 
-void dsda_JoinDemo(ticcmd_t* cmd) {
-  if (!demoplayback)
-    return;
+void dsda_JoinDemo(ticcmd_t* cmd)
+{
+	if(!demoplayback)
+		return;
 
-  if (dsda_SkipMode())
-    dsda_ExitSkipMode();
+	if(dsda_SkipMode())
+		dsda_ExitSkipMode();
 
-  if (demorecording)
-    dsda_WriteQueueToDemo(playback_p, playback_length - (playback_p - playback_origin_p));
+	if(demorecording)
+		dsda_WriteQueueToDemo(playback_p, playback_length - (playback_p - playback_origin_p));
 
-  dsda_ClearPlaybackStream();
+	dsda_ClearPlaybackStream();
 
-  if (cmd)
-    dsda_JoinDemoCmd(cmd);
-  else
-    dsda_QueueJoin();
+	if(cmd)
+		dsda_JoinDemoCmd(cmd);
+	else
+		dsda_QueueJoin();
 
-  dsda_MergeExDemoFeatures();
+	dsda_MergeExDemoFeatures();
 }
 
-void dsda_TryPlaybackOneTick(ticcmd_t* cmd) {
-  dboolean ended = false;
+void dsda_TryPlaybackOneTick(ticcmd_t* cmd)
+{
+	dboolean ended = false;
 
-  if (!playback_p)
-    return;
+	if(!playback_p)
+		return;
 
-  if (dsda_EndOfPlaybackStream())
-    ended = true;
-  else {
-    G_ReadOneTick(cmd, &playback_p);
+	if(dsda_EndOfPlaybackStream())
+		ended = true;
+	else
+	{
+		G_ReadOneTick(cmd, &playback_p);
 
-    ++demo_tics;
-  }
+		++demo_tics;
+	}
 
-  if (ended) {
-    if (playback_behaviour & PLAYBACK_JOIN_ON_END)
-      dsda_JoinDemo(cmd);
-    else
-      G_CheckDemoStatus();
-  }
-  else if (dsda_InputActive(dsda_input_join_demo) || dsda_InputJoyBActive(dsda_input_use))
-    dsda_JoinDemo(cmd);
+	if(ended)
+	{
+		if(playback_behaviour & PLAYBACK_JOIN_ON_END)
+			dsda_JoinDemo(cmd);
+		else
+			G_CheckDemoStatus();
+	}
+	else if(dsda_InputActive(dsda_input_join_demo) || dsda_InputJoyBActive(dsda_input_use))
+		dsda_JoinDemo(cmd);
 }

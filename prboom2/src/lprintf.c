@@ -39,48 +39,48 @@ int cons_stderr_mask = LO_WARN | LO_ERROR;
  */
 #define MAX_MESSAGE_SIZE 2048
 
-int lprintf(OutputLevels pri, const char *s, ...)
+int lprintf(OutputLevels pri, const char* s, ...)
 {
-  int r=0;
-  char msg[MAX_MESSAGE_SIZE];
-  int lvl=pri;
+	int r = 0;
+	char msg[MAX_MESSAGE_SIZE];
+	int lvl = pri;
 
-  va_list v;
-  va_start(v,s);
-  vsnprintf(msg,sizeof(msg),s,v);    /* print message in buffer  */
-  va_end(v);
-
-#ifdef _WIN32
-  // do not crash with unicode dirs
-  if (fileno(stdout) != -1)
-#endif
-  if (lvl & cons_stdout_mask)
-    r = fprintf(stdout,"%s",msg);
+	va_list v;
+	va_start(v, s);
+	vsnprintf(msg, sizeof(msg), s, v); /* print message in buffer  */
+	va_end(v);
 
 #ifdef _WIN32
-  // do not crash with unicode dirs
-  if (fileno(stderr) != -1)
+	// do not crash with unicode dirs
+	if(fileno(stdout) != -1)
 #endif
-  if (lvl & cons_stderr_mask)
-    r = fprintf(stderr,"%s",msg);
+	if(lvl & cons_stdout_mask)
+		r = fprintf(stdout, "%s", msg);
 
-  return r;
+#ifdef _WIN32
+	// do not crash with unicode dirs
+	if(fileno(stderr) != -1)
+#endif
+	if(lvl & cons_stderr_mask)
+		r = fprintf(stderr, "%s", msg);
+
+	return r;
 }
 
 void I_EnableVerboseLogging(void)
 {
-  cons_stdout_mask = LO_INFO | LO_DEBUG;
+	cons_stdout_mask = LO_INFO | LO_DEBUG;
 }
 
 void I_DisableAllLogging(void)
 {
-  cons_stdout_mask = 0;
-  cons_stderr_mask = 0;
+	cons_stdout_mask = 0;
+	cons_stderr_mask = 0;
 }
 
 void I_DisableMessageBoxes(void)
 {
-  disable_message_box = true;
+	disable_message_box = true;
 }
 
 /*
@@ -92,33 +92,35 @@ void I_DisableMessageBoxes(void)
  * killough 3/20/98: add const
  */
 
-void I_Error(const char *error, ...)
+void I_Error(const char* error, ...)
 {
-  char errmsg[MAX_MESSAGE_SIZE];
-  va_list argptr;
-  va_start(argptr,error);
-  vsnprintf(errmsg,sizeof(errmsg),error,argptr);
-  va_end(argptr);
-  lprintf(LO_ERROR, "%s\n", errmsg);
+	char errmsg[MAX_MESSAGE_SIZE];
+	va_list argptr;
+	va_start(argptr, error);
+	vsnprintf(errmsg, sizeof(errmsg), error, argptr);
+	va_end(argptr);
+	lprintf(LO_ERROR, "%s\n", errmsg);
 #ifdef _WIN32
-  if (!disable_message_box && !dsda_Flag(dsda_arg_nodraw) && !capturing_video) {
-    I_MessageBox(errmsg, PRB_MB_OK);
-  }
+	if(!disable_message_box && !dsda_Flag(dsda_arg_nodraw) && !capturing_video)
+	{
+		I_MessageBox(errmsg, PRB_MB_OK);
+	}
 #endif
-  I_SafeExit(-1);
+	I_SafeExit(-1);
 }
 
-void I_Warn(const char *error, ...)
+void I_Warn(const char* error, ...)
 {
-  char errmsg[MAX_MESSAGE_SIZE];
-  va_list argptr;
-  va_start(argptr, error);
-  vsnprintf(errmsg, sizeof(errmsg), error, argptr);
-  va_end(argptr);
-  lprintf(LO_WARN, "%s\n", errmsg);
+	char errmsg[MAX_MESSAGE_SIZE];
+	va_list argptr;
+	va_start(argptr, error);
+	vsnprintf(errmsg, sizeof(errmsg), error, argptr);
+	va_end(argptr);
+	lprintf(LO_WARN, "%s\n", errmsg);
 #ifdef _WIN32
-  if (!dsda_Flag(dsda_arg_nodraw) && !capturing_video) {
-    I_MessageBox(errmsg, PRB_MB_OK);
-  }
+	if(!dsda_Flag(dsda_arg_nodraw) && !capturing_video)
+	{
+		I_MessageBox(errmsg, PRB_MB_OK);
+	}
 #endif
 }

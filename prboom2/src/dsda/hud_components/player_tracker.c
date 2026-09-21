@@ -7,15 +7,17 @@
 
 #include "player_tracker.h"
 
-void dsda_PlayerTrackerHC(char* str, size_t max_size) {
-  extern int player_damage_last_tic;
+void dsda_PlayerTrackerHC(char* str, size_t max_size)
+{
+	extern int player_damage_last_tic;
 
-  snprintf(
-    str,
-    max_size,
-    "%sp: %d",
-    player_damage_last_tic > 0 ? dsda_TextColor(dsda_tc_exhud_player_damage)
-                               : dsda_TextColor(dsda_tc_exhud_player_neutral),
-    player_damage_last_tic
-  );
+	snprintf(
+		str,
+		max_size,
+		"%sp: %d",
+		player_damage_last_tic > 0
+		? dsda_TextColor(dsda_tc_exhud_player_damage)
+		: dsda_TextColor(dsda_tc_exhud_player_neutral),
+		player_damage_last_tic
+	);
 }

@@ -82,15 +82,15 @@ Scanner::Scanner(const char* data, int length) : line(1), lineStart(0), logicalP
 
 Scanner::~Scanner()
 {
-	if (string != NULL) free(string);
+	if(string != NULL) free(string);
 	delete[] data;
 }
 
-void Scanner::SetString(char **ptr, const char *start, unsigned int length)
+void Scanner::SetString(char** ptr, const char* start, unsigned int length)
 {
-	if (length == -1)
+	if(length == -1)
 		length = strlen(start);
-	if (*ptr != NULL) free(*ptr);
+	if(*ptr != NULL) free(*ptr);
 	*ptr = (char*)malloc(length + 1);
 	memcpy(*ptr, start, length);
 	(*ptr)[length] = 0;
@@ -102,7 +102,7 @@ void Scanner::CheckForWhitespace()
 	while(scanPos < length)
 	{
 		char cur = data[scanPos];
-		char next = scanPos+1 < length ? data[scanPos+1] : 0;
+		char next = scanPos + 1 < length ? data[scanPos + 1] : 0;
 		if(comment == 2)
 		{
 			if(cur != '*' || next != '/')
@@ -201,22 +201,22 @@ void Scanner::ExpandState()
 	tokenLinePosition = nextState.tokenLinePosition;
 }
 
-void Scanner::SaveState(Scanner &savedstate)
+void Scanner::SaveState(Scanner& savedstate)
 {
 	// This saves the entire parser state except for the data pointer.
-	if (savedstate.string != NULL) free(savedstate.string);
-	if (savedstate.nextState.string != NULL) free(savedstate.nextState.string);
+	if(savedstate.string != NULL) free(savedstate.string);
+	if(savedstate.nextState.string != NULL) free(savedstate.nextState.string);
 	savedstate = *this;
 	savedstate.string = strdup(string);
 	savedstate.nextState.string = strdup(nextState.string);
 	savedstate.data = NULL;
 }
 
-void Scanner::RestoreState(Scanner &savedstate)
+void Scanner::RestoreState(Scanner& savedstate)
 {
-	if (savedstate.data == NULL)
+	if(savedstate.data == NULL)
 	{
-		char *saveddata = data;
+		char* saveddata = data;
 		savedstate.SaveState(*this);
 		data = saveddata;
 	}
@@ -286,8 +286,8 @@ bool Scanner::GetNextToken(bool expandState)
 				nextState.token = TK_ShiftLeft;
 			else if(cur == '>' && next == '>')
 				nextState.token = TK_ShiftRight;
-			//else if(cur == '#' && next == '#')
-			//	nextState.token = TK_MacroConcat;
+				//else if(cur == '#' && next == '#')
+				//	nextState.token = TK_MacroConcat;
 			else if(next == '=')
 			{
 				switch(cur)
@@ -331,9 +331,9 @@ bool Scanner::GetNextToken(bool expandState)
 						end = scanPos;
 					break;
 				case TK_IntConst:
-					if(cur == '.' || (scanPos-1 != start && cur == 'e'))
+					if(cur == '.' || (scanPos - 1 != start && cur == 'e'))
 						nextState.token = TK_FloatConst;
-					else if((cur == 'x' || cur == 'X') && scanPos-1 == start)
+					else if((cur == 'x' || cur == 'X') && scanPos - 1 == start)
 					{
 						integerBase = 16;
 						break;
@@ -369,9 +369,9 @@ bool Scanner::GetNextToken(bool expandState)
 						{
 							floatHasDecimal = true;
 							floatHasExponent = true;
-							if(scanPos+1 < length)
+							if(scanPos + 1 < length)
 							{
-								char next = data[scanPos+1];
+								char next = data[scanPos + 1];
 								if((next < '0' || next > '9') && next != '+' && next != '-')
 									end = scanPos;
 								else
@@ -399,17 +399,17 @@ bool Scanner::GetNextToken(bool expandState)
 				break;
 		}
 
-		if (start == end && scanPos == length)
+		if(start == end && scanPos == length)
 			end = scanPos;
 	}
 
-	if(end-start > 0 || stringFinished)
+	if(end - start > 0 || stringFinished)
 	{
-		SetString(&nextState.string, data+start, end-start);
+		SetString(&nextState.string, data + start, end - start);
 		if(nextState.token == TK_FloatConst)
 		{
 			nextState.decimal = atof(nextState.string);
-			nextState.number = static_cast<int> (nextState.decimal);
+			nextState.number = static_cast<int>(nextState.decimal);
 			nextState.boolean = (nextState.number != 0);
 		}
 		else if(nextState.token == TK_IntConst)
@@ -421,8 +421,8 @@ bool Scanner::GetNextToken(bool expandState)
 		else if(nextState.token == TK_Identifier)
 		{
 			// Identifiers should be case insensitive.
-			char *p = nextState.string;
-			while (*p)
+			char* p = nextState.string;
+			while(*p)
 			{
 				*p = tolower(*p);
 				p++;
@@ -433,7 +433,7 @@ bool Scanner::GetNextToken(bool expandState)
 				nextState.token = TK_BoolConst;
 				nextState.boolean = true;
 			}
-			else if (strcmp(nextState.string, "false") == 0)
+			else if(strcmp(nextState.string, "false") == 0)
 			{
 				nextState.token = TK_BoolConst;
 				nextState.boolean = false;
@@ -461,32 +461,32 @@ void Scanner::IncrementLine()
 
 void Scanner::SkipLine()
 {
-	while (tokenLine == line && GetNextToken());
+	while(tokenLine == line && GetNextToken());
 }
 
 void Scanner::Error(int token)
 {
-	if (token < TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), TokenNames[token], TokenNames[(unsigned char) this->token]);
-	else if (token < TK_NumSpecialTokens && this->token >= TK_NumSpecialTokens)
+	if(token < TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
+		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), TokenNames[token], TokenNames[(unsigned char)this->token]);
+	else if(token < TK_NumSpecialTokens && this->token >= TK_NumSpecialTokens)
 		error("%d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), TokenNames[token], this->token);
-	else if (token < TK_NumSpecialTokens && this->token == TK_NoToken)
+	else if(token < TK_NumSpecialTokens && this->token == TK_NoToken)
 		error("%d:%d:Expected '%s'", GetLine(), GetLinePos(), TokenNames[token]);
-	else if (token >= TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
-		error("%d:%d:Expected '%c' but got '%s' instead.", GetLine(), GetLinePos(), token, TokenNames[(unsigned char) this->token]);
+	else if(token >= TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
+		error("%d:%d:Expected '%c' but got '%s' instead.", GetLine(), GetLinePos(), token, TokenNames[(unsigned char)this->token]);
 	else
 		error("%d:%d:Expected '%c' but got '%c' instead.", GetLine(), GetLinePos(), token, this->token);
 }
 
-void Scanner::Error(const char *mustget)
+void Scanner::Error(const char* mustget)
 {
-	if (token < TK_NumSpecialTokens && this->token < TK_NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), mustget, TokenNames[(unsigned char) this->token]);
+	if(token < TK_NumSpecialTokens && this->token < TK_NumSpecialTokens)
+		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), mustget, TokenNames[(unsigned char)this->token]);
 	else
 		error("%d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), mustget, this->token);
 }
 
-void Scanner::ErrorF(const char *msg, ...)
+void Scanner::ErrorF(const char* msg, ...)
 {
 	char buffer[1024];
 	va_list ap;
@@ -505,9 +505,9 @@ void Scanner::MustGetToken(char token)
 	}
 }
 
-void Scanner::MustGetIdentifier(const char *ident)
+void Scanner::MustGetIdentifier(const char* ident)
 {
-	if (!CheckToken(TK_Identifier) || strcmpnocase(string, ident))
+	if(!CheckToken(TK_Identifier) || strcmpnocase(string, ident))
 	{
 		Error(ident);
 		return;
@@ -518,30 +518,30 @@ void Scanner::MustGetIdentifier(const char *ident)
 bool Scanner::ScanInteger()
 {
 	bool neg = false;
-	if (!GetNextToken())
+	if(!GetNextToken())
 	{
 		return false;
 	}
-	if (token == '-')
+	if(token == '-')
 	{
-		if (!GetNextToken())
+		if(!GetNextToken())
 		{
 			return false;
 		}
 		neg = true;
 	}
-	else if (token == '+')
+	else if(token == '+')
 	{
-		if (!GetNextToken())
+		if(!GetNextToken())
 		{
 			return false;
 		}
 	}
-	if (token != TK_IntConst)
+	if(token != TK_IntConst)
 	{
 		return false;
 	}
-	if (neg)
+	if(neg)
 	{
 		number = -number;
 		decimal = -decimal;
@@ -552,30 +552,30 @@ bool Scanner::ScanInteger()
 bool Scanner::ScanFloat()
 {
 	bool neg = false;
-	if (!GetNextToken())
+	if(!GetNextToken())
 	{
 		return false;
 	}
-	if (token == '-')
+	if(token == '-')
 	{
-		if (!GetNextToken())
+		if(!GetNextToken())
 		{
 			return false;
 		}
 		neg = true;
 	}
-	else if (token == '+')
+	else if(token == '+')
 	{
-		if (!GetNextToken())
+		if(!GetNextToken())
 		{
 			return false;
 		}
 	}
-	if (token != TK_IntConst && token != TK_FloatConst)
+	if(token != TK_IntConst && token != TK_FloatConst)
 	{
 		return false;
 	}
-	if (neg)
+	if(neg)
 	{
 		number = -number;
 		decimal = -decimal;
@@ -588,7 +588,7 @@ bool Scanner::CheckInteger()
 	Scanner savedstate;
 	SaveState(savedstate);
 	bool res = ScanInteger();
-	if (!res) RestoreState(savedstate);
+	if(!res) RestoreState(savedstate);
 	return res;
 }
 
@@ -597,7 +597,7 @@ bool Scanner::CheckFloat()
 	Scanner savedstate;
 	SaveState(savedstate);
 	bool res = ScanFloat();
-	if (!res) RestoreState(savedstate);
+	if(!res) RestoreState(savedstate);
 	return res;
 }
 
@@ -606,24 +606,24 @@ bool Scanner::CheckString()
 	return CheckToken(TK_StringConst) || CheckToken(TK_Identifier);
 }
 
-bool Scanner::StringMatch(const char *target)
+bool Scanner::StringMatch(const char* target)
 {
 	return !strcmpnocase(string, target);
 }
 
 void Scanner::MustGetInteger()
 {
-	if (!ScanInteger()) Error(TK_IntConst);
+	if(!ScanInteger()) Error(TK_IntConst);
 }
 
 void Scanner::MustGetFloat()
 {
-	if (!ScanFloat()) Error(TK_FloatConst);
+	if(!ScanFloat()) Error(TK_FloatConst);
 }
 
 void Scanner::MustGetString()
 {
-	if (!CheckString())
+	if(!CheckString())
 	{
 		ErrorF("Expected String Constant or Identifier");
 		return;
@@ -636,88 +636,92 @@ bool Scanner::TokensLeft() const
 }
 
 // This is taken from ZDoom's strbin function which can do a lot more than just unescaping backslashes and quotation marks.
-void Scanner::Unescape(char *str)
+void Scanner::Unescape(char* str)
 {
 	char *p = str, c;
 	int i;
 
-	while ((c = *p++)) {
-		if (c != '\\') {
+	while((c = *p++))
+	{
+		if(c != '\\')
+		{
 			*str++ = c;
 		}
-		else if (*p) {
-			switch (*p) {
-			case 'a':
-				*str++ = '\a';
-				break;
-			case 'b':
-				*str++ = '\b';
-				break;
-			case 'f':
-				*str++ = '\f';
-				break;
-			case 'n':
-				*str++ = '\n';
-				break;
-			case 't':
-				*str++ = '\t';
-				break;
-			case 'r':
-				*str++ = '\r';
-				break;
-			case 'v':
-				*str++ = '\v';
-				break;
-			case '?':
-				*str++ = '\?';
-				break;
-			case '\n':
-				break;
-			case 'x':
-			case 'X':
-				c = 0;
-				for (i = 0; i < 2; i++)
-				{
-					p++;
-					if (*p >= '0' && *p <= '9')
-						c = (c << 4) + *p - '0';
-					else if (*p >= 'a' && *p <= 'f')
-						c = (c << 4) + 10 + *p - 'a';
-					else if (*p >= 'A' && *p <= 'F')
-						c = (c << 4) + 10 + *p - 'A';
-					else
+		else if(*p)
+		{
+			switch(*p)
+			{
+				case 'a':
+					*str++ = '\a';
+					break;
+				case 'b':
+					*str++ = '\b';
+					break;
+				case 'f':
+					*str++ = '\f';
+					break;
+				case 'n':
+					*str++ = '\n';
+					break;
+				case 't':
+					*str++ = '\t';
+					break;
+				case 'r':
+					*str++ = '\r';
+					break;
+				case 'v':
+					*str++ = '\v';
+					break;
+				case '?':
+					*str++ = '\?';
+					break;
+				case '\n':
+					break;
+				case 'x':
+				case 'X':
+					c = 0;
+					for(i = 0; i < 2; i++)
 					{
-						p--;
-						break;
+						p++;
+						if(*p >= '0' && *p <= '9')
+							c = (c << 4) + *p - '0';
+						else if(*p >= 'a' && *p <= 'f')
+							c = (c << 4) + 10 + *p - 'a';
+						else if(*p >= 'A' && *p <= 'F')
+							c = (c << 4) + 10 + *p - 'A';
+						else
+						{
+							p--;
+							break;
+						}
 					}
-				}
-				*str++ = c;
-				break;
-			case '0':
-			case '1':
-			case '2':
-			case '3':
-			case '4':
-			case '5':
-			case '6':
-			case '7':
-				c = *p - '0';
-				for (i = 0; i < 2; i++)
-				{
-					p++;
-					if (*p >= '0' && *p <= '7')
-						c = (c << 3) + *p - '0';
-					else
+					*str++ = c;
+					break;
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+					c = *p - '0';
+					for(i = 0; i < 2; i++)
 					{
-						p--;
-						break;
+						p++;
+						if(*p >= '0' && *p <= '7')
+							c = (c << 3) + *p - '0';
+						else
+						{
+							p--;
+							break;
+						}
 					}
-				}
-				*str++ = c;
-				break;
-			default:
-				*str++ = *p;
-				break;
+					*str++ = c;
+					break;
+				default:
+					*str++ = *p;
+					break;
 			}
 			p++;
 		}

@@ -7,27 +7,31 @@
 
 #include "big_artifact.h"
 
-typedef struct {
-  dsda_patch_component_t component;
+typedef struct
+{
+	dsda_patch_component_t component;
 } local_component_t;
 
 static local_component_t* local;
 
-void dsda_InitBigArtifactHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data) {
-  *data = Z_Calloc(1, sizeof(local_component_t));
-  local = *data;
+void dsda_InitBigArtifactHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+{
+	*data = Z_Calloc(1, sizeof(local_component_t));
+	local = *data;
 
-  dsda_InitPatchHC(&local->component, x_offset, y_offset, vpt);
+	dsda_InitPatchHC(&local->component, x_offset, y_offset, vpt);
 }
 
-void dsda_UpdateBigArtifactHC(void* data) {
-  local = data;
+void dsda_UpdateBigArtifactHC(void* data)
+{
+	local = data;
 }
 
-void dsda_DrawBigArtifactHC(void* data) {
-  extern void DrawArtifact(int x, int y, int vpt);
+void dsda_DrawBigArtifactHC(void* data)
+{
+	extern void DrawArtifact(int x, int y, int vpt);
 
-  local = data;
+	local = data;
 
-  DrawArtifact(local->component.x, local->component.y, local->component.vpt);
+	DrawArtifact(local->component.x, local->component.y, local->component.vpt);
 }

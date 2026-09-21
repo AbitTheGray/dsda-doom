@@ -19,25 +19,29 @@
 
 #define ZERO_DATA(item) memset(&item, 0, sizeof(item))
 
-typedef struct {
-  dboolean negative;
-  int base;
-  int frac;
+typedef struct
+{
+	dboolean negative;
+	int base;
+	int frac;
 } dsda_fixed_t;
 
-typedef struct {
-  int base;
-  int frac;
+typedef struct
+{
+	int base;
+	int frac;
 } dsda_angle_t;
 
-typedef struct {
-  byte bytes[16];
-  char string[33];
+typedef struct
+{
+	byte bytes[16];
+	char string[33];
 } dsda_cksum_t;
 
-typedef struct {
-  char* string;
-  size_t size;
+typedef struct
+{
+	char* string;
+	size_t size;
 } dsda_string_t;
 
 void dsda_InitString(dsda_string_t* dest, const char* value);
@@ -58,12 +62,12 @@ void dsda_CutExtension(char* str);
 const char* dsda_BaseName(const char* str);
 const char* dsda_FileExtension(const char* str);
 double dsda_DistancePointToLine(fixed_t line_x1, fixed_t line_y1,
-                                fixed_t line_x2, fixed_t line_y2,
-                                fixed_t point_x, fixed_t point_y);
+	fixed_t line_x2, fixed_t line_y2,
+	fixed_t point_x, fixed_t point_y);
 fixed_t dsda_FixedDistancePointToLine(fixed_t line_x1, fixed_t line_y1,
-                                      fixed_t line_x2, fixed_t line_y2,
-                                      fixed_t point_x, fixed_t point_y,
-                                      fixed_t *closest_x, fixed_t *closest_y);
+	fixed_t line_x2, fixed_t line_y2,
+	fixed_t point_x, fixed_t point_y,
+	fixed_t* closest_x, fixed_t* closest_y);
 fixed_t dsda_FloatToFixed(float x);
 fixed_t dsda_StringToFixed(const char* x);
 byte dsda_FloatToPercent(float x);

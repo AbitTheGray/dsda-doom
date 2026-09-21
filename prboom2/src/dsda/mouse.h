@@ -9,4 +9,4 @@
 
 void dsda_ApplyQuickstartMouseCache(int* mousex);
 void dsda_QueueQuickstart(void);
-void dsda_GetMousePosition(int *x, int *y);
+void dsda_GetMousePosition(int* x, int* y);

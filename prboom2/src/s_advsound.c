@@ -30,124 +30,125 @@ musinfo_t musinfo;
 // S_ParseMusInfo
 // Parses MUSINFO lump.
 //
-void S_ParseMusInfo(const char *mapid)
+void S_ParseMusInfo(const char* mapid)
 {
-  if (gamemode != shareware && W_LumpNameExists("MUSINFO"))
-  {
-    int num, lumpnum;
-    int inMap = false;
-    int load_muslump = -1;
+	if(gamemode != shareware && W_LumpNameExists("MUSINFO"))
+	{
+		int num, lumpnum;
+		int inMap = false;
+		int load_muslump = -1;
 
-    /* don't restart music that is already playing */
-    if (mus_playing &&
-        mus_playing->lumpnum == S_music[mus_musinfo].lumpnum) {
-        load_muslump = S_music[mus_musinfo].lumpnum;
-    }
+		/* don't restart music that is already playing */
+		if(mus_playing &&
+			mus_playing->lumpnum == S_music[mus_musinfo].lumpnum)
+		{
+			load_muslump = S_music[mus_musinfo].lumpnum;
+		}
 
-    memset(&musinfo, 0, sizeof(musinfo));
-    musinfo.items[0] = -1;
-    musinfo.current_item = load_muslump;
-    S_music[mus_musinfo].lumpnum = load_muslump;
+		memset(&musinfo, 0, sizeof(musinfo));
+		musinfo.items[0] = -1;
+		musinfo.current_item = load_muslump;
+		S_music[mus_musinfo].lumpnum = load_muslump;
 
-    SC_OpenLump("MUSINFO");
+		SC_OpenLump("MUSINFO");
 
-    while (SC_GetString())
-    {
-      if (inMap || SC_Compare(mapid))
-      {
-        if (!inMap)
-        {
-          SC_GetString();
-          inMap = true;
-        }
+		while(SC_GetString())
+		{
+			if(inMap || SC_Compare(mapid))
+			{
+				if(!inMap)
+				{
+					SC_GetString();
+					inMap = true;
+				}
 
-        if (sc_String[0] == 'E' || sc_String[0] == 'e' ||
-            sc_String[0] == 'M' || sc_String[0] == 'm')
-        {
-          break;
-        }
+				if(sc_String[0] == 'E' || sc_String[0] == 'e' ||
+					sc_String[0] == 'M' || sc_String[0] == 'm')
+				{
+					break;
+				}
 
-        // Check number in range
-        if (M_StrToInt(sc_String, &num) && num >= 0 && num < MAX_MUS_ENTRIES)
-        {
-          if (SC_GetString())
-          {
-            lumpnum = W_CheckNumForName(sc_String);
+				// Check number in range
+				if(M_StrToInt(sc_String, &num) && num >= 0 && num < MAX_MUS_ENTRIES)
+				{
+					if(SC_GetString())
+					{
+						lumpnum = W_CheckNumForName(sc_String);
 
-            if (lumpnum != LUMP_NOT_FOUND)
-            {
-              musinfo.items[num] = lumpnum;
-            }
-            else
-            {
-              lprintf(LO_ERROR, "S_ParseMusInfo: Unknown MUS lump %s", sc_String);
-            }
-          }
-        }
-        else
-        {
-          lprintf(LO_ERROR, "S_ParseMusInfo: Number not in range 0 to %d", MAX_MUS_ENTRIES - 1);
-        }
-      }
-    }
+						if(lumpnum != LUMP_NOT_FOUND)
+						{
+							musinfo.items[num] = lumpnum;
+						}
+						else
+						{
+							lprintf(LO_ERROR, "S_ParseMusInfo: Unknown MUS lump %s", sc_String);
+						}
+					}
+				}
+				else
+				{
+					lprintf(LO_ERROR, "S_ParseMusInfo: Number not in range 0 to %d", MAX_MUS_ENTRIES - 1);
+				}
+			}
+		}
 
-    SC_Close();
-  }
-  else // No MUSINFO lump -> clear MUSINFO music state (without restarting music)
-  {
-    memset(musinfo.items, 0, sizeof(musinfo.items));
-    musinfo.items[0] = -1;
-    musinfo.mapthing = NULL;
-    musinfo.lastmapthing = NULL;
-    musinfo.tics = 0;
-  }
+		SC_Close();
+	}
+	else // No MUSINFO lump -> clear MUSINFO music state (without restarting music)
+	{
+		memset(musinfo.items, 0, sizeof(musinfo.items));
+		musinfo.items[0] = -1;
+		musinfo.mapthing = NULL;
+		musinfo.lastmapthing = NULL;
+		musinfo.tics = 0;
+	}
 }
 
-void MusInfoThinker(mobj_t *thing)
+void MusInfoThinker(mobj_t* thing)
 {
-  if (musinfo.mapthing != thing &&
-      thing->subsector->sector == players[displayplayer].mo->subsector->sector)
-  {
-    musinfo.lastmapthing = musinfo.mapthing;
-    musinfo.mapthing = thing;
-    musinfo.tics = 30;
-  }
+	if(musinfo.mapthing != thing &&
+		thing->subsector->sector == players[displayplayer].mo->subsector->sector)
+	{
+		musinfo.lastmapthing = musinfo.mapthing;
+		musinfo.mapthing = thing;
+		musinfo.tics = 30;
+	}
 }
 
 void T_MAPMusic(void)
 {
-  if (musinfo.tics < 0 || !musinfo.mapthing)
-  {
-    return;
-  }
+	if(musinfo.tics < 0 || !musinfo.mapthing)
+	{
+		return;
+	}
 
-  if (musinfo.tics > 0)
-  {
-    musinfo.tics--;
-  }
-  else
-  {
-    if (!musinfo.tics && musinfo.lastmapthing != musinfo.mapthing)
-    {
-      int arraypt = TIDNUM(musinfo.mapthing);
+	if(musinfo.tics > 0)
+	{
+		musinfo.tics--;
+	}
+	else
+	{
+		if(!musinfo.tics && musinfo.lastmapthing != musinfo.mapthing)
+		{
+			int arraypt = TIDNUM(musinfo.mapthing);
 
-      if (arraypt >= 0 && arraypt < MAX_MUS_ENTRIES)
-      {
-        int lumpnum = musinfo.items[arraypt];
+			if(arraypt >= 0 && arraypt < MAX_MUS_ENTRIES)
+			{
+				int lumpnum = musinfo.items[arraypt];
 
-        if (lumpnum > 0 && lumpnum < numlumps)
-        {
-          S_ChangeMusInfoMusic(lumpnum, true);
-        }
-        else // missing musinfo entry -> silence
-        {
-          lprintf(LO_WARN, "T_MAPMusic: MUSINFO entry %d not defined\n", arraypt);
-          S_StopMusic();
-          musinfo.current_item = -1;
-        }
-      }
+				if(lumpnum > 0 && lumpnum < numlumps)
+				{
+					S_ChangeMusInfoMusic(lumpnum, true);
+				}
+				else // missing musinfo entry -> silence
+				{
+					lprintf(LO_WARN, "T_MAPMusic: MUSINFO entry %d not defined\n", arraypt);
+					S_StopMusic();
+					musinfo.current_item = -1;
+				}
+			}
 
-      musinfo.tics = -1;
-    }
-  }
+			musinfo.tics = -1;
+		}
+	}
 }

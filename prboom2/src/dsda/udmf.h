@@ -6,20 +6,22 @@
 #pragma once
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #include <inttypes.h>
 
-typedef enum {
-  UDMF_NONE,
-  UDMF_DOOM,
-  UDMF_HERETIC,
-  UDMF_HEXEN,
-  UDMF_DSDA,
-} udmf_namespace_t;
+	typedef enum
+	{
+		UDMF_NONE,
+		UDMF_DOOM,
+		UDMF_HERETIC,
+		UDMF_HEXEN,
+		UDMF_DSDA,
+	} udmf_namespace_t;
 
-extern udmf_namespace_t udmf_namespace;
+	extern udmf_namespace_t udmf_namespace;
 
 #define UDMF_ML_BLOCKING           0x0000000000000001ull
 #define UDMF_ML_BLOCKMONSTERS      0x0000000000000002ull
@@ -67,29 +69,30 @@ extern udmf_namespace_t udmf_namespace;
 #define UDMF_ML_DEATHSPECIAL       0x0000080000000000ull
 #define UDMF_ML_BLOCKLANDMONSTERS  0x0000100000000000ull
 
-typedef uint64_t udmf_line_flags_t;
+	typedef uint64_t udmf_line_flags_t;
 
-typedef struct {
-  int id;
-  char* moreids;
-  int v1;
-  int v2;
-  int special;
-  int arg0;
-  int arg1;
-  int arg2;
-  int arg3;
-  int arg4;
-  char* arg0str;
-  int sidefront;
-  int sideback;
-  float alpha;
-  int locknumber;
-  int automapstyle;
-  int health;
-  int healthgroup;
-  udmf_line_flags_t flags;
-} udmf_line_t;
+	typedef struct
+	{
+		int id;
+		char* moreids;
+		int v1;
+		int v2;
+		int special;
+		int arg0;
+		int arg1;
+		int arg2;
+		int arg3;
+		int arg4;
+		char* arg0str;
+		int sidefront;
+		int sideback;
+		float alpha;
+		int locknumber;
+		int automapstyle;
+		int health;
+		int healthgroup;
+		udmf_line_flags_t flags;
+	} udmf_line_t;
 
 #define UDMF_SF_LIGHTABSOLUTE       0x0001
 #define UDMF_SF_LIGHTFOG            0x0002
@@ -102,46 +105,48 @@ typedef struct {
 #define UDMF_SF_LIGHTABSOLUTEMID    0x0100
 #define UDMF_SF_LIGHTABSOLUTEBOTTOM 0x0200
 
-typedef uint16_t udmf_side_flags_t;
+	typedef uint16_t udmf_side_flags_t;
 
-typedef struct {
-  int offsetx;
-  int offsety;
-  char texturetop[9];
-  char texturebottom[9];
-  char texturemiddle[9];
-  int sector;
-  float scalex_top;
-  float scaley_top;
-  float scalex_mid;
-  float scaley_mid;
-  float scalex_bottom;
-  float scaley_bottom;
-  float offsetx_top;
-  float offsety_top;
-  float offsetx_mid;
-  float offsety_mid;
-  float offsetx_bottom;
-  float offsety_bottom;
-  int light;
-  int light_top;
-  int light_mid;
-  int light_bottom;
-  float xscroll;
-  float yscroll;
-  float xscrolltop;
-  float yscrolltop;
-  float xscrollmid;
-  float yscrollmid;
-  float xscrollbottom;
-  float yscrollbottom;
-  udmf_side_flags_t flags;
-} udmf_side_t;
+	typedef struct
+	{
+		int offsetx;
+		int offsety;
+		char texturetop[9];
+		char texturebottom[9];
+		char texturemiddle[9];
+		int sector;
+		float scalex_top;
+		float scaley_top;
+		float scalex_mid;
+		float scaley_mid;
+		float scalex_bottom;
+		float scaley_bottom;
+		float offsetx_top;
+		float offsety_top;
+		float offsetx_mid;
+		float offsety_mid;
+		float offsetx_bottom;
+		float offsety_bottom;
+		int light;
+		int light_top;
+		int light_mid;
+		int light_bottom;
+		float xscroll;
+		float yscroll;
+		float xscrolltop;
+		float yscrolltop;
+		float xscrollmid;
+		float yscrollmid;
+		float xscrollbottom;
+		float yscrollbottom;
+		udmf_side_flags_t flags;
+	} udmf_side_t;
 
-typedef struct {
-  const char* x;
-  const char* y;
-} udmf_vertex_t;
+	typedef struct
+	{
+		const char* x;
+		const char* y;
+	} udmf_vertex_t;
 
 #define UDMF_SECF_LIGHTFLOORABSOLUTE   0x0001
 #define UDMF_SECF_LIGHTCEILINGABSOLUTE 0x0002
@@ -169,50 +174,51 @@ typedef struct {
 #define UDMF_THRUST_CEILING    0x40
 #define UDMF_THRUST_WINDTHRUST 0x80
 
-typedef uint16_t udmf_sector_flags_t;
+	typedef uint16_t udmf_sector_flags_t;
 
-typedef struct {
-  int heightfloor;
-  int heightceiling;
-  char texturefloor[9];
-  char textureceiling[9];
-  int lightlevel;
-  int special;
-  int id;
-  char* skyfloor;
-  char* skyceiling;
-  char* colormap;
-  char* moreids;
-  float xpanningfloor;
-  float ypanningfloor;
-  float xpanningceiling;
-  float ypanningceiling;
-  float xscalefloor;
-  float yscalefloor;
-  float xscaleceiling;
-  float yscaleceiling;
-  float rotationfloor;
-  float rotationceiling;
-  int lightfloor;
-  int lightceiling;
-  const char* gravity;
-  int damageamount;
-  int damageinterval;
-  int leakiness;
-  float xscrollfloor;
-  float yscrollfloor;
-  int scrollfloormode;
-  float xscrollceiling;
-  float yscrollceiling;
-  int scrollceilingmode;
-  char* xthrust;
-  char* ythrust;
-  int thrustgroup;
-  int thrustlocation;
-  char* frictionfactor;
-  char* movefactor;
-  udmf_sector_flags_t flags;
-} udmf_sector_t;
+	typedef struct
+	{
+		int heightfloor;
+		int heightceiling;
+		char texturefloor[9];
+		char textureceiling[9];
+		int lightlevel;
+		int special;
+		int id;
+		char* skyfloor;
+		char* skyceiling;
+		char* colormap;
+		char* moreids;
+		float xpanningfloor;
+		float ypanningfloor;
+		float xpanningceiling;
+		float ypanningceiling;
+		float xscalefloor;
+		float yscalefloor;
+		float xscaleceiling;
+		float yscaleceiling;
+		float rotationfloor;
+		float rotationceiling;
+		int lightfloor;
+		int lightceiling;
+		const char* gravity;
+		int damageamount;
+		int damageinterval;
+		int leakiness;
+		float xscrollfloor;
+		float yscrollfloor;
+		int scrollfloormode;
+		float xscrollceiling;
+		float yscrollceiling;
+		int scrollceilingmode;
+		char* xthrust;
+		char* ythrust;
+		int thrustgroup;
+		int thrustlocation;
+		char* frictionfactor;
+		char* movefactor;
+		udmf_sector_flags_t flags;
+	} udmf_sector_t;
 
 #define UDMF_TF_SKILL1      0x00000001
 #define UDMF_TF_SKILL2      0x00000002
@@ -234,54 +240,56 @@ typedef struct {
 #define UDMF_TF_INVISIBLE   0x00020000
 #define UDMF_TF_COUNTSECRET 0x00040000
 
-typedef uint32_t udmf_thing_flags_t;
+	typedef uint32_t udmf_thing_flags_t;
 
-typedef struct {
-  int id;
-  const char* x;
-  const char* y;
-  const char* height;
-  int angle;
-  int type;
-  int special;
-  int arg0;
-  int arg1;
-  int arg2;
-  int arg3;
-  int arg4;
-  char* arg0str;
-  const char* gravity;
-  const char* health;
-  float scalex;
-  float scaley;
-  float scale;
-  float alpha;
-  int floatbobphase;
-  udmf_thing_flags_t flags;
-} udmf_thing_t;
+	typedef struct
+	{
+		int id;
+		const char* x;
+		const char* y;
+		const char* height;
+		int angle;
+		int type;
+		int special;
+		int arg0;
+		int arg1;
+		int arg2;
+		int arg3;
+		int arg4;
+		char* arg0str;
+		const char* gravity;
+		const char* health;
+		float scalex;
+		float scaley;
+		float scale;
+		float alpha;
+		int floatbobphase;
+		udmf_thing_flags_t flags;
+	} udmf_thing_t;
 
-typedef struct {
-  size_t num_lines;
-  udmf_line_t* lines;
+	typedef struct
+	{
+		size_t num_lines;
+		udmf_line_t* lines;
 
-  size_t num_sides;
-  udmf_side_t* sides;
+		size_t num_sides;
+		udmf_side_t* sides;
 
-  size_t num_vertices;
-  udmf_vertex_t* vertices;
+		size_t num_vertices;
+		udmf_vertex_t* vertices;
 
-  size_t num_sectors;
-  udmf_sector_t* sectors;
+		size_t num_sectors;
+		udmf_sector_t* sectors;
 
-  size_t num_things;
-  udmf_thing_t* things;
-} udmf_t;
+		size_t num_things;
+		udmf_thing_t* things;
+	} udmf_t;
 
-extern udmf_t udmf;
+	extern udmf_t udmf;
 
-typedef void (*udmf_errorfunc)(const char *fmt, ...);	// this must not return!
+	typedef void (*udmf_errorfunc)(const char* fmt, ...); // this must not return!
 
-void dsda_ParseUDMF(const unsigned char* buffer, size_t length, udmf_errorfunc err);
+	void dsda_ParseUDMF(const unsigned char* buffer, size_t length, udmf_errorfunc err);
 
 #ifdef __cplusplus
 }

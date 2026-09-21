@@ -4,4 +4,4 @@
 
 #include <stdarg.h>
 
-unsigned int TXT_DecodeUTF8(const char **ptr);
+unsigned int TXT_DecodeUTF8(const char** ptr);

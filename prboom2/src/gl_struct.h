@@ -6,21 +6,23 @@
 
 extern dboolean use_gl_nodes;
 
-typedef enum {
-  skytype_auto,
-  skytype_none,
-  skytype_standard,
-  skytype_skydome,
+typedef enum
+{
+	skytype_auto,
+	skytype_none,
+	skytype_standard,
+	skytype_skydome,
 
-  skytype_count
+	skytype_count
 } skytype_t;
 
 #define MAX_GLGAMMA 32
 
-enum bleedtype {
-  BLEED_NONE = 0x0,
-  BLEED_CEILING = 0x1,
-  BLEED_OCCLUDE = 0x2
+enum bleedtype
+{
+	BLEED_NONE    = 0x0,
+	BLEED_CEILING = 0x1,
+	BLEED_OCCLUDE = 0x2
 };
 
 extern int gl_drawskys;
@@ -31,7 +33,7 @@ void gld_FlushTextures(void);
 
 void gld_InitVertexData();
 void gld_CleanVertexData();
-void gld_UpdateSplitData(sector_t *sector);
+void gld_UpdateSplitData(sector_t* sector);
 
 void gld_Init(int width, int height);
 void gld_InitCommandLine(void);
@@ -61,11 +63,11 @@ void gld_FillPatch(int lump, int x, int y, int width, int height, enum patch_tra
 
 void gld_DrawLine(int x0, int y0, int x1, int y1, int BaseColor);
 void gld_DrawLine_f(float x0, float y0, float x1, float y1, int BaseColor);
-void gld_DrawWeapon(int weaponlump, vissprite_t *vis, int lightlevel);
+void gld_DrawWeapon(int weaponlump, vissprite_t* vis, int lightlevel);
 void gld_FillBlock(int x, int y, int width, int height, int col);
 void gld_DrawShaded(int x, int y, int width, int height, int shade);
 void gld_SetPalette(int palette);
-unsigned char *gld_ReadScreen(void);
+unsigned char* gld_ReadScreen(void);
 
 void gld_CleanMemory(void);
 void gld_CleanStaticMemory(void);
@@ -74,15 +76,15 @@ void gld_PreprocessLevel(void);
 void gld_Set2DMode();
 void gld_InitDrawScene(void);
 void gld_StartDrawScene(void);
-void gld_AddPlane(int subsectornum, visplane_t *floor, visplane_t *ceiling);
-void gld_AddWall(seg_t *seg);
+void gld_AddPlane(int subsectornum, visplane_t* floor, visplane_t* ceiling);
+void gld_AddWall(seg_t* seg);
 void gld_ProjectSprite(mobj_t* thing, int lightlevel);
-void gld_DrawScene(player_t *player);
+void gld_DrawScene(player_t* player);
 void gld_EndDrawScene(void);
 void gld_Finish();
 
 // wipe
-int gld_wipe_doMelt(int ticks, int *y_lookup);
+int gld_wipe_doMelt(int ticks, int* y_lookup);
 int gld_wipe_exitMelt(int ticks);
 int gld_wipe_StartScreen(void);
 int gld_wipe_EndScreen(void);
@@ -95,7 +97,7 @@ dboolean gld_SphereInFrustum(float x, float y, float z, float radius);
 
 //missing flats (fake floors and ceilings)
 extern dboolean gl_use_stencil;
-sector_t* GetBestFake(sector_t *sector, int ceiling, int validcount);
+sector_t* GetBestFake(sector_t* sector, int ceiling, int validcount);
 sector_t* GetBestBleedSector(sector_t* source, enum bleedtype type);
 
 void gld_DrawMapLines(void);
@@ -106,7 +108,7 @@ void gld_MultisamplingSet(void);
 
 void gld_ProcessTexturedMap(void);
 void gld_ResetTexturedAutomap(void);
-void gld_MapDrawSubsectors(player_t *plr, int fx, int fy, fixed_t mx, fixed_t my, int fw, int fh, fixed_t scale);
+void gld_MapDrawSubsectors(player_t* plr, int fx, int fy, fixed_t mx, fixed_t my, int fw, int fh, fixed_t scale);
 
 void gld_Init8InGLMode(void);
 void gld_Draw8InGL(void);
@@ -114,37 +116,38 @@ void gld_Draw8InGL(void);
 // Nice map
 enum
 {
-  am_icon_shadow,
+	am_icon_shadow,
 
-  am_icon_corpse,
-  am_icon_normal,
-  am_icon_health,
-  am_icon_armor,
-  am_icon_ammo,
-  am_icon_key,
-  am_icon_power,
-  am_icon_weap,
+	am_icon_corpse,
+	am_icon_normal,
+	am_icon_health,
+	am_icon_armor,
+	am_icon_ammo,
+	am_icon_key,
+	am_icon_power,
+	am_icon_weap,
 
-  am_icon_arrow,
-  am_icon_monster,
-  am_icon_player,
-  am_icon_mark,
-  am_icon_bullet,
+	am_icon_arrow,
+	am_icon_monster,
+	am_icon_player,
+	am_icon_mark,
+	am_icon_bullet,
 
-  am_icon_count
+	am_icon_count
 };
 
 typedef struct am_icon_s
 {
-  GLuint tex_id;
-  const char* name;
-  int lumpnum;
+	GLuint tex_id;
+	const char* name;
+	int lumpnum;
 } am_icon_t;
+
 extern am_icon_t am_icons[];
 
 void gld_InitMapPics(void);
 void gld_AddNiceThing(int type, float x, float y, float radius, float angle,
-                     unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+	unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void gld_DrawNiceThings(int fx, int fy, int fw, int fh);
 void gld_ClearNiceThings(void);
 

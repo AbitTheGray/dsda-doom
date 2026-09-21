@@ -25,11 +25,11 @@
 
 
 #ifdef WORDS_BIGENDIAN
-	#define _xs_iexp_				0
-	#define _xs_iman_				1
+#define _xs_iexp_				0
+#define _xs_iman_				1
 #else
-	#define _xs_iexp_				1       //intel is little endian
-	#define _xs_iman_				0
+#define _xs_iexp_				1       //intel is little endian
+#define _xs_iman_				0
 #endif //BigEndian_
 
 #ifdef __GNUC__
@@ -38,7 +38,7 @@
 #define finline __forceinline
 #endif
 
-typedef double					real64;
+typedef double real64;
 
 
 typedef union _xs_doubleints
@@ -60,7 +60,7 @@ finline int xs_CRoundToInt(real64 val)
 	uval.val = val + 6755399441055744.0;
 	return uval.ival[_xs_iman_];
 #else
-    return int(floor(val+.5));
+	return int(floor(val + .5));
 #endif
 }
 

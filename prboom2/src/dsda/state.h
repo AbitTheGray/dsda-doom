@@ -7,10 +7,11 @@
 
 #include "info.h"
 
-typedef struct {
-  state_t* state;
-  actionf_t* codeptr;
-  byte* defined_codeptr_args;
+typedef struct
+{
+	state_t* state;
+	actionf_t* codeptr;
+	byte* defined_codeptr_args;
 } dsda_deh_state_t;
 
 dsda_deh_state_t dsda_GetDehState(int index);

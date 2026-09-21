@@ -11,15 +11,15 @@
 
 typedef struct
 {
-  wadinfo_t header;
-  filelump_t *lumps;
-  char* data;
-  int datasize;
+	wadinfo_t header;
+	filelump_t* lumps;
+	char* data;
+	int datasize;
 } wadtbl_t;
 
 #define PWAD_SIGNATURE "PWAD"
 
-void InitPWADTable(wadtbl_t *wadtbl);
-void FreePWADTable(wadtbl_t *wadtbl);
-void AddPWADTableLump(wadtbl_t *wadtbl, const char *name, const byte* data, size_t size);
-wadinfo_t *ReadPWADTable(byte *buffer, size_t size);
+void InitPWADTable(wadtbl_t* wadtbl);
+void FreePWADTable(wadtbl_t* wadtbl);
+void AddPWADTableLump(wadtbl_t* wadtbl, const char* name, const byte* data, size_t size);
+wadinfo_t* ReadPWADTable(byte* buffer, size_t size);

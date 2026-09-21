@@ -9,9 +9,10 @@
 
 #include "dsda/deh_hash.h"
 
-typedef struct {
-  mobjinfo_t* info;
-  byte* edited_bits;
+typedef struct
+{
+	mobjinfo_t* info;
+	byte* edited_bits;
 } dsda_deh_mobjinfo_t;
 
 int dsda_FindDehMobjIndex(int index);

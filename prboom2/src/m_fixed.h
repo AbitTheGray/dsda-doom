@@ -53,12 +53,12 @@ typedef unsigned int ufixed_t;
 
 inline static CONSTFUNC fixed_t FixedMul(fixed_t a, fixed_t b)
 {
-  return (fixed_t)((int64_t) a*b >> FRACBITS);
+	return (fixed_t)((int64_t)a * b >> FRACBITS);
 }
 
 inline static CONSTFUNC int64_t FixedMul64(int64_t a, int64_t b)
 {
-  return a * b >> FRACBITS;
+	return a * b >> FRACBITS;
 }
 
 /*
@@ -67,8 +67,7 @@ inline static CONSTFUNC int64_t FixedMul64(int64_t a, int64_t b)
 
 static CONSTFUNC fixed_t FixedDiv(fixed_t a, fixed_t b)
 {
-  return (D_abs(a)>>14) >= D_abs(b) ? ((a^b)>>31) ^ INT_MAX :
-    (fixed_t)(((int64_t) a << FRACBITS) / b);
+	return (D_abs(a) >> 14) >= D_abs(b) ? ((a ^ b) >> 31) ^ INT_MAX : (fixed_t)(((int64_t)a << FRACBITS) / b);
 }
 
 /* CPhipps -
@@ -78,14 +77,16 @@ static CONSTFUNC fixed_t FixedDiv(fixed_t a, fixed_t b)
 
 inline static CONSTFUNC fixed_t FixedMod(fixed_t a, fixed_t b)
 {
-  if (b & (b-1)) {
-    fixed_t r = a % b;
-    return ((r<0) ? r+b : r);
-  } else
-    return (a & (b-1));
+	if(b & (b - 1))
+	{
+		fixed_t r = a % b;
+		return ((r < 0) ? r + b : r);
+	}
+	else
+		return (a & (b - 1));
 }
 
 static CONSTFUNC fixed_t Scale(fixed_t a, fixed_t b, fixed_t c)
 {
-	return (fixed_t)(((int64_t)a*b)/c);
+	return (fixed_t)(((int64_t)a * b) / c);
 }

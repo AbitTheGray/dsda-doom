@@ -21,7 +21,7 @@ int sts_pct_always_gray; // killough 2/21/98: always gray %'s? bug or feature?
 //
 void STlib_init(void)
 {
-  // cph - no longer hold STMINUS pointer
+	// cph - no longer hold STMINUS pointer
 }
 
 //
@@ -34,21 +34,21 @@ void STlib_init(void)
 // Returns nothing
 //
 void STlib_initNum
-( st_number_t* n,
-  int x,
-  int y,
-  const patchnum_t* pl,
-  int* num,
-  dboolean* on,
-  int     width )
+(st_number_t* n,
+	int x,
+	int y,
+	const patchnum_t* pl,
+	int* num,
+	dboolean* on,
+	int width)
 {
-  n->x  = x;
-  n->y  = y;
-  n->oldnum = 0;
-  n->width  = width;
-  n->num  = num;
-  n->on = on;
-  n->p  = pl;
+	n->x = x;
+	n->y = y;
+	n->oldnum = 0;
+	n->width = width;
+	n->num = num;
+	n->on = on;
+	n->p = pl;
 }
 
 /*
@@ -65,73 +65,73 @@ void STlib_initNum
  * cphipps 10/99 - const pointer to colour trans table, made function static
  */
 static void STlib_drawNum
-( st_number_t*  n,
-  int cm,
-  dboolean refresh )
+(st_number_t* n,
+	int cm,
+	dboolean refresh)
 {
+	int numdigits = n->width;
+	int num = *n->num;
 
-  int   numdigits = n->width;
-  int   num = *n->num;
+	int w = n->p[0].width;
+	int h = n->p[0].height;
+	int x = n->x;
+	int clear_x, clear_y;
 
-  int   w = n->p[0].width;
-  int   h = n->p[0].height;
-  int   x = n->x;
-  int   clear_x, clear_y;
+	int neg;
 
-  int   neg;
+	// leban 1/20/99:
+	// strange that somebody went through all the work to draw only the
+	// differences, and then went and constantly redrew all the numbers.
+	// return without drawing if the number didn't change and the bar
+	// isn't refreshing.
+	if(n->oldnum == num && !refresh)
+		return;
 
-  // leban 1/20/99:
-  // strange that somebody went through all the work to draw only the
-  // differences, and then went and constantly redrew all the numbers.
-  // return without drawing if the number didn't change and the bar
-  // isn't refreshing.
-  if(n->oldnum == num && !refresh)
-    return;
+	// CPhipps - compact some code, use num instead of *n->num
+	if((neg = (n->oldnum = num) < 0))
+	{
+		if(numdigits == 2 && num < -9)
+			num = -9;
+		else if(numdigits == 3 && num < -99)
+			num = -99;
 
-  // CPhipps - compact some code, use num instead of *n->num
-  if ((neg = (n->oldnum = num) < 0))
-  {
-    if (numdigits == 2 && num < -9)
-      num = -9;
-    else if (numdigits == 3 && num < -99)
-      num = -99;
+		num = -num;
+	}
 
-    num = -num;
-  }
+	// clear the area
+	clear_x = n->x - LittleShort(n->p[0].leftoffset) - numdigits * w;
+	clear_y = n->y - LittleShort(n->p[0].topoffset);
 
-  // clear the area
-  clear_x = n->x - LittleShort(n->p[0].leftoffset) - numdigits * w;
-  clear_y = n->y - LittleShort(n->p[0].topoffset);
+	V_CopyRect(BG, FG, clear_x, clear_y, w * numdigits, h, VPT_STRETCH | VPT_ALIGN_BOTTOM);
 
-  V_CopyRect(BG, FG, clear_x, clear_y, w * numdigits, h, VPT_STRETCH | VPT_ALIGN_BOTTOM);
+	// if non-number, do not draw it
+	if(num == 1994)
+		return;
 
-  // if non-number, do not draw it
-  if (num == 1994)
-    return;
+	//jff 2/16/98 add color translation to digit output
+	// in the special case of 0, you draw 0
+	if(!num)
+		// CPhipps - patch drawing updated, reformatted
+		V_DrawNumPatch(x - w, n->y, FG, n->p[0].lumpnum, cm,
+		(((cm!=CR_DEFAULT) && sts_colored_numbers) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
 
-  //jff 2/16/98 add color translation to digit output
-  // in the special case of 0, you draw 0
-  if (!num)
-    // CPhipps - patch drawing updated, reformatted
-    V_DrawNumPatch(x - w, n->y, FG, n->p[0].lumpnum, cm,
-       (((cm!=CR_DEFAULT) && sts_colored_numbers) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
+	// draw the new number
+	//jff 2/16/98 add color translation to digit output
+	while(num && numdigits--)
+	{
+		// CPhipps - patch drawing updated, reformatted
+		x -= w;
+		V_DrawNumPatch(x, n->y, FG, n->p[num % 10].lumpnum, cm,
+			(((cm!=CR_DEFAULT) && sts_colored_numbers) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
+		num /= 10;
+	}
 
-  // draw the new number
-  //jff 2/16/98 add color translation to digit output
-  while (num && numdigits--) {
-    // CPhipps - patch drawing updated, reformatted
-    x -= w;
-    V_DrawNumPatch(x, n->y, FG, n->p[num % 10].lumpnum, cm,
-       (((cm!=CR_DEFAULT) && sts_colored_numbers) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
-    num /= 10;
-  }
-
-  // draw a minus sign if necessary
-  //jff 2/16/98 add color translation to digit output
-  // cph - patch drawing updated, load by name instead of acquiring pointer earlier
-  if (neg)
-    V_DrawNamePatch(x - w, n->y, FG, "STTMINUS", cm,
-       (((cm!=CR_DEFAULT) && sts_colored_numbers) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
+	// draw a minus sign if necessary
+	//jff 2/16/98 add color translation to digit output
+	// cph - patch drawing updated, load by name instead of acquiring pointer earlier
+	if(neg)
+		V_DrawNamePatch(x - w, n->y, FG, "STTMINUS", cm,
+		(((cm!=CR_DEFAULT) && sts_colored_numbers) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
 }
 
 /*
@@ -146,11 +146,11 @@ static void STlib_drawNum
  * cphipps 10/99 - make that pointer const
  */
 void STlib_updateNum
-( st_number_t*    n,
-  int cm,
-  dboolean   refresh )
+(st_number_t* n,
+	int cm,
+	dboolean refresh)
 {
-  if (*n->on) STlib_drawNum(n, cm, refresh);
+	if(*n->on) STlib_drawNum(n, cm, refresh);
 }
 
 //
@@ -164,16 +164,16 @@ void STlib_updateNum
 // Returns nothing.
 //
 void STlib_initPercent
-( st_percent_t* p,
-  int x,
-  int y,
-  const patchnum_t* pl,
-  int* num,
-  dboolean* on,
-  const patchnum_t* percent )
+(st_percent_t* p,
+	int x,
+	int y,
+	const patchnum_t* pl,
+	int* num,
+	dboolean* on,
+	const patchnum_t* percent)
 {
-  STlib_initNum(&p->n, x, y, pl, num, on, 3);
-  p->p = percent;
+	STlib_initNum(&p->n, x, y, pl, num, on, 3);
+	p->p = percent;
 }
 
 /*
@@ -189,20 +189,21 @@ void STlib_initPercent
  */
 
 void STlib_updatePercent
-( st_percent_t*   per,
-  int cm,
-  int refresh )
+(st_percent_t* per,
+	int cm,
+	int refresh)
 {
-  if (*per->n.on && (refresh || (per->n.oldnum != *per->n.num))) {
-    // killough 2/21/98: fix percents not updated;
-    /* CPhipps - make %'s only be updated if number changed */
-    // CPhipps - patch drawing updated
-    V_DrawNumPatch(per->n.x, per->n.y, FG, per->p->lumpnum,
-       sts_pct_always_gray ? CR_GRAY : cm,
-       (sts_colored_numbers || sts_pct_always_gray ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
-  }
+	if(*per->n.on && (refresh || (per->n.oldnum != *per->n.num)))
+	{
+		// killough 2/21/98: fix percents not updated;
+		/* CPhipps - make %'s only be updated if number changed */
+		// CPhipps - patch drawing updated
+		V_DrawNumPatch(per->n.x, per->n.y, FG, per->p->lumpnum,
+			sts_pct_always_gray ? CR_GRAY : cm,
+			(sts_colored_numbers || sts_pct_always_gray ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM);
+	}
 
-  STlib_updateNum(&per->n, cm, refresh);
+	STlib_updateNum(&per->n, cm, refresh);
 }
 
 //
@@ -216,19 +217,19 @@ void STlib_updatePercent
 // Returns nothing.
 //
 void STlib_initMultIcon
-( st_multicon_t* i,
-  int x,
-  int y,
-  const patchnum_t* il,
-  int* inum,
-  dboolean* on )
+(st_multicon_t* i,
+	int x,
+	int y,
+	const patchnum_t* il,
+	int* inum,
+	dboolean* on)
 {
-  i->x  = x;
-  i->y  = y;
-  i->oldinum  = -1;
-  i->inum = inum;
-  i->on = on;
-  i->p  = il;
+	i->x = x;
+	i->y = y;
+	i->oldinum = -1;
+	i->inum = inum;
+	i->on = on;
+	i->p = il;
 }
 
 //
@@ -242,32 +243,32 @@ void STlib_initMultIcon
 // Returns nothing.
 //
 void STlib_updateMultIcon
-( st_multicon_t*  mi,
-  dboolean   refresh )
+(st_multicon_t* mi,
+	dboolean refresh)
 {
-  int w;
-  int h;
-  int x;
-  int y;
+	int w;
+	int h;
+	int x;
+	int y;
 
-  if (*mi->on && (mi->oldinum != *mi->inum || refresh))
-  {
-    if (mi->oldinum != -1)
-    {
-      x = mi->x - mi->p[mi->oldinum].leftoffset;
-      y = mi->y - mi->p[mi->oldinum].topoffset;
-      w = mi->p[mi->oldinum].width;
-      h = mi->p[mi->oldinum].height;
+	if(*mi->on && (mi->oldinum != *mi->inum || refresh))
+	{
+		if(mi->oldinum != -1)
+		{
+			x = mi->x - mi->p[mi->oldinum].leftoffset;
+			y = mi->y - mi->p[mi->oldinum].topoffset;
+			w = mi->p[mi->oldinum].width;
+			h = mi->p[mi->oldinum].height;
 
 #ifdef RANGECHECK
-      if (y - ST_Y < 0)
-        I_Error("STlib_updateMultIcon: y - ST_Y < 0");
+			if(y - ST_Y < 0)
+				I_Error("STlib_updateMultIcon: y - ST_Y < 0");
 #endif
 
-      V_CopyRect(BG, FG, x, y, w, h, VPT_STRETCH | VPT_ALIGN_BOTTOM);
-    }
-    if (*mi->inum != -1)  // killough 2/16/98: redraw only if != -1
-      V_DrawNumPatch(mi->x, mi->y, FG, mi->p[*mi->inum].lumpnum, CR_DEFAULT, VPT_ALIGN_BOTTOM);
-    mi->oldinum = *mi->inum;
-  }
+			V_CopyRect(BG, FG, x, y, w, h, VPT_STRETCH | VPT_ALIGN_BOTTOM);
+		}
+		if(*mi->inum != -1) // killough 2/16/98: redraw only if != -1
+			V_DrawNumPatch(mi->x, mi->y, FG, mi->p[*mi->inum].lumpnum, CR_DEFAULT, VPT_ALIGN_BOTTOM);
+		mi->oldinum = *mi->inum;
+	}
 }

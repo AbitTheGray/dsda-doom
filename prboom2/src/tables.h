@@ -57,24 +57,24 @@ typedef unsigned angle_t;
 // pitch is -lookdir * ang1 / pi
 // precomputed to avoid compiler-dependent floating point operation!
 static const angle_t raven_angle_down_limit = 0x18e70000; // (angle_t) (int) (110 * ANG1 / M_PI);
-static const angle_t raven_angle_up_limit   = 0xeba00000; // (angle_t) (int) (-90 * ANG1 / M_PI);
+static const angle_t raven_angle_up_limit = 0xeba00000;   // (angle_t) (int) (-90 * ANG1 / M_PI);
 
 // Load trig tables if needed
 void R_LoadTrigTables(void);
 
 // Effective size is 10240.
-extern fixed_t finesine[5*FINEANGLES/4];
+extern fixed_t finesine[5 * FINEANGLES / 4];
 
 // Re-use data, is just PI/2 phase shift.
-static fixed_t *const finecosine = finesine + (FINEANGLES/4);
+static fixed_t* const finecosine = finesine + (FINEANGLES / 4);
 
 // Effective size is 4096.
-extern fixed_t finetangent[FINEANGLES/2];
+extern fixed_t finetangent[FINEANGLES / 2];
 
 // Effective size is 2049;
 // The +1 size is to handle the case when x==y without additional checking.
 
-extern angle_t tantoangle[SLOPERANGE+1];
+extern angle_t tantoangle[SLOPERANGE + 1];
 
 // Utility function, called by R_PointToAngle.
 typedef int (*slope_div_fn)(unsigned int num, unsigned int den);
@@ -85,30 +85,30 @@ int SlopeDivEx(unsigned int num, unsigned int den);
 // These are straight from Eternity so demos stay in sync.
 inline static angle_t FixedToAngle(fixed_t a)
 {
-  return (angle_t)(((uint64_t)a * ANG1) >> FRACBITS);
+	return (angle_t)(((uint64_t)a * ANG1) >> FRACBITS);
 }
 
 inline static fixed_t AngleToFixed(angle_t a)
 {
-  return (fixed_t)(((uint64_t)a << FRACBITS) / ANG1);
+	return (fixed_t)(((uint64_t)a << FRACBITS) / ANG1);
 }
 
 // [XA] Clamped angle->slope, for convenience
 inline static fixed_t AngleToSlope(int a)
 {
-  if (a > ANG90)
-    return finetangent[0];
-  else if (-a > ANG90)
-    return finetangent[FINEANGLES / 2 - 1];
-  else
-    return finetangent[(ANG90 - a) >> ANGLETOFINESHIFT];
+	if(a > ANG90)
+		return finetangent[0];
+	else if(-a > ANG90)
+		return finetangent[FINEANGLES / 2 - 1];
+	else
+		return finetangent[(ANG90 - a) >> ANGLETOFINESHIFT];
 }
 
 // [XA] Ditto, using fixed-point-degrees input
 inline static fixed_t DegToSlope(fixed_t a)
 {
-  if (a >= 0)
-    return AngleToSlope(FixedToAngle(a));
-  else
-    return AngleToSlope(-(int)FixedToAngle(-a));
+	if(a >= 0)
+		return AngleToSlope(FixedToAngle(a));
+	else
+		return AngleToSlope(-(int)FixedToAngle(-a));
 }

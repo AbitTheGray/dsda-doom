@@ -32,60 +32,60 @@ fixed_t freelookviewheight;
 //
 void R_InitSkyMap(void)
 {
-  int r_stretchsky;
+	int r_stretchsky;
 
-  r_stretchsky = dsda_IntConfig(dsda_config_render_stretchsky);
+	r_stretchsky = dsda_IntConfig(dsda_config_render_stretchsky);
 
-  if (raven || !dsda_FreeAim())
-  {
-    skystretch = false;
-    skytexturemid = (raven ? 200 : 100) * FRACUNIT;
-    skyiscale = (200 << FRACBITS) / SCREENHEIGHT;
-  }
-  else
-  {
-    int skyheight;
+	if(raven || !dsda_FreeAim())
+	{
+		skystretch = false;
+		skytexturemid = (raven ? 200 : 100) * FRACUNIT;
+		skyiscale = (200 << FRACBITS) / SCREENHEIGHT;
+	}
+	else
+	{
+		int skyheight;
 
-    if (!textureheight)
-      return;
+		if(!textureheight)
+			return;
 
-    // There are various combinations for sky rendering depending on how tall the sky is:
-    //        h <  128: Unstretched and tiled, centered on horizon
-    // 128 <= h <  200: Can possibly be stretched. When unstretched, the baseline is
-    //                  28 rows below the horizon so that the top of the texture
-    //                  aligns with the top of the screen when looking straight ahead.
-    //                  When stretched, it is scaled to 228 pixels with the baseline
-    //                  in the same location as an unstretched 128-tall sky, so the top
-    //					of the texture aligns with the top of the screen when looking
-    //                  fully up.
-    //        h == 200: Unstretched, baseline is on horizon, and top is at the top of
-    //                  the screen when looking fully up.
-    //        h >  200: Unstretched, but the baseline is shifted down so that the top
-    //                  of the texture is at the top of the screen when looking fully up.
+		// There are various combinations for sky rendering depending on how tall the sky is:
+		//        h <  128: Unstretched and tiled, centered on horizon
+		// 128 <= h <  200: Can possibly be stretched. When unstretched, the baseline is
+		//                  28 rows below the horizon so that the top of the texture
+		//                  aligns with the top of the screen when looking straight ahead.
+		//                  When stretched, it is scaled to 228 pixels with the baseline
+		//                  in the same location as an unstretched 128-tall sky, so the top
+		//					of the texture aligns with the top of the screen when looking
+		//                  fully up.
+		//        h == 200: Unstretched, baseline is on horizon, and top is at the top of
+		//                  the screen when looking fully up.
+		//        h >  200: Unstretched, but the baseline is shifted down so that the top
+		//                  of the texture is at the top of the screen when looking fully up.
 
-    skyheight = textureheight[skytexture]>>FRACBITS;
-    skystretch = false;
-    skytexturemid = 0;
-    if (skyheight >= 128 && skyheight < 200)
-    {
-      skystretch = (r_stretchsky && skyheight >= 128);
-      skytexturemid = -28*FRACUNIT;
-    }
-    else if (skyheight > 200)
-    {
-      skytexturemid = (200 - skyheight) << FRACBITS;
-    }
+		skyheight = textureheight[skytexture] >> FRACBITS;
+		skystretch = false;
+		skytexturemid = 0;
+		if(skyheight >= 128 && skyheight < 200)
+		{
+			skystretch = (r_stretchsky && skyheight >= 128);
+			skytexturemid = -28 * FRACUNIT;
+		}
+		else if(skyheight > 200)
+		{
+			skytexturemid = (200 - skyheight) << FRACBITS;
+		}
 
-    skyiscale = (200 << FRACBITS) / SCREENHEIGHT;
+		skyiscale = (200 << FRACBITS) / SCREENHEIGHT;
 
-    if (skystretch)
-    {
-      skyiscale = (fixed_t)((int64_t)skyiscale * skyheight / SKYSTRETCH_HEIGHT);
-      skytexturemid = (int)((int64_t)skytexturemid * skyheight / SKYSTRETCH_HEIGHT);
-    }
-    else
-    {
-      skytexturemid = 100*FRACUNIT;
-    }
-  }
+		if(skystretch)
+		{
+			skyiscale = (fixed_t)((int64_t)skyiscale * skyheight / SKYSTRETCH_HEIGHT);
+			skytexturemid = (int)((int64_t)skytexturemid * skyheight / SKYSTRETCH_HEIGHT);
+		}
+		else
+		{
+			skytexturemid = 100 * FRACUNIT;
+		}
+	}
 }

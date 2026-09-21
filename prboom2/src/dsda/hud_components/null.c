@@ -7,6 +7,7 @@
 
 #include "null.h"
 
-void dsda_NullHC(char* str, size_t max_size) {
-  str[0] = '\0';
+void dsda_NullHC(char* str, size_t max_size)
+{
+	str[0] = '\0';
 }

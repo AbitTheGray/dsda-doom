@@ -14,16 +14,16 @@
 // Returning 1 will cause the event to be eaten; the textscreen code
 // will not see it.
 
-typedef int (*TxtSDLEventCallbackFunc)(SDL_Event *event, void *user_data);
+typedef int (*TxtSDLEventCallbackFunc)(SDL_Event* event, void* user_data);
 
-void TXT_PreInit(SDL_Window *preset_window, SDL_Renderer *preset_renderer, int opengl);
+void TXT_PreInit(SDL_Window* preset_window, SDL_Renderer* preset_renderer, int opengl);
 
 typedef struct
 {
-    const char *name;
-    const uint8_t *data;
-    unsigned int w;
-    unsigned int h;
+	const char* name;
+	const uint8_t* data;
+	unsigned int w;
+	unsigned int h;
 } txt_font_t;
 
 // GL stuff

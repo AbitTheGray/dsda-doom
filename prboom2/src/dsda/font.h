@@ -11,14 +11,15 @@
 #define HU_FONTEND (0x7f) /*jff 2/16/98 '_' the last font characters */
 #define HU_FONTSIZE (HU_FONTEND - HU_FONTSTART + 1)
 
-typedef struct {
-  const patchnum_t *font;
-  int height;
-  int line_height;
-  int space_width;
-  int start;
+typedef struct
+{
+	const patchnum_t* font;
+	int height;
+	int line_height;
+	int space_width;
+	int start;
 
-  int kerning; // Heretic/Hexen -1 kerning
+	int kerning; // Heretic/Hexen -1 kerning
 } dsda_font_t;
 
 extern dsda_font_t hud_font;

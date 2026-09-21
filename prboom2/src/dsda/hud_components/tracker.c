@@ -18,58 +18,64 @@
 
 extern dsda_tracker_t dsda_tracker[TRACKER_LIMIT];
 
-typedef struct {
-  dsda_text_t component[TRACKER_LIMIT];
+typedef struct
+{
+	dsda_text_t component[TRACKER_LIMIT];
 } local_component_t;
 
 static local_component_t* local;
 
-void dsda_InitTrackerHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data) {
-  int i;
+void dsda_InitTrackerHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+{
+	int i;
 
-  *data = Z_Calloc(1, sizeof(local_component_t));
-  local = *data;
+	*data = Z_Calloc(1, sizeof(local_component_t));
+	local = *data;
 
-  for (i = 0; i < TRACKER_LIMIT; ++i)
-    dsda_InitTextHC(&local->component[i], x_offset, y_offset + i * 8, vpt);
+	for(i = 0; i < TRACKER_LIMIT; ++i)
+		dsda_InitTextHC(&local->component[i], x_offset, y_offset + i * 8, vpt);
 }
 
-void dsda_UpdateTrackerHC(void* data) {
-  int i;
+void dsda_UpdateTrackerHC(void* data)
+{
+	int i;
 
-  local = data;
+	local = data;
 
-  for (i = 0; i < TRACKER_LIMIT; ++i) {
-    switch (dsda_tracker[i].type) {
-      case dsda_tracker_nothing:
-        dsda_NullHC(local->component[i].msg, sizeof(local->component[i].msg));
-        break;
-      case dsda_tracker_line:
-        dsda_LineTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id);
-        break;
-      case dsda_tracker_line_distance:
-        dsda_LineDistanceTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id);
-        break;
-      case dsda_tracker_sector:
-        dsda_SectorTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id);
-        break;
-      case dsda_tracker_mobj:
-        dsda_MobjTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id, dsda_tracker[i].mobj);
-        break;
-      case dsda_tracker_player:
-        dsda_PlayerTrackerHC(local->component[i].msg, sizeof(local->component[i].msg));
-        break;
-    }
+	for(i = 0; i < TRACKER_LIMIT; ++i)
+	{
+		switch(dsda_tracker[i].type)
+		{
+			case dsda_tracker_nothing:
+				dsda_NullHC(local->component[i].msg, sizeof(local->component[i].msg));
+				break;
+			case dsda_tracker_line:
+				dsda_LineTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id);
+				break;
+			case dsda_tracker_line_distance:
+				dsda_LineDistanceTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id);
+				break;
+			case dsda_tracker_sector:
+				dsda_SectorTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id);
+				break;
+			case dsda_tracker_mobj:
+				dsda_MobjTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id, dsda_tracker[i].mobj);
+				break;
+			case dsda_tracker_player:
+				dsda_PlayerTrackerHC(local->component[i].msg, sizeof(local->component[i].msg));
+				break;
+		}
 
-    dsda_RefreshHudText(&local->component[i]);
-  }
+		dsda_RefreshHudText(&local->component[i]);
+	}
 }
 
-void dsda_DrawTrackerHC(void* data) {
-  int i;
+void dsda_DrawTrackerHC(void* data)
+{
+	int i;
 
-  local = data;
+	local = data;
 
-  for (i = 0; i < TRACKER_LIMIT; ++i)
-    dsda_DrawBasicText(&local->component[i]);
+	for(i = 0; i < TRACKER_LIMIT; ++i)
+		dsda_DrawBasicText(&local->component[i]);
 }

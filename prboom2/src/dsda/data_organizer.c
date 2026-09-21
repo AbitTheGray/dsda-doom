@@ -27,106 +27,117 @@ static char* dsda_data_dir_strings[DATA_DIR_LIMIT];
 static char* dsda_base_data_dir;
 static char* dsda_wad_data_dir;
 
-char* dsda_DetectDirectory(const char* env_key, int arg_id) {
-  dsda_arg_t* arg;
-  char* result = NULL;
-  const char* default_directory;
+char* dsda_DetectDirectory(const char* env_key, int arg_id)
+{
+	dsda_arg_t* arg;
+	char* result = NULL;
+	const char* default_directory;
 
-  default_directory = M_getenv(env_key);
+	default_directory = M_getenv(env_key);
 
-  if (!default_directory)
-    default_directory = I_ConfigDir();
+	if(!default_directory)
+		default_directory = I_ConfigDir();
 
-  arg = dsda_Arg(arg_id);
-  if (arg->found) {
-    if (M_IsDir(arg->value.v_string)) {
-      if (result) Z_Free(result);
-      result = Z_Strdup(arg->value.v_string);
-    }
-    else
-      lprintf(LO_ERROR, "Error: path %s does not exist. Using %s\n",
-              arg->value.v_string, default_directory);
-  }
+	arg = dsda_Arg(arg_id);
+	if(arg->found)
+	{
+		if(M_IsDir(arg->value.v_string))
+		{
+			if(result) Z_Free(result);
+			result = Z_Strdup(arg->value.v_string);
+		}
+		else
+			lprintf(LO_ERROR, "Error: path %s does not exist. Using %s\n",
+				arg->value.v_string, default_directory);
+	}
 
-  if (!result)
-    result = Z_Strdup(default_directory);
+	if(!result)
+		result = Z_Strdup(default_directory);
 
-  return result;
+	return result;
 }
 
-void dsda_InitDataDir(void) {
-  char* parent_directory;
-  dsda_string_t str;
+void dsda_InitDataDir(void)
+{
+	char* parent_directory;
+	dsda_string_t str;
 
-  parent_directory = dsda_DetectDirectory("DOOMDATADIR", dsda_arg_data);
+	parent_directory = dsda_DetectDirectory("DOOMDATADIR", dsda_arg_data);
 
-  dsda_StringPrintF(&str, "%s/%s", parent_directory, dsda_data_root);
+	dsda_StringPrintF(&str, "%s/%s", parent_directory, dsda_data_root);
 
-  dsda_base_data_dir = str.string;
-  M_MakeDir(dsda_base_data_dir, false);
+	dsda_base_data_dir = str.string;
+	M_MakeDir(dsda_base_data_dir, false);
 
-  Z_Free(parent_directory);
+	Z_Free(parent_directory);
 }
 
-static void dsda_InitWadDataDir(void) {
-  int i;
-  const int iwad_index = 0;
-  int pwad_index = 1;
-  dsda_string_t str;
+static void dsda_InitWadDataDir(void)
+{
+	int i;
+	const int iwad_index = 0;
+	int pwad_index = 1;
+	dsda_string_t str;
 
-  for (i = 0; i < numwadfiles; ++i) {
-    const char* start;
-    char* result;
-    int length;
+	for(i = 0; i < numwadfiles; ++i)
+	{
+		const char* start;
+		char* result;
+		int length;
 
-    start = PathFindFileName(wadfiles[i].name);
+		start = PathFindFileName(wadfiles[i].name);
 
-    length = strlen(start) - 4;
+		length = strlen(start) - 4;
 
-    if (length > 0 && !strcasecmp(start + length, ".wad")) {
-      int dir_index;
+		if(length > 0 && !strcasecmp(start + length, ".wad"))
+		{
+			int dir_index;
 
-      if (wadfiles[i].src == source_iwad)
-        dir_index = iwad_index;
-      else if (wadfiles[i].src == source_pwad)
-        dir_index = pwad_index;
-      else
-        dir_index = -1;
+			if(wadfiles[i].src == source_iwad)
+				dir_index = iwad_index;
+			else if(wadfiles[i].src == source_pwad)
+				dir_index = pwad_index;
+			else
+				dir_index = -1;
 
-      if (dir_index >= 0 && dir_index < DATA_DIR_LIMIT) {
-        dsda_data_dir_strings[dir_index] = Z_Malloc(length + 1);
-        strncpy(dsda_data_dir_strings[dir_index], start, length);
-        dsda_data_dir_strings[dir_index][length] = '\0';
+			if(dir_index >= 0 && dir_index < DATA_DIR_LIMIT)
+			{
+				dsda_data_dir_strings[dir_index] = Z_Malloc(length + 1);
+				strncpy(dsda_data_dir_strings[dir_index], start, length);
+				dsda_data_dir_strings[dir_index][length] = '\0';
 
-        for (result = dsda_data_dir_strings[dir_index]; *result; ++result)
-          *result = tolower(*result);
+				for(result = dsda_data_dir_strings[dir_index]; *result; ++result)
+					*result = tolower(*result);
 
-        if (dir_index == pwad_index)
-          pwad_index++;
-      }
-    }
-  }
+				if(dir_index == pwad_index)
+					pwad_index++;
+			}
+		}
+	}
 
-  dsda_InitString(&str, dsda_base_data_dir);
+	dsda_InitString(&str, dsda_base_data_dir);
 
-  for (i = 0; i < DATA_DIR_LIMIT; ++i)
-    if (dsda_data_dir_strings[i]) {
-      dsda_StringCatF(&str, "/%s", dsda_data_dir_strings[i]);
-      M_MakeDir(str.string, false);
-    }
+	for(i = 0; i < DATA_DIR_LIMIT; ++i)
+		if(dsda_data_dir_strings[i])
+		{
+			dsda_StringCatF(&str, "/%s", dsda_data_dir_strings[i]);
+			M_MakeDir(str.string, false);
+		}
 
-  dsda_wad_data_dir = str.string;
+	dsda_wad_data_dir = str.string;
 
-  lprintf(LO_INFO, "Using data file directory: %s\n", dsda_wad_data_dir);
+	lprintf(LO_INFO, "Using data file directory: %s\n", dsda_wad_data_dir);
 }
 
-char* dsda_DataDir(void) {
-  if (!dsda_wad_data_dir)
-    dsda_InitWadDataDir();
+char* dsda_DataDir(void)
+{
+	if(!dsda_wad_data_dir)
+		dsda_InitWadDataDir();
 
-  return dsda_wad_data_dir;
+	return dsda_wad_data_dir;
 }
 
-const char* dsda_DataRoot(void) {
-  return dsda_base_data_dir;
+const char* dsda_DataRoot(void)
+{
+	return dsda_base_data_dir;
 }

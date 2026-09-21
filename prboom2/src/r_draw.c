@@ -29,9 +29,9 @@
 //  and the total size == width*height*depth/8.,
 //
 
-byte *viewimage;
-int  viewwidth;
-int  viewheight;
+byte* viewimage;
+int viewwidth;
+int viewheight;
 
 // Color tables for different players,
 //  translate a limited part to another
@@ -39,8 +39,8 @@ int  viewheight;
 //
 
 // CPhipps - made const*'s
-const byte *tranmap;          // translucency filter maps 256x256   // phares
-const byte *main_tranmap;     // killough 4/11/98
+const byte* tranmap;      // translucency filter maps 256x256   // phares
+const byte* main_tranmap; // killough 4/11/98
 
 //
 // R_DrawColumn
@@ -50,26 +50,26 @@ const byte *main_tranmap;     // killough 4/11/98
 // SoM: OPTIMIZE for ANYRES
 typedef enum
 {
-   COL_NONE,
-   COL_OPAQUE,
-   COL_TRANS,
-   COL_FLEXTRANS,
-   COL_FUZZ,
-   COL_FLEXADD
+	COL_NONE,
+	COL_OPAQUE,
+	COL_TRANS,
+	COL_FLEXTRANS,
+	COL_FUZZ,
+	COL_FLEXADD
 } columntype_e;
 
-static int    temp_x = 0;
-static int    tempyl[4], tempyh[4];
+static int temp_x = 0;
+static int tempyl[4], tempyh[4];
 
 // e6y: resolution limitation is removed
-static byte           *tempbuf;
+static byte* tempbuf;
 
-static int    startx = 0;
-static int    temptype = COL_NONE;
-static int    commontop, commonbot;
-static const byte *temptranmap = NULL;
+static int startx = 0;
+static int temptype = COL_NONE;
+static int commontop, commonbot;
+static const byte* temptranmap = NULL;
 // SoM 7-28-04: Fix the fuzz problem.
-static const byte   *tempfuzzmap;
+static const byte* tempfuzzmap;
 
 //
 // Spectre/Invisibility.
@@ -81,13 +81,13 @@ static const byte   *tempfuzzmap;
 #define FUZZOFF 1
 
 static const int fuzzoffset_org[FUZZTABLE] = {
-  FUZZOFF,-FUZZOFF,FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,
-  FUZZOFF,FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,
-  FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,
-  FUZZOFF,-FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,
-  FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,-FUZZOFF,FUZZOFF,
-  FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,
-  FUZZOFF,FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,FUZZOFF
+	FUZZOFF, -FUZZOFF,FUZZOFF, -FUZZOFF,FUZZOFF,FUZZOFF, -FUZZOFF,
+	FUZZOFF,FUZZOFF, -FUZZOFF,FUZZOFF,FUZZOFF,FUZZOFF, -FUZZOFF,
+	FUZZOFF,FUZZOFF,FUZZOFF, -FUZZOFF, -FUZZOFF, -FUZZOFF, -FUZZOFF,
+	FUZZOFF, -FUZZOFF, -FUZZOFF,FUZZOFF,FUZZOFF,FUZZOFF,FUZZOFF, -FUZZOFF,
+	FUZZOFF, -FUZZOFF,FUZZOFF,FUZZOFF, -FUZZOFF, -FUZZOFF,FUZZOFF,
+	FUZZOFF, -FUZZOFF, -FUZZOFF, -FUZZOFF, -FUZZOFF,FUZZOFF,FUZZOFF,
+	FUZZOFF,FUZZOFF, -FUZZOFF,FUZZOFF,FUZZOFF, -FUZZOFF,FUZZOFF
 };
 
 static int fuzzoffset[FUZZTABLE];
@@ -107,23 +107,23 @@ int fuzz_cutoff = false;
 #define RDC_NOCOLMAP     16
 
 draw_vars_t drawvars = {
-  NULL, // topleft
-  0, // pitch
+	NULL, // topleft
+	0,    // pitch
 };
 
 dboolean R_FullView(void)
 {
-  return viewheight == SCREENHEIGHT;
+	return viewheight == SCREENHEIGHT;
 }
 
 dboolean R_PartialView(void)
 {
-  return viewheight != SCREENHEIGHT;
+	return viewheight != SCREENHEIGHT;
 }
 
 dboolean R_StatusBarVisible(void)
 {
-  return R_PartialView() || automap_solid;
+	return R_PartialView() || automap_solid;
 }
 
 //
@@ -133,33 +133,33 @@ dboolean R_StatusBarVisible(void)
 
 static void R_FlushWholeError(void)
 {
-   I_Error("R_FlushWholeColumns called without being initialized.\n");
+	I_Error("R_FlushWholeColumns called without being initialized.\n");
 }
 
 static void R_FlushHTError(void)
 {
-   I_Error("R_FlushHTColumns called without being initialized.\n");
+	I_Error("R_FlushHTColumns called without being initialized.\n");
 }
 
 static void R_QuadFlushError(void)
 {
-   I_Error("R_FlushQuadColumn called without being initialized.\n");
+	I_Error("R_FlushQuadColumn called without being initialized.\n");
 }
 
 static void (*R_FlushWholeColumns)(void) = R_FlushWholeError;
-static void (*R_FlushHTColumns)(void)    = R_FlushHTError;
+static void (*R_FlushHTColumns)(void) = R_FlushHTError;
 static void (*R_FlushQuadColumn)(void) = R_QuadFlushError;
 
 static void R_FlushColumns(void)
 {
-   if(temp_x != 4 || commontop >= commonbot)
-      R_FlushWholeColumns();
-   else
-   {
-      R_FlushHTColumns();
-      R_FlushQuadColumn();
-   }
-   temp_x = 0;
+	if(temp_x != 4 || commontop >= commonbot)
+		R_FlushWholeColumns();
+	else
+	{
+		R_FlushHTColumns();
+		R_FlushQuadColumn();
+	}
+	temp_x = 0;
 }
 
 //
@@ -171,13 +171,13 @@ static void R_FlushColumns(void)
 //
 void R_ResetColumnBuffer(void)
 {
-   // haleyjd 10/06/05: this must not be done if temp_x == 0!
-   if(temp_x)
-      R_FlushColumns();
-   temptype = COL_NONE;
-   R_FlushWholeColumns = R_FlushWholeError;
-   R_FlushHTColumns    = R_FlushHTError;
-   R_FlushQuadColumn   = R_QuadFlushError;
+	// haleyjd 10/06/05: this must not be done if temp_x == 0!
+	if(temp_x)
+		R_FlushColumns();
+	temptype = COL_NONE;
+	R_FlushWholeColumns = R_FlushWholeError;
+	R_FlushHTColumns = R_FlushHTError;
+	R_FlushQuadColumn = R_QuadFlushError;
 }
 
 #define R_DRAWCOLUMN_PIPELINE RDC_STANDARD
@@ -210,7 +210,7 @@ void R_ResetColumnBuffer(void)
 //  be used. It has also been used with Wolfenstein 3D.
 //
 
-byte *translationtables;
+byte* translationtables;
 
 #define R_DRAWCOLUMN_PIPELINE_TYPE RDC_PIPELINE_STANDARD
 #define R_DRAWCOLUMN_PIPELINE_BASE RDC_STANDARD
@@ -292,42 +292,44 @@ byte *translationtables;
 #undef R_DRAWCOLUMN_PIPELINE_TYPE
 
 static R_DrawColumn_f drawcolumnfuncs[RDRAW_FILTER_MAXFILTERS][RDC_PIPELINE_MAXPIPELINES] = {
-  {
-    R_DrawColumn_PointUV,
-    R_DrawTLColumn_PointUV,
-    R_DrawTranslatedColumn_PointUV,
-    R_DrawFuzzColumn_PointUV,
-  },
-  {
-    R_DrawColumn_PointUV_PointZ,
-    R_DrawTLColumn_PointUV_PointZ,
-    R_DrawTranslatedColumn_PointUV_PointZ,
-    R_DrawFuzzColumn_PointUV_PointZ,
-  },
+	{
+		R_DrawColumn_PointUV,
+		R_DrawTLColumn_PointUV,
+		R_DrawTranslatedColumn_PointUV,
+		R_DrawFuzzColumn_PointUV,
+	},
+	{
+		R_DrawColumn_PointUV_PointZ,
+		R_DrawTLColumn_PointUV_PointZ,
+		R_DrawTranslatedColumn_PointUV_PointZ,
+		R_DrawFuzzColumn_PointUV_PointZ,
+	},
 };
 
-R_DrawColumn_f R_GetDrawColumnFunc(enum column_pipeline_e type, enum draw_filter_type_e filterz) {
-  R_DrawColumn_f result = drawcolumnfuncs[filterz][type];
-  if (result == NULL)
-    I_Error("R_GetDrawColumnFunc: undefined function (%d, %d)", type, filterz);
-  return result;
+R_DrawColumn_f R_GetDrawColumnFunc(enum column_pipeline_e type, enum draw_filter_type_e filterz)
+{
+	R_DrawColumn_f result = drawcolumnfuncs[filterz][type];
+	if(result == NULL)
+		I_Error("R_GetDrawColumnFunc: undefined function (%d, %d)", type, filterz);
+	return result;
 }
 
-void R_SetDefaultDrawColumnVars(draw_column_vars_t *dcvars) {
-  dcvars->x = dcvars->yl = dcvars->yh = 0;
-  dcvars->iscale = dcvars->texturemid = dcvars->texheight = 0;
-  dcvars->source = dcvars->prevsource = dcvars->nextsource = NULL;
-  dcvars->colormap = colormaps[0];
-  dcvars->translation = NULL;
-  dcvars->edgeslope = dcvars->drawingmasked = 0;
-  dcvars->flags = 0;
+void R_SetDefaultDrawColumnVars(draw_column_vars_t* dcvars)
+{
+	dcvars->x = dcvars->yl = dcvars->yh = 0;
+	dcvars->iscale = dcvars->texturemid = dcvars->texheight = 0;
+	dcvars->source = dcvars->prevsource = dcvars->nextsource = NULL;
+	dcvars->colormap = colormaps[0];
+	dcvars->translation = NULL;
+	dcvars->edgeslope = dcvars->drawingmasked = 0;
+	dcvars->flags = 0;
 
-  // [AR] mark weapon sprite
-  dcvars->isplayersprite = false;
-  dcvars->pspritepostheight = 0;
+	// [AR] mark weapon sprite
+	dcvars->isplayersprite = false;
+	dcvars->pspritepostheight = 0;
 
-  // heretic
-  dcvars->baseclip = -1;
+	// heretic
+	dcvars->baseclip = -1;
 }
 
 //
@@ -341,62 +343,64 @@ void R_SetDefaultDrawColumnVars(draw_column_vars_t *dcvars) {
 byte playernumtotrans[MAX_MAXPLAYERS];
 
 // HERETIC_TODO: player colors
-const byte player_colors[] = { 0x70, 0x60, 0x40, 0x20 };
+const byte player_colors[] = {0x70, 0x60, 0x40, 0x20};
 
-void R_InitTranslationTables (void)
+void R_InitTranslationTables(void)
 {
-  int i, j;
+	int i, j;
 #define MAXTRANS 3
-  byte transtocolour[MAXTRANS];
+	byte transtocolour[MAXTRANS];
 
-  if (hexen)
-  {
-    int lumpnum = W_GetNumForName("trantbl0");
-    translationtables = Z_Malloc(256 * 3 * (g_maxplayers - 1));
+	if(hexen)
+	{
+		int lumpnum = W_GetNumForName("trantbl0");
+		translationtables = Z_Malloc(256 * 3 * (g_maxplayers - 1));
 
-    for (i = 0; i < g_maxplayers; i++)
-      playernumtotrans[i] = i;
+		for(i = 0; i < g_maxplayers; i++)
+			playernumtotrans[i] = i;
 
-    for (i = 0; i < 3 * (g_maxplayers - 1); i++)
-    {
-        const byte* transLump = W_LumpByNum(lumpnum + i);
-        memcpy(translationtables + i * 256, transLump, 256);
-    }
+		for(i = 0; i < 3 * (g_maxplayers - 1); i++)
+		{
+			const byte* transLump = W_LumpByNum(lumpnum + i);
+			memcpy(translationtables + i * 256, transLump, 256);
+		}
 
-    return;
-  }
+		return;
+	}
 
-  // killough 5/2/98:
-  // Remove dependency of colormaps aligned on 256-byte boundary
+	// killough 5/2/98:
+	// Remove dependency of colormaps aligned on 256-byte boundary
 
-  if (translationtables == NULL) // CPhipps - allow multiple calls
-    translationtables = Z_Malloc(256*MAXTRANS);
+	if(translationtables == NULL) // CPhipps - allow multiple calls
+		translationtables = Z_Malloc(256 * MAXTRANS);
 
-  for (i=0; i<MAXTRANS; i++) transtocolour[i] = 255;
+	for(i = 0; i < MAXTRANS; i++) transtocolour[i] = 255;
 
-  for (i = 0; i < g_maxplayers; i++) {
-    byte wantcolour = player_colors[i];
-    playernumtotrans[i] = 0;
-    if (wantcolour != 0x70) // Not green, would like translation
-      for (j = 0; j < MAXTRANS; j++)
-        if (transtocolour[j] == 255) {
-          transtocolour[j] = wantcolour;
-          playernumtotrans[i] = j + 1;
-          break;
-        }
-  }
+	for(i = 0; i < g_maxplayers; i++)
+	{
+		byte wantcolour = player_colors[i];
+		playernumtotrans[i] = 0;
+		if(wantcolour != 0x70) // Not green, would like translation
+			for(j = 0; j < MAXTRANS; j++)
+				if(transtocolour[j] == 255)
+				{
+					transtocolour[j] = wantcolour;
+					playernumtotrans[i] = j + 1;
+					break;
+				}
+	}
 
-  // translate just the 16 green colors
-  for (i=0; i<256; i++)
-    if (i >= 0x70 && i<= 0x7f)
-    {
-      // CPhipps - configurable player colours
-      translationtables[i] = colormaps[0][(i&0xf) + transtocolour[0]];
-      translationtables[i+256] = colormaps[0][(i&0xf) + transtocolour[1]];
-      translationtables[i+512] = colormaps[0][(i&0xf) + transtocolour[2]];
-    }
-    else  // Keep all other colors as is.
-      translationtables[i]=translationtables[i+256]=translationtables[i+512]=i;
+	// translate just the 16 green colors
+	for(i = 0; i < 256; i++)
+		if(i >= 0x70 && i <= 0x7f)
+		{
+			// CPhipps - configurable player colours
+			translationtables[i] = colormaps[0][(i & 0xf) + transtocolour[0]];
+			translationtables[i + 256] = colormaps[0][(i & 0xf) + transtocolour[1]];
+			translationtables[i + 512] = colormaps[0][(i & 0xf) + transtocolour[2]];
+		}
+		else // Keep all other colors as is.
+			translationtables[i] = translationtables[i + 256] = translationtables[i + 512] = i;
 }
 
 //
@@ -412,38 +416,40 @@ void R_InitTranslationTables (void)
 //  and the inner loop has to step in texture space u and v.
 //
 
-void R_DrawSpan(draw_span_vars_t *dsvars) {
-  unsigned count = dsvars->x2 - dsvars->x1 + 1;
-  fixed_t xfrac = dsvars->xfrac;
-  fixed_t yfrac = dsvars->yfrac;
-  const fixed_t xstep = dsvars->xstep;
-  const fixed_t ystep = dsvars->ystep;
-  const byte *source = dsvars->source;
-  const byte *colormap = dsvars->colormap;
-  byte *dest = drawvars.topleft + dsvars->y*drawvars.pitch + dsvars->x1;
+void R_DrawSpan(draw_span_vars_t* dsvars)
+{
+	unsigned count = dsvars->x2 - dsvars->x1 + 1;
+	fixed_t xfrac = dsvars->xfrac;
+	fixed_t yfrac = dsvars->yfrac;
+	const fixed_t xstep = dsvars->xstep;
+	const fixed_t ystep = dsvars->ystep;
+	const byte* source = dsvars->source;
+	const byte* colormap = dsvars->colormap;
+	byte* dest = drawvars.topleft + dsvars->y * drawvars.pitch + dsvars->x1;
 
-  while (count) {
-    const fixed_t xtemp = (xfrac >> 16) & 63;
-    const fixed_t ytemp = (yfrac >> 10) & 4032;
-    const fixed_t spot = xtemp | ytemp;
-    xfrac += xstep;
-    yfrac += ystep;
-    *dest++ = colormap[source[spot]];
-    count--;
-  }
+	while(count)
+	{
+		const fixed_t xtemp = (xfrac >> 16) & 63;
+		const fixed_t ytemp = (yfrac >> 10) & 4032;
+		const fixed_t spot = xtemp | ytemp;
+		xfrac += xstep;
+		yfrac += ystep;
+		*dest++ = colormap[source[spot]];
+		count--;
+	}
 }
 
 void R_InitBuffersRes(void)
 {
-  extern byte *solidcol;
+	extern byte* solidcol;
 
-  if (solidcol) Z_Free(solidcol);
-  if (tempbuf) Z_Free(tempbuf);
+	if(solidcol) Z_Free(solidcol);
+	if(tempbuf) Z_Free(tempbuf);
 
-  solidcol = Z_Calloc(1, SCREENWIDTH * sizeof(*solidcol));
-  tempbuf = Z_Calloc(1, (SCREENHEIGHT * 4) * sizeof(*tempbuf));
+	solidcol = Z_Calloc(1, SCREENWIDTH * sizeof(*solidcol));
+	tempbuf = Z_Calloc(1, (SCREENHEIGHT * 4) * sizeof(*tempbuf));
 
-  temp_x = 0;
+	temp_x = 0;
 }
 
 //
@@ -456,18 +462,18 @@ void R_InitBuffersRes(void)
 
 void R_InitBuffer(int width, int height)
 {
-  int i;
+	int i;
 
-  drawvars.topleft = screens[0].data;
-  drawvars.pitch = screens[0].pitch;
+	drawvars.topleft = screens[0].data;
+	drawvars.pitch = screens[0].pitch;
 
-  for (i=0; i<FUZZTABLE; i++)
-    fuzzoffset[i] = fuzzoffset_org[i]*screens[0].pitch;
-  
-  if (!tallscreen)
-    fuzzcellsize = (SCREENHEIGHT + 100) / 200;
-  else
-    fuzzcellsize = (SCREENWIDTH + 160) / 320;
+	for(i = 0; i < FUZZTABLE; i++)
+		fuzzoffset[i] = fuzzoffset_org[i] * screens[0].pitch;
+
+	if(!tallscreen)
+		fuzzcellsize = (SCREENHEIGHT + 100) / 200;
+	else
+		fuzzcellsize = (SCREENWIDTH + 160) / 320;
 }
 
 //
@@ -476,39 +482,39 @@ void R_InitBuffer(int width, int height)
 // with a color
 //
 
-void R_FillBackColor (void)
+void R_FillBackColor(void)
 {
-  extern patchnum_t stbarbg;
-  static byte col;
-  static byte col_top;
-  static int prevlump = -1;
-  const int stbar_top = SCREENHEIGHT - ST_SCALED_HEIGHT;
-  const int ST_SCALED_BORDER = brdr_b.height * patches_scaley/2;
-  int lump = stbarbg.lumpnum;
+	extern patchnum_t stbarbg;
+	static byte col;
+	static byte col_top;
+	static int prevlump = -1;
+	const int stbar_top = SCREENHEIGHT - ST_SCALED_HEIGHT;
+	const int ST_SCALED_BORDER = brdr_b.height * patches_scaley / 2;
+	int lump = stbarbg.lumpnum;
 
-  if (prevlump != lump)
-  {
-    const unsigned char *playpal = V_GetPlaypal();
-    SDL_Color stbar_color = V_GetPatchColor(lump);
-    int r = stbar_color.r;
-    int g = stbar_color.g;
-    int b = stbar_color.b;
+	if(prevlump != lump)
+	{
+		const unsigned char* playpal = V_GetPlaypal();
+		SDL_Color stbar_color = V_GetPatchColor(lump);
+		int r = stbar_color.r;
+		int g = stbar_color.g;
+		int b = stbar_color.b;
 
-    // Convert to palette and tune down saturation
-    col = V_BestColor(playpal, r/3, g/3, b/3);
-    col_top = V_BestColor(playpal, r/2, g/2, b/2);
+		// Convert to palette and tune down saturation
+		col = V_BestColor(playpal, r / 3, g / 3, b / 3);
+		col_top = V_BestColor(playpal, r / 2, g / 2, b / 2);
 
-    // If colors are the same, brighten top
-    if (col_top == col)
-      col_top = V_BestColor(playpal, r, g, b);
+		// If colors are the same, brighten top
+		if(col_top == col)
+			col_top = V_BestColor(playpal, r, g, b);
 
-    prevlump = lump;
-  }
+		prevlump = lump;
+	}
 
-  V_BeginMenuDraw();
-  V_FillRect(1, 0, stbar_top, SCREENWIDTH, ST_SCALED_BORDER, col_top);
-  V_FillRect(1, 0, stbar_top + ST_SCALED_BORDER, SCREENWIDTH, ST_SCALED_HEIGHT - ST_SCALED_BORDER, col);
-  V_EndMenuDraw();
+	V_BeginMenuDraw();
+	V_FillRect(1, 0, stbar_top, SCREENWIDTH, ST_SCALED_BORDER, col_top);
+	V_FillRect(1, 0, stbar_top + ST_SCALED_BORDER, SCREENWIDTH, ST_SCALED_HEIGHT - ST_SCALED_BORDER, col);
+	V_EndMenuDraw();
 }
 
 //
@@ -519,50 +525,50 @@ void R_FillBackColor (void)
 //
 // CPhipps - patch drawing updated
 
-void R_FillBackScreen (void)
+void R_FillBackScreen(void)
 {
-  int automap = automap_solid;
+	int automap = automap_solid;
 
-  if (grnrock.lumpnum == 0)
-    return;
+	if(grnrock.lumpnum == 0)
+		return;
 
-  V_BeginUIDraw();
+	V_BeginUIDraw();
 
-  // e6y: wide-res
-  if (ratio_multiplier != ratio_scale || wide_offsety)
-  {
-    int only_stbar;
+	// e6y: wide-res
+	if(ratio_multiplier != ratio_scale || wide_offsety)
+	{
+		int only_stbar;
 
-    only_stbar = V_IsSoftwareMode() || automap || R_PartialView();
+		only_stbar = V_IsSoftwareMode() || automap || R_PartialView();
 
-    if (only_stbar && ST_SCALED_OFFSETX > 0)
-    {
-      int stbar_top = SCREENHEIGHT - ST_SCALED_HEIGHT;
-      int stbar_solid_bg = dsda_IntConfig(dsda_config_sts_solid_bg_color);
+		if(only_stbar && ST_SCALED_OFFSETX > 0)
+		{
+			int stbar_top = SCREENHEIGHT - ST_SCALED_HEIGHT;
+			int stbar_solid_bg = dsda_IntConfig(dsda_config_sts_solid_bg_color);
 
-      if (stbar_solid_bg)
-      {
-        R_FillBackColor();
-        V_EndUIDraw();
-        return;
-      }
+			if(stbar_solid_bg)
+			{
+				R_FillBackColor();
+				V_EndUIDraw();
+				return;
+			}
 
-      if (V_IsOpenGLMode()) // OpenGL has no way to adjust y-offset independent from height
-        V_FillFlat(grnrock.lumpnum, 1, 0, 0, SCREENWIDTH, SCREENHEIGHT, VPT_STRETCH);
-      else
-        V_FillFlat(grnrock.lumpnum, 1, 0, stbar_top, SCREENWIDTH, ST_SCALED_HEIGHT, VPT_STRETCH);
+			if(V_IsOpenGLMode()) // OpenGL has no way to adjust y-offset independent from height
+				V_FillFlat(grnrock.lumpnum, 1, 0, 0, SCREENWIDTH, SCREENHEIGHT, VPT_STRETCH);
+			else
+				V_FillFlat(grnrock.lumpnum, 1, 0, stbar_top, SCREENWIDTH, ST_SCALED_HEIGHT, VPT_STRETCH);
 
-      // heretic_note: I think this looks bad, so I'm skipping it...
-      if (!heretic)
-      {
-        // line between view and status bar
-        V_FillPatch(brdr_b.lumpnum, 1, 0, stbar_top, ST_SCALED_OFFSETX, brdr_b.height, VPT_NONE);
-        V_FillPatch(brdr_b.lumpnum, 1, SCREENWIDTH - ST_SCALED_OFFSETX, stbar_top, ST_SCALED_OFFSETX, brdr_b.height, VPT_NONE);
-      }
-    }
-  }
+			// heretic_note: I think this looks bad, so I'm skipping it...
+			if(!heretic)
+			{
+				// line between view and status bar
+				V_FillPatch(brdr_b.lumpnum, 1, 0, stbar_top, ST_SCALED_OFFSETX, brdr_b.height, VPT_NONE);
+				V_FillPatch(brdr_b.lumpnum, 1, SCREENWIDTH - ST_SCALED_OFFSETX, stbar_top, ST_SCALED_OFFSETX, brdr_b.height, VPT_NONE);
+			}
+		}
+	}
 
-  V_EndUIDraw();
+	V_EndUIDraw();
 }
 
 //
@@ -571,10 +577,10 @@ void R_FillBackScreen (void)
 
 static void R_CopyScreenBufferSection(int x, int y, int count)
 {
-  if (V_IsSoftwareMode())
-    memcpy(screens[0].data+y*screens[0].pitch+x,
-           screens[1].data+y*screens[1].pitch+x,
-           count);   // LFB copy.
+	if(V_IsSoftwareMode())
+		memcpy(screens[0].data + y * screens[0].pitch + x,
+			screens[1].data + y * screens[1].pitch + x,
+			count); // LFB copy.
 }
 
 //
@@ -585,44 +591,45 @@ static void R_CopyScreenBufferSection(int x, int y, int count)
 
 void R_DrawViewBorder(void)
 {
-  int i;
+	int i;
 
-  if (V_IsOpenGLMode()) {
-    // proff 11/99: we don't have a backscreen in OpenGL from where we can copy this
-    R_FillBackScreen();
-    return;
-  }
+	if(V_IsOpenGLMode())
+	{
+		// proff 11/99: we don't have a backscreen in OpenGL from where we can copy this
+		R_FillBackScreen();
+		return;
+	}
 
-  // e6y: wide-res
-  if ((ratio_multiplier != ratio_scale || wide_offsety) && R_StatusBarVisible())
-  {
-    for (i = SCREENHEIGHT - ST_SCALED_HEIGHT; i < SCREENHEIGHT; i++)
-    {
-      R_CopyScreenBufferSection(0, i, ST_SCALED_OFFSETX);
-      R_CopyScreenBufferSection(SCREENWIDTH - ST_SCALED_OFFSETX, i, ST_SCALED_OFFSETX);
-    }
-  }
+	// e6y: wide-res
+	if((ratio_multiplier != ratio_scale || wide_offsety) && R_StatusBarVisible())
+	{
+		for(i = SCREENHEIGHT - ST_SCALED_HEIGHT; i < SCREENHEIGHT; i++)
+		{
+			R_CopyScreenBufferSection(0, i, ST_SCALED_OFFSETX);
+			R_CopyScreenBufferSection(SCREENWIDTH - ST_SCALED_OFFSETX, i, ST_SCALED_OFFSETX);
+		}
+	}
 }
 
 void R_SetFuzzPos(int fp)
 {
-  fuzzpos = fp;
+	fuzzpos = fp;
 }
 
 int R_GetFuzzPos()
 {
-  return fuzzpos;
+	return fuzzpos;
 }
 
 void R_ResetFuzzCol(int height)
 {
-  R_ResetColumnBuffer();
+	R_ResetColumnBuffer();
 
-  fuzzpos = (fuzzpos + (height / fuzzcellsize)) % FUZZTABLE;
+	fuzzpos = (fuzzpos + (height / fuzzcellsize)) % FUZZTABLE;
 }
 
 void R_CheckFuzzCol(int x, int height)
 {
-  if (!(x % fuzzcellsize))
-    R_ResetFuzzCol(height);
+	if(!(x % fuzzcellsize))
+		R_ResetFuzzCol(height);
 }

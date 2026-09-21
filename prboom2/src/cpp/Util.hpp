@@ -19,11 +19,14 @@
  * @pre `v` is less than the number of bits of `T`
  */
 template<typename T>
-	requires std::is_integral_v<T> && std::is_unsigned_v<T>
-[[nodiscard]] inline constexpr T (Bit)(const T v) noexcept
+requires std::is_integral_v<T>
+&&
+std::is_unsigned_v<T>
+[[nodiscard]]
+inline constexpr T(Bit)(const T v) noexcept
 {
-	assert(std::cmp_less(v, std::numeric_limits<T>::digits));
-	return static_cast<T>(1u) << v;
+	assert(std::cmp_less(v, std::numeric_limits < T > ::digits));
+	return static_cast < T > (1u) << v;
 }
 static_assert(Bit<uint8_t>(0u) == 0b0000'0001u);
 static_assert(Bit<uint8_t>(1u) == 0b0000'0010u);
@@ -39,8 +42,11 @@ static_assert(Bit<uint8_t>(7u) == 0b1000'0000u);
  * @pre `v` is less than the number of bits of `T`
  */
 template<typename T>
-	requires std::is_integral_v<T> && std::is_unsigned_v<T>
-[[nodiscard]] inline constexpr T (Bits)(const T v) noexcept
+requires std::is_integral_v<T>
+&&
+std::is_unsigned_v<T>
+[[nodiscard]]
+inline constexpr T(Bits)(const T v) noexcept
 {
 	return Bit(v) - 1u;
 }
@@ -58,8 +64,11 @@ static_assert(Bits<uint8_t>(7u) == 0b0111'1111u);
  * @pre `modulo` is positive
  */
 template<typename TV, typename TM>
-	requires std::is_integral_v<TV> && std::is_integral_v<TM>
-[[nodiscard]] inline constexpr TV PositiveModulo(const TV value, const TM modulo) noexcept
+requires std::is_integral_v<TV>
+&&
+std::is_integral_v<TM>
+[[nodiscard]]
+inline constexpr TV PositiveModulo(const TV value, const TM modulo) noexcept
 {
 	assert(modulo > 0);
 	return static_cast<TV>(((value % modulo) + modulo) % modulo);

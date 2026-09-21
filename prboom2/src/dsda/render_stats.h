@@ -5,10 +5,11 @@
 
 #pragma once
 
-typedef struct {
-  int visplanes;
-  int drawsegs;
-  int vissprites;
+typedef struct
+{
+	int visplanes;
+	int drawsegs;
+	int vissprites;
 } dsda_render_stats_t;
 
 void dsda_BeginRenderStats(void);

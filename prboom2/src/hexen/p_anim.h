@@ -6,12 +6,12 @@
 
 typedef struct
 {
-    int type;
-    int index;
-    int tics;
-    int currentFrameDef;
-    int startFrameDef;
-    int endFrameDef;
+	int type;
+	int index;
+	int tics;
+	int currentFrameDef;
+	int startFrameDef;
+	int endFrameDef;
 } animDef_t;
 
 extern animDef_t AnimDefs[MAX_ANIM_DEFS];

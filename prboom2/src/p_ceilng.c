@@ -20,7 +20,7 @@
 #include "dsda/map_format.h"
 
 // the list of ceilings moving currently, including crushers
-ceilinglist_t *activeceilings;
+ceilinglist_t* activeceilings;
 
 /////////////////////////////////////////////////////////////////
 //
@@ -44,85 +44,84 @@ ceilinglist_t *activeceilings;
 //  crushed - plane encountered an obstacle, is holding until removed
 //
 result_e T_MoveCeilingPlane
-( sector_t*     sector,
-  fixed_t       speed,
-  fixed_t       dest,
-  int           crush,
-  int           direction,
-  dboolean      hexencrush )
+(sector_t* sector,
+	fixed_t speed,
+	fixed_t dest,
+	int crush,
+	int direction,
+	dboolean hexencrush)
 {
-  dboolean       flag;
-  fixed_t       lastpos;
-  fixed_t       destheight; //jff 02/04/98 used to keep ceilings from moving thru each other
+	dboolean flag;
+	fixed_t lastpos;
+	fixed_t destheight; //jff 02/04/98 used to keep ceilings from moving thru each other
 
-  if (V_IsOpenGLMode())
-  {
-    gld_UpdateSplitData(sector);
-  }
+	if(V_IsOpenGLMode())
+	{
+		gld_UpdateSplitData(sector);
+	}
 
-  switch(direction)
-  {
-    case -1:
-      // moving a ceiling down
-      // jff 02/04/98 keep ceiling from moving thru floors
-      // jff 2/22/98 weaken check to demo_compatibility
-      destheight = (comp[comp_floors] || dest>sector->floorheight)?
-                      dest : sector->floorheight;
-      if (sector->ceilingheight - speed < destheight)
-      {
-        lastpos = sector->ceilingheight;
-        sector->ceilingheight = destheight;
-        flag = P_CheckSector(sector,crush); //jff 3/19/98 use faster chk
+	switch(direction)
+	{
+		case -1:
+			// moving a ceiling down
+			// jff 02/04/98 keep ceiling from moving thru floors
+			// jff 2/22/98 weaken check to demo_compatibility
+			destheight = (comp[comp_floors] || dest > sector->floorheight) ? dest : sector->floorheight;
+			if(sector->ceilingheight - speed < destheight)
+			{
+				lastpos = sector->ceilingheight;
+				sector->ceilingheight = destheight;
+				flag = P_CheckSector(sector, crush); //jff 3/19/98 use faster chk
 
-        if (flag == true)
-        {
-          sector->ceilingheight = lastpos;
-          P_CheckSector(sector,crush);      //jff 3/19/98 use faster chk
-        }
-        return pastdest;
-      }
-      else
-      {
-        // crushing is possible
-        lastpos = sector->ceilingheight;
-        sector->ceilingheight -= speed;
-        flag = P_CheckSector(sector,crush); //jff 3/19/98 use faster chk
+				if(flag == true)
+				{
+					sector->ceilingheight = lastpos;
+					P_CheckSector(sector, crush); //jff 3/19/98 use faster chk
+				}
+				return pastdest;
+			}
+			else
+			{
+				// crushing is possible
+				lastpos = sector->ceilingheight;
+				sector->ceilingheight -= speed;
+				flag = P_CheckSector(sector, crush); //jff 3/19/98 use faster chk
 
-        if (flag == true)
-        {
-          if (!hexencrush && crush >= 0)
-            return crushed;
-          sector->ceilingheight = lastpos;
-          P_CheckSector(sector,crush);      //jff 3/19/98 use faster chk
-          return crushed;
-        }
-      }
-      break;
+				if(flag == true)
+				{
+					if(!hexencrush && crush >= 0)
+						return crushed;
+					sector->ceilingheight = lastpos;
+					P_CheckSector(sector, crush); //jff 3/19/98 use faster chk
+					return crushed;
+				}
+			}
+			break;
 
-    case 1:
-      // moving a ceiling up
-      if (sector->ceilingheight + speed > dest)
-      {
-        lastpos = sector->ceilingheight;
-        sector->ceilingheight = dest;
-        flag = P_CheckSector(sector,crush); //jff 3/19/98 use faster chk
-        if (flag == true)
-        {
-          sector->ceilingheight = lastpos;
-          P_CheckSector(sector,crush);      //jff 3/19/98 use faster chk
-        }
-        return pastdest;
-      }
-      else
-      {
-        lastpos = sector->ceilingheight;
-        sector->ceilingheight += speed;
-        flag = P_CheckSector(sector,crush); //jff 3/19/98 use faster chk
-      }
-      break;
-  }
+		case 1:
+			// moving a ceiling up
+			if(sector->ceilingheight + speed > dest)
+			{
+				lastpos = sector->ceilingheight;
+				sector->ceilingheight = dest;
+				flag = P_CheckSector(sector, crush); //jff 3/19/98 use faster chk
+				if(flag == true)
+				{
+					sector->ceilingheight = lastpos;
+					P_CheckSector(sector, crush); //jff 3/19/98 use faster chk
+				}
+				return pastdest;
+			}
+			else
+			{
+				lastpos = sector->ceilingheight;
+				sector->ceilingheight += speed;
+				flag = P_CheckSector(sector, crush); //jff 3/19/98 use faster chk
+			}
+			break;
+	}
 
-  return ok;
+	return ok;
 }
 
 //
@@ -137,255 +136,255 @@ result_e T_MoveCeilingPlane
 // generalized line type behaviors.
 //
 
-void T_MoveCompatibleCeiling(ceiling_t * ceiling)
+void T_MoveCompatibleCeiling(ceiling_t* ceiling)
 {
-  result_e res;
+	result_e res;
 
-  switch(ceiling->direction)
-  {
-    case 0:
-      // If ceiling in stasis, do nothing
-      break;
+	switch(ceiling->direction)
+	{
+		case 0:
+			// If ceiling in stasis, do nothing
+			break;
 
-    case 1:
-      // Ceiling is moving up
-      res = T_MoveCeilingPlane
-            (
-              ceiling->sector,
-              ceiling->speed,
-              ceiling->topheight,
-              NO_CRUSH,
-              ceiling->direction,
-              false
-            );
+		case 1:
+			// Ceiling is moving up
+			res = T_MoveCeilingPlane
+			(
+				ceiling->sector,
+				ceiling->speed,
+				ceiling->topheight,
+				NO_CRUSH,
+				ceiling->direction,
+				false
+			);
 
-      // if not silent, make moving sound
-      if (!(leveltime & 7) && !ceiling->silent)
-        S_LoopSectorSound(ceiling->sector, g_sfx_stnmov, 8);
+			// if not silent, make moving sound
+			if(!(leveltime & 7) && !ceiling->silent)
+				S_LoopSectorSound(ceiling->sector, g_sfx_stnmov, 8);
 
-      // handle reaching destination height
-      if (res == pastdest)
-      {
-        switch(ceiling->type)
-        {
-          // plain movers are just removed
-          case raiseToHighest:
-          case genCeiling:
-            P_RemoveActiveCeiling(ceiling);
-            break;
+			// handle reaching destination height
+			if(res == pastdest)
+			{
+				switch(ceiling->type)
+				{
+					// plain movers are just removed
+					case raiseToHighest:
+					case genCeiling:
+						P_RemoveActiveCeiling(ceiling);
+						break;
 
-          // movers with texture change, change the texture then get removed
-          case genCeilingChgT:
-          case genCeilingChg0:
-            P_TransferSpecial(ceiling->sector, &ceiling->newspecial);
-            // fallthrough
-          case genCeilingChg:
-            ceiling->sector->ceilingpic = ceiling->texture;
-            P_RemoveActiveCeiling(ceiling);
-            break;
+					// movers with texture change, change the texture then get removed
+					case genCeilingChgT:
+					case genCeilingChg0:
+						P_TransferSpecial(ceiling->sector, &ceiling->newspecial);
+					// fallthrough
+					case genCeilingChg:
+						ceiling->sector->ceilingpic = ceiling->texture;
+						P_RemoveActiveCeiling(ceiling);
+						break;
 
-          // crushers reverse direction at the top
-          case silentCrushAndRaise:
-            S_StartSectorSound(ceiling->sector, sfx_pstop);
-            // fallthrough
-          case genSilentCrusher:
-          case genCrusher:
-          case fastCrushAndRaise:
-          case crushAndRaise:
-            ceiling->direction = -1;
-            break;
+					// crushers reverse direction at the top
+					case silentCrushAndRaise:
+						S_StartSectorSound(ceiling->sector, sfx_pstop);
+					// fallthrough
+					case genSilentCrusher:
+					case genCrusher:
+					case fastCrushAndRaise:
+					case crushAndRaise:
+						ceiling->direction = -1;
+						break;
 
-          case ceilCrushAndRaise:
-            ceiling->direction = -1;
-            ceiling->speed = ceiling->oldspeed;
-            if (ceiling->silent == 1)
-              S_StartSectorSound(ceiling->sector, sfx_pstop);
-            break;
+					case ceilCrushAndRaise:
+						ceiling->direction = -1;
+						ceiling->speed = ceiling->oldspeed;
+						if(ceiling->silent == 1)
+							S_StartSectorSound(ceiling->sector, sfx_pstop);
+						break;
 
-          default:
-            if (map_format.zdoom)
-              P_RemoveActiveCeiling(ceiling);
-            break;
-        }
-      }
-      break;
+					default:
+						if(map_format.zdoom)
+							P_RemoveActiveCeiling(ceiling);
+						break;
+				}
+			}
+			break;
 
-    case -1:
-      // Ceiling moving down
-      res = T_MoveCeilingPlane
-            (
-              ceiling->sector,
-              ceiling->speed,
-              ceiling->bottomheight,
-              ceiling->crush,
-              ceiling->direction,
-              ceiling->crushmode == crushHexen
-            );
+		case -1:
+			// Ceiling moving down
+			res = T_MoveCeilingPlane
+			(
+				ceiling->sector,
+				ceiling->speed,
+				ceiling->bottomheight,
+				ceiling->crush,
+				ceiling->direction,
+				ceiling->crushmode == crushHexen
+			);
 
-      // if not silent, make moving sound
-      if (!(leveltime & 7) && !ceiling->silent)
-        S_LoopSectorSound(ceiling->sector, g_sfx_stnmov, 8);
+			// if not silent, make moving sound
+			if(!(leveltime & 7) && !ceiling->silent)
+				S_LoopSectorSound(ceiling->sector, g_sfx_stnmov, 8);
 
-      // handle reaching destination height
-      if (res == pastdest)
-      {
-        switch(ceiling->type)
-        {
-          // 02/09/98 jff change slow crushers' speed back to normal
-          // start back up
-          case genSilentCrusher:
-          case genCrusher:
-            if (ceiling->oldspeed<CEILSPEED*3)
-              ceiling->speed = ceiling->oldspeed;
-            ceiling->direction = 1; //jff 2/22/98 make it go back up!
-            break;
+			// handle reaching destination height
+			if(res == pastdest)
+			{
+				switch(ceiling->type)
+				{
+					// 02/09/98 jff change slow crushers' speed back to normal
+					// start back up
+					case genSilentCrusher:
+					case genCrusher:
+						if(ceiling->oldspeed < CEILSPEED * 3)
+							ceiling->speed = ceiling->oldspeed;
+						ceiling->direction = 1; //jff 2/22/98 make it go back up!
+						break;
 
-          // make platform stop at bottom of all crusher strokes
-          // except generalized ones, reset speed, start back up
-          case silentCrushAndRaise:
-            S_StartSectorSound(ceiling->sector, sfx_pstop);
-            // fallthrough
-          case crushAndRaise:
-            ceiling->speed = CEILSPEED;
-            // fallthrough
-          case fastCrushAndRaise:
-            ceiling->direction = 1;
-            break;
+					// make platform stop at bottom of all crusher strokes
+					// except generalized ones, reset speed, start back up
+					case silentCrushAndRaise:
+						S_StartSectorSound(ceiling->sector, sfx_pstop);
+					// fallthrough
+					case crushAndRaise:
+						ceiling->speed = CEILSPEED;
+					// fallthrough
+					case fastCrushAndRaise:
+						ceiling->direction = 1;
+						break;
 
-          // in the case of ceiling mover/changer, change the texture
-          // then remove the active ceiling
-          case genCeilingChgT:
-          case genCeilingChg0:
-            P_TransferSpecial(ceiling->sector, &ceiling->newspecial);
-            // fallthrough
-          case genCeilingChg:
-            ceiling->sector->ceilingpic = ceiling->texture;
-            P_RemoveActiveCeiling(ceiling);
-            break;
+					// in the case of ceiling mover/changer, change the texture
+					// then remove the active ceiling
+					case genCeilingChgT:
+					case genCeilingChg0:
+						P_TransferSpecial(ceiling->sector, &ceiling->newspecial);
+					// fallthrough
+					case genCeilingChg:
+						ceiling->sector->ceilingpic = ceiling->texture;
+						P_RemoveActiveCeiling(ceiling);
+						break;
 
-          // all other case, just remove the active ceiling
-          case lowerAndCrush:
-          case lowerToFloor:
-          case lowerToLowest:
-          case lowerToMaxFloor:
-          case genCeiling:
-            P_RemoveActiveCeiling(ceiling);
-            break;
+					// all other case, just remove the active ceiling
+					case lowerAndCrush:
+					case lowerToFloor:
+					case lowerToLowest:
+					case lowerToMaxFloor:
+					case genCeiling:
+						P_RemoveActiveCeiling(ceiling);
+						break;
 
-          case ceilCrushAndRaise:
-          case ceilCrushRaiseAndStay:
-            ceiling->speed = ceiling->speed2;
-            ceiling->direction = 1;
-            if (ceiling->silent == 1)
-              S_StartSectorSound(ceiling->sector, sfx_pstop);
-            break;
+					case ceilCrushAndRaise:
+					case ceilCrushRaiseAndStay:
+						ceiling->speed = ceiling->speed2;
+						ceiling->direction = 1;
+						if(ceiling->silent == 1)
+							S_StartSectorSound(ceiling->sector, sfx_pstop);
+						break;
 
-          default:
-            if (map_format.zdoom)
-              P_RemoveActiveCeiling(ceiling);
-            break;
-        }
-      }
-      else // ( res != pastdest )
-      {
-        // handle the crusher encountering an obstacle
-        if (res == crushed)
-        {
-          switch(ceiling->type)
-          {
-            //jff 02/08/98 slow down slow crushers on obstacle
-            case genCrusher:
-            case genSilentCrusher:
-              if (ceiling->oldspeed < CEILSPEED*3)
-                ceiling->speed = CEILSPEED / 8;
-              break;
-            case silentCrushAndRaise:
-            case crushAndRaise:
-            case lowerAndCrush:
-              ceiling->speed = CEILSPEED / 8;
-              break;
+					default:
+						if(map_format.zdoom)
+							P_RemoveActiveCeiling(ceiling);
+						break;
+				}
+			}
+			else // ( res != pastdest )
+			{
+				// handle the crusher encountering an obstacle
+				if(res == crushed)
+				{
+					switch(ceiling->type)
+					{
+						//jff 02/08/98 slow down slow crushers on obstacle
+						case genCrusher:
+						case genSilentCrusher:
+							if(ceiling->oldspeed < CEILSPEED * 3)
+								ceiling->speed = CEILSPEED / 8;
+							break;
+						case silentCrushAndRaise:
+						case crushAndRaise:
+						case lowerAndCrush:
+							ceiling->speed = CEILSPEED / 8;
+							break;
 
-            case ceilCrushAndRaise:
-            case ceilLowerAndCrush:
-              if (ceiling->crushmode == crushSlowdown)
-                ceiling->speed = FRACUNIT / 8;
-              break;
+						case ceilCrushAndRaise:
+						case ceilLowerAndCrush:
+							if(ceiling->crushmode == crushSlowdown)
+								ceiling->speed = FRACUNIT / 8;
+							break;
 
-            default:
-              break;
-          }
-        }
-      }
-      break;
-  }
+						default:
+							break;
+					}
+				}
+			}
+			break;
+	}
 }
 
-void T_MoveHexenCeiling(ceiling_t * ceiling)
+void T_MoveHexenCeiling(ceiling_t* ceiling)
 {
-    result_e res;
+	result_e res;
 
-    switch (ceiling->direction)
-    {
-    //              case 0:         // IN STASIS
-    //                      break;
-        case 1:                // UP
-            res = T_MoveCeilingPlane(ceiling->sector, ceiling->speed,
-                                     ceiling->topheight, NO_CRUSH,
-                                     ceiling->direction, true);
-            if (res == pastdest)
-            {
-                SN_StopSequence((mobj_t *) & ceiling->sector->soundorg);
-                switch (ceiling->type)
-                {
-                    case CLEV_CRUSHANDRAISE:
-                        ceiling->direction = -1;
-                        ceiling->speed = ceiling->speed * 2;
-                        break;
-                    default:
-                        P_RemoveActiveCeiling(ceiling);
-                        break;
-                }
-            }
-            break;
-        case -1:               // DOWN
-            res = T_MoveCeilingPlane(ceiling->sector, ceiling->speed,
-                                     ceiling->bottomheight, ceiling->crush,
-                                     ceiling->direction, true);
-            if (res == pastdest)
-            {
-                SN_StopSequence((mobj_t *) & ceiling->sector->soundorg);
-                switch (ceiling->type)
-                {
-                    case CLEV_CRUSHANDRAISE:
-                    case CLEV_CRUSHRAISEANDSTAY:
-                        ceiling->direction = 1;
-                        ceiling->speed = ceiling->speed / 2;
-                        break;
-                    default:
-                        P_RemoveActiveCeiling(ceiling);
-                        break;
-                }
-            }
-            else if (res == crushed)
-            {
-                switch (ceiling->type)
-                {
-                    case CLEV_CRUSHANDRAISE:
-                    case CLEV_LOWERANDCRUSH:
-                    case CLEV_CRUSHRAISEANDSTAY:
-                        //ceiling->speed = ceiling->speed/4;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            break;
-    }
+	switch(ceiling->direction)
+	{
+		//              case 0:         // IN STASIS
+		//                      break;
+		case 1: // UP
+			res = T_MoveCeilingPlane(ceiling->sector, ceiling->speed,
+				ceiling->topheight, NO_CRUSH,
+				ceiling->direction, true);
+			if(res == pastdest)
+			{
+				SN_StopSequence((mobj_t*)&ceiling->sector->soundorg);
+				switch(ceiling->type)
+				{
+					case CLEV_CRUSHANDRAISE:
+						ceiling->direction = -1;
+						ceiling->speed = ceiling->speed * 2;
+						break;
+					default:
+						P_RemoveActiveCeiling(ceiling);
+						break;
+				}
+			}
+			break;
+		case -1: // DOWN
+			res = T_MoveCeilingPlane(ceiling->sector, ceiling->speed,
+				ceiling->bottomheight, ceiling->crush,
+				ceiling->direction, true);
+			if(res == pastdest)
+			{
+				SN_StopSequence((mobj_t*)&ceiling->sector->soundorg);
+				switch(ceiling->type)
+				{
+					case CLEV_CRUSHANDRAISE:
+					case CLEV_CRUSHRAISEANDSTAY:
+						ceiling->direction = 1;
+						ceiling->speed = ceiling->speed / 2;
+						break;
+					default:
+						P_RemoveActiveCeiling(ceiling);
+						break;
+				}
+			}
+			else if(res == crushed)
+			{
+				switch(ceiling->type)
+				{
+					case CLEV_CRUSHANDRAISE:
+					case CLEV_LOWERANDCRUSH:
+					case CLEV_CRUSHRAISEANDSTAY:
+						//ceiling->speed = ceiling->speed/4;
+						break;
+					default:
+						break;
+				}
+			}
+			break;
+	}
 }
 
-void T_MoveCeiling (ceiling_t * ceiling)
+void T_MoveCeiling(ceiling_t* ceiling)
 {
-  map_format.t_move_ceiling(ceiling);
+	map_format.t_move_ceiling(ceiling);
 }
 
 
@@ -398,102 +397,102 @@ void T_MoveCeiling (ceiling_t * ceiling)
 // returns true if a thinker started
 //
 int EV_DoCeiling
-( line_t* line,
-  ceiling_e type )
+(line_t* line,
+	ceiling_e type)
 {
-  const int *id_p;
-  int   rtn;
-  sector_t* sec;
-  ceiling_t*  ceiling;
+	const int* id_p;
+	int rtn;
+	sector_t* sec;
+	ceiling_t* ceiling;
 
-  rtn = 0;
+	rtn = 0;
 
-  // Reactivate in-stasis ceilings...for certain types.
-  // This restarts a crusher after it has been stopped
-  switch(type)
-  {
-    case fastCrushAndRaise:
-    case silentCrushAndRaise:
-    case crushAndRaise:
-      //jff 4/5/98 return if activated
-      rtn = P_ActivateInStasisCeiling(line->special_args[0]); // heretic_note: rtn not set in heretic
-    default:
-      break;
-  }
+	// Reactivate in-stasis ceilings...for certain types.
+	// This restarts a crusher after it has been stopped
+	switch(type)
+	{
+		case fastCrushAndRaise:
+		case silentCrushAndRaise:
+		case crushAndRaise:
+			//jff 4/5/98 return if activated
+			rtn = P_ActivateInStasisCeiling(line->special_args[0]); // heretic_note: rtn not set in heretic
+		default:
+			break;
+	}
 
-  // affects all sectors with the same tag as the linedef
-  FIND_SECTORS(id_p, line->special_args[0])
-  {
-    sec = &sectors[*id_p];
+	// affects all sectors with the same tag as the linedef
+	FIND_SECTORS(id_p, line->special_args[0])
+	{
+		sec = &sectors[*id_p];
 
-    // if ceiling already moving, don't start a second function on it
-    if (P_CeilingActive(sec)) //jff 2/22/98
-      continue;
+		// if ceiling already moving, don't start a second function on it
+		if(P_CeilingActive(sec)) //jff 2/22/98
+			continue;
 
-    // create a new ceiling thinker
-    rtn = 1;
-    ceiling = Z_MallocLevel (sizeof(*ceiling));
-    memset(ceiling, 0, sizeof(*ceiling));
-    P_AddThinker (&ceiling->thinker);
-    sec->ceilingdata = ceiling;               //jff 2/22/98
-    ceiling->thinker.function = T_MoveCeiling;
-    ceiling->sector = sec;
-    ceiling->crush = NO_CRUSH;
+		// create a new ceiling thinker
+		rtn = 1;
+		ceiling = Z_MallocLevel(sizeof(*ceiling));
+		memset(ceiling, 0, sizeof(*ceiling));
+		P_AddThinker(&ceiling->thinker);
+		sec->ceilingdata = ceiling; //jff 2/22/98
+		ceiling->thinker.function = T_MoveCeiling;
+		ceiling->sector = sec;
+		ceiling->crush = NO_CRUSH;
 
-    // setup ceiling structure according to type of function
-    switch(type)
-    {
-      case fastCrushAndRaise:
-        ceiling->crush = DOOM_CRUSH;
-        ceiling->topheight = sec->ceilingheight;
-        ceiling->bottomheight = sec->floorheight + (8*FRACUNIT);
-        ceiling->direction = -1;
-        ceiling->speed = CEILSPEED * 2;
-        break;
+		// setup ceiling structure according to type of function
+		switch(type)
+		{
+			case fastCrushAndRaise:
+				ceiling->crush = DOOM_CRUSH;
+				ceiling->topheight = sec->ceilingheight;
+				ceiling->bottomheight = sec->floorheight + (8 * FRACUNIT);
+				ceiling->direction = -1;
+				ceiling->speed = CEILSPEED * 2;
+				break;
 
-      case silentCrushAndRaise:
-        ceiling->silent = 1;
-      case crushAndRaise:
-        ceiling->crush = DOOM_CRUSH;
-        ceiling->topheight = sec->ceilingheight;
-        // fallthrough
-      case lowerAndCrush:
-      case lowerToFloor:
-        ceiling->bottomheight = sec->floorheight;
-        if (type != lowerToFloor)
-          ceiling->bottomheight += 8*FRACUNIT;
-        ceiling->direction = -1;
-        ceiling->speed = CEILSPEED;
-        break;
+			case silentCrushAndRaise:
+				ceiling->silent = 1;
+			case crushAndRaise:
+				ceiling->crush = DOOM_CRUSH;
+				ceiling->topheight = sec->ceilingheight;
+			// fallthrough
+			case lowerAndCrush:
+			case lowerToFloor:
+				ceiling->bottomheight = sec->floorheight;
+				if(type != lowerToFloor)
+					ceiling->bottomheight += 8 * FRACUNIT;
+				ceiling->direction = -1;
+				ceiling->speed = CEILSPEED;
+				break;
 
-      case raiseToHighest:
-        ceiling->topheight = P_FindHighestCeilingSurrounding(sec);
-        ceiling->direction = 1;
-        ceiling->speed = CEILSPEED;
-        break;
+			case raiseToHighest:
+				ceiling->topheight = P_FindHighestCeilingSurrounding(sec);
+				ceiling->direction = 1;
+				ceiling->speed = CEILSPEED;
+				break;
 
-      case lowerToLowest:
-        ceiling->bottomheight = P_FindLowestCeilingSurrounding(sec);
-        ceiling->direction = -1;
-        ceiling->speed = CEILSPEED;
-        break;
+			case lowerToLowest:
+				ceiling->bottomheight = P_FindLowestCeilingSurrounding(sec);
+				ceiling->direction = -1;
+				ceiling->speed = CEILSPEED;
+				break;
 
-      case lowerToMaxFloor:
-        ceiling->bottomheight = P_FindHighestFloorSurrounding(sec);
-        ceiling->direction = -1;
-        ceiling->speed = CEILSPEED;
-        break;
+			case lowerToMaxFloor:
+				ceiling->bottomheight = P_FindHighestFloorSurrounding(sec);
+				ceiling->direction = -1;
+				ceiling->speed = CEILSPEED;
+				break;
 
-      default:
-        break;
-    }
+			default:
+				break;
+		}
 
-    // add the ceiling to the active list
-    ceiling->tag = sec->tag;
-    ceiling->type = type;
-    P_AddActiveCeiling(ceiling);
-  }
-  return rtn;
+		// add the ceiling to the active list
+		ceiling->tag = sec->tag;
+		ceiling->type = type;
+		P_AddActiveCeiling(ceiling);
+	}
+	return rtn;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -523,77 +522,77 @@ int EV_DoCeiling
 //jff 4/5/98 return if activated
 int P_ActivateInStasisCeiling(int tag)
 {
-  ceilinglist_t *cl;
-  int rtn=0;
+	ceilinglist_t* cl;
+	int rtn = 0;
 
-  for (cl=activeceilings; cl; cl=cl->next)
-  {
-    ceiling_t *ceiling = cl->ceiling;
-    if (ceiling->tag == tag && ceiling->direction == 0)
-    {
-      ceiling->direction = ceiling->olddirection;
-      ceiling->thinker.function = T_MoveCeiling;
-      //jff 4/5/98 return if activated
-      rtn=1;
-    }
-  }
-  return rtn;
+	for(cl = activeceilings; cl; cl = cl->next)
+	{
+		ceiling_t* ceiling = cl->ceiling;
+		if(ceiling->tag == tag && ceiling->direction == 0)
+		{
+			ceiling->direction = ceiling->olddirection;
+			ceiling->thinker.function = T_MoveCeiling;
+			//jff 4/5/98 return if activated
+			rtn = 1;
+		}
+	}
+	return rtn;
 }
 
 // TODO: without reflection, we don't know if the ceilingdata needs special handling
-int EV_ZDoomCeilingStop(int tag, line_t *line)
+int EV_ZDoomCeilingStop(int tag, line_t* line)
 {
-  const int *id_p;
-  ceilinglist_t *cl;
+	const int* id_p;
+	ceilinglist_t* cl;
 
-  for (cl = activeceilings; cl; cl = cl->next)
-  {
-    ceiling_t *ceiling = cl->ceiling;
-    if (ceiling->tag == tag)
-    {
-      P_RemoveActiveCeiling(ceiling);
-    }
-  }
+	for(cl = activeceilings; cl; cl = cl->next)
+	{
+		ceiling_t* ceiling = cl->ceiling;
+		if(ceiling->tag == tag)
+		{
+			P_RemoveActiveCeiling(ceiling);
+		}
+	}
 
-  FIND_SECTORS2(id_p, tag, line)
-  {
-    sector_t *sec = &sectors[*id_p];
-    ceiling_t *ceiling = (ceiling_t *) sec->ceilingdata;
+	FIND_SECTORS2(id_p, tag, line)
+	{
+		sector_t* sec = &sectors[*id_p];
+		ceiling_t* ceiling = (ceiling_t*)sec->ceilingdata;
 
-    if (ceiling)
-    {
-      sec->ceilingdata = NULL;
-      P_RemoveThinker(&ceiling->thinker);
-    }
-  }
+		if(ceiling)
+		{
+			sec->ceilingdata = NULL;
+			P_RemoveThinker(&ceiling->thinker);
+		}
+	}
 
-  return true;
+	return true;
 }
 
 int EV_ZDoomCeilingCrushStop(int tag, dboolean remove)
 {
-  dboolean rtn = 0;
-  ceilinglist_t *cl;
+	dboolean rtn = 0;
+	ceilinglist_t* cl;
 
-  for (cl = activeceilings; cl; cl = cl->next)
-  {
-    ceiling_t *ceiling = cl->ceiling;
-    if (ceiling->direction != 0 && ceiling->tag == tag)
-    {
-      if (!remove)
-      {
-        ceiling->olddirection = ceiling->direction;
-        ceiling->direction = 0;
-      }
-      else
-      {
-        P_RemoveActiveCeiling(ceiling);
-      }
-      rtn = 1;
-    }
-  }
+	for(cl = activeceilings; cl; cl = cl->next)
+	{
+		ceiling_t* ceiling = cl->ceiling;
+		if(ceiling->direction != 0 && ceiling->tag == tag)
+		{
+			if(!remove)
+			{
+				ceiling->olddirection = ceiling->direction;
+				ceiling->direction = 0;
+			}
+			else
+			{
+				P_RemoveActiveCeiling(ceiling);
+			}
+			rtn = 1;
+		}
+	}
 
-  return rtn;
+	return rtn;
 }
 
 //
@@ -606,21 +605,21 @@ int EV_ZDoomCeilingCrushStop(int tag, dboolean remove)
 //
 int EV_CeilingCrushStop(line_t* line)
 {
-  int rtn=0;
+	int rtn = 0;
 
-  ceilinglist_t *cl;
-  for (cl=activeceilings; cl; cl=cl->next)
-  {
-    ceiling_t *ceiling = cl->ceiling;
-    if (ceiling->direction != 0 && ceiling->tag == line->special_args[0])
-    {
-      ceiling->olddirection = ceiling->direction;
-      ceiling->direction = 0;
-      ceiling->thinker.function = NULL;
-      rtn=1;
-    }
-  }
-  return rtn;
+	ceilinglist_t* cl;
+	for(cl = activeceilings; cl; cl = cl->next)
+	{
+		ceiling_t* ceiling = cl->ceiling;
+		if(ceiling->direction != 0 && ceiling->tag == line->special_args[0])
+		{
+			ceiling->olddirection = ceiling->direction;
+			ceiling->direction = 0;
+			ceiling->thinker.function = NULL;
+			rtn = 1;
+		}
+	}
+	return rtn;
 }
 
 //
@@ -633,13 +632,13 @@ int EV_CeilingCrushStop(line_t* line)
 //
 void P_AddActiveCeiling(ceiling_t* ceiling)
 {
-  ceilinglist_t *list = Z_Malloc(sizeof *list);
-  list->ceiling = ceiling;
-  ceiling->list = list;
-  if ((list->next = activeceilings))
-    list->next->prev = &list->next;
-  list->prev = &activeceilings;
-  activeceilings = list;
+	ceilinglist_t* list = Z_Malloc(sizeof *list);
+	list->ceiling = ceiling;
+	ceiling->list = list;
+	if((list->next = activeceilings))
+		list->next->prev = &list->next;
+	list->prev = &activeceilings;
+	activeceilings = list;
 }
 
 //
@@ -652,13 +651,13 @@ void P_AddActiveCeiling(ceiling_t* ceiling)
 //
 void P_RemoveActiveCeiling(ceiling_t* ceiling)
 {
-  ceilinglist_t *list = ceiling->list;
-  ceiling->sector->ceilingdata = NULL;  //jff 2/22/98
-  P_RemoveThinker(&ceiling->thinker);
-  P_TagFinished(ceiling->sector->tag);
-  if ((*list->prev = list->next))
-    list->next->prev = list->prev;
-  Z_Free(list);
+	ceilinglist_t* list = ceiling->list;
+	ceiling->sector->ceilingdata = NULL; //jff 2/22/98
+	P_RemoveThinker(&ceiling->thinker);
+	P_TagFinished(ceiling->sector->tag);
+	if((*list->prev = list->next))
+		list->next->prev = list->prev;
+	Z_Free(list);
 }
 
 //
@@ -670,392 +669,390 @@ void P_RemoveActiveCeiling(ceiling_t* ceiling)
 //
 void P_RemoveAllActiveCeilings(void)
 {
-  while (activeceilings)
-  {
-    ceilinglist_t *next = activeceilings->next;
-    Z_Free(activeceilings);
-    activeceilings = next;
-  }
+	while(activeceilings)
+	{
+		ceilinglist_t* next = activeceilings->next;
+		Z_Free(activeceilings);
+		activeceilings = next;
+	}
 }
 
 // hexen
 
-int Hexen_EV_CeilingCrushStop(line_t * line, byte * args)
+int Hexen_EV_CeilingCrushStop(line_t* line, byte* args)
 {
-    ceilinglist_t *cl;
-    for (cl=activeceilings; cl; cl=cl->next)
-    {
-        ceiling_t *ceiling = cl->ceiling;
-        if (ceiling->tag == args[0])
-        {
-            SN_StopSequence((mobj_t *) & ceiling->sector->soundorg);
-            P_RemoveActiveCeiling(ceiling);
+	ceilinglist_t* cl;
+	for(cl = activeceilings; cl; cl = cl->next)
+	{
+		ceiling_t* ceiling = cl->ceiling;
+		if(ceiling->tag == args[0])
+		{
+			SN_StopSequence((mobj_t*)&ceiling->sector->soundorg);
+			P_RemoveActiveCeiling(ceiling);
 
-            return 1;
-        }
-    }
-    return 0;
+			return 1;
+		}
+	}
+	return 0;
 }
 
-static void P_SpawnZDoomCeiling(sector_t *sec, ceiling_e type, line_t *line, int tag,
-                                fixed_t speed, fixed_t speed2, fixed_t height, int crush,
-                                byte silent, int change, crushmode_e crushmode)
+static void P_SpawnZDoomCeiling(sector_t* sec, ceiling_e type, line_t* line, int tag,
+	fixed_t speed, fixed_t speed2, fixed_t height, int crush,
+	byte silent, int change, crushmode_e crushmode)
 {
-  ceiling_t *ceiling;
-  fixed_t targheight = 0;
+	ceiling_t* ceiling;
+	fixed_t targheight = 0;
 
-  ceiling = Z_MallocLevel(sizeof(*ceiling));
-  memset(ceiling, 0, sizeof(*ceiling));
-  P_AddThinker(&ceiling->thinker);
-  sec->ceilingdata = ceiling;
-  ceiling->thinker.function = T_MoveCeiling;
-  ceiling->sector = sec;
-  ceiling->speed = speed;
-  ceiling->oldspeed = speed;
-  ceiling->speed2 = speed2;
-  ceiling->silent = (silent & ~4);
-  ceiling->texture = NO_TEXTURE;
+	ceiling = Z_MallocLevel(sizeof(*ceiling));
+	memset(ceiling, 0, sizeof(*ceiling));
+	P_AddThinker(&ceiling->thinker);
+	sec->ceilingdata = ceiling;
+	ceiling->thinker.function = T_MoveCeiling;
+	ceiling->sector = sec;
+	ceiling->speed = speed;
+	ceiling->oldspeed = speed;
+	ceiling->speed2 = speed2;
+	ceiling->silent = (silent & ~4);
+	ceiling->texture = NO_TEXTURE;
 
-  switch (type)
-  {
-    case ceilCrushAndRaise:
-    case ceilCrushRaiseAndStay:
-      ceiling->topheight = sec->ceilingheight;
-    case ceilLowerAndCrush:
-      targheight = sec->floorheight + height;
-      ceiling->bottomheight = targheight;
-      ceiling->direction = -1;
-      break;
-    case ceilRaiseToHighest:
-      targheight = P_FindHighestCeilingSurrounding(sec);
-      ceiling->topheight = targheight;
-      ceiling->direction = 1;
-      break;
-    case ceilLowerByValue:
-      targheight = sec->ceilingheight - height;
-      ceiling->bottomheight = targheight;
-      ceiling->direction = -1;
-      break;
-    case ceilRaiseByValue:
-      targheight = sec->ceilingheight + height;
-      ceiling->topheight = targheight;
-      ceiling->direction = 1;
-      break;
-    case ceilMoveToValue:
-      {
-        fixed_t diff = height - sec->ceilingheight;
+	switch(type)
+	{
+		case ceilCrushAndRaise:
+		case ceilCrushRaiseAndStay:
+			ceiling->topheight = sec->ceilingheight;
+		case ceilLowerAndCrush:
+			targheight = sec->floorheight + height;
+			ceiling->bottomheight = targheight;
+			ceiling->direction = -1;
+			break;
+		case ceilRaiseToHighest:
+			targheight = P_FindHighestCeilingSurrounding(sec);
+			ceiling->topheight = targheight;
+			ceiling->direction = 1;
+			break;
+		case ceilLowerByValue:
+			targheight = sec->ceilingheight - height;
+			ceiling->bottomheight = targheight;
+			ceiling->direction = -1;
+			break;
+		case ceilRaiseByValue:
+			targheight = sec->ceilingheight + height;
+			ceiling->topheight = targheight;
+			ceiling->direction = 1;
+			break;
+		case ceilMoveToValue:
+		{
+			fixed_t diff = height - sec->ceilingheight;
 
-        targheight = height;
-        if (diff < 0)
-        {
-          ceiling->bottomheight = height;
-          ceiling->direction = -1;
-        }
-        else
-        {
-          ceiling->topheight = height;
-          ceiling->direction = 1;
-        }
-      }
-      break;
-    case ceilLowerToHighestFloor:
-      targheight = P_FindHighestFloorSurrounding(sec) + height;
-      ceiling->bottomheight = targheight;
-      ceiling->direction = -1;
-      break;
-    case ceilRaiseToHighestFloor:
-      targheight = P_FindHighestFloorSurrounding(sec);
-      ceiling->topheight = targheight;
-      ceiling->direction = 1;
-      break;
-    case ceilLowerInstant:
-      targheight = sec->ceilingheight - height;
-      ceiling->bottomheight = targheight;
-      ceiling->direction = -1;
-      ceiling->speed = height;
-      break;
-    case ceilRaiseInstant:
-      targheight = sec->ceilingheight + height;
-      ceiling->topheight = targheight;
-      ceiling->direction = 1;
-      ceiling->speed = height;
-      break;
-    case ceilLowerToNearest:
-      targheight = P_FindNextLowestCeiling(sec, sec->ceilingheight);
-      ceiling->bottomheight = targheight;
-      ceiling->direction = -1;
-      break;
-    case ceilRaiseToNearest:
-      targheight = P_FindNextHighestCeiling(sec, sec->ceilingheight);
-      ceiling->topheight = targheight;
-      ceiling->direction = 1;
-      break;
-    case ceilLowerToLowest:
-      targheight = P_FindLowestCeilingSurrounding(sec);
-      ceiling->bottomheight = targheight;
-      ceiling->direction = -1;
-      break;
-    case ceilRaiseToLowest:
-      targheight = P_FindLowestCeilingSurrounding(sec);
-      ceiling->topheight = targheight;
-      ceiling->direction = 1;
-      break;
-    case ceilLowerToFloor:
-      targheight = sec->floorheight + height;
-      ceiling->bottomheight = targheight;
-      ceiling->direction = -1;
-      break;
-    case ceilRaiseToFloor:
-      targheight = sec->floorheight + height;
-      ceiling->topheight = targheight;
-      ceiling->direction = 1;
-      break;
-    case ceilLowerToHighest:
-      targheight = P_FindHighestCeilingSurrounding(sec);
-      ceiling->bottomheight = targheight;
-      ceiling->direction = -1;
-      break;
-    case ceilLowerByTexture:
-      targheight = sec->ceilingheight - P_FindShortestUpperAround(sec->iSectorID);
-      ceiling->bottomheight = targheight;
-      ceiling->direction = -1;
-      break;
-    case ceilRaiseByTexture:
-      targheight = sec->ceilingheight + P_FindShortestUpperAround(sec->iSectorID);
-      ceiling->topheight = targheight;
-      ceiling->direction = 1;
-      break;
-    default:
-      break;
-  }
+			targheight = height;
+			if(diff < 0)
+			{
+				ceiling->bottomheight = height;
+				ceiling->direction = -1;
+			}
+			else
+			{
+				ceiling->topheight = height;
+				ceiling->direction = 1;
+			}
+		}
+		break;
+		case ceilLowerToHighestFloor:
+			targheight = P_FindHighestFloorSurrounding(sec) + height;
+			ceiling->bottomheight = targheight;
+			ceiling->direction = -1;
+			break;
+		case ceilRaiseToHighestFloor:
+			targheight = P_FindHighestFloorSurrounding(sec);
+			ceiling->topheight = targheight;
+			ceiling->direction = 1;
+			break;
+		case ceilLowerInstant:
+			targheight = sec->ceilingheight - height;
+			ceiling->bottomheight = targheight;
+			ceiling->direction = -1;
+			ceiling->speed = height;
+			break;
+		case ceilRaiseInstant:
+			targheight = sec->ceilingheight + height;
+			ceiling->topheight = targheight;
+			ceiling->direction = 1;
+			ceiling->speed = height;
+			break;
+		case ceilLowerToNearest:
+			targheight = P_FindNextLowestCeiling(sec, sec->ceilingheight);
+			ceiling->bottomheight = targheight;
+			ceiling->direction = -1;
+			break;
+		case ceilRaiseToNearest:
+			targheight = P_FindNextHighestCeiling(sec, sec->ceilingheight);
+			ceiling->topheight = targheight;
+			ceiling->direction = 1;
+			break;
+		case ceilLowerToLowest:
+			targheight = P_FindLowestCeilingSurrounding(sec);
+			ceiling->bottomheight = targheight;
+			ceiling->direction = -1;
+			break;
+		case ceilRaiseToLowest:
+			targheight = P_FindLowestCeilingSurrounding(sec);
+			ceiling->topheight = targheight;
+			ceiling->direction = 1;
+			break;
+		case ceilLowerToFloor:
+			targheight = sec->floorheight + height;
+			ceiling->bottomheight = targheight;
+			ceiling->direction = -1;
+			break;
+		case ceilRaiseToFloor:
+			targheight = sec->floorheight + height;
+			ceiling->topheight = targheight;
+			ceiling->direction = 1;
+			break;
+		case ceilLowerToHighest:
+			targheight = P_FindHighestCeilingSurrounding(sec);
+			ceiling->bottomheight = targheight;
+			ceiling->direction = -1;
+			break;
+		case ceilLowerByTexture:
+			targheight = sec->ceilingheight - P_FindShortestUpperAround(sec->iSectorID);
+			ceiling->bottomheight = targheight;
+			ceiling->direction = -1;
+			break;
+		case ceilRaiseByTexture:
+			targheight = sec->ceilingheight + P_FindShortestUpperAround(sec->iSectorID);
+			ceiling->topheight = targheight;
+			ceiling->direction = 1;
+			break;
+		default:
+			break;
+	}
 
-  ceiling->tag = tag;
-  ceiling->type = type;
-  ceiling->crush = crush;
-  ceiling->crushmode = crushmode;
+	ceiling->tag = tag;
+	ceiling->type = type;
+	ceiling->crush = crush;
+	ceiling->crushmode = crushmode;
 
-  // Don't make noise for instant movement ceilings
-  if (ceiling->direction < 0)
-  {
-    if (ceiling->speed >= sec->ceilingheight - ceiling->bottomheight)
-      if (silent & 4)
-        ceiling->silent = 2;
-  }
-  else
-  {
-    if (ceiling->speed >= ceiling->topheight - sec->ceilingheight)
-      if (silent & 4)
-        ceiling->silent = 2;
-  }
+	// Don't make noise for instant movement ceilings
+	if(ceiling->direction < 0)
+	{
+		if(ceiling->speed >= sec->ceilingheight - ceiling->bottomheight)
+			if(silent & 4)
+				ceiling->silent = 2;
+	}
+	else
+	{
+		if(ceiling->speed >= ceiling->topheight - sec->ceilingheight)
+			if(silent & 4)
+				ceiling->silent = 2;
+	}
 
-  // set texture/type change properties
-  if (change & 3) // if a texture change is indicated
-  {
-    if (change & 4) // if a numeric model change
-    {
-      sector_t *modelsec;
+	// set texture/type change properties
+	if(change & 3) // if a texture change is indicated
+	{
+		if(change & 4) // if a numeric model change
+		{
+			sector_t* modelsec;
 
-      // jff 5/23/98 find model with floor at target height if target is a floor type
-      modelsec = (type == ceilRaiseToFloor || type == ceilLowerToFloor) ?
-                 P_FindModelFloorSector(targheight, sec->iSectorID) :
-                 P_FindModelCeilingSector(targheight, sec->iSectorID);
+			// jff 5/23/98 find model with floor at target height if target is a floor type
+			modelsec = (type == ceilRaiseToFloor || type == ceilLowerToFloor) ? P_FindModelFloorSector(targheight, sec->iSectorID) : P_FindModelCeilingSector(targheight, sec->iSectorID);
 
-      if (modelsec != NULL)
-      {
-        ceiling->texture = modelsec->ceilingpic;
-        switch (change & 3)
-        {
-          case 0:
-            break;
-          case 1: // type is zeroed
-            P_ResetTransferSpecial(&ceiling->newspecial);
-            ceiling->type = genCeilingChg0;
-            break;
-          case 2: // type is copied
-            P_CopyTransferSpecial(&ceiling->newspecial, sec);
-            ceiling->type = genCeilingChgT;
-            break;
-          case 3: // type is left alone
-            ceiling->type = genCeilingChg;
-            break;
-        }
-      }
-    }
-    else if (line)  // else if a trigger model change
-    {
-      ceiling->texture = line->frontsector->ceilingpic;
-      switch (change & 3)
-      {
-        case 0:
-          break;
-        case 1: // type is zeroed
-          P_ResetTransferSpecial(&ceiling->newspecial);
-          ceiling->type = genCeilingChg0;
-          break;
-        case 2: // type is copied
-          P_CopyTransferSpecial(&ceiling->newspecial, line->frontsector);
-          ceiling->type = genCeilingChgT;
-          break;
-        case 3: // type is left alone
-          ceiling->type = genCeilingChg;
-          break;
-      }
-    }
-  }
+			if(modelsec != NULL)
+			{
+				ceiling->texture = modelsec->ceilingpic;
+				switch(change & 3)
+				{
+					case 0:
+						break;
+					case 1: // type is zeroed
+						P_ResetTransferSpecial(&ceiling->newspecial);
+						ceiling->type = genCeilingChg0;
+						break;
+					case 2: // type is copied
+						P_CopyTransferSpecial(&ceiling->newspecial, sec);
+						ceiling->type = genCeilingChgT;
+						break;
+					case 3: // type is left alone
+						ceiling->type = genCeilingChg;
+						break;
+				}
+			}
+		}
+		else if(line) // else if a trigger model change
+		{
+			ceiling->texture = line->frontsector->ceilingpic;
+			switch(change & 3)
+			{
+				case 0:
+					break;
+				case 1: // type is zeroed
+					P_ResetTransferSpecial(&ceiling->newspecial);
+					ceiling->type = genCeilingChg0;
+					break;
+				case 2: // type is copied
+					P_CopyTransferSpecial(&ceiling->newspecial, line->frontsector);
+					ceiling->type = genCeilingChgT;
+					break;
+				case 3: // type is left alone
+					ceiling->type = genCeilingChg;
+					break;
+			}
+		}
+	}
 
-  P_AddActiveCeiling(ceiling);
+	P_AddActiveCeiling(ceiling);
 
-  return;
+	return;
 }
 
-int EV_DoZDoomCeiling(ceiling_e type, line_t *line, int tag, fixed_t speed, fixed_t speed2,
-                      fixed_t height, int crush, byte silent, int change, crushmode_e crushmode)
+int EV_DoZDoomCeiling(ceiling_e type, line_t* line, int tag, fixed_t speed, fixed_t speed2,
+	fixed_t height, int crush, byte silent, int change, crushmode_e crushmode)
 {
-  sector_t *sec;
-  const int *id_p;
-  int retcode = 0;
+	sector_t* sec;
+	const int* id_p;
+	int retcode = 0;
 
-  height *= FRACUNIT;
+	height *= FRACUNIT;
 
-  // check if a manual trigger, if so do just the sector on the backside
-  if (tag == 0)
-  {
-    int secnum;
+	// check if a manual trigger, if so do just the sector on the backside
+	if(tag == 0)
+	{
+		int secnum;
 
-    if (!line || !(sec = line->backsector))
-      return 0;
+		if(!line || !(sec = line->backsector))
+			return 0;
 
-    secnum = sec - sectors;
-    // [RH] Hack to let manual crushers be retriggerable, too
-    tag ^= secnum | 0x1000000;
-    P_ActivateInStasisCeiling(tag);
+		secnum = sec - sectors;
+		// [RH] Hack to let manual crushers be retriggerable, too
+		tag ^= secnum | 0x1000000;
+		P_ActivateInStasisCeiling(tag);
 
-    if (sec->ceilingdata)
-      return 0;
+		if(sec->ceilingdata)
+			return 0;
 
-    P_SpawnZDoomCeiling(sec, type, line, tag, speed, speed2,
-                        height, crush, silent, change, crushmode);
-    return 1;
-  }
+		P_SpawnZDoomCeiling(sec, type, line, tag, speed, speed2,
+			height, crush, silent, change, crushmode);
+		return 1;
+	}
 
-  // Reactivate in-stasis ceilings...for certain types.
-  // This restarts a crusher after it has been stopped
-  if (type == ceilCrushAndRaise)
-  {
-    P_ActivateInStasisCeiling(tag);
-  }
+	// Reactivate in-stasis ceilings...for certain types.
+	// This restarts a crusher after it has been stopped
+	if(type == ceilCrushAndRaise)
+	{
+		P_ActivateInStasisCeiling(tag);
+	}
 
-  FIND_SECTORS(id_p, tag)
-  {
-    sec = &sectors[*id_p];
-    if (sec->ceilingdata)
-    {
-      continue;
-    }
-    retcode = 1;
-    P_SpawnZDoomCeiling(sec, type, line, tag, speed, speed2,
-                        height, crush, silent, change, crushmode);
-  }
+	FIND_SECTORS(id_p, tag)
+	{
+		sec = &sectors[*id_p];
+		if(sec->ceilingdata)
+		{
+			continue;
+		}
+		retcode = 1;
+		P_SpawnZDoomCeiling(sec, type, line, tag, speed, speed2,
+			height, crush, silent, change, crushmode);
+	}
 
-  return retcode;
+	return retcode;
 }
 
-int Hexen_EV_DoCeiling(line_t * line, byte * arg, ceiling_e type)
+int Hexen_EV_DoCeiling(line_t* line, byte* arg, ceiling_e type)
 {
-    const int *id_p;
-    int rtn;
-    sector_t *sec;
-    ceiling_t *ceiling;
+	const int* id_p;
+	int rtn;
+	sector_t* sec;
+	ceiling_t* ceiling;
 
-    rtn = 0;
+	rtn = 0;
 
-    FIND_SECTORS(id_p, arg[0])
-    {
-        sec = &sectors[*id_p];
-        if (sec->floordata || sec->ceilingdata)
-            continue;
+	FIND_SECTORS(id_p, arg[0])
+	{
+		sec = &sectors[*id_p];
+		if(sec->floordata || sec->ceilingdata)
+			continue;
 
-        //
-        // new door thinker
-        //
-        rtn = 1;
-        ceiling = Z_MallocLevel(sizeof(*ceiling));
-        memset(ceiling, 0, sizeof(*ceiling));
-        P_AddThinker(&ceiling->thinker);
-        sec->ceilingdata = ceiling;
-        ceiling->thinker.function = T_MoveCeiling;
-        ceiling->sector = sec;
-        ceiling->crush = NO_CRUSH;
-        ceiling->speed = arg[1] * (FRACUNIT / 8);
-        switch (type)
-        {
-            case CLEV_CRUSHRAISEANDSTAY:
-                ceiling->crush = P_ConvertHexenCrush(arg[2]);        // arg[2] = crushing value
-                ceiling->topheight = sec->ceilingheight;
-                ceiling->bottomheight = sec->floorheight + (8 * FRACUNIT);
-                ceiling->direction = -1;
-                break;
-            case CLEV_CRUSHANDRAISE:
-                ceiling->topheight = sec->ceilingheight;
-            case CLEV_LOWERANDCRUSH:
-                ceiling->crush = P_ConvertHexenCrush(arg[2]);        // arg[2] = crushing value
-            case CLEV_LOWERTOFLOOR:
-                ceiling->bottomheight = sec->floorheight;
-                if (type != CLEV_LOWERTOFLOOR)
-                {
-                    ceiling->bottomheight += 8 * FRACUNIT;
-                }
-                ceiling->direction = -1;
-                break;
-            case CLEV_RAISETOHIGHEST:
-                ceiling->topheight = P_FindHighestCeilingSurrounding(sec);
-                ceiling->direction = 1;
-                break;
-            case CLEV_LOWERBYVALUE:
-                ceiling->bottomheight =
-                    sec->ceilingheight - arg[2] * FRACUNIT;
-                ceiling->direction = -1;
-                break;
-            case CLEV_RAISEBYVALUE:
-                ceiling->topheight = sec->ceilingheight + arg[2] * FRACUNIT;
-                ceiling->direction = 1;
-                break;
-            case CLEV_MOVETOVALUETIMES8:
-                {
-                    int destHeight = arg[2] * FRACUNIT * 8;
+		//
+		// new door thinker
+		//
+		rtn = 1;
+		ceiling = Z_MallocLevel(sizeof(*ceiling));
+		memset(ceiling, 0, sizeof(*ceiling));
+		P_AddThinker(&ceiling->thinker);
+		sec->ceilingdata = ceiling;
+		ceiling->thinker.function = T_MoveCeiling;
+		ceiling->sector = sec;
+		ceiling->crush = NO_CRUSH;
+		ceiling->speed = arg[1] * (FRACUNIT / 8);
+		switch(type)
+		{
+			case CLEV_CRUSHRAISEANDSTAY:
+				ceiling->crush = P_ConvertHexenCrush(arg[2]); // arg[2] = crushing value
+				ceiling->topheight = sec->ceilingheight;
+				ceiling->bottomheight = sec->floorheight + (8 * FRACUNIT);
+				ceiling->direction = -1;
+				break;
+			case CLEV_CRUSHANDRAISE:
+				ceiling->topheight = sec->ceilingheight;
+			case CLEV_LOWERANDCRUSH:
+				ceiling->crush = P_ConvertHexenCrush(arg[2]); // arg[2] = crushing value
+			case CLEV_LOWERTOFLOOR:
+				ceiling->bottomheight = sec->floorheight;
+				if(type != CLEV_LOWERTOFLOOR)
+				{
+					ceiling->bottomheight += 8 * FRACUNIT;
+				}
+				ceiling->direction = -1;
+				break;
+			case CLEV_RAISETOHIGHEST:
+				ceiling->topheight = P_FindHighestCeilingSurrounding(sec);
+				ceiling->direction = 1;
+				break;
+			case CLEV_LOWERBYVALUE:
+				ceiling->bottomheight =
+					sec->ceilingheight - arg[2] * FRACUNIT;
+				ceiling->direction = -1;
+				break;
+			case CLEV_RAISEBYVALUE:
+				ceiling->topheight = sec->ceilingheight + arg[2] * FRACUNIT;
+				ceiling->direction = 1;
+				break;
+			case CLEV_MOVETOVALUETIMES8:
+			{
+				int destHeight = arg[2] * FRACUNIT * 8;
 
-                    if (arg[3])
-                    {
-                        destHeight = -destHeight;
-                    }
-                    if (sec->ceilingheight <= destHeight)
-                    {
-                        ceiling->direction = 1;
-                        ceiling->topheight = destHeight;
-                        if (sec->ceilingheight == destHeight)
-                        {
-                            rtn = 0;
-                        }
-                    }
-                    else if (sec->ceilingheight > destHeight)
-                    {
-                        ceiling->direction = -1;
-                        ceiling->bottomheight = destHeight;
-                    }
-                    break;
-                }
-            default:
-                rtn = 0;
-                break;
-        }
-        ceiling->tag = sec->tag;
-        ceiling->type = type;
-        P_AddActiveCeiling(ceiling);
-        if (rtn)
-        {
-            SN_StartSequence((mobj_t *) & ceiling->sector->soundorg,
-                             SEQ_PLATFORM + ceiling->sector->seqType);
-        }
-    }
-    return rtn;
+				if(arg[3])
+				{
+					destHeight = -destHeight;
+				}
+				if(sec->ceilingheight <= destHeight)
+				{
+					ceiling->direction = 1;
+					ceiling->topheight = destHeight;
+					if(sec->ceilingheight == destHeight)
+					{
+						rtn = 0;
+					}
+				}
+				else if(sec->ceilingheight > destHeight)
+				{
+					ceiling->direction = -1;
+					ceiling->bottomheight = destHeight;
+				}
+				break;
+			}
+			default:
+				rtn = 0;
+				break;
+		}
+		ceiling->tag = sec->tag;
+		ceiling->type = type;
+		P_AddActiveCeiling(ceiling);
+		if(rtn)
+		{
+			SN_StartSequence((mobj_t*)&ceiling->sector->soundorg,
+				SEQ_PLATFORM + ceiling->sector->seqType);
+		}
+	}
+	return rtn;
 }

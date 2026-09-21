@@ -5,24 +5,26 @@
 
 #pragma once
 
-typedef struct {
-  int current;
-  int best;
-  int best_delta;
-  int session_best;
-  int session_best_delta;
-  int ref;
-  int ref_delta;
+typedef struct
+{
+	int current;
+	int best;
+	int best_delta;
+	int session_best;
+	int session_best_delta;
+	int ref;
+	int ref_delta;
 } dsda_split_time_t;
 
-typedef struct {
-  dsda_split_time_t leveltime;
-  dsda_split_time_t totalleveltimes;
-  int episode;
-  int map;
-  int first_time;
-  int run_counter;
-  int exits;
+typedef struct
+{
+	dsda_split_time_t leveltime;
+	dsda_split_time_t totalleveltimes;
+	int episode;
+	int map;
+	int first_time;
+	int run_counter;
+	int exits;
 } dsda_split_t;
 
 void dsda_RecordSplit(void);

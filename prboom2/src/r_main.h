@@ -15,30 +15,30 @@ extern int r_frame_count;
 // POV related.
 //
 
-extern fixed_t  viewcos;
-extern fixed_t  viewsin;
-extern fixed_t  viewtancos;
-extern fixed_t  viewtansin;
-extern int      viewwidth;
-extern int      viewheight;
-extern int      centerx;
-extern int      centery;
-extern fixed_t  globaluclip;
-extern fixed_t  globaldclip;
-extern fixed_t  centerxfrac;
-extern fixed_t  centeryfrac;
-extern fixed_t  yaspectmul;
-extern fixed_t  viewheightfrac; //e6y: for correct cliping of things
-extern fixed_t  projection;
-extern fixed_t  skyiscale;
+extern fixed_t viewcos;
+extern fixed_t viewsin;
+extern fixed_t viewtancos;
+extern fixed_t viewtansin;
+extern int viewwidth;
+extern int viewheight;
+extern int centerx;
+extern int centery;
+extern fixed_t globaluclip;
+extern fixed_t globaldclip;
+extern fixed_t centerxfrac;
+extern fixed_t centeryfrac;
+extern fixed_t yaspectmul;
+extern fixed_t viewheightfrac; //e6y: for correct cliping of things
+extern fixed_t projection;
+extern fixed_t skyiscale;
 // e6y: wide-res
 extern int wide_centerx;
 #define RMUL (1.6f/1.333333f)
 
 // proff 11/06/98: Added for high-res
-extern fixed_t  projectiony;
-extern int      validcount;
-extern int      validcount2;
+extern fixed_t projectiony;
+extern int validcount;
+extern int validcount2;
 // e6y: Added for more precise flats drawing
 extern fixed_t viewfocratio;
 
@@ -67,23 +67,23 @@ extern int LIGHTLEVELS;
 #define LIGHTZSHIFT       20
 
 // killough 3/20/98: Allow colormaps to be dynamic (e.g. underwater)
-extern const lighttable_t *(*scalelight)[MAXLIGHTSCALE];
-extern const lighttable_t *(*c_zlight)[LIGHTLEVELS_MAX][MAXLIGHTZ];
-extern const lighttable_t *(*zlight)[MAXLIGHTZ];
-extern const lighttable_t *fullcolormap;
-extern int numcolormaps;    // killough 4/4/98: dynamic number of maps
-extern const lighttable_t **colormaps;
+extern const lighttable_t* (*scalelight)[MAXLIGHTSCALE];
+extern const lighttable_t* (*c_zlight)[LIGHTLEVELS_MAX][MAXLIGHTZ];
+extern const lighttable_t* (*zlight)[MAXLIGHTZ];
+extern const lighttable_t* fullcolormap;
+extern int numcolormaps; // killough 4/4/98: dynamic number of maps
+extern const lighttable_t** colormaps;
 // killough 3/20/98, 4/4/98: end dynamic colormaps
 
 extern const byte* colormap_lump;
 
 //e6y: for Boom colormaps in OpenGL mode
 extern dboolean use_boom_cm;
-extern int boom_cm;         // current colormap
+extern int boom_cm; // current colormap
 extern int frame_fixedcolormap;
 
-extern int          extralight;
-extern const lighttable_t *fixedcolormap;
+extern int extralight;
+extern const lighttable_t* fixedcolormap;
 
 // Number of diminishing brightness levels.
 // There a 0-31, i.e. 32 LUT in the COLORMAP lump.
@@ -96,19 +96,19 @@ extern const lighttable_t *fixedcolormap;
 // Utility functions.
 //
 
-PUREFUNC int R_CompatiblePointOnSide(fixed_t x, fixed_t y, const node_t *node);
-PUREFUNC int R_ZDoomPointOnSide(fixed_t x, fixed_t y, const node_t *node);
-extern int (*R_PointOnSide)(fixed_t x, fixed_t y, const node_t *node);
+PUREFUNC int R_CompatiblePointOnSide(fixed_t x, fixed_t y, const node_t* node);
+PUREFUNC int R_ZDoomPointOnSide(fixed_t x, fixed_t y, const node_t* node);
+extern int (*R_PointOnSide)(fixed_t x, fixed_t y, const node_t* node);
 
-PUREFUNC int R_CompatiblePointOnSegSide(fixed_t x, fixed_t y, const seg_t *line);
-PUREFUNC int R_ZDoomPointOnSegSide(fixed_t x, fixed_t y, const seg_t *line);
-extern int (*R_PointOnSegSide)(fixed_t x, fixed_t y, const seg_t *line);
+PUREFUNC int R_CompatiblePointOnSegSide(fixed_t x, fixed_t y, const seg_t* line);
+PUREFUNC int R_ZDoomPointOnSegSide(fixed_t x, fixed_t y, const seg_t* line);
+extern int (*R_PointOnSegSide)(fixed_t x, fixed_t y, const seg_t* line);
 
 angle_t R_PointToAngle2(fixed_t x1, fixed_t y1, fixed_t x, fixed_t y);
-subsector_t *R_PointInSubsector(fixed_t x, fixed_t y);
-sector_t *R_PointInSector(fixed_t x, fixed_t y);
-void R_SectorCenter(fixed_t *x, fixed_t *y, sector_t *sec);
-void R_LineCenter(fixed_t *x, fixed_t *y, line_t *line);
+subsector_t* R_PointInSubsector(fixed_t x, fixed_t y);
+sector_t* R_PointInSector(fixed_t x, fixed_t y);
+void R_SectorCenter(fixed_t* x, fixed_t* y, sector_t* sec);
+void R_LineCenter(fixed_t* x, fixed_t* y, line_t* line);
 
 //e6y: made more precise
 angle_t R_PointToAngleEx(fixed_t x, fixed_t y);
@@ -120,10 +120,10 @@ angle_t R_PointToPseudoAngle(fixed_t x, fixed_t y);
 //
 
 void R_ResetColorMap(void);
-void R_RenderPlayerView(player_t *player);   // Called by G_Drawer.
-void R_Init(void);                           // Called by startup code.
-void R_SetViewSize(void);              // Called by M_Responder.
-void R_ExecuteSetViewSize(void);             // cph - called by D_Display to complete a view resize
+void R_RenderPlayerView(player_t* player); // Called by G_Drawer.
+void R_Init(void);                         // Called by startup code.
+void R_SetViewSize(void);                  // Called by M_Responder.
+void R_ExecuteSetViewSize(void);           // cph - called by D_Display to complete a view resize
 dboolean R_FullView(void);
 dboolean R_PartialView(void);
 dboolean R_StatusBarVisible(void);
@@ -137,4 +137,4 @@ dboolean R_StatusBarVisible(void);
 extern int viewport[4];
 extern float modelMatrix[16];
 extern float projMatrix[16];
-int R_Project(float objx, float objy, float objz, float *winx, float *winy, float *winz);
+int R_Project(float objx, float objy, float objz, float* winx, float* winy, float* winz);

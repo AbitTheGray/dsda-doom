@@ -58,11 +58,11 @@ int ST_HealthColor(int health);
 // States for status bar code.
 typedef enum
 {
-  AutomapState,
-  FirstPersonState
+	AutomapState,
+	FirstPersonState
 } st_stateenum_t;
 
-extern int st_palette;    // cph 2006/04/06 - make palette visible
+extern int st_palette; // cph 2006/04/06 - make palette visible
 
 // e6y: makes sense for wide resolutions
 extern patchnum_t grnrock;

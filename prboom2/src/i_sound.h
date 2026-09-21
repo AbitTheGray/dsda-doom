@@ -34,10 +34,10 @@ void I_CacheSounds(void);
 void I_SetChannels(void);
 
 // Get raw data lump index for sound descriptor.
-int I_GetSfxLumpNum (sfxinfo_t *sfxinfo);
+int I_GetSfxLumpNum(sfxinfo_t* sfxinfo);
 
 // Starts a sound in a particular sound channel.
-int I_StartSound(int id, int channel, sfx_params_t *params);
+int I_StartSound(int id, int channel, sfx_params_t* params);
 
 // Stops a sound channel.
 void I_StopSound(int handle);
@@ -52,17 +52,17 @@ dboolean I_AnySoundStillPlaying(void);
 
 // Updates the volume, separation,
 //  and pitch of a sound channel.
-void I_UpdateSoundParams(int handle, sfx_params_t *params);
+void I_UpdateSoundParams(int handle, sfx_params_t* params);
 
 // NSM sound capture routines
 // silences sound output, and instead allows sound capture to work
 // call this before sound startup
-void I_SetSoundCap (void);
+void I_SetSoundCap(void);
 // grabs len samples of audio (16 bit interleaved)
-unsigned char *I_GrabSound (int len);
+unsigned char* I_GrabSound(int len);
 
 // NSM helper routine for some of the streaming audio
-void I_ResampleStream (void *dest, unsigned nsamp, void (*proc) (void *dest, unsigned nsamp), unsigned sratein, unsigned srateout);
+void I_ResampleStream(void* dest, unsigned nsamp, void (*proc)(void* dest, unsigned nsamp), unsigned sratein, unsigned srateout);
 
 //
 //  MUSIC I/O
@@ -77,7 +77,7 @@ void I_PauseSong(int handle);
 void I_ResumeSong(int handle);
 
 // Registers a song handle to song data.
-int I_RegisterSong(const void *data, size_t len);
+int I_RegisterSong(const void* data, size_t len);
 
 // Called by anything that wishes to start music.
 //  plays a song, and when the song is done,
@@ -97,13 +97,13 @@ extern int snd_samplerate;
 // prefered MIDI player
 typedef enum
 {
-  midi_player_fluidsynth,
-  midi_player_opl,
-  midi_player_portmidi,
+	midi_player_fluidsynth,
+	midi_player_opl,
+	midi_player_portmidi,
 
-  midi_player_last
+	midi_player_last
 } midi_player_name_t;
 
-extern const char *midiplayers[];
+extern const char* midiplayers[];
 
 void M_ChangeMIDIPlayer(void);

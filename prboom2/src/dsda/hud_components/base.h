@@ -37,15 +37,17 @@
 #define DSDA_CHAR_HEIGHT 8
 #define DSDA_CHAR_WIDTH 6
 
-typedef struct {
-  hu_textline_t text;
-  char msg[DSDA_TEXT_SIZE];
+typedef struct
+{
+	hu_textline_t text;
+	char msg[DSDA_TEXT_SIZE];
 } dsda_text_t;
 
-typedef struct {
-  int x;
-  int y;
-  int vpt;
+typedef struct
+{
+	int x;
+	int y;
+	int vpt;
 } dsda_patch_component_t;
 
 int dsda_HudComponentY(int y_offset, int vpt, double ratio);

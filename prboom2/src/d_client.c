@@ -40,85 +40,94 @@ ticcmd_t local_cmds[MAX_MAXPLAYERS][BACKUPTICS];
 int maketic;
 int solo_net = 0;
 
-void D_InitFakeNetGame (void)
+void D_InitFakeNetGame(void)
 {
-  int i;
+	int i;
 
-  consoleplayer = displayplayer = 0;
-  solo_net = dsda_Flag(dsda_arg_solo_net);
-  coop_spawns = dsda_Flag(dsda_arg_coop_spawns);
-  netgame = solo_net;
+	consoleplayer = displayplayer = 0;
+	solo_net = dsda_Flag(dsda_arg_solo_net);
+	coop_spawns = dsda_Flag(dsda_arg_coop_spawns);
+	netgame = solo_net;
 
-  playeringame[0] = true;
-  for (i = 1; i < g_maxplayers; i++)
-    playeringame[i] = false;
+	playeringame[0] = true;
+	for(i = 1; i < g_maxplayers; i++)
+		playeringame[i] = false;
 }
 
 void FakeNetUpdate(void)
 {
-  static int lastmadetic;
+	static int lastmadetic;
 
-  if (isExtraDDisplay)
-    return;
+	if(isExtraDDisplay)
+		return;
 
-  { // Build new ticcmds
-    int newtics = dsda_GetTick() - lastmadetic;
-    lastmadetic += newtics;
+	{
+		// Build new ticcmds
+		int newtics = dsda_GetTick() - lastmadetic;
+		lastmadetic += newtics;
 
-    while (newtics--) {
-      I_StartTic();
-      if (maketic - gametic > BACKUPTICS/2) break;
+		while(newtics--)
+		{
+			I_StartTic();
+			if(maketic - gametic > BACKUPTICS / 2) break;
 
-      // e6y
-      // Eliminating the sudden jump of six frames(BACKUPTICS/2)
-      // after change of game_speed.
-      if (maketic - gametic && gametic <= force_singletics_to && dsda_GameSpeed() < 200) break;
+			// e6y
+			// Eliminating the sudden jump of six frames(BACKUPTICS/2)
+			// after change of game_speed.
+			if(maketic - gametic && gametic <= force_singletics_to && dsda_GameSpeed() < 200) break;
 
-      G_BuildTiccmd(&local_cmds[0][maketic%BACKUPTICS]);
-      maketic++;
-    }
-  }
+			G_BuildTiccmd(&local_cmds[0][maketic % BACKUPTICS]);
+			maketic++;
+		}
+	}
 }
 
 // Implicitly tracked whenever we check the current tick
 int ms_to_next_tick;
 
-void TryRunTics (void)
+void TryRunTics(void)
 {
-  int runtics;
-  int entertime = dsda_GetTick();
+	int runtics;
+	int entertime = dsda_GetTick();
 
-  // Wait for tics to run
-  while (1) {
-    FakeNetUpdate();
-    runtics = maketic - gametic;
-    if (!runtics) {
-      if (!movement_smooth) {
-          I_uSleep(ms_to_next_tick*1000);
-      }
-      if (dsda_GetTick() - entertime > 10) {
-        M_Ticker(); return;
-      }
+	// Wait for tics to run
+	while(1)
+	{
+		FakeNetUpdate();
+		runtics = maketic - gametic;
+		if(!runtics)
+		{
+			if(!movement_smooth)
+			{
+				I_uSleep(ms_to_next_tick * 1000);
+			}
+			if(dsda_GetTick() - entertime > 10)
+			{
+				M_Ticker();
+				return;
+			}
 
-      if (gametic > 0)
-      {
-        WasRenderedInTryRunTics = true;
-        if (movement_smooth && gamestate==wipegamestate)
-        {
-          isExtraDDisplay = true;
-          D_Display(-1);
-          isExtraDDisplay = false;
-        }
-      }
-    } else break;
-  }
+			if(gametic > 0)
+			{
+				WasRenderedInTryRunTics = true;
+				if(movement_smooth && gamestate == wipegamestate)
+				{
+					isExtraDDisplay = true;
+					D_Display(-1);
+					isExtraDDisplay = false;
+				}
+			}
+		}
+		else break;
+	}
 
-  while (runtics--) {
-    if (advancedemo)
-      D_DoAdvanceDemo ();
-    M_Ticker ();
-    G_Ticker ();
-    gametic++;
-    FakeNetUpdate();
-  }
+	while(runtics--)
+	{
+		if(advancedemo)
+			D_DoAdvanceDemo();
+		M_Ticker();
+		G_Ticker();
+		gametic++;
+		FakeNetUpdate();
+	}
 }

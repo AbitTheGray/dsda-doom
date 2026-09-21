@@ -14,4 +14,4 @@ sfxinfo_t* dsda_NewSFX(int* index);
 void dsda_InitializeSFX(sfxinfo_t* source, int count);
 int dsda_TranslateDehSFXIndex(int index);
 void dsda_FreeDehSFX(void);
-dboolean dsda_BlockSFX(sfxinfo_t *sfx);
+dboolean dsda_BlockSFX(sfxinfo_t* sfx);

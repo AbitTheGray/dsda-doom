@@ -21,15 +21,15 @@
 
 #include <stddef.h>
 
-void Z_Free(void *ptr);
+void Z_Free(void* ptr);
 void Z_FreeLevel(void);
 
-void *Z_Malloc(size_t size);
-void *Z_Calloc(size_t n, size_t n2);
-void *Z_Realloc(void *p, size_t n);
-char *Z_Strdup(const char *s);
+void* Z_Malloc(size_t size);
+void* Z_Calloc(size_t n, size_t n2);
+void* Z_Realloc(void* p, size_t n);
+char* Z_Strdup(const char* s);
 
-void *Z_MallocLevel(size_t size);
-void *Z_CallocLevel(size_t n, size_t n2);
-void *Z_ReallocLevel(void *p, size_t n);
-char *Z_StrdupLevel(const char *s);
+void* Z_MallocLevel(size_t size);
+void* Z_CallocLevel(size_t n, size_t n2);
+void* Z_ReallocLevel(void* p, size_t n);
+char* Z_StrdupLevel(const char* s);

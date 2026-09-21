@@ -7,25 +7,25 @@
 
 #include "line_distance_tracker.h"
 
-void dsda_LineDistanceTrackerHC(char* str, size_t max_size, int id) {
-  line_t* line;
-  mobj_t* mo;
-  double distance;
-  double radius;
+void dsda_LineDistanceTrackerHC(char* str, size_t max_size, int id)
+{
+	line_t* line;
+	mobj_t* mo;
+	double distance;
+	double radius;
 
-  line = &lines[id];
-  mo = players[displayplayer].mo;
-  radius = (double) mo->radius / FRACUNIT;
-  distance = dsda_DistancePointToLine(line->v1->x, line->v1->y, line->v2->x, line->v2->y,
-                                      mo->x, mo->y);
+	line = &lines[id];
+	mo = players[displayplayer].mo;
+	radius = (double)mo->radius / FRACUNIT;
+	distance = dsda_DistancePointToLine(line->v1->x, line->v1->y, line->v2->x, line->v2->y,
+		mo->x, mo->y);
 
-  snprintf(
-    str,
-    max_size,
-    "%sld %d: %.03f",
-    distance < radius ? dsda_TextColor(dsda_tc_exhud_line_close) :
-                        dsda_TextColor(dsda_tc_exhud_line_far),
-    id,
-    distance
-  );
+	snprintf(
+		str,
+		max_size,
+		"%sld %d: %.03f",
+		distance < radius ? dsda_TextColor(dsda_tc_exhud_line_close) : dsda_TextColor(dsda_tc_exhud_line_far),
+		id,
+		distance
+	);
 }

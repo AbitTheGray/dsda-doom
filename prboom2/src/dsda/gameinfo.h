@@ -6,10 +6,11 @@
 #pragma once
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-void dsda_LoadGameInfo(void);
+	void dsda_LoadGameInfo(void);
 
 #ifdef __cplusplus
 }

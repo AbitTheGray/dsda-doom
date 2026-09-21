@@ -16,16 +16,16 @@
 #include "m_fixed.h"
 
 #ifdef _MSC_VER
-#define    F_OK    0    /* Check for file existence */
-#define    W_OK    2    /* Check for write permission */
-#define    R_OK    4    /* Check for read permission */
+#define F_OK    0    /* Check for file existence */
+#define W_OK    2    /* Check for write permission */
+#define R_OK    4    /* Check for read permission */
 #endif
 
 extern int interpolation_method;
 extern int ms_to_next_tick;
 dboolean I_StartDisplay(void);
 void I_EndDisplay(void);
-fixed_t I_GetTimeFrac (void);
+fixed_t I_GetTimeFrac(void);
 
 unsigned long I_GetRandomTimeSeed(void); /* cphipps */
 
@@ -48,8 +48,8 @@ void I_SwitchToWindow(HWND hwnd);
 // e6y
 const char* I_GetTempDir(void);
 
-const char *I_ExeDir(void); // killough 2/16/98: path to executable's dir
-const char *I_ConfigDir(void); // path to config and autoload dir
+const char* I_ExeDir(void);    // killough 2/16/98: path to executable's dir
+const char* I_ConfigDir(void); // path to config and autoload dir
 
 dboolean HasTrailingSlash(const char* dn);
 char* I_RequireFile(const char* wfname, const char* ext);
@@ -78,12 +78,12 @@ int I_Filelength(int handle);
 
 typedef enum
 {
-  exit_priority_first,
-  exit_priority_normal,
-  exit_priority_last,
-  exit_priority_max,
+	exit_priority_first,
+	exit_priority_normal,
+	exit_priority_last,
+	exit_priority_max,
 } exit_priority_t;
 
 typedef void (*atexit_func_t)(void);
 void I_AtExit(atexit_func_t func, dboolean run_if_error,
-              const char* name, exit_priority_t priority);
+	const char* name, exit_priority_t priority);

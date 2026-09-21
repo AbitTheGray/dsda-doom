@@ -17,16 +17,16 @@ void MN_DrawSave(void);
 void MN_DrawPause(void);
 void MN_DrawMessage(const char* messageString);
 void MN_DrawSlider(int x, int y, int width, int range, int slot, int color);
-void MN_DrawTitle(int y, const char *text, int cm);
-void MN_DrTextA(const char *text, int x, int y);
-int MN_TextAHeight(const char *text);
-int MN_TextAWidth(const char *text);
-void MN_DrTextB(const char *text, int x, int y);
-int MN_TextBWidth(const char *text);
+void MN_DrawTitle(int y, const char* text, int cm);
+void MN_DrTextA(const char* text, int x, int y);
+int MN_TextAHeight(const char* text);
+int MN_TextAWidth(const char* text);
+void MN_DrTextB(const char* text, int x, int y);
+int MN_TextBWidth(const char* text);
 
 // hexen
 
 void MN_DrawEpisode(void);
 void MN_UpdateClass(int choice);
-void MN_DrTextAYellow(const char *text, int x, int y);
+void MN_DrTextAYellow(const char* text, int x, int y);
 void MN_DrawSkillMenu(void);

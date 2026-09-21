@@ -5,7 +5,7 @@
 
 #pragma once
 
-const char* dsda_UnzipFile(const char *zipped_file_name);
-const char* dsda_ReadUnzippedFile(const char *zipped_file_name);
+const char* dsda_UnzipFile(const char* zipped_file_name);
+const char* dsda_ReadUnzippedFile(const char* zipped_file_name);
 
 void dsda_CleanZipTempDirs(void);

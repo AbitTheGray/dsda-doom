@@ -16,49 +16,51 @@
 
 typedef struct
 {
-  int back;
-  int grid;
-  int wall;
-  int fchg;
-  int cchg;
-  int clsd;
-  int rkey;
-  int bkey;
-  int ykey;
-  int rdor;
-  int bdor;
-  int ydor;
-  int tele;
-  int secr;
-  int revsecr;
-  int tagfinder;
-  int exit;
-  int exitsecr;
-  int unsn;
-  int flat;
-  int sprt;
-  int item;
-  int frnd;
-  int enemy;
-  int hair;
-  int sngl;
-  int me;
-  int plyr[8];
-  int trail_1;
-  int trail_2;
-  int pickup;
+	int back;
+	int grid;
+	int wall;
+	int fchg;
+	int cchg;
+	int clsd;
+	int rkey;
+	int bkey;
+	int ykey;
+	int rdor;
+	int bdor;
+	int ydor;
+	int tele;
+	int secr;
+	int revsecr;
+	int tagfinder;
+	int exit;
+	int exitsecr;
+	int unsn;
+	int flat;
+	int sprt;
+	int item;
+	int frnd;
+	int enemy;
+	int hair;
+	int sngl;
+	int me;
+	int plyr[8];
+	int trail_1;
+	int trail_2;
+	int pickup;
 } mapcolor_t;
 
 typedef struct map_point_s
 {
-  float x, y;
-  unsigned char r, g, b, a;
-} PACKEDATTR map_point_t;
+	float x, y;
+	unsigned char r, g, b, a;
+}
+	PACKEDATTR map_point_t;
 
 typedef struct map_line_s
 {
-  map_point_t point[2];
-} PACKEDATTR map_line_t;
+	map_point_t point[2];
+}
+	PACKEDATTR map_line_t;
 
 extern array_t map_lines;
 
@@ -66,25 +68,25 @@ extern array_t map_lines;
 #define FRACTOMAPBITS (FRACBITS-MAPBITS)
 
 // Called by main loop.
-dboolean AM_Responder (event_t* ev);
+dboolean AM_Responder(event_t* ev);
 
 // Called by main loop.
-void AM_Ticker (void);
+void AM_Ticker(void);
 
 // Called by main loop,
 // called instead of view drawer if automap active.
-void AM_Drawer (dboolean minimap);
+void AM_Drawer(dboolean minimap);
 
 // Called to force the automap to quit
 // if the level is completed while it is up.
-void AM_Stop (dboolean minimap);
+void AM_Stop(dboolean minimap);
 
 // killough 2/22/98: for saving automap information in savegame:
 
 typedef enum
 {
-  AM_OPEN_MINIMAP,
-  AM_OPEN_FULLAUTOMAP
+	AM_OPEN_MINIMAP,
+	AM_OPEN_FULLAUTOMAP
 } am_start_t;
 
 void AM_Start(dboolean open_full_automap);
@@ -99,20 +101,20 @@ void AM_SetResolution(void);
 
 typedef struct
 {
- fixed_t x,y;
- float fx,fy;
+	fixed_t x, y;
+	float fx, fy;
 } mpoint_t;
 
 typedef struct
 {
- fixed_t x, y;
- fixed_t w, h;
+	fixed_t x, y;
+	fixed_t w, h;
 
- char label[16];
- int widths[16];
+	char label[16];
+	int widths[16];
 } markpoint_t;
 
-extern markpoint_t *markpoints;
+extern markpoint_t* markpoints;
 extern int markpointnum, markpointnum_max;
 
 // end changes -- killough 2/22/98
@@ -126,36 +128,37 @@ void AM_SetMapCenter(fixed_t x, fixed_t y);
 
 typedef struct am_frame_s
 {
-  fixed_t centerx, centery;
-  fixed_t sin, cos;
+	fixed_t centerx, centery;
+	fixed_t sin, cos;
 
-  float centerx_f, centery_f;
-  float sin_f, cos_f;
+	float centerx_f, centery_f;
+	float sin_f, cos_f;
 
-  fixed_t bbox[4];
+	fixed_t bbox[4];
 
-  int precise;
+	int precise;
 } am_frame_t;
+
 extern am_frame_t am_frame;
 
 typedef enum
 {
-  map_things_appearance_classic,
-  map_things_appearance_scaled,
+	map_things_appearance_classic,
+	map_things_appearance_scaled,
 #if defined(HAVE_LIBSDL2_IMAGE)
-  map_things_appearance_icon,
+	map_things_appearance_icon,
 #endif
-  map_things_appearance_box,
+	map_things_appearance_box,
 
-  map_things_appearance_max
+	map_things_appearance_max
 } map_things_appearance_t;
 
 typedef enum
 {
-  map_trail_mode_off,
-  map_trail_mode_ignore_collisions,
-  map_trail_mode_include_collisions,
-  map_trail_mode_max
+	map_trail_mode_off,
+	map_trail_mode_ignore_collisions,
+	map_trail_mode_include_collisions,
+	map_trail_mode_max
 } map_trail_mode_t;
 
 extern map_trail_mode_t map_trail_mode;

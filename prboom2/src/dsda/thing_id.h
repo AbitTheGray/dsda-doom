@@ -7,21 +7,24 @@
 
 #include "p_mobj.h"
 
-typedef struct thing_id_list_entry_s {
-  mobj_t* mo;
-  struct thing_id_list_entry_s* next;
+typedef struct thing_id_list_entry_s
+{
+	mobj_t* mo;
+	struct thing_id_list_entry_s* next;
 } thing_id_list_entry_t;
 
-typedef struct {
-  dboolean done;
-  struct thing_id_list_entry_s* start;
+typedef struct
+{
+	dboolean done;
+	struct thing_id_list_entry_s* start;
 } thing_id_search_t;
 
-typedef struct thing_id_list_s {
-  short thing_id;
-  struct thing_id_list_entry_s* first;
-  struct thing_id_list_entry_s* last;
-  struct thing_id_list_s* next;
+typedef struct thing_id_list_s
+{
+	short thing_id;
+	struct thing_id_list_entry_s* first;
+	struct thing_id_list_entry_s* last;
+	struct thing_id_list_s* next;
 } thing_id_list_t;
 
 void dsda_AddMobjThingID(mobj_t* mo, short thing_id);

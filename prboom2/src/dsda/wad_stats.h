@@ -5,29 +5,31 @@
 
 #pragma once
 
-typedef struct {
-  char lump[9];
-  int episode;
-  int map;
-  int best_skill;
-  int best_time;
-  int best_max_time;
-  int best_nm_time;
-  int total_exits;
-  int total_kills;
-  int best_kills;
-  int best_items;
-  int best_secrets;
-  int max_kills;
-  int max_items;
-  int max_secrets;
+typedef struct
+{
+	char lump[9];
+	int episode;
+	int map;
+	int best_skill;
+	int best_time;
+	int best_max_time;
+	int best_nm_time;
+	int total_exits;
+	int total_kills;
+	int best_kills;
+	int best_items;
+	int best_secrets;
+	int max_kills;
+	int max_items;
+	int max_secrets;
 } map_stats_t;
 
-typedef struct {
-  int total_kills;
-  map_stats_t* maps;
-  int maps_size;
-  int map_count;
+typedef struct
+{
+	int total_kills;
+	map_stats_t* maps;
+	int maps_size;
+	int map_count;
 } wad_stats_t;
 
 extern wad_stats_t wad_stats;

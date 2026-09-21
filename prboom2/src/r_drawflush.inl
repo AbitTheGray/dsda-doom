@@ -15,106 +15,108 @@
 //
 static void R_FLUSHWHOLE_FUNCNAME(void)
 {
-   // Scaled software fuzz algorithm
+	// Scaled software fuzz algorithm
 #if (R_DRAWCOLUMN_PIPELINE & RDC_FUZZ)
-{
-    int yl, yh, count, lines;
-    byte *dest;
+	{
+		int yl, yh, count, lines;
+		byte* dest;
 
-    if ((temp_x + startx) % fuzzcellsize)
-    {
-        return;
-    }
+		if((temp_x + startx) % fuzzcellsize)
+		{
+			return;
+		}
 
-    yl = tempyl[temp_x - 1];
-    yh = tempyh[temp_x - 1];
+		yl = tempyl[temp_x - 1];
+		yh = tempyh[temp_x - 1];
 
-    count = yh - yl;
+		count = yh - yl;
 
-    if (count < 0)
-    {
-        return;
-    }
+		if(count < 0)
+		{
+			return;
+		}
 
 #ifdef RANGECHECK
-    if ((unsigned)x >= video.width || yl < 0 || yh  >= video.height)
-    {
-        I_Error("R_DrawFuzzColumn: %i to %i at %i", yl, yh , x);
-    }
+	if((unsigned)x >= video.width || yl < 0 || yh >= video.height)
+	{
+		I_Error("R_DrawFuzzColumn: %i to %i at %i", yl, yh, x);
+	}
 #endif
 
-    ++count;
+	++count;
 
-    dest = drawvars.topleft + yl * drawvars.pitch + startx + temp_x - fuzzcellsize;
+	dest = drawvars.topleft + yl * drawvars.pitch + startx + temp_x - fuzzcellsize;
 
-    lines = fuzzcellsize - (yl % fuzzcellsize);
+	lines = fuzzcellsize - (yl % fuzzcellsize);
 
-    do
-    {
-        int mask;
-        byte fuzz;
+	do
+	{
+		int mask;
+		byte fuzz;
 
-        count -= lines;
+		count -= lines;
 
-        // if (count < 0)
-        // {
-        //    lines += count;
-        //    count = 0;
-        // }
-        mask = count >> (8 * sizeof(mask) - 1);
-        lines += count & mask;
-        count &= ~mask;
+		// if (count < 0)
+		// {
+		//    lines += count;
+		//    count = 0;
+		// }
+		mask = count >> (8 * sizeof(mask) - 1);
+		lines += count & mask;
+		count &= ~mask;
 
-        fuzz = fullcolormap[6 * 256 + dest[fuzzoffset[fuzzpos]]];
+		fuzz = fullcolormap[6 * 256 + dest[fuzzoffset[fuzzpos]]];
 
-        do
-        {
-            memset(dest, fuzz, fuzzcellsize);
-            dest += drawvars.pitch;
-        } while (--lines);
+		do
+		{
+			memset(dest, fuzz, fuzzcellsize);
+			dest += drawvars.pitch;
+		}
+		while(--lines);
 
-        ++fuzzpos;
+		++fuzzpos;
 
-        // Clamp table lookup index.
-        fuzzpos &= (fuzzpos - FUZZTABLE) >> (8 * sizeof(fuzzpos) - 1); // killough 1/99
+		// Clamp table lookup index.
+		fuzzpos &= (fuzzpos - FUZZTABLE) >> (8 * sizeof(fuzzpos) - 1); // killough 1/99
 
-        lines = fuzzcellsize;
-    } while (count);
+		lines = fuzzcellsize;
+	}
+	while(count);
 
-   // [crispy] if the line at the bottom had to be cut off,
-   // draw one extra line using only pixels of that line and the one above
-   if (fuzz_cutoff)
-   {
-      const byte fuzz = fullcolormap[6 * 256 + dest[(fuzzoffset[fuzzpos] - drawvars.pitch) / 2]];
-      memset(dest, fuzz, fuzzcellsize);
-   }
+	// [crispy] if the line at the bottom had to be cut off,
+	// draw one extra line using only pixels of that line and the one above
+	if(fuzz_cutoff)
+	{
+		const byte fuzz = fullcolormap[6 * 256 + dest[(fuzzoffset[fuzzpos] - drawvars.pitch) / 2]];
+		memset(dest, fuzz, fuzzcellsize);
+	}
 }
 #else
-{
-   byte *source;
-   byte *dest;
-   int  count, yl;
+	{
+		byte* source;
+		byte* dest;
+		int count, yl;
 
-   while(--temp_x >= 0)
-   {
-      yl     = tempyl[temp_x];
-      source = &tempbuf[temp_x + (yl << 2)];
-      dest   = drawvars.topleft + yl*drawvars.pitch + startx + temp_x;
-      count  = tempyh[temp_x] - yl + 1;
+		while(--temp_x >= 0)
+		{
+			yl = tempyl[temp_x];
+			source = &tempbuf[temp_x + (yl << 2)];
+			dest = drawvars.topleft + yl * drawvars.pitch + startx + temp_x;
+			count = tempyh[temp_x] - yl + 1;
 
-      while(--count >= 0)
-      {
+			while(--count >= 0)
+			{
 #if (R_DRAWCOLUMN_PIPELINE & RDC_TRANSLUCENT)
-         *dest = GETDESTCOLOR(*dest, *source);
+				*dest = GETDESTCOLOR(*dest, *source);
 #else
-         *dest = *source;
+				*dest = *source;
 #endif
 
-         source += 4;
-         dest += drawvars.pitch;
-      }
-   }
-}
+				source += 4;
+				dest += drawvars.pitch;
+			}
+		}
+	}
 #endif
 }
 
@@ -127,111 +129,114 @@ static void R_FLUSHWHOLE_FUNCNAME(void)
 //
 static void R_FLUSHHEADTAIL_FUNCNAME(void)
 {
-   byte *source;
-   byte *dest;
-   int count, colnum = 0;
-   int yl, yh;
+	byte* source;
+	byte* dest;
+	int count, colnum = 0;
+	int yl, yh;
 
-   #if (R_DRAWCOLUMN_PIPELINE & RDC_FUZZ)
-      // Only whole flushes are supported for fuzz
-      R_FLUSHWHOLE_FUNCNAME();
-      return;
-   #endif
-
-   while(colnum < 4)
-   {
-      yl = tempyl[colnum];
-      yh = tempyh[colnum];
-
-      // flush column head
-      if(yl < commontop)
-      {
-         source = &tempbuf[colnum + (yl << 2)];
-         dest   = drawvars.topleft + yl*drawvars.pitch + startx + colnum;
-         count  = commontop - yl;
-
-         while(--count >= 0)
-         {
-#if (R_DRAWCOLUMN_PIPELINE & RDC_TRANSLUCENT)
-            // haleyjd 09/11/04: use temptranmap here
-            *dest = GETDESTCOLOR(*dest, *source);
-#else
-            *dest = *source;
+#if (R_DRAWCOLUMN_PIPELINE & RDC_FUZZ)
+	// Only whole flushes are supported for fuzz
+	R_FLUSHWHOLE_FUNCNAME();
+	return;
 #endif
 
-            source += 4;
-            dest += drawvars.pitch;
-         }
-      }
+	while(colnum < 4)
+	{
+		yl = tempyl[colnum];
+		yh = tempyh[colnum];
 
-      // flush column tail
-      if(yh > commonbot)
-      {
-         source = &tempbuf[colnum + ((commonbot + 1) << 2)];
-         dest   = drawvars.topleft + (commonbot + 1)*drawvars.pitch + startx + colnum;
-         count  = yh - commonbot;
+		// flush column head
+		if(yl < commontop)
+		{
+			source = &tempbuf[colnum + (yl << 2)];
+			dest = drawvars.topleft + yl * drawvars.pitch + startx + colnum;
+			count = commontop - yl;
 
-         while(--count >= 0)
-         {
+			while(--count >= 0)
+			{
 #if (R_DRAWCOLUMN_PIPELINE & RDC_TRANSLUCENT)
-            // haleyjd 09/11/04: use temptranmap here
-            *dest = GETDESTCOLOR(*dest, *source);
+				// haleyjd 09/11/04: use temptranmap here
+				*dest = GETDESTCOLOR(*dest, *source);
 #else
-            *dest = *source;
+				*dest = *source;
 #endif
 
-            source += 4;
-            dest += drawvars.pitch;
-         }
-      }
-      ++colnum;
-   }
+				source += 4;
+				dest += drawvars.pitch;
+			}
+		}
+
+		// flush column tail
+		if(yh > commonbot)
+		{
+			source = &tempbuf[colnum + ((commonbot + 1) << 2)];
+			dest = drawvars.topleft + (commonbot + 1) * drawvars.pitch + startx + colnum;
+			count = yh - commonbot;
+
+			while(--count >= 0)
+			{
+#if (R_DRAWCOLUMN_PIPELINE & RDC_TRANSLUCENT)
+				// haleyjd 09/11/04: use temptranmap here
+				*dest = GETDESTCOLOR(*dest, *source);
+#else
+				*dest = *source;
+#endif
+
+				source += 4;
+				dest += drawvars.pitch;
+			}
+		}
+		++colnum;
+	}
 }
 
 static void R_FLUSHQUAD_FUNCNAME(void)
 {
-   byte *source;
-   byte *dest;
-   int count;
+	byte* source;
+	byte* dest;
+	int count;
 
-   #if (R_DRAWCOLUMN_PIPELINE & RDC_FUZZ)
-      // Only whole flushes are supported for fuzz
-      return;
-   #endif
+#if (R_DRAWCOLUMN_PIPELINE & RDC_FUZZ)
+	// Only whole flushes are supported for fuzz
+	return;
+#endif
 
-   source = &tempbuf[commontop << 2];
-   dest = drawvars.topleft + commontop*drawvars.pitch + startx;
-   count = commonbot - commontop + 1;
+	source = &tempbuf[commontop << 2];
+	dest = drawvars.topleft + commontop * drawvars.pitch + startx;
+	count = commonbot - commontop + 1;
 
 #if (R_DRAWCOLUMN_PIPELINE & RDC_TRANSLUCENT)
-   while(--count >= 0)
-   {
-      dest[0] = GETDESTCOLOR(dest[0], source[0]);
-      dest[1] = GETDESTCOLOR(dest[1], source[1]);
-      dest[2] = GETDESTCOLOR(dest[2], source[2]);
-      dest[3] = GETDESTCOLOR(dest[3], source[3]);
-      source += 4 * sizeof(byte);
-      dest += drawvars.pitch * sizeof(byte);
-   }
+	while(--count >= 0)
+	{
+		dest[0] = GETDESTCOLOR(dest[0], source[0]);
+		dest[1] = GETDESTCOLOR(dest[1], source[1]);
+		dest[2] = GETDESTCOLOR(dest[2], source[2]);
+		dest[3] = GETDESTCOLOR(dest[3], source[3]);
+		source += 4 * sizeof(byte);
+		dest += drawvars.pitch * sizeof(byte);
+	}
 #else
-   if ((sizeof(int) == 4) && (((intptr_t)source % 4) == 0) && (((intptr_t)dest % 4) == 0)) {
-      while(--count >= 0)
-      {
-         *(int *)dest = *(int *)source;
-         source += 4 * sizeof(byte);
-         dest += drawvars.pitch * sizeof(byte);
-      }
-   } else {
-      while(--count >= 0)
-      {
-         dest[0] = source[0];
-         dest[1] = source[1];
-         dest[2] = source[2];
-         dest[3] = source[3];
-         source += 4 * sizeof(byte);
-         dest += drawvars.pitch * sizeof(byte);
-      }
-   }
+	if((sizeof(int) == 4) && (((intptr_t)source % 4) == 0) && (((intptr_t)dest % 4) == 0))
+	{
+		while(--count >= 0)
+		{
+			*(int*)dest = *(int*)source;
+			source += 4 * sizeof(byte);
+			dest += drawvars.pitch * sizeof(byte);
+		}
+	}
+	else
+	{
+		while(--count >= 0)
+		{
+			dest[0] = source[0];
+			dest[1] = source[1];
+			dest[2] = source[2];
+			dest[3] = source[3];
+			source += 4 * sizeof(byte);
+			dest += drawvars.pitch * sizeof(byte);
+		}
+	}
 #endif
 }
 

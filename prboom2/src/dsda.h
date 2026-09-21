@@ -10,12 +10,14 @@
 #include "d_player.h"
 #include "r_defs.h"
 
-typedef struct {
-  int m, s, t;
+typedef struct
+{
+	int m, s, t;
 } dsda_level_time_t;
 
-typedef struct {
-  int h, m, s;
+typedef struct
+{
+	int h, m, s;
 } dsda_movie_time_t;
 
 #define LINE_ACTIVATION_INDEX_MAX 8
@@ -28,12 +30,12 @@ void dsda_AddCommandToCommandDisplay(ticcmd_t* cmd);
 // TODO: Might want a split object separate from display
 typedef enum
 {
-  DSDA_SPLIT_BLUE_KEY,
-  DSDA_SPLIT_YELLOW_KEY,
-  DSDA_SPLIT_RED_KEY,
-  DSDA_SPLIT_USE,
-  DSDA_SPLIT_SECRET,
-  DSDA_SPLIT_CLASS_COUNT
+	DSDA_SPLIT_BLUE_KEY,
+	DSDA_SPLIT_YELLOW_KEY,
+	DSDA_SPLIT_RED_KEY,
+	DSDA_SPLIT_USE,
+	DSDA_SPLIT_SECRET,
+	DSDA_SPLIT_CLASS_COUNT
 } dsda_split_class_t;
 
 void dsda_AddSplit(dsda_split_class_t split_class, int lifetime);

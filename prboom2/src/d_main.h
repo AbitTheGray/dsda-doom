@@ -13,9 +13,9 @@
 /* CPhipps - removed wadfiles[] stuff to w_wad.h */
 
 //jff 1/24/98 make command line copies of play modes available
-extern dboolean clnomonsters; // checkparm of -nomonsters
-extern dboolean clrespawnparm;  // checkparm of -respawn
-extern dboolean clfastparm; // checkparm of -fast
+extern dboolean clnomonsters;  // checkparm of -nomonsters
+extern dboolean clrespawnparm; // checkparm of -respawn
+extern dboolean clfastparm;    // checkparm of -fast
 //jff end of external declaration of command line playmode
 
 extern dboolean nosfxparm;
@@ -27,7 +27,7 @@ void D_PostEvent(event_t* ev);
 // Demo stuff
 extern dboolean advancedemo;
 void D_AdvanceDemo(void);
-void D_DoAdvanceDemo (void);
+void D_DoAdvanceDemo(void);
 
 //
 // BASE LEVEL
@@ -37,18 +37,18 @@ void D_Display(fixed_t frac);
 void D_PageTicker(void);
 void D_StartTitle(void);
 void D_DoomMain(void);
-void D_AddFile (const char *file, wad_source_t source);
+void D_AddFile(const char* file, wad_source_t source);
 
 extern char* iwadlump;
 
-void AddIWAD(const char *iwad);
+void AddIWAD(const char* iwad);
 
-extern const char *port_wad_file;
+extern const char* port_wad_file;
 
 typedef struct
 {
-  void (*func)(const char *);
-  const char *name;
+	void (*func)(const char*);
+	const char* name;
 } demostate_t;
 
 void D_SetPage(const char* name, int tics, int music);

@@ -36,69 +36,71 @@ extern int psprite_offset; // Needed for "tallscreen" modes
 // Screen 1 is an extra buffer.
 
 // array of pointers to color translation tables
-extern const byte *colrngs[];
+extern const byte* colrngs[];
 
 // symbolic indices into color translation table pointer array
 typedef enum
 {
-  CR_DEFAULT,
-  CR_BRICK,
-  CR_TAN,
-  CR_GRAY,
-  CR_GREEN,
-  CR_BROWN,
-  CR_GOLD,
-  CR_RED,
-  CR_BLUE,
-  CR_ORANGE,
-  CR_YELLOW,
-  CR_LIGHTBLUE,
-  CR_BLACK,
-  CR_PURPLE,
-  CR_WHITE,
-  CR_HUD_LIMIT,
-  CR_DARKEN = CR_HUD_LIMIT,
-  CR_DARKEN_BRICK,
-  CR_DARKEN_TAN,
-  CR_DARKEN_GRAY,
-  CR_DARKEN_GREEN,
-  CR_DARKEN_BROWN,
-  CR_DARKEN_GOLD,
-  CR_DARKEN_RED,
-  CR_DARKEN_BLUE,
-  CR_DARKEN_ORANGE,
-  CR_DARKEN_YELLOW,
-  CR_DARKEN_LIGHTBLUE,
-  CR_DARKEN_BLACK,
-  CR_DARKEN_PURPLE,
-  CR_DARKEN_WHITE,
-  CR_BRIGHT,
-  CR_BRIGHT_LIMIT = CR_BRIGHT + CR_HUD_LIMIT,
-  CR_BLOOD = CR_BRIGHT_LIMIT,
-  CR_BLOOD_GRAY = CR_BLOOD,
-  CR_BLOOD_GREEN,
-  CR_BLOOD_BLUE,
-  CR_BLOOD_YELLOW,
-  CR_BLOOD_BLACK,
-  CR_BLOOD_PURPLE,
-  CR_BLOOD_WHITE,
-  CR_BLOOD_ORANGE,
-  CR_LIMIT,
+	CR_DEFAULT,
+	CR_BRICK,
+	CR_TAN,
+	CR_GRAY,
+	CR_GREEN,
+	CR_BROWN,
+	CR_GOLD,
+	CR_RED,
+	CR_BLUE,
+	CR_ORANGE,
+	CR_YELLOW,
+	CR_LIGHTBLUE,
+	CR_BLACK,
+	CR_PURPLE,
+	CR_WHITE,
+	CR_HUD_LIMIT,
+	CR_DARKEN = CR_HUD_LIMIT,
+	CR_DARKEN_BRICK,
+	CR_DARKEN_TAN,
+	CR_DARKEN_GRAY,
+	CR_DARKEN_GREEN,
+	CR_DARKEN_BROWN,
+	CR_DARKEN_GOLD,
+	CR_DARKEN_RED,
+	CR_DARKEN_BLUE,
+	CR_DARKEN_ORANGE,
+	CR_DARKEN_YELLOW,
+	CR_DARKEN_LIGHTBLUE,
+	CR_DARKEN_BLACK,
+	CR_DARKEN_PURPLE,
+	CR_DARKEN_WHITE,
+	CR_BRIGHT,
+	CR_BRIGHT_LIMIT = CR_BRIGHT + CR_HUD_LIMIT,
+	CR_BLOOD        = CR_BRIGHT_LIMIT,
+	CR_BLOOD_GRAY   = CR_BLOOD,
+	CR_BLOOD_GREEN,
+	CR_BLOOD_BLUE,
+	CR_BLOOD_YELLOW,
+	CR_BLOOD_BLACK,
+	CR_BLOOD_PURPLE,
+	CR_BLOOD_WHITE,
+	CR_BLOOD_ORANGE,
+	CR_LIMIT,
 } crange_idx_e;
+
 //jff 1/16/98 end palette color range additions
 
-typedef struct {
-  byte *data;          // pointer to the screen content
-  dboolean not_on_heap; // if set, no malloc or free is preformed and
-                       // data never set to NULL. Used i.e. with SDL doublebuffer.
-  int width;           // the width of the surface
-  int height;          // the height of the surface, used when mallocing
-  int pitch;      // tha actual width of one line, used when mallocing
+typedef struct
+{
+	byte* data;           // pointer to the screen content
+	dboolean not_on_heap; // if set, no malloc or free is preformed and
+	// data never set to NULL. Used i.e. with SDL doublebuffer.
+	int width;            // the width of the surface
+	int height;           // the height of the surface, used when mallocing
+	int pitch;            // tha actual width of one line, used when mallocing
 } screeninfo_t;
 
 #define NUM_SCREENS 6
 extern screeninfo_t screens[NUM_SCREENS];
-extern int          usegamma;
+extern int usegamma;
 
 // Varying bit-depth support -POPE
 //
@@ -118,9 +120,10 @@ extern int          usegamma;
 #define NUM_GAMMA_LEVELS 5
 
 // The available bit-depth modes
-typedef enum {
-  VID_MODESW,
-  VID_MODEGL
+typedef enum
+{
+	VID_MODESW,
+	VID_MODEGL
 } video_mode_t;
 
 void V_InitMode(video_mode_t mode);
@@ -140,44 +143,44 @@ void V_InitColorTranslation(void);
 void V_InitFlexTranTable(void);
 
 // Allocates buffer screens, call before R_Init.
-void V_Init (void);
+void V_Init(void);
 
 // V_BeginUIDraw
-typedef void(*V_BeginUIDraw_f)(void);
+typedef void (*V_BeginUIDraw_f)(void);
 extern V_BeginUIDraw_f V_BeginUIDraw;
 
 // V_EndUIDraw
-typedef void(*V_EndUIDraw_f)(void);
+typedef void (*V_EndUIDraw_f)(void);
 extern V_EndUIDraw_f V_EndUIDraw;
 
 // V_BeginAutomapDraw
-typedef void(*V_BeginAutomapDraw_f)(void);
+typedef void (*V_BeginAutomapDraw_f)(void);
 extern V_BeginAutomapDraw_f V_BeginAutomapDraw;
 
 // V_EndAutomapDraw
-typedef void(*V_EndAutomapDraw_f)(void);
+typedef void (*V_EndAutomapDraw_f)(void);
 extern V_EndAutomapDraw_f V_EndAutomapDraw;
 
 // V_BeginMenuDraw
-typedef void(*V_BeginMenuDraw_f)(void);
+typedef void (*V_BeginMenuDraw_f)(void);
 extern V_BeginMenuDraw_f V_BeginMenuDraw;
 
 // V_EndMenuDraw
-typedef void(*V_EndMenuDraw_f)(void);
+typedef void (*V_EndMenuDraw_f)(void);
 extern V_EndMenuDraw_f V_EndMenuDraw;
 
 // V_CopyRect
 typedef void (*V_CopyRect_f)(int srcscrn, int destscrn,
-                             int x, int y,
-                             int width, int height,
-                             enum patch_translation_e flags);
+	int x, int y,
+	int width, int height,
+	enum patch_translation_e flags);
 extern V_CopyRect_f V_CopyRect;
 
 void V_CopyScreen(int srcscrn, int destscrn);
 
 // V_FillRect
 typedef void (*V_FillRect_f)(int scrn, int x, int y,
-                             int width, int height, byte colour);
+	int width, int height, byte colour);
 extern V_FillRect_f V_FillRect;
 
 // CPhipps - patch drawing
@@ -185,13 +188,13 @@ extern V_FillRect_f V_FillRect;
 
 // V_DrawNumPatchGen - Draws the patch from lump num
 typedef void (*V_DrawNumPatchGen_f)(int x, int y, int scrn,
-                                 int lump, dboolean center, int cm,
-                                 enum patch_translation_e flags);
+	int lump, dboolean center, int cm,
+	enum patch_translation_e flags);
 extern V_DrawNumPatchGen_f V_DrawNumPatchGen;
 
 typedef void (*V_DrawNumPatchGenPrecise_f)(float x, float y, int scrn,
-                                 int lump, dboolean center, int cm,
-                                 enum patch_translation_e flags);
+	int lump, dboolean center, int cm,
+	enum patch_translation_e flags);
 extern V_DrawNumPatchGenPrecise_f V_DrawNumPatchGenPrecise;
 
 // V_DrawNumPatch - Draws the patch from lump "num"
@@ -247,18 +250,18 @@ void V_ChangeScreenResolution(void);
 // CPhipps - function to plot a pixel
 
 // V_PlotPixel
-typedef void (*V_PlotPixel_f)(int,int,int,byte);
+typedef void (*V_PlotPixel_f)(int, int, int, byte);
 extern V_PlotPixel_f V_PlotPixel;
 
 typedef struct
 {
-  int x, y;
-  float fx, fy;
+	int x, y;
+	float fx, fy;
 } fpoint_t;
 
 typedef struct
 {
-  fpoint_t a, b;
+	fpoint_t a, b;
 } fline_t;
 
 // V_DrawLine
@@ -273,9 +276,9 @@ extern V_DrawLineWu_f V_DrawLineWu;
 typedef void (*V_PlotPixelWu_f)(int scrn, int x, int y, byte color, int weight);
 extern V_PlotPixelWu_f V_PlotPixelWu;
 
-void V_AllocScreen(screeninfo_t *scrn);
+void V_AllocScreen(screeninfo_t* scrn);
 void V_AllocScreens();
-void V_FreeScreen(screeninfo_t *scrn);
+void V_FreeScreen(screeninfo_t* scrn);
 void V_FreeScreens();
 
 const unsigned char* V_GetPlaypal(void);
@@ -284,14 +287,14 @@ void V_FreePlaypal(void);
 // [XA] get number of palettes in the current playpal
 int V_GetPlaypalCount(void);
 
-SDL_Color V_GetPatchColor (int lumpnum);
+SDL_Color V_GetPatchColor(int lumpnum);
 
 // e6y: wide-res
 void V_ClearBorder(void);
 
-void V_GetWideRect(int *x, int *y, int *w, int *h, enum patch_translation_e flags);
+void V_GetWideRect(int* x, int* y, int* w, int* h, enum patch_translation_e flags);
 
-int V_BestColor(const unsigned char *palette, int r, int g, int b);
+int V_BestColor(const unsigned char* palette, int r, int g, int b);
 
 // [FG] colored blood and gibs
 int V_BloodColor(int blood);
@@ -303,8 +306,8 @@ int V_FillHeightVPT(int scrn, int y, int height, byte color, enum patch_translat
 
 // heretic
 
-void V_DrawRawScreen(const char *lump_name);
-void V_DrawRawScreenSection(const char *lump_name, int source_offset, int dest_y_offset, int dest_y_limit);
+void V_DrawRawScreen(const char* lump_name);
+void V_DrawRawScreenSection(const char* lump_name, int source_offset, int dest_y_offset, int dest_y_limit);
 void V_DrawShadowedNumPatch(int x, int y, int lump);
 void V_DrawShadowedNamePatch(int x, int y, const char* name);
 void V_DrawTLNumPatch(int x, int y, int lump);

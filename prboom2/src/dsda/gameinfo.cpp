@@ -5,7 +5,8 @@
 
 #include <string.h>
 
-extern "C" {
+extern "C"
+{
 #include "d_main.h"
 #include "w_wad.h"
 #include "lprintf.h"
@@ -15,38 +16,41 @@ extern "C" {
 #include "scanner.h"
 
 #include "gameinfo.h"
-    
-void dsda_ParseGameInfoLine(Scanner &scanner) {
 
-  if (!scanner.CheckString()) {
-    scanner.GetNextToken();
-    scanner.SkipLine();
-    return;
-  }
+void dsda_ParseGameInfoLine(Scanner& scanner)
+{
+	if(!scanner.CheckString())
+	{
+		scanner.GetNextToken();
+		scanner.SkipLine();
+		return;
+	}
 
-  if (!stricmp(scanner.string, "IWAD")) {
-    scanner.MustGetToken('=');
-    scanner.MustGetString();
+	if(!stricmp(scanner.string, "IWAD"))
+	{
+		scanner.MustGetToken('=');
+		scanner.MustGetString();
 
-    if (iwadlump)
-      Z_Free(iwadlump);
+		if(iwadlump)
+			Z_Free(iwadlump);
 
-    iwadlump = Z_Strdup(scanner.string);
-  }
+		iwadlump = Z_Strdup(scanner.string);
+	}
 }
 
-void dsda_LoadGameInfo(void) {
-  int lump;
+void dsda_LoadGameInfo(void)
+{
+	int lump;
 
-  lump = W_CheckNumForName("GAMEINFO");
+	lump = W_CheckNumForName("GAMEINFO");
 
-  if (lump == LUMP_NOT_FOUND)
-    return;
+	if(lump == LUMP_NOT_FOUND)
+		return;
 
-  Scanner scanner((const char*) W_LumpByNum(lump), W_LumpLength(lump));
+	Scanner scanner((const char*)W_LumpByNum(lump), W_LumpLength(lump));
 
-  scanner.SetErrorCallback(I_Error);
+	scanner.SetErrorCallback(I_Error);
 
-  while (scanner.TokensLeft())
-    dsda_ParseGameInfoLine(scanner);
+	while(scanner.TokensLeft())
+		dsda_ParseGameInfoLine(scanner);
 }

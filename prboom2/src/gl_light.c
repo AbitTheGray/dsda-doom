@@ -33,43 +33,43 @@ static float lighttable[5][256];
  */
 void gld_InitLightTable(void)
 {
-  int i, g;
-  float gamma[5] = {-0.2f, -2.0f, -4.0f, -6.0f, -8.0f};
+	int i, g;
+	float gamma[5] = {-0.2f, -2.0f, -4.0f, -6.0f, -8.0f};
 
-  for (g = 0; g < 5; g++)
-  {
-    for (i = 0; i < 256; i++)
-    {
-      lighttable[g][i] = (float)((1.0f - exp(pow(i / 255.0f, 3) * gamma[g])) / (1.0f - exp(1.0f * gamma[g])));
-    }
-  }
+	for(g = 0; g < 5; g++)
+	{
+		for(i = 0; i < 256; i++)
+		{
+			lighttable[g][i] = (float)((1.0f - exp(pow(i / 255.0f, 3) * gamma[g])) / (1.0f - exp(1.0f * gamma[g])));
+		}
+	}
 }
 
 float gld_Calc2DLightLevel(int lightlevel)
 {
-  return lighttable[usegamma][BETWEEN(0, 255, lightlevel)];
+	return lighttable[usegamma][BETWEEN(0, 255, lightlevel)];
 }
 
 float gld_CalcLightLevel(int lightlevel)
 {
-  int light;
+	int light;
 
-  light = BETWEEN(0, 255, lightlevel);
+	light = BETWEEN(0, 255, lightlevel);
 
-  return (float)light/255.0f;
+	return (float)light / 255.0f;
 }
 
 void gld_StaticLightAlpha(float light, float alpha)
 {
-  player_t *player = &players[displayplayer];
+	player_t* player = &players[displayplayer];
 
-  glColor4f(1.0f, 1.0f, 1.0f, alpha);
+	glColor4f(1.0f, 1.0f, 1.0f, alpha);
 
-  glsl_SetLightLevel((player->fixedcolormap ? 1.0f : light));
+	glsl_SetLightLevel((player->fixedcolormap ? 1.0f : light));
 }
 
 // [XA] return amount of light to add from the player's gun flash.
 int gld_GetGunFlashLight(void)
 {
-  return (extralight << 4);
+	return (extralight << 4);
 }

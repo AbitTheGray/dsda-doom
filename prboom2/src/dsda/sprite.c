@@ -17,93 +17,102 @@ static int deh_spritenames_size;
 static char** deh_spritenames;
 static byte* sprnames_state;
 
-static void dsda_PrepAllocation(void) {
-  static int first_allocation = true;
+static void dsda_PrepAllocation(void)
+{
+	static int first_allocation = true;
 
-  if (first_allocation) {
-    const char** source = sprnames;
+	if(first_allocation)
+	{
+		const char** source = sprnames;
 
-    first_allocation = false;
-    sprnames = malloc(num_sprites * sizeof(*sprnames));
-    memcpy(sprnames, source, num_sprites * sizeof(*sprnames));
-  }
+		first_allocation = false;
+		sprnames = malloc(num_sprites * sizeof(*sprnames));
+		memcpy(sprnames, source, num_sprites * sizeof(*sprnames));
+	}
 }
 
-static void dsda_EnsureCapacity(int limit) {
-  while (limit >= num_sprites) {
-    int old_num_sprites = num_sprites;
+static void dsda_EnsureCapacity(int limit)
+{
+	while(limit >= num_sprites)
+	{
+		int old_num_sprites = num_sprites;
 
-    dsda_PrepAllocation();
+		dsda_PrepAllocation();
 
-    num_sprites *= 2;
+		num_sprites *= 2;
 
-    sprnames = realloc(sprnames, num_sprites * sizeof(*sprnames));
-    memset(sprnames + old_num_sprites, 0, (num_sprites - old_num_sprites) * sizeof(*sprnames));
+		sprnames = realloc(sprnames, num_sprites * sizeof(*sprnames));
+		memset(sprnames + old_num_sprites, 0, (num_sprites - old_num_sprites) * sizeof(*sprnames));
 
-    sprnames_state = realloc(sprnames_state, num_sprites * sizeof(*sprnames_state));
-    memset(sprnames_state + old_num_sprites, 0,
-      (num_sprites - old_num_sprites) * sizeof(*sprnames_state));
-  }
+		sprnames_state = realloc(sprnames_state, num_sprites * sizeof(*sprnames_state));
+		memset(sprnames_state + old_num_sprites, 0,
+			(num_sprites - old_num_sprites) * sizeof(*sprnames_state));
+	}
 }
 
-int dsda_GetDehSpriteIndex(const char* key) {
-  int i;
+int dsda_GetDehSpriteIndex(const char* key)
+{
+	int i;
 
-  for (i = 0; i < num_sprites; ++i)
-    if (sprnames[i] && !strnicmp(sprnames[i], key, 4) && !sprnames_state[i]) {
-      sprnames_state[i] = true; // sprite has been edited
-      return i;
-    }
+	for(i = 0; i < num_sprites; ++i)
+		if(sprnames[i] && !strnicmp(sprnames[i], key, 4) && !sprnames_state[i])
+		{
+			sprnames_state[i] = true; // sprite has been edited
+			return i;
+		}
 
-  return -1;
+	return -1;
 }
 
-int dsda_GetOriginalSpriteIndex(const char* key) {
-  int i;
-  const char* c;
+int dsda_GetOriginalSpriteIndex(const char* key)
+{
+	int i;
+	const char* c;
 
-  for (i = 0; deh_spritenames[i]; ++i)
-    if (!strncasecmp(deh_spritenames[i], key, 4))
-      return i;
+	for(i = 0; deh_spritenames[i]; ++i)
+		if(!strncasecmp(deh_spritenames[i], key, 4))
+			return i;
 
-  // is it a number?
-  for (c = key; *c; c++)
-    if (!isdigit(*c))
-      return -1;
+	// is it a number?
+	for(c = key; *c; c++)
+		if(!isdigit(*c))
+			return -1;
 
-  i = atoi(key);
-  dsda_EnsureCapacity(i);
+	i = atoi(key);
+	dsda_EnsureCapacity(i);
 
-  return i;
+	return i;
 }
 
-void dsda_InitializeSprites(const char** source, int count) {
-  int i;
-  extern int raven;
+void dsda_InitializeSprites(const char** source, int count)
+{
+	int i;
+	extern int raven;
 
-  num_sprites = count;
-  deh_spritenames_size = num_sprites + 1;
+	num_sprites = count;
+	deh_spritenames_size = num_sprites + 1;
 
-  sprnames = source;
+	sprnames = source;
 
-  if (raven) return;
+	if(raven) return;
 
-  deh_spritenames = malloc(deh_spritenames_size * sizeof(*deh_spritenames));
-  for (i = 0; i < num_sprites; i++)
-    deh_spritenames[i] = strdup(sprnames[i]);
-  deh_spritenames[num_sprites] = NULL;
+	deh_spritenames = malloc(deh_spritenames_size * sizeof(*deh_spritenames));
+	for(i = 0; i < num_sprites; i++)
+		deh_spritenames[i] = strdup(sprnames[i]);
+	deh_spritenames[num_sprites] = NULL;
 
-  sprnames_state = calloc(num_sprites, sizeof(*sprnames_state));
+	sprnames_state = calloc(num_sprites, sizeof(*sprnames_state));
 }
 
-void dsda_FreeDehSprites(void) {
-  int i;
+void dsda_FreeDehSprites(void)
+{
+	int i;
 
-  if (deh_spritenames)
-    for (i = 0; i < deh_spritenames_size; i++)
-      if (deh_spritenames[i])
-        free(deh_spritenames[i]);
+	if(deh_spritenames)
+		for(i = 0; i < deh_spritenames_size; i++)
+			if(deh_spritenames[i])
+				free(deh_spritenames[i]);
 
-  free(deh_spritenames);
-  free(sprnames_state);
+	free(deh_spritenames);
+	free(sprnames_state);
 }

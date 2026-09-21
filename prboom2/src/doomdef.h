@@ -33,37 +33,40 @@ extern dboolean bfgedition;
 
 // Game mode handling - identify IWAD version
 //  to handle IWAD dependend animations etc.
-typedef enum {
-  shareware,    // DOOM 1 shareware, E1, M9
-  registered,   // DOOM 1 registered, E3, M27
-  commercial,   // DOOM 2 retail, E1 M34  (DOOM 2 german edition not handled)
-  retail,       // DOOM 1 retail, E4, M36
-  indetermined  // Well, no IWAD found.
+typedef enum
+{
+	shareware,   // DOOM 1 shareware, E1, M9
+	registered,  // DOOM 1 registered, E3, M27
+	commercial,  // DOOM 2 retail, E1 M34  (DOOM 2 german edition not handled)
+	retail,      // DOOM 1 retail, E4, M36
+	indetermined // Well, no IWAD found.
 } GameMode_t;
 
 // Mission packs - might be useful for TC stuff?
-typedef enum {
-  doom,         // DOOM 1
-  doom2,        // DOOM 2
-  pack_tnt,     // TNT mission pack
-  pack_plut,    // Plutonia pack
-  pack_nerve,   // No Rest For The Living
-  tc_hacx,      // HACX - Twitch 'n Kill
-  tc_chex,      // Chex Quest
-  tc_chex3v,    // Chex Quest 3: Vanilla/Modding Edition
-  tc_rekkr,     // REKKR
-  tc_freedoom,  // Freedoom
-  none
+typedef enum
+{
+	doom,        // DOOM 1
+	doom2,       // DOOM 2
+	pack_tnt,    // TNT mission pack
+	pack_plut,   // Plutonia pack
+	pack_nerve,  // No Rest For The Living
+	tc_hacx,     // HACX - Twitch 'n Kill
+	tc_chex,     // Chex Quest
+	tc_chex3v,   // Chex Quest 3: Vanilla/Modding Edition
+	tc_rekkr,    // REKKR
+	tc_freedoom, // Freedoom
+	none
 } GameMission_t;
 
 extern dboolean tc_game;
 
 // Identify language to use, software localization.
-typedef enum {
-  english,
-  french,
-  german,
-  unknown
+typedef enum
+{
+	english,
+	french,
+	german,
+	unknown
 } Language_t;
 
 //
@@ -124,12 +127,13 @@ extern int SCREEN_320x200;
 // The current state of the game: whether we are playing, gazing
 // at the intermission screen, the game final animation, or a demo.
 
-typedef enum {
-  GS_DEFAULT = -1,
-  GS_LEVEL,
-  GS_INTERMISSION,
-  GS_FINALE,
-  GS_DEMOSCREEN
+typedef enum
+{
+	GS_DEFAULT = -1,
+	GS_LEVEL,
+	GS_INTERMISSION,
+	GS_FINALE,
+	GS_DEMOSCREEN
 } gamestate_t;
 
 //
@@ -176,131 +180,136 @@ typedef enum {
 // Key cards.
 //
 
-typedef enum {
-  it_bluecard,
-  it_yellowcard,
-  it_redcard,
-  it_blueskull,
-  it_yellowskull,
-  it_redskull,
-  DOOM_NUMCARDS,
+typedef enum
+{
+	it_bluecard,
+	it_yellowcard,
+	it_redcard,
+	it_blueskull,
+	it_yellowskull,
+	it_redskull,
+	DOOM_NUMCARDS,
 
-  // heretic
-  key_blue = 0,
-  key_yellow,
-  key_green,
+	// heretic
+	key_blue = 0,
+	key_yellow,
+	key_green,
 
-  // hexen
-  key_1 = 0,
-  key_2,
-  key_3,
-  key_4,
-  key_5,
-  key_6,
-  key_7,
-  key_8,
-  key_9,
-  key_a,
-  key_b,
-  NUMCARDS
+	// hexen
+	key_1 = 0,
+	key_2,
+	key_3,
+	key_4,
+	key_5,
+	key_6,
+	key_7,
+	key_8,
+	key_9,
+	key_a,
+	key_b,
+	NUMCARDS
 } card_t;
 
 // The defined weapons, including a marker
 // indicating user has not changed weapon.
-typedef enum {
-  wp_fist,
-  wp_pistol,
-  wp_shotgun,
-  wp_chaingun,
-  wp_missile,
-  wp_plasma,
-  wp_bfg,
-  wp_chainsaw,
-  wp_supershotgun,
+typedef enum
+{
+	wp_fist,
+	wp_pistol,
+	wp_shotgun,
+	wp_chaingun,
+	wp_missile,
+	wp_plasma,
+	wp_bfg,
+	wp_chainsaw,
+	wp_supershotgun,
 
-  // heretic
-  wp_staff = 0,
-  wp_goldwand,
-  wp_crossbow,
-  wp_blaster,
-  wp_skullrod,
-  wp_phoenixrod,
-  wp_mace,
-  wp_gauntlets,
-  wp_beak,
+	// heretic
+	wp_staff = 0,
+	wp_goldwand,
+	wp_crossbow,
+	wp_blaster,
+	wp_skullrod,
+	wp_phoenixrod,
+	wp_mace,
+	wp_gauntlets,
+	wp_beak,
 
-  NUMWEAPONS,
-  wp_nochange,             // No pending weapon change.
+	NUMWEAPONS,
+	wp_nochange, // No pending weapon change.
 
-  // hexen
-  wp_first = 0,
-  wp_second,
-  wp_third,
-  wp_fourth,
-  HEXEN_NUMWEAPONS
+	// hexen
+	wp_first = 0,
+	wp_second,
+	wp_third,
+	wp_fourth,
+	HEXEN_NUMWEAPONS
 } weapontype_t;
 
 // Ammunition types defined.
-typedef enum {
-  am_clip,    // Pistol / chaingun ammo.
-  am_shell,   // Shotgun / double barreled shotgun.
-  am_cell,    // Plasma rifle, BFG.
-  am_misl,    // Missile launcher.
-  DOOM_NUMAMMO,
+typedef enum
+{
+	am_clip,  // Pistol / chaingun ammo.
+	am_shell, // Shotgun / double barreled shotgun.
+	am_cell,  // Plasma rifle, BFG.
+	am_misl,  // Missile launcher.
+	DOOM_NUMAMMO,
 
-  // heretic
-  am_goldwand = 0,
-  am_crossbow,
-  am_blaster,
-  am_skullrod,
-  am_phoenixrod,
-  am_mace,
-  HERETIC_NUMAMMO,
+	// heretic
+	am_goldwand = 0,
+	am_crossbow,
+	am_blaster,
+	am_skullrod,
+	am_phoenixrod,
+	am_mace,
+	HERETIC_NUMAMMO,
 
-  NUMAMMO = HERETIC_NUMAMMO,
-  am_noammo,   // fist, chainsaw, staff, gauntlets
+	NUMAMMO = HERETIC_NUMAMMO,
+	am_noammo, // fist, chainsaw, staff, gauntlets
 
-  // hexen
-  MANA_1 = 0,
-  MANA_2,
-  NUMMANA,
-  MANA_BOTH,
-  MANA_NONE = am_noammo
+	// hexen
+	MANA_1 = 0,
+	MANA_2,
+	NUMMANA,
+	MANA_BOTH,
+	MANA_NONE = am_noammo
 } ammotype_t;
 
 // Power up artifacts.
-typedef enum {
-  pw_invulnerability,
-  pw_strength,
-  pw_invisibility,
-  pw_ironfeet,
-  pw_allmap,
-  pw_infrared,
+typedef enum
+{
+	pw_invulnerability,
+	pw_strength,
+	pw_invisibility,
+	pw_ironfeet,
+	pw_allmap,
+	pw_infrared,
 
-  // heretic
-  pw_weaponlevel2,
-  pw_flight,
-  pw_shield,
-  pw_health2,
+	// heretic
+	pw_weaponlevel2,
+	pw_flight,
+	pw_shield,
+	pw_health2,
 
-  // hexen
-  pw_speed,
-  pw_minotaur,
+	// hexen
+	pw_speed,
+	pw_minotaur,
 
-  NUMPOWERS
+	NUMPOWERS
 } powertype_t;
 
 // Power up durations (how many seconds till expiration).
-typedef enum {
-  INVULNTICS   = (30*TICRATE),
-  INVISTICS    = (60*TICRATE),
-  INFRATICS    = (120*TICRATE),
-  IRONTICS     = (60*TICRATE),
-  WPNLEV2TICS  = (40*TICRATE),
-  FLIGHTTICS   = (60*TICRATE),
-  SPEEDTICS    = (45*TICRATE),
-  MORPHTICS    = (40*TICRATE),
-  MAULATORTICS = (25*TICRATE)
+typedef enum
+{
+	INVULNTICS   = (30 * TICRATE),
+	INVISTICS    = (60 * TICRATE),
+	INFRATICS    = (120 * TICRATE),
+	IRONTICS     = (60 * TICRATE),
+	WPNLEV2TICS  = (40 * TICRATE),
+	FLIGHTTICS   = (60 * TICRATE),
+	SPEEDTICS    = (45 * TICRATE),
+	MORPHTICS    = (40 * TICRATE),
+	MAULATORTICS = (25 * TICRATE)
 } powerduration_t;
 
 // DOOM keyboard definition.
@@ -405,13 +414,14 @@ extern dboolean raven;
 #define FOOTCLIPSIZE 10*FRACUNIT
 
 // Any floor type >= FLOOR_LIQUID will floorclip sprites (hexen)
-typedef enum {
-  FLOOR_SOLID,
-  FLOOR_ICE,
-  FLOOR_LIQUID,
-  FLOOR_WATER,
-  FLOOR_LAVA,
-  FLOOR_SLUDGE
+typedef enum
+{
+	FLOOR_SOLID,
+	FLOOR_ICE,
+	FLOOR_LIQUID,
+	FLOOR_WATER,
+	FLOOR_LAVA,
+	FLOOR_SLUDGE
 } floortype_t;
 
 #define USE_GWND_AMMO_1 1
@@ -445,21 +455,21 @@ extern dboolean heretic;
 
 typedef enum
 {
-  ARMOR_ARMOR,
-  ARMOR_SHIELD,
-  ARMOR_HELMET,
-  ARMOR_AMULET,
-  NUMARMOR
+	ARMOR_ARMOR,
+	ARMOR_SHIELD,
+	ARMOR_HELMET,
+	ARMOR_AMULET,
+	NUMARMOR
 } armortype_t;
 
 typedef enum
 {
-  PCLASS_NULL,
-  PCLASS_FIGHTER,
-  PCLASS_CLERIC,
-  PCLASS_MAGE,
-  PCLASS_PIG,
-  NUMCLASSES
+	PCLASS_NULL,
+	PCLASS_FIGHTER,
+	PCLASS_CLERIC,
+	PCLASS_MAGE,
+	PCLASS_PIG,
+	NUMCLASSES
 } pclass_t;
 
 typedef ammotype_t manatype_t;
@@ -472,43 +482,43 @@ typedef ammotype_t manatype_t;
 
 enum
 {
-  SEQ_PLATFORM,
-  SEQ_PLATFORM_HEAVY,         // same script as a normal platform
-  SEQ_PLATFORM_METAL,
-  SEQ_PLATFORM_CREAK,         // same script as a normal platform
-  SEQ_PLATFORM_SILENCE,
-  SEQ_PLATFORM_LAVA,
-  SEQ_PLATFORM_WATER,
-  SEQ_PLATFORM_ICE,
-  SEQ_PLATFORM_EARTH,
-  SEQ_PLATFORM_METAL2,
-  SEQ_DOOR_STONE,
-  SEQ_DOOR_HEAVY,
-  SEQ_DOOR_METAL,
-  SEQ_DOOR_CREAK,
-  SEQ_DOOR_SILENCE,
-  SEQ_DOOR_LAVA,
-  SEQ_DOOR_WATER,
-  SEQ_DOOR_ICE,
-  SEQ_DOOR_EARTH,
-  SEQ_DOOR_METAL2,
-  SEQ_ESOUND_WIND,
-  SEQ_NUMSEQ
+	SEQ_PLATFORM,
+	SEQ_PLATFORM_HEAVY, // same script as a normal platform
+	SEQ_PLATFORM_METAL,
+	SEQ_PLATFORM_CREAK, // same script as a normal platform
+	SEQ_PLATFORM_SILENCE,
+	SEQ_PLATFORM_LAVA,
+	SEQ_PLATFORM_WATER,
+	SEQ_PLATFORM_ICE,
+	SEQ_PLATFORM_EARTH,
+	SEQ_PLATFORM_METAL2,
+	SEQ_DOOR_STONE,
+	SEQ_DOOR_HEAVY,
+	SEQ_DOOR_METAL,
+	SEQ_DOOR_CREAK,
+	SEQ_DOOR_SILENCE,
+	SEQ_DOOR_LAVA,
+	SEQ_DOOR_WATER,
+	SEQ_DOOR_ICE,
+	SEQ_DOOR_EARTH,
+	SEQ_DOOR_METAL2,
+	SEQ_ESOUND_WIND,
+	SEQ_NUMSEQ
 };
 
 typedef enum
 {
-  SEQTYPE_STONE,
-  SEQTYPE_HEAVY,
-  SEQTYPE_METAL,
-  SEQTYPE_CREAK,
-  SEQTYPE_SILENCE,
-  SEQTYPE_LAVA,
-  SEQTYPE_WATER,
-  SEQTYPE_ICE,
-  SEQTYPE_EARTH,
-  SEQTYPE_METAL2,
-  SEQTYPE_NUMSEQ
+	SEQTYPE_STONE,
+	SEQTYPE_HEAVY,
+	SEQTYPE_METAL,
+	SEQTYPE_CREAK,
+	SEQTYPE_SILENCE,
+	SEQTYPE_LAVA,
+	SEQTYPE_WATER,
+	SEQTYPE_ICE,
+	SEQTYPE_EARTH,
+	SEQTYPE_METAL2,
+	SEQTYPE_NUMSEQ
 } seqtype_t;
 
 #define MAX_INTRMSN_MESSAGE_SIZE 1024

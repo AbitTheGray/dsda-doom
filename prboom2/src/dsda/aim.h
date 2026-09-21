@@ -7,10 +7,11 @@
 
 #include "d_player.h"
 
-typedef struct {
-  angle_t angle;
-  fixed_t slope;
-  fixed_t z_offset;
+typedef struct
+{
+	angle_t angle;
+	fixed_t slope;
+	fixed_t z_offset;
 } aim_t;
 
 angle_t dsda_PlayerPitch(player_t* player);

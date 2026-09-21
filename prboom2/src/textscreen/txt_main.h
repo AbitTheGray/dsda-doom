@@ -61,51 +61,51 @@
 
 typedef enum
 {
-    TXT_COLOR_BLACK,
-    TXT_COLOR_BLUE,
-    TXT_COLOR_GREEN,
-    TXT_COLOR_CYAN,
-    TXT_COLOR_RED,
-    TXT_COLOR_MAGENTA,
-    TXT_COLOR_BROWN,
-    TXT_COLOR_GREY,
-    TXT_COLOR_DARK_GREY,
-    TXT_COLOR_BRIGHT_BLUE,
-    TXT_COLOR_BRIGHT_GREEN,
-    TXT_COLOR_BRIGHT_CYAN,
-    TXT_COLOR_BRIGHT_RED,
-    TXT_COLOR_BRIGHT_MAGENTA,
-    TXT_COLOR_YELLOW,
-    TXT_COLOR_BRIGHT_WHITE,
+	TXT_COLOR_BLACK,
+	TXT_COLOR_BLUE,
+	TXT_COLOR_GREEN,
+	TXT_COLOR_CYAN,
+	TXT_COLOR_RED,
+	TXT_COLOR_MAGENTA,
+	TXT_COLOR_BROWN,
+	TXT_COLOR_GREY,
+	TXT_COLOR_DARK_GREY,
+	TXT_COLOR_BRIGHT_BLUE,
+	TXT_COLOR_BRIGHT_GREEN,
+	TXT_COLOR_BRIGHT_CYAN,
+	TXT_COLOR_BRIGHT_RED,
+	TXT_COLOR_BRIGHT_MAGENTA,
+	TXT_COLOR_YELLOW,
+	TXT_COLOR_BRIGHT_WHITE,
 } txt_color_t;
 
 // Modifier keys.
 
 typedef enum
 {
-    TXT_MOD_SHIFT,
-    TXT_MOD_CTRL,
-    TXT_MOD_ALT,
-    TXT_NUM_MODIFIERS
+	TXT_MOD_SHIFT,
+	TXT_MOD_CTRL,
+	TXT_MOD_ALT,
+	TXT_NUM_MODIFIERS
 } txt_modifier_t;
 
 // Due to the way the SDL API works, we provide different ways of configuring
 // how we read input events, each of which is useful in different scenarios.
 typedef enum
 {
-    // "Localized" output that takes software keyboard layout into account,
-    // but key shifting has no effect.
-    TXT_INPUT_NORMAL,
+	// "Localized" output that takes software keyboard layout into account,
+	// but key shifting has no effect.
+	TXT_INPUT_NORMAL,
 
-    // "Raw" input; the keys correspond to physical keyboard layout and
-    // software keyboard layout has no effect.
-    TXT_INPUT_RAW,
+	// "Raw" input; the keys correspond to physical keyboard layout and
+	// software keyboard layout has no effect.
+	TXT_INPUT_RAW,
 
-    // Used for full text input. Events are fully shifted and localized.
-    // However, not all keyboard keys will generate input.
-    // Setting this mode may activate the on-screen keyboard, depending on
-    // device and OS.
-    TXT_INPUT_TEXT,
+	// Used for full text input. Events are fully shifted and localized.
+	// However, not all keyboard keys will generate input.
+	// Setting this mode may activate the on-screen keyboard, depending on
+	// device and OS.
+	TXT_INPUT_TEXT,
 } txt_input_mode_t;
 
 
@@ -113,11 +113,11 @@ typedef enum
 
 #define PRINTF_ATTR(fmt, first) __attribute__((format(printf, fmt, first)))
 
-#else  // __GNUC__
+#else // __GNUC__
 
 #define PRINTF_ATTR(fmt, first)
 
-#endif  // __GNUC__
+#endif // __GNUC__
 
 // Initialize the screen
 // Returns 1 if successful, 0 if failed.
@@ -127,7 +127,7 @@ int TXT_Init(void);
 void TXT_Shutdown(void);
 
 // Get a pointer to the buffer containing the raw screen data.
-unsigned char *TXT_GetScreenData(void);
+unsigned char* TXT_GetScreenData(void);
 
 // Update an area of the screen
 void TXT_UpdateScreenArea(int x, int y, int w, int h);
@@ -139,7 +139,7 @@ void TXT_UpdateScreen(void);
 int TXT_GetChar(void);
 
 // Retrieve the current position of the mouse
-void TXT_GetMousePosition(int *x, int *y);
+void TXT_GetMousePosition(int* x, int* y);
 
 // Sleep until an event is received or the screen needs updating
 // Optional timeout in ms (timeout == 0 : sleep forever)

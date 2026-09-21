@@ -8,11 +8,12 @@
 
 #include "doomtype.h"
 
-typedef struct {
-  byte actions;
-  byte save_slot;
-  byte load_slot;
-  signed short look;
+typedef struct
+{
+	byte actions;
+	byte save_slot;
+	byte load_slot;
+	signed short look;
 } excmd_t;
 
 /* The data sampled per tick (single player)
@@ -23,15 +24,15 @@ typedef struct {
  */
 typedef struct
 {
-  signed char forwardmove;  /* *2048 for move       */
-  signed char sidemove; /* *2048 for move       */
-  signed short  angleturn;  /* <<16 for angle delta */
-  byte  buttons;
+	signed char forwardmove; /* *2048 for move       */
+	signed char sidemove;    /* *2048 for move       */
+	signed short angleturn;  /* <<16 for angle delta */
+	byte buttons;
 
-  // heretic
-  byte lookfly; // look/fly up/down/centering
-  byte arti;    // artitype_t to use
+	// heretic
+	byte lookfly; // look/fly up/down/centering
+	byte arti;    // artitype_t to use
 
-  // dsda extension
-  excmd_t ex;
+	// dsda extension
+	excmd_t ex;
 } ticcmd_t;

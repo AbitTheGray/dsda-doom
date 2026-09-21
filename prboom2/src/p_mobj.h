@@ -179,7 +179,7 @@
 #define MF_UNUSED2      0x0000000010000000ull
 #define MF_UNUSED3      0x0000000020000000ull
 
-    // Translucent sprite?                                          // phares
+// Translucent sprite?                                          // phares
 #define MF_TRANSLUCENT  0x0000000040000000ull
 
 // this is free            0x0000000100000000ull
@@ -201,8 +201,8 @@
 #define MF_FLY             0x0000020000000000ull
 
 // hexen
-#define	MF_ALTSHADOW	0x0000040000000000ull // alternate translucent draw
-#define	MF_ICECORPSE	0x0000080000000000ull // a frozen corpse (for blasting)
+#define MF_ALTSHADOW	0x0000040000000000ull // alternate translucent draw
+#define MF_ICECORPSE	0x0000080000000000ull // a frozen corpse (for blasting)
 
 // hexen_note: MF_TRANSLATION covers doom's (MF_TRANSLATION | MF_UNUSED2)
 
@@ -211,22 +211,23 @@
 // killough 9/15/98: Same, but internal flags, not intended for .deh
 // (some degree of opaqueness is good, to avoid compatibility woes)
 
-enum {
-  MIF_FALLING               = (1<<0), // Object is falling
-  MIF_ARMED                 = (1<<1), // Object is armed (for MF_TOUCHY objects)
-  MIF_SCROLLING             = (1<<2), // Object is affected by scroller / pusher / puller
-  MIF_PLAYER_DAMAGED_BARREL = (1<<3),
-  MIF_SPAWNED_BY_ICON       = (1<<4),
-  MIF_FAKE                  = (1<<5), // Not a real thing, transient (e.g., for cheats)
-  MIF_LINEDONE              = (1<<6), // Object has activated W1 or S1 linedef via DEH frame
-  MIF_INTERP_CAPTURE        = (1<<7), // [AR] Capture interpolation once per tic
+enum
+{
+	MIF_FALLING               = (1 << 0), // Object is falling
+	MIF_ARMED                 = (1 << 1), // Object is armed (for MF_TOUCHY objects)
+	MIF_SCROLLING             = (1 << 2), // Object is affected by scroller / pusher / puller
+	MIF_PLAYER_DAMAGED_BARREL = (1 << 3),
+	MIF_SPAWNED_BY_ICON       = (1 << 4),
+	MIF_FAKE                  = (1 << 5), // Not a real thing, transient (e.g., for cheats)
+	MIF_LINEDONE              = (1 << 6), // Object has activated W1 or S1 linedef via DEH frame
+	MIF_INTERP_CAPTURE        = (1 << 7), // [AR] Capture interpolation once per tic
 };
 
 // heretic
 typedef struct
 {
-    int i;
-    struct mobj_s *m;
+	int i;
+	struct mobj_s* m;
 } specialval_t;
 
 // Map Object definition.
@@ -250,140 +251,140 @@ typedef struct
 
 typedef struct mobj_s
 {
-    // List: thinker links.
-    thinker_t           thinker;
+	// List: thinker links.
+	thinker_t thinker;
 
-    // Info for drawing: position.
-    fixed_t             x;
-    fixed_t             y;
-    fixed_t             z;
+	// Info for drawing: position.
+	fixed_t x;
+	fixed_t y;
+	fixed_t z;
 
-    // More list: links in sector (if needed)
-    struct mobj_s*      snext;
-    struct mobj_s**     sprev; // killough 8/10/98: change to ptr-to-ptr
+	// More list: links in sector (if needed)
+	struct mobj_s* snext;
+	struct mobj_s** sprev; // killough 8/10/98: change to ptr-to-ptr
 
-    //More drawing info: to determine current sprite.
-    angle_t             angle;  // orientation
-    spritenum_t         sprite; // used to find patch_t and flip value
-    int                 frame;  // might be ORed with FF_FULLBRIGHT
+	//More drawing info: to determine current sprite.
+	angle_t angle;      // orientation
+	spritenum_t sprite; // used to find patch_t and flip value
+	int frame;          // might be ORed with FF_FULLBRIGHT
 
-    // Interaction info, by BLOCKMAP.
-    // Links in blocks (if needed).
-    struct mobj_s*      bnext;
-    struct mobj_s**     bprev; // killough 8/11/98: change to ptr-to-ptr
+	// Interaction info, by BLOCKMAP.
+	// Links in blocks (if needed).
+	struct mobj_s* bnext;
+	struct mobj_s** bprev; // killough 8/11/98: change to ptr-to-ptr
 
-    struct subsector_s* subsector;
+	struct subsector_s* subsector;
 
-    // The closest interval over all contacted Sectors.
-    fixed_t             floorz;
-    fixed_t             ceilingz;
+	// The closest interval over all contacted Sectors.
+	fixed_t floorz;
+	fixed_t ceilingz;
 
-    // killough 11/98: the lowest floor over all contacted Sectors.
-    fixed_t             dropoffz;
+	// killough 11/98: the lowest floor over all contacted Sectors.
+	fixed_t dropoffz;
 
-    // For movement checking.
-    fixed_t             radius;
-    fixed_t             height;
+	// For movement checking.
+	fixed_t radius;
+	fixed_t height;
 
-    // Momentums, used to update position.
-    fixed_t             momx;
-    fixed_t             momy;
-    fixed_t             momz;
+	// Momentums, used to update position.
+	fixed_t momx;
+	fixed_t momy;
+	fixed_t momz;
 
-    // If == validcount, already checked.
-    int                 validcount;
+	// If == validcount, already checked.
+	int validcount;
 
-    mobjtype_t          type;
-    mobjinfo_t*         info;   // &mobjinfo[mobj->type]
+	mobjtype_t type;
+	mobjinfo_t* info; // &mobjinfo[mobj->type]
 
-    int                 tics;   // state tic counter
-    state_t*            state;
-    uint64_t            flags;
-    int                 intflags;  // killough 9/15/98: internal flags
-    int                 health;
+	int tics; // state tic counter
+	state_t* state;
+	uint64_t flags;
+	int intflags; // killough 9/15/98: internal flags
+	int health;
 
-    // Movement direction, movement generation (zig-zagging).
-    short               movedir;        // 0-7
-    short               movecount;      // when 0, select a new dir
-    short               strafecount;    // killough 9/8/98: monster strafing
+	// Movement direction, movement generation (zig-zagging).
+	short movedir;     // 0-7
+	short movecount;   // when 0, select a new dir
+	short strafecount; // killough 9/8/98: monster strafing
 
-    // Thing being chased/attacked (or NULL),
-    // also the originator for missiles.
-    struct mobj_s*      target;
+	// Thing being chased/attacked (or NULL),
+	// also the originator for missiles.
+	struct mobj_s* target;
 
-    // Reaction time: if non 0, don't attack yet.
-    // Used by player to freeze a bit after teleporting.
-    short               reactiontime;
+	// Reaction time: if non 0, don't attack yet.
+	// Used by player to freeze a bit after teleporting.
+	short reactiontime;
 
-    // If >0, the current target will be chased no
-    // matter what (even if shot by another object)
-    short               threshold;
+	// If >0, the current target will be chased no
+	// matter what (even if shot by another object)
+	short threshold;
 
-    // killough 9/9/98: How long a monster pursues a target.
-    short               pursuecount;
+	// killough 9/9/98: How long a monster pursues a target.
+	short pursuecount;
 
-    short               gear; // killough 11/98: used in torque simulation
+	short gear; // killough 11/98: used in torque simulation
 
-    // Additional info record for player avatars only.
-    // Only valid if type == MT_PLAYER
-    struct player_s*    player;
+	// Additional info record for player avatars only.
+	// Only valid if type == MT_PLAYER
+	struct player_s* player;
 
-    // Player number last looked for.
-    short               lastlook;
+	// Player number last looked for.
+	short lastlook;
 
-    // For nightmare respawn.
-    mapthing_t          spawnpoint;
+	// For nightmare respawn.
+	mapthing_t spawnpoint;
 
-    // Thing being chased/attacked for tracers.
-    struct mobj_s*      tracer;
+	// Thing being chased/attacked for tracers.
+	struct mobj_s* tracer;
 
-    // new field: last known enemy -- killough 2/15/98
-    struct mobj_s*      lastenemy;
+	// new field: last known enemy -- killough 2/15/98
+	struct mobj_s* lastenemy;
 
-    // killough 8/2/98: friction properties part of sectors,
-    // not objects -- removed friction properties from here
-    // e6y: restored friction properties here
-    // Friction values for the sector the object is in
-    int friction;                                           // phares 3/17/98
-    int movefactor;
+	// killough 8/2/98: friction properties part of sectors,
+	// not objects -- removed friction properties from here
+	// e6y: restored friction properties here
+	// Friction values for the sector the object is in
+	int friction; // phares 3/17/98
+	int movefactor;
 
-    // a linked list of sectors where this object appears
-    struct msecnode_s* touching_sectorlist;                 // phares 3/14/98
+	// a linked list of sectors where this object appears
+	struct msecnode_s* touching_sectorlist; // phares 3/14/98
 
-    fixed_t             PrevX;
-    fixed_t             PrevY;
-    fixed_t             PrevZ;
+	fixed_t PrevX;
+	fixed_t PrevY;
+	fixed_t PrevZ;
 
-    //e6y
-    angle_t             pitch;  // orientation
-    int index;
-    short patch_width;
+	//e6y
+	angle_t pitch; // orientation
+	int index;
+	short patch_width;
 
-    int iden_nums;		// hi word stores thing num, low word identifier num
+	int iden_nums; // hi word stores thing num, low word identifier num
 
-    // heretic
-    int damage;                 // For missiles
-    uint64_t flags2;           // Heretic & MBF21 flags
-    specialval_t special1;      // Special info
-    specialval_t special2;      // Special info
+	// heretic
+	int damage;            // For missiles
+	uint64_t flags2;       // Heretic & MBF21 flags
+	specialval_t special1; // Special info
+	specialval_t special2; // Special info
 
-    // hexen
-    fixed_t floorpic;           // contacted sec floorpic
-    fixed_t floorclip;          // value to use for floor clipping
-    int archiveNum;             // Identity during archive
-    short tid;                  // thing identifier
-    int special;                // special
-    int special_args[5];        // special arguments
+	// hexen
+	fixed_t floorpic;    // contacted sec floorpic
+	fixed_t floorclip;   // value to use for floor clipping
+	int archiveNum;      // Identity during archive
+	short tid;           // thing identifier
+	int special;         // special
+	int special_args[5]; // special arguments
 
-    // zdoom
-    fixed_t gravity;
-    float alpha;
+	// zdoom
+	fixed_t gravity;
+	float alpha;
 
-    // misc
-    byte color;
-    const byte* tranmap;
+	// misc
+	byte color;
+	const byte* tranmap;
 
-    // SEE WARNING ABOVE ABOUT POINTER FIELDS!!!
+	// SEE WARNING ABOVE ABOUT POINTER FIELDS!!!
 } mobj_t;
 
 // External declarations (fomerly in p_local.h) -- killough 5/2/98
@@ -414,23 +415,23 @@ extern int iquehead;
 extern int iquetail;
 
 int P_MobjSpawnHealth(const mobj_t* mobj);
-mobj_t* P_SubstNullMobj (mobj_t* th);
-void    P_RespawnSpecials(void);
-mobj_t  *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type);
-void    P_RemoveMobj(mobj_t *th);
-dboolean P_SetMobjState(mobj_t *mobj, statenum_t state);
-void    P_MobjThinker(mobj_t *mobj);
-void    P_UpdateMobjInterpolations(void);
-void    P_MobjInterpolation(mobj_t *mobj);
-void    P_SpawnPuff(fixed_t x, fixed_t y, fixed_t z);
-void    P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, int damage, mobj_t *bleeder);
-mobj_t  *P_SpawnMissile(mobj_t *source, mobj_t *dest, mobjtype_t type);
-mobj_t  *P_SpawnPlayerMissile(mobj_t *source, mobjtype_t type);
+mobj_t* P_SubstNullMobj(mobj_t* th);
+void P_RespawnSpecials(void);
+mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type);
+void P_RemoveMobj(mobj_t* th);
+dboolean P_SetMobjState(mobj_t* mobj, statenum_t state);
+void P_MobjThinker(mobj_t* mobj);
+void P_UpdateMobjInterpolations(void);
+void P_MobjInterpolation(mobj_t* mobj);
+void P_SpawnPuff(fixed_t x, fixed_t y, fixed_t z);
+void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, int damage, mobj_t* bleeder);
+mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type);
+mobj_t* P_SpawnPlayerMissile(mobj_t* source, mobjtype_t type);
 dboolean P_IsDoomnumAllowed(int doomnum);
-mobj_t* P_SpawnMapThing (const mapthing_t*  mthing, int index);
-void    P_SpawnPlayer(int n, const mapthing_t *mthing);
-dboolean P_CheckMissileSpawn(mobj_t*);  // killough 8/2/98
-void    P_ExplodeMissile(mobj_t*);    // killough
+mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index);
+void P_SpawnPlayer(int n, const mapthing_t* mthing);
+dboolean P_CheckMissileSpawn(mobj_t*); // killough 8/2/98
+void P_ExplodeMissile(mobj_t*);        // killough
 
 void P_RemoveMonsters(void);
 
@@ -511,39 +512,39 @@ void P_RemoveMonsters(void);
 
 extern mobj_t* MissileMobj;
 
-void P_BlasterMobjThinker(mobj_t * mobj);
-mobj_t *P_SpawnMissileAngle(mobj_t * source, mobjtype_t type, angle_t angle, fixed_t momz);
-dboolean P_SetMobjStateNF(mobj_t * mobj, statenum_t state);
-void P_ThrustMobj(mobj_t * mo, angle_t angle, fixed_t move);
-dboolean P_SeekerMissile(mobj_t * actor, mobj_t ** seekTarget, angle_t thresh, angle_t turnMax, dboolean seekcenter);
-mobj_t *P_SPMAngle(mobj_t * source, mobjtype_t type, angle_t angle);
-int P_HitFloor(mobj_t * thing);
-int P_GetThingFloorType(mobj_t * thing);
-int P_FaceMobj(mobj_t * source, mobj_t * target, angle_t * delta);
-void P_BloodSplatter(fixed_t x, fixed_t y, fixed_t z, mobj_t * originator);
-void P_RipperBlood(mobj_t * mo, mobj_t * bleeder);
-dboolean Raven_P_SetMobjState(mobj_t * mobj, statenum_t state);
-void P_FloorBounceMissile(mobj_t * mo);
+void P_BlasterMobjThinker(mobj_t* mobj);
+mobj_t* P_SpawnMissileAngle(mobj_t* source, mobjtype_t type, angle_t angle, fixed_t momz);
+dboolean P_SetMobjStateNF(mobj_t* mobj, statenum_t state);
+void P_ThrustMobj(mobj_t* mo, angle_t angle, fixed_t move);
+dboolean P_SeekerMissile(mobj_t* actor, mobj_t** seekTarget, angle_t thresh, angle_t turnMax, dboolean seekcenter);
+mobj_t* P_SPMAngle(mobj_t* source, mobjtype_t type, angle_t angle);
+int P_HitFloor(mobj_t* thing);
+int P_GetThingFloorType(mobj_t* thing);
+int P_FaceMobj(mobj_t* source, mobj_t* target, angle_t* delta);
+void P_BloodSplatter(fixed_t x, fixed_t y, fixed_t z, mobj_t* originator);
+void P_RipperBlood(mobj_t* mo, mobj_t* bleeder);
+dboolean Raven_P_SetMobjState(mobj_t* mobj, statenum_t state);
+void P_FloorBounceMissile(mobj_t* mo);
 void Raven_P_SpawnPuff(fixed_t x, fixed_t y, fixed_t z);
 
 // hexen
 
-mobj_t *P_SpawnMissileXYZ(fixed_t x, fixed_t y, fixed_t z,
-                          mobj_t * source, mobj_t * dest, mobjtype_t type);
-mobj_t *P_SpawnMissileAngleSpeed(mobj_t * source, mobjtype_t type,
-                                 angle_t angle, fixed_t momz, fixed_t speed);
-mobj_t *P_SPMAngleXYZ(mobj_t * source, fixed_t x, fixed_t y,
-                      fixed_t z, mobjtype_t type, angle_t angle);
-mobj_t *P_SpawnKoraxMissile(fixed_t x, fixed_t y, fixed_t z,
-                            mobj_t * source, mobj_t * dest, mobjtype_t type);
-mobj_t *P_FindMobjFromTID(short tid, int *searchPosition);
-void P_BloodSplatter2(fixed_t x, fixed_t y, fixed_t z, mobj_t * originator);
+mobj_t* P_SpawnMissileXYZ(fixed_t x, fixed_t y, fixed_t z,
+	mobj_t* source, mobj_t* dest, mobjtype_t type);
+mobj_t* P_SpawnMissileAngleSpeed(mobj_t* source, mobjtype_t type,
+	angle_t angle, fixed_t momz, fixed_t speed);
+mobj_t* P_SPMAngleXYZ(mobj_t* source, fixed_t x, fixed_t y,
+	fixed_t z, mobjtype_t type, angle_t angle);
+mobj_t* P_SpawnKoraxMissile(fixed_t x, fixed_t y, fixed_t z,
+	mobj_t* source, mobj_t* dest, mobjtype_t type);
+mobj_t* P_FindMobjFromTID(short tid, int* searchPosition);
+void P_BloodSplatter2(fixed_t x, fixed_t y, fixed_t z, mobj_t* originator);
 
 // zdoom
 
 fixed_t P_MobjGravity(mobj_t* mo);
-dboolean P_SpawnThing(short thing_id, mobj_t *source, int type,
-                      angle_t angle, dboolean fog, short new_thing_id);
-dboolean P_SpawnProjectile(short thing_id, mobj_t *source, int spawn_num, angle_t angle,
-	                         fixed_t speed, fixed_t vspeed, short dest_id, mobj_t *forcedest,
-                           int gravity, short new_thing_id);
+dboolean P_SpawnThing(short thing_id, mobj_t* source, int type,
+	angle_t angle, dboolean fog, short new_thing_id);
+dboolean P_SpawnProjectile(short thing_id, mobj_t* source, int spawn_num, angle_t angle,
+	fixed_t speed, fixed_t vspeed, short dest_id, mobj_t* forcedest,
+	int gravity, short new_thing_id);

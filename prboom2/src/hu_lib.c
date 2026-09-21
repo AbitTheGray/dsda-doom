@@ -17,7 +17,7 @@
 
 char HUlib_Color(int cm)
 {
-  return HU_COLOR + cm;
+	return HU_COLOR + cm;
 }
 
 ////////////////////////////////////////////////////////
@@ -35,9 +35,9 @@ char HUlib_Color(int cm)
 //
 void HUlib_clearTextLine(hu_textline_t* t)
 {
-  t->linelen =         // killough 1/23 98: support multiple lines
-    t->len = 0;
-  t->l[0] = 0;
+	t->linelen = // killough 1/23 98: support multiple lines
+		t->len = 0;
+	t->l[0] = 0;
 }
 
 //
@@ -50,19 +50,19 @@ void HUlib_clearTextLine(hu_textline_t* t)
 // Returns nothing
 //
 void HUlib_initTextLine(hu_textline_t* t, int x, int y,
-      const dsda_font_t* f, int cm, enum patch_translation_e flags )
-  //jff 2/16/98 add color range parameter
+	const dsda_font_t* f, int cm, enum patch_translation_e flags)
+//jff 2/16/98 add color range parameter
 {
-  t->x = x;
-  t->y = y;
-  t->f = f->font;
-  t->sc = f->start;
-  t->cm = cm;
-  t->flags = flags;
-  t->line_height = f->line_height;
-  t->space_width = f->space_width;
-  t->kerning = f->kerning;
-  HUlib_clearTextLine(t);
+	t->x = x;
+	t->y = y;
+	t->f = f->font;
+	t->sc = f->start;
+	t->cm = cm;
+	t->flags = flags;
+	t->line_height = f->line_height;
+	t->space_width = f->space_width;
+	t->kerning = f->kerning;
+	HUlib_clearTextLine(t);
 }
 
 //
@@ -74,23 +74,22 @@ void HUlib_initTextLine(hu_textline_t* t, int x, int y,
 // Returns false if already at length limit, true if the character added
 //
 dboolean HUlib_addCharToTextLine
-( hu_textline_t*  t,
-  char      ch )
+(hu_textline_t* t,
+	char ch)
 {
-  // killough 1/23/98 -- support multiple lines
-  if (t->linelen == HU_MAXLINELENGTH)
-    return false;
-  else
-  {
-    t->linelen++;
-    if (ch == '\n')
-      t->linelen=0;
+	// killough 1/23/98 -- support multiple lines
+	if(t->linelen == HU_MAXLINELENGTH)
+		return false;
+	else
+	{
+		t->linelen++;
+		if(ch == '\n')
+			t->linelen = 0;
 
-    t->l[t->len++] = ch;
-    t->l[t->len] = 0;
-    return true;
-  }
-
+		t->l[t->len++] = ch;
+		t->l[t->len] = 0;
+		return true;
+	}
 }
 
 //
@@ -102,78 +101,78 @@ dboolean HUlib_addCharToTextLine
 // Returns nothing
 //
 void HUlib_drawTextLine
-( hu_textline_t* l,
-  dboolean drawcursor )
+(hu_textline_t* l,
+	dboolean drawcursor)
 {
+	int i;
+	int w;
+	int x;
+	unsigned char c;
+	int oc = l->cm; //jff 2/17/98 remember default color
+	int y;          // killough 1/18/98 -- support multiple lines
 
-  int     i;
-  int     w;
-  int     x;
-  unsigned char c;
-  int oc = l->cm; //jff 2/17/98 remember default color
-  int y;          // killough 1/18/98 -- support multiple lines
+	// draw the new stuff
 
-  // draw the new stuff
+	x = l->x;
+	y = l->y;
+	for(i = 0; i < l->len; i++)
+	{
+		c = toupper(l->l[i]); //jff insure were not getting a cheap toupper conv.
 
-  x = l->x;
-  y = l->y;
-  for (i=0;i<l->len;i++)
-  {
-    c = toupper(l->l[i]); //jff insure were not getting a cheap toupper conv.
+		if(c == '\n') // killough 1/18/98 -- support multiple lines
+		{
+			x = l->x;
+			y += l->line_height;
+		}
+		else if(c == '\t') // killough 1/23/98 -- support tab stops
+			x = x - x % 80 + 80;
+		else if(c == '\x1b') //jff 2/17/98 escape code for color change
+		{
+			//jff 3/26/98 changed to actual escape char
+			if(++i < l->len)
+			{
+				if(l->l[i] >= HU_COLOR && l->l[i] < HU_COLOR + CR_HUD_LIMIT)
+					l->cm = l->l[i] - HU_COLOR;
+				else if(l->l[i] < HU_COLOR)
+					x += l->l[i];
+			}
+		}
+		else if(c != ' ' && c >= l->sc && c <= 127)
+		{
+			w = l->f[c - l->sc].width + l->kerning;
+			if(x + w - l->f[c - l->sc].leftoffset > BASE_WIDTH)
+				break;
+			// killough 1/18/98 -- support multiple lines:
+			// CPhipps - patch drawing updated
+			V_DrawNumPatch(x, y, FG, l->f[c - l->sc].lumpnum, l->cm, VPT_TRANS | l->flags);
+			x += w;
+		}
+		else
+		{
+			x += l->space_width;
+			if(x >= BASE_WIDTH)
+				break;
+		}
+	}
+	l->cm = oc; //jff 2/17/98 restore original color
 
-    if (c=='\n')         // killough 1/18/98 -- support multiple lines
-    {
-      x = l->x;
-      y += l->line_height;
-    }
-    else if (c=='\t')    // killough 1/23/98 -- support tab stops
-      x=x-x%80+80;
-    else if (c=='\x1b')  //jff 2/17/98 escape code for color change
-    {                    //jff 3/26/98 changed to actual escape char
-      if (++i < l->len)
-      {
-        if (l->l[i] >= HU_COLOR && l->l[i] < HU_COLOR + CR_HUD_LIMIT)
-          l->cm = l->l[i] - HU_COLOR;
-        else if (l->l[i] < HU_COLOR)
-          x += l->l[i];
-      }
-    }
-    else  if (c != ' ' && c >= l->sc && c <= 127)
-    {
-      w = l->f[c - l->sc].width + l->kerning;
-      if (x+w-l->f[c - l->sc].leftoffset > BASE_WIDTH)
-        break;
-      // killough 1/18/98 -- support multiple lines:
-      // CPhipps - patch drawing updated
-      V_DrawNumPatch(x, y, FG, l->f[c - l->sc].lumpnum, l->cm, VPT_TRANS | l->flags);
-      x += w;
-    }
-    else
-    {
-      x += l->space_width;
-      if (x >= BASE_WIDTH)
-      break;
-    }
-  }
-  l->cm = oc; //jff 2/17/98 restore original color
-
-  // draw the cursor if requested
-  if (drawcursor && x + l->f['_' - l->sc].width + l->kerning <= BASE_WIDTH)
-  {
-    // killough 1/18/98 -- support multiple lines
-    // CPhipps - patch drawing updated
-    V_DrawNumPatch(x, y, FG, l->f['_' - l->sc].lumpnum, CR_DEFAULT, VPT_NONE | l->flags);
-  }
+	// draw the cursor if requested
+	if(drawcursor && x + l->f['_' - l->sc].width + l->kerning <= BASE_WIDTH)
+	{
+		// killough 1/18/98 -- support multiple lines
+		// CPhipps - patch drawing updated
+		V_DrawNumPatch(x, y, FG, l->f['_' - l->sc].lumpnum, CR_DEFAULT, VPT_NONE | l->flags);
+	}
 }
 
 void HUlib_drawOffsetTextLine(hu_textline_t* l, int offset)
 {
-  int old_y;
+	int old_y;
 
-  old_y = l->y;
-  l->y += offset;
-  HUlib_drawTextLine(l, false);
-  l->y = old_y;
+	old_y = l->y;
+	l->y += offset;
+	HUlib_drawTextLine(l, false);
+	l->y = old_y;
 }
 
 //
@@ -186,15 +185,15 @@ void HUlib_drawOffsetTextLine(hu_textline_t* l, int offset)
 //
 void HUlib_setTextXCenter(hu_textline_t* t)
 {
-  char *s = t->l;
-  t->x = 320;
-  while (*s)
-  {
-    int c = toupper(*(s++)) - HU_FONTSTART;
-    t->x -= (c < 0 || c > HU_FONTSIZE ? t->space_width : t->f[c].width + t->kerning);
-  }
-  if (t->x < 0)
-    t->x = 0;
+	char* s = t->l;
+	t->x = 320;
+	while(*s)
+	{
+		int c = toupper(*(s++)) - HU_FONTSTART;
+		t->x -= (c < 0 || c > HU_FONTSIZE ? t->space_width : t->f[c].width + t->kerning);
+	}
+	if(t->x < 0)
+		t->x = 0;
 
-  t->x >>= 1;
+	t->x >>= 1;
 }

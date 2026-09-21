@@ -28,21 +28,23 @@
 
 #define THRUST_LOCATION_SHIFT 5
 
-typedef struct {
-  thinker_t thinker;
-  fixed_t dx;
-  fixed_t dy;
-  int affectee;
-  int flags;
+typedef struct
+{
+	thinker_t thinker;
+	fixed_t dx;
+	fixed_t dy;
+	int affectee;
+	int flags;
 } scroll_t;
 
-typedef struct {
-  scroll_t scroll;
-  int control;
-  fixed_t last_height;
-  fixed_t vdx;
-  fixed_t vdy;
-  int accel;
+typedef struct
+{
+	scroll_t scroll;
+	int control;
+	fixed_t last_height;
+	fixed_t vdx;
+	fixed_t vdy;
+	int accel;
 } control_scroll_t;
 
 void dsda_UpdateControlSideScroller(control_scroll_t* s);
@@ -59,16 +61,16 @@ void dsda_UpdateThruster(scroll_t* s);
 
 void dsda_AddSideScroller(fixed_t dx, fixed_t dy, int affectee, int flags);
 void dsda_AddControlSideScroller(fixed_t dx, fixed_t dy,
-                                 int control, int affectee, int accel, int flags);
+	int control, int affectee, int accel, int flags);
 void dsda_AddFloorScroller(fixed_t dx, fixed_t dy, int affectee, int flags);
 void dsda_AddControlFloorScroller(fixed_t dx, fixed_t dy,
-                                  int control, int affectee, int accel, int flags);
+	int control, int affectee, int accel, int flags);
 void dsda_AddCeilingScroller(fixed_t dx, fixed_t dy, int affectee, int flags);
 void dsda_AddControlCeilingScroller(fixed_t dx, fixed_t dy,
-                                    int control, int affectee, int accel, int flags);
+	int control, int affectee, int accel, int flags);
 void dsda_AddFloorCarryScroller(fixed_t dx, fixed_t dy, int affectee, int flags);
 void dsda_AddControlFloorCarryScroller(fixed_t dx, fixed_t dy,
-                                       int control, int affectee, int accel, int flags);
+	int control, int affectee, int accel, int flags);
 void dsda_AddZDoomFloorScroller(fixed_t dx, fixed_t dy, int affectee, int flags);
 void dsda_AddZDoomCeilingScroller(fixed_t dx, fixed_t dy, int affectee, int flags);
 void dsda_AddThruster(fixed_t dx, fixed_t dy, int affectee, int flags);

@@ -14,17 +14,17 @@
 
 typedef struct camera_s
 {
-  fixed_t x;
-  fixed_t y;
-  fixed_t z;
-  fixed_t PrevX;
-  fixed_t PrevY;
-  fixed_t PrevZ;
-  angle_t angle;
-  angle_t pitch;
-  angle_t PrevAngle;
-  angle_t PrevPitch;
-  int type;
+	fixed_t x;
+	fixed_t y;
+	fixed_t z;
+	fixed_t PrevX;
+	fixed_t PrevY;
+	fixed_t PrevZ;
+	angle_t angle;
+	angle_t pitch;
+	angle_t PrevAngle;
+	angle_t PrevPitch;
+	int type;
 } camera_t;
 
 extern dboolean wasWiped;
@@ -61,7 +61,7 @@ void ParamsMatchingCheck();
 void e6y_HandleSkip(void);
 void e6y_InitCommandLine(void);
 
-void P_WalkTicker ();
+void P_WalkTicker();
 void P_SyncWalkcam(dboolean sync_coords, dboolean sync_sight);
 void P_ResetWalkcam(void);
 
@@ -83,7 +83,7 @@ void M_ChangeScreenMultipleFactor(void);
 void M_ChangeInterlacedScanning(void);
 void M_MouseMLook(int choice);
 void M_MouseAccel(int choice);
-void CheckPitch(signed int *pitch);
+void CheckPitch(signed int* pitch);
 
 dboolean HaveMouseLook(void);
 
@@ -91,39 +91,39 @@ extern float viewPitch;
 
 typedef struct prboom_comp_s
 {
-  unsigned int minver;
-  unsigned int maxver;
-  dboolean state;
-  int arg_id;
+	unsigned int minver;
+	unsigned int maxver;
+	dboolean state;
+	int arg_id;
 } prboom_comp_t;
 
 enum
 {
-  PC_MONSTER_AVOID_HAZARDS,
-  PC_REMOVE_SLIME_TRAILS,
-  PC_NO_DROPOFF,
-  PC_TRUNCATED_SECTOR_SPECIALS,
-  PC_BOOM_BRAINAWAKE,
-  PC_PRBOOM_FRICTION,
-  PC_REJECT_PAD_WITH_FF,
-  PC_FORCE_LXDOOM_DEMO_COMPATIBILITY,
-  PC_ALLOW_SSG_DIRECT,
-  PC_TREAT_NO_CLIPPING_THINGS_AS_NOT_BLOCKING,
-  PC_FORCE_INCORRECT_PROCESSING_OF_RESPAWN_FRAME_ENTRY,
-  PC_FORCE_CORRECT_CODE_FOR_3_KEYS_DOORS_IN_MBF,
-  PC_UNINITIALIZE_CRUSH_FIELD_FOR_STAIRS,
-  PC_FORCE_BOOM_FINDNEXTHIGHESTFLOOR,
-  PC_ALLOW_SKY_TRANSFER_IN_BOOM,
-  PC_APPLY_GREEN_ARMOR_CLASS_TO_ARMOR_BONUSES,
-  PC_APPLY_BLUE_ARMOR_CLASS_TO_MEGASPHERE,
-  PC_FORCE_INCORRECT_BOBBING_IN_BOOM,
-  PC_BOOM_DEH_PARSER,
-  PC_MBF_REMOVE_THINKER_IN_KILLMOBJ,
-  PC_DO_NOT_INHERIT_FRIENDLYNESS_FLAG_ON_SPAWN,
-  PC_DO_NOT_USE_MISC12_FRAME_PARAMETERS_IN_A_MUSHROOM,
-  PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL,
-  PC_RESET_MONSTERSPAWNER_PARAMS_AFTER_LOADING,
-  PC_MAX
+	PC_MONSTER_AVOID_HAZARDS,
+	PC_REMOVE_SLIME_TRAILS,
+	PC_NO_DROPOFF,
+	PC_TRUNCATED_SECTOR_SPECIALS,
+	PC_BOOM_BRAINAWAKE,
+	PC_PRBOOM_FRICTION,
+	PC_REJECT_PAD_WITH_FF,
+	PC_FORCE_LXDOOM_DEMO_COMPATIBILITY,
+	PC_ALLOW_SSG_DIRECT,
+	PC_TREAT_NO_CLIPPING_THINGS_AS_NOT_BLOCKING,
+	PC_FORCE_INCORRECT_PROCESSING_OF_RESPAWN_FRAME_ENTRY,
+	PC_FORCE_CORRECT_CODE_FOR_3_KEYS_DOORS_IN_MBF,
+	PC_UNINITIALIZE_CRUSH_FIELD_FOR_STAIRS,
+	PC_FORCE_BOOM_FINDNEXTHIGHESTFLOOR,
+	PC_ALLOW_SKY_TRANSFER_IN_BOOM,
+	PC_APPLY_GREEN_ARMOR_CLASS_TO_ARMOR_BONUSES,
+	PC_APPLY_BLUE_ARMOR_CLASS_TO_MEGASPHERE,
+	PC_FORCE_INCORRECT_BOBBING_IN_BOOM,
+	PC_BOOM_DEH_PARSER,
+	PC_MBF_REMOVE_THINKER_IN_KILLMOBJ,
+	PC_DO_NOT_INHERIT_FRIENDLYNESS_FLAG_ON_SPAWN,
+	PC_DO_NOT_USE_MISC12_FRAME_PARAMETERS_IN_A_MUSHROOM,
+	PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL,
+	PC_RESET_MONSTERSPAWNER_PARAMS_AFTER_LOADING,
+	PC_MAX
 };
 
 extern prboom_comp_t prboom_comp[];
@@ -132,28 +132,28 @@ int StepwiseSum(int value, int direction, int minval, int maxval, int defval);
 
 enum
 {
-  TT_ALLKILL,
-  TT_ALLITEM,
-  TT_ALLSECRET,
+	TT_ALLKILL,
+	TT_ALLITEM,
+	TT_ALLSECRET,
 
-  TT_TIME,
-  TT_TOTALTIME,
-  TT_TOTALKILL,
-  TT_TOTALITEM,
-  TT_TOTALSECRET,
+	TT_TIME,
+	TT_TOTALTIME,
+	TT_TOTALKILL,
+	TT_TOTALITEM,
+	TT_TOTALSECRET,
 
-  TT_MAX
+	TT_MAX
 };
 
 typedef struct timetable_s
 {
-  char map[16];
+	char map[16];
 
-  int kill[MAX_MAXPLAYERS];
-  int item[MAX_MAXPLAYERS];
-  int secret[MAX_MAXPLAYERS];
+	int kill[MAX_MAXPLAYERS];
+	int item[MAX_MAXPLAYERS];
+	int secret[MAX_MAXPLAYERS];
 
-  int stat[TT_MAX];
+	int stat[TT_MAX];
 } timetable_t;
 
 #ifdef _WIN32
@@ -191,13 +191,13 @@ extern int levelstarttic;
 extern int force_singletics_to;
 
 int HU_DrawDemoProgress(int force);
-dboolean HU_MouseOnDemoProgressBar(int *x);
+dboolean HU_MouseOnDemoProgressBar(int* x);
 
 #ifdef _WIN32
-int GetFullPath(const char* FileName, const char* ext, char *Buffer, size_t BufferLength);
+int GetFullPath(const char* FileName, const char* ext, char* Buffer, size_t BufferLength);
 #endif
 
-void I_vWarning(const char *message, va_list argList);
+void I_vWarning(const char* message, va_list argList);
 
 #define PRB_MB_OK                       0x00000000
 #define PRB_MB_OKCANCEL                 0x00000001

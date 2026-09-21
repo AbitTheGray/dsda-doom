@@ -11,7 +11,7 @@ void dsda_AddLineID(int id, int value);
 void dsda_AddSectorID(int id, int value);
 const int* dsda_FindLinesFromID(int id);
 const int* dsda_FindSectorsFromID(int id);
-const int* dsda_FindSectorsFromIDOrLine(int id, const line_t *line);
+const int* dsda_FindSectorsFromIDOrLine(int id, const line_t* line);
 void dsda_ResetLineIDList(int size);
 void dsda_ResetSectorIDList(int size);
 

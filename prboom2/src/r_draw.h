@@ -8,24 +8,26 @@
 
 #include "r_defs.h"
 
-enum column_pipeline_e {
-  RDC_PIPELINE_STANDARD,
-  RDC_PIPELINE_TRANSLUCENT,
-  RDC_PIPELINE_TRANSLATED,
-  RDC_PIPELINE_FUZZ,
-  RDC_PIPELINE_MAXPIPELINES,
+enum column_pipeline_e
+{
+	RDC_PIPELINE_STANDARD,
+	RDC_PIPELINE_TRANSLUCENT,
+	RDC_PIPELINE_TRANSLATED,
+	RDC_PIPELINE_FUZZ,
+	RDC_PIPELINE_MAXPIPELINES,
 };
 
 // Used to specify what kind of filering you want
-enum draw_filter_type_e {
-  RDRAW_FILTER_NONE,
-  RDRAW_FILTER_POINT,
-  RDRAW_FILTER_MAXFILTERS
+enum draw_filter_type_e
+{
+	RDRAW_FILTER_NONE,
+	RDRAW_FILTER_POINT,
+	RDRAW_FILTER_MAXFILTERS
 };
 
 typedef enum
 {
-  DRAW_COLUMN_ISPATCH = 0x00000001
+	DRAW_COLUMN_ISPATCH = 0x00000001
 } draw_column_flags_e;
 
 typedef struct draw_column_vars_s* pdraw_column_vars_s;
@@ -34,69 +36,71 @@ typedef void (*R_DrawColumn_f)(pdraw_column_vars_s dcvars);
 // Packaged into a struct - POPE
 typedef struct draw_column_vars_s
 {
-  int                 x;
-  int                 yl;
-  int                 yh;
-  int                 dy;
-  fixed_t             iscale;
-  fixed_t             texturemid;
-  int                 texheight;    // killough
-  const byte          *source; // first pixel in a column
-  const byte          *prevsource; // first pixel in previous column
-  const byte          *nextsource; // first pixel in next column
-  const lighttable_t  *colormap;
-  const byte          *translation;
-  int                 edgeslope; // OR'ed RDRAW_EDGESLOPE_*
-  // 1 if R_DrawColumn* is currently drawing a masked column, otherwise 0
-  int                 drawingmasked;
-  unsigned int        flags; //e6y: for detect patches ind colfunc()
+	int x;
+	int yl;
+	int yh;
+	int dy;
+	fixed_t iscale;
+	fixed_t texturemid;
+	int texheight;          // killough
+	const byte* source;     // first pixel in a column
+	const byte* prevsource; // first pixel in previous column
+	const byte* nextsource; // first pixel in next column
+	const lighttable_t* colormap;
+	const byte* translation;
+	int edgeslope; // OR'ed RDRAW_EDGESLOPE_*
+	// 1 if R_DrawColumn* is currently drawing a masked column, otherwise 0
+	int drawingmasked;
+	unsigned int flags; //e6y: for detect patches ind colfunc()
 
-  // [AR] mark weapon sprite
-  dboolean            isplayersprite;
-  int                 pspritepostheight;
+	// [AR] mark weapon sprite
+	dboolean isplayersprite;
+	int pspritepostheight;
 
-  // heretic
-  int baseclip;
+	// heretic
+	int baseclip;
 } draw_column_vars_t;
 
-void R_SetDefaultDrawColumnVars(draw_column_vars_t *dcvars);
+void R_SetDefaultDrawColumnVars(draw_column_vars_t* dcvars);
 
-typedef struct {
-  int                 y;
-  int                 x1;
-  int                 x2;
-  fixed_t             z; // the current span z coord
-  fixed_t             xfrac;
-  fixed_t             yfrac;
-  fixed_t             xstep;
-  fixed_t             ystep;
-  const byte          *source; // start of a 64*64 tile image
-  const lighttable_t  *colormap;
+typedef struct
+{
+	int y;
+	int x1;
+	int x2;
+	fixed_t z; // the current span z coord
+	fixed_t xfrac;
+	fixed_t yfrac;
+	fixed_t xstep;
+	fixed_t ystep;
+	const byte* source; // start of a 64*64 tile image
+	const lighttable_t* colormap;
 
-  fixed_t xoffs;
-  fixed_t yoffs;
-  fixed_t xscale;
-  fixed_t yscale;
-  fixed_t sine;
-  fixed_t cosine;
-  fixed_t planeheight;
-  const lighttable_t **planezlight;
+	fixed_t xoffs;
+	fixed_t yoffs;
+	fixed_t xscale;
+	fixed_t yscale;
+	fixed_t sine;
+	fixed_t cosine;
+	fixed_t planeheight;
+	const lighttable_t** planezlight;
 } draw_span_vars_t;
 
-typedef struct {
-  byte           *topleft;
-  int   pitch;
+typedef struct
+{
+	byte* topleft;
+	int pitch;
 } draw_vars_t;
 
 extern draw_vars_t drawvars;
 
 extern byte playernumtotrans[MAX_MAXPLAYERS]; // CPhipps - what translation table for what player
-extern byte       *translationtables;
+extern byte* translationtables;
 
 R_DrawColumn_f R_GetDrawColumnFunc(enum column_pipeline_e type, enum draw_filter_type_e filterz);
 
 // Span blitting for rows, floor/ceiling. No Spectre effect needed.
-void R_DrawSpan(draw_span_vars_t *dsvars);
+void R_DrawSpan(draw_span_vars_t* dsvars);
 
 void R_InitBuffer(int width, int height);
 

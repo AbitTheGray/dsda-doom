@@ -50,62 +50,63 @@
 
 typedef struct vertexsplit_info_s
 {
-  dboolean changed;
-  int numheights;
-  int numsectors;
-  sector_t **sectors;
-  float *heightlist;
-  byte validcount;
+	dboolean changed;
+	int numheights;
+	int numsectors;
+	sector_t** sectors;
+	float* heightlist;
+	byte validcount;
 } vertexsplit_info_t;
 
-static vertexsplit_info_t * gl_vertexsplit = NULL;
+static vertexsplit_info_t* gl_vertexsplit = NULL;
 
 typedef struct splitsbysector_s
 {
-  int numsplits;
-  vertexsplit_info_t **splits;
+	int numsplits;
+	vertexsplit_info_t** splits;
 } splitsbysector_t;
-static splitsbysector_t * gl_splitsbysector = NULL;
+
+static splitsbysector_t* gl_splitsbysector = NULL;
 
 //==========================================================================
 //
 // Split left edge of wall
 //
 //==========================================================================
-void gld_SplitLeftEdge(const GLWall *wall)
+void gld_SplitLeftEdge(const GLWall* wall)
 {
-  vertex_t *v;
-  vertexsplit_info_t *vi;
+	vertex_t* v;
+	vertexsplit_info_t* vi;
 
-  v = wall->seg->linedef->v1;
+	v = wall->seg->linedef->v1;
 
-  if (v == NULL)
-    return;
+	if(v == NULL)
+		return;
 
-  vi = &gl_vertexsplit[v - vertexes];
+	vi = &gl_vertexsplit[v - vertexes];
 
-  if (vi->numheights)
-  {
-    int i = 0;
+	if(vi->numheights)
+	{
+		int i = 0;
 
-    float polyh1 = wall->ytop - wall->ybottom;
-    float factv1 = (polyh1 ? (wall->vt - wall->vb) / polyh1 : 0);
-    float factu1 = (polyh1 ? (wall->ul - wall->ul) / polyh1 : 0);
+		float polyh1 = wall->ytop - wall->ybottom;
+		float factv1 = (polyh1 ? (wall->vt - wall->vb) / polyh1 : 0);
+		float factu1 = (polyh1 ? (wall->ul - wall->ul) / polyh1 : 0);
 
-    while (i < vi->numheights && vi->heightlist[i] <= wall->ybottom)
-      i++;
+		while(i < vi->numheights && vi->heightlist[i] <= wall->ybottom)
+			i++;
 
-    while (i < vi->numheights && vi->heightlist[i] < wall->ytop)
-    {
-      GLfloat s = factu1 * (vi->heightlist[i] - wall->ytop) + wall->ul;
-      GLfloat t = factv1 * (vi->heightlist[i] - wall->ytop) + wall->vt;
+		while(i < vi->numheights && vi->heightlist[i] < wall->ytop)
+		{
+			GLfloat s = factu1 * (vi->heightlist[i] - wall->ytop) + wall->ul;
+			GLfloat t = factv1 * (vi->heightlist[i] - wall->ytop) + wall->vt;
 
-      glTexCoord2f(s, t);
+			glTexCoord2f(s, t);
 
-      glVertex3f(wall->glseg->x1, vi->heightlist[i], wall->glseg->z1);
-      i++;
-    }
-  }
+			glVertex3f(wall->glseg->x1, vi->heightlist[i], wall->glseg->z1);
+			i++;
+		}
+	}
 }
 
 //==========================================================================
@@ -113,40 +114,40 @@ void gld_SplitLeftEdge(const GLWall *wall)
 // Split right edge of wall
 //
 //==========================================================================
-void gld_SplitRightEdge(const GLWall *wall)
+void gld_SplitRightEdge(const GLWall* wall)
 {
-  vertex_t *v;
-  vertexsplit_info_t * vi;
+	vertex_t* v;
+	vertexsplit_info_t* vi;
 
-  v = wall->seg->linedef->v2;
+	v = wall->seg->linedef->v2;
 
-  if (v == NULL)
-    return;
+	if(v == NULL)
+		return;
 
-  vi = &gl_vertexsplit[v - vertexes];
+	vi = &gl_vertexsplit[v - vertexes];
 
-  if (vi->numheights)
-  {
-    int i = vi->numheights - 1;
+	if(vi->numheights)
+	{
+		int i = vi->numheights - 1;
 
-    float polyh2 = wall->ytop - wall->ybottom;
-    float factv2 = (polyh2 ? (wall->vt - wall->vb) / polyh2 : 0);
-    float factu2 = (polyh2 ? (wall->ur - wall->ur) / polyh2 : 0);
+		float polyh2 = wall->ytop - wall->ybottom;
+		float factv2 = (polyh2 ? (wall->vt - wall->vb) / polyh2 : 0);
+		float factu2 = (polyh2 ? (wall->ur - wall->ur) / polyh2 : 0);
 
-    while (i > 0 && vi->heightlist[i] >= wall->ytop)
-      i--;
+		while(i > 0 && vi->heightlist[i] >= wall->ytop)
+			i--;
 
-    while (i > 0 && vi->heightlist[i] > wall->ybottom)
-    {
-      GLfloat s = factu2 * (vi->heightlist[i] - wall->ytop) + wall->ur;
-      GLfloat t = factv2 * (vi->heightlist[i] - wall->ytop) + wall->vt;
+		while(i > 0 && vi->heightlist[i] > wall->ybottom)
+		{
+			GLfloat s = factu2 * (vi->heightlist[i] - wall->ytop) + wall->ur;
+			GLfloat t = factv2 * (vi->heightlist[i] - wall->ytop) + wall->vt;
 
-      glTexCoord2f(s, t);
+			glTexCoord2f(s, t);
 
-      glVertex3f(wall->glseg->x2, vi->heightlist[i], wall->glseg->z2);
-      i--;
-    }
-  }
+			glVertex3f(wall->glseg->x2, vi->heightlist[i], wall->glseg->z2);
+			i--;
+		}
+	}
 }
 
 //==========================================================================
@@ -154,54 +155,54 @@ void gld_SplitRightEdge(const GLWall *wall)
 // Recalculate all heights affectting this vertex.
 //
 //==========================================================================
-void gld_RecalcVertexHeights(const vertex_t *v)
+void gld_RecalcVertexHeights(const vertex_t* v)
 {
-  int i,j,k;
-  float height;
-  vertexsplit_info_t *vi;
+	int i, j, k;
+	float height;
+	vertexsplit_info_t* vi;
 
-  vi = &gl_vertexsplit[v - vertexes];
+	vi = &gl_vertexsplit[v - vertexes];
 
-  if (vi->validcount == rendermarker)
-    return;
+	if(vi->validcount == rendermarker)
+		return;
 
-  vi->validcount = rendermarker;
+	vi->validcount = rendermarker;
 
-  if (!vi->changed)
-    return;
+	if(!vi->changed)
+		return;
 
-  vi->changed = false;
+	vi->changed = false;
 
-  vi->numheights = 0;
-  for(i = 0; i < vi->numsectors; i++)
-  {
-    for(j = 0; j < 2; j++)
-    {
-      if (j == 0)
-        height = (float)vi->sectors[i]->ceilingheight/MAP_SCALE;
-      else
-        height = (float)vi->sectors[i]->floorheight/MAP_SCALE;
+	vi->numheights = 0;
+	for(i = 0; i < vi->numsectors; i++)
+	{
+		for(j = 0; j < 2; j++)
+		{
+			if(j == 0)
+				height = (float)vi->sectors[i]->ceilingheight / MAP_SCALE;
+			else
+				height = (float)vi->sectors[i]->floorheight / MAP_SCALE;
 
-      for(k = 0; k < vi->numheights; k++)
-      {
-        if (height == vi->heightlist[k])
-          break;
+			for(k = 0; k < vi->numheights; k++)
+			{
+				if(height == vi->heightlist[k])
+					break;
 
-        if (height < vi->heightlist[k])
-        {
-          memmove(&vi->heightlist[k + 1], &vi->heightlist[k], sizeof(vi->heightlist[0]) * (vi->numheights - k));
-          vi->heightlist[k] = height;
-          vi->numheights++;
-          break;
-        }
-      }
-      if (k == vi->numheights)
-        vi->heightlist[vi->numheights++] = height;
-    }
-  }
+				if(height < vi->heightlist[k])
+				{
+					memmove(&vi->heightlist[k + 1], &vi->heightlist[k], sizeof(vi->heightlist[0]) * (vi->numheights - k));
+					vi->heightlist[k] = height;
+					vi->numheights++;
+					break;
+				}
+			}
+			if(k == vi->numheights)
+				vi->heightlist[vi->numheights++] = height;
+		}
+	}
 
-  if (vi->numheights <= 2)
-    vi->numheights = 0;  // is not in need of any special attention
+	if(vi->numheights <= 2)
+		vi->numheights = 0; // is not in need of any special attention
 }
 
 //==========================================================================
@@ -209,19 +210,19 @@ void gld_RecalcVertexHeights(const vertex_t *v)
 //
 //
 //==========================================================================
-static void AddToVertex(const sector_t *sec, int **list, unsigned int *size)
+static void AddToVertex(const sector_t* sec, int** list, unsigned int* size)
 {
-  unsigned int i;
-  int secno = sec->iSectorID;
+	unsigned int i;
+	int secno = sec->iSectorID;
 
-  for(i = 0; i < (*size); i++)
-  {
-    if ((*list)[i] == secno)
-      return;
-  }
-  (*list) = Z_Realloc((*list), sizeof(*list) * ((*size) + 1));
-  (*list)[(*size)] = secno;
-  (*size)++;
+	for(i = 0; i < (*size); i++)
+	{
+		if((*list)[i] == secno)
+			return;
+	}
+	(*list) = Z_Realloc((*list), sizeof(*list) * ((*size) + 1));
+	(*list)[(*size)] = secno;
+	(*size)++;
 }
 
 //==========================================================================
@@ -229,19 +230,19 @@ static void AddToVertex(const sector_t *sec, int **list, unsigned int *size)
 //
 //
 //==========================================================================
-static void AddToSplitBySector(vertexsplit_info_t *vi, splitsbysector_t *splitsbysector)
+static void AddToSplitBySector(vertexsplit_info_t* vi, splitsbysector_t* splitsbysector)
 {
-  int i;
-  for(i = 0; i < splitsbysector->numsplits; i++)
-  {
-    if (splitsbysector->splits[i] == vi)
-      return;
-  }
-  splitsbysector->splits = Z_Realloc(
-    splitsbysector->splits,
-    sizeof(splitsbysector->splits) * (splitsbysector->numsplits + 1));
-  splitsbysector->splits[splitsbysector->numsplits] = vi;
-  splitsbysector->numsplits++;
+	int i;
+	for(i = 0; i < splitsbysector->numsplits; i++)
+	{
+		if(splitsbysector->splits[i] == vi)
+			return;
+	}
+	splitsbysector->splits = Z_Realloc(
+		splitsbysector->splits,
+		sizeof(splitsbysector->splits) * (splitsbysector->numsplits + 1));
+	splitsbysector->splits[splitsbysector->numsplits] = vi;
+	splitsbysector->numsplits++;
 }
 
 //==========================================================================
@@ -251,109 +252,109 @@ static void AddToSplitBySector(vertexsplit_info_t *vi, splitsbysector_t *splitsb
 //==========================================================================
 void gld_InitVertexData()
 {
-  int i, j, k;
-  int vertexes_count, gl_vertexsplit_size, pos;
-  int ** vt_sectorlists;
-  unsigned int * vt_sectorlists_size;
+	int i, j, k;
+	int vertexes_count, gl_vertexsplit_size, pos;
+	int** vt_sectorlists;
+	unsigned int* vt_sectorlists_size;
 
-  if (gl_vertexsplit)
-    return;
+	if(gl_vertexsplit)
+		return;
 
-  vt_sectorlists = Z_Calloc(sizeof(vt_sectorlists[0]), numvertexes);
-  vt_sectorlists_size = Z_Calloc(sizeof(vt_sectorlists_size[0]), numvertexes);
+	vt_sectorlists = Z_Calloc(sizeof(vt_sectorlists[0]), numvertexes);
+	vt_sectorlists_size = Z_Calloc(sizeof(vt_sectorlists_size[0]), numvertexes);
 
-  for(i = 0; i < numlines; i++)
-  {
-    line_t *line = &lines[i];
+	for(i = 0; i < numlines; i++)
+	{
+		line_t* line = &lines[i];
 
-    for(j = 0; j < 2; j++)
-    {
-      vertex_t *v = (j==0 ? line->v1 : line->v2);
+		for(j = 0; j < 2; j++)
+		{
+			vertex_t* v = (j == 0 ? line->v1 : line->v2);
 
-      for(k = 0; k < 2; k++)
-      {
-        sector_t *sec = (k == 0 ? line->frontsector : line->backsector);
+			for(k = 0; k < 2; k++)
+			{
+				sector_t* sec = (k == 0 ? line->frontsector : line->backsector);
 
-        if (sec)
-        {
-          AddToVertex(sec, &vt_sectorlists[v-vertexes], &vt_sectorlists_size[v-vertexes]);
-          if (sec->heightsec >= 0)
-          {
-            AddToVertex(&sectors[sec->heightsec], &vt_sectorlists[v-vertexes], &vt_sectorlists_size[v-vertexes]);
-          }
-        }
-      }
-    }
-  }
+				if(sec)
+				{
+					AddToVertex(sec, &vt_sectorlists[v - vertexes], &vt_sectorlists_size[v - vertexes]);
+					if(sec->heightsec >= 0)
+					{
+						AddToVertex(&sectors[sec->heightsec], &vt_sectorlists[v - vertexes], &vt_sectorlists_size[v - vertexes]);
+					}
+				}
+			}
+		}
+	}
 
-  vertexes_count = 0;
-  for(i = 0; i < numvertexes; i++)
-  {
-    if (vt_sectorlists_size[i] > 1)
-    {
-      vertexes_count += vt_sectorlists_size[i];
-    }
-  }
+	vertexes_count = 0;
+	for(i = 0; i < numvertexes; i++)
+	{
+		if(vt_sectorlists_size[i] > 1)
+		{
+			vertexes_count += vt_sectorlists_size[i];
+		}
+	}
 
-  gl_vertexsplit_size =
-    numvertexes * sizeof(vertexsplit_info_t) +
-    vertexes_count * sizeof(gl_vertexsplit->sectors[0]) +
-    2 * vertexes_count * sizeof(gl_vertexsplit->heightlist[0]);
+	gl_vertexsplit_size =
+		numvertexes * sizeof(vertexsplit_info_t) +
+		vertexes_count * sizeof(gl_vertexsplit->sectors[0]) +
+		2 * vertexes_count * sizeof(gl_vertexsplit->heightlist[0]);
 
-  gl_vertexsplit = Z_Malloc(gl_vertexsplit_size);
-  memset(gl_vertexsplit, 0, gl_vertexsplit_size);
+	gl_vertexsplit = Z_Malloc(gl_vertexsplit_size);
+	memset(gl_vertexsplit, 0, gl_vertexsplit_size);
 
-  pos = numvertexes * sizeof(vertexsplit_info_t);
-  for(i = 0; i < numvertexes; i++)
-  {
-    int cnt = vt_sectorlists_size[i];
-    vertexsplit_info_t *vi = &gl_vertexsplit[i];
+	pos = numvertexes * sizeof(vertexsplit_info_t);
+	for(i = 0; i < numvertexes; i++)
+	{
+		int cnt = vt_sectorlists_size[i];
+		vertexsplit_info_t* vi = &gl_vertexsplit[i];
 
-    vi->validcount = -1;
-    vi->numheights = 0;
-    if (cnt > 1)
-    {
-      vi->changed = true;
-      vi->numsectors = cnt;
+		vi->validcount = -1;
+		vi->numheights = 0;
+		if(cnt > 1)
+		{
+			vi->changed = true;
+			vi->numsectors = cnt;
 
-      vi->sectors = (sector_t **)((unsigned char*)gl_vertexsplit + pos);
-      pos += sizeof(vi->sectors[0]) * cnt;
-      vi->heightlist = (float *)((unsigned char*)gl_vertexsplit + pos);
-      pos += sizeof(vi->heightlist[0]) * cnt * 2;
+			vi->sectors = (sector_t**)((unsigned char*)gl_vertexsplit + pos);
+			pos += sizeof(vi->sectors[0]) * cnt;
+			vi->heightlist = (float*)((unsigned char*)gl_vertexsplit + pos);
+			pos += sizeof(vi->heightlist[0]) * cnt * 2;
 
-      for(j = 0; j < cnt; j++)
-      {
-        vi->sectors[j] = &sectors[vt_sectorlists[i][j]];
-      }
-    }
-    else
-    {
-      vi->numsectors=0;
-    }
-  }
+			for(j = 0; j < cnt; j++)
+			{
+				vi->sectors[j] = &sectors[vt_sectorlists[i][j]];
+			}
+		}
+		else
+		{
+			vi->numsectors = 0;
+		}
+	}
 
-  gl_splitsbysector = Z_Malloc(sizeof(gl_splitsbysector[0]) * numsectors);
-  memset(gl_splitsbysector, 0, sizeof(gl_splitsbysector[0]) * numsectors);
+	gl_splitsbysector = Z_Malloc(sizeof(gl_splitsbysector[0]) * numsectors);
+	memset(gl_splitsbysector, 0, sizeof(gl_splitsbysector[0]) * numsectors);
 
-  for(i = 0; i < numsectors; i++)
-  {
-    for(j = 0; j < numvertexes; j++)
-    {
-      vertexsplit_info_t *vi = &gl_vertexsplit[j];
+	for(i = 0; i < numsectors; i++)
+	{
+		for(j = 0; j < numvertexes; j++)
+		{
+			vertexsplit_info_t* vi = &gl_vertexsplit[j];
 
-      for(k = 0; k < vi->numsectors; k++)
-      {
-        if (vi->sectors[k] == &sectors[i])
-          AddToSplitBySector(vi, &gl_splitsbysector[i]);
-      }
-    }
-  }
+			for(k = 0; k < vi->numsectors; k++)
+			{
+				if(vi->sectors[k] == &sectors[i])
+					AddToSplitBySector(vi, &gl_splitsbysector[i]);
+			}
+		}
+	}
 
-  for(i = 0; i < numvertexes; i++)
-    gld_RecalcVertexHeights(&vertexes[i]);
+	for(i = 0; i < numvertexes; i++)
+		gld_RecalcVertexHeights(&vertexes[i]);
 
-  Z_Free(vt_sectorlists);
-  Z_Free(vt_sectorlists_size);
+	Z_Free(vt_sectorlists);
+	Z_Free(vt_sectorlists_size);
 }
 
 //==========================================================================
@@ -361,18 +362,18 @@ void gld_InitVertexData()
 //
 //
 //==========================================================================
-void gld_UpdateSplitData(sector_t *sector)
+void gld_UpdateSplitData(sector_t* sector)
 {
-  int i;
+	int i;
 
-  if (gl_splitsbysector)
-  {
-    splitsbysector_t *splitsbysector = &gl_splitsbysector[sector->iSectorID];
-    for (i = 0; i < splitsbysector->numsplits; i++)
-    {
-      splitsbysector->splits[i]->changed = true;
-    }
-  }
+	if(gl_splitsbysector)
+	{
+		splitsbysector_t* splitsbysector = &gl_splitsbysector[sector->iSectorID];
+		for(i = 0; i < splitsbysector->numsplits; i++)
+		{
+			splitsbysector->splits[i]->changed = true;
+		}
+	}
 }
 
 //==========================================================================
@@ -382,23 +383,23 @@ void gld_UpdateSplitData(sector_t *sector)
 //==========================================================================
 void gld_CleanVertexData()
 {
-  if (gl_vertexsplit)
-  {
-    Z_Free(gl_vertexsplit);
-    gl_vertexsplit = NULL;
-  }
+	if(gl_vertexsplit)
+	{
+		Z_Free(gl_vertexsplit);
+		gl_vertexsplit = NULL;
+	}
 
-  if (gl_splitsbysector)
-  {
-    int i;
-    for(i = 0; i < numsectors; i++)
-    {
-      if (gl_splitsbysector[i].numsplits > 0)
-      {
-        Z_Free(gl_splitsbysector[i].splits);
-      }
-    }
-    Z_Free(gl_splitsbysector);
-    gl_splitsbysector = NULL;
-  }
+	if(gl_splitsbysector)
+	{
+		int i;
+		for(i = 0; i < numsectors; i++)
+		{
+			if(gl_splitsbysector[i].numsplits > 0)
+			{
+				Z_Free(gl_splitsbysector[i].splits);
+			}
+		}
+		Z_Free(gl_splitsbysector);
+		gl_splitsbysector = NULL;
+	}
 }

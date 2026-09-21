@@ -10,12 +10,12 @@
 
 // Game Mode - identify IWAD as shareware, retail etc.
 GameMode_t gamemode = indetermined;
-GameMission_t   gamemission = doom;
+GameMission_t gamemission = doom;
 
 dboolean tc_game;
 
 // Language.
-Language_t   language = english;
+Language_t language = english;
 
 // Set if homebrew PWAD stuff has been added.
 dboolean modifiedgame;
@@ -29,27 +29,27 @@ complevel_t compatibility_level;
 // it's required for demos recorded in "demo compatibility" mode by boom201 for example
 int demover;
 
-int comp[MBF_COMP_TOTAL];    // killough 10/98
+int comp[MBF_COMP_TOTAL]; // killough 10/98
 int default_comperr[COMPERR_NUM];
 
-int demo_insurance;        // killough 1/16/98
+int demo_insurance; // killough 1/16/98
 
-int  allow_pushers = 1;      // MT_PUSH Things              // phares 3/10/98
+int allow_pushers = 1; // MT_PUSH Things              // phares 3/10/98
 
-int  variable_friction = 1;      // ice & mud               // phares 3/10/98
+int variable_friction = 1; // ice & mud               // phares 3/10/98
 
-int  weapon_recoil = 0;              // weapon recoil                   // phares
+int weapon_recoil = 0; // weapon recoil                   // phares
 
-int player_bobbing = 1;  // whether player bobs or not          // phares 2/25/98
+int player_bobbing = 1; // whether player bobs or not          // phares 2/25/98
 
-int monsters_remember = 1;          // killough 3/1/98
+int monsters_remember = 1; // killough 3/1/98
 
-int monster_infighting=1;       // killough 7/19/98: monster<=>monster attacks
+int monster_infighting = 1; // killough 7/19/98: monster<=>monster attacks
 
-int monster_friction=1;       // killough 10/98: monsters affected by friction
+int monster_friction = 1; // killough 10/98: monsters affected by friction
 
-int dogs;         // killough 7/19/98: Marine's best friend :)
-int dog_jumping;   // killough 10/98
+int dogs;        // killough 7/19/98: Marine's best friend :)
+int dog_jumping; // killough 10/98
 
 // killough 8/8/98: distance friends tend to move towards players
 int distfriend = 128;
@@ -65,14 +65,14 @@ int help_friends;
 
 int monkeys;
 
-char *VANILLA_MAP_LUMP_NAME(int e, int m)
+char* VANILLA_MAP_LUMP_NAME(int e, int m)
 {
-  static char name[9];
+	static char name[9];
 
-  if (gamemode == commercial || map_format.map99)
-    snprintf(name, sizeof(name), "MAP%02d", m);
-  else
-    snprintf(name, sizeof(name), "E%dM%d", e, m);
+	if(gamemode == commercial || map_format.map99)
+		snprintf(name, sizeof(name), "MAP%02d", m);
+	else
+		snprintf(name, sizeof(name), "E%dM%d", e, m);
 
-  return name;
+	return name;
 }

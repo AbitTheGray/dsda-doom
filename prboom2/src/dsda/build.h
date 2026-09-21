@@ -17,7 +17,7 @@ void dsda_CopyBuildCmd(ticcmd_t* cmd);
 void dsda_ReadBuildCmd(ticcmd_t* cmd);
 void dsda_EnterBuildMode(void);
 void dsda_RefreshBuildMode(void);
-dboolean dsda_BuildResponder(event_t *ev);
+dboolean dsda_BuildResponder(event_t* ev);
 void dsda_ToggleBuildTurbo(void);
 dboolean dsda_AdvanceFrame(void);
 dboolean dsda_BuildMF(int x);

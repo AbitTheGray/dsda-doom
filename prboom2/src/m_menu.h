@@ -19,7 +19,7 @@
 // this can resize the view and change game parameters.
 // Does all the real work of the menu interaction.
 
-dboolean M_Responder (event_t *ev);
+dboolean M_Responder(event_t* ev);
 
 dboolean fadeBG(void);
 dboolean M_MenuIsShaded(void);
@@ -30,31 +30,31 @@ void M_ShadedScreen(int scrn);
 // Called by main loop,
 // only used for menu (skull cursor) animation.
 
-void M_Ticker (void);
+void M_Ticker(void);
 
 // Called by main loop,
 // draws the menus directly into the screen buffer.
 
-void M_Drawer (void);
+void M_Drawer(void);
 
 // Called by D_DoomMain,
 // loads the config file.
 
-void M_Init (void);
+void M_Init(void);
 
 // Called by intro code to force menu up upon a keypress,
 // does nothing if menu is already up.
 
-void M_StartControlPanel (void);
+void M_StartControlPanel(void);
 
-void M_ForcedLoadGame(const char *msg); // killough 5/15/98: forced loadgames
+void M_ForcedLoadGame(const char* msg); // killough 5/15/98: forced loadgames
 
-void M_ResetMenu(void);      // killough 11/98: reset main menu ordering
+void M_ResetMenu(void); // killough 11/98: reset main menu ordering
 
 void M_DrawCredits(void);
-void M_DrawCreditsDynamic(void);    // killough 11/98
+void M_DrawCreditsDynamic(void); // killough 11/98
 
-void M_DrawTabs(const char **pages, int m, int y);
+void M_DrawTabs(const char** pages, int m, int y);
 
 // Big Thermo (for Raven)
 void M_DrawThermoBig(int x, int y, int thermWidth, int thermRange, int thermDot, int menu_item);
@@ -63,9 +63,10 @@ void M_DrawThermoBig(int x, int y, int thermWidth, int thermRange, int thermDot,
 dboolean M_FileBoxSelected(int menu, int item);
 int M_FileTextColor(int menu, int item);
 
-typedef enum {
-  MN_LOAD,
-  MN_SAVE,
+typedef enum
+{
+	MN_LOAD,
+	MN_SAVE,
 } save_or_load_menu;
 
 // Menu Highlights
@@ -80,14 +81,15 @@ int M_AddColorFlag(int color);
  * It also applies behaviour to other types of settings.
  */
 
-typedef enum {
-  m_null,       // Has no meaning; not applicable
-  m_scrn,       // A key can not be assigned to more than one action
-  m_map,        // in the same group. A key can be assigned to one
-  m_menu,       // action in one group, and another action in another.
-  m_build,
+typedef enum
+{
+	m_null, // Has no meaning; not applicable
+	m_scrn, // A key can not be assigned to more than one action
+	m_map,  // in the same group. A key can be assigned to one
+	m_menu, // action in one group, and another action in another.
+	m_build,
 
-  m_conf,       // migrate to new config process
+	m_conf, // migrate to new config process
 } setup_group;
 
 /****************************
@@ -109,14 +111,14 @@ typedef enum {
 
 typedef struct setup_menu_s
 {
-  const char  *m_text;  /* text to display */
-  int         m_flags;  /* phares 4/17/98: flag bits S_* (defined above) */
-  setup_group m_group;  /* Group */
-  short       m_x;      /* screen x position (left is 0) */
-  dsda_config_identifier_t config_id;
-  int input; // composite input identifier
-  const char **selectstrings; /* list of strings for choice value */
-  struct setup_menu_s *menu;  /* next or prev menu */
+	const char* m_text;  /* text to display */
+	int m_flags;         /* phares 4/17/98: flag bits S_* (defined above) */
+	setup_group m_group; /* Group */
+	short m_x;           /* screen x position (left is 0) */
+	dsda_config_identifier_t config_id;
+	int input;                  // composite input identifier
+	const char** selectstrings; /* list of strings for choice value */
+	struct setup_menu_s* menu;  /* next or prev menu */
 } setup_menu_t;
 
 //
@@ -125,25 +127,25 @@ typedef struct setup_menu_s
 
 typedef enum
 {
-  M_ITEM_SKIP = -1,
-  M_ITEM_INACTIVE,
-  M_ITEM_ACTION,
-  M_ITEM_THERMO,
+	M_ITEM_SKIP = -1,
+	M_ITEM_INACTIVE,
+	M_ITEM_ACTION,
+	M_ITEM_THERMO,
 } menuitem_type_t;
 
 typedef struct
 {
-  menuitem_type_t status;
-  char  name[10];
+	menuitem_type_t status;
+	char name[10];
 
-  // choice = menu item #.
-  // if status = M_ITEM_THERMO,
-  //   choice=0:leftarrow,1:rightarrow
-  void  (*routine)(int choice);
-  char  alphaKey; // hotkey in menu
-  const char *alttext;
-  int color;
-  byte flags;
+	// choice = menu item #.
+	// if status = M_ITEM_THERMO,
+	//   choice=0:leftarrow,1:rightarrow
+	void (*routine)(int choice);
+	char alphaKey; // hotkey in menu
+	const char* alttext;
+	int color;
+	byte flags;
 } menuitem_t;
 
 #define MENUF_TEXTINPUT 0x01
@@ -151,14 +153,14 @@ typedef struct
 
 typedef struct menu_s
 {
-  short           numitems;     // # of menu items
-  struct menu_s*  prevMenu;     // previous menu
-  menuitem_t*     menuitems;    // menu items
-  void            (*routine)(); // draw routine
-  short           x;
-  short           y;            // x,y of menu
-  short           lastOn;       // last item user was on in menu
-  byte            flags;
+	short numitems;          // # of menu items
+	struct menu_s* prevMenu; // previous menu
+	menuitem_t* menuitems;   // menu items
+	void (*routine)();       // draw routine
+	short x;
+	short y;      // x,y of menu
+	short lastOn; // last item user was on in menu
+	byte flags;
 } menu_t;
 
 #define SAVESTRINGSIZE 24
@@ -173,7 +175,7 @@ typedef struct menu_s
 #define MENU_ESCAPE    -8
 #define MENU_CLEAR     -9
 
-void M_SetupNextMenu(menu_t *menudef);
+void M_SetupNextMenu(menu_t* menudef);
 void M_DrawDelVerify(void);
 void M_ChangeMessages(void);
 void M_LeaveSetupMenu(void);

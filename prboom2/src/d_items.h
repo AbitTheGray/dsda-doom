@@ -26,19 +26,19 @@
 /* Weapon info: sprite frames, ammunition use. */
 typedef struct
 {
-  ammotype_t  ammo;
-  int         upstate;
-  int         downstate;
-  int         readystate;
-  int         atkstate;
-  int         holdatkstate;
-  int         flashstate;
-  int         ammopershot;
-  int         intflags;
-  int         flags;
+	ammotype_t ammo;
+	int upstate;
+	int downstate;
+	int readystate;
+	int atkstate;
+	int holdatkstate;
+	int flashstate;
+	int ammopershot;
+	int intflags;
+	int flags;
 } weaponinfo_t;
 
-extern weaponinfo_t doom_weaponinfo[NUMWEAPONS+2];
+extern weaponinfo_t doom_weaponinfo[NUMWEAPONS + 2];
 
 // heretic
 

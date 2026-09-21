@@ -21,25 +21,26 @@
 
 typedef uint16_t skill_info_flags_t;
 
-typedef struct {
-  fixed_t ammo_factor;
-  fixed_t damage_factor;
-  fixed_t armor_factor;
-  fixed_t health_factor;
-  fixed_t monster_health_factor;
-  fixed_t friend_health_factor;
-  int respawn_time;
-  int spawn_filter;
-  char key;
-  const char* must_confirm;
-  const char* name;
-  const char* pic_name;
-  int text_color;
-  skill_info_flags_t flags;
+typedef struct
+{
+	fixed_t ammo_factor;
+	fixed_t damage_factor;
+	fixed_t armor_factor;
+	fixed_t health_factor;
+	fixed_t monster_health_factor;
+	fixed_t friend_health_factor;
+	int respawn_time;
+	int spawn_filter;
+	char key;
+	const char* must_confirm;
+	const char* name;
+	const char* pic_name;
+	int text_color;
+	skill_info_flags_t flags;
 } skill_info_t;
 
 extern skill_info_t skill_info;
-extern skill_info_t *skill_infos;
+extern skill_info_t* skill_infos;
 
 extern int num_skills;
 

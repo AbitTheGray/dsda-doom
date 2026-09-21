@@ -12,29 +12,29 @@
 
 typedef struct overrun_param_s
 {
-  int warn;
-  int emulate;
-  int footer;
-  int footer_emulate;
-  int promted;
-  int happened;
+	int warn;
+	int emulate;
+	int footer;
+	int footer_emulate;
+	int promted;
+	int happened;
 } overrun_param_t;
 
 typedef enum overrun_list_s
 {
-  OVERFLOW_SPECHIT,
-  OVERFLOW_REJECT,
-  OVERFLOW_INTERCEPT,
-  OVERFLOW_PLAYERINGAME,
-  OVERFLOW_DONUT,
-  OVERFLOW_MISSEDBACKSIDE,
+	OVERFLOW_SPECHIT,
+	OVERFLOW_REJECT,
+	OVERFLOW_INTERCEPT,
+	OVERFLOW_PLAYERINGAME,
+	OVERFLOW_DONUT,
+	OVERFLOW_MISSEDBACKSIDE,
 
-  OVERFLOW_MAX //last
+	OVERFLOW_MAX //last
 } overrun_list_t;
 
 extern int overflows_enabled;
 extern overrun_param_t overflows[];
-extern const char *overflow_cfgname[OVERFLOW_MAX];
+extern const char* overflow_cfgname[OVERFLOW_MAX];
 
 #define EMULATE(overflow) (overflows_enabled && (overflows[overflow].footer ? overflows[overflow].footer_emulate : overflows[overflow].emulate))
 #define PROCESS(overflow) (overflows_enabled && (overflows[overflow].warn || EMULATE(overflow)))
@@ -53,13 +53,13 @@ extern const char *overflow_cfgname[OVERFLOW_MAX];
 
 typedef struct
 {
-    int len;
-    void *addr;
-    void *addr2;
+	int len;
+	void* addr;
+	void* addr2;
 } intercepts_overrun_t;
 
 extern intercepts_overrun_t intercepts_overrun[];
-void InterceptsOverrun(int num_intercepts, intercept_t *intercept);
+void InterceptsOverrun(int num_intercepts, intercept_t* intercept);
 
 //
 // playeringame overrun emulation
@@ -76,34 +76,34 @@ int PlayeringameOverrun(const mapthing_t* mthing);
 
 typedef struct spechit_overrun_param_s
 {
-  line_t *line;
+	line_t* line;
 
-  line_t ***spechit;
-  int *numspechit;
+	line_t*** spechit;
+	int* numspechit;
 
-  fixed_t *tmbbox;
-  fixed_t *tmfloorz;
-  fixed_t *tmceilingz;
+	fixed_t* tmbbox;
+	fixed_t* tmfloorz;
+	fixed_t* tmceilingz;
 
-  int      *crushchange;
-  dboolean *nofit;
+	int* crushchange;
+	dboolean* nofit;
 } spechit_overrun_param_t;
 
 extern unsigned int spechit_baseaddr;
 
-void SpechitOverrun(spechit_overrun_param_t *params);
+void SpechitOverrun(spechit_overrun_param_t* params);
 
 //
 // reject overrun emulation
 //
 
-void RejectOverrun(unsigned int length, const byte **rejectmatrix, int totallines);
+void RejectOverrun(unsigned int length, const byte** rejectmatrix, int totallines);
 
 //
 // donut overrun emulation (linedef action 9)
 //
 
-int DonutOverrun(fixed_t *pfloorheight, short *pfloorpic);
+int DonutOverrun(fixed_t* pfloorheight, short* pfloorpic);
 
-int MissedBackSideOverrun(line_t *line);
+int MissedBackSideOverrun(line_t* line);
 sector_t* GetSectorAtNullAddress(void);
