@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "p_mobj.hpp"
 
 void dsda_AddLineToHealthGroup(line_t* line);
 void dsda_ResetHealthGroups();

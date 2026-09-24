@@ -92,6 +92,10 @@
  *     both default-off; see opl3.h.
  */
 
+#include "cpp/Util.hpp"
+
+#include <utility>
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -184,21 +188,22 @@ static void OPL3_BuildWfTable()
 
 /* Channel types */
 
-enum
+enum struct OplChannelType : int32_t
 {
-	ch_2op  = 0,
-	ch_4op  = 1,
-	ch_4op2 = 2,
-	ch_drum = 3
+	TwoOp  = 0,
+	FourOp  = 1,
+	FourOp2 = 2,
+	Drum = 3
 };
 
 /* Envelope key types */
 
-enum
+enum struct OplEnvelopeKey : uint32_t
 {
-	egk_norm = 0x01,
-	egk_drum = 0x02
+	Norm = 0x01,
+	Drum = 0x02
 };
+ENUM_FLAGS_FUNC(OplEnvelopeKey)
 
 /*
     exp table
@@ -298,12 +303,12 @@ static uint8_t panpot_lut_build = 0;
     Envelope generator
 */
 
-enum envelope_gen_num
+enum struct EnvelopeGenNum : int32_t
 {
-	envelope_gen_num_attack  = 0,
-	envelope_gen_num_decay   = 1,
-	envelope_gen_num_sustain = 2,
-	envelope_gen_num_release = 3
+	Attack  = 0,
+	Decay   = 1,
+	Sustain = 2,
+	Release = 3
 };
 
 static void OPL3_EnvelopeUpdateKSL(opl3_slot* slot)
@@ -355,7 +360,7 @@ static void OPL3_EnvelopeCalc(opl3_slot* slot)
 	uint8_t reset = 0;
 
 	slot->eg_out = slot->eg_rout + slot->eg_tl_ksl + *slot->trem;
-	if(slot->key && slot->eg_gen == envelope_gen_num_release)
+	if(slot->key && slot->eg_gen == std::to_underlying(EnvelopeGenNum::Release))
 	{
 		reset = 1;
 		reg_rate = slot->eg_rates[0];
@@ -430,34 +435,34 @@ static void OPL3_EnvelopeCalc(opl3_slot* slot)
 	{
 		eg_off = 1;
 	}
-	if(slot->eg_gen != envelope_gen_num_attack && !reset && eg_off)
+	if(slot->eg_gen != std::to_underlying(EnvelopeGenNum::Attack) && !reset && eg_off)
 	{
 		eg_rout = 0x1ff;
 	}
-	switch(slot->eg_gen)
+	switch(static_cast<EnvelopeGenNum>(slot->eg_gen))
 	{
-		case envelope_gen_num_attack:
+		case EnvelopeGenNum::Attack:
 			if(!slot->eg_rout)
 			{
-				slot->eg_gen = envelope_gen_num_decay;
+				slot->eg_gen = std::to_underlying(EnvelopeGenNum::Decay);
 			}
 			else if(slot->key && shift > 0 && rate_hi != 0x0f)
 			{
 				eg_inc = ~slot->eg_rout >> (4 - shift);
 			}
 			break;
-		case envelope_gen_num_decay:
+		case EnvelopeGenNum::Decay:
 			if((slot->eg_rout >> 4) == slot->reg_sl)
 			{
-				slot->eg_gen = envelope_gen_num_sustain;
+				slot->eg_gen = std::to_underlying(EnvelopeGenNum::Sustain);
 			}
 			else if(!eg_off && !reset && shift > 0)
 			{
 				eg_inc = 1 << (shift - 1);
 			}
 			break;
-		case envelope_gen_num_sustain:
-		case envelope_gen_num_release:
+		case EnvelopeGenNum::Sustain:
+		case EnvelopeGenNum::Release:
 			if(!eg_off && !reset && shift > 0)
 			{
 				eg_inc = 1 << (shift - 1);
@@ -468,11 +473,11 @@ static void OPL3_EnvelopeCalc(opl3_slot* slot)
 	/* Key off */
 	if(reset)
 	{
-		slot->eg_gen = envelope_gen_num_attack;
+		slot->eg_gen = std::to_underlying(EnvelopeGenNum::Attack);
 	}
 	if(!slot->key)
 	{
-		slot->eg_gen = envelope_gen_num_release;
+		slot->eg_gen = std::to_underlying(EnvelopeGenNum::Release);
 	}
 }
 
@@ -737,7 +742,7 @@ static void OPL3_ChannelUpdateRhythm(opl3_chip* chip, uint8_t data)
 		channel8->out_cnt = 4;
 		for(chnum = 6; chnum < 9; chnum++)
 		{
-			chip->channel[chnum].chtype = ch_drum;
+			chip->channel[chnum].chtype = std::to_underlying(OplChannelType::Drum);
 		}
 		OPL3_ChannelSetupAlg(channel6);
 		OPL3_ChannelSetupAlg(channel7);
@@ -745,66 +750,66 @@ static void OPL3_ChannelUpdateRhythm(opl3_chip* chip, uint8_t data)
 		/* hh */
 		if(chip->rhy & 0x01)
 		{
-			OPL3_EnvelopeKeyOn(channel7->slotz[0], egk_drum);
+			OPL3_EnvelopeKeyOn(channel7->slotz[0], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 		else
 		{
-			OPL3_EnvelopeKeyOff(channel7->slotz[0], egk_drum);
+			OPL3_EnvelopeKeyOff(channel7->slotz[0], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 		/* tc */
 		if(chip->rhy & 0x02)
 		{
-			OPL3_EnvelopeKeyOn(channel8->slotz[1], egk_drum);
+			OPL3_EnvelopeKeyOn(channel8->slotz[1], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 		else
 		{
-			OPL3_EnvelopeKeyOff(channel8->slotz[1], egk_drum);
+			OPL3_EnvelopeKeyOff(channel8->slotz[1], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 		/* tom */
 		if(chip->rhy & 0x04)
 		{
-			OPL3_EnvelopeKeyOn(channel8->slotz[0], egk_drum);
+			OPL3_EnvelopeKeyOn(channel8->slotz[0], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 		else
 		{
-			OPL3_EnvelopeKeyOff(channel8->slotz[0], egk_drum);
+			OPL3_EnvelopeKeyOff(channel8->slotz[0], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 		/* sd */
 		if(chip->rhy & 0x08)
 		{
-			OPL3_EnvelopeKeyOn(channel7->slotz[1], egk_drum);
+			OPL3_EnvelopeKeyOn(channel7->slotz[1], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 		else
 		{
-			OPL3_EnvelopeKeyOff(channel7->slotz[1], egk_drum);
+			OPL3_EnvelopeKeyOff(channel7->slotz[1], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 		/* bd */
 		if(chip->rhy & 0x10)
 		{
-			OPL3_EnvelopeKeyOn(channel6->slotz[0], egk_drum);
-			OPL3_EnvelopeKeyOn(channel6->slotz[1], egk_drum);
+			OPL3_EnvelopeKeyOn(channel6->slotz[0], std::to_underlying(OplEnvelopeKey::Drum));
+			OPL3_EnvelopeKeyOn(channel6->slotz[1], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 		else
 		{
-			OPL3_EnvelopeKeyOff(channel6->slotz[0], egk_drum);
-			OPL3_EnvelopeKeyOff(channel6->slotz[1], egk_drum);
+			OPL3_EnvelopeKeyOff(channel6->slotz[0], std::to_underlying(OplEnvelopeKey::Drum));
+			OPL3_EnvelopeKeyOff(channel6->slotz[1], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 	}
 	else
 	{
 		for(chnum = 6; chnum < 9; chnum++)
 		{
-			chip->channel[chnum].chtype = ch_2op;
+			chip->channel[chnum].chtype = std::to_underlying(OplChannelType::TwoOp);
 			OPL3_ChannelSetupAlg(&chip->channel[chnum]);
-			OPL3_EnvelopeKeyOff(chip->channel[chnum].slotz[0], egk_drum);
-			OPL3_EnvelopeKeyOff(chip->channel[chnum].slotz[1], egk_drum);
+			OPL3_EnvelopeKeyOff(chip->channel[chnum].slotz[0], std::to_underlying(OplEnvelopeKey::Drum));
+			OPL3_EnvelopeKeyOff(chip->channel[chnum].slotz[1], std::to_underlying(OplEnvelopeKey::Drum));
 		}
 	}
 }
 
 static void OPL3_ChannelWriteA0(opl3_channel* channel, uint8_t data)
 {
-	if(channel->chip->newm && channel->chtype == ch_4op2)
+	if(channel->chip->newm && channel->chtype == std::to_underlying(OplChannelType::FourOp2))
 	{
 		return;
 	}
@@ -817,7 +822,7 @@ static void OPL3_ChannelWriteA0(opl3_channel* channel, uint8_t data)
 	OPL3_EnvelopeUpdateRate(channel->slotz[1]);
 	OPL3_PhaseUpdateInc(channel->slotz[0]);
 	OPL3_PhaseUpdateInc(channel->slotz[1]);
-	if(channel->chip->newm && channel->chtype == ch_4op)
+	if(channel->chip->newm && channel->chtype == std::to_underlying(OplChannelType::FourOp))
 	{
 		channel->pair->f_num = channel->f_num;
 		channel->pair->ksv = channel->ksv;
@@ -832,7 +837,7 @@ static void OPL3_ChannelWriteA0(opl3_channel* channel, uint8_t data)
 
 static void OPL3_ChannelWriteB0(opl3_channel* channel, uint8_t data)
 {
-	if(channel->chip->newm && channel->chtype == ch_4op2)
+	if(channel->chip->newm && channel->chtype == std::to_underlying(OplChannelType::FourOp2))
 	{
 		return;
 	}
@@ -846,7 +851,7 @@ static void OPL3_ChannelWriteB0(opl3_channel* channel, uint8_t data)
 	OPL3_EnvelopeUpdateRate(channel->slotz[1]);
 	OPL3_PhaseUpdateInc(channel->slotz[0]);
 	OPL3_PhaseUpdateInc(channel->slotz[1]);
-	if(channel->chip->newm && channel->chtype == ch_4op)
+	if(channel->chip->newm && channel->chtype == std::to_underlying(OplChannelType::FourOp))
 	{
 		channel->pair->f_num = channel->f_num;
 		channel->pair->block = channel->block;
@@ -862,7 +867,7 @@ static void OPL3_ChannelWriteB0(opl3_channel* channel, uint8_t data)
 
 static void OPL3_ChannelSetupAlgBody(opl3_channel* channel)
 {
-	if(channel->chtype == ch_drum)
+	if(channel->chtype == std::to_underlying(OplChannelType::Drum))
 	{
 		if(channel->ch_num == 7 || channel->ch_num == 8)
 		{
@@ -1065,13 +1070,13 @@ static void OPL3_ChannelUpdateAlg(opl3_channel* channel)
 	channel->alg = channel->con;
 	if(channel->chip->newm)
 	{
-		if(channel->chtype == ch_4op)
+		if(channel->chtype == std::to_underlying(OplChannelType::FourOp))
 		{
 			channel->pair->alg = 0x04 | (channel->con << 1) | (channel->pair->con);
 			channel->alg = 0x08;
 			OPL3_ChannelSetupAlg(channel->pair);
 		}
-		else if(channel->chtype == ch_4op2)
+		else if(channel->chtype == std::to_underlying(OplChannelType::FourOp2))
 		{
 			channel->alg = 0x04 | (channel->pair->con << 1) | (channel->con);
 			channel->pair->alg = 0x08;
@@ -1131,23 +1136,23 @@ static void OPL3_ChannelKeyOn(opl3_channel* channel)
 {
 	if(channel->chip->newm)
 	{
-		if(channel->chtype == ch_4op)
+		if(channel->chtype == std::to_underlying(OplChannelType::FourOp))
 		{
-			OPL3_EnvelopeKeyOn(channel->slotz[0], egk_norm);
-			OPL3_EnvelopeKeyOn(channel->slotz[1], egk_norm);
-			OPL3_EnvelopeKeyOn(channel->pair->slotz[0], egk_norm);
-			OPL3_EnvelopeKeyOn(channel->pair->slotz[1], egk_norm);
+			OPL3_EnvelopeKeyOn(channel->slotz[0], std::to_underlying(OplEnvelopeKey::Norm));
+			OPL3_EnvelopeKeyOn(channel->slotz[1], std::to_underlying(OplEnvelopeKey::Norm));
+			OPL3_EnvelopeKeyOn(channel->pair->slotz[0], std::to_underlying(OplEnvelopeKey::Norm));
+			OPL3_EnvelopeKeyOn(channel->pair->slotz[1], std::to_underlying(OplEnvelopeKey::Norm));
 		}
-		else if(channel->chtype == ch_2op || channel->chtype == ch_drum)
+		else if(channel->chtype == std::to_underlying(OplChannelType::TwoOp) || channel->chtype == std::to_underlying(OplChannelType::Drum))
 		{
-			OPL3_EnvelopeKeyOn(channel->slotz[0], egk_norm);
-			OPL3_EnvelopeKeyOn(channel->slotz[1], egk_norm);
+			OPL3_EnvelopeKeyOn(channel->slotz[0], std::to_underlying(OplEnvelopeKey::Norm));
+			OPL3_EnvelopeKeyOn(channel->slotz[1], std::to_underlying(OplEnvelopeKey::Norm));
 		}
 	}
 	else
 	{
-		OPL3_EnvelopeKeyOn(channel->slotz[0], egk_norm);
-		OPL3_EnvelopeKeyOn(channel->slotz[1], egk_norm);
+		OPL3_EnvelopeKeyOn(channel->slotz[0], std::to_underlying(OplEnvelopeKey::Norm));
+		OPL3_EnvelopeKeyOn(channel->slotz[1], std::to_underlying(OplEnvelopeKey::Norm));
 	}
 }
 
@@ -1155,23 +1160,23 @@ static void OPL3_ChannelKeyOff(opl3_channel* channel)
 {
 	if(channel->chip->newm)
 	{
-		if(channel->chtype == ch_4op)
+		if(channel->chtype == std::to_underlying(OplChannelType::FourOp))
 		{
-			OPL3_EnvelopeKeyOff(channel->slotz[0], egk_norm);
-			OPL3_EnvelopeKeyOff(channel->slotz[1], egk_norm);
-			OPL3_EnvelopeKeyOff(channel->pair->slotz[0], egk_norm);
-			OPL3_EnvelopeKeyOff(channel->pair->slotz[1], egk_norm);
+			OPL3_EnvelopeKeyOff(channel->slotz[0], std::to_underlying(OplEnvelopeKey::Norm));
+			OPL3_EnvelopeKeyOff(channel->slotz[1], std::to_underlying(OplEnvelopeKey::Norm));
+			OPL3_EnvelopeKeyOff(channel->pair->slotz[0], std::to_underlying(OplEnvelopeKey::Norm));
+			OPL3_EnvelopeKeyOff(channel->pair->slotz[1], std::to_underlying(OplEnvelopeKey::Norm));
 		}
-		else if(channel->chtype == ch_2op || channel->chtype == ch_drum)
+		else if(channel->chtype == std::to_underlying(OplChannelType::TwoOp) || channel->chtype == std::to_underlying(OplChannelType::Drum))
 		{
-			OPL3_EnvelopeKeyOff(channel->slotz[0], egk_norm);
-			OPL3_EnvelopeKeyOff(channel->slotz[1], egk_norm);
+			OPL3_EnvelopeKeyOff(channel->slotz[0], std::to_underlying(OplEnvelopeKey::Norm));
+			OPL3_EnvelopeKeyOff(channel->slotz[1], std::to_underlying(OplEnvelopeKey::Norm));
 		}
 	}
 	else
 	{
-		OPL3_EnvelopeKeyOff(channel->slotz[0], egk_norm);
-		OPL3_EnvelopeKeyOff(channel->slotz[1], egk_norm);
+		OPL3_EnvelopeKeyOff(channel->slotz[0], std::to_underlying(OplEnvelopeKey::Norm));
+		OPL3_EnvelopeKeyOff(channel->slotz[1], std::to_underlying(OplEnvelopeKey::Norm));
 	}
 }
 
@@ -1188,16 +1193,16 @@ static void OPL3_ChannelSet4Op(opl3_chip* chip, uint8_t data)
 		}
 		if((data >> bit) & 0x01)
 		{
-			chip->channel[chnum].chtype = ch_4op;
-			chip->channel[chnum + 3u].chtype = ch_4op2;
+			chip->channel[chnum].chtype = std::to_underlying(OplChannelType::FourOp);
+			chip->channel[chnum + 3u].chtype = std::to_underlying(OplChannelType::FourOp2);
 #if !OPL_COMPAT_DEFERRED_4OP_ALG
 			OPL3_ChannelUpdateAlg(&chip->channel[chnum]);
 #endif
 		}
 		else
 		{
-			chip->channel[chnum].chtype = ch_2op;
-			chip->channel[chnum + 3u].chtype = ch_2op;
+			chip->channel[chnum].chtype = std::to_underlying(OplChannelType::TwoOp);
+			chip->channel[chnum + 3u].chtype = std::to_underlying(OplChannelType::TwoOp);
 #if !OPL_COMPAT_DEFERRED_4OP_ALG
 			OPL3_ChannelUpdateAlg(&chip->channel[chnum]);
 			OPL3_ChannelUpdateAlg(&chip->channel[chnum + 3u]);
@@ -1240,7 +1245,7 @@ static inline void OPL3_ProcessSlotImpl(opl3_slot* slot, uint8_t fb, int maybe_r
 			slot->prout = 0;
 			slot->eg_out = 0x1ff;
 			slot->pg_reset = 0;
-			slot->eg_gen = envelope_gen_num_release;
+			slot->eg_gen = std::to_underlying(EnvelopeGenNum::Release);
 			slot->pg_phase_out = 0;
 			return;
 		}
@@ -1249,7 +1254,7 @@ static inline void OPL3_ProcessSlotImpl(opl3_slot* slot, uint8_t fb, int maybe_r
 
 		slot->eg_out = slot->eg_rout + slot->eg_tl_ksl + *slot->trem;
 		slot->pg_reset = 0;
-		slot->eg_gen = envelope_gen_num_release;
+		slot->eg_gen = std::to_underlying(EnvelopeGenNum::Release);
 
 		if(slot->reg_vib)
 		{
@@ -1269,8 +1274,8 @@ static inline void OPL3_ProcessSlotImpl(opl3_slot* slot, uint8_t fb, int maybe_r
 		OPL3_SlotGenerateSilent(slot);
 		return;
 	}
-	if(slot->eg_gen == envelope_gen_num_sustain && slot->key
-		&& slot->eg_rates[envelope_gen_num_sustain] == 0)
+	if(slot->eg_gen == std::to_underlying(EnvelopeGenNum::Sustain) && slot->key
+		&& slot->eg_rates[std::to_underlying(EnvelopeGenNum::Sustain)] == 0)
 	{
 		OPL3_SlotCalcFB(slot, fb);
 		slot->eg_out = slot->eg_rout + slot->eg_tl_ksl + *slot->trem;
@@ -1331,7 +1336,7 @@ static inline void OPL3_ProcessSlotMaybeInline(opl3_slot* slot, uint8_t fb, int 
 		return;
 	}
 	if(!slot->key && slot->eg_rout == 0x1ff
-		&& slot->eg_gen == envelope_gen_num_release
+		&& slot->eg_gen == std::to_underlying(EnvelopeGenNum::Release)
 		&& (!maybe_rhythm
 			|| (slot->slot_num != 13 && slot->slot_num != 16 && slot->slot_num != 17))
 		&& fb == 0 && slot->pg_inc == 0 && slot->out == 0
@@ -1694,7 +1699,7 @@ void OPL3_Reset(opl3_chip* chip, uint32_t samplerate)
 		slot->mod = &chip->zeromod;
 		slot->eg_rout = 0x1ff;
 		slot->eg_out = 0x1ff;
-		slot->eg_gen = envelope_gen_num_release;
+		slot->eg_gen = std::to_underlying(EnvelopeGenNum::Release);
 		slot->trem = (uint8_t*)&chip->zeromod;
 		slot->eg_rates[0] = slot->eg_rates[1] = slot->eg_rates[2] = slot->eg_rates[3] = 0;
 		slot->slot_num = slotnum;
@@ -1721,7 +1726,7 @@ void OPL3_Reset(opl3_chip* chip, uint32_t samplerate)
 		channel->out[2] = &chip->zeromod;
 		channel->out[3] = &chip->zeromod;
 		channel->out_cnt = 0;
-		channel->chtype = ch_2op;
+		channel->chtype = std::to_underlying(OplChannelType::TwoOp);
 		channel->cha = 0xffff;
 		channel->chb = 0xffff;
 #if OPL_ENABLE_STEREOEXT

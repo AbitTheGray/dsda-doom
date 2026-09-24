@@ -6,12 +6,12 @@
 
 #pragma once
 
+#include "r_draw.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "r_draw.hpp"
 
 #define MINZ        (FRACUNIT*4)
 

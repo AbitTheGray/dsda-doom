@@ -2,12 +2,12 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "p_mobj.hpp"
 
 extern int localQuakeHappening[MAX_MAXPLAYERS];
 

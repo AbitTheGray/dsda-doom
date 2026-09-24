@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Ghost
 
+#include <utility>
+
 #include <stdio.h>
 
 #include "lprintf.hpp"
@@ -30,7 +32,7 @@ typedef struct
 	fixed_t y;
 	fixed_t z;
 	angle_t angle;
-	spritenum_t sprite;
+	SpriteId sprite;
 	int frame;
 	int map;
 	int episode;
@@ -60,28 +62,28 @@ typedef struct
 
 mobjinfo_t dsda_ghost_info = {
 	-1,                             // doomednum
-	S_PLAY,                         // spawnstate
+	StateId::Play,                         // spawnstate
 	0,                              // spawnhealth
-	S_PLAY_RUN1,                    // seestate
-	sfx_None,                       // seesound
+	StateId::PlayRun1,                    // seestate
+	SfxId::None,                       // seesound
 	0,                              // reactiontime
-	sfx_None,                       // attacksound
-	S_PLAY_PAIN,                    // painstate
+	SfxId::None,                       // attacksound
+	StateId::PlayPain,                    // painstate
 	0,                              // painchance
-	sfx_None,                       // painsound
-	S_NULL,                         // meleestate
-	S_PLAY_ATK1,                    // missilestate
-	S_PLAY_DIE1,                    // deathstate
-	S_PLAY_XDIE1,                   // xdeathstate
-	sfx_None,                       // deathsound
+	SfxId::None,                       // painsound
+	StateId::Null,                         // meleestate
+	StateId::PlayAtk1,                    // missilestate
+	StateId::PlayDie1,                    // deathstate
+	StateId::PlayXdie1,                   // xdeathstate
+	SfxId::None,                       // deathsound
 	0,                              // speed
 	0,                              // radius
 	0,                              // height
 	0,                              // mass
 	0,                              // damage
-	sfx_None,                       // activesound
+	SfxId::None,                       // activesound
 	MF_NOBLOCKMAP | MF_TRANSLUCENT, // flags
-	S_NULL                          // raisestate
+	StateId::Null                          // raisestate
 };
 
 FILE* dsda_ghost_export;
@@ -237,7 +239,7 @@ void dsda_SpawnGhost()
 
 		mobj = static_cast<mobj_t*>(Z_MallocLevel(sizeof(*mobj)));
 		memset(mobj, 0, sizeof(*mobj));
-		mobj->type = MT_NULL;
+		mobj->type = MobjType::Null;
 		mobj->info = &dsda_ghost_info;
 		mobj->flags = dsda_ghost_info.flags;
 
@@ -264,7 +266,7 @@ void dsda_SpawnGhost()
 		mobj->z = players[0].mo->z;
 		mobj->angle = players[0].mo->angle;
 
-		ghost_state = &states[dsda_ghost_info.spawnstate];
+		ghost_state = &states[std::to_underlying(dsda_ghost_info.spawnstate)];
 
 		mobj->state = ghost_state;
 		mobj->tics = ghost_state->tics;
@@ -290,7 +292,7 @@ void dsda_SpawnGhost()
 
 	if(dsda_ghost_import.count > 0)
 	{
-		dsda_TrackFeature(uf_ghost);
+		dsda_TrackFeature(FeatureFlag::Ghost);
 		dsda_ghost_import.thinker = static_cast<decltype(dsda_ghost_import.thinker)>(Z_MallocLevel(sizeof(*mobj)));
 		memset(dsda_ghost_import.thinker, 0, sizeof(thinker_t));
 		dsda_ghost_import.thinker->function = reinterpret_cast<think_t>(dsda_UpdateGhosts);

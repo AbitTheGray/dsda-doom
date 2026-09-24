@@ -30,10 +30,10 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 			max_size,
 			"%s%s%d:%02d %s%d:%05.2f ",
 			local->label,
-			dsda_TextColor(dsda_tc_exhud_total_time),
+			dsda_TextColor(TextColorIndex::ExhudTotalTime),
 			total_time / TICRATE / 60,
 			(total_time % (60 * TICRATE)) / TICRATE,
-			dsda_TextColor(dsda_tc_exhud_level_time),
+			dsda_TextColor(TextColorIndex::ExhudLevelTime),
 			leveltime / TICRATE / 60,
 			(float)(leveltime % (60 * TICRATE)) / TICRATE
 		);
@@ -43,7 +43,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 			max_size,
 			"%s%s%d:%05.2f ",
 			local->label,
-			dsda_TextColor(dsda_tc_exhud_level_time),
+			dsda_TextColor(TextColorIndex::ExhudLevelTime),
 			leveltime / TICRATE / 60,
 			(float)(leveltime % (60 * TICRATE)) / TICRATE
 		);
@@ -56,20 +56,20 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 			str + length,
 			max_size - length,
 			"%s%d:%02d ",
-			dsda_TextColor(dsda_tc_exhud_demo_length),
+			dsda_TextColor(TextColorIndex::ExhudDemoLength),
 			demo_tic / TICRATE / 60,
 			(demo_tic % (60 * TICRATE)) / TICRATE
 		);
 	}
 }
 
-void dsda_InitCompositeTimeHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitCompositeTimeHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);
 
 	if(arg_count < 1 || args[0])
-		snprintf(local->label, sizeof(local->label), "%stime ", dsda_TextColor(dsda_tc_exhud_time_label));
+		snprintf(local->label, sizeof(local->label), "%stime ", dsda_TextColor(TextColorIndex::ExhudTimeLabel));
 	else
 		local->label[0] = '\0';
 

@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Big Health HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "big_health.hpp"
@@ -29,17 +31,17 @@ static void dsda_DrawComponent()
 	player_t* player;
 	int health;
 	int x, y;
-	int cm;
+	ColorRange cm;
 
 	player = &players[displayplayer];
 	x = local->component.x;
 	y = local->component.y;
 
-	cm = player->health <= hud_health_red ? dsda_TextCR(dsda_tc_stbar_health_bad) : player->health <= hud_health_yellow ? dsda_TextCR(dsda_tc_stbar_health_warning) : player->health <= hud_health_green ? dsda_TextCR(dsda_tc_stbar_health_ok) : dsda_TextCR(dsda_tc_stbar_health_super);
+	cm = player->health <= hud_health_red ? dsda_TextCR(TextColorIndex::StbarHealthBad) : player->health <= hud_health_yellow ? dsda_TextCR(TextColorIndex::StbarHealthWarning) : player->health <= hud_health_green ? dsda_TextCR(TextColorIndex::StbarHealthOk) : dsda_TextCR(TextColorIndex::StbarHealthSuper);
 
 	V_DrawNumPatch(x, y, FG,
-		player->powers[pw_strength] ? strength_lump : health_lump,
-		CR_DEFAULT, static_cast<enum patch_translation_e>((enum patch_translation_e)local->component.vpt));
+		player->powers[std::to_underlying(PowerType::Strength)] ? strength_lump : health_lump,
+		ColorRange::Default, static_cast<PatchTranslation>((PatchTranslation)local->component.vpt));
 
 	x += patch_spacing;
 	y += patch_vertical_spacing;
@@ -50,14 +52,14 @@ static void dsda_DrawComponent()
 		cm, local->component.vpt, 3, health);
 }
 
-void dsda_InitBigHealthHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitBigHealthHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);
 
 	if(heretic)
 	{
-		health_lump = R_NumPatchForSpriteIndex(HERETIC_SPR_PTN2);
+		health_lump = R_NumPatchForSpriteIndex(SpriteId::HereticPtn2);
 		strength_lump = health_lump;
 		patch_delta_x = 10;
 		patch_vertical_spacing = 6;
@@ -65,7 +67,7 @@ void dsda_InitBigHealthHC(int x_offset, int y_offset, int vpt, int* args, int ar
 	}
 	else if(hexen)
 	{
-		health_lump = R_NumPatchForSpriteIndex(HEXEN_SPR_PTN2);
+		health_lump = R_NumPatchForSpriteIndex(SpriteId::HexenPtn2);
 		strength_lump = health_lump;
 		patch_delta_x = 10;
 		patch_vertical_spacing = 6;
@@ -73,8 +75,8 @@ void dsda_InitBigHealthHC(int x_offset, int y_offset, int vpt, int* args, int ar
 	}
 	else
 	{
-		health_lump = R_NumPatchForSpriteIndex(SPR_MEDI);
-		strength_lump = R_NumPatchForSpriteIndex(SPR_PSTR);
+		health_lump = R_NumPatchForSpriteIndex(SpriteId::Medi);
+		strength_lump = R_NumPatchForSpriteIndex(SpriteId::Pstr);
 		patch_delta_x = 14;
 		patch_vertical_spacing = 2;
 		patch_spacing = 2;

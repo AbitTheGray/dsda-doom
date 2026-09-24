@@ -2,12 +2,12 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "p_mobj.hpp"
 
 typedef struct seqnode_s seqnode_t;
 
@@ -16,10 +16,10 @@ struct seqnode_s
 	int* sequencePtr;
 	int sequence;
 	mobj_t* mobj;
-	int currentSoundID;
+	SfxId currentSoundID;
 	int delayTics;
 	int volume;
-	int stopSound;
+	SfxId stopSound;
 	seqnode_t* prev;
 	seqnode_t* next;
 };
@@ -34,7 +34,7 @@ void SN_StopSequence(mobj_t* mobj);
 void SN_UpdateActiveSequences();
 void SN_StopAllSequences();
 int SN_GetSequenceOffset(int sequence, int* sequencePtr);
-void SN_ChangeNodeData(int nodeNum, int seqOffset, int delayTics, int volume, int currentSoundID);
+void SN_ChangeNodeData(int nodeNum, int seqOffset, int delayTics, int volume, SfxId currentSoundID);
 
 #ifdef __cplusplus
 }

@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <utility>
+
 #include "doomtype.hpp"
 #include "sounds.hpp"
 
 // Hexen map music is set dynamically in SNDINFO
-musicinfo_t hexen_S_music[HEXEN_NUMMUSIC] = {
-	[hexen_mus_hexen] = {"HEXEN", 0},
-	[hexen_mus_hub] = {"HUB", 0},
-	[hexen_mus_hall] = {"HALL", 0},
-	[hexen_mus_orb] = {"ORB", 0},
-	[hexen_mus_chess] = {"CHESS", 0},
+musicinfo_t hexen_S_music[std::to_underlying(MusicId::HexenCount)] = {
+	[std::to_underlying(MusicId::HexenHexen)] = {"HEXEN", 0},
+	[std::to_underlying(MusicId::HexenHub)] = {"HUB", 0},
+	[std::to_underlying(MusicId::HexenHall)] = {"HALL", 0},
+	[std::to_underlying(MusicId::HexenOrb)] = {"ORB", 0},
+	[std::to_underlying(MusicId::HexenChess)] = {"CHESS", 0},
 };
 
 sfxinfo_t hexen_S_sfx[] = {

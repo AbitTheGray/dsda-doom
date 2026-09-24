@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA MapInfo Legacy
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "g_game.hpp"
 #include "m_misc.hpp"
@@ -33,7 +35,7 @@ int dsda_LegacyNameToMap(int* found, const char* name, int* episode, int* map)
 	name_upper[8] = 0;
 	M_Strupr(name_upper);
 
-	if(gamemode != commercial)
+	if(gamemode != GameMode::Commercial)
 	{
 		if(sscanf(name_upper, "E%dM%d", &episode_from_name, &map_from_name) != 2)
 		{
@@ -69,13 +71,13 @@ int dsda_LegacyFirstMap(int* episode, int* map)
 	*episode = 1;
 	*map = 1;
 
-	if(gamemode == commercial)
+	if(gamemode == GameMode::Commercial)
 	{
 		for(i = 1; i < 33; i++)
 		{
 			lump = W_CheckNumForName(VANILLA_MAP_LUMP_NAME(1, i));
 
-			if(lump != LUMP_NOT_FOUND && lumpinfo[lump].source == source_pwad)
+			if(lump != LUMP_NOT_FOUND && lumpinfo[lump].source == WadSource::Pwad)
 			{
 				*map = i;
 
@@ -89,7 +91,7 @@ int dsda_LegacyFirstMap(int* episode, int* map)
 			{
 				lump = W_CheckNumForName(VANILLA_MAP_LUMP_NAME(i, j));
 
-				if(lump != LUMP_NOT_FOUND && lumpinfo[lump].source == source_pwad)
+				if(lump != LUMP_NOT_FOUND && lumpinfo[lump].source == WadSource::Pwad)
 				{
 					*episode = i;
 					*map = j;
@@ -108,7 +110,7 @@ int dsda_LegacyNewGameMap(int* episode, int* map)
 
 int dsda_LegacyResolveWarp(int* args, int arg_count, int* episode, int* map)
 {
-	if(gamemode == commercial)
+	if(gamemode == GameMode::Commercial)
 	{
 		if(arg_count)
 		{
@@ -160,24 +162,24 @@ int dsda_LegacyNextMap(int* episode, int* map)
 	{
 		int next;
 
-		if(gamemode == shareware)
+		if(gamemode == GameMode::Shareware)
 			heretic_next[0][7] = 11;
 
-		if(gamemode == registered)
+		if(gamemode == GameMode::Registered)
 			heretic_next[2][7] = 11;
 
 		next = heretic_next[BETWEEN(0, 5, *episode)][BETWEEN(0, 8, *map)];
 		*episode = next / 10;
 		*map = next % 10;
 	}
-	else if(gamemode == commercial)
+	else if(gamemode == GameMode::Commercial)
 	{
 		// secret level
 		doom2_next[14] = (haswolflevels ? 31 : 16);
 
 		if(bfgedition && allow_incompatibility)
 		{
-			if(gamemission == pack_nerve)
+			if(gamemission == GameMission::PackNerve)
 			{
 				doom2_next[3] = 9;
 				doom2_next[7] = 1;
@@ -195,10 +197,10 @@ int dsda_LegacyNextMap(int* episode, int* map)
 		int next;
 
 		// shareware doom has only episode 1
-		doom_next[0][7] = (gamemode == shareware ? 11 : 21);
+		doom_next[0][7] = (gamemode == GameMode::Shareware ? 11 : 21);
 
 		doom_next[2][7] = // the fourth episode for pre-ultimate complevels is not allowed
-			((gamemode == registered) || (compatibility_level < ultdoom_compatibility) ? 11 : 41);
+			((gamemode == GameMode::Registered) || (compatibility_level < CompLevel::Ultdoom) ? 11 : 41);
 
 		next = doom_next[BETWEEN(0, 3, *episode)][BETWEEN(0, 9, *map)];
 		*episode = next / 10;
@@ -243,14 +245,14 @@ int dsda_LegacyPrevMap(int* episode, int* map)
 		*episode = prev / 10;
 		*map = prev % 10;
 	}
-	else if(gamemode == commercial)
+	else if(gamemode == GameMode::Commercial)
 	{
 		// secret level
 		doom2_prev[15] = (haswolflevels ? 32 : 15);
 
 		if(bfgedition && allow_incompatibility)
 		{
-			if(gamemission == pack_nerve)
+			if(gamemission == GameMission::PackNerve)
 			{
 				doom2_prev[4] = 9;
 				doom2_prev[8] = 4;
@@ -277,8 +279,8 @@ int dsda_LegacyPrevMap(int* episode, int* map)
 int dsda_LegacyShowNextLocBehaviour(int* behaviour)
 {
 	if(
-		gamemode != commercial &&
-		(gamemap == 8 || (gamemission == tc_chex && gamemap == 5))
+		gamemode != GameMode::Commercial &&
+		(gamemap == 8 || (gamemission == GameMission::TcChex && gamemap == 5))
 	)
 		*behaviour = WI_SHOW_NEXT_DONE;
 	else
@@ -322,10 +324,10 @@ static int dsda_CannotCLEV(int episode, int map)
 	if(
 		episode < 1 ||
 		map < 0 ||
-		((gamemode == retail || gamemode == registered) && (episode > 9 || map > 9)) ||
-		(gamemode == shareware && (episode > 1 || map > 9)) ||
-		(gamemode == commercial && (episode > 1 || map > 99)) ||
-		(gamemission == pack_nerve && map > 9)
+		((gamemode == GameMode::Retail || gamemode == GameMode::Registered) && (episode > 9 || map > 9)) ||
+		(gamemode == GameMode::Shareware && (episode > 1 || map > 9)) ||
+		(gamemode == GameMode::Commercial && (episode > 1 || map > 99)) ||
+		(gamemission == GameMission::PackNerve && map > 9)
 	)
 		return true;
 
@@ -346,7 +348,7 @@ int dsda_LegacyResolveCLEV(int* clev, int* episode, int* map)
 		*clev = false;
 	else
 	{
-		if(gamemission == tc_chex)
+		if(gamemission == GameMission::TcChex)
 			*episode = 1;
 
 		*clev = true;
@@ -392,29 +394,29 @@ int dsda_LegacyMapMusic(int* music_index, int* music_lump, int episode, int map)
 		*music_index = idmusnum; //jff 3/17/98 reload IDMUS music if not -1
 	else
 	{
-		if(gamemode == commercial)
-			*music_index = mus_runnin + WRAP(map - 1, DOOM_MUSINFO - mus_runnin);
+		if(gamemode == GameMode::Commercial)
+			*music_index = std::to_underlying(MusicId::Runnin) + WRAP(map - 1, std::to_underlying(MusicId::DoomMusinfo) - std::to_underlying(MusicId::Runnin));
 		else
 		{
 			static const int spmus[] = {
-				mus_e3m4,
-				mus_e3m2,
-				mus_e3m3,
-				mus_e1m5,
-				mus_e2m7,
-				mus_e2m4,
-				mus_e2m6,
-				mus_e2m5,
-				mus_e1m9
+				std::to_underlying(MusicId::E3m4),
+				std::to_underlying(MusicId::E3m2),
+				std::to_underlying(MusicId::E3m3),
+				std::to_underlying(MusicId::E1m5),
+				std::to_underlying(MusicId::E2m7),
+				std::to_underlying(MusicId::E2m4),
+				std::to_underlying(MusicId::E2m6),
+				std::to_underlying(MusicId::E2m5),
+				std::to_underlying(MusicId::E1m9)
 			};
 
 			if(heretic)
-				*music_index = heretic_mus_e1m1 +
+				*music_index = std::to_underlying(MusicId::HereticE1m1) +
 					WRAP((episode - 1) * 9 + map - 1,
-						HERETIC_NUMMUSIC - heretic_mus_e1m1);
+						std::to_underlying(MusicId::HereticCount) - std::to_underlying(MusicId::HereticE1m1));
 			else if(episode < 4)
-				*music_index = mus_e1m1 +
-					WRAP((episode - 1) * 9 + map - 1, mus_runnin - mus_e1m1);
+				*music_index = std::to_underlying(MusicId::E1m1) +
+					WRAP((episode - 1) * 9 + map - 1, std::to_underlying(MusicId::Runnin) - std::to_underlying(MusicId::E1m1));
 			else
 				*music_index = spmus[WRAP(map - 1, 9)];
 		}
@@ -427,10 +429,10 @@ int dsda_LegacyIntermissionMusic(int* music_index, int* music_lump)
 {
 	*music_lump = -1;
 
-	if(gamemode == commercial)
-		*music_index = mus_dm2int;
+	if(gamemode == GameMode::Commercial)
+		*music_index = std::to_underlying(MusicId::Dm2int);
 	else
-		*music_index = mus_inter;
+		*music_index = std::to_underlying(MusicId::Inter);
 
 	return true;
 }
@@ -441,13 +443,13 @@ int dsda_LegacyInterMusic(int* music_index, int* music_lump)
 
 	switch(gamemode)
 	{
-		case shareware:
-		case registered:
-		case retail:
-			*music_index = mus_victor;
+		case GameMode::Shareware:
+		case GameMode::Registered:
+		case GameMode::Retail:
+			*music_index = std::to_underlying(MusicId::Victor);
 			break;
 		default:
-			*music_index = mus_read_m;
+			*music_index = std::to_underlying(MusicId::ReadM);
 			break;
 	}
 
@@ -498,7 +500,7 @@ int dsda_LegacyHUTitle(dsda_string_t* str)
 
 	dsda_InitString(str, nullptr);
 
-	if(gamestate == GS_LEVEL && gamemap > 0 && gameepisode > 0)
+	if(gamestate == GameState::Level && gamemap > 0 && gameepisode > 0)
 	{
 		if(heretic)
 		{
@@ -509,21 +511,21 @@ int dsda_LegacyHUTitle(dsda_string_t* str)
 		{
 			switch(gamemode)
 			{
-				case shareware:
-				case registered:
-				case retail:
+				case GameMode::Shareware:
+				case GameMode::Registered:
+				case GameMode::Retail:
 					// Chex.exe always uses the episode 1 level title
 					// eg. E2M1 gives the title for E1M1
-					if(gamemission == tc_chex && gamemap < 10)
+					if(gamemission == GameMission::TcChex && gamemap < 10)
 						dsda_StringCat(str, *mapnames[gamemap - 1]);
 					else if(gameepisode < 6 && gamemap < 10)
 						dsda_StringCat(str, *mapnames[(gameepisode - 1) * 9 + gamemap - 1]);
 					break;
 
 				default: // Ty 08/27/98 - modified to check mission for TNT/Plutonia
-					if(gamemission == pack_tnt && gamemap < 33)
+					if(gamemission == GameMission::PackTnt && gamemap < 33)
 						dsda_StringCat(str, *mapnamest[gamemap - 1]);
-					else if(gamemission == pack_plut && gamemap < 33)
+					else if(gamemission == GameMission::PackPlut && gamemap < 33)
 						dsda_StringCat(str, *mapnamesp[gamemap - 1]);
 					else if(gamemap < 34)
 						dsda_StringCat(str, *mapnames2[gamemap - 1]);
@@ -553,7 +555,7 @@ int dsda_LegacySkyTexture(int* sky)
 		else
 			*sky = R_TextureNumForName("SKY1");
 	}
-	else if(gamemode == commercial)
+	else if(gamemode == GameMode::Commercial)
 	{
 		*sky = R_TextureNumForName("SKY3");
 		if(gamemap < 12)
@@ -595,7 +597,7 @@ extern int deh_pars;
 extern "C" void dsda_LegacyParTime(int* partime, dboolean* modified)
 {
 
-	if(gamemode == commercial)
+	if(gamemode == GameMode::Commercial)
 	{
 		if(gamemap >= 1 && gamemap <= 34)
 		{
@@ -624,7 +626,7 @@ extern "C" void dsda_LegacyParTime(int* partime, dboolean* modified)
 
 int dsda_LegacyPrepareIntermission(int* result)
 {
-	if(gamemode != commercial)
+	if(gamemode != GameMode::Commercial)
 		if(gamemap == 9)
 		{
 			int i;
@@ -636,7 +638,7 @@ int dsda_LegacyPrepareIntermission(int* result)
 	wminfo.didsecret = players[consoleplayer].didsecret;
 
 	// wminfo.next is 0 biased, unlike gamemap
-	if(gamemode == commercial)
+	if(gamemode == GameMode::Commercial)
 	{
 		if(secretexit)
 			switch(gamemap)
@@ -652,7 +654,7 @@ int dsda_LegacyPrepareIntermission(int* result)
 						wminfo.next = 32;
 					break;
 				case 4:
-					if(gamemission == pack_nerve && allow_incompatibility)
+					if(gamemission == GameMission::PackNerve && allow_incompatibility)
 						wminfo.next = 8;
 					break;
 			}
@@ -674,7 +676,7 @@ int dsda_LegacyPrepareIntermission(int* result)
 					wminfo.next = gamemap;
 			}
 
-		if(gamemission == pack_nerve && allow_incompatibility && gamemap == 9)
+		if(gamemission == GameMission::PackNerve && allow_incompatibility && gamemap == 9)
 			wminfo.next = 4;
 	}
 	else
@@ -725,7 +727,7 @@ int dsda_LegacyPrepareFinale(int* result)
 {
 	*result = 0;
 
-	if(gamemode == commercial && gamemission != pack_nerve)
+	if(gamemode == GameMode::Commercial && gamemission != GameMission::PackNerve)
 	{
 		switch(gamemap)
 		{
@@ -742,11 +744,11 @@ int dsda_LegacyPrepareFinale(int* result)
 				break;
 		}
 	}
-	else if(gamemission == pack_nerve && allow_incompatibility && gamemap == 8)
+	else if(gamemission == GameMission::PackNerve && allow_incompatibility && gamemap == 8)
 		*result = WD_START_FINALE;
 	else if(gamemap == 8)
 		*result = WD_VICTORY;
-	else if(gamemap == 5 && gamemission == tc_chex)
+	else if(gamemap == 5 && gamemission == GameMission::TcChex)
 		*result = WD_VICTORY;
 
 	if(dsda_FinaleShortcut())
@@ -776,7 +778,7 @@ int dsda_LegacyEnterPic(const char** enter_pic)
 
 int dsda_LegacyBorderTexture(const char** border_texture)
 {
-	*border_texture = heretic ? "FLOOR30" : gamemode == commercial ? "GRNROCK" : "FLOOR7_2";
+	*border_texture = heretic ? "FLOOR30" : gamemode == GameMode::Commercial ? "GRNROCK" : "FLOOR7_2";
 
 	return true;
 }

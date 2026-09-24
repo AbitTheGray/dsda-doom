@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "r_main.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "r_main.hpp"
 
 void dsda_AddLineID(int id, int value);
 void dsda_AddSectorID(int id, int value);

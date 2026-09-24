@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Skip Mode
 
+#include <utility>
+
 #include "d_main.hpp"
 #include "doomstat.hpp"
 #include "e6y.hpp"
@@ -68,7 +70,7 @@ extern "C" void M_ClearMenus();
 void dsda_EnterSkipMode()
 {
 
-	dsda_TrackFeature(uf_skip);
+	dsda_TrackFeature(FeatureFlag::Skip);
 	dsda_ApplySkipSettings();
 
 	skip_mode = true;
@@ -166,7 +168,7 @@ void dsda_EvaluateSkipModeDoTeleportNewMap()
 
 		demo_warp_reached = skip_until_next_map ||
 		(
-			gamemode == commercial ? (skip_until_map == gamemap) : (skip_until_episode == gameepisode && skip_until_map == gamemap)
+			gamemode == GameMode::Commercial ? (skip_until_map == gamemap) : (skip_until_episode == gameepisode && skip_until_map == gamemap)
 		);
 
 		if(demo_warp_reached && demo_skiptics == 0 && !firstmap)
@@ -184,7 +186,7 @@ void dsda_EvaluateSkipModeDoWorldDone()
 
 		demo_warp_reached = skip_until_next_map ||
 		(
-			gamemode == commercial ? (skip_until_map == gamemap) : (skip_until_episode == gameepisode && skip_until_map == gamemap)
+			gamemode == GameMode::Commercial ? (skip_until_map == gamemap) : (skip_until_episode == gameepisode && skip_until_map == gamemap)
 		);
 
 		if(demo_warp_reached && demo_skiptics == 0 && !firstmap)
@@ -207,7 +209,7 @@ void dsda_HandleSkip()
 
 	dsda_arg_t* arg;
 
-	arg = dsda_Arg(dsda_arg_skipsec);
+	arg = dsda_Arg(ArgId::Skipsec);
 	if(arg->found)
 	{
 		float min, sec;
@@ -218,7 +220,7 @@ void dsda_HandleSkip()
 			demo_skiptics = (int)(sec * TICRATE);
 	}
 
-	arg = dsda_Arg(dsda_arg_skiptic);
+	arg = dsda_Arg(ArgId::Skiptic);
 	if(arg->found)
 		demo_skiptics = arg->value.v_int;
 

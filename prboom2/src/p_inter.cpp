@@ -4,6 +4,8 @@
  *      Handling interactions (i.e., collisions).
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "dstrings.hpp"
 #include "m_random.hpp"
@@ -64,21 +66,21 @@ int monsters_infight = 0; // e6y: Dehacked support - monsters infight
 
 // a weapon is found with two clip loads,
 // a big item has five clip loads
-int maxammo[NUMAMMO] = {200, 50, 300, 50, 0, 0}; // heretic +2 ammo types
-int clipammo[NUMAMMO] = {10, 4, 20, 1, 0, 0};    // heretic +2 ammo types
+int maxammo[std::to_underlying(AmmoType::Count)] = {200, 50, 300, 50, 0, 0}; // heretic +2 ammo types
+int clipammo[std::to_underlying(AmmoType::Count)] = {10, 4, 20, 1, 0, 0};    // heretic +2 ammo types
 
 //
 // GET STUFF
 //
 
 // heretic
-static weapontype_t GetAmmoChange[] = {
-	wp_goldwand,
-	wp_crossbow,
-	wp_blaster,
-	wp_skullrod,
-	wp_phoenixrod,
-	wp_mace
+static WeaponType GetAmmoChange[] = {
+	WeaponType::GoldWand,
+	WeaponType::Crossbow,
+	WeaponType::Blaster,
+	WeaponType::SkullRod,
+	WeaponType::PhoenixRod,
+	WeaponType::Mace
 };
 
 //
@@ -87,9 +89,9 @@ static weapontype_t GetAmmoChange[] = {
 // Based on config and other conditions.
 //
 
-static void P_AutoSwitchWeapon(player_t* player, weapontype_t weapon)
+static void P_AutoSwitchWeapon(player_t* player, WeaponType weapon)
 {
-	int autoswitch_config = dsda_IntConfig(dsda_config_switch_weapon_on_pickup);
+	int autoswitch_config = dsda_IntConfig(ConfigId::SwitchWeaponOnPickup);
 	int autoswitch = ((allow_incompatibility && !deathmatch && !netgame) ? autoswitch_config : true);
 
 	if(!autoswitch) return;
@@ -104,26 +106,26 @@ static void P_AutoSwitchWeapon(player_t* player, weapontype_t weapon)
 // Returns false if the ammo can't be picked up at all
 //
 
-static dboolean P_GiveAmmoAutoSwitch(player_t* player, ammotype_t ammo, int oldammo)
+static dboolean P_GiveAmmoAutoSwitch(player_t* player, AmmoType ammo, int oldammo)
 {
 	int i;
 
 	if(
-		weaponinfo[player->readyweapon].flags & WPF_AUTOSWITCHFROM &&
-		weaponinfo[player->readyweapon].ammo != ammo
+		weaponinfo[std::to_underlying(player->readyweapon)].flags & WPF_AUTOSWITCHFROM &&
+		weaponinfo[std::to_underlying(player->readyweapon)].ammo != ammo
 	)
 	{
-		for(i = NUMWEAPONS - 1; i > player->readyweapon; --i)
+		for(i = std::to_underlying(WeaponType::Count) - 1; i > std::to_underlying(player->readyweapon); --i)
 		{
 			if(
 				player->weaponowned[i] &&
 				!(weaponinfo[i].flags & WPF_NOAUTOSWITCHTO) &&
 				weaponinfo[i].ammo == ammo &&
 				weaponinfo[i].ammopershot > oldammo &&
-				weaponinfo[i].ammopershot <= player->ammo[ammo]
+				weaponinfo[i].ammopershot <= player->ammo[std::to_underlying(ammo)]
 			)
 			{
-				P_AutoSwitchWeapon(player, static_cast<weapontype_t>(i));
+				P_AutoSwitchWeapon(player, static_cast<WeaponType>(i));
 				break;
 			}
 		}
@@ -132,34 +134,34 @@ static dboolean P_GiveAmmoAutoSwitch(player_t* player, ammotype_t ammo, int olda
 	return true;
 }
 
-static dboolean P_GiveAmmo(player_t* player, ammotype_t ammo, int num)
+static dboolean P_GiveAmmo(player_t* player, AmmoType ammo, int num)
 {
 	int oldammo;
 
-	if(ammo == am_noammo)
+	if(ammo == AmmoType::NoAmmo)
 		return false;
 
 #ifdef RANGECHECK
-	if(ammo < 0 || ammo > NUMAMMO)
+	if(ammo < 0 || ammo > std::to_underlying(AmmoType::Count))
 		I_Error("P_GiveAmmo: bad type %i", ammo);
 #endif
 
-	if(player->ammo[ammo] == player->maxammo[ammo])
+	if(player->ammo[std::to_underlying(ammo)] == player->maxammo[std::to_underlying(ammo)])
 		return false;
 
 	if(num)
-		num *= clipammo[ammo];
+		num *= clipammo[std::to_underlying(ammo)];
 	else
-		num = clipammo[ammo] / 2;
+		num = clipammo[std::to_underlying(ammo)] / 2;
 
 	if(skill_info.ammo_factor)
 		num = FixedMul(num, skill_info.ammo_factor);
 
-	oldammo = player->ammo[ammo];
-	player->ammo[ammo] += num;
+	oldammo = player->ammo[std::to_underlying(ammo)];
+	player->ammo[std::to_underlying(ammo)] += num;
 
-	if(player->ammo[ammo] > player->maxammo[ammo])
-		player->ammo[ammo] = player->maxammo[ammo];
+	if(player->ammo[std::to_underlying(ammo)] > player->maxammo[std::to_underlying(ammo)])
+		player->ammo[std::to_underlying(ammo)] = player->maxammo[std::to_underlying(ammo)];
 
 	if(mbf21)
 		return P_GiveAmmoAutoSwitch(player, ammo, oldammo);
@@ -173,11 +175,11 @@ static dboolean P_GiveAmmo(player_t* player, ammotype_t ammo, int num)
 
 	if(heretic)
 	{
-		if(player->readyweapon == wp_staff || player->readyweapon == wp_gauntlets)
+		if(player->readyweapon == WeaponType::Staff || player->readyweapon == WeaponType::Gauntlets)
 		{
-			if(player->weaponowned[GetAmmoChange[ammo]])
+			if(player->weaponowned[std::to_underlying(GetAmmoChange[std::to_underlying(ammo)])])
 			{
-				P_AutoSwitchWeapon(player, static_cast<weapontype_t>(GetAmmoChange[ammo]));
+				P_AutoSwitchWeapon(player, static_cast<WeaponType>(GetAmmoChange[std::to_underlying(ammo)]));
 			}
 		}
 
@@ -186,32 +188,32 @@ static dboolean P_GiveAmmo(player_t* player, ammotype_t ammo, int num)
 
 	switch(ammo)
 	{
-		case am_clip:
-			if(player->readyweapon == wp_fist)
+		case AmmoType::Clip:
+			if(player->readyweapon == WeaponType::Fist)
 			{
-				if(player->weaponowned[wp_chaingun])
-					P_AutoSwitchWeapon(player, static_cast<weapontype_t>(wp_chaingun));
+				if(player->weaponowned[std::to_underlying(WeaponType::Chaingun)])
+					P_AutoSwitchWeapon(player, static_cast<WeaponType>(WeaponType::Chaingun));
 				else
-					P_AutoSwitchWeapon(player, static_cast<weapontype_t>(wp_pistol));
+					P_AutoSwitchWeapon(player, static_cast<WeaponType>(WeaponType::Pistol));
 			}
 			break;
 
-		case am_shell:
-			if(player->readyweapon == wp_fist || player->readyweapon == wp_pistol)
-				if(player->weaponowned[wp_shotgun])
-					P_AutoSwitchWeapon(player, static_cast<weapontype_t>(wp_shotgun));
+		case AmmoType::Shell:
+			if(player->readyweapon == WeaponType::Fist || player->readyweapon == WeaponType::Pistol)
+				if(player->weaponowned[std::to_underlying(WeaponType::Shotgun)])
+					P_AutoSwitchWeapon(player, static_cast<WeaponType>(WeaponType::Shotgun));
 			break;
 
-		case am_cell:
-			if(player->readyweapon == wp_fist || player->readyweapon == wp_pistol)
-				if(player->weaponowned[wp_plasma])
-					P_AutoSwitchWeapon(player, static_cast<weapontype_t>(wp_plasma));
+		case AmmoType::Cell:
+			if(player->readyweapon == WeaponType::Fist || player->readyweapon == WeaponType::Pistol)
+				if(player->weaponowned[std::to_underlying(WeaponType::Plasma)])
+					P_AutoSwitchWeapon(player, static_cast<WeaponType>(WeaponType::Plasma));
 			break;
 
-		case am_misl:
-			if(player->readyweapon == wp_fist)
-				if(player->weaponowned[wp_missile])
-					P_AutoSwitchWeapon(player, static_cast<weapontype_t>(wp_missile));
+		case AmmoType::Misl:
+			if(player->readyweapon == WeaponType::Fist)
+				if(player->weaponowned[std::to_underlying(WeaponType::Missile)])
+					P_AutoSwitchWeapon(player, static_cast<WeaponType>(WeaponType::Missile));
 		default:
 			break;
 	}
@@ -223,7 +225,7 @@ static dboolean P_GiveAmmo(player_t* player, ammotype_t ammo, int num)
 // The weapon name may have a MF_DROPPED flag ored in.
 //
 
-extern "C" dboolean P_GiveWeapon(player_t* player, weapontype_t weapon, dboolean dropped)
+extern "C" dboolean P_GiveWeapon(player_t* player, WeaponType weapon, dboolean dropped)
 {
 	dboolean gaveammo;
 	dboolean gaveweapon;
@@ -233,40 +235,40 @@ extern "C" dboolean P_GiveWeapon(player_t* player, weapontype_t weapon, dboolean
 	if(netgame && deathmatch != 2 && !dropped)
 	{
 		// leave placed weapons forever on net games
-		if(player->weaponowned[weapon])
+		if(player->weaponowned[std::to_underlying(weapon)])
 			return false;
 
 		player->bonuscount += BONUSADD;
-		player->weaponowned[weapon] = true;
+		player->weaponowned[std::to_underlying(weapon)] = true;
 
-		P_GiveAmmo(player, static_cast<ammotype_t>(weaponinfo[weapon].ammo), deathmatch ? 5 : 2);
-		P_AutoSwitchWeapon(player, static_cast<weapontype_t>(weapon));
+		P_GiveAmmo(player, static_cast<AmmoType>(weaponinfo[std::to_underlying(weapon)].ammo), deathmatch ? 5 : 2);
+		P_AutoSwitchWeapon(player, static_cast<WeaponType>(weapon));
 		/* cph 20028/10 - for old-school DM addicts, allow old behavior
 		* where only consoleplayer's pickup sounds are heard */
 		// displayplayer, not consoleplayer, for viewing multiplayer demos
-		if(!comp[comp_sound])
-			S_StartSound(player->mo, sfx_wpnup | PICKUP_SOUND); // killough 4/25/98
+		if(!comp[std::to_underlying(CompOption::Sound)])
+			S_StartSound(player->mo, SfxAsPickup(SfxId::Wpnup)); // killough 4/25/98
 		else if(player == &players[displayplayer])
-			S_StartVoidSound(sfx_wpnup | PICKUP_SOUND);
+			S_StartVoidSound(SfxAsPickup(SfxId::Wpnup));
 		return false;
 	}
 
-	if(weaponinfo[weapon].ammo != am_noammo)
+	if(weaponinfo[std::to_underlying(weapon)].ammo != AmmoType::NoAmmo)
 	{
 		// give one clip with a dropped weapon,
 		// two clips with a found weapon
-		gaveammo = P_GiveAmmo(player, static_cast<ammotype_t>(weaponinfo[weapon].ammo), dropped ? 1 : 2);
+		gaveammo = P_GiveAmmo(player, static_cast<AmmoType>(weaponinfo[std::to_underlying(weapon)].ammo), dropped ? 1 : 2);
 	}
 	else
 		gaveammo = false;
 
-	if(player->weaponowned[weapon])
+	if(player->weaponowned[std::to_underlying(weapon)])
 		gaveweapon = false;
 	else
 	{
 		gaveweapon = true;
-		player->weaponowned[weapon] = true;
-		P_AutoSwitchWeapon(player, static_cast<weapontype_t>(weapon));
+		player->weaponowned[std::to_underlying(weapon)] = true;
+		P_AutoSwitchWeapon(player, static_cast<WeaponType>(weapon));
 	}
 	return gaveweapon || gaveammo;
 }
@@ -322,7 +324,7 @@ void P_HealMobj(mobj_t* mo, int num)
 {
 	player_t* player = mo->player;
 
-	if(mo->health <= 0 || (player && player->playerstate == PST_DEAD))
+	if(mo->health <= 0 || (player && player->playerstate == PlayerState::Dead))
 		return;
 
 	if(player)
@@ -349,10 +351,10 @@ void P_HealMobj(mobj_t* mo, int num)
 static dboolean P_GiveArmor(player_t* player, int armortype)
 {
 	int hits = P_PlayerArmorIncrease(armortype * 100);
-	if(player->armorpoints[ARMOR_ARMOR] >= hits)
+	if(player->armorpoints[std::to_underlying(ArmorType::Armor)] >= hits)
 		return false; // don't pick up
 	player->armortype = armortype;
-	player->armorpoints[ARMOR_ARMOR] = hits;
+	player->armorpoints[std::to_underlying(ArmorType::Armor)] = hits;
 	return true;
 }
 
@@ -360,15 +362,15 @@ static dboolean P_GiveArmor(player_t* player, int armortype)
 // P_GiveCard
 //
 
-void P_GiveCard(player_t* player, card_t card)
+void P_GiveCard(player_t* player, Card card)
 {
-	if(player->cards[card])
+	if(player->cards[std::to_underlying(card)])
 		return;
 	player->bonuscount = BONUSADD;
-	player->cards[card] = 1;
+	player->cards[std::to_underlying(card)] = 1;
 
 	if(player == &players[consoleplayer])
-		player->ravenkeys |= 1 << card;
+		player->ravenkeys |= 1 << std::to_underlying(card);
 
 	dsda_WatchCard(card);
 }
@@ -379,46 +381,46 @@ void P_GiveCard(player_t* player, card_t card)
 // Rewritten by Lee Killough
 //
 
-dboolean P_GivePower(player_t* player, int power)
+dboolean P_GivePower(player_t* player, PowerType power)
 {
-	static const int tics[NUMPOWERS] = {
-		INVULNTICS, 1 /* strength */, INVISTICS,
-		IRONTICS, 1 /* allmap */, INFRATICS,
-		WPNLEV2TICS, FLIGHTTICS, 1 /* shield */, 1 /* health2 */,
-		SPEEDTICS, MAULATORTICS
+	static const int tics[std::to_underlying(PowerType::Count)] = {
+		std::to_underlying(PowerDuration::Invulntics), 1 /* strength */, std::to_underlying(PowerDuration::Invistics),
+		std::to_underlying(PowerDuration::Irontics), 1 /* allmap */, std::to_underlying(PowerDuration::Infratics),
+		std::to_underlying(PowerDuration::Wpnlev2tics), std::to_underlying(PowerDuration::Flighttics), 1 /* shield */, 1 /* health2 */,
+		std::to_underlying(PowerDuration::Speedtics), std::to_underlying(PowerDuration::Maulatortics)
 	};
 
 	if(
 		raven &&
-		tics[power] > 1 &&
-		power != pw_ironfeet && power != pw_minotaur &&
-		player->powers[power] > BLINKTHRESHOLD
+		tics[std::to_underlying(power)] > 1 &&
+		power != PowerType::IronFeet && power != PowerType::Minotaur &&
+		player->powers[std::to_underlying(power)] > BLINKTHRESHOLD
 	)
 		return false;
 
 	switch(power)
 	{
-		case pw_invulnerability:
+		case PowerType::Invulnerability:
 			if(hexen)
 			{
 				player->mo->flags2 |= MF2_INVULNERABLE;
-				if(player->pclass == PCLASS_MAGE)
+				if(player->pclass == PClass::Mage)
 				{
 					player->mo->flags2 |= MF2_REFLECTIVE;
 				}
 			}
 			break;
-		case pw_invisibility:
+		case PowerType::Invisibility:
 			player->mo->flags |= MF_SHADOW;
 			break;
-		case pw_allmap:
-			if(player->powers[pw_allmap])
+		case PowerType::AllMap:
+			if(player->powers[std::to_underlying(PowerType::AllMap)])
 				return false;
 			break;
-		case pw_strength:
+		case PowerType::Strength:
 			P_GiveBody(player, 100);
 			break;
-		case pw_flight:
+		case PowerType::Flight:
 			player->mo->flags2 |= MF2_FLY;
 			player->mo->flags |= MF_NOGRAVITY;
 			if(player->mo->z <= player->mo->floorz)
@@ -428,13 +430,13 @@ dboolean P_GivePower(player_t* player, int power)
 			break;
 	}
 
-	if(hexen && player->powers[power])
+	if(hexen && player->powers[std::to_underlying(power)])
 		return false;
 
 	// Unless player has infinite duration cheat, set duration (killough)
 
-	if(player->powers[power] >= 0)
-		player->powers[power] = tics[power];
+	if(player->powers[std::to_underlying(power)] >= 0)
+		player->powers[std::to_underlying(power)] = tics[std::to_underlying(power)];
 	return true;
 }
 
@@ -449,7 +451,7 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 {
 	player_t* player;
 	int i;
-	int sound;
+	SfxId sound;
 	fixed_t delta = special->z - toucher->z;
 
 	if(heretic) return Heretic_P_TouchSpecialThing(special, toucher);
@@ -458,7 +460,7 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 	if(delta > toucher->height || delta < -8 * FRACUNIT)
 		return; // out of reach
 
-	sound = sfx_itemup;
+	sound = SfxId::Itemup;
 	player = toucher->player;
 
 	// Dead thing touching.
@@ -470,20 +472,20 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 	switch(special->sprite)
 	{
 		// armor
-		case SPR_ARM1:
+		case SpriteId::Arm1:
 			if(!P_GiveArmor(player, green_armor_class))
 				return;
 			dsda_AddPlayerMessage(s_GOTARMOR, player);
 			break;
 
-		case SPR_ARM2:
+		case SpriteId::Arm2:
 			if(!P_GiveArmor(player, blue_armor_class))
 				return;
 			dsda_AddPlayerMessage(s_GOTMEGA, player);
 			break;
 
 		// bonus items
-		case SPR_BON1:
+		case SpriteId::Bon1:
 			// can go over 100%
 			player->health += P_PlayerHealthIncrease(1);
 			if(player->health > (maxhealthbonus))  //e6y
@@ -492,9 +494,9 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			dsda_AddPlayerMessage(s_GOTHTHBONUS, player);
 			break;
 
-		case SPR_BON2:
+		case SpriteId::Bon2:
 			// can go over 100%
-			player->armorpoints[ARMOR_ARMOR] += P_PlayerArmorIncrease(1);
+			player->armorpoints[std::to_underlying(ArmorType::Armor)] += P_PlayerArmorIncrease(1);
 			// e6y
 			// Doom 1.2 does not do check of armor points on overflow.
 			// If you set the "IDKFA Armor" to MAX_INT (DWORD at 0x00064B5A -> FFFFFF7F)
@@ -502,36 +504,36 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			// and you will die after reception of any damage since this moment.
 			// It happens because the taken health damage depends from armor points
 			// if they are present and becomes equal to very large value in this case
-			if(player->armorpoints[ARMOR_ARMOR] > max_armor && compatibility_level != doom_12_compatibility)
-				player->armorpoints[ARMOR_ARMOR] = max_armor;
+			if(player->armorpoints[std::to_underlying(ArmorType::Armor)] > max_armor && compatibility_level != CompLevel::Doom12)
+				player->armorpoints[std::to_underlying(ArmorType::Armor)] = max_armor;
 			// e6y
 			// We always give armor type 1 for the armor bonuses;
 			// dehacked only affects the GreenArmor.
 			if(!player->armortype)
 				player->armortype =
-					((!demo_compatibility || prboom_comp[PC_APPLY_GREEN_ARMOR_CLASS_TO_ARMOR_BONUSES].state) ? green_armor_class : 1);
+					((!demo_compatibility || prboom_comp[std::to_underlying(PrboomComp::ApplyGreenArmorClassToArmorBonuses)].state) ? green_armor_class : 1);
 			dsda_AddPlayerMessage(s_GOTARMBONUS, player);
 			break;
 
-		case SPR_BON3: // killough 7/11/98: evil sceptre from beta version
+		case SpriteId::Bon3: // killough 7/11/98: evil sceptre from beta version
 			dsda_AddPlayerMessage(s_BETA_BONUS3, player);
 			break;
 
-		case SPR_BON4: // killough 7/11/98: unholy bible from beta version
+		case SpriteId::Bon4: // killough 7/11/98: unholy bible from beta version
 			dsda_AddPlayerMessage(s_BETA_BONUS4, player);
 			break;
 
-		case SPR_SOUL:
+		case SpriteId::Soul:
 			player->health += P_PlayerHealthIncrease(soul_health);
 			if(player->health > max_soul)
 				player->health = max_soul;
 			player->mo->health = player->health;
 			dsda_AddPlayerMessage(s_GOTSUPER, player);
-			sound = sfx_getpow;
+			sound = SfxId::Getpow;
 			break;
 
-		case SPR_MEGA:
-			if(gamemode != commercial)
+		case SpriteId::Mega:
+			if(gamemode != GameMode::Commercial)
 				return;
 			player->health = mega_health;
 			player->mo->health = player->health;
@@ -539,69 +541,69 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			// We always give armor type 2 for the megasphere;
 			// dehacked only affects the MegaArmor.
 			P_GiveArmor(player,
-				((!demo_compatibility || prboom_comp[PC_APPLY_BLUE_ARMOR_CLASS_TO_MEGASPHERE].state) ? blue_armor_class : 2));
+				((!demo_compatibility || prboom_comp[std::to_underlying(PrboomComp::ApplyBlueArmorClassToMegasphere)].state) ? blue_armor_class : 2));
 			dsda_AddPlayerMessage(s_GOTMSPHERE, player);
-			sound = sfx_getpow;
+			sound = SfxId::Getpow;
 			break;
 
 		// cards
 		// leave cards for everyone
-		case SPR_BKEY:
-			if(!player->cards[it_bluecard])
+		case SpriteId::Bkey:
+			if(!player->cards[std::to_underlying(Card::BlueCard)])
 				dsda_AddPlayerMessage(s_GOTBLUECARD, player);
-			P_GiveCard(player, it_bluecard);
+			P_GiveCard(player, Card::BlueCard);
 			if(!netgame)
 				break;
 			return;
 
-		case SPR_YKEY:
-			if(!player->cards[it_yellowcard])
+		case SpriteId::Ykey:
+			if(!player->cards[std::to_underlying(Card::YellowCard)])
 				dsda_AddPlayerMessage(s_GOTYELWCARD, player);
-			P_GiveCard(player, it_yellowcard);
+			P_GiveCard(player, Card::YellowCard);
 			if(!netgame)
 				break;
 			return;
 
-		case SPR_RKEY:
-			if(!player->cards[it_redcard])
+		case SpriteId::Rkey:
+			if(!player->cards[std::to_underlying(Card::RedCard)])
 				dsda_AddPlayerMessage(s_GOTREDCARD, player);
-			P_GiveCard(player, it_redcard);
+			P_GiveCard(player, Card::RedCard);
 			if(!netgame)
 				break;
 			return;
 
-		case SPR_BSKU:
-			if(!player->cards[it_blueskull])
+		case SpriteId::Bsku:
+			if(!player->cards[std::to_underlying(Card::BlueSkull)])
 				dsda_AddPlayerMessage(s_GOTBLUESKUL, player);
-			P_GiveCard(player, it_blueskull);
+			P_GiveCard(player, Card::BlueSkull);
 			if(!netgame)
 				break;
 			return;
 
-		case SPR_YSKU:
-			if(!player->cards[it_yellowskull])
+		case SpriteId::Ysku:
+			if(!player->cards[std::to_underlying(Card::YellowSkull)])
 				dsda_AddPlayerMessage(s_GOTYELWSKUL, player);
-			P_GiveCard(player, it_yellowskull);
+			P_GiveCard(player, Card::YellowSkull);
 			if(!netgame)
 				break;
 			return;
 
-		case SPR_RSKU:
-			if(!player->cards[it_redskull])
+		case SpriteId::Rsku:
+			if(!player->cards[std::to_underlying(Card::RedSkull)])
 				dsda_AddPlayerMessage(s_GOTREDSKULL, player);
-			P_GiveCard(player, it_redskull);
+			P_GiveCard(player, Card::RedSkull);
 			if(!netgame)
 				break;
 			return;
 
 		// medikits, heals
-		case SPR_STIM:
+		case SpriteId::Stim:
 			if(!P_GiveBody(player, 10))
 				return;
 			dsda_AddPlayerMessage(s_GOTSTIM, player);
 			break;
 
-		case SPR_MEDI:
+		case SpriteId::Medi:
 			if(!P_GiveBody(player, 25))
 				return;
 
@@ -613,167 +615,167 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 
 
 		// power ups
-		case SPR_PINV:
-			if(!P_GivePower(player, pw_invulnerability))
+		case SpriteId::Pinv:
+			if(!P_GivePower(player, PowerType::Invulnerability))
 				return;
 			dsda_AddPlayerMessage(s_GOTINVUL, player);
-			sound = sfx_getpow;
+			sound = SfxId::Getpow;
 			break;
 
-		case SPR_PSTR:
-			if(!P_GivePower(player, pw_strength))
+		case SpriteId::Pstr:
+			if(!P_GivePower(player, PowerType::Strength))
 				return;
 			dsda_AddPlayerMessage(s_GOTBERSERK, player);
-			if(player->readyweapon != wp_fist)
-				P_AutoSwitchWeapon(player, static_cast<weapontype_t>(wp_fist));
-			sound = sfx_getpow;
+			if(player->readyweapon != WeaponType::Fist)
+				P_AutoSwitchWeapon(player, static_cast<WeaponType>(WeaponType::Fist));
+			sound = SfxId::Getpow;
 			break;
 
-		case SPR_PINS:
-			if(!P_GivePower(player, pw_invisibility))
+		case SpriteId::Pins:
+			if(!P_GivePower(player, PowerType::Invisibility))
 				return;
 			dsda_AddPlayerMessage(s_GOTINVIS, player);
-			sound = sfx_getpow;
+			sound = SfxId::Getpow;
 			break;
 
-		case SPR_SUIT:
-			if(!P_GivePower(player, pw_ironfeet))
+		case SpriteId::Suit:
+			if(!P_GivePower(player, PowerType::IronFeet))
 				return;
 			dsda_AddPlayerMessage(s_GOTSUIT, player);
-			sound = sfx_getpow;
+			sound = SfxId::Getpow;
 			break;
 
-		case SPR_PMAP:
-			if(!P_GivePower(player, pw_allmap))
+		case SpriteId::Pmap:
+			if(!P_GivePower(player, PowerType::AllMap))
 				return;
 			dsda_AddPlayerMessage(s_GOTMAP, player);
-			sound = sfx_getpow;
+			sound = SfxId::Getpow;
 			break;
 
-		case SPR_PVIS:
-			if(!P_GivePower(player, pw_infrared))
+		case SpriteId::Pvis:
+			if(!P_GivePower(player, PowerType::Infrared))
 				return;
 			dsda_AddPlayerMessage(s_GOTVISOR, player);
-			sound = sfx_getpow;
+			sound = SfxId::Getpow;
 			break;
 
 		// ammo
-		case SPR_CLIP:
+		case SpriteId::Clip:
 			if(special->flags & MF_DROPPED)
 			{
-				if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_clip), 0))
+				if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Clip), 0))
 					return;
 			}
 			else
 			{
-				if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_clip), 1))
+				if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Clip), 1))
 					return;
 			}
 			dsda_AddPlayerMessage(s_GOTCLIP, player);
 			break;
 
-		case SPR_AMMO:
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_clip), 5))
+		case SpriteId::Ammo:
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Clip), 5))
 				return;
 			dsda_AddPlayerMessage(s_GOTCLIPBOX, player);
 			break;
 
-		case SPR_ROCK:
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_misl), 1))
+		case SpriteId::Rock:
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Misl), 1))
 				return;
 			dsda_AddPlayerMessage(s_GOTROCKET, player);
 			break;
 
-		case SPR_BROK:
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_misl), 5))
+		case SpriteId::Brok:
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Misl), 5))
 				return;
 			dsda_AddPlayerMessage(s_GOTROCKBOX, player);
 			break;
 
-		case SPR_CELL:
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_cell), 1))
+		case SpriteId::Cell:
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Cell), 1))
 				return;
 			dsda_AddPlayerMessage(s_GOTCELL, player);
 			break;
 
-		case SPR_CELP:
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_cell), 5))
+		case SpriteId::Celp:
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Cell), 5))
 				return;
 			dsda_AddPlayerMessage(s_GOTCELLBOX, player);
 			break;
 
-		case SPR_SHEL:
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_shell), 1))
+		case SpriteId::Shel:
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Shell), 1))
 				return;
 			dsda_AddPlayerMessage(s_GOTSHELLS, player);
 			break;
 
-		case SPR_SBOX:
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_shell), 5))
+		case SpriteId::Sbox:
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Shell), 5))
 				return;
 			dsda_AddPlayerMessage(s_GOTSHELLBOX, player);
 			break;
 
-		case SPR_BPAK:
+		case SpriteId::Bpak:
 			if(!player->backpack)
 			{
-				for(i = 0; i < NUMAMMO; i++)
+				for(i = 0; i < std::to_underlying(AmmoType::Count); i++)
 					player->maxammo[i] *= 2;
 				player->backpack = true;
 			}
-			for(i = 0; i < NUMAMMO; i++)
-				P_GiveAmmo(player, static_cast<ammotype_t>(i), 1);
+			for(i = 0; i < std::to_underlying(AmmoType::Count); i++)
+				P_GiveAmmo(player, static_cast<AmmoType>(i), 1);
 			dsda_AddPlayerMessage(s_GOTBACKPACK, player);
 			break;
 
 		// weapons
-		case SPR_BFUG:
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_bfg), false))
+		case SpriteId::Bfug:
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Bfg), false))
 				return;
 			dsda_AddPlayerMessage(s_GOTBFG9000, player);
-			sound = sfx_wpnup;
+			sound = SfxId::Wpnup;
 			break;
 
-		case SPR_MGUN:
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_chaingun), (special->flags & MF_DROPPED) != 0))
+		case SpriteId::Mgun:
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Chaingun), (special->flags & MF_DROPPED) != 0))
 				return;
 			dsda_AddPlayerMessage(s_GOTCHAINGUN, player);
-			sound = sfx_wpnup;
+			sound = SfxId::Wpnup;
 			break;
 
-		case SPR_CSAW:
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_chainsaw), false))
+		case SpriteId::Csaw:
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Chainsaw), false))
 				return;
 			dsda_AddPlayerMessage(s_GOTCHAINSAW, player);
-			sound = sfx_wpnup;
+			sound = SfxId::Wpnup;
 			break;
 
-		case SPR_LAUN:
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_missile), false))
+		case SpriteId::Laun:
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Missile), false))
 				return;
 			dsda_AddPlayerMessage(s_GOTLAUNCHER, player);
-			sound = sfx_wpnup;
+			sound = SfxId::Wpnup;
 			break;
 
-		case SPR_PLAS:
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_plasma), false))
+		case SpriteId::Plas:
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Plasma), false))
 				return;
 			dsda_AddPlayerMessage(s_GOTPLASMA, player);
-			sound = sfx_wpnup;
+			sound = SfxId::Wpnup;
 			break;
 
-		case SPR_SHOT:
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_shotgun), (special->flags & MF_DROPPED) != 0))
+		case SpriteId::Shot:
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Shotgun), (special->flags & MF_DROPPED) != 0))
 				return;
 			dsda_AddPlayerMessage(s_GOTSHOTGUN, player);
-			sound = sfx_wpnup;
+			sound = SfxId::Wpnup;
 			break;
 
-		case SPR_SGN2:
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_supershotgun), (special->flags & MF_DROPPED) != 0))
+		case SpriteId::Sgn2:
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Supershotgun), (special->flags & MF_DROPPED) != 0))
 				return;
 			dsda_AddPlayerMessage(s_GOTSHOTGUN2, player);
-			sound = sfx_wpnup;
+			sound = SfxId::Wpnup;
 			break;
 
 		default:
@@ -798,10 +800,10 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 	/* cph 20028/10 - for old-school DM addicts, allow old behavior
 	* where only consoleplayer's pickup sounds are heard */
 	// displayplayer, not consoleplayer, for viewing multiplayer demos
-	if(!comp[comp_sound])
-		S_StartSound(player->mo, sound | PICKUP_SOUND); // killough 4/25/98
+	if(!comp[std::to_underlying(CompOption::Sound)])
+		S_StartSound(player->mo, SfxAsPickup(sound)); // killough 4/25/98
 	else if(player == &players[displayplayer])
-		S_StartVoidSound(sound | PICKUP_SOUND);
+		S_StartVoidSound(SfxAsPickup(sound));
 }
 
 //
@@ -813,13 +815,13 @@ static mobj_t* ActiveMinotaur(player_t* master);
 // killough 11/98: make static
 static void P_KillMobj(mobj_t* source, mobj_t* target)
 {
-	mobjtype_t item;
+	MobjType item;
 	mobj_t* mo;
 	int xdeath_limit;
 
 	target->flags &= ~(MF_SHOOTABLE | MF_FLOAT | MF_SKULLFLY);
 
-	if(target->type != MT_SKULL)
+	if(target->type != MobjType::Skull)
 		target->flags &= ~MF_NOGRAVITY;
 
 	target->flags |= MF_CORPSE | MF_DROPOFF;
@@ -830,8 +832,8 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 
 	if(
 		mbf21 || (
-			compatibility_level == mbf_compatibility &&
-			!prboom_comp[PC_MBF_REMOVE_THINKER_IN_KILLMOBJ].state
+			compatibility_level == CompLevel::Mbf &&
+			!prboom_comp[std::to_underlying(PrboomComp::MbfRemoveThinkerInKillmobj)].state
 		)
 	)
 	{
@@ -846,10 +848,10 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 
 	if(map_format.hexen && target->special)
 	{
-		if(!hexen || (target->flags & MF_COUNTKILL || target->type == HEXEN_MT_ZBELL))
+		if(!hexen || (target->flags & MF_COUNTKILL || target->type == MobjType::HexenZbell))
 		{
 			// Initiate monster death actions
-			if(hexen && target->type == HEXEN_MT_SORCBOSS)
+			if(hexen && target->type == MobjType::HexenSorcboss)
 			{
 				byte dummyArgs[3] = {0, 0, 0};
 				P_StartACS(target->special, 0, dummyArgs, target, nullptr, 0);
@@ -877,12 +879,12 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 			{
 				if(source->player == &players[consoleplayer])
 				{
-					S_StartVoidSound(heretic_sfx_gfrag);
+					S_StartVoidSound(SfxId::HereticGfrag);
 				}
 				if(source->player->chickenTics)
 				{
 					// Make a super chicken
-					P_GivePower(source->player, pw_weaponlevel2);
+					P_GivePower(source->player, PowerType::WeaponLevel2);
 				}
 			}
 		}
@@ -890,7 +892,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 	else if(target->flags & MF_COUNTKILL)
 	{
 		/* Add to kills tally */
-		if((compatibility_level < lxdoom_1_compatibility) || !netgame)
+		if((compatibility_level < CompLevel::Lxdoom1) || !netgame)
 		{
 			if(!netgame)
 			{
@@ -941,7 +943,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 
 				if(activeplayers)
 				{
-					player = P_Random(pr_friends) % activeplayers;
+					player = P_Random(RandomClass::Friends) % activeplayers;
 
 					for(i = 0; i < g_maxplayers; i++)
 						if(playeringame[i])
@@ -964,10 +966,10 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 
 		// heretic
 		target->flags2 &= ~MF2_FLY;
-		target->player->powers[pw_flight] = 0;
-		target->player->powers[pw_weaponlevel2] = 0;
+		target->player->powers[std::to_underlying(PowerType::Flight)] = 0;
+		target->player->powers[std::to_underlying(PowerType::WeaponLevel2)] = 0;
 
-		target->player->playerstate = PST_DEAD;
+		target->player->playerstate = PlayerState::Dead;
 		P_DropWeapon(target->player);
 
 		// heretic
@@ -976,20 +978,20 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 			// Player flame death
 			switch(target->player->pclass)
 			{
-				case PCLASS_NULL: // heretic
-					P_SetMobjState(target, HERETIC_S_PLAY_FDTH1);
+				case PClass::Null: // heretic
+					P_SetMobjState(target, StateId::HereticPlayFdth1);
 					return;
-				case PCLASS_FIGHTER:
-					S_StartMobjSound(target, hexen_sfx_player_fighter_burn_death);
-					P_SetMobjState(target, HEXEN_S_PLAY_F_FDTH1);
+				case PClass::Fighter:
+					S_StartMobjSound(target, SfxId::HexenPlayerFighterBurnDeath);
+					P_SetMobjState(target, StateId::HexenPlayFFdth1);
 					return;
-				case PCLASS_CLERIC:
-					S_StartMobjSound(target, hexen_sfx_player_cleric_burn_death);
-					P_SetMobjState(target, HEXEN_S_PLAY_C_FDTH1);
+				case PClass::Cleric:
+					S_StartMobjSound(target, SfxId::HexenPlayerClericBurnDeath);
+					P_SetMobjState(target, StateId::HexenPlayCFdth1);
 					return;
-				case PCLASS_MAGE:
-					S_StartMobjSound(target, hexen_sfx_player_mage_burn_death);
-					P_SetMobjState(target, HEXEN_S_PLAY_M_FDTH1);
+				case PClass::Mage:
+					S_StartMobjSound(target, SfxId::HexenPlayerMageBurnDeath);
+					P_SetMobjState(target, StateId::HexenPlayMFdth1);
 					return;
 				default:
 					break;
@@ -1004,17 +1006,17 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 			target->flags |= MF_ICECORPSE;
 			switch(target->player->pclass)
 			{
-				case PCLASS_FIGHTER:
-					P_SetMobjState(target, HEXEN_S_FPLAY_ICE);
+				case PClass::Fighter:
+					P_SetMobjState(target, StateId::HexenFplayIce);
 					return;
-				case PCLASS_CLERIC:
-					P_SetMobjState(target, HEXEN_S_CPLAY_ICE);
+				case PClass::Cleric:
+					P_SetMobjState(target, StateId::HexenCplayIce);
 					return;
-				case PCLASS_MAGE:
-					P_SetMobjState(target, HEXEN_S_MPLAY_ICE);
+				case PClass::Mage:
+					P_SetMobjState(target, StateId::HexenMplayIce);
 					return;
-				case PCLASS_PIG:
-					P_SetMobjState(target, HEXEN_S_PIG_ICE);
+				case PClass::Pig:
+					P_SetMobjState(target, StateId::HexenPigIce);
 					return;
 				default:
 					break;
@@ -1029,33 +1031,33 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 	{
 		if(target->flags2 & MF2_FIREDAMAGE)
 		{
-			if(target->type == HEXEN_MT_FIGHTER_BOSS
-				|| target->type == HEXEN_MT_CLERIC_BOSS
-				|| target->type == HEXEN_MT_MAGE_BOSS)
+			if(target->type == MobjType::HexenFighterBoss
+				|| target->type == MobjType::HexenClericBoss
+				|| target->type == MobjType::HexenMageBoss)
 			{
 				switch(target->type)
 				{
-					case HEXEN_MT_FIGHTER_BOSS:
-						S_StartMobjSound(target, hexen_sfx_player_fighter_burn_death);
-						P_SetMobjState(target, HEXEN_S_PLAY_F_FDTH1);
+					case MobjType::HexenFighterBoss:
+						S_StartMobjSound(target, SfxId::HexenPlayerFighterBurnDeath);
+						P_SetMobjState(target, StateId::HexenPlayFFdth1);
 						return;
-					case HEXEN_MT_CLERIC_BOSS:
-						S_StartMobjSound(target, hexen_sfx_player_cleric_burn_death);
-						P_SetMobjState(target, HEXEN_S_PLAY_C_FDTH1);
+					case MobjType::HexenClericBoss:
+						S_StartMobjSound(target, SfxId::HexenPlayerClericBurnDeath);
+						P_SetMobjState(target, StateId::HexenPlayCFdth1);
 						return;
-					case HEXEN_MT_MAGE_BOSS:
-						S_StartMobjSound(target, hexen_sfx_player_mage_burn_death);
-						P_SetMobjState(target, HEXEN_S_PLAY_M_FDTH1);
+					case MobjType::HexenMageBoss:
+						S_StartMobjSound(target, SfxId::HexenPlayerMageBurnDeath);
+						P_SetMobjState(target, StateId::HexenPlayMFdth1);
 						return;
 					default:
 						break;
 				}
 			}
-			else if(target->type == HEXEN_MT_TREEDESTRUCTIBLE)
+			else if(target->type == MobjType::HexenTreedestructible)
 			{
-				P_SetMobjState(target, HEXEN_S_ZTREEDES_X1);
+				P_SetMobjState(target, StateId::HexenZtreedesX1);
 				target->height = 24 * FRACUNIT;
-				S_StartMobjSound(target, hexen_sfx_tree_explode);
+				S_StartMobjSound(target, SfxId::HexenTreeExplode);
 				return;
 			}
 		}
@@ -1064,42 +1066,42 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 			target->flags |= MF_ICECORPSE;
 			switch(target->type)
 			{
-				case HEXEN_MT_BISHOP:
-					P_SetMobjState(target, HEXEN_S_BISHOP_ICE);
+				case MobjType::HexenBishop:
+					P_SetMobjState(target, StateId::HexenBishopIce);
 					return;
-				case HEXEN_MT_CENTAUR:
-				case HEXEN_MT_CENTAURLEADER:
-					P_SetMobjState(target, HEXEN_S_CENTAUR_ICE);
+				case MobjType::HexenCentaur:
+				case MobjType::HexenCentaurleader:
+					P_SetMobjState(target, StateId::HexenCentaurIce);
 					return;
-				case HEXEN_MT_DEMON:
-				case HEXEN_MT_DEMON2:
-					P_SetMobjState(target, HEXEN_S_DEMON_ICE);
+				case MobjType::HexenDemon:
+				case MobjType::HexenDemon2:
+					P_SetMobjState(target, StateId::HexenDemonIce);
 					return;
-				case HEXEN_MT_SERPENT:
-				case HEXEN_MT_SERPENTLEADER:
-					P_SetMobjState(target, HEXEN_S_SERPENT_ICE);
+				case MobjType::HexenSerpent:
+				case MobjType::HexenSerpentleader:
+					P_SetMobjState(target, StateId::HexenSerpentIce);
 					return;
-				case HEXEN_MT_WRAITH:
-				case HEXEN_MT_WRAITHB:
-					P_SetMobjState(target, HEXEN_S_WRAITH_ICE);
+				case MobjType::HexenWraith:
+				case MobjType::HexenWraithb:
+					P_SetMobjState(target, StateId::HexenWraithIce);
 					return;
-				case HEXEN_MT_ETTIN:
-					P_SetMobjState(target, HEXEN_S_ETTIN_ICE1);
+				case MobjType::HexenEttin:
+					P_SetMobjState(target, StateId::HexenEttinIce1);
 					return;
-				case HEXEN_MT_FIREDEMON:
-					P_SetMobjState(target, HEXEN_S_FIRED_ICE1);
+				case MobjType::HexenFiredemon:
+					P_SetMobjState(target, StateId::HexenFiredIce1);
 					return;
-				case HEXEN_MT_FIGHTER_BOSS:
-					P_SetMobjState(target, HEXEN_S_FIGHTER_ICE);
+				case MobjType::HexenFighterBoss:
+					P_SetMobjState(target, StateId::HexenFighterIce);
 					return;
-				case HEXEN_MT_CLERIC_BOSS:
-					P_SetMobjState(target, HEXEN_S_CLERIC_ICE);
+				case MobjType::HexenClericBoss:
+					P_SetMobjState(target, StateId::HexenClericIce);
 					return;
-				case HEXEN_MT_MAGE_BOSS:
-					P_SetMobjState(target, HEXEN_S_MAGE_ICE);
+				case MobjType::HexenMageBoss:
+					P_SetMobjState(target, StateId::HexenMageIce);
 					return;
-				case HEXEN_MT_PIG:
-					P_SetMobjState(target, HEXEN_S_PIG_ICE);
+				case MobjType::HexenPig:
+					P_SetMobjState(target, StateId::HexenPigIce);
 					return;
 				default:
 					target->flags &= ~MF_ICECORPSE;
@@ -1107,53 +1109,53 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 			}
 		}
 
-		if(target->type == HEXEN_MT_MINOTAUR)
+		if(target->type == MobjType::HexenMinotaur)
 		{
 			mobj_t* master = target->special1.m;
 			if(master->health > 0)
 			{
 				if(!ActiveMinotaur(master->player))
 				{
-					master->player->powers[pw_minotaur] = 0;
+					master->player->powers[std::to_underlying(PowerType::Minotaur)] = 0;
 				}
 			}
 		}
-		else if(target->type == HEXEN_MT_TREEDESTRUCTIBLE)
+		else if(target->type == MobjType::HexenTreedestructible)
 		{
 			target->height = 24 * FRACUNIT;
 		}
 		if(target->health < -(P_MobjSpawnHealth(target) >> 1)
-			&& target->info->xdeathstate)
+			&& target->info->xdeathstate != StateId::Null)
 		{
 			// Extreme death
-			P_SetMobjState(target, static_cast<statenum_t>(target->info->xdeathstate));
+			P_SetMobjState(target, target->info->xdeathstate);
 		}
 		else
 		{
 			// Normal death
-			if((target->type == HEXEN_MT_FIREDEMON) &&
+			if((target->type == MobjType::HexenFiredemon) &&
 				(target->z <= target->floorz + 2 * FRACUNIT) &&
-				(target->info->xdeathstate))
+				(target->info->xdeathstate != StateId::Null))
 			{
 				// This is to fix the imps' staying in fall state
-				P_SetMobjState(target, static_cast<statenum_t>(target->info->xdeathstate));
+				P_SetMobjState(target, target->info->xdeathstate);
 			}
 			else
 			{
-				P_SetMobjState(target, static_cast<statenum_t>(target->info->deathstate));
+				P_SetMobjState(target, target->info->deathstate);
 			}
 		}
 	}
 	else
 	{
 		xdeath_limit = heretic ? (P_MobjSpawnHealth(target) >> 1) : P_MobjSpawnHealth(target);
-		if(target->health < -xdeath_limit && target->info->xdeathstate)
-			P_SetMobjState(target, static_cast<statenum_t>(target->info->xdeathstate));
+		if(target->health < -xdeath_limit && target->info->xdeathstate != StateId::Null)
+			P_SetMobjState(target, target->info->xdeathstate);
 		else
-			P_SetMobjState(target, static_cast<statenum_t>(target->info->deathstate));
+			P_SetMobjState(target, target->info->deathstate);
 	}
 
-	target->tics -= P_Random(pr_killtics) & 3;
+	target->tics -= P_Random(RandomClass::Killtics) & 3;
 
 	if(raven) return;
 
@@ -1161,7 +1163,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 		target->tics = 1;
 
 	// In Chex Quest, monsters don't drop items.
-	if(gamemission == tc_chex)
+	if(gamemission == GameMission::TcChex)
 	{
 		return;
 	}
@@ -1170,13 +1172,13 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 	// This determines the kind of object spawned
 	// during the death frame of a thing.
 
-	if(target->info->droppeditem != MT_NULL)
+	if(target->info->droppeditem != MobjType::Null)
 	{
 		item = target->info->droppeditem;
 	}
 	else return;
 
-	mo = P_SpawnMobj(target->x, target->y,ONFLOORZ, static_cast<mobjtype_t>(item));
+	mo = P_SpawnMobj(target->x, target->y,ONFLOORZ, static_cast<MobjType>(item));
 	mo->flags |= MF_DROPPED; // special versions of items
 
 	if(target->momx == 0 && target->momy == 0)
@@ -1200,8 +1202,8 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 static dboolean P_InfightingImmune(mobj_t* target, mobj_t* source)
 {
 	return // not default behaviour, and same group
-		mobjinfo[target->type].infighting_group != IG_DEFAULT &&
-		mobjinfo[target->type].infighting_group == mobjinfo[source->type].infighting_group;
+		mobjinfo[std::to_underlying(target->type)].infighting_group != std::to_underlying(InfightingGroup::Default) &&
+		mobjinfo[std::to_underlying(target->type)].infighting_group == mobjinfo[std::to_underlying(source->type)].infighting_group;
 }
 
 static dboolean P_MorphMonster(mobj_t* actor);
@@ -1243,9 +1245,9 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 				switch(inflictor->type)
 				{
 					// These inflictors aren't foiled by invulnerability
-					case HEXEN_MT_HOLY_FX:
-					case HEXEN_MT_POISONCLOUD:
-					case HEXEN_MT_FIREBOMB:
+					case MobjType::HexenHolyFx:
+					case MobjType::HexenPoisoncloud:
+					case MobjType::HexenFirebomb:
 						break;
 					default:
 						return;
@@ -1259,7 +1261,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		if(target->player)
 		{
 			if(damage < 1000 && ((target->player->cheats & CF_GODMODE)
-				|| target->player->powers[pw_invulnerability]))
+				|| target->player->powers[std::to_underlying(PowerType::Invulnerability)]))
 			{
 				return;
 			}
@@ -1268,7 +1270,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 
 	if(target->flags & MF_SKULLFLY)
 	{
-		if(heretic && target->type == HERETIC_MT_MINOTAUR) return;
+		if(heretic && target->type == MobjType::HereticMinotaur) return;
 		target->momx = target->momy = target->momz = 0;
 	}
 
@@ -1287,7 +1289,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 	{
 		switch(inflictor->type)
 		{
-			case HERETIC_MT_EGGFX:
+			case MobjType::HereticEggfx:
 				if(player)
 				{
 					P_ChickenMorphPlayer(player);
@@ -1297,10 +1299,10 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 					P_ChickenMorph(target);
 				}
 				return; // Always return
-			case HERETIC_MT_WHIRLWIND:
+			case MobjType::HereticWhirlwind:
 				P_TouchWhirlwind(target);
 				return;
-			case HERETIC_MT_MINOTAUR:
+			case MobjType::HereticMinotaur:
 				if(inflictor->flags & MF_SKULLFLY)
 				{
 					// Slam only when in charge mode
@@ -1308,8 +1310,8 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 					return;
 				}
 				break;
-			case HERETIC_MT_MACEFX4: // Death ball
-				if((target->flags2 & MF2_BOSS) || target->type == HERETIC_MT_HEAD)
+			case MobjType::HereticMacefx4: // Death ball
+				if((target->flags2 & MF2_BOSS) || target->type == MobjType::HereticHead)
 				{
 					// Don't allow cheap boss kills
 					break;
@@ -1317,7 +1319,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 				else if(target->player)
 				{
 					// Player specific checks
-					if(target->player->powers[pw_invulnerability])
+					if(target->player->powers[std::to_underlying(PowerType::Invulnerability)])
 					{
 						// Can't hurt invulnerable players
 						break;
@@ -1330,38 +1332,38 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 				}
 				damage = 10000; // Something's gonna die
 				break;
-			case HERETIC_MT_PHOENIXFX2: // Flame thrower
-				if(target->player && P_Random(pr_heretic) < 128)
+			case MobjType::HereticPhoenixfx2: // Flame thrower
+				if(target->player && P_Random(RandomClass::Heretic) < 128)
 				{
 					// Freeze player for a bit
 					target->reactiontime += 4;
 				}
 				break;
-			case HERETIC_MT_RAINPLR1: // Rain missiles
-			case HERETIC_MT_RAINPLR2:
-			case HERETIC_MT_RAINPLR3:
-			case HERETIC_MT_RAINPLR4:
+			case MobjType::HereticRainplr1: // Rain missiles
+			case MobjType::HereticRainplr2:
+			case MobjType::HereticRainplr3:
+			case MobjType::HereticRainplr4:
 				if(target->flags2 & MF2_BOSS)
 				{
 					// Decrease damage for bosses
-					damage = (P_Random(pr_heretic) & 7) + 1;
+					damage = (P_Random(RandomClass::Heretic) & 7) + 1;
 				}
 				break;
-			case HERETIC_MT_HORNRODFX2:
-			case HERETIC_MT_PHOENIXFX1:
-				if(target->type == HERETIC_MT_SORCERER2 && P_Random(pr_heretic) < 96)
+			case MobjType::HereticHornrodfx2:
+			case MobjType::HereticPhoenixfx1:
+				if(target->type == MobjType::HereticSorcerer2 && P_Random(RandomClass::Heretic) < 96)
 				{
 					// D'Sparil teleports away
 					P_DSparilTeleport(target);
 					return;
 				}
 				break;
-			case HERETIC_MT_BLASTERFX1:
-			case HERETIC_MT_RIPPER:
-				if(target->type == HERETIC_MT_HEAD)
+			case MobjType::HereticBlasterfx1:
+			case MobjType::HereticRipper:
+				if(target->type == MobjType::HereticHead)
 				{
 					// Less damage to Ironlich bosses
-					damage = P_Random(pr_heretic) & 1;
+					damage = P_Random(RandomClass::Heretic) & 1;
 					if(!damage)
 					{
 						return;
@@ -1376,7 +1378,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 	{
 		switch(inflictor->type)
 		{
-			case HEXEN_MT_EGGFX:
+			case MobjType::HexenEggfx:
 				if(player)
 				{
 					P_MorphPlayer(player);
@@ -1386,20 +1388,20 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 					P_MorphMonster(target);
 				}
 				return; // Always return
-			case HEXEN_MT_TELOTHER_FX1:
-			case HEXEN_MT_TELOTHER_FX2:
-			case HEXEN_MT_TELOTHER_FX3:
-			case HEXEN_MT_TELOTHER_FX4:
-			case HEXEN_MT_TELOTHER_FX5:
+			case MobjType::HexenTelotherFx1:
+			case MobjType::HexenTelotherFx2:
+			case MobjType::HexenTelotherFx3:
+			case MobjType::HexenTelotherFx4:
+			case MobjType::HexenTelotherFx5:
 				if((target->flags & MF_COUNTKILL) &&
-					(target->type != HEXEN_MT_SERPENT) &&
-					(target->type != HEXEN_MT_SERPENTLEADER) &&
+					(target->type != MobjType::HexenSerpent) &&
+					(target->type != MobjType::HexenSerpentleader) &&
 					(!(target->flags2 & MF2_BOSS)))
 				{
 					P_TeleportOther(target);
 				}
 				return;
-			case HEXEN_MT_MINOTAUR:
+			case MobjType::HexenMinotaur:
 				if(inflictor->flags & MF_SKULLFLY)
 				{
 					// Slam only when in charge mode
@@ -1407,11 +1409,11 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 					return;
 				}
 				break;
-			case HEXEN_MT_BISH_FX:
+			case MobjType::HexenBishFx:
 				// Bishops are just too nasty
 				damage >>= 1;
 				break;
-			case HEXEN_MT_SHARDFX1:
+			case MobjType::HexenShardfx1:
 				switch(inflictor->special2.i)
 				{
 					case 3:
@@ -1427,7 +1429,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 						break;
 				}
 				break;
-			case HEXEN_MT_CSTAFF_MISSILE:
+			case MobjType::HexenCstaffMissile:
 				// Cleric Serpent Staff does poison damage
 				if(target->player)
 				{
@@ -1435,24 +1437,24 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 					damage >>= 1;
 				}
 				break;
-			case HEXEN_MT_ICEGUY_FX2:
+			case MobjType::HexenIceguyFx2:
 				damage >>= 1;
 				break;
-			case HEXEN_MT_POISONDART:
+			case MobjType::HexenPoisondart:
 				if(target->player)
 				{
 					P_PoisonPlayer(target->player, source, 20);
 					damage >>= 1;
 				}
 				break;
-			case HEXEN_MT_POISONCLOUD:
+			case MobjType::HexenPoisoncloud:
 				if(target->player)
 				{
 					if(target->player->poisoncount < 4)
 					{
-						P_PoisonDamage(target->player, source, 15 + (P_Random(pr_hexen) & 15), false); // Don't play painsound
+						P_PoisonDamage(target->player, source, 15 + (P_Random(RandomClass::Hexen) & 15), false); // Don't play painsound
 						P_PoisonPlayer(target->player, source, 50);
-						S_StartMobjSound(target, hexen_sfx_player_poisoncough);
+						S_StartMobjSound(target, SfxId::HexenPlayerPoisoncough);
 					}
 					return;
 				}
@@ -1462,7 +1464,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 					return;
 				}
 				break;
-			case HEXEN_MT_FSWORD_MISSILE:
+			case MobjType::HexenFswordMissile:
 				if(target->player)
 				{
 					damage -= damage >> 2;
@@ -1483,7 +1485,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		!(
 			source &&
 			source->player &&
-			(hexen || weaponinfo[source->player->readyweapon].flags & WPF_NOTHRUST)
+			(hexen || weaponinfo[std::to_underlying(source->player->readyweapon)].flags & WPF_NOTHRUST)
 		) &&
 		!(inflictor->flags2 & MF2_NODMGTHRUST)
 	)
@@ -1496,7 +1498,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		// make fall forwards sometimes
 		if(damage < 40 && damage > target->health
 			&& target->z - inflictor->z > 64 * FRACUNIT
-			&& P_Random(pr_damagemobj) & 1)
+			&& P_Random(RandomClass::Damagemobj) & 1)
 		{
 			ang += ANG180;
 			thrust *= 4;
@@ -1505,8 +1507,8 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		ang >>= ANGLETOFINESHIFT;
 
 		if(source && source->player && (source == inflictor)
-			&& source->player->powers[pw_weaponlevel2]
-			&& source->player->readyweapon == wp_staff)
+			&& source->player->powers[std::to_underlying(PowerType::WeaponLevel2)]
+			&& source->player->readyweapon == WeaponType::Staff)
 		{
 			// Staff power level 2
 			target->momx += FixedMul(10 * FRACUNIT, finecosine[ang]);
@@ -1523,7 +1525,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		}
 
 		/* killough 11/98: thrust objects hanging off ledges */
-		if(target->intflags & MIF_FALLING && target->gear >= MAXGEAR)
+		if((target->intflags & MobjIntFlag::Falling) != MobjIntFlag{} && target->gear >= MAXGEAR)
 			target->gear = 0;
 	}
 
@@ -1540,8 +1542,8 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 
 		if(
 			!hexen &&
-			(damage < 1000 || (!comp[comp_god] && (player->cheats & CF_GODMODE))) &&
-			(player->cheats & CF_GODMODE || player->powers[pw_invulnerability])
+			(damage < 1000 || (!comp[std::to_underlying(CompOption::God)] && (player->cheats & CF_GODMODE))) &&
+			(player->cheats & CF_GODMODE || player->powers[std::to_underlying(PowerType::Invulnerability)])
 		)
 			return;
 
@@ -1549,11 +1551,11 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		{
 			int i;
 			int saved;
-			fixed_t savedPercent = pclass[player->pclass].auto_armor_save
-				+ player->armorpoints[ARMOR_ARMOR]
-				+ player->armorpoints[ARMOR_SHIELD]
-				+ player->armorpoints[ARMOR_HELMET]
-				+ player->armorpoints[ARMOR_AMULET];
+			fixed_t savedPercent = pclass[std::to_underlying(player->pclass)].auto_armor_save
+				+ player->armorpoints[std::to_underlying(ArmorType::Armor)]
+				+ player->armorpoints[std::to_underlying(ArmorType::Shield)]
+				+ player->armorpoints[std::to_underlying(ArmorType::Helmet)]
+				+ player->armorpoints[std::to_underlying(ArmorType::Amulet)];
 			if(savedPercent)
 			{
 				// armor absorbed some damage
@@ -1561,12 +1563,12 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 				{
 					savedPercent = 100 * FRACUNIT;
 				}
-				for(i = 0; i < NUMARMOR; i++)
+				for(i = 0; i < std::to_underlying(ArmorType::Count); i++)
 				{
 					if(player->armorpoints[i])
 					{
 						player->armorpoints[i] -= FixedDiv(
-							FixedMul(damage << FRACBITS, pclass[player->pclass].armor_increment[i]),
+							FixedMul(damage << FRACBITS, pclass[std::to_underlying(player->pclass)].armor_increment[i]),
 							300 * FRACUNIT
 						);
 						if(player->armorpoints[i] < 2 * FRACUNIT)
@@ -1597,13 +1599,13 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 				else
 					saved = player->armortype == 1 ? damage / 3 : damage / 2;
 
-				if(player->armorpoints[ARMOR_ARMOR] <= saved)
+				if(player->armorpoints[std::to_underlying(ArmorType::Armor)] <= saved)
 				{
 					// armor is used up
-					saved = player->armorpoints[ARMOR_ARMOR];
+					saved = player->armorpoints[std::to_underlying(ArmorType::Armor)];
 					player->armortype = 0;
 				}
-				player->armorpoints[ARMOR_ARMOR] -= saved;
+				player->armorpoints[std::to_underlying(ArmorType::Armor)] -= saved;
 				damage -= saved;
 			}
 		}
@@ -1644,7 +1646,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		if(heretic)
 		{
 			target->special1.i = damage;
-			if(target->type == HERETIC_MT_POD && source && source->type != HERETIC_MT_POD)
+			if(target->type == MobjType::HereticPod && source && source->type != MobjType::HereticPod)
 			{
 				// Make sure players get frags for chain-reaction kills
 				P_SetTarget(&target->target, source);
@@ -1653,7 +1655,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 			{
 				// Check for flame death
 				if((inflictor->flags2 & MF2_FIREDAMAGE)
-					|| ((inflictor->type == HERETIC_MT_PHOENIXFX1)
+					|| ((inflictor->type == MobjType::HereticPhoenixfx1)
 						&& (target->health > -50) && (damage > 25)))
 				{
 					target->flags2 |= MF2_FIREDAMAGE;
@@ -1685,7 +1687,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 					target->flags2 |= MF2_ICEDAMAGE;
 				}
 			}
-			if(source && (source->type == HEXEN_MT_MINOTAUR))
+			if(source && (source->type == MobjType::HexenMinotaur))
 			{
 				// Minotaur's kills go to his master
 				mobj_t* master = source->special1.m;
@@ -1696,7 +1698,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 				}
 			}
 			if(source && (source->player) &&
-				(source->player->readyweapon == wp_fourth))
+				(source->player->readyweapon == WeaponType::Fourth))
 			{
 				// Always extreme death from fourth weapon
 				target->health = -5000;
@@ -1722,7 +1724,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		*/
 		if(target->health * 2 < P_MobjSpawnHealth(target))
 		{
-			thinker_t* cap = &thinkerclasscap[target->flags & MF_FRIEND ? th_friends : th_enemies];
+			thinker_t* cap = &thinkerclasscap[std::to_underlying(target->flags & MF_FRIEND ? ThinkerClass::Friends : ThinkerClass::Enemies)];
 			(target->thinker.cprev->cnext = target->thinker.cnext)->cprev =
 				target->thinker.cprev;
 			(target->thinker.cnext = cap->cnext)->cprev = &target->thinker;
@@ -1731,29 +1733,29 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 	}
 
 	if(!(skill_info.flags & SI_NO_PAIN) &&
-		P_Random(pr_painchance) < target->info->painchance &&
+		P_Random(RandomClass::Painchance) < target->info->painchance &&
 		!(target->flags & MF_SKULLFLY)) //killough 11/98: see below
 	{
-		if(hexen && inflictor && inflictor->type >= HEXEN_MT_LIGHTNING_FLOOR &&
-			inflictor->type <= HEXEN_MT_LIGHTNING_ZAP)
+		if(hexen && inflictor && inflictor->type >= MobjType::HexenLightningFloor &&
+			inflictor->type <= MobjType::HexenLightningZap)
 		{
-			if(P_Random(pr_hexen) < 96)
+			if(P_Random(RandomClass::Hexen) < 96)
 			{
 				target->flags |= MF_JUSTHIT; // fight back!
-				P_SetMobjState(target, static_cast<statenum_t>(target->info->painstate));
+				P_SetMobjState(target, target->info->painstate);
 			}
 			else
 			{
 				// "electrocute" the target
 				target->frame |= FF_FULLBRIGHT;
-				if(target->flags & MF_COUNTKILL && P_Random(pr_hexen) < 128
-					&& !S_GetSoundPlayingInfo(target, hexen_sfx_puppybeat))
+				if(target->flags & MF_COUNTKILL && P_Random(RandomClass::Hexen) < 128
+					&& !S_GetSoundPlayingInfo(target, SfxId::HexenPuppybeat))
 				{
-					if((target->type == HEXEN_MT_CENTAUR) ||
-						(target->type == HEXEN_MT_CENTAURLEADER) ||
-						(target->type == HEXEN_MT_ETTIN))
+					if((target->type == MobjType::HexenCentaur) ||
+						(target->type == MobjType::HexenCentaurleader) ||
+						(target->type == MobjType::HexenEttin))
 					{
-						S_StartMobjSound(target, hexen_sfx_puppybeat);
+						S_StartMobjSound(target, SfxId::HexenPuppybeat);
 					}
 				}
 			}
@@ -1765,18 +1767,18 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 			else
 				target->flags |= MF_JUSTHIT; // fight back!
 
-			P_SetMobjState(target, static_cast<statenum_t>(target->info->painstate));
+			P_SetMobjState(target, target->info->painstate);
 
-			if(hexen && inflictor && inflictor->type == HEXEN_MT_POISONCLOUD)
+			if(hexen && inflictor && inflictor->type == MobjType::HexenPoisoncloud)
 			{
-				if(target->flags & MF_COUNTKILL && P_Random(pr_hexen) < 128
-					&& !S_GetSoundPlayingInfo(target, hexen_sfx_puppybeat))
+				if(target->flags & MF_COUNTKILL && P_Random(RandomClass::Hexen) < 128
+					&& !S_GetSoundPlayingInfo(target, SfxId::HexenPuppybeat))
 				{
-					if((target->type == HEXEN_MT_CENTAUR) ||
-						(target->type == HEXEN_MT_CENTAURLEADER) ||
-						(target->type == HEXEN_MT_ETTIN))
+					if((target->type == MobjType::HexenCentaur) ||
+						(target->type == MobjType::HexenCentaurleader) ||
+						(target->type == MobjType::HexenEttin))
 					{
-						S_StartMobjSound(target, hexen_sfx_puppybeat);
+						S_StartMobjSound(target, SfxId::HexenPuppybeat);
 					}
 				}
 			}
@@ -1789,18 +1791,18 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 	//e6y: Monsters could commit suicide in Doom v1.2 if they damaged themselves by exploding a barrel
 	if(
 		source &&
-		(source != target || compatibility_level == doom_12_compatibility) &&
+		(source != target || compatibility_level == CompLevel::Doom12) &&
 		!(source->flags2 & MF2_DMGIGNORED) &&
 		(!target->threshold || target->flags2 & MF2_NOTHRESHOLD) &&
 		((source->flags ^ target->flags) & MF_FRIEND || monster_infighting || !mbf_features) &&
 		!(
 			raven && (
 				source->flags2 & MF2_BOSS ||
-				(target->type == HERETIC_MT_SORCERER2 && source->type == HERETIC_MT_WIZARD) ||
-				target->type == HEXEN_MT_BISHOP ||
-				target->type == HEXEN_MT_MINOTAUR ||
-				(target->type == HEXEN_MT_CENTAUR && source->type == HEXEN_MT_CENTAURLEADER) ||
-				(target->type == HEXEN_MT_CENTAURLEADER && source->type == HEXEN_MT_CENTAUR)
+				(target->type == MobjType::HereticSorcerer2 && source->type == MobjType::HereticWizard) ||
+				target->type == MobjType::HexenBishop ||
+				target->type == MobjType::HexenMinotaur ||
+				(target->type == MobjType::HexenCentaur && source->type == MobjType::HexenCentaurleader) ||
+				(target->type == MobjType::HexenCentaurleader && source->type == MobjType::HexenCentaur)
 			)
 		) &&
 		!P_InfightingImmune(target, source)
@@ -1824,9 +1826,9 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 
 		P_SetTarget(&target->target, source); // killough 11/98
 		target->threshold = BASETHRESHOLD;
-		if(target->state == &states[target->info->spawnstate]
+		if(target->state == &states[std::to_underlying(target->info->spawnstate)]
 			&& target->info->seestate != g_s_null)
-			P_SetMobjState(target, static_cast<statenum_t>(target->info->seestate));
+			P_SetMobjState(target, target->info->seestate);
 	}
 
 	/* killough 11/98: Don't attack a friend, unless hit by that friend.
@@ -1846,13 +1848,13 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 extern "C" void A_RestoreArtifact(mobj_t* arti)
 {
 	arti->flags |= MF_SPECIAL;
-	P_SetMobjState(arti, static_cast<statenum_t>(arti->info->spawnstate));
+	P_SetMobjState(arti, arti->info->spawnstate);
 	S_StartMobjSound(arti, g_sfx_respawn);
 }
 
 extern "C" void A_RestoreSpecialThing1(mobj_t* thing)
 {
-	if(thing->type == HERETIC_MT_WMACE)
+	if(thing->type == MobjType::HereticWmace)
 	{
 		// Do random mace placement
 		P_RepositionMace(thing);
@@ -1864,7 +1866,7 @@ extern "C" void A_RestoreSpecialThing1(mobj_t* thing)
 extern "C" void A_RestoreSpecialThing2(mobj_t* thing)
 {
 	thing->flags |= MF_SPECIAL;
-	P_SetMobjState(thing, static_cast<statenum_t>(thing->info->spawnstate));
+	P_SetMobjState(thing, thing->info->spawnstate);
 }
 
 // heretic
@@ -1880,7 +1882,7 @@ static void Heretic_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 	int i;
 	player_t* player;
 	fixed_t delta;
-	int sound;
+	SfxId sound;
 
 	delta = special->z - toucher->z;
 	if(delta > toucher->height || delta < -32 * FRACUNIT)
@@ -1893,51 +1895,51 @@ static void Heretic_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 		// Toucher is dead
 		return;
 	}
-	sound = heretic_sfx_itemup;
+	sound = SfxId::HereticItemup;
 	player = toucher->player;
 
 	switch(special->sprite)
 	{
 		// Items
-		case HERETIC_SPR_PTN1: // Item_HealingPotion
+		case SpriteId::HereticPtn1: // Item_HealingPotion
 			if(!P_GiveBody(player, 10))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_ITEMHEALTH, false);
 			break;
-		case HERETIC_SPR_SHLD: // Item_Shield1
+		case SpriteId::HereticShld: // Item_Shield1
 			if(!P_GiveArmor(player, 1))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_ITEMSHIELD1, false);
 			break;
-		case HERETIC_SPR_SHD2: // Item_Shield2
+		case SpriteId::HereticShd2: // Item_Shield2
 			if(!P_GiveArmor(player, 2))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_ITEMSHIELD2, false);
 			break;
-		case HERETIC_SPR_BAGH: // Item_BagOfHolding
+		case SpriteId::HereticBagh: // Item_BagOfHolding
 			if(!player->backpack)
 			{
-				for(i = 0; i < NUMAMMO; i++)
+				for(i = 0; i < std::to_underlying(AmmoType::Count); i++)
 				{
 					player->maxammo[i] *= 2;
 				}
 				player->backpack = true;
 			}
-			P_GiveAmmo(player, static_cast<ammotype_t>(am_goldwand), AMMO_GWND_WIMPY);
-			P_GiveAmmo(player, static_cast<ammotype_t>(am_blaster), AMMO_BLSR_WIMPY);
-			P_GiveAmmo(player, static_cast<ammotype_t>(am_crossbow), AMMO_CBOW_WIMPY);
-			P_GiveAmmo(player, static_cast<ammotype_t>(am_skullrod), AMMO_SKRD_WIMPY);
-			P_GiveAmmo(player, static_cast<ammotype_t>(am_phoenixrod), AMMO_PHRD_WIMPY);
+			P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::GoldWand), AMMO_GWND_WIMPY);
+			P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Blaster), AMMO_BLSR_WIMPY);
+			P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Crossbow), AMMO_CBOW_WIMPY);
+			P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::SkullRod), AMMO_SKRD_WIMPY);
+			P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::PhoenixRod), AMMO_PHRD_WIMPY);
 			P_SetMessage(player, HERETIC_TXT_ITEMBAGOFHOLDING, false);
 			break;
-		case HERETIC_SPR_SPMP: // Item_SuperMap
-			if(!P_GivePower(player, pw_allmap))
+		case SpriteId::HereticSpmp: // Item_SuperMap
+			if(!P_GivePower(player, PowerType::AllMap))
 			{
 				return;
 			}
@@ -1945,37 +1947,37 @@ static void Heretic_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			break;
 
 		// Keys
-		case HERETIC_SPR_BKYY: // Key_Blue
-			if(!player->cards[key_blue])
+		case SpriteId::HereticBkyy: // Key_Blue
+			if(!player->cards[std::to_underlying(Card::KeyBlue)])
 			{
 				P_SetMessage(player, HERETIC_TXT_GOTBLUEKEY, false);
 			}
-			P_GiveCard(player, key_blue);
-			sound = heretic_sfx_keyup;
+			P_GiveCard(player, Card::KeyBlue);
+			sound = SfxId::HereticKeyup;
 			if(!netgame)
 			{
 				break;
 			}
 			return;
-		case HERETIC_SPR_CKYY: // Key_Yellow
-			if(!player->cards[key_yellow])
+		case SpriteId::HereticCkyy: // Key_Yellow
+			if(!player->cards[std::to_underlying(Card::KeyYellow)])
 			{
 				P_SetMessage(player, HERETIC_TXT_GOTYELLOWKEY, false);
 			}
-			sound = heretic_sfx_keyup;
-			P_GiveCard(player, key_yellow);
+			sound = SfxId::HereticKeyup;
+			P_GiveCard(player, Card::KeyYellow);
 			if(!netgame)
 			{
 				break;
 			}
 			return;
-		case HERETIC_SPR_AKYY: // Key_Green
-			if(!player->cards[key_green])
+		case SpriteId::HereticAkyy: // Key_Green
+			if(!player->cards[std::to_underlying(Card::KeyGreen)])
 			{
 				P_SetMessage(player, HERETIC_TXT_GOTGREENKEY, false);
 			}
-			sound = heretic_sfx_keyup;
-			P_GiveCard(player, key_green);
+			sound = SfxId::HereticKeyup;
+			P_GiveCard(player, Card::KeyGreen);
 			if(!netgame)
 			{
 				break;
@@ -1983,71 +1985,71 @@ static void Heretic_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			return;
 
 		// Artifacts
-		case HERETIC_SPR_PTN2: // Arti_HealingPotion
-			if(P_GiveArtifact(player, static_cast<artitype_t>(arti_health), special))
+		case SpriteId::HereticPtn2: // Arti_HealingPotion
+			if(P_GiveArtifact(player, static_cast<ArtiType>(ArtiType::Health), special))
 			{
 				P_SetMessage(player, HERETIC_TXT_ARTIHEALTH, false);
 				P_SetDormantArtifact(special);
 			}
 			return;
-		case HERETIC_SPR_SOAR: // Arti_Fly
-			if(P_GiveArtifact(player, static_cast<artitype_t>(arti_fly), special))
+		case SpriteId::HereticSoar: // Arti_Fly
+			if(P_GiveArtifact(player, static_cast<ArtiType>(ArtiType::Fly), special))
 			{
 				P_SetMessage(player, HERETIC_TXT_ARTIFLY, false);
 				P_SetDormantArtifact(special);
 			}
 			return;
-		case HERETIC_SPR_INVU: // Arti_Invulnerability
-			if(P_GiveArtifact(player, static_cast<artitype_t>(arti_invulnerability), special))
+		case SpriteId::HereticInvu: // Arti_Invulnerability
+			if(P_GiveArtifact(player, static_cast<ArtiType>(ArtiType::Invulnerability), special))
 			{
 				P_SetMessage(player, HERETIC_TXT_ARTIINVULNERABILITY, false);
 				P_SetDormantArtifact(special);
 			}
 			return;
-		case HERETIC_SPR_PWBK: // Arti_TomeOfPower
-			if(P_GiveArtifact(player, static_cast<artitype_t>(arti_tomeofpower), special))
+		case SpriteId::HereticPwbk: // Arti_TomeOfPower
+			if(P_GiveArtifact(player, static_cast<ArtiType>(ArtiType::TomeOfPower), special))
 			{
 				P_SetMessage(player, HERETIC_TXT_ARTITOMEOFPOWER, false);
 				P_SetDormantArtifact(special);
 			}
 			return;
-		case HERETIC_SPR_INVS: // Arti_Invisibility
-			if(P_GiveArtifact(player, static_cast<artitype_t>(arti_invisibility), special))
+		case SpriteId::HereticInvs: // Arti_Invisibility
+			if(P_GiveArtifact(player, static_cast<ArtiType>(ArtiType::Invisibility), special))
 			{
 				P_SetMessage(player, HERETIC_TXT_ARTIINVISIBILITY, false);
 				P_SetDormantArtifact(special);
 			}
 			return;
-		case HERETIC_SPR_EGGC: // Arti_Egg
-			if(P_GiveArtifact(player, static_cast<artitype_t>(arti_egg), special))
+		case SpriteId::HereticEggc: // Arti_Egg
+			if(P_GiveArtifact(player, static_cast<ArtiType>(ArtiType::Egg), special))
 			{
 				P_SetMessage(player, HERETIC_TXT_ARTIEGG, false);
 				P_SetDormantArtifact(special);
 			}
 			return;
-		case HERETIC_SPR_SPHL: // Arti_SuperHealth
-			if(P_GiveArtifact(player, static_cast<artitype_t>(arti_superhealth), special))
+		case SpriteId::HereticSphl: // Arti_SuperHealth
+			if(P_GiveArtifact(player, static_cast<ArtiType>(ArtiType::SuperHealth), special))
 			{
 				P_SetMessage(player, HERETIC_TXT_ARTISUPERHEALTH, false);
 				P_SetDormantArtifact(special);
 			}
 			return;
-		case HERETIC_SPR_TRCH: // Arti_Torch
-			if(P_GiveArtifact(player, static_cast<artitype_t>(arti_torch), special))
+		case SpriteId::HereticTrch: // Arti_Torch
+			if(P_GiveArtifact(player, static_cast<ArtiType>(ArtiType::Torch), special))
 			{
 				P_SetMessage(player, HERETIC_TXT_ARTITORCH, false);
 				P_SetDormantArtifact(special);
 			}
 			return;
-		case HERETIC_SPR_FBMB: // Arti_FireBomb
-			if(P_GiveArtifact(player, static_cast<artitype_t>(arti_firebomb), special))
+		case SpriteId::HereticFbmb: // Arti_FireBomb
+			if(P_GiveArtifact(player, static_cast<ArtiType>(ArtiType::Firebomb), special))
 			{
 				P_SetMessage(player, HERETIC_TXT_ARTIFIREBOMB, false);
 				P_SetDormantArtifact(special);
 			}
 			return;
-		case HERETIC_SPR_ATLP: // Arti_Teleport
-			if(P_GiveArtifact(player, static_cast<artitype_t>(arti_teleport), special))
+		case SpriteId::HereticAtlp: // Arti_Teleport
+			if(P_GiveArtifact(player, static_cast<ArtiType>(ArtiType::Teleport), special))
 			{
 				P_SetMessage(player, HERETIC_TXT_ARTITELEPORT, false);
 				P_SetDormantArtifact(special);
@@ -2055,85 +2057,85 @@ static void Heretic_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			return;
 
 		// Ammo
-		case HERETIC_SPR_AMG1: // Ammo_GoldWandWimpy
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_goldwand), special->health))
+		case SpriteId::HereticAmg1: // Ammo_GoldWandWimpy
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::GoldWand), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOGOLDWAND1, false);
 			break;
-		case HERETIC_SPR_AMG2: // Ammo_GoldWandHefty
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_goldwand), special->health))
+		case SpriteId::HereticAmg2: // Ammo_GoldWandHefty
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::GoldWand), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOGOLDWAND2, false);
 			break;
-		case HERETIC_SPR_AMM1: // Ammo_MaceWimpy
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_mace), special->health))
+		case SpriteId::HereticAmm1: // Ammo_MaceWimpy
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Mace), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOMACE1, false);
 			break;
-		case HERETIC_SPR_AMM2: // Ammo_MaceHefty
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_mace), special->health))
+		case SpriteId::HereticAmm2: // Ammo_MaceHefty
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Mace), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOMACE2, false);
 			break;
-		case HERETIC_SPR_AMC1: // Ammo_CrossbowWimpy
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_crossbow), special->health))
+		case SpriteId::HereticAmc1: // Ammo_CrossbowWimpy
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Crossbow), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOCROSSBOW1, false);
 			break;
-		case HERETIC_SPR_AMC2: // Ammo_CrossbowHefty
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_crossbow), special->health))
+		case SpriteId::HereticAmc2: // Ammo_CrossbowHefty
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Crossbow), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOCROSSBOW2, false);
 			break;
-		case HERETIC_SPR_AMB1: // Ammo_BlasterWimpy
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_blaster), special->health))
+		case SpriteId::HereticAmb1: // Ammo_BlasterWimpy
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Blaster), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOBLASTER1, false);
 			break;
-		case HERETIC_SPR_AMB2: // Ammo_BlasterHefty
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_blaster), special->health))
+		case SpriteId::HereticAmb2: // Ammo_BlasterHefty
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Blaster), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOBLASTER2, false);
 			break;
-		case HERETIC_SPR_AMS1: // Ammo_SkullRodWimpy
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_skullrod), special->health))
+		case SpriteId::HereticAms1: // Ammo_SkullRodWimpy
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::SkullRod), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOSKULLROD1, false);
 			break;
-		case HERETIC_SPR_AMS2: // Ammo_SkullRodHefty
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_skullrod), special->health))
+		case SpriteId::HereticAms2: // Ammo_SkullRodHefty
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::SkullRod), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOSKULLROD2, false);
 			break;
-		case HERETIC_SPR_AMP1: // Ammo_PhoenixRodWimpy
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_phoenixrod), special->health))
+		case SpriteId::HereticAmp1: // Ammo_PhoenixRodWimpy
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::PhoenixRod), special->health))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_AMMOPHOENIXROD1, false);
 			break;
-		case HERETIC_SPR_AMP2: // Ammo_PhoenixRodHefty
-			if(!P_GiveAmmo(player, static_cast<ammotype_t>(am_phoenixrod), special->health))
+		case SpriteId::HereticAmp2: // Ammo_PhoenixRodHefty
+			if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::PhoenixRod), special->health))
 			{
 				return;
 			}
@@ -2141,53 +2143,53 @@ static void Heretic_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			break;
 
 		// Weapons
-		case HERETIC_SPR_WMCE: // Weapon_Mace
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_mace), false))
+		case SpriteId::HereticWmce: // Weapon_Mace
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Mace), false))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_WPNMACE, false);
-			sound = heretic_sfx_wpnup;
+			sound = SfxId::HereticWpnup;
 			break;
-		case HERETIC_SPR_WBOW: // Weapon_Crossbow
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_crossbow), false))
+		case SpriteId::HereticWbow: // Weapon_Crossbow
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Crossbow), false))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_WPNCROSSBOW, false);
-			sound = heretic_sfx_wpnup;
+			sound = SfxId::HereticWpnup;
 			break;
-		case HERETIC_SPR_WBLS: // Weapon_Blaster
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_blaster), false))
+		case SpriteId::HereticWbls: // Weapon_Blaster
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Blaster), false))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_WPNBLASTER, false);
-			sound = heretic_sfx_wpnup;
+			sound = SfxId::HereticWpnup;
 			break;
-		case HERETIC_SPR_WSKL: // Weapon_SkullRod
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_skullrod), false))
+		case SpriteId::HereticWskl: // Weapon_SkullRod
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::SkullRod), false))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_WPNSKULLROD, false);
-			sound = heretic_sfx_wpnup;
+			sound = SfxId::HereticWpnup;
 			break;
-		case HERETIC_SPR_WPHX: // Weapon_PhoenixRod
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_phoenixrod), false))
+		case SpriteId::HereticWphx: // Weapon_PhoenixRod
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::PhoenixRod), false))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_WPNPHOENIXROD, false);
-			sound = heretic_sfx_wpnup;
+			sound = SfxId::HereticWpnup;
 			break;
-		case HERETIC_SPR_WGNT: // Weapon_Gauntlets
-			if(!P_GiveWeapon(player, static_cast<weapontype_t>(wp_gauntlets), false))
+		case SpriteId::HereticWgnt: // Weapon_Gauntlets
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Gauntlets), false))
 			{
 				return;
 			}
 			P_SetMessage(player, HERETIC_TXT_WPNGAUNTLETS, false);
-			sound = heretic_sfx_wpnup;
+			sound = SfxId::HereticWpnup;
 			break;
 		default:
 			I_Error("Heretic_P_TouchSpecialThing: Unknown gettable thing");
@@ -2212,23 +2214,23 @@ static void Heretic_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 	}
 }
 
-dboolean P_GiveArtifact(player_t* player, artitype_t arti, mobj_t* mo)
+dboolean P_GiveArtifact(player_t* player, ArtiType arti, mobj_t* mo)
 {
 	int i;
 	dboolean slidePointer;
 
 	slidePointer = false;
 	i = 0;
-	while(player->inventory[i].type != arti && i < player->inventorySlotNum)
+	while(player->inventory[i].type != std::to_underlying(arti) && i < player->inventorySlotNum)
 	{
 		i++;
 	}
 	if(i == player->inventorySlotNum)
 	{
-		if(hexen && arti < hexen_arti_firstpuzzitem)
+		if(hexen && arti < ArtiType::HexenFirstpuzzitem)
 		{
 			i = 0;
-			while(player->inventory[i].type < hexen_arti_firstpuzzitem
+			while(player->inventory[i].type < std::to_underlying(ArtiType::HexenFirstpuzzitem)
 				&& i < player->inventorySlotNum)
 			{
 				i++;
@@ -2246,12 +2248,12 @@ dboolean P_GiveArtifact(player_t* player, artitype_t arti, mobj_t* mo)
 			}
 		}
 		player->inventory[i].count = 1;
-		player->inventory[i].type = arti;
+		player->inventory[i].type = std::to_underlying(arti);
 		player->inventorySlotNum++;
 	}
 	else
 	{
-		if(hexen && arti >= hexen_arti_firstpuzzitem && netgame && !deathmatch)
+		if(hexen && arti >= ArtiType::HexenFirstpuzzitem && netgame && !deathmatch)
 		{
 			// Can't carry more than 1 puzzle item in coop netplay
 			return false;
@@ -2287,20 +2289,20 @@ dboolean P_GiveArtifact(player_t* player, artitype_t arti, mobj_t* mo)
 void P_SetDormantArtifact(mobj_t* arti)
 {
 	arti->flags &= ~MF_SPECIAL;
-	if(deathmatch && (arti->type != HERETIC_MT_ARTIINVULNERABILITY)
-		&& (arti->type != HERETIC_MT_ARTIINVISIBILITY))
+	if(deathmatch && (arti->type != MobjType::HereticArtiinvulnerability)
+		&& (arti->type != MobjType::HereticArtiinvisibility))
 	{
-		P_SetMobjState(arti, HERETIC_S_DORMANTARTI1);
+		P_SetMobjState(arti, StateId::HereticDormantarti1);
 	}
 	else
 	{
 		// Don't respawn
-		P_SetMobjState(arti, HERETIC_S_DEADARTI1);
+		P_SetMobjState(arti, StateId::HereticDeadarti1);
 	}
-	S_StartMobjSound(arti, heretic_sfx_artiup);
+	S_StartMobjSound(arti, SfxId::HereticArtiup);
 }
 
-int GetWeaponAmmo[NUMWEAPONS] = {
+int GetWeaponAmmo[std::to_underlying(WeaponType::Count)] = {
 	0,  // staff
 	25, // gold wand
 	10, // crossbow
@@ -2324,7 +2326,7 @@ int WeaponValue[] = {
 	0  // beak
 };
 
-dboolean Heretic_P_GiveWeapon(player_t* player, weapontype_t weapon)
+dboolean Heretic_P_GiveWeapon(player_t* player, WeaponType weapon)
 {
 	dboolean gaveAmmo;
 	dboolean gaveWeapon;
@@ -2332,34 +2334,34 @@ dboolean Heretic_P_GiveWeapon(player_t* player, weapontype_t weapon)
 	if(netgame && !deathmatch)
 	{
 		// Cooperative net-game
-		if(player->weaponowned[weapon])
+		if(player->weaponowned[std::to_underlying(weapon)])
 		{
 			return (false);
 		}
 		player->bonuscount += BONUSADD;
-		player->weaponowned[weapon] = true;
-		P_GiveAmmo(player, static_cast<ammotype_t>(wpnlev1info[weapon].ammo), GetWeaponAmmo[weapon]);
-		P_AutoSwitchWeapon(player, static_cast<weapontype_t>(weapon));
+		player->weaponowned[std::to_underlying(weapon)] = true;
+		P_GiveAmmo(player, static_cast<AmmoType>(wpnlev1info[std::to_underlying(weapon)].ammo), GetWeaponAmmo[std::to_underlying(weapon)]);
+		P_AutoSwitchWeapon(player, static_cast<WeaponType>(weapon));
 		if(player == &players[consoleplayer])
 		{
-			S_StartVoidSound(heretic_sfx_wpnup);
+			S_StartVoidSound(SfxId::HereticWpnup);
 		}
 		return (false);
 	}
-	gaveAmmo = P_GiveAmmo(player, static_cast<ammotype_t>(wpnlev1info[weapon].ammo),
-		GetWeaponAmmo[weapon]);
-	if(player->weaponowned[weapon])
+	gaveAmmo = P_GiveAmmo(player, static_cast<AmmoType>(wpnlev1info[std::to_underlying(weapon)].ammo),
+		GetWeaponAmmo[std::to_underlying(weapon)]);
+	if(player->weaponowned[std::to_underlying(weapon)])
 	{
 		gaveWeapon = false;
 	}
 	else
 	{
 		gaveWeapon = true;
-		player->weaponowned[weapon] = true;
-		if(WeaponValue[weapon] > WeaponValue[player->readyweapon])
+		player->weaponowned[std::to_underlying(weapon)] = true;
+		if(WeaponValue[std::to_underlying(weapon)] > WeaponValue[std::to_underlying(player->readyweapon)])
 		{
 			// Only switch to more powerful weapons
-			P_AutoSwitchWeapon(player, static_cast<weapontype_t>(weapon));
+			P_AutoSwitchWeapon(player, static_cast<WeaponType>(weapon));
 		}
 	}
 	return (gaveWeapon || gaveAmmo);
@@ -2369,7 +2371,7 @@ void P_HideSpecialThing(mobj_t* thing)
 {
 	thing->flags &= ~MF_SPECIAL;
 	thing->flags2 |= MF2_DONTDRAW;
-	P_SetMobjState(thing, static_cast<statenum_t>(g_hide_state));
+	P_SetMobjState(thing, static_cast<StateId>(g_hide_state));
 }
 
 void P_MinotaurSlam(mobj_t* source, mobj_t* target)
@@ -2379,7 +2381,7 @@ void P_MinotaurSlam(mobj_t* source, mobj_t* target)
 
 	angle = R_PointToAngle2(source->x, source->y, target->x, target->y);
 	angle >>= ANGLETOFINESHIFT;
-	thrust = 16 * FRACUNIT + (P_Random(pr_heretic) << 10);
+	thrust = 16 * FRACUNIT + (P_Random(RandomClass::Heretic) << 10);
 	target->momx += FixedMul(thrust, finecosine[angle]);
 	target->momy += FixedMul(thrust, finesine[angle]);
 	if(hexen)
@@ -2392,7 +2394,7 @@ void P_MinotaurSlam(mobj_t* source, mobj_t* target)
 	}
 	if(target->player)
 	{
-		target->reactiontime = 14 + (P_Random(pr_heretic) & 7);
+		target->reactiontime = 14 + (P_Random(RandomClass::Heretic) & 7);
 	}
 	source->special_args[0] = 0; // Stop charging
 }
@@ -2406,7 +2408,7 @@ void P_TouchWhirlwind(mobj_t* target)
 	target->momy += P_SubRandom() << 10;
 	if(leveltime & 16 && !(target->flags2 & MF2_BOSS))
 	{
-		randVal = P_Random(pr_heretic);
+		randVal = P_Random(RandomClass::Heretic);
 		if(randVal > 160)
 		{
 			randVal = 160;
@@ -2439,14 +2441,14 @@ dboolean P_ChickenMorphPlayer(player_t* player)
 	if(player->chickenTics)
 	{
 		if((player->chickenTics < CHICKENTICS - TICRATE)
-			&& !player->powers[pw_weaponlevel2])
+			&& !player->powers[std::to_underlying(PowerType::WeaponLevel2)])
 		{
 			// Make a super chicken
-			P_GivePower(player, pw_weaponlevel2);
+			P_GivePower(player, PowerType::WeaponLevel2);
 		}
 		return (false);
 	}
-	if(player->powers[pw_invulnerability])
+	if(player->powers[std::to_underlying(PowerType::Invulnerability)])
 	{
 		// Immune when invulnerable
 		return (false);
@@ -2457,18 +2459,18 @@ dboolean P_ChickenMorphPlayer(player_t* player)
 	z = pmo->z;
 	angle = pmo->angle;
 	oldFlags2 = pmo->flags2;
-	P_SetMobjState(pmo, HERETIC_S_FREETARGMOBJ);
-	fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, HERETIC_MT_TFOG);
-	S_StartMobjSound(fog, heretic_sfx_telept);
-	chicken = P_SpawnMobj(x, y, z, HERETIC_MT_CHICPLAYER);
-	chicken->special1.i = player->readyweapon;
+	P_SetMobjState(pmo, StateId::HereticFreetargmobj);
+	fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, MobjType::HereticTfog);
+	S_StartMobjSound(fog, SfxId::HereticTelept);
+	chicken = P_SpawnMobj(x, y, z, MobjType::HereticChicplayer);
+	chicken->special1.i = std::to_underlying(player->readyweapon);
 	chicken->angle = angle;
 	chicken->player = player;
 	player->health = chicken->health = MAXCHICKENHEALTH;
 	player->mo = chicken;
-	player->armorpoints[ARMOR_ARMOR] = player->armortype = 0;
-	player->powers[pw_invisibility] = 0;
-	player->powers[pw_weaponlevel2] = 0;
+	player->armorpoints[std::to_underlying(ArmorType::Armor)] = player->armortype = 0;
+	player->powers[std::to_underlying(PowerType::Invisibility)] = 0;
+	player->powers[std::to_underlying(PowerType::WeaponLevel2)] = 0;
 	if(oldFlags2 & MF2_FLY)
 	{
 		chicken->flags2 |= MF2_FLY;
@@ -2483,7 +2485,7 @@ dboolean P_ChickenMorph(mobj_t* actor)
 	mobj_t* fog;
 	mobj_t* chicken;
 	mobj_t* target;
-	mobjtype_t moType;
+	MobjType moType;
 	fixed_t x;
 	fixed_t y;
 	fixed_t z;
@@ -2497,12 +2499,12 @@ dboolean P_ChickenMorph(mobj_t* actor)
 	moType = actor->type;
 	switch(moType)
 	{
-		case HERETIC_MT_POD:
-		case HERETIC_MT_CHICKEN:
-		case HERETIC_MT_HEAD:
-		case HERETIC_MT_MINOTAUR:
-		case HERETIC_MT_SORCERER1:
-		case HERETIC_MT_SORCERER2:
+		case MobjType::HereticPod:
+		case MobjType::HereticChicken:
+		case MobjType::HereticHead:
+		case MobjType::HereticMinotaur:
+		case MobjType::HereticSorcerer1:
+		case MobjType::HereticSorcerer2:
 			return (false);
 		default:
 			break;
@@ -2513,12 +2515,12 @@ dboolean P_ChickenMorph(mobj_t* actor)
 	angle = actor->angle;
 	ghost = actor->flags & MF_SHADOW;
 	target = actor->target;
-	P_SetMobjState(actor, HERETIC_S_FREETARGMOBJ);
-	fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, HERETIC_MT_TFOG);
-	S_StartMobjSound(fog, heretic_sfx_telept);
-	chicken = P_SpawnMobj(x, y, z, HERETIC_MT_CHICKEN);
-	chicken->special2.i = moType;
-	chicken->special1.i = CHICKENTICS + P_Random(pr_heretic);
+	P_SetMobjState(actor, StateId::HereticFreetargmobj);
+	fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, MobjType::HereticTfog);
+	S_StartMobjSound(fog, SfxId::HereticTelept);
+	chicken = P_SpawnMobj(x, y, z, MobjType::HereticChicken);
+	chicken->special2.i = std::to_underlying(moType);
+	chicken->special1.i = CHICKENTICS + P_Random(RandomClass::Heretic);
 	chicken->flags |= ghost;
 	P_SetTarget(&chicken->target, target);
 	chicken->angle = angle;
@@ -2532,9 +2534,9 @@ dboolean P_AutoUseChaosDevice(player_t* player)
 
 	for(i = 0; i < player->inventorySlotNum; i++)
 	{
-		if(player->inventory[i].type == arti_teleport)
+		if(player->inventory[i].type == std::to_underlying(ArtiType::Teleport))
 		{
-			P_PlayerUseArtifact(player, static_cast<artitype_t>(arti_teleport));
+			P_PlayerUseArtifact(player, static_cast<ArtiType>(std::to_underlying(ArtiType::Teleport)));
 			player->health = player->mo->health = (player->health + 1) / 2;
 			return (true);
 		}
@@ -2700,7 +2702,7 @@ void P_FallingDamage(player_t* player)
 		// No-death threshold
 		damage = player->mo->health - 1;
 	}
-	S_StartMobjSound(player->mo, hexen_sfx_player_land);
+	S_StartMobjSound(player->mo, SfxId::HexenPlayerLand);
 	P_DamageMobj(player->mo, nullptr, nullptr, damage);
 }
 
@@ -2726,7 +2728,7 @@ void P_PoisonDamage(player_t* player, mobj_t* source, int damage,
 		damage = FixedMul(damage, skill_info.damage_factor);
 	}
 	if(damage < 1000 && ((player->cheats & CF_GODMODE)
-		|| player->powers[pw_invulnerability]))
+		|| player->powers[std::to_underlying(PowerType::Invulnerability)]))
 	{
 		return;
 	}
@@ -2769,7 +2771,7 @@ void P_PoisonDamage(player_t* player, mobj_t* source, int damage,
 	}
 	if(!(leveltime & 63) && playPainSound)
 	{
-		P_SetMobjState(target, static_cast<statenum_t>(target->info->painstate));
+		P_SetMobjState(target, target->info->painstate);
 	}
 }
 
@@ -2777,15 +2779,15 @@ dboolean P_GiveMana(player_t* player, manatype_t mana, int count)
 {
 	int prevMana;
 
-	if(mana == MANA_NONE || mana == MANA_BOTH)
+	if(mana == AmmoType::ManaNone || mana == AmmoType::ManaBoth)
 	{
 		return (false);
 	}
-	if((unsigned int)mana > NUMMANA)
+	if((unsigned int)mana > std::to_underlying(AmmoType::ManaCount))
 	{
 		I_Error("P_GiveMana: bad type %i", mana);
 	}
-	if(player->ammo[mana] == MAX_MANA)
+	if(player->ammo[std::to_underlying(mana)] == MAX_MANA)
 	{
 		return (false);
 	}
@@ -2793,49 +2795,49 @@ dboolean P_GiveMana(player_t* player, manatype_t mana, int count)
 	{
 		count = FixedMul(count, skill_info.ammo_factor);
 	}
-	prevMana = player->ammo[mana];
+	prevMana = player->ammo[std::to_underlying(mana)];
 
-	player->ammo[mana] += count;
-	if(player->ammo[mana] > MAX_MANA)
+	player->ammo[std::to_underlying(mana)] += count;
+	if(player->ammo[std::to_underlying(mana)] > MAX_MANA)
 	{
-		player->ammo[mana] = MAX_MANA;
+		player->ammo[std::to_underlying(mana)] = MAX_MANA;
 	}
-	if(player->pclass == PCLASS_FIGHTER && player->readyweapon == wp_second
-		&& mana == MANA_1 && prevMana <= 0)
+	if(player->pclass == PClass::Fighter && player->readyweapon == WeaponType::Second
+		&& mana == AmmoType::Mana1 && prevMana <= 0)
 	{
-		P_SetPsprite(player, ps_weapon, HEXEN_S_FAXEREADY_G);
+		P_SetPsprite(player, PspNum::Weapon, StateId::HexenFaxereadyG);
 	}
 	return (true);
 }
 
-dboolean Hexen_P_GiveArmor(player_t* player, armortype_t armortype, int amount)
+dboolean Hexen_P_GiveArmor(player_t* player, ArmorType armortype, int amount)
 {
 	int hits;
 	int totalArmor;
 
 	if(amount == -1)
 	{
-		hits = pclass[player->pclass].armor_increment[armortype];
-		if(player->armorpoints[armortype] >= hits)
+		hits = pclass[std::to_underlying(player->pclass)].armor_increment[std::to_underlying(armortype)];
+		if(player->armorpoints[std::to_underlying(armortype)] >= hits)
 		{
 			return false;
 		}
 		else
 		{
-			player->armorpoints[armortype] = hits;
+			player->armorpoints[std::to_underlying(armortype)] = hits;
 		}
 	}
 	else
 	{
 		hits = amount * 5 * FRACUNIT;
-		totalArmor = player->armorpoints[ARMOR_ARMOR]
-			+ player->armorpoints[ARMOR_SHIELD]
-			+ player->armorpoints[ARMOR_HELMET]
-			+ player->armorpoints[ARMOR_AMULET]
-			+ pclass[player->pclass].auto_armor_save;
-		if(totalArmor < pclass[player->pclass].armor_max)
+		totalArmor = player->armorpoints[std::to_underlying(ArmorType::Armor)]
+			+ player->armorpoints[std::to_underlying(ArmorType::Shield)]
+			+ player->armorpoints[std::to_underlying(ArmorType::Helmet)]
+			+ player->armorpoints[std::to_underlying(ArmorType::Amulet)]
+			+ pclass[std::to_underlying(player->pclass)].auto_armor_save;
+		if(totalArmor < pclass[std::to_underlying(player->pclass)].armor_max)
 		{
-			player->armorpoints[armortype] += hits;
+			player->armorpoints[std::to_underlying(armortype)] += hits;
 		}
 		else
 		{
@@ -2851,8 +2853,8 @@ void P_SetYellowMessage(player_t* player, const char* message, dboolean ultmsg)
 	player->yellowMessage = true;
 }
 
-void TryPickupWeapon(player_t* player, pclass_t weaponClass,
-	weapontype_t weaponType, mobj_t* weapon,
+void TryPickupWeapon(player_t* player, PClass weaponClass,
+	WeaponType weaponType, mobj_t* weapon,
 	const char* message)
 {
 	dboolean remove;
@@ -2868,16 +2870,16 @@ void TryPickupWeapon(player_t* player, pclass_t weaponClass,
 			// Can't pick up weapons for other classes in coop netplay
 			return;
 		}
-		if(weaponType == wp_second)
+		if(weaponType == WeaponType::Second)
 		{
-			if(!P_GiveMana(player, MANA_1, 25))
+			if(!P_GiveMana(player, AmmoType::Mana1, 25))
 			{
 				return;
 			}
 		}
 		else
 		{
-			if(!P_GiveMana(player, MANA_2, 25))
+			if(!P_GiveMana(player, AmmoType::Mana2, 25))
 			{
 				return;
 			}
@@ -2886,45 +2888,45 @@ void TryPickupWeapon(player_t* player, pclass_t weaponClass,
 	else if(netgame && !deathmatch)
 	{
 		// Cooperative net-game
-		if(player->weaponowned[weaponType])
+		if(player->weaponowned[std::to_underlying(weaponType)])
 		{
 			return;
 		}
-		player->weaponowned[weaponType] = true;
-		if(weaponType == wp_second)
+		player->weaponowned[std::to_underlying(weaponType)] = true;
+		if(weaponType == WeaponType::Second)
 		{
-			P_GiveMana(player, MANA_1, 25);
+			P_GiveMana(player, AmmoType::Mana1, 25);
 		}
 		else
 		{
-			P_GiveMana(player, MANA_2, 25);
+			P_GiveMana(player, AmmoType::Mana2, 25);
 		}
-		P_AutoSwitchWeapon(player, static_cast<weapontype_t>(weaponType));
+		P_AutoSwitchWeapon(player, static_cast<WeaponType>(weaponType));
 		remove = false;
 	}
 	else
 	{
 		// Deathmatch or single player game
-		if(weaponType == wp_second)
+		if(weaponType == WeaponType::Second)
 		{
-			gaveMana = P_GiveMana(player, MANA_1, 25);
+			gaveMana = P_GiveMana(player, AmmoType::Mana1, 25);
 		}
 		else
 		{
-			gaveMana = P_GiveMana(player, MANA_2, 25);
+			gaveMana = P_GiveMana(player, AmmoType::Mana2, 25);
 		}
-		if(player->weaponowned[weaponType])
+		if(player->weaponowned[std::to_underlying(weaponType)])
 		{
 			gaveWeapon = false;
 		}
 		else
 		{
 			gaveWeapon = true;
-			player->weaponowned[weaponType] = true;
+			player->weaponowned[std::to_underlying(weaponType)] = true;
 			if(weaponType > player->readyweapon)
 			{
 				// Only switch to more powerful weapons
-				P_AutoSwitchWeapon(player, static_cast<weapontype_t>(weaponType));
+				P_AutoSwitchWeapon(player, static_cast<WeaponType>(weaponType));
 			}
 		}
 		if(!(gaveWeapon || gaveMana))
@@ -2941,7 +2943,7 @@ void TryPickupWeapon(player_t* player, pclass_t weaponClass,
 		weapon->special = 0;
 	}
 
-	if(remove && !(weapon->intflags & MIF_FAKE))
+	if(remove && (weapon->intflags & MobjIntFlag::Fake) == MobjIntFlag{})
 	{
 		if(deathmatch && !(weapon->flags & MF_DROPPED))
 		{
@@ -2956,12 +2958,12 @@ void TryPickupWeapon(player_t* player, pclass_t weaponClass,
 	player->bonuscount += BONUSADD;
 	if(player == &players[consoleplayer])
 	{
-		S_StartVoidSound(hexen_sfx_pickup_weapon);
+		S_StartVoidSound(SfxId::HexenPickupWeapon);
 		SB_PaletteFlash(false);
 	}
 }
 
-static void TryPickupWeaponPiece(player_t* player, pclass_t matchClass,
+static void TryPickupWeaponPiece(player_t* player, PClass matchClass,
 	int pieceValue, mobj_t* pieceMobj)
 {
 	dboolean remove;
@@ -3000,8 +3002,8 @@ static void TryPickupWeaponPiece(player_t* player, pclass_t matchClass,
 			return;
 		}
 		checkAssembled = false;
-		gaveMana = P_GiveMana(player, MANA_1, 20) +
-			P_GiveMana(player, MANA_2, 20);
+		gaveMana = P_GiveMana(player, AmmoType::Mana1, 20) +
+			P_GiveMana(player, AmmoType::Mana2, 20);
 		if(!gaveMana)
 		{
 			// Didn't need the mana, so don't pick it up
@@ -3017,15 +3019,15 @@ static void TryPickupWeaponPiece(player_t* player, pclass_t matchClass,
 			return;
 		}
 		pieceValue = pieceValueTrans[pieceValue];
-		P_GiveMana(player, MANA_1, 20);
-		P_GiveMana(player, MANA_2, 20);
+		P_GiveMana(player, AmmoType::Mana1, 20);
+		P_GiveMana(player, AmmoType::Mana2, 20);
 		remove = false;
 	}
 	else
 	{
 		// Deathmatch or single player game
-		gaveMana = P_GiveMana(player, MANA_1, 20) +
-			P_GiveMana(player, MANA_2, 20);
+		gaveMana = P_GiveMana(player, AmmoType::Mana1, 20) +
+			P_GiveMana(player, AmmoType::Mana2, 20);
 		if(player->pieces & pieceValue)
 		{
 			// Already has the piece, check if mana needed
@@ -3068,38 +3070,38 @@ static void TryPickupWeaponPiece(player_t* player, pclass_t matchClass,
 		if(player->pieces == (WPIECE1 | WPIECE2 | WPIECE3))
 		{
 			gaveWeapon = true;
-			player->weaponowned[wp_fourth] = true;
-			P_AutoSwitchWeapon(player, static_cast<weapontype_t>(wp_fourth));
+			player->weaponowned[std::to_underlying(WeaponType::Fourth)] = true;
+			P_AutoSwitchWeapon(player, static_cast<WeaponType>(WeaponType::Fourth));
 		}
 	}
 
 	if(gaveWeapon)
 	{
-		P_SetMessage(player, fourthWeaponText[matchClass], false);
+		P_SetMessage(player, fourthWeaponText[std::to_underlying(matchClass)], false);
 		// Play the build-sound full volume for all players
-		S_StartVoidSound(hexen_sfx_weapon_build);
+		S_StartVoidSound(SfxId::HexenWeaponBuild);
 	}
 	else
 	{
-		P_SetMessage(player, weaponPieceText[matchClass], false);
+		P_SetMessage(player, weaponPieceText[std::to_underlying(matchClass)], false);
 		if(player == &players[consoleplayer])
 		{
-			S_StartVoidSound(hexen_sfx_pickup_weapon);
+			S_StartVoidSound(SfxId::HexenPickupWeapon);
 		}
 	}
 }
 
-int P_GiveKey(player_t* player, card_t key)
+int P_GiveKey(player_t* player, Card key)
 {
-	if(player->cards[key])
+	if(player->cards[std::to_underlying(key)])
 	{
 		return false;
 	}
 	player->bonuscount += BONUSADD;
-	player->cards[key] = true;
+	player->cards[std::to_underlying(key)] = true;
 
 	if(player == &players[consoleplayer])
-		player->ravenkeys |= 1 << key;
+		player->ravenkeys |= 1 << std::to_underlying(key);
 
 	return true;
 }
@@ -3109,29 +3111,29 @@ static void SetDormantArtifact(mobj_t* arti)
 	arti->flags &= ~MF_SPECIAL;
 	if(deathmatch && !(arti->flags & MF_DROPPED))
 	{
-		if(arti->type == HEXEN_MT_ARTIINVULNERABILITY)
+		if(arti->type == MobjType::HexenArtiinvulnerability)
 		{
-			P_SetMobjState(arti, HEXEN_S_DORMANTARTI3_1);
+			P_SetMobjState(arti, StateId::HexenDormantarti31);
 		}
-		else if(arti->type == HEXEN_MT_SUMMONMAULATOR || arti->type == HEXEN_MT_ARTIFLY)
+		else if(arti->type == MobjType::HexenSummonmaulator || arti->type == MobjType::HexenArtifly)
 		{
-			P_SetMobjState(arti, HEXEN_S_DORMANTARTI2_1);
+			P_SetMobjState(arti, StateId::HexenDormantarti21);
 		}
 		else
 		{
-			P_SetMobjState(arti, HEXEN_S_DORMANTARTI1_1);
+			P_SetMobjState(arti, StateId::HexenDormantarti11);
 		}
 	}
 	else
 	{
 		// Don't respawn
-		P_SetMobjState(arti, HEXEN_S_DEADARTI1);
+		P_SetMobjState(arti, StateId::HexenDeadarti1);
 	}
 }
 
-static void TryPickupArtifact(player_t* player, artitype_t artifactType, mobj_t* artifact)
+static void TryPickupArtifact(player_t* player, ArtiType artifactType, mobj_t* artifact)
 {
-	static const char* artifactMessages[HEXEN_NUMARTIFACTS] = {
+	static const char* artifactMessages[std::to_underlying(ArtiType::HexenCount)] = {
 		nullptr,
 		TXT_ARTIINVULNERABILITY,
 		TXT_ARTIHEALTH,
@@ -3167,13 +3169,13 @@ static void TryPickupArtifact(player_t* player, artitype_t artifactType, mobj_t*
 		TXT_ARTIPUZZGEAR
 	};
 
-	if(gamemode == shareware)
+	if(gamemode == GameMode::Shareware)
 	{
-		artifactMessages[hexen_arti_blastradius] = TXT_ARTITELEPORT;
-		artifactMessages[hexen_arti_teleport] = TXT_ARTIBLASTRADIUS;
+		artifactMessages[std::to_underlying(ArtiType::HexenBlastradius)] = TXT_ARTITELEPORT;
+		artifactMessages[std::to_underlying(ArtiType::HexenTeleport)] = TXT_ARTIBLASTRADIUS;
 	}
 
-	if(P_GiveArtifact(player, static_cast<artitype_t>(artifactType), artifact))
+	if(P_GiveArtifact(player, static_cast<ArtiType>(artifactType), artifact))
 	{
 		if(artifact->special)
 		{
@@ -3181,17 +3183,17 @@ static void TryPickupArtifact(player_t* player, artitype_t artifactType, mobj_t*
 			artifact->special = 0;
 		}
 		player->bonuscount += BONUSADD;
-		if(artifactType < hexen_arti_firstpuzzitem)
+		if(artifactType < ArtiType::HexenFirstpuzzitem)
 		{
 			SetDormantArtifact(artifact);
-			S_StartMobjSound(artifact, hexen_sfx_pickup_artifact);
-			P_SetMessage(player, artifactMessages[artifactType], false);
+			S_StartMobjSound(artifact, SfxId::HexenPickupArtifact);
+			P_SetMessage(player, artifactMessages[std::to_underlying(artifactType)], false);
 		}
 		else
 		{
 			// Puzzle item
-			S_StartVoidSound(hexen_sfx_pickup_item);
-			P_SetMessage(player, artifactMessages[artifactType], true);
+			S_StartVoidSound(SfxId::HexenPickupItem);
+			P_SetMessage(player, artifactMessages[std::to_underlying(artifactType)], true);
 			if(!netgame || deathmatch)
 			{
 				// Remove puzzle items if not cooperative netplay
@@ -3205,7 +3207,7 @@ static void Hexen_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 {
 	player_t* player;
 	fixed_t delta;
-	int sound;
+	SfxId sound;
 	dboolean respawn;
 
 	delta = special->z - toucher->z;
@@ -3219,42 +3221,42 @@ static void Hexen_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 		// Toucher is dead
 		return;
 	}
-	sound = hexen_sfx_pickup_item;
+	sound = SfxId::HexenPickupItem;
 	player = toucher->player;
 	respawn = true;
 	switch(special->sprite)
 	{
 		// Items
-		case HEXEN_SPR_PTN1: // Item_HealingPotion
+		case SpriteId::HexenPtn1: // Item_HealingPotion
 			if(!P_GiveBody(player, 10))
 			{
 				return;
 			}
 			P_SetMessage(player, TXT_ITEMHEALTH, false);
 			break;
-		case HEXEN_SPR_ARM1:
-			if(!Hexen_P_GiveArmor(player, ARMOR_ARMOR, -1))
+		case SpriteId::HexenArm1:
+			if(!Hexen_P_GiveArmor(player, ArmorType::Armor, -1))
 			{
 				return;
 			}
 			P_SetMessage(player, TXT_ARMOR1, false);
 			break;
-		case HEXEN_SPR_ARM2:
-			if(!Hexen_P_GiveArmor(player, ARMOR_SHIELD, -1))
+		case SpriteId::HexenArm2:
+			if(!Hexen_P_GiveArmor(player, ArmorType::Shield, -1))
 			{
 				return;
 			}
 			P_SetMessage(player, TXT_ARMOR2, false);
 			break;
-		case HEXEN_SPR_ARM3:
-			if(!Hexen_P_GiveArmor(player, ARMOR_HELMET, -1))
+		case SpriteId::HexenArm3:
+			if(!Hexen_P_GiveArmor(player, ArmorType::Helmet, -1))
 			{
 				return;
 			}
 			P_SetMessage(player, TXT_ARMOR3, false);
 			break;
-		case HEXEN_SPR_ARM4:
-			if(!Hexen_P_GiveArmor(player, ARMOR_AMULET, -1))
+		case SpriteId::HexenArm4:
+			if(!Hexen_P_GiveArmor(player, ArmorType::Amulet, -1))
 			{
 				return;
 			}
@@ -3262,24 +3264,24 @@ static void Hexen_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			break;
 
 		// Keys
-		case HEXEN_SPR_KEY1:
-		case HEXEN_SPR_KEY2:
-		case HEXEN_SPR_KEY3:
-		case HEXEN_SPR_KEY4:
-		case HEXEN_SPR_KEY5:
-		case HEXEN_SPR_KEY6:
-		case HEXEN_SPR_KEY7:
-		case HEXEN_SPR_KEY8:
-		case HEXEN_SPR_KEY9:
-		case HEXEN_SPR_KEYA:
-		case HEXEN_SPR_KEYB:
-			if(!P_GiveKey(player, static_cast<card_t>(special->sprite - HEXEN_SPR_KEY1)))
+		case SpriteId::HexenKey1:
+		case SpriteId::HexenKey2:
+		case SpriteId::HexenKey3:
+		case SpriteId::HexenKey4:
+		case SpriteId::HexenKey5:
+		case SpriteId::HexenKey6:
+		case SpriteId::HexenKey7:
+		case SpriteId::HexenKey8:
+		case SpriteId::HexenKey9:
+		case SpriteId::HexenKeya:
+		case SpriteId::HexenKeyb:
+			if(!P_GiveKey(player, static_cast<Card>(std::to_underlying(special->sprite) - std::to_underlying(SpriteId::HexenKey1))))
 			{
 				return;
 			}
-			P_SetMessage(player, TextKeyMessages[special->sprite - HEXEN_SPR_KEY1],
+			P_SetMessage(player, TextKeyMessages[std::to_underlying(special->sprite) - std::to_underlying(SpriteId::HexenKey1)],
 				true);
-			sound = hexen_sfx_pickup_key;
+			sound = SfxId::HexenPickupKey;
 
 			// Check and process the special now in case the key doesn't
 			// get removed for coop netplay
@@ -3303,192 +3305,192 @@ static void Hexen_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			return;
 
 		// Artifacts
-		case HEXEN_SPR_PTN2:
-			TryPickupArtifact(player, hexen_arti_health, special);
+		case SpriteId::HexenPtn2:
+			TryPickupArtifact(player, ArtiType::HexenHealth, special);
 			return;
-		case HEXEN_SPR_SOAR:
-			TryPickupArtifact(player, hexen_arti_fly, special);
+		case SpriteId::HexenSoar:
+			TryPickupArtifact(player, ArtiType::HexenFly, special);
 			return;
-		case HEXEN_SPR_INVU:
-			TryPickupArtifact(player, hexen_arti_invulnerability, special);
+		case SpriteId::HexenInvu:
+			TryPickupArtifact(player, ArtiType::HexenInvulnerability, special);
 			return;
-		case HEXEN_SPR_SUMN:
-			TryPickupArtifact(player, hexen_arti_summon, special);
+		case SpriteId::HexenSumn:
+			TryPickupArtifact(player, ArtiType::HexenSummon, special);
 			return;
-		case HEXEN_SPR_PORK:
-			TryPickupArtifact(player, hexen_arti_egg, special);
+		case SpriteId::HexenPork:
+			TryPickupArtifact(player, ArtiType::HexenEgg, special);
 			return;
-		case HEXEN_SPR_SPHL:
-			TryPickupArtifact(player, hexen_arti_superhealth, special);
+		case SpriteId::HexenSphl:
+			TryPickupArtifact(player, ArtiType::HexenSuperhealth, special);
 			return;
-		case HEXEN_SPR_HRAD:
-			TryPickupArtifact(player, hexen_arti_healingradius, special);
+		case SpriteId::HexenHrad:
+			TryPickupArtifact(player, ArtiType::HexenHealingradius, special);
 			return;
-		case HEXEN_SPR_TRCH:
-			TryPickupArtifact(player, hexen_arti_torch, special);
+		case SpriteId::HexenTrch:
+			TryPickupArtifact(player, ArtiType::HexenTorch, special);
 			return;
-		case HEXEN_SPR_ATLP:
-			TryPickupArtifact(player, hexen_arti_teleport, special);
+		case SpriteId::HexenAtlp:
+			TryPickupArtifact(player, ArtiType::HexenTeleport, special);
 			return;
-		case HEXEN_SPR_TELO:
-			TryPickupArtifact(player, hexen_arti_teleportother, special);
+		case SpriteId::HexenTelo:
+			TryPickupArtifact(player, ArtiType::HexenTeleportother, special);
 			return;
-		case HEXEN_SPR_PSBG:
-			TryPickupArtifact(player, hexen_arti_poisonbag, special);
+		case SpriteId::HexenPsbg:
+			TryPickupArtifact(player, ArtiType::HexenPoisonbag, special);
 			return;
-		case HEXEN_SPR_SPED:
-			TryPickupArtifact(player, hexen_arti_speed, special);
+		case SpriteId::HexenSped:
+			TryPickupArtifact(player, ArtiType::HexenSpeed, special);
 			return;
-		case HEXEN_SPR_BMAN:
-			TryPickupArtifact(player, hexen_arti_boostmana, special);
+		case SpriteId::HexenBman:
+			TryPickupArtifact(player, ArtiType::HexenBoostmana, special);
 			return;
-		case HEXEN_SPR_BRAC:
-			TryPickupArtifact(player, hexen_arti_boostarmor, special);
+		case SpriteId::HexenBrac:
+			TryPickupArtifact(player, ArtiType::HexenBoostarmor, special);
 			return;
-		case HEXEN_SPR_BLST:
-			TryPickupArtifact(player, hexen_arti_blastradius, special);
+		case SpriteId::HexenBlst:
+			TryPickupArtifact(player, ArtiType::HexenBlastradius, special);
 			return;
 
 		// Puzzle artifacts
-		case HEXEN_SPR_ASKU:
-			TryPickupArtifact(player, hexen_arti_puzzskull, special);
+		case SpriteId::HexenAsku:
+			TryPickupArtifact(player, ArtiType::HexenPuzzskull, special);
 			return;
-		case HEXEN_SPR_ABGM:
-			TryPickupArtifact(player, hexen_arti_puzzgembig, special);
+		case SpriteId::HexenAbgm:
+			TryPickupArtifact(player, ArtiType::HexenPuzzgembig, special);
 			return;
-		case HEXEN_SPR_AGMR:
-			TryPickupArtifact(player, hexen_arti_puzzgemred, special);
+		case SpriteId::HexenAgmr:
+			TryPickupArtifact(player, ArtiType::HexenPuzzgemred, special);
 			return;
-		case HEXEN_SPR_AGMG:
-			TryPickupArtifact(player, hexen_arti_puzzgemgreen1, special);
+		case SpriteId::HexenAgmg:
+			TryPickupArtifact(player, ArtiType::HexenPuzzgemgreen1, special);
 			return;
-		case HEXEN_SPR_AGG2:
-			TryPickupArtifact(player, hexen_arti_puzzgemgreen2, special);
+		case SpriteId::HexenAgg2:
+			TryPickupArtifact(player, ArtiType::HexenPuzzgemgreen2, special);
 			return;
-		case HEXEN_SPR_AGMB:
-			TryPickupArtifact(player, hexen_arti_puzzgemblue1, special);
+		case SpriteId::HexenAgmb:
+			TryPickupArtifact(player, ArtiType::HexenPuzzgemblue1, special);
 			return;
-		case HEXEN_SPR_AGB2:
-			TryPickupArtifact(player, hexen_arti_puzzgemblue2, special);
+		case SpriteId::HexenAgb2:
+			TryPickupArtifact(player, ArtiType::HexenPuzzgemblue2, special);
 			return;
-		case HEXEN_SPR_ABK1:
-			TryPickupArtifact(player, hexen_arti_puzzbook1, special);
+		case SpriteId::HexenAbk1:
+			TryPickupArtifact(player, ArtiType::HexenPuzzbook1, special);
 			return;
-		case HEXEN_SPR_ABK2:
-			TryPickupArtifact(player, hexen_arti_puzzbook2, special);
+		case SpriteId::HexenAbk2:
+			TryPickupArtifact(player, ArtiType::HexenPuzzbook2, special);
 			return;
-		case HEXEN_SPR_ASK2:
-			TryPickupArtifact(player, hexen_arti_puzzskull2, special);
+		case SpriteId::HexenAsk2:
+			TryPickupArtifact(player, ArtiType::HexenPuzzskull2, special);
 			return;
-		case HEXEN_SPR_AFWP:
-			TryPickupArtifact(player, hexen_arti_puzzfweapon, special);
+		case SpriteId::HexenAfwp:
+			TryPickupArtifact(player, ArtiType::HexenPuzzfweapon, special);
 			return;
-		case HEXEN_SPR_ACWP:
-			TryPickupArtifact(player, hexen_arti_puzzcweapon, special);
+		case SpriteId::HexenAcwp:
+			TryPickupArtifact(player, ArtiType::HexenPuzzcweapon, special);
 			return;
-		case HEXEN_SPR_AMWP:
-			TryPickupArtifact(player, hexen_arti_puzzmweapon, special);
+		case SpriteId::HexenAmwp:
+			TryPickupArtifact(player, ArtiType::HexenPuzzmweapon, special);
 			return;
-		case HEXEN_SPR_AGER:
-			TryPickupArtifact(player, hexen_arti_puzzgear1, special);
+		case SpriteId::HexenAger:
+			TryPickupArtifact(player, ArtiType::HexenPuzzgear1, special);
 			return;
-		case HEXEN_SPR_AGR2:
-			TryPickupArtifact(player, hexen_arti_puzzgear2, special);
+		case SpriteId::HexenAgr2:
+			TryPickupArtifact(player, ArtiType::HexenPuzzgear2, special);
 			return;
-		case HEXEN_SPR_AGR3:
-			TryPickupArtifact(player, hexen_arti_puzzgear3, special);
+		case SpriteId::HexenAgr3:
+			TryPickupArtifact(player, ArtiType::HexenPuzzgear3, special);
 			return;
-		case HEXEN_SPR_AGR4:
-			TryPickupArtifact(player, hexen_arti_puzzgear4, special);
+		case SpriteId::HexenAgr4:
+			TryPickupArtifact(player, ArtiType::HexenPuzzgear4, special);
 			return;
 
 		// Mana
-		case HEXEN_SPR_MAN1:
-			if(!P_GiveMana(player, MANA_1, 15))
+		case SpriteId::HexenMan1:
+			if(!P_GiveMana(player, AmmoType::Mana1, 15))
 			{
 				return;
 			}
 			P_SetMessage(player, TXT_MANA_1, false);
 			break;
-		case HEXEN_SPR_MAN2:
-			if(!P_GiveMana(player, MANA_2, 15))
+		case SpriteId::HexenMan2:
+			if(!P_GiveMana(player, AmmoType::Mana2, 15))
 			{
 				return;
 			}
 			P_SetMessage(player, TXT_MANA_2, false);
 			break;
-		case HEXEN_SPR_MAN3: // Double Mana Dodecahedron
-			if(!P_GiveMana(player, MANA_1, 20))
+		case SpriteId::HexenMan3: // Double Mana Dodecahedron
+			if(!P_GiveMana(player, AmmoType::Mana1, 20))
 			{
-				if(!P_GiveMana(player, MANA_2, 20))
+				if(!P_GiveMana(player, AmmoType::Mana2, 20))
 				{
 					return;
 				}
 			}
 			else
 			{
-				P_GiveMana(player, MANA_2, 20);
+				P_GiveMana(player, AmmoType::Mana2, 20);
 			}
 			P_SetMessage(player, TXT_MANA_BOTH, false);
 			break;
 
 		// 2nd and 3rd Mage Weapons
-		case HEXEN_SPR_WMCS: // Frost Shards
-			TryPickupWeapon(player, PCLASS_MAGE, wp_second,
+		case SpriteId::HexenWmcs: // Frost Shards
+			TryPickupWeapon(player, PClass::Mage, WeaponType::Second,
 				special, TXT_WEAPON_M2);
 			return;
-		case HEXEN_SPR_WMLG: // Arc of Death
-			TryPickupWeapon(player, PCLASS_MAGE, wp_third,
+		case SpriteId::HexenWmlg: // Arc of Death
+			TryPickupWeapon(player, PClass::Mage, WeaponType::Third,
 				special, TXT_WEAPON_M3);
 			return;
 
 		// 2nd and 3rd Fighter Weapons
-		case HEXEN_SPR_WFAX: // Timon's Axe
-			TryPickupWeapon(player, PCLASS_FIGHTER, wp_second,
+		case SpriteId::HexenWfax: // Timon's Axe
+			TryPickupWeapon(player, PClass::Fighter, WeaponType::Second,
 				special, TXT_WEAPON_F2);
 			return;
-		case HEXEN_SPR_WFHM: // Hammer of Retribution
-			TryPickupWeapon(player, PCLASS_FIGHTER, wp_third,
+		case SpriteId::HexenWfhm: // Hammer of Retribution
+			TryPickupWeapon(player, PClass::Fighter, WeaponType::Third,
 				special, TXT_WEAPON_F3);
 			return;
 
 		// 2nd and 3rd Cleric Weapons
-		case HEXEN_SPR_WCSS: // Serpent Staff
-			TryPickupWeapon(player, PCLASS_CLERIC, wp_second,
+		case SpriteId::HexenWcss: // Serpent Staff
+			TryPickupWeapon(player, PClass::Cleric, WeaponType::Second,
 				special, TXT_WEAPON_C2);
 			return;
-		case HEXEN_SPR_WCFM: // Firestorm
-			TryPickupWeapon(player, PCLASS_CLERIC, wp_third,
+		case SpriteId::HexenWcfm: // Firestorm
+			TryPickupWeapon(player, PClass::Cleric, WeaponType::Third,
 				special, TXT_WEAPON_C3);
 			return;
 
 		// Fourth Weapon Pieces
-		case HEXEN_SPR_WFR1:
-			TryPickupWeaponPiece(player, PCLASS_FIGHTER, WPIECE1, special);
+		case SpriteId::HexenWfr1:
+			TryPickupWeaponPiece(player, PClass::Fighter, WPIECE1, special);
 			return;
-		case HEXEN_SPR_WFR2:
-			TryPickupWeaponPiece(player, PCLASS_FIGHTER, WPIECE2, special);
+		case SpriteId::HexenWfr2:
+			TryPickupWeaponPiece(player, PClass::Fighter, WPIECE2, special);
 			return;
-		case HEXEN_SPR_WFR3:
-			TryPickupWeaponPiece(player, PCLASS_FIGHTER, WPIECE3, special);
+		case SpriteId::HexenWfr3:
+			TryPickupWeaponPiece(player, PClass::Fighter, WPIECE3, special);
 			return;
-		case HEXEN_SPR_WCH1:
-			TryPickupWeaponPiece(player, PCLASS_CLERIC, WPIECE1, special);
+		case SpriteId::HexenWch1:
+			TryPickupWeaponPiece(player, PClass::Cleric, WPIECE1, special);
 			return;
-		case HEXEN_SPR_WCH2:
-			TryPickupWeaponPiece(player, PCLASS_CLERIC, WPIECE2, special);
+		case SpriteId::HexenWch2:
+			TryPickupWeaponPiece(player, PClass::Cleric, WPIECE2, special);
 			return;
-		case HEXEN_SPR_WCH3:
-			TryPickupWeaponPiece(player, PCLASS_CLERIC, WPIECE3, special);
+		case SpriteId::HexenWch3:
+			TryPickupWeaponPiece(player, PClass::Cleric, WPIECE3, special);
 			return;
-		case HEXEN_SPR_WMS1:
-			TryPickupWeaponPiece(player, PCLASS_MAGE, WPIECE1, special);
+		case SpriteId::HexenWms1:
+			TryPickupWeaponPiece(player, PClass::Mage, WPIECE1, special);
 			return;
-		case HEXEN_SPR_WMS2:
-			TryPickupWeaponPiece(player, PCLASS_MAGE, WPIECE2, special);
+		case SpriteId::HexenWms2:
+			TryPickupWeaponPiece(player, PClass::Mage, WPIECE2, special);
 			return;
-		case HEXEN_SPR_WMS3:
-			TryPickupWeaponPiece(player, PCLASS_MAGE, WPIECE3, special);
+		case SpriteId::HexenWms3:
+			TryPickupWeaponPiece(player, PClass::Mage, WPIECE3, special);
 			return;
 
 		default:
@@ -3529,7 +3531,7 @@ static mobj_t* ActiveMinotaur(player_t* master)
 		if(think->function != reinterpret_cast<think_t>(P_MobjThinker))
 			continue;
 		mo = (mobj_t*)think;
-		if(mo->type != HEXEN_MT_MINOTAUR)
+		if(mo->type != MobjType::HexenMinotaur)
 			continue;
 		if(mo->health <= 0)
 			continue;
@@ -3540,7 +3542,7 @@ static mobj_t* ActiveMinotaur(player_t* master)
 
 		COLLAPSE_SPECIAL_ARGS(args, mo->special_args);
 		memcpy(&starttime, args, sizeof(unsigned int));
-		if(leveltime - LittleLong(starttime) >= MAULATORTICS)
+		if(leveltime - LittleLong(starttime) >= std::to_underlying(PowerDuration::Maulatortics))
 			continue;
 
 		plr = mo->special1.m->player;
@@ -3561,7 +3563,7 @@ dboolean P_MorphPlayer(player_t* player)
 	angle_t angle;
 	int oldFlags2;
 
-	if(player->powers[pw_invulnerability])
+	if(player->powers[std::to_underlying(PowerType::Invulnerability)])
 	{
 		// Immune when invulnerable
 		return (false);
@@ -3577,22 +3579,22 @@ dboolean P_MorphPlayer(player_t* player)
 	z = pmo->z;
 	angle = pmo->angle;
 	oldFlags2 = pmo->flags2;
-	P_SetMobjState(pmo, HEXEN_S_FREETARGMOBJ);
-	fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, HEXEN_MT_TFOG);
-	S_StartMobjSound(fog, hexen_sfx_teleport);
-	beastMo = P_SpawnMobj(x, y, z, HEXEN_MT_PIGPLAYER);
-	beastMo->special1.i = player->readyweapon;
+	P_SetMobjState(pmo, StateId::HexenFreetargmobj);
+	fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, MobjType::HexenTfog);
+	S_StartMobjSound(fog, SfxId::HexenTeleport);
+	beastMo = P_SpawnMobj(x, y, z, MobjType::HexenPigplayer);
+	beastMo->special1.i = std::to_underlying(player->readyweapon);
 	beastMo->angle = angle;
 	beastMo->player = player;
 	player->health = beastMo->health = MAXMORPHHEALTH;
 	player->mo = beastMo;
-	memset(&player->armorpoints[0], 0, NUMARMOR * sizeof(int));
-	player->pclass = PCLASS_PIG;
+	memset(&player->armorpoints[0], 0, std::to_underlying(ArmorType::Count) * sizeof(int));
+	player->pclass = PClass::Pig;
 	if(oldFlags2 & MF2_FLY)
 	{
 		beastMo->flags2 |= MF2_FLY;
 	}
-	player->morphTics = MORPHTICS;
+	player->morphTics = std::to_underlying(PowerDuration::Morphtics);
 	P_ActivateMorphWeapon(player);
 	return (true);
 }
@@ -3600,7 +3602,7 @@ dboolean P_MorphPlayer(player_t* player)
 static dboolean P_MorphMonster(mobj_t* actor)
 {
 	mobj_t *master, *monster, *fog;
-	mobjtype_t moType;
+	MobjType moType;
 	fixed_t x;
 	fixed_t y;
 	fixed_t z;
@@ -3615,11 +3617,11 @@ static dboolean P_MorphMonster(mobj_t* actor)
 	moType = actor->type;
 	switch(moType)
 	{
-		case HEXEN_MT_PIG:
+		case MobjType::HexenPig:
 			return (false);
-		case HEXEN_MT_FIGHTER_BOSS:
-		case HEXEN_MT_CLERIC_BOSS:
-		case HEXEN_MT_MAGE_BOSS:
+		case MobjType::HexenFighterBoss:
+		case MobjType::HexenClericBoss:
+		case MobjType::HexenMageBoss:
 			return (false);
 		default:
 			break;
@@ -3630,12 +3632,12 @@ static dboolean P_MorphMonster(mobj_t* actor)
 	y = oldMonster.y;
 	z = oldMonster.z;
 	map_format.remove_mobj_thing_id(actor);
-	P_SetMobjState(actor, HEXEN_S_FREETARGMOBJ);
-	fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, HEXEN_MT_TFOG);
-	S_StartMobjSound(fog, hexen_sfx_teleport);
-	monster = P_SpawnMobj(x, y, z, HEXEN_MT_PIG);
-	monster->special2.i = moType;
-	monster->special1.i = MORPHTICS + P_Random(pr_hexen);
+	P_SetMobjState(actor, StateId::HexenFreetargmobj);
+	fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, MobjType::HexenTfog);
+	S_StartMobjSound(fog, SfxId::HexenTeleport);
+	monster = P_SpawnMobj(x, y, z, MobjType::HexenPig);
+	monster->special2.i = std::to_underlying(moType);
+	monster->special1.i = std::to_underlying(PowerDuration::Morphtics) + P_Random(RandomClass::Hexen);
 	monster->flags |= (oldMonster.flags & MF_SHADOW);
 	P_SetTarget(&monster->target, oldMonster.target);
 	monster->angle = oldMonster.angle;
@@ -3646,14 +3648,14 @@ static dboolean P_MorphMonster(mobj_t* actor)
 	dsda_WatchMorph(monster);
 
 	// check for turning off minotaur power for active icon
-	if(moType == HEXEN_MT_MINOTAUR)
+	if(moType == MobjType::HexenMinotaur)
 	{
 		master = oldMonster.special1.m;
 		if(master->health > 0)
 		{
 			if(!ActiveMinotaur(master->player))
 			{
-				master->player->powers[pw_minotaur] = 0;
+				master->player->powers[std::to_underlying(PowerType::Minotaur)] = 0;
 			}
 		}
 	}
@@ -3662,7 +3664,7 @@ static dboolean P_MorphMonster(mobj_t* actor)
 
 void P_PoisonPlayer(player_t* player, mobj_t* poisoner, int poison)
 {
-	if((player->cheats & CF_GODMODE) || player->powers[pw_invulnerability])
+	if((player->cheats & CF_GODMODE) || player->powers[std::to_underlying(PowerType::Invulnerability)])
 	{
 		return;
 	}

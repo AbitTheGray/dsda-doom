@@ -6,21 +6,21 @@
 
 #pragma once
 
+#include <limits.h>
+#include "m_fixed.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <limits.h>
-#include "m_fixed.hpp"
-
 /* Bounding box coordinate storage. */
-enum
+enum struct BoxEdge : int32_t
 {
-	BOXTOP,
-	BOXBOTTOM,
-	BOXLEFT,
-	BOXRIGHT
+	Top,
+	Bottom,
+	Left,
+	Right
 }; /* bbox coordinates */
 
 /* Bounding box functions. */

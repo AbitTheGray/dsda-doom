@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Map Format
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "dsda/udmf.hpp"
 #include "lprintf.hpp"
@@ -17,17 +19,7 @@
 
 map_format_t map_format;
 
-typedef enum
-{
-	door_type_none = -1,
-	door_type_red,
-	door_type_blue,
-	door_type_yellow,
-	door_type_unknown = door_type_yellow,
-	door_type_multiple
-} door_type_t;
-
-int dsda_DoorType(int index)
+DoorType dsda_DoorType(int index)
 {
 	int special = lines[index].special;
 
@@ -40,49 +32,50 @@ int dsda_DoorType(int index)
 		else
 			lock = lines[index].locknumber;
 
-		switch(lock)
+		switch(static_cast<ZDoomLock>(lock))
 		{
-			case zk_none:
-				return door_type_none;
-			case zk_red_card:
-			case zk_red_skull:
-			case zk_red:
-			case zk_redx:
-				return door_type_red;
-			case zk_blue_card:
-			case zk_blue_skull:
-			case zk_blue:
-			case zk_bluex:
-				return door_type_blue;
-			case zk_yellow_card:
-			case zk_yellow_skull:
-			case zk_yellow:
-			case zk_yellowx:
-				return door_type_yellow;
+			case ZDoomLock::None:
+				return DoorType::None;
+			case ZDoomLock::RedCard:
+			case ZDoomLock::RedSkull:
+			case ZDoomLock::Red:
+			case ZDoomLock::Redx:
+				return DoorType::Red;
+			case ZDoomLock::BlueCard:
+			case ZDoomLock::BlueSkull:
+			case ZDoomLock::Blue:
+			case ZDoomLock::Bluex:
+				return DoorType::Blue;
+			case ZDoomLock::YellowCard:
+			case ZDoomLock::YellowSkull:
+			case ZDoomLock::Yellow:
+			case ZDoomLock::Yellowx:
+				return DoorType::Yellow;
 			default:
-				return door_type_unknown;
+				return DoorType::Unknown;
 		}
 	}
 
 	if(map_format.hexen)
 	{
 		if(special == 13 || special == 83)
-			return door_type_unknown;
+			return DoorType::Unknown;
 
-		return door_type_none;
+		return DoorType::None;
 	}
 
 	if(heretic && special > 34)
-		return door_type_none;
+		return DoorType::None;
 
 	if(GenLockedBase <= special && special < GenDoorBase)
 	{
 		special -= GenLockedBase;
 		special = (special & LockedKey) >> LockedKeyShift;
 		if(!special || special == 7)
-			return door_type_multiple;
+			return DoorType::Multiple;
 		else
-			return (special - 1) % 3;
+			// the generalized locked-door key bits map onto Red/Blue/Yellow
+			return static_cast<DoorType>((special - 1) % 3);
 	}
 
 	switch(special)
@@ -91,19 +84,19 @@ int dsda_DoorType(int index)
 		case 32:
 		case 99:
 		case 133:
-			return door_type_blue;
+			return DoorType::Blue;
 		case 27:
 		case 34:
 		case 136:
 		case 137:
-			return door_type_yellow;
+			return DoorType::Yellow;
 		case 28:
 		case 33:
 		case 134:
 		case 135:
-			return door_type_red;
+			return DoorType::Red;
 		default:
-			return door_type_none;
+			return DoorType::None;
 	}
 }
 
@@ -211,8 +204,8 @@ static void dsda_MigrateMobjInfo()
 
 		if(!raven)
 		{
-			mobjinfo[MT_SKULL].flags2 |= MF2_MCROSS | MF2_PUSHWALL | MF2_CANUSEWALLS;
-			mobjinfo[MT_PLAYER].flags2 |= MF2_WINDTHRUST | MF2_PUSHWALL | MF2_CANUSEWALLS;
+			mobjinfo[std::to_underlying(MobjType::Skull)].flags2 |= MF2_MCROSS | MF2_PUSHWALL | MF2_CANUSEWALLS;
+			mobjinfo[std::to_underlying(MobjType::Player)].flags2 |= MF2_WINDTHRUST | MF2_PUSHWALL | MF2_CANUSEWALLS;
 		}
 	}
 	else if(!map_format.zdoom && migrated)
@@ -230,8 +223,8 @@ static void dsda_MigrateMobjInfo()
 
 		if(!raven)
 		{
-			mobjinfo[MT_SKULL].flags2 &= ~(MF2_MCROSS | MF2_PUSHWALL | MF2_CANUSEWALLS);
-			mobjinfo[MT_PLAYER].flags2 &= ~(MF2_WINDTHRUST | MF2_PUSHWALL | MF2_CANUSEWALLS);
+			mobjinfo[std::to_underlying(MobjType::Skull)].flags2 &= ~(MF2_MCROSS | MF2_PUSHWALL | MF2_CANUSEWALLS);
+			mobjinfo[std::to_underlying(MobjType::Player)].flags2 &= ~(MF2_WINDTHRUST | MF2_PUSHWALL | MF2_CANUSEWALLS);
 		}
 	}
 }
@@ -378,8 +371,8 @@ static const map_format_t zdoom_map_format = {
 	.iterate_spechit = P_IterateZDoomSpecHit,
 	.mapthing_size = sizeof(hexen_mapthing_t),
 	.maplinedef_size = sizeof(hexen_maplinedef_t),
-	.mt_push = MT_PUSH,
-	.mt_pull = MT_PULL,
+	.mt_push = MobjType::Push,
+	.mt_pull = MobjType::Pull,
 	.dn_polyanchor = 9300,
 	.dn_polyspawn_start = 9301,
 	.dn_polyspawn_hurt = 9303,
@@ -429,8 +422,8 @@ static const map_format_t hexen_map_format = {
 	.iterate_spechit = nullptr, // not used
 	.mapthing_size = sizeof(hexen_mapthing_t),
 	.maplinedef_size = sizeof(hexen_maplinedef_t),
-	.mt_push = -1,
-	.mt_pull = -1,
+	.mt_push = MobjType::Null,
+	.mt_pull = MobjType::Null,
 	.dn_polyanchor = 3000,
 	.dn_polyspawn_start = 3001,
 	.dn_polyspawn_hurt = -1,
@@ -480,8 +473,8 @@ static const map_format_t heretic_map_format = {
 	.iterate_spechit = P_IterateCompatibleSpecHit,
 	.mapthing_size = sizeof(doom_mapthing_t),
 	.maplinedef_size = sizeof(doom_maplinedef_t),
-	.mt_push = -1,
-	.mt_pull = -1,
+	.mt_push = MobjType::Null,
+	.mt_pull = MobjType::Null,
 	.dn_polyanchor = -1,
 	.dn_polyspawn_start = -1,
 	.dn_polyspawn_hurt = -1,
@@ -531,8 +524,8 @@ static const map_format_t doom_map_format = {
 	.iterate_spechit = P_IterateCompatibleSpecHit,
 	.mapthing_size = sizeof(doom_mapthing_t),
 	.maplinedef_size = sizeof(doom_maplinedef_t),
-	.mt_push = MT_PUSH,
-	.mt_pull = MT_PULL,
+	.mt_push = MobjType::Push,
+	.mt_pull = MobjType::Pull,
 	.dn_polyanchor = -1,
 	.dn_polyspawn_start = -1,
 	.dn_polyspawn_hurt = -1,
@@ -569,19 +562,19 @@ void dsda_ApplyZDoomMapFormat()
 
 void dsda_ApplyUDMF()
 {
-	if(udmf_namespace == UDMF_DOOM)
+	if(udmf_namespace == UdmfNamespace::Doom)
 	{
 		map_format = doom_map_format;
 	}
-	else if(udmf_namespace == UDMF_HERETIC)
+	else if(udmf_namespace == UdmfNamespace::Heretic)
 	{
 		map_format = heretic_map_format;
 	}
-	else if(udmf_namespace == UDMF_HEXEN)
+	else if(udmf_namespace == UdmfNamespace::Hexen)
 	{
 		map_format = hexen_map_format;
 	}
-	else if(udmf_namespace == UDMF_DSDA)
+	else if(udmf_namespace == UdmfNamespace::Dsda)
 	{
 		map_format = zdoom_map_format;
 	}

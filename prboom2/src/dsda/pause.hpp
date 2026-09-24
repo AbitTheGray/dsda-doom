@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
 
 #define PAUSE_COMMAND   1
 #define PAUSE_PLAYBACK  2

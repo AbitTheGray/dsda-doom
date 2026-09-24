@@ -14,7 +14,7 @@ typedef struct
 
 static local_component_t* local;
 
-void dsda_InitLineDisplayHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitLineDisplayHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	int i;
 
@@ -37,7 +37,7 @@ void dsda_UpdateLineDisplayHC(void* data)
 	for(i = 0; line_ids[i] != -1; ++i)
 	{
 		snprintf(local->line_display[i].msg, sizeof(local->line_display[i].msg), "%s%d",
-			dsda_TextColor(dsda_tc_exhud_line_activation), line_ids[i]);
+			dsda_TextColor(TextColorIndex::ExhudLineActivation), line_ids[i]);
 		dsda_RefreshHudText(&local->line_display[i]);
 	}
 

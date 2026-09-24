@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Episode
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "lprintf.hpp"
 #include "w_wad.hpp"
@@ -29,7 +31,7 @@ void dsda_AddOriginalEpisodes()
 		dsda_AddEpisode("e2m1", "HELL'S MAW", nullptr, 'h', true);
 		dsda_AddEpisode("e3m1", "THE DOME OF D'SPARIL", nullptr, 't', true);
 
-		if(gamemode == retail)
+		if(gamemode == GameMode::Retail)
 		{
 			dsda_AddEpisode("e4m1", "THE OSSUARY", nullptr, 't', true);
 			dsda_AddEpisode("e5m1", "THE STAGNANT DEMESNE", nullptr, 't', true);
@@ -41,13 +43,13 @@ void dsda_AddOriginalEpisodes()
 		dsda_AddEpisode("map01", "CLERIC", nullptr, 'c', true);
 		dsda_AddEpisode("map01", "MAGE", nullptr, 'm', true);
 	}
-	else if(gamemode != commercial && gamemission != tc_chex)
+	else if(gamemode != GameMode::Commercial && gamemission != GameMission::TcChex)
 	{
 		dsda_AddEpisode("e1m1", nullptr, "M_EPI1", 'k', true);
 		dsda_AddEpisode("e2m1", nullptr, "M_EPI2", 't', true);
 		dsda_AddEpisode("e3m1", nullptr, "M_EPI3", 'i', true);
 
-		if(gamemode == retail && (compatibility_level >= ultdoom_compatibility || W_PWADLumpNameExists2("E4M1")))
+		if(gamemode == GameMode::Retail && (compatibility_level >= CompLevel::Ultdoom || W_PWADLumpNameExists2("E4M1")))
 			dsda_AddEpisode("e4m1", nullptr, "M_EPI4", 't', true);
 	}
 }

@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //  DSDA MapInfo Hexen
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "g_game.hpp"
 #include "lprintf.hpp"
@@ -272,18 +274,18 @@ int dsda_HexenMusicIndexToLumpNum(int* lump, int music_index)
 	if(!hexen)
 		return false;
 
-	if(music_index >= hexen_mus_hub)
+	if(music_index >= std::to_underlying(MusicId::HexenHub))
 		return false;
 
 	lump_name = dsda_SndInfoMapSongLumpName(music_index);
 	if(!*lump_name)
 		switch(music_index)
 		{
-			case hexen_mus_hexen:
-			case hexen_mus_hub:
-			case hexen_mus_hall:
-			case hexen_mus_orb:
-			case hexen_mus_chess:
+			case std::to_underlying(MusicId::HexenHexen):
+			case std::to_underlying(MusicId::HexenHub):
+			case std::to_underlying(MusicId::HexenHall):
+			case std::to_underlying(MusicId::HexenOrb):
+			case std::to_underlying(MusicId::HexenChess):
 				lump_name = S_music[music_index].name;
 				break;
 		}
@@ -354,7 +356,7 @@ int dsda_HexenHUTitle(dsda_string_t* str)
 
 	dsda_InitString(str, nullptr);
 
-	if(gamestate == GS_LEVEL && gamemap > 0 && gameepisode > 0)
+	if(gamestate == GameState::Level && gamemap > 0 && gameepisode > 0)
 		dsda_StringCat(str, CurrentMap->name);
 
 	if(!str->string)
@@ -423,7 +425,7 @@ void dsda_HexenLoadMapInfo()
 
 	mapMax = 1;
 
-	if(gamemode == shareware)
+	if(gamemode == GameMode::Shareware)
 		default_sky_name = "SKY2";
 
 	// Put defaults into MapInfo[0]

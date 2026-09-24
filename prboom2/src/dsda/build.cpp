@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Build Mode
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "g_game.hpp"
 
@@ -39,17 +41,17 @@ static build_cmd_queue_t cmd_queue;
 
 static signed char forward50()
 {
-	return dsda_Flag(dsda_arg_stroller) ? pclass[players[consoleplayer].pclass].forwardmove[0] : pclass[players[consoleplayer].pclass].forwardmove[1];
+	return dsda_Flag(ArgId::Stroller) ? pclass[std::to_underlying(players[consoleplayer].pclass)].forwardmove[0] : pclass[std::to_underlying(players[consoleplayer].pclass)].forwardmove[1];
 }
 
 static signed char strafe40()
 {
-	return pclass[players[consoleplayer].pclass].sidemove[1];
+	return pclass[std::to_underlying(players[consoleplayer].pclass)].sidemove[1];
 }
 
 static signed char strafe50()
 {
-	return dsda_Flag(dsda_arg_stroller) ? 0 : forward50();
+	return dsda_Flag(ArgId::Stroller) ? 0 : forward50();
 }
 
 static signed short shortTic()
@@ -385,14 +387,14 @@ static void buildTurnLeft()
 
 static void buildUse()
 {
-	build_cmd.buttons ^= BT_USE;
+	build_cmd.buttons = static_cast<ButtonCode>(std::to_underlying(build_cmd.buttons) ^ std::to_underlying(ButtonCode::Use));
 
 	dsda_ChangeBuildCommand();
 }
 
 static void buildFire()
 {
-	build_cmd.buttons ^= BT_ATTACK;
+	build_cmd.buttons = static_cast<ButtonCode>(std::to_underlying(build_cmd.buttons) ^ std::to_underlying(ButtonCode::Attack));
 
 	dsda_ChangeBuildCommand();
 }
@@ -401,16 +403,16 @@ static void buildWeapon(int weapon)
 {
 	int cmdweapon;
 
-	cmdweapon = weapon << BT_WEAPONSHIFT;
+	cmdweapon = weapon << std::to_underlying(ButtonCode::WeaponShift);
 
-	if(build_cmd.buttons & BT_CHANGE && (build_cmd.buttons & BT_WEAPONMASK) == cmdweapon)
-		build_cmd.buttons &= ~BT_CHANGE;
+	if((build_cmd.buttons & ButtonCode::Change) != ButtonCode{} && ButtonWeapon(build_cmd.buttons) == (cmdweapon >> std::to_underlying(ButtonCode::WeaponShift)))
+		build_cmd.buttons -= ButtonCode::Change;
 	else
-		build_cmd.buttons |= BT_CHANGE;
+		build_cmd.buttons |= ButtonCode::Change;
 
-	build_cmd.buttons &= ~BT_WEAPONMASK;
-	if(build_cmd.buttons & BT_CHANGE)
-		build_cmd.buttons |= cmdweapon;
+	build_cmd.buttons -= ButtonCode::WeaponMask;
+	if((build_cmd.buttons & ButtonCode::Change) != ButtonCode{})
+		build_cmd.buttons |= static_cast<ButtonCode>(cmdweapon);
 
 	dsda_ChangeBuildCommand();
 }
@@ -480,7 +482,7 @@ void dsda_ReadBuildCmd(ticcmd_t* cmd)
 
 void dsda_EnterBuildMode()
 {
-	dsda_TrackFeature(uf_build);
+	dsda_TrackFeature(FeatureFlag::Build);
 
 	if(!demorecording)
 	{
@@ -529,7 +531,7 @@ dboolean dsda_BuildResponder(event_t* ev)
 	if(!dsda_AllowBuilding())
 		return false;
 
-	if(dsda_InputActivated(dsda_input_build))
+	if(dsda_InputActivated(InputId::Build))
 	{
 		if(dsda_BuildMode())
 			dsda_ExitBuildMode();
@@ -539,10 +541,10 @@ dboolean dsda_BuildResponder(event_t* ev)
 		return true;
 	}
 
-	if(!build_mode || menuactive)
+	if(!build_mode || menuactive != MenuActive::Inactive)
 		return false;
 
-	if(dsda_InputActivated(dsda_input_build_source))
+	if(dsda_InputActivated(InputId::BuildSource))
 	{
 		replace_source = !replace_source;
 
@@ -557,16 +559,16 @@ dboolean dsda_BuildResponder(event_t* ev)
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_advance_frame))
+	if(dsda_InputActivated(InputId::BuildAdvanceFrame))
 	{
 		advance_frame = true;
 		build_cmd_tic = true_logictic;
 
 		build_cmd.angleturn = 0;
 		build_cmd.arti = 0;
-		build_cmd.buttons &= ~BT_USE;
-		if(build_cmd.buttons & BT_CHANGE)
-			build_cmd.buttons &= ~(BT_CHANGE | BT_WEAPONMASK);
+		build_cmd.buttons -= ButtonCode::Use;
+		if((build_cmd.buttons & ButtonCode::Change) != ButtonCode{})
+			build_cmd.buttons -= ButtonCode::Change | ButtonCode::WeaponMask;
 
 		if(dsda_CopyPendingCmd(&overwritten_cmd, 0))
 		{
@@ -587,7 +589,7 @@ dboolean dsda_BuildResponder(event_t* ev)
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_reverse_frame))
+	if(dsda_InputActivated(InputId::BuildReverseFrame))
 	{
 		if(!demorecording)
 		{
@@ -608,162 +610,162 @@ dboolean dsda_BuildResponder(event_t* ev)
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_reset_command))
+	if(dsda_InputActivated(InputId::BuildResetCommand))
 	{
 		resetCmd();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_forward))
+	if(dsda_InputActivated(InputId::BuildForward))
 	{
 		buildForward();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_backward))
+	if(dsda_InputActivated(InputId::BuildBackward))
 	{
 		buildBackward();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_fine_forward))
+	if(dsda_InputActivated(InputId::BuildFineForward))
 	{
 		buildFineForward();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_fine_backward))
+	if(dsda_InputActivated(InputId::BuildFineBackward))
 	{
 		buildFineBackward();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_strafe_right))
+	if(dsda_InputActivated(InputId::BuildStrafeRight))
 	{
 		buildStrafeRight();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_strafe_left))
+	if(dsda_InputActivated(InputId::BuildStrafeLeft))
 	{
 		buildStrafeLeft();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_fine_strafe_right))
+	if(dsda_InputActivated(InputId::BuildFineStrafeRight))
 	{
 		buildFineStrafeRight();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_fine_strafe_left))
+	if(dsda_InputActivated(InputId::BuildFineStrafeLeft))
 	{
 		buildFineStrafeLeft();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_turn_right))
+	if(dsda_InputActivated(InputId::BuildTurnRight))
 	{
 		buildTurnRight();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_turn_left))
+	if(dsda_InputActivated(InputId::BuildTurnLeft))
 	{
 		buildTurnLeft();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_use))
+	if(dsda_InputActivated(InputId::BuildUse))
 	{
 		buildUse();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_fire))
+	if(dsda_InputActivated(InputId::BuildFire))
 	{
 		buildFire();
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_weapon1))
+	if(dsda_InputActivated(InputId::BuildWeapon1))
 	{
 		buildWeapon(0);
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_weapon2))
+	if(dsda_InputActivated(InputId::BuildWeapon2))
 	{
 		buildWeapon(1);
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_weapon3))
+	if(dsda_InputActivated(InputId::BuildWeapon3))
 	{
 		buildWeapon(2);
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_weapon4))
+	if(dsda_InputActivated(InputId::BuildWeapon4))
 	{
 		buildWeapon(3);
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_weapon5))
+	if(dsda_InputActivated(InputId::BuildWeapon5))
 	{
 		buildWeapon(4);
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_weapon6))
+	if(dsda_InputActivated(InputId::BuildWeapon6))
 	{
 		buildWeapon(5);
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_weapon7))
+	if(dsda_InputActivated(InputId::BuildWeapon7))
 	{
 		buildWeapon(6);
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_weapon8))
+	if(dsda_InputActivated(InputId::BuildWeapon8))
 	{
 		buildWeapon(7);
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_build_weapon9))
+	if(dsda_InputActivated(InputId::BuildWeapon9))
 	{
-		if(!demo_compatibility && gamemode == commercial)
+		if(!demo_compatibility && gamemode == GameMode::Commercial)
 			buildWeapon(8);
 
 		return true;
 	}
 
-	if(dsda_InputActivated(dsda_input_join_demo))
+	if(dsda_InputActivated(InputId::JoinDemo))
 		dsda_JoinDemo(nullptr);
 
 	return false;

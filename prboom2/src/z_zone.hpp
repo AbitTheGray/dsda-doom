@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -23,8 +25,6 @@ extern "C"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#include <stddef.h>
 
 void Z_Free(void* ptr);
 void Z_FreeLevel();

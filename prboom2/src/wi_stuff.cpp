@@ -4,6 +4,8 @@
  *  Intermission screens.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "m_random.hpp"
 #include "w_wad.hpp"
@@ -93,12 +95,12 @@ extern dboolean deh_pars;
 // These animation variables, structures, etc. are used for the
 // DOOM/Ultimate DOOM intermission screen animations.  This is
 // totally different from any sprite or texture/flat animations
-typedef enum
+enum struct AnimType : int32_t
 {
-	ANIM_ALWAYS, // determined by patch entry
-	ANIM_RANDOM, // occasional
-	ANIM_LEVEL   // continuous
-} animenum_t;
+	Always, // determined by patch entry
+	Random, // occasional
+	Level   // continuous
+};
 
 typedef struct
 {
@@ -112,7 +114,7 @@ typedef struct
 //
 typedef struct
 {
-	animenum_t type;
+	AnimType type;
 
 	// period in tics between animations
 	int period;
@@ -204,39 +206,39 @@ static point_t lnodes[NUMEPISODES][NUMMAPS] =
 //
 static wi_anim_t epsd0animinfo[] =
 {
-	{ANIM_ALWAYS, TICRATE / 3, 3, {224, 104}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {184, 160}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {112, 136}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {72, 112}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {88, 96}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {64, 48}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {192, 40}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {136, 16}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {80, 16}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {64, 24}}
+	{AnimType::Always, TICRATE / 3, 3, {224, 104}},
+	{AnimType::Always, TICRATE / 3, 3, {184, 160}},
+	{AnimType::Always, TICRATE / 3, 3, {112, 136}},
+	{AnimType::Always, TICRATE / 3, 3, {72, 112}},
+	{AnimType::Always, TICRATE / 3, 3, {88, 96}},
+	{AnimType::Always, TICRATE / 3, 3, {64, 48}},
+	{AnimType::Always, TICRATE / 3, 3, {192, 40}},
+	{AnimType::Always, TICRATE / 3, 3, {136, 16}},
+	{AnimType::Always, TICRATE / 3, 3, {80, 16}},
+	{AnimType::Always, TICRATE / 3, 3, {64, 24}}
 };
 
 static wi_anim_t epsd1animinfo[] =
 {
-	{ANIM_LEVEL, TICRATE / 3, 1, {128, 136}, 1},
-	{ANIM_LEVEL, TICRATE / 3, 1, {128, 136}, 2},
-	{ANIM_LEVEL, TICRATE / 3, 1, {128, 136}, 3},
-	{ANIM_LEVEL, TICRATE / 3, 1, {128, 136}, 4},
-	{ANIM_LEVEL, TICRATE / 3, 1, {128, 136}, 5},
-	{ANIM_LEVEL, TICRATE / 3, 1, {128, 136}, 6},
-	{ANIM_LEVEL, TICRATE / 3, 1, {128, 136}, 7},
-	{ANIM_LEVEL, TICRATE / 3, 3, {192, 144}, 8},
-	{ANIM_LEVEL, TICRATE / 3, 1, {128, 136}, 8}
+	{AnimType::Level, TICRATE / 3, 1, {128, 136}, 1},
+	{AnimType::Level, TICRATE / 3, 1, {128, 136}, 2},
+	{AnimType::Level, TICRATE / 3, 1, {128, 136}, 3},
+	{AnimType::Level, TICRATE / 3, 1, {128, 136}, 4},
+	{AnimType::Level, TICRATE / 3, 1, {128, 136}, 5},
+	{AnimType::Level, TICRATE / 3, 1, {128, 136}, 6},
+	{AnimType::Level, TICRATE / 3, 1, {128, 136}, 7},
+	{AnimType::Level, TICRATE / 3, 3, {192, 144}, 8},
+	{AnimType::Level, TICRATE / 3, 1, {128, 136}, 8}
 };
 
 static wi_anim_t epsd2animinfo[] =
 {
-	{ANIM_ALWAYS, TICRATE / 3, 3, {104, 168}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {40, 136}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {160, 96}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {104, 80}},
-	{ANIM_ALWAYS, TICRATE / 3, 3, {120, 32}},
-	{ANIM_ALWAYS, TICRATE / 4, 3, {40, 0}}
+	{AnimType::Always, TICRATE / 3, 3, {104, 168}},
+	{AnimType::Always, TICRATE / 3, 3, {40, 136}},
+	{AnimType::Always, TICRATE / 3, 3, {160, 96}},
+	{AnimType::Always, TICRATE / 3, 3, {104, 80}},
+	{AnimType::Always, TICRATE / 3, 3, {120, 32}},
+	{AnimType::Always, TICRATE / 4, 3, {40, 0}}
 };
 
 static int NUMANIMS[NUMEPISODES] =
@@ -286,7 +288,7 @@ int acceleratestage; // killough 3/28/98: made global
 static int me;
 
 // specifies current state
-static stateenum_t state;
+static WiState state;
 
 // contains information passed into intermission
 static wbstartstruct_t* wbs;
@@ -378,7 +380,7 @@ static void WI_endNetgameStats();
  */
 void WI_levelNameLump(int epis, int map, char* buf)
 {
-	if(gamemode == commercial)
+	if(gamemode == GameMode::Commercial)
 	{
 		snprintf(buf, 9, "CWILV%2.2d", map);
 	}
@@ -423,7 +425,7 @@ static int WI_secretLimit(int i)
 {
 	return wbs->maxsecret
 		? (plrs[i].ssecret * 100) / wbs->maxsecret
-		: compatibility_level < lxdoom_1_compatibility
+		: compatibility_level < CompLevel::Lxdoom1
 		? 0
 		: 100;
 }
@@ -438,9 +440,9 @@ static void WI_slamBackground()
 {
 	char name[9]; // limited to 8 characters
 
-	if(state != StatCount && enterpic) strcpy(name, enterpic);
+	if(state != WiState::StatCount && enterpic) strcpy(name, enterpic);
 	else if(exitpic) strcpy(name, exitpic);
-	else if(gamemode == commercial || wbs->epsd < 0 || (gamemode == retail && wbs->epsd >= 3))
+	else if(gamemode == GameMode::Commercial || wbs->epsd < 0 || (gamemode == GameMode::Retail && wbs->epsd >= 3))
 		strcpy(name, "INTERPIC");
 	else
 		snprintf(name, sizeof(name), "WIMAP%d", wbs->epsd);
@@ -449,7 +451,7 @@ static void WI_slamBackground()
 	V_ClearBorder();
 
 	// background
-	V_DrawNamePatchFS(0, 0, FB, name, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatchFS(0, 0, FB, name, ColorRange::Default, PatchTranslation::Stretch);
 }
 
 #define SPACEWIDTH 4
@@ -490,7 +492,7 @@ static void WI_DrawString(int cx, int cy, const char* ch)
 		if(cx + w > 320)
 			break;
 
-		V_DrawNumPatch(cx, cy, 0, hud_font.font[c].lumpnum, CR_GRAY, static_cast<enum patch_translation_e>(VPT_STRETCH | VPT_TRANS));
+		V_DrawNumPatch(cx, cy, 0, hud_font.font[c].lumpnum, ColorRange::Gray, PatchTranslation::Stretch | PatchTranslation::Trans);
 		cx += w;
 	}
 }
@@ -533,7 +535,7 @@ void WI_drawLF()
 
 		// CPhipps - patch drawing updated
 		V_DrawNamePatchFS((320 - V_NamePatchWidth(lname)) / 2, y,
-			FB, lname, CR_DEFAULT, VPT_STRETCH);
+			FB, lname, ColorRange::Default, PatchTranslation::Stretch);
 
 		y += (5 * V_NamePatchHeight(lname)) / 4;
 	}
@@ -548,7 +550,7 @@ void WI_drawLF()
 	// CPhipps - patch drawing updated
 	// draw "Finished!"
 	V_DrawNamePatch((320 - V_NamePatchWidth(finished))/2, y,
-		FB, finished, CR_DEFAULT, VPT_STRETCH);
+		FB, finished, ColorRange::Default, PatchTranslation::Stretch);
 }
 
 
@@ -570,7 +572,7 @@ void WI_drawEL()
 	// draw "Entering"
 	// CPhipps - patch drawing updated
 	V_DrawNamePatch((320 - V_NamePatchWidth(entering)) / 2,
-		y, FB, entering, CR_DEFAULT, VPT_STRETCH);
+		y, FB, entering, ColorRange::Default, PatchTranslation::Stretch);
 
 	y += (5 * V_NamePatchHeight(entering)) / 4;
 
@@ -601,7 +603,7 @@ void WI_drawEL()
 		// CPhipps - patch drawing updated
 		// draw level
 		V_DrawNamePatchFS((320 - V_NamePatchWidth(lname)) / 2, y, FB,
-			lname, CR_DEFAULT, VPT_STRETCH);
+			lname, ColorRange::Default, PatchTranslation::Stretch);
 
 		y += (5 * V_NamePatchHeight(lname)) / 4;
 	}
@@ -661,13 +663,13 @@ WI_drawOnLnode // draw stuff at a location by episode/map#
 	{
 		// CPhipps - patch drawing updated
 		V_DrawNamePatch(lnodes[wbs->epsd][n].x, lnodes[wbs->epsd][n].y,
-			FB, c[i], CR_DEFAULT, VPT_STRETCH);
+			FB, c[i], ColorRange::Default, PatchTranslation::Stretch);
 	}
 	else
 	{
 		// DEBUG
 		//jff 8/3/98 use logical output routine
-		lprintf(LO_DEBUG, "Could not place patch on level %d\n", n + 1);
+		lprintf(OutputLevels::Debug, "Could not place patch on level %d\n", n + 1);
 	}
 }
 
@@ -686,7 +688,7 @@ void WI_initAnimatedBack(int entering)
 	if(exitpic) return;
 	if(enterpic && entering) return;
 
-	if(gamemode == commercial) // no animation for DOOM2
+	if(gamemode == GameMode::Commercial) // no animation for DOOM2
 		return;
 
 	if(wbs->epsd < 0 || wbs->epsd > 2)
@@ -705,11 +707,11 @@ void WI_initAnimatedBack(int entering)
 			a->ctr = -1;
 
 		// specify the next time to draw it
-		if(a->type == ANIM_ALWAYS)
+		if(a->type == AnimType::Always)
 			a->nexttic = bcnt + 1 + (M_Random() % a->period);
-		else if(a->type == ANIM_RANDOM)
+		else if(a->type == AnimType::Random)
 			a->nexttic = bcnt + 1 + a->data2 + (M_Random() % a->data1);
-		else if(a->type == ANIM_LEVEL)
+		else if(a->type == AnimType::Level)
 			a->nexttic = bcnt + 1;
 	}
 }
@@ -727,9 +729,9 @@ void WI_updateAnimatedBack()
 	wi_anim_t* a;
 
 	if(exitpic) return;
-	if(enterpic && state != StatCount) return;
+	if(enterpic && state != WiState::StatCount) return;
 
-	if(gamemode == commercial)
+	if(gamemode == GameMode::Commercial)
 		return;
 
 	if(wbs->epsd < 0 || wbs->epsd > 2)
@@ -743,12 +745,12 @@ void WI_updateAnimatedBack()
 		{
 			switch(a->type)
 			{
-				case ANIM_ALWAYS:
+				case AnimType::Always:
 					if(++a->ctr >= a->nanims) a->ctr = 0;
 					a->nexttic = bcnt + a->period;
 					break;
 
-				case ANIM_RANDOM:
+				case AnimType::Random:
 					a->ctr++;
 					if(a->ctr == a->nanims)
 					{
@@ -759,9 +761,9 @@ void WI_updateAnimatedBack()
 						a->nexttic = bcnt + a->period;
 					break;
 
-				case ANIM_LEVEL:
+				case AnimType::Level:
 					// gawd-awful hack for level anims
-					if(!(state == StatCount && i == 7)
+					if(!(state == WiState::StatCount && i == 7)
 						&& wbs->next == a->data1)
 					{
 						a->ctr++;
@@ -787,9 +789,9 @@ void WI_drawAnimatedBack()
 	wi_anim_t* a;
 
 	if(exitpic) return;
-	if(enterpic && state != StatCount) return;
+	if(enterpic && state != WiState::StatCount) return;
 
-	if(gamemode == commercial) //jff 4/25/98 Someone forgot commercial an enum
+	if(gamemode == GameMode::Commercial) //jff 4/25/98 Someone forgot commercial an enum
 		return;
 
 	if(wbs->epsd < 0 || wbs->epsd > 2)
@@ -800,7 +802,7 @@ void WI_drawAnimatedBack()
 	{
 		a = &anims[1][7];
 
-		V_DrawNumPatch(a->loc.x, a->loc.y, FB, a->p[2].lumpnum, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNumPatch(a->loc.x, a->loc.y, FB, a->p[2].lumpnum, ColorRange::Default, PatchTranslation::Stretch);
 	}
 
 	for(i = 0; i < NUMANIMS[wbs->epsd]; i++)
@@ -809,7 +811,7 @@ void WI_drawAnimatedBack()
 
 		if(a->ctr >= 0)
 			// CPhipps - patch drawing updated
-			V_DrawNumPatch(a->loc.x, a->loc.y, FB, a->p[a->ctr].lumpnum, CR_DEFAULT, VPT_STRETCH);
+			V_DrawNumPatch(a->loc.x, a->loc.y, FB, a->p[a->ctr].lumpnum, ColorRange::Default, PatchTranslation::Stretch);
 	}
 }
 
@@ -863,14 +865,14 @@ static int WI_drawNum(int x, int y, int n, int digits)
 	{
 		x -= fontwidth;
 		// CPhipps - patch drawing updated
-		V_DrawNumPatch(x, y, FB, num[ n % 10 ].lumpnum, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNumPatch(x, y, FB, num[ n % 10 ].lumpnum, ColorRange::Default, PatchTranslation::Stretch);
 		n /= 10;
 	}
 
 	// draw a minus sign if necessary
 	if(neg)
 		// CPhipps - patch drawing updated
-		V_DrawNamePatch(x-=8, y, FB, wiminus, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatch(x-=8, y, FB, wiminus, ColorRange::Default, PatchTranslation::Stretch);
 
 	return x;
 }
@@ -890,7 +892,7 @@ static void WI_drawPercent(int x, int y, int p)
 		return;
 
 	// CPhipps - patch drawing updated
-	V_DrawNamePatch(x, y, FB, percent, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch(x, y, FB, percent, ColorRange::Default, PatchTranslation::Stretch);
 	WI_drawNum(x, y, p, -1);
 }
 
@@ -923,12 +925,12 @@ static void WI_drawTime(int x, int y, int t)
 			// draw
 			if(t)
 				// CPhipps - patch drawing updated
-				V_DrawNamePatch(x, y, FB, colon, CR_DEFAULT, VPT_STRETCH);
+				V_DrawNamePatch(x, y, FB, colon, ColorRange::Default, PatchTranslation::Stretch);
 			else break;
 		}
 	else // "sucks" (maybe should be "addicted", even I've never had a 100 hour game ;)
 		V_DrawNamePatch(x - V_NamePatchWidth(sucks),
-		y, FB, sucks, CR_DEFAULT, VPT_STRETCH);
+		y, FB, sucks, ColorRange::Default, PatchTranslation::Stretch);
 }
 
 
@@ -950,7 +952,7 @@ void WI_End()
 		WI_endStats();
 }
 
-#define WI_LONGER_NOW_ENTERING (allow_incompatibility && gamemode == commercial && !netgame)
+#define WI_LONGER_NOW_ENTERING (allow_incompatibility && gamemode == GameMode::Commercial && !netgame)
 
 void WI_wait()
 {
@@ -968,7 +970,7 @@ void WI_wait()
 //
 void WI_initNoState()
 {
-	state = NoState;
+	state = WiState::NoState;
 	acceleratestage = 0;
 	WI_wait();
 }
@@ -984,10 +986,10 @@ void WI_initNoState()
 
 static void WI_drawTimeStats(int cnt_time, int cnt_total_time, int cnt_par)
 {
-	V_DrawNamePatch(SP_TIMEX, SP_TIMEY, FB, time1, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch(SP_TIMEX, SP_TIMEY, FB, time1, ColorRange::Default, PatchTranslation::Stretch);
 	WI_drawTime(320 / 2 - SP_TIMEX, SP_TIMEY, cnt_time);
 
-	V_DrawNamePatch(SP_TIMEX, (SP_TIMEY+200)/2, FB, total, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch(SP_TIMEX, (SP_TIMEY+200)/2, FB, total, ColorRange::Default, PatchTranslation::Stretch);
 	WI_drawTime(320 / 2 - SP_TIMEX, (SP_TIMEY + 200) / 2, cnt_total_time);
 
 	// Ty 04/11/98: redid logic: should skip only if with pwad but
@@ -997,7 +999,7 @@ static void WI_drawTimeStats(int cnt_time, int cnt_total_time, int cnt_par)
 
 	if(
 		!(modifiedgame && !wbs->modified_partime)
-		|| (gamemission == pack_nerve && allow_incompatibility)
+		|| (gamemission == GameMission::PackNerve && allow_incompatibility)
 	)
 	{
 		if(wbs->epsd < 4 || wbs->modified_partime)
@@ -1007,7 +1009,7 @@ static void WI_drawTimeStats(int cnt_time, int cnt_total_time, int cnt_par)
 			display_count =
 				wbs->fake_partime && cnt_par >= 0 ? wbs->fake_partime / TICRATE : cnt_par;
 
-			V_DrawNamePatch(320/2 + SP_TIMEX, SP_TIMEY, FB, par, CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatch(320/2 + SP_TIMEX, SP_TIMEY, FB, par, ColorRange::Default, PatchTranslation::Stretch);
 			WI_drawTime(320 - SP_TIMEX, SP_TIMEY, display_count);
 		}
 	}
@@ -1053,7 +1055,7 @@ void WI_initShowNextLoc()
 
 	if(behaviour & WI_SHOW_NEXT_LOC)
 	{
-		state = ShowNextLoc;
+		state = WiState::ShowNextLoc;
 	}
 
 	if(behaviour & WI_SHOW_NEXT_EPISODAL)
@@ -1078,7 +1080,7 @@ void WI_initShowNextLoc()
 	// .text:0003119E                 mov     ds:acceleratestage, 0
 	// .text:000311A8                 mov     ds:cnt, 3Ch
 	// nowhere no hide
-	if(compatibility_level == tasdoom_compatibility)
+	if(compatibility_level == CompLevel::Tasdoom)
 		cnt = 60;
 	else
 		cnt = SHOWNEXTLOCDELAY * TICRATE;
@@ -1126,13 +1128,13 @@ void WI_drawShowNextLoc()
 	WI_drawAnimatedBack();
 
 	// custom interpic.
-	if(exitpic || (enterpic && state != StatCount))
+	if(exitpic || (enterpic && state != WiState::StatCount))
 	{
 		WI_drawEL();
 		return;
 	}
 
-	if(gamemode != commercial)
+	if(gamemode != GameMode::Commercial)
 	{
 		if(wbs->epsd < 0 || wbs->epsd > 2)
 		{
@@ -1155,11 +1157,11 @@ void WI_drawShowNextLoc()
 			WI_drawOnLnode(wbs->next, yah);
 	}
 
-	if(gamemission == pack_nerve && allow_incompatibility && wbs->last == 7)
+	if(gamemission == GameMission::PackNerve && allow_incompatibility && wbs->last == 7)
 		return; // MAP08 end game
 
 	// draws which level you are entering..
-	if((gamemode != commercial) || (gamemap != 30)) // allows for MAP31 entering screen, if not MAP30
+	if((gamemode != GameMode::Commercial) || (gamemap != 30)) // allows for MAP31 entering screen, if not MAP30
 		WI_drawEL();
 }
 
@@ -1223,7 +1225,7 @@ void WI_initDeathmatchStats()
 	dm_frags = static_cast<short int**>(Z_Calloc(g_maxplayers, sizeof(*dm_frags)));
 	dm_totals = static_cast<short int*>(Z_Calloc(g_maxplayers, sizeof(*dm_totals)));
 
-	state = StatCount; // We're doing stats
+	state = WiState::StatCount; // We're doing stats
 	acceleratestage = 0;
 	dm_state = 1; // count how many times we've done a complete stat
 
@@ -1292,7 +1294,7 @@ void WI_updateDeathmatchStats()
 			}
 		}
 
-		S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+		S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 		dm_state = 4; // we're done with all 4 (or all we have to do)
 	}
 
@@ -1300,7 +1302,7 @@ void WI_updateDeathmatchStats()
 	if(dm_state == 2)
 	{
 		if(!(bcnt & 3))
-			S_StartOptionalSound(g_sfx_inttic, sfx_pistol, false); // noise while counting
+			S_StartOptionalSound(g_sfx_inttic, SfxId::Pistol, false); // noise while counting
 
 		stillticking = false;
 
@@ -1339,7 +1341,7 @@ void WI_updateDeathmatchStats()
 
 		if(!stillticking)
 		{
-			S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+			S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 			dm_state++;
 		}
 	}
@@ -1347,9 +1349,9 @@ void WI_updateDeathmatchStats()
 	{
 		if(acceleratestage)
 		{
-			S_StartOptionalSound(g_sfx_intdms, sfx_slop, false);
+			S_StartOptionalSound(g_sfx_intdms, SfxId::Slop, false);
 
-			if(gamemode == commercial)
+			if(gamemode == GameMode::Commercial)
 				WI_initNoState();
 			else
 				WI_initShowNextLoc();
@@ -1392,10 +1394,10 @@ void WI_drawDeathmatchStats()
 
 	// draw stat titles (top line)
 	V_DrawNamePatch(DM_TOTALSX-V_NamePatchWidth(total)/2,
-		DM_MATRIXY-WI_SPACINGY+10, FB, total, CR_DEFAULT, VPT_STRETCH);
+		DM_MATRIXY-WI_SPACINGY+10, FB, total, ColorRange::Default, PatchTranslation::Stretch);
 
-	V_DrawNamePatch(DM_KILLERSX, DM_KILLERSY, FB, killers, CR_DEFAULT, VPT_STRETCH);
-	V_DrawNamePatch(DM_VICTIMSX, DM_VICTIMSY, FB, victims, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch(DM_KILLERSX, DM_KILLERSY, FB, killers, ColorRange::Default, PatchTranslation::Stretch);
+	V_DrawNamePatch(DM_VICTIMSX, DM_VICTIMSY, FB, victims, ColorRange::Default, PatchTranslation::Stretch);
 
 	// draw P?
 	x = DM_MATRIXX + DM_SPACINGX;
@@ -1407,18 +1409,18 @@ void WI_drawDeathmatchStats()
 		{
 			//int trans = playernumtotrans[i];
 			V_DrawNamePatch(x-halfface, DM_MATRIXY - WI_SPACINGY,
-				FB, facebackp, i ? CR_LIMIT+i : CR_DEFAULT,
-				static_cast<enum patch_translation_e>(VPT_STRETCH | (i ? VPT_TRANS : 0)));
+				FB, facebackp, i ? static_cast<ColorRange>(std::to_underlying(ColorRange::Limit) + i) : ColorRange::Default,
+				(i ? PatchTranslation::Stretch | PatchTranslation::Trans : PatchTranslation::Stretch));
 			V_DrawNamePatch(DM_MATRIXX-halfface, y,
-				FB, facebackp, i ? CR_LIMIT+i : CR_DEFAULT,
-				static_cast<enum patch_translation_e>(VPT_STRETCH | (i ? VPT_TRANS : 0)));
+				FB, facebackp, i ? static_cast<ColorRange>(std::to_underlying(ColorRange::Limit) + i) : ColorRange::Default,
+				(i ? PatchTranslation::Stretch | PatchTranslation::Trans : PatchTranslation::Stretch));
 
 			if(i == me)
 			{
 				V_DrawNamePatch(x-halfface, DM_MATRIXY - WI_SPACINGY,
-					FB, bstar, CR_DEFAULT, VPT_STRETCH);
+					FB, bstar, ColorRange::Default, PatchTranslation::Stretch);
 				V_DrawNamePatch(DM_MATRIXX-halfface, y,
-					FB, star, CR_DEFAULT, VPT_STRETCH);
+					FB, star, ColorRange::Default, PatchTranslation::Stretch);
 			}
 		}
 		x += DM_SPACINGX;
@@ -1488,7 +1490,7 @@ void WI_initNetgameStats()
 {
 	int i;
 
-	state = StatCount;
+	state = WiState::StatCount;
 	acceleratestage = 0;
 	ng_state = 1;
 
@@ -1542,14 +1544,14 @@ void WI_updateNetgameStats()
 			if(dofrags)
 				cnt_frags[i] = WI_fragSum(i); // we had frags
 		}
-		S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+		S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 		ng_state = 10;
 	}
 
 	if(ng_state == 2)
 	{
 		if(!(bcnt & 3))
-			S_StartOptionalSound(g_sfx_inttic, sfx_pistol, false);
+			S_StartOptionalSound(g_sfx_inttic, SfxId::Pistol, false);
 
 		stillticking = false;
 
@@ -1568,14 +1570,14 @@ void WI_updateNetgameStats()
 
 		if(!stillticking)
 		{
-			S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+			S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 			ng_state++;
 		}
 	}
 	else if(ng_state == 4)
 	{
 		if(!(bcnt & 3))
-			S_StartOptionalSound(g_sfx_inttic, sfx_pistol, false);
+			S_StartOptionalSound(g_sfx_inttic, SfxId::Pistol, false);
 
 		stillticking = false;
 
@@ -1593,14 +1595,14 @@ void WI_updateNetgameStats()
 
 		if(!stillticking)
 		{
-			S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+			S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 			ng_state++;
 		}
 	}
 	else if(ng_state == 6)
 	{
 		if(!(bcnt & 3))
-			S_StartOptionalSound(g_sfx_inttic, sfx_pistol, false);
+			S_StartOptionalSound(g_sfx_inttic, SfxId::Pistol, false);
 
 		stillticking = false;
 
@@ -1619,14 +1621,14 @@ void WI_updateNetgameStats()
 
 		if(!stillticking)
 		{
-			S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+			S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 			ng_state += 1 + 2 * !dofrags;
 		}
 	}
 	else if(ng_state == 8)
 	{
 		if(!(bcnt & 3))
-			S_StartOptionalSound(g_sfx_inttic, sfx_pistol, false);
+			S_StartOptionalSound(g_sfx_inttic, SfxId::Pistol, false);
 
 		stillticking = false;
 
@@ -1645,7 +1647,7 @@ void WI_updateNetgameStats()
 
 		if(!stillticking)
 		{
-			S_StartOptionalSound(g_sfx_intnet, sfx_pldeth, false);
+			S_StartOptionalSound(g_sfx_intnet, SfxId::Pldeth, false);
 			ng_state++;
 		}
 	}
@@ -1653,8 +1655,8 @@ void WI_updateNetgameStats()
 	{
 		if(acceleratestage)
 		{
-			S_StartOptionalSound(g_sfx_intnex, sfx_sgcock, false);
-			if(gamemode == commercial)
+			S_StartOptionalSound(g_sfx_intnex, SfxId::Sgcock, false);
+			if(gamemode == GameMode::Commercial)
 				WI_initNoState();
 			else
 				WI_initShowNextLoc();
@@ -1696,17 +1698,17 @@ void WI_drawNetgameStats()
 
 	// draw stat titles (top line)
 	V_DrawNamePatch(NG_STATSX+NG_SPACINGX-V_NamePatchWidth(kills),
-		NG_STATSY, FB, kills, CR_DEFAULT, VPT_STRETCH);
+		NG_STATSY, FB, kills, ColorRange::Default, PatchTranslation::Stretch);
 
 	V_DrawNamePatch(NG_STATSX+2*NG_SPACINGX-V_NamePatchWidth(items),
-		NG_STATSY, FB, items, CR_DEFAULT, VPT_STRETCH);
+		NG_STATSY, FB, items, ColorRange::Default, PatchTranslation::Stretch);
 
 	V_DrawNamePatch(NG_STATSX+3*NG_SPACINGX-V_NamePatchWidth(secret),
-		NG_STATSY, FB, secret, CR_DEFAULT, VPT_STRETCH);
+		NG_STATSY, FB, secret, ColorRange::Default, PatchTranslation::Stretch);
 
 	if(dofrags)
 		V_DrawNamePatch(NG_STATSX+4*NG_SPACINGX-V_NamePatchWidth(frags),
-		NG_STATSY, FB, frags, CR_DEFAULT, VPT_STRETCH);
+		NG_STATSY, FB, frags, ColorRange::Default, PatchTranslation::Stretch);
 
 	// draw stats
 	y = NG_STATSY + V_NamePatchHeight(kills);
@@ -1719,11 +1721,11 @@ void WI_drawNetgameStats()
 
 		x = NG_STATSX;
 		V_DrawNamePatch(x-fwidth, y, FB, facebackp,
-			i ? CR_LIMIT+i : CR_DEFAULT,
-			static_cast<enum patch_translation_e>(VPT_STRETCH | (i ? VPT_TRANS : 0)));
+			i ? static_cast<ColorRange>(std::to_underlying(ColorRange::Limit) + i) : ColorRange::Default,
+			(i ? PatchTranslation::Stretch | PatchTranslation::Trans : PatchTranslation::Stretch));
 
 		if(i == me)
-			V_DrawNamePatch(x-fwidth, y, FB, star, CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatch(x-fwidth, y, FB, star, ColorRange::Default, PatchTranslation::Stretch);
 
 		x += NG_SPACINGX;
 		if(cnt_kills)
@@ -1759,7 +1761,7 @@ static int sp_state;
 //
 void WI_initStats()
 {
-	state = StatCount;
+	state = WiState::StatCount;
 	acceleratestage = 0;
 	sp_state = 1;
 
@@ -1796,7 +1798,7 @@ void WI_updateStats()
 		cnt_total_time = wbs->totaltimes / TICRATE;
 		cnt_time = plrs[me].stime / TICRATE;
 		cnt_par = wbs->partime / TICRATE;
-		S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+		S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 		sp_state = 10;
 	}
 
@@ -1805,12 +1807,12 @@ void WI_updateStats()
 		cnt_kills[0] += 2;
 
 		if(!(bcnt & 3))
-			S_StartOptionalSound(g_sfx_inttic, sfx_pistol, false);
+			S_StartOptionalSound(g_sfx_inttic, SfxId::Pistol, false);
 
 		if(cnt_kills[0] >= WI_killLimit(me))
 		{
 			cnt_kills[0] = WI_killPercent(me);
-			S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+			S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 			sp_state++;
 		}
 	}
@@ -1819,12 +1821,12 @@ void WI_updateStats()
 		cnt_items[0] += 2;
 
 		if(!(bcnt & 3))
-			S_StartOptionalSound(g_sfx_inttic, sfx_pistol, false);
+			S_StartOptionalSound(g_sfx_inttic, SfxId::Pistol, false);
 
 		if(cnt_items[0] >= WI_itemLimit(me))
 		{
 			cnt_items[0] = WI_itemPercent(me);
-			S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+			S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 			sp_state++;
 		}
 	}
@@ -1833,19 +1835,19 @@ void WI_updateStats()
 		cnt_secret[0] += 2;
 
 		if(!(bcnt & 3))
-			S_StartOptionalSound(g_sfx_inttic, sfx_pistol, false);
+			S_StartOptionalSound(g_sfx_inttic, SfxId::Pistol, false);
 
 		if(cnt_secret[0] >= WI_secretLimit(me))
 		{
 			cnt_secret[0] = WI_secretPercent(me);
-			S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+			S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 			sp_state++;
 		}
 	}
 	else if(sp_state == 8)
 	{
 		if(!(bcnt & 3) && play_early_explosion) //e6y: do not play count sound after explosion sound
-			S_StartOptionalSound(g_sfx_inttic, sfx_pistol, false);
+			S_StartOptionalSound(g_sfx_inttic, SfxId::Pistol, false);
 
 		cnt_time += 3;
 
@@ -1865,13 +1867,13 @@ void WI_updateStats()
 		// the counter will reach level time instead of par time
 		if(modifiedgame && play_early_explosion)
 		{
-			if((cnt_time >= plrs[me].stime / TICRATE) && (compatibility_level < lxdoom_1_compatibility || cnt_total_time >= wbs->totaltimes / TICRATE))
+			if((cnt_time >= plrs[me].stime / TICRATE) && (compatibility_level < CompLevel::Lxdoom1 || cnt_total_time >= wbs->totaltimes / TICRATE))
 			{
 				// for ExM8 levels if the player won't have pressed <Use>
-				if(compatibility_level < lxdoom_1_compatibility)
+				if(compatibility_level < CompLevel::Lxdoom1)
 					cnt_total_time = wbs->totaltimes / TICRATE;
 
-				S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+				S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 				play_early_explosion = false; // do not play it twice or more
 			}
 		}
@@ -1880,14 +1882,14 @@ void WI_updateStats()
 		{
 			cnt_par = wbs->partime / TICRATE;
 
-			if((cnt_time >= plrs[me].stime / TICRATE) && (compatibility_level < lxdoom_1_compatibility || cnt_total_time >= wbs->totaltimes / TICRATE))
+			if((cnt_time >= plrs[me].stime / TICRATE) && (compatibility_level < CompLevel::Lxdoom1 || cnt_total_time >= wbs->totaltimes / TICRATE))
 			{
 				//e6y: for ExM8 levels
-				if(compatibility_level < lxdoom_1_compatibility)
+				if(compatibility_level < CompLevel::Lxdoom1)
 					cnt_total_time = wbs->totaltimes / TICRATE;
 
 				if(!modifiedgame) //e6y: do not play explosion sound if it was already played
-					S_StartOptionalSound(g_sfx_inttot, sfx_barexp, false);
+					S_StartOptionalSound(g_sfx_inttot, SfxId::Barexp, false);
 				sp_state++;
 			}
 		}
@@ -1896,9 +1898,9 @@ void WI_updateStats()
 	{
 		if(acceleratestage)
 		{
-			S_StartOptionalSound(g_sfx_intnex, sfx_sgcock, false);
+			S_StartOptionalSound(g_sfx_intnex, SfxId::Sgcock, false);
 
-			if(gamemode == commercial)
+			if(gamemode == GameMode::Commercial)
 				WI_initNoState();
 			else
 				WI_initShowNextLoc();
@@ -1937,15 +1939,15 @@ void WI_drawStats()
 
 	WI_drawLF();
 
-	V_DrawNamePatch(SP_STATSX, SP_STATSY, FB, kills, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch(SP_STATSX, SP_STATSY, FB, kills, ColorRange::Default, PatchTranslation::Stretch);
 	if(cnt_kills)
 		WI_drawPercent(320 - SP_STATSX, SP_STATSY, cnt_kills[0]);
 
-	V_DrawNamePatch(SP_STATSX, SP_STATSY+lh, FB, items, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch(SP_STATSX, SP_STATSY+lh, FB, items, ColorRange::Default, PatchTranslation::Stretch);
 	if(cnt_items)
 		WI_drawPercent(320 - SP_STATSX, SP_STATSY + lh, cnt_items[0]);
 
-	V_DrawNamePatch(SP_STATSX, SP_STATSY+2*lh, FB, sp_secret, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch(SP_STATSX, SP_STATSY+2*lh, FB, sp_secret, ColorRange::Default, PatchTranslation::Stretch);
 	if(cnt_secret)
 		WI_drawPercent(320 - SP_STATSX, SP_STATSY + 2 * lh, cnt_secret[0]);
 
@@ -1970,7 +1972,7 @@ extern "C" void WI_checkForAccelerate()
 	{
 		if(playeringame[i])
 		{
-			if(player->cmd.buttons & BT_ATTACK)
+			if((player->cmd.buttons & ButtonCode::Attack) != ButtonCode{})
 			{
 				if(!player->attackdown)
 					acceleratestage = 1;
@@ -1979,7 +1981,7 @@ extern "C" void WI_checkForAccelerate()
 			else
 				player->attackdown = false;
 
-			if(player->cmd.buttons & BT_USE)
+			if((player->cmd.buttons & ButtonCode::Use) != ButtonCode{})
 			{
 				if(!player->usedown)
 					acceleratestage = 1;
@@ -2019,7 +2021,7 @@ void WI_Ticker()
 		}
 		else
 		{
-			S_ChangeMusic(mnum, true);
+			S_ChangeMusic(static_cast<MusicId>(mnum), true);
 		}
 	}
 
@@ -2027,17 +2029,17 @@ void WI_Ticker()
 
 	switch(state)
 	{
-		case StatCount:
+		case WiState::StatCount:
 			if(deathmatch) WI_updateDeathmatchStats();
 			else if(netgame) WI_updateNetgameStats();
 			else WI_updateStats();
 			break;
 
-		case ShowNextLoc:
+		case WiState::ShowNextLoc:
 			WI_updateShowNextLoc();
 			break;
 
-		case NoState:
+		case WiState::NoState:
 			WI_updateNoState();
 			break;
 	}
@@ -2062,7 +2064,7 @@ extern "C" void WI_loadData()
 	char name[9]; // limited to 8 characters
 	wi_anim_t* a;
 
-	if(gamemode != commercial)
+	if(gamemode != GameMode::Commercial)
 	{
 		if(wbs->epsd < 3)
 		{
@@ -2114,7 +2116,7 @@ void WI_Drawer()
 
 	switch(state)
 	{
-		case StatCount:
+		case WiState::StatCount:
 			if(deathmatch)
 				WI_drawDeathmatchStats();
 			else if(netgame)
@@ -2123,11 +2125,11 @@ void WI_Drawer()
 				WI_drawStats();
 			break;
 
-		case ShowNextLoc:
+		case WiState::ShowNextLoc:
 			WI_drawShowNextLoc();
 			break;
 
-		case NoState:
+		case WiState::NoState:
 			WI_drawNoState();
 			break;
 	}
@@ -2146,9 +2148,9 @@ void WI_initVariables(wbstartstruct_t* wbstartstruct)
 	wbs = wbstartstruct;
 
 #ifdef RANGECHECKING
-	if(gamemode != commercial)
+	if(gamemode != std::to_underlying(GameMode::Commercial))
 	{
-		if(gamemode == retail)
+		if(gamemode == std::to_underlying(GameMode::Retail))
 			RNGCHECK(wbs->epsd, 0, 3);
 		else
 			RNGCHECK(wbs->epsd, 0, 2);
@@ -2168,7 +2170,7 @@ void WI_initVariables(wbstartstruct_t* wbstartstruct)
 	me = wbs->pnum;
 	plrs = wbs->plyr;
 
-	if(gamemode != retail)
+	if(gamemode != GameMode::Retail)
 		if(wbs->epsd > 2)
 			wbs->epsd -= 3;
 }

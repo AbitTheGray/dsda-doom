@@ -2,6 +2,8 @@
 
 // MN_menu.c
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "w_wad.hpp"
 #include "v_video.hpp"
@@ -74,10 +76,10 @@ extern "C" void MN_DrawCredits();
 extern "C" void MN_DrawHelp1();
 extern "C" void MN_DrawHelp2();
 
-static void MN_DrTextAColor(const char* text, int x, int y, int cm);
-static void MN_DrTextBColor(const char* text, int x, int y, int cm);
+static void MN_DrTextAColor(const char* text, int x, int y, ColorRange cm);
+static void MN_DrTextBColor(const char* text, int x, int y, ColorRange cm);
 
-extern "C" void M_ChangeMenu(menu_t* menu, menuactive_t mnact);
+extern "C" void M_ChangeMenu(menu_t* menu, MenuActive mnact);
 extern dboolean inhelpscreens;
 extern menu_t ExtHelpDef;
 extern "C" void M_NewGame(int choice);
@@ -93,22 +95,22 @@ extern "C" void M_SaveGame(int choice);
 //
 /////////////////////////////
 
-enum info_e1 { infoempty1, info1_end };
+enum struct InfoItem1 : int32_t{ Empty, End };
 
-enum info_e2 { infoempty2, info2_end };
+enum struct InfoItem2 : int32_t{ Empty, End };
 
-enum info_e3 { infoempty3, info3_end };
+enum struct InfoItem3 : int32_t{ Empty, End };
 
-enum info_e4 { infoempty4, info4_end };
+enum struct InfoItem4 : int32_t{ Empty, End };
 
-menuitem_t InfoMenu1[] = {{M_ITEM_ACTION, "", MN_Info2, 0}};
-menuitem_t InfoMenu2[] = {{M_ITEM_ACTION, "", MN_Info3, 0}};
-menuitem_t InfoMenu3[] = {{M_ITEM_ACTION, "", MN_Info4, 0}};
-menuitem_t InfoMenu4[] = {{M_ITEM_ACTION, "", MN_FinishInfo, 0}};
+menuitem_t InfoMenu1[] = {{MenuItemType::Action, "", MN_Info2, 0}};
+menuitem_t InfoMenu2[] = {{MenuItemType::Action, "", MN_Info3, 0}};
+menuitem_t InfoMenu3[] = {{MenuItemType::Action, "", MN_Info4, 0}};
+menuitem_t InfoMenu4[] = {{MenuItemType::Action, "", MN_FinishInfo, 0}};
 
 menu_t InfoDef1 =
 {
-	info1_end,
+	std::to_underlying(InfoItem1::End),
 	&MainDef,
 	InfoMenu1,
 	MN_DrawInfoAd,
@@ -118,7 +120,7 @@ menu_t InfoDef1 =
 
 menu_t InfoDef2 =
 {
-	info2_end,
+	std::to_underlying(InfoItem2::End),
 	&InfoDef1,
 	InfoMenu2,
 	MN_DrawInfoHelp1,
@@ -128,7 +130,7 @@ menu_t InfoDef2 =
 
 menu_t InfoDef3 =
 {
-	info3_end,
+	std::to_underlying(InfoItem3::End),
 	&InfoDef2,
 	InfoMenu3,
 	MN_DrawInfoHelp2,
@@ -138,7 +140,7 @@ menu_t InfoDef3 =
 
 menu_t InfoDef4 =
 {
-	info4_end,
+	std::to_underlying(InfoItem4::End),
 	&InfoDef3,
 	InfoMenu4,
 	MN_DrawInfoCredits,
@@ -179,26 +181,26 @@ extern "C" void MN_DrawInfoCredits()
 extern "C" void MN_DrawAd()
 {
 	const char* ravenlump;
-	ravenlump = (heretic && (gamemode == shareware)) ? "ORDER" : "CREDIT";
-	M_ChangeMenu(nullptr, static_cast<menuactive_t>(mnact_full));
+	ravenlump = (heretic && (gamemode == GameMode::Shareware)) ? "ORDER" : "CREDIT";
+	M_ChangeMenu(nullptr, static_cast<MenuActive>(MenuActive::Full));
 	V_DrawRawScreen(ravenlump);
 }
 
 extern "C" void MN_DrawHelp1()
 {
-	M_ChangeMenu(nullptr, static_cast<menuactive_t>(mnact_full));
+	M_ChangeMenu(nullptr, static_cast<MenuActive>(MenuActive::Full));
 	V_DrawRawScreen("HELP1");
 }
 
 extern "C" void MN_DrawHelp2()
 {
-	M_ChangeMenu(nullptr, static_cast<menuactive_t>(mnact_full));
+	M_ChangeMenu(nullptr, static_cast<MenuActive>(MenuActive::Full));
 	V_DrawRawScreen("HELP2");
 }
 
 extern "C" void MN_DrawCredits()
 {
-	M_ChangeMenu(nullptr, static_cast<menuactive_t>(mnact_full));
+	M_ChangeMenu(nullptr, static_cast<MenuActive>(MenuActive::Full));
 	V_DrawRawScreen("CREDIT");
 }
 
@@ -208,23 +210,23 @@ extern "C" void MN_DrawCredits()
 //
 /////////////////////////////
 
-enum rmain_e
+enum struct RavenMainItem : int32_t
 {
-	rnewgame = 0,
-	roptions,
-	rgamefiles,
-	rinfo,
-	rquitdoom,
-	rmain_end
+	NewGame = 0,
+	Options,
+	GameFiles,
+	Info,
+	QuitDoom,
+	End
 };
 
 menuitem_t RavenMainMenu[] =
 {
-	{static_cast<menuitem_type_t>(1), "", M_NewGame, 'n', "NEW GAME"},
-	{static_cast<menuitem_type_t>(1), "", M_Options, 'o', "OPTIONS"},
-	{static_cast<menuitem_type_t>(1), "", MN_GameFiles, 'g', "GAME FILES"},
-	{static_cast<menuitem_type_t>(1), "", MN_Info, 'i', "INFO"},
-	{static_cast<menuitem_type_t>(1), "", M_QuitDOOM, 'q', "QUIT GAME"}
+	{static_cast<MenuItemType>(1), "", M_NewGame, 'n', "NEW GAME"},
+	{static_cast<MenuItemType>(1), "", M_Options, 'o', "OPTIONS"},
+	{static_cast<MenuItemType>(1), "", MN_GameFiles, 'g', "GAME FILES"},
+	{static_cast<MenuItemType>(1), "", MN_Info, 'i', "INFO"},
+	{static_cast<MenuItemType>(1), "", M_QuitDOOM, 'q', "QUIT GAME"}
 };
 
 
@@ -234,22 +236,22 @@ menuitem_t RavenMainMenu[] =
 //
 /////////////////////////////
 
-enum saveload_e
+enum struct SaveLoadItem : int32_t
 {
-	rloadgame,
-	rsavegame,
-	rsaveload_end
+	LoadGame,
+	SaveGame,
+	End
 };
 
 menuitem_t SaveLoadMenu[] =
 {
-	{static_cast<menuitem_type_t>(1), "", M_LoadGame, 'l', "LOAD GAME"},
-	{static_cast<menuitem_type_t>(1), "", M_SaveGame, 's', "SAVE GAME"},
+	{static_cast<MenuItemType>(1), "", M_LoadGame, 'l', "LOAD GAME"},
+	{static_cast<MenuItemType>(1), "", M_SaveGame, 's', "SAVE GAME"},
 };
 
 menu_t SaveLoadDef =
 {
-	rsaveload_end, // number of menu items
+	std::to_underlying(SaveLoadItem::End), // number of menu items
 	&MainDef,      // previous menu screen
 	SaveLoadMenu,  // table that defines menu items
 	nullptr,              // drawing routine
@@ -279,7 +281,7 @@ void MN_Init()
 	}
 	else
 	{
-		SkullBaseLump = W_CheckNumForName2("FBULA0", ns_sprites);
+		SkullBaseLump = W_CheckNumForName2("FBULA0", LumpNamespace::Sprites);
 	}
 
 	// override doom menu parameters
@@ -309,7 +311,7 @@ void MN_Init()
 		SkillDef.x = 38;
 		SkillDef.y = 30;
 
-		if(gamemode == retail)
+		if(gamemode == GameMode::Retail)
 		{
 			EpiDef.y -= ITEM_HEIGHT;
 		}
@@ -328,12 +330,12 @@ void MN_Init()
 
 	// Use exclusive Raven MainMenu.
 	MainDef.menuitems = RavenMainMenu;
-	MainDef.numitems = rmain_end;
+	MainDef.numitems = static_cast<int16_t>(std::to_underlying(RavenMainItem::End));
 	SaveDef.prevMenu = &SaveLoadDef;
 	LoadDef.prevMenu = &SaveLoadDef;
 
 	// remove "ORDER" screen if not shareware
-	if(gamemode != shareware)
+	if(gamemode != GameMode::Shareware)
 	{
 		InfoDef1.routine = MN_DrawInfoHelp1;
 		InfoMenu1[0].routine = MN_Info3;
@@ -343,11 +345,11 @@ void MN_Init()
 
 void MN_UpdateClass(int choice)
 {
-	PlayerClass[consoleplayer] = static_cast<pclass_t>(choice + 1);
+	PlayerClass[consoleplayer] = static_cast<PClass>(choice + 1);
 
 	switch(PlayerClass[consoleplayer])
 	{
-		case PCLASS_FIGHTER:
+		case PClass::Fighter:
 			SkillDef.x = 120;
 			SkillDef.menuitems[0].alttext = hexen_skill_fighter[0];
 			SkillDef.menuitems[1].alttext = hexen_skill_fighter[1];
@@ -355,7 +357,7 @@ void MN_UpdateClass(int choice)
 			SkillDef.menuitems[3].alttext = hexen_skill_fighter[3];
 			SkillDef.menuitems[4].alttext = hexen_skill_fighter[4];
 			break;
-		case PCLASS_CLERIC:
+		case PClass::Cleric:
 			SkillDef.x = 116;
 			SkillDef.menuitems[0].alttext = hexen_skill_cleric[0];
 			SkillDef.menuitems[1].alttext = hexen_skill_cleric[1];
@@ -363,7 +365,7 @@ void MN_UpdateClass(int choice)
 			SkillDef.menuitems[3].alttext = hexen_skill_cleric[3];
 			SkillDef.menuitems[4].alttext = hexen_skill_cleric[4];
 			break;
-		case PCLASS_MAGE:
+		case PClass::Mage:
 			SkillDef.x = 112;
 			SkillDef.menuitems[0].alttext = hexen_skill_mage[0];
 			SkillDef.menuitems[1].alttext = hexen_skill_mage[1];
@@ -378,7 +380,7 @@ void MN_UpdateClass(int choice)
 
 void MN_Ticker()
 {
-	if(!menuactive)
+	if(menuactive == MenuActive::Inactive)
 	{
 		return;
 	}
@@ -433,7 +435,7 @@ void MN_Drawer()
 	{
 		const char* text = currentMenu->menuitems[i].alttext;
 		int custom_skill_text = text && (currentMenu->menuitems[i].flags == MENUF_OPTLUMP);
-		int color = M_HighlightColor(M_MouseHovered(i), CR_DEFAULT);
+		ColorRange color = M_HighlightColor(M_MouseHovered(i), ColorRange::Default);
 
 		if(custom_skill_text)
 		{
@@ -456,7 +458,7 @@ void MN_Drawer()
 	{
 		y = currentMenu->y + (itemOn * ITEM_HEIGHT) + SELECTOR_YOFFSET;
 		selName = (MenuTime & 16 ? "M_SLCTR1" : "M_SLCTR2");
-		V_DrawNamePatch(x + SELECTOR_XOFFSET, y, 0, selName, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatch(x + SELECTOR_XOFFSET, y, 0, selName, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	// MenuItem_t *item;
 	// const char *message;
@@ -531,9 +533,9 @@ void MN_DrawMainMenu()
 	if(hexen) return Hexen_MN_DrawMainMenu();
 
 	frame = (MenuTime / 3) % 18;
-	V_DrawNamePatch(88, 0, 0, "M_HTIC", CR_DEFAULT, VPT_STRETCH);
-	V_DrawNumPatch(40, 10, 0, SkullBaseLump + (17 - frame), CR_DEFAULT, VPT_STRETCH);
-	V_DrawNumPatch(232, 10, 0, SkullBaseLump + frame, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch(88, 0, 0, "M_HTIC", ColorRange::Default, PatchTranslation::Stretch);
+	V_DrawNumPatch(40, 10, 0, SkullBaseLump + (17 - frame), ColorRange::Default, PatchTranslation::Stretch);
+	V_DrawNumPatch(232, 10, 0, SkullBaseLump + frame, ColorRange::Default, PatchTranslation::Stretch);
 }
 
 static void Hexen_MN_DrawMainMenu()
@@ -541,15 +543,15 @@ static void Hexen_MN_DrawMainMenu()
 	int frame;
 
 	frame = (MenuTime / 5) % 7;
-	V_DrawNamePatch(88, 0, 0, "M_HTIC", CR_DEFAULT, VPT_STRETCH);
-	V_DrawNumPatch(37, 80, 0, SkullBaseLump + (frame + 2) % 7, CR_DEFAULT, VPT_STRETCH);
-	V_DrawNumPatch(278, 80, 0, SkullBaseLump + frame, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch(88, 0, 0, "M_HTIC", ColorRange::Default, PatchTranslation::Stretch);
+	V_DrawNumPatch(37, 80, 0, SkullBaseLump + (frame + 2) % 7, ColorRange::Default, PatchTranslation::Stretch);
+	V_DrawNumPatch(278, 80, 0, SkullBaseLump + frame, ColorRange::Default, PatchTranslation::Stretch);
 }
 
 // Class menu is in the episode slot for hexen
 void MN_DrawEpisode()
 {
-	pclass_t class_;
+	PClass class_;
 	static const char* boxLumpName[3] = {
 		"m_fbox",
 		"m_cbox",
@@ -564,10 +566,10 @@ void MN_DrawEpisode()
 	if(heretic) return;
 
 	MN_DrTextB("CHOOSE CLASS:", 34, 24);
-	class_ = (pclass_t)itemOn;
-	V_DrawNamePatch(174, 8, 0, boxLumpName[class_], CR_DEFAULT, VPT_STRETCH);
-	V_DrawNumPatch(174 + 24, 8 + 12, 0, W_GetNumForName(walkLumpName[class_]) + ((MenuTime >> 3) & 3),
-		CR_DEFAULT, VPT_STRETCH);
+	class_ = static_cast<PClass>(itemOn);
+	V_DrawNamePatch(174, 8, 0, boxLumpName[std::to_underlying(class_)], ColorRange::Default, PatchTranslation::Stretch);
+	V_DrawNumPatch(174 + 24, 8 + 12, 0, W_GetNumForName(walkLumpName[std::to_underlying(class_)]) + ((MenuTime >> 3) & 3),
+		ColorRange::Default, PatchTranslation::Stretch);
 }
 
 void MN_DrawSkillMenu()
@@ -596,7 +598,7 @@ void MN_DrawSound()
 
 extern char savegamestrings[10][SAVESTRINGSIZE];
 
-static void MN_DrawFileSlots(int x, int y, int menu)
+static void MN_DrawFileSlots(int x, int y, SaveOrLoadMenu menu)
 {
 	int i;
 	extern const char* saves_pages[];
@@ -604,11 +606,11 @@ static void MN_DrawFileSlots(int x, int y, int menu)
 	for(i = 0; i < g_menu_save_page_size; i++)
 	{
 		dboolean selected = M_FileBoxSelected(menu, i);
-		int textcolor = M_HighlightColor(selected, M_FileTextColor(menu, i));
-		int boxcolor = M_HighlightColor(selected, CR_DEFAULT);
-		int flags = VPT_STRETCH | M_AddColorFlag(boxcolor);
+		ColorRange textcolor = M_HighlightColor(selected, M_FileTextColor(menu, i));
+		ColorRange boxcolor = M_HighlightColor(selected, ColorRange::Default);
+		PatchTranslation flags = PatchTranslation::Stretch | M_AddColorFlag(boxcolor);
 
-		V_DrawNamePatch(x, y, 0, "M_FSLOT", boxcolor, static_cast<enum patch_translation_e>(flags));
+		V_DrawNamePatch(x, y, 0, "M_FSLOT", boxcolor, static_cast<PatchTranslation>(flags));
 		MN_DrTextAColor(savegamestrings[i], x + 5, y + 5, textcolor);
 		y += ITEM_HEIGHT;
 	}
@@ -623,7 +625,7 @@ void MN_DrawLoad()
 	title = "LOAD GAME";
 
 	MN_DrTextB(title, 160 - MN_TextBWidth(title) / 2, 10);
-	MN_DrawFileSlots(LoadDef.x, LoadDef.y, MN_LOAD);
+	MN_DrawFileSlots(LoadDef.x, LoadDef.y, SaveOrLoadMenu::Load);
 
 	if(delete_verify)
 		M_DrawDelVerify();
@@ -639,7 +641,7 @@ void MN_DrawSave()
 	title = "SAVE GAME";
 
 	MN_DrTextB(title, 160 - MN_TextBWidth(title) / 2, 10);
-	MN_DrawFileSlots(SaveDef.x, SaveDef.y, MN_SAVE);
+	MN_DrawFileSlots(SaveDef.x, SaveDef.y, SaveOrLoadMenu::Save);
 
 	if(saveStringEnter)
 	{
@@ -663,16 +665,16 @@ void MN_DrawPause()
 
 void MN_DrTextA(const char* text, int x, int y)
 {
-	MN_DrTextAColor(text, x, y, CR_DEFAULT);
+	MN_DrTextAColor(text, x, y, ColorRange::Default);
 }
 
-static void MN_DrTextAColor(const char* text, int x, int y, int cm)
+static void MN_DrTextAColor(const char* text, int x, int y, ColorRange cm)
 {
 	char c;
 	int lump;
-	int flags;
+	PatchTranslation flags;
 
-	flags = VPT_STRETCH | M_AddColorFlag(cm);
+	flags = PatchTranslation::Stretch | M_AddColorFlag(cm);
 
 	while((c = *text++) != 0)
 	{
@@ -684,7 +686,7 @@ static void MN_DrTextAColor(const char* text, int x, int y, int cm)
 		else
 		{
 			lump = MN_SafeFontALump(c - 33);
-			V_DrawNumPatch(x, y, 0, lump, cm, static_cast<enum patch_translation_e>(flags));
+			V_DrawNumPatch(x, y, 0, lump, cm, static_cast<PatchTranslation>(flags));
 			x += R_NumPatchWidth(lump) - 1;
 		}
 	}
@@ -728,16 +730,16 @@ int MN_TextAWidth(const char* text)
 
 void MN_DrTextB(const char* text, int x, int y)
 {
-	MN_DrTextBColor(text, x, y, CR_DEFAULT);
+	MN_DrTextBColor(text, x, y, ColorRange::Default);
 }
 
-static void MN_DrTextBColor(const char* text, int x, int y, int cm)
+static void MN_DrTextBColor(const char* text, int x, int y, ColorRange cm)
 {
 	char c;
 	int lump;
-	int flags;
+	PatchTranslation flags;
 
-	flags = VPT_STRETCH | M_AddColorFlag(cm);
+	flags = PatchTranslation::Stretch | M_AddColorFlag(cm);
 
 	while((c = *text++) != 0)
 	{
@@ -749,7 +751,7 @@ static void MN_DrTextBColor(const char* text, int x, int y, int cm)
 		else
 		{
 			lump = FontBBaseLump + c - 33;
-			V_DrawNumPatch(x, y, 0, lump, cm, static_cast<enum patch_translation_e>(flags));
+			V_DrawNumPatch(x, y, 0, lump, cm, static_cast<PatchTranslation>(flags));
 			x += R_NumPatchWidth(lump) - 1;
 		}
 	}
@@ -778,7 +780,7 @@ int MN_TextBWidth(const char* text)
 	return (width);
 }
 
-void MN_DrawTitle(int y, const char* text, int cm)
+void MN_DrawTitle(int y, const char* text, ColorRange cm)
 {
 	MN_DrTextB(text, 160 - (MN_TextBWidth(text) / 2), y);
 }
@@ -787,7 +789,7 @@ void MN_DrawTitle(int y, const char* text, int cm)
 #define SLIDER_WIDTH (SLIDER_LIMIT - 64)
 #define SLIDER_PATCH_COUNT (SLIDER_WIDTH / 8)
 
-void MN_DrawSlider(int x, int y, int width, int range, int slot, int color)
+void MN_DrawSlider(int x, int y, int width, int range, int slot, ColorRange color)
 {
 	int xx;
 	int i;
@@ -796,23 +798,23 @@ void MN_DrawSlider(int x, int y, int width, int range, int slot, int color)
 
 	// [AR] We check both if the item is selected and highlight
 	// to include the label on the sound screen
-	int flags = VPT_STRETCH | M_AddColorFlag(color);
+	PatchTranslation flags = PatchTranslation::Stretch | M_AddColorFlag(color);
 
 	width -= 4;
 
 	xx = x - 12;
-	V_DrawNamePatch(xx, y, 0, "M_SLDLT", color, static_cast<enum patch_translation_e>(flags));
+	V_DrawNamePatch(xx, y, 0, "M_SLDLT", color, static_cast<PatchTranslation>(flags));
 	xx += 32;
 	for(i = 0; i < width; i++)
 	{
 		const char* name;
 		name = (slider_img & 1 ? "M_SLDMD1" : "M_SLDMD2");
 		slider_img ^= 1;
-		V_DrawNamePatch(xx, y, 0, name, color, static_cast<enum patch_translation_e>(flags));
+		V_DrawNamePatch(xx, y, 0, name, color, static_cast<PatchTranslation>(flags));
 
 		xx += 8;
 	}
-	V_DrawNamePatch(xx, y, 0, "M_SLDRT", color, static_cast<enum patch_translation_e>(flags));
+	V_DrawNamePatch(xx, y, 0, "M_SLDRT", color, static_cast<PatchTranslation>(flags));
 
 	if(slot >= range)
 	{
@@ -823,7 +825,7 @@ void MN_DrawSlider(int x, int y, int width, int range, int slot, int color)
 
 	slot_offset = 8 * slot * width / range;
 	slot_offset -= range / width;
-	V_DrawNamePatch(x + 20 + slot_offset, y + 7, 0, "M_SLDKB", color, static_cast<enum patch_translation_e>(flags));
+	V_DrawNamePatch(x + 20 + slot_offset, y + 7, 0, "M_SLDKB", color, static_cast<PatchTranslation>(flags));
 }
 
 // hexen
@@ -843,7 +845,7 @@ void MN_DrTextAYellow(const char* text, int x, int y)
 		else
 		{
 			lump = FontAYellowBaseLump + c - 33;
-			V_DrawNumPatch(x, y, 0, lump, CR_DEFAULT, VPT_STRETCH);
+			V_DrawNumPatch(x, y, 0, lump, ColorRange::Default, PatchTranslation::Stretch);
 			x += R_NumPatchWidth(lump) - 1;
 		}
 	}

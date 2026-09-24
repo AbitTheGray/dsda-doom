@@ -5,22 +5,22 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "doomtype.hpp"
-
-typedef enum
+enum struct FeatureFlag : int32_t
 {
-	uf_menu,
-	uf_exhud,
-	uf_advhud,
-	uf_crosshair,
-	uf_quickstartcache,
-	uf_100k,
-	uf_console,
+	Menu,
+	Exhud,
+	Advhud,
+	Crosshair,
+	Quickstartcache,
+	Track100k,
+	Console,
 	// 7
 	// 8
 	// 9
@@ -45,49 +45,49 @@ typedef enum
 	// 28
 	// 29
 
-	uf_unknown = 30,
-	uf_invalid = 31,
+	Unknown = 30,
+	Invalid = 31,
 
-	uf_iddt = 32,
-	uf_automap,
-	uf_liteamp,
-	uf_build,
-	uf_buildzero,
-	uf_bruteforce,
-	uf_tracker,
-	uf_keyframe,
-	uf_skip,
-	uf_wipescreen,
-	uf_speedup,
-	uf_slowdown,
-	uf_coordinates,
-	uf_mouselook,
-	uf_weaponalignment,
-	uf_commanddisplay,
-	uf_crosshaircolor,
-	uf_crosshairlock,
-	uf_shadows,
-	uf_painpalette,
-	uf_bonuspalette,
-	uf_powerpalette,
-	uf_healthbar,
-	uf_alwayssr50,
-	uf_maxplayercorpse,
-	uf_hideweapon,
-	uf_showalive,
-	uf_join,
-	uf_mouse_and_controller,
-	uf_ghost,
-	uf_advanced_map,
+	Iddt = 32,
+	Automap,
+	Liteamp,
+	Build,
+	Buildzero,
+	Bruteforce,
+	Tracker,
+	Keyframe,
+	Skip,
+	Wipescreen,
+	Speedup,
+	Slowdown,
+	Coordinates,
+	Mouselook,
+	Weaponalignment,
+	Commanddisplay,
+	Crosshaircolor,
+	Crosshairlock,
+	Shadows,
+	Painpalette,
+	Bonuspalette,
+	Powerpalette,
+	Healthbar,
+	Alwayssr50,
+	Maxplayercorpse,
+	Hideweapon,
+	Showalive,
+	Join,
+	MouseAndController,
+	Ghost,
+	AdvancedMap,
 	// uf_blink_keys = 63
 	// uf_fuzz = 64
-	uf_vanillatrans = 65,
-	uf_ghosttrans,
-	uf_levelbrightness,
+	Vanillatrans = 65,
+	Ghosttrans,
+	Levelbrightness,
 	// 68
 
 	// 127
-} dsda_feature_flag_t;
+};
 
 #define BITMASK(b) (1 << ((b) % 8))
 #define BITSLOT(b) ((b) / 8)
@@ -99,8 +99,7 @@ typedef enum
 #define FEATURE_SIZE 128
 #define FEATURE_SLOTS BITNSLOTS(FEATURE_SIZE)
 
-
-void dsda_TrackFeature(int feature);
+void dsda_TrackFeature(FeatureFlag feature);
 void dsda_ResetFeatures();
 byte* dsda_UsedFeatures();
 void dsda_MergeFeatures(byte* source);

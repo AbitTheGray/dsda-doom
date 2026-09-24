@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA CR Table
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "lprintf.hpp"
 #include "w_wad.hpp"
@@ -20,22 +22,22 @@ typedef struct
 } cr_range_t;
 
 // Default values - overridden by DSDACR lump
-cr_range_t cr_range[CR_HUD_LIMIT] = {
-	[CR_DEFAULT] = {0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF},
-	[CR_BRICK] = {0x47, 0x00, 0x00, 0xFF, 0xB8, 0xB8},
-	[CR_TAN] = {0x33, 0x2B, 0x13, 0xFF, 0xEB, 0xDF},
-	[CR_GRAY] = {0x27, 0x27, 0x27, 0xEF, 0xEF, 0xEF},
-	[CR_GREEN] = {0x0B, 0x17, 0x07, 0x77, 0xFF, 0x6F},
-	[CR_BROWN] = {0x53, 0x3F, 0x2F, 0xBF, 0xA7, 0x8F},
-	[CR_GOLD] = {0x73, 0x2B, 0x00, 0xFF, 0xFF, 0x73},
-	[CR_RED] = {0x3F, 0x00, 0x00, 0xFF, 0x00, 0x00},
-	[CR_BLUE] = {0x00, 0x00, 0x27, 0x00, 0x00, 0xFF},
-	[CR_ORANGE] = {0x20, 0x00, 0x00, 0xFF, 0x80, 0x00},
-	[CR_YELLOW] = {0x77, 0x77, 0x00, 0xFF, 0xFF, 0x00},
-	[CR_LIGHTBLUE] = {0x00, 0x00, 0x73, 0xB4, 0xB4, 0xFF},
-	[CR_BLACK] = {0x13, 0x13, 0x13, 0x50, 0x50, 0x50},
-	[CR_PURPLE] = {0x23, 0x00, 0x23, 0xCF, 0x00, 0xCF},
-	[CR_WHITE] = {0x24, 0x24, 0x24, 0xFF, 0xFF, 0xFF},
+cr_range_t cr_range[std::to_underlying(ColorRange::HudLimit)] = {
+	[std::to_underlying(ColorRange::Default)] = {0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF},
+	[std::to_underlying(ColorRange::Brick)] = {0x47, 0x00, 0x00, 0xFF, 0xB8, 0xB8},
+	[std::to_underlying(ColorRange::Tan)] = {0x33, 0x2B, 0x13, 0xFF, 0xEB, 0xDF},
+	[std::to_underlying(ColorRange::Gray)] = {0x27, 0x27, 0x27, 0xEF, 0xEF, 0xEF},
+	[std::to_underlying(ColorRange::Green)] = {0x0B, 0x17, 0x07, 0x77, 0xFF, 0x6F},
+	[std::to_underlying(ColorRange::Brown)] = {0x53, 0x3F, 0x2F, 0xBF, 0xA7, 0x8F},
+	[std::to_underlying(ColorRange::Gold)] = {0x73, 0x2B, 0x00, 0xFF, 0xFF, 0x73},
+	[std::to_underlying(ColorRange::Red)] = {0x3F, 0x00, 0x00, 0xFF, 0x00, 0x00},
+	[std::to_underlying(ColorRange::Blue)] = {0x00, 0x00, 0x27, 0x00, 0x00, 0xFF},
+	[std::to_underlying(ColorRange::Orange)] = {0x20, 0x00, 0x00, 0xFF, 0x80, 0x00},
+	[std::to_underlying(ColorRange::Yellow)] = {0x77, 0x77, 0x00, 0xFF, 0xFF, 0x00},
+	[std::to_underlying(ColorRange::Lightblue)] = {0x00, 0x00, 0x73, 0xB4, 0xB4, 0xFF},
+	[std::to_underlying(ColorRange::Black)] = {0x13, 0x13, 0x13, 0x50, 0x50, 0x50},
+	[std::to_underlying(ColorRange::Purple)] = {0x23, 0x00, 0x23, 0xCF, 0x00, 0xCF},
+	[std::to_underlying(ColorRange::White)] = {0x24, 0x24, 0x24, 0xFF, 0xFF, 0xFF},
 };
 
 static char ref_lump_doom[9] = "STCFN065";
@@ -110,7 +112,7 @@ static void dsda_CalculateFontBounds(const byte* playpal)
 
 	cr_font.multiplier = 1.0 / (cr_font.light_upper_bound - cr_font.light_lower_bound);
 
-	lprintf(LO_DEBUG, "Font Bounds: %lf:%lf x%lf\n",
+	lprintf(OutputLevels::Debug, "Font Bounds: %lf:%lf x%lf\n",
 		cr_font.light_lower_bound, cr_font.light_upper_bound, cr_font.multiplier);
 }
 
@@ -136,7 +138,7 @@ static void dsda_LoadCRLump()
 		if(sscanf(line, "%d %i %i %i %i %i %i", &i, &r1, &g1, &b1, &r2, &g2, &b2) != 7)
 			I_Error("DSDACR lump has unknown format!");
 
-		if(i < 1 || i >= CR_HUD_LIMIT)
+		if(i < 1 || i >= std::to_underlying(ColorRange::HudLimit))
 			I_Error("DSDACR index %d is out of bounds!", i);
 
 		if(r1 < 0 || g1 < 0 || b1 < 0 || r2 < 0 || g2 < 0 || b2 < 0 ||
@@ -158,18 +160,18 @@ static void dsda_LoadCRLump()
 typedef struct
 {
 	const char* name;
-	int fallback;
+	ColorRange fallback;
 } blood_load_t;
 
-static blood_load_t blood_data[CR_LIMIT - CR_BLOOD] = {
-	{"CRGRAY", CR_GRAY},
-	{"CRGREEN", CR_GREEN},
-	{"CRBLUE2", CR_BLUE},
-	{"CRYELLOW", CR_YELLOW},
-	{"CRBLACK", CR_BLACK},
-	{"CRPURPLE", CR_PURPLE},
-	{"CRWHITE", CR_WHITE},
-	{"CRORANGE", CR_ORANGE},
+static blood_load_t blood_data[std::to_underlying(ColorRange::Limit) - std::to_underlying(ColorRange::Blood)] = {
+	{"CRGRAY", ColorRange::Gray},
+	{"CRGREEN", ColorRange::Green},
+	{"CRBLUE2", ColorRange::Blue},
+	{"CRYELLOW", ColorRange::Yellow},
+	{"CRBLACK", ColorRange::Black},
+	{"CRPURPLE", ColorRange::Purple},
+	{"CRWHITE", ColorRange::White},
+	{"CRORANGE", ColorRange::Orange},
 };
 
 static void dsda_LoadCRLumps(byte* buffer)
@@ -177,9 +179,9 @@ static void dsda_LoadCRLumps(byte* buffer)
 	int i;
 	byte* blood_buffer;
 
-	blood_buffer = buffer + CR_BLOOD * 256;
+	blood_buffer = buffer + std::to_underlying(ColorRange::Blood) * 256;
 
-	for(i = 0; i < CR_LIMIT - CR_BLOOD; ++i)
+	for(i = 0; i < std::to_underlying(ColorRange::Limit) - std::to_underlying(ColorRange::Blood); ++i)
 	{
 		int lump;
 
@@ -187,7 +189,7 @@ static void dsda_LoadCRLumps(byte* buffer)
 		if(lump != LUMP_NOT_FOUND && W_LumpLength(lump) == 256)
 			memcpy(blood_buffer + i * 256, W_LumpByNum(lump), 256);
 		else
-			memcpy(blood_buffer + i * 256, buffer + blood_data[i].fallback * 256, 256);
+			memcpy(blood_buffer + i * 256, buffer + std::to_underlying(blood_data[i].fallback) * 256, 256);
 	}
 }
 
@@ -231,7 +233,7 @@ byte* dsda_GenerateCRTable()
 
 	playpal = static_cast<const byte *>(W_LumpByName("PLAYPAL"));
 
-	buffer = static_cast<byte *>(Z_Malloc(256 * CR_LIMIT));
+	buffer = static_cast<byte *>(Z_Malloc(256 * std::to_underlying(ColorRange::Limit)));
 
 	dsda_CalculateFontBounds(playpal);
 
@@ -253,7 +255,7 @@ byte* dsda_GenerateCRTable()
 
 		for(dark_i = 0; dark_i < 2; ++dark_i)
 		{
-			for(cr_i = 0; cr_i < CR_HUD_LIMIT; ++cr_i)
+			for(cr_i = 0; cr_i < std::to_underlying(ColorRange::HudLimit); ++cr_i)
 			{
 				int target_r, target_g, target_b;
 				int best_i = 0;
@@ -305,20 +307,20 @@ byte* dsda_GenerateCRTable()
 					}
 				}
 
-				buffer[(dark_i ? CR_DARKEN * 256 : 0) + cr_i * 256 + orig_i] = best_i;
+				buffer[(dark_i ? std::to_underlying(ColorRange::Darken) * 256 : 0) + cr_i * 256 + orig_i] = best_i;
 			}
 		}
 
-		buffer[CR_BRIGHT * 256 + orig_i] =
+		buffer[std::to_underlying(ColorRange::Bright) * 256 + orig_i] =
 			dsda_BrightenPaletteEntry(playpal, orig_i);
 	}
 
-	for(cr_i = CR_DEFAULT + 1; cr_i < CR_HUD_LIMIT; ++cr_i)
+	for(cr_i = std::to_underlying(ColorRange::Default) + 1; cr_i < std::to_underlying(ColorRange::HudLimit); ++cr_i)
 	{
 		for(orig_i = 0; orig_i < 256; ++orig_i)
 		{
-			buffer[(CR_BRIGHT + cr_i) * 256 + orig_i] =
-				buffer[CR_BRIGHT * 256 + buffer[cr_i * 256 + orig_i]];
+			buffer[(std::to_underlying(ColorRange::Bright) + cr_i) * 256 + orig_i] =
+				buffer[std::to_underlying(ColorRange::Bright) * 256 + buffer[cr_i * 256 + orig_i]];
 		}
 	}
 

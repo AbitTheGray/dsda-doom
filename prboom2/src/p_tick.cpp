@@ -4,6 +4,8 @@
  *      Thinker, Ticker.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "p_user.hpp"
 #include "p_spec.hpp"
@@ -32,7 +34,7 @@ static dboolean newthinkerpresent;
 
 // killough 8/29/98: we maintain several separate threads, each containing
 // a special class of thinkers, to allow more efficient searches.
-thinker_t thinkerclasscap[th_all + 1];
+thinker_t thinkerclasscap[std::to_underlying(ThinkerClass::All) + 1];
 int init_thinkers_count = 0;
 
 //
@@ -43,7 +45,7 @@ void P_InitThinkers()
 {
 	int i;
 
-	for(i = 0; i < NUMTHCLASS; i++) // killough 8/29/98: initialize threaded lists
+	for(i = 0; i < std::to_underlying(ThinkerClass::Count); i++) // killough 8/29/98: initialize threaded lists
 		thinkerclasscap[i].cprev = thinkerclasscap[i].cnext = &thinkerclasscap[i];
 
 	thinkercap.prev = thinkercap.next = &thinkercap;
@@ -63,17 +65,17 @@ void P_UpdateThinker(thinker_t* thinker)
 	thinker_t* th;
 	// find the class the thinker belongs to
 
-	int class_ =
+	ThinkerClass class_ =
 		thinker->function == reinterpret_cast<think_t>(P_RemoveThinkerDelayed)
-		? th_delete
+		? ThinkerClass::Delete
 		: thinker->function == reinterpret_cast<think_t>(P_MobjThinker) &&
 		((mobj_t*)thinker)->health > 0 &&
 		(((mobj_t*)thinker)->flags & MF_COUNTKILL ||
-			((mobj_t*)thinker)->type == MT_SKULL)
+			((mobj_t*)thinker)->type == MobjType::Skull)
 		? ((mobj_t*)thinker)->flags & MF_FRIEND
-		? th_friends
-		: th_enemies
-		: th_misc;
+		? ThinkerClass::Friends
+		: ThinkerClass::Enemies
+		: ThinkerClass::Misc;
 
 	{
 		/* Remove from current thread, if in one */
@@ -82,7 +84,7 @@ void P_UpdateThinker(thinker_t* thinker)
 	}
 
 	// Add to appropriate thread
-	th = &thinkerclasscap[class_];
+	th = &thinkerclasscap[std::to_underlying(class_)];
 	th->cprev->cnext = thinker;
 	thinker->cnext = th;
 	thinker->cprev = th->cprev;
@@ -174,11 +176,11 @@ void P_RemoveThinker(thinker_t* thinker)
 /* cph 2002/01/13 - iterator for thinker list
  * WARNING: Do not modify thinkers between calls to this functin
  */
-thinker_t* P_NextThinker(thinker_t* th, th_class cl)
+thinker_t* P_NextThinker(thinker_t* th, ThinkerClass cl)
 {
-	thinker_t* top = &thinkerclasscap[cl];
+	thinker_t* top = &thinkerclasscap[std::to_underlying(cl)];
 	if(!th) th = top;
-	th = cl == th_all ? th->next : th->cnext;
+	th = cl == ThinkerClass::All ? th->next : th->cnext;
 	return th == top ? nullptr : th;
 }
 
@@ -259,7 +261,7 @@ static void P_FrozenTicker()
 
 	P_MapStart();
 
-	if(gamestate == GS_LEVEL)
+	if(gamestate == GameState::Level)
 	{
 		thinker_t* th;
 		mobj_t* mo;
@@ -324,7 +326,7 @@ void P_Ticker()
 		P_MapStart();
 
 		// not if this is an intermission screen
-		if(gamestate == GS_LEVEL)
+		if(gamestate == GameState::Level)
 			for(i = 0; i < g_maxplayers; i++)
 				if(playeringame[i])
 					P_PlayerThink(&players[i]);

@@ -4,6 +4,8 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -32,7 +34,7 @@ musinfo_t musinfo;
 //
 void S_ParseMusInfo(const char* mapid)
 {
-	if(gamemode != shareware && W_LumpNameExists("MUSINFO"))
+	if(gamemode != GameMode::Shareware && W_LumpNameExists("MUSINFO"))
 	{
 		int num, lumpnum;
 		int inMap = false;
@@ -81,13 +83,13 @@ void S_ParseMusInfo(const char* mapid)
 						}
 						else
 						{
-							lprintf(LO_ERROR, "S_ParseMusInfo: Unknown MUS lump %s", sc_String);
+							lprintf(OutputLevels::Error, "S_ParseMusInfo: Unknown MUS lump %s", sc_String);
 						}
 					}
 				}
 				else
 				{
-					lprintf(LO_ERROR, "S_ParseMusInfo: Number not in range 0 to %d", MAX_MUS_ENTRIES - 1);
+					lprintf(OutputLevels::Error, "S_ParseMusInfo: Number not in range 0 to %d", MAX_MUS_ENTRIES - 1);
 				}
 			}
 		}
@@ -142,7 +144,7 @@ void T_MAPMusic()
 				}
 				else // missing musinfo entry -> silence
 				{
-					lprintf(LO_WARN, "T_MAPMusic: MUSINFO entry %d not defined\n", arraypt);
+					lprintf(OutputLevels::Warn, "T_MAPMusic: MUSINFO entry %d not defined\n", arraypt);
 					S_StopMusic();
 					musinfo.current_item = -1;
 				}

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "p_mobj.hpp"
 #include "r_defs.hpp"
@@ -188,7 +190,7 @@ dboolean EV_RotateZDoomPoly(line_t* line, int polyNum, int speed,
 	}
 	pe->speed = (speed * direction * (ANG90 / 64)) >> 3;
 	poly->specialdata = pe;
-	SN_StartSequence((mobj_t*)&poly->startSpot, SEQ_DOOR_STONE + static_cast<int>(poly->seqType));
+	SN_StartSequence((mobj_t*)&poly->startSpot, std::to_underlying(SoundSequence::DoorStone) + poly->seqType);
 
 	while((mirror = GetPolyobjMirror(polyNum)) != 0)
 	{
@@ -230,7 +232,7 @@ dboolean EV_RotateZDoomPoly(line_t* line, int polyNum, int speed,
 		direction = -direction;
 		pe->speed = (speed * direction * (ANG90 / 64)) >> 3;
 		polyNum = mirror;
-		SN_StartSequence((mobj_t*)&poly->startSpot, SEQ_DOOR_STONE + static_cast<int>(poly->seqType));
+		SN_StartSequence((mobj_t*)&poly->startSpot, std::to_underlying(SoundSequence::DoorStone) + poly->seqType);
 	}
 	return true;
 }
@@ -277,7 +279,7 @@ static void EV_SpawnMovePolyEvent(int polyNum, polyobj_t* poly, fixed_t speed,
 	pe->angle = an >> ANGLETOFINESHIFT;
 	pe->xSpeed = FixedMul(pe->speed, finecosine[pe->angle]);
 	pe->ySpeed = FixedMul(pe->speed, finesine[pe->angle]);
-	SN_StartSequence((mobj_t*)&poly->startSpot, SEQ_DOOR_STONE + static_cast<int>(poly->seqType));
+	SN_StartSequence((mobj_t*)&poly->startSpot, std::to_underlying(SoundSequence::DoorStone) + poly->seqType);
 
 	while((mirror = GetPolyobjMirror(polyNum)) != 0)
 	{
@@ -299,7 +301,7 @@ static void EV_SpawnMovePolyEvent(int polyNum, polyobj_t* poly, fixed_t speed,
 		pe->xSpeed = FixedMul(pe->speed, finecosine[pe->angle]);
 		pe->ySpeed = FixedMul(pe->speed, finesine[pe->angle]);
 		polyNum = mirror;
-		SN_StartSequence((mobj_t*)&poly->startSpot, SEQ_DOOR_STONE + static_cast<int>(poly->seqType));
+		SN_StartSequence((mobj_t*)&poly->startSpot, std::to_underlying(SoundSequence::DoorStone) + poly->seqType);
 	}
 }
 
@@ -383,14 +385,14 @@ void T_PolyDoor(polydoor_t* pd)
 		if(!--pd->tics)
 		{
 			poly = GetPolyobj(pd->polyobj);
-			SN_StartSequence((mobj_t*)&poly->startSpot, SEQ_DOOR_STONE +
+			SN_StartSequence((mobj_t*)&poly->startSpot, std::to_underlying(SoundSequence::DoorStone) +
 				static_cast<int>(poly->seqType));
 		}
 		return;
 	}
 	switch(pd->type)
 	{
-		case PODOOR_SLIDE:
+		case PolyDoorType::Slide:
 			if(PO_MovePolyobj(pd->polyobj, pd->xSpeed, pd->ySpeed))
 			{
 				absSpeed = abs(pd->speed);
@@ -438,11 +440,11 @@ void T_PolyDoor(polydoor_t* pd)
 					pd->ySpeed = -pd->ySpeed;
 					pd->close = false;
 					SN_StartSequence((mobj_t*)&poly->startSpot,
-						SEQ_DOOR_STONE + static_cast<int>(poly->seqType));
+						std::to_underlying(SoundSequence::DoorStone) + poly->seqType);
 				}
 			}
 			break;
-		case PODOOR_SWING:
+		case PolyDoorType::Swing:
 			if(PO_RotatePolyobj(pd->polyobj, pd->speed))
 			{
 				absSpeed = abs(pd->speed);
@@ -489,7 +491,7 @@ void T_PolyDoor(polydoor_t* pd)
 					pd->speed = -pd->speed;
 					pd->close = false;
 					SN_StartSequence((mobj_t*)&poly->startSpot,
-						SEQ_DOOR_STONE + static_cast<int>(poly->seqType));
+						std::to_underlying(SoundSequence::DoorStone) + poly->seqType);
 				}
 			}
 			break;
@@ -500,7 +502,7 @@ void T_PolyDoor(polydoor_t* pd)
 
 // TODO: Split into 2 functions with accurate variable names
 dboolean EV_OpenZDoomPolyDoor(line_t* line, int polyNum, int speed,
-	int angle, int distance, int delay, podoortype_t type)
+	int angle, int distance, int delay, PolyDoorType type)
 {
 	int mirror;
 	polydoor_t* pd;
@@ -526,7 +528,7 @@ dboolean EV_OpenZDoomPolyDoor(line_t* line, int polyNum, int speed,
 	pd->thinker.function = reinterpret_cast<think_t>(T_PolyDoor);
 	pd->type = type;
 	pd->polyobj = polyNum;
-	if(type == PODOOR_SLIDE)
+	if(type == PolyDoorType::Slide)
 	{
 		pd->waitTics = delay;
 		pd->speed = speed * (FRACUNIT / 8);
@@ -536,16 +538,16 @@ dboolean EV_OpenZDoomPolyDoor(line_t* line, int polyNum, int speed,
 		pd->direction = an >> ANGLETOFINESHIFT;
 		pd->xSpeed = FixedMul(pd->speed, finecosine[pd->direction]);
 		pd->ySpeed = FixedMul(pd->speed, finesine[pd->direction]);
-		SN_StartSequence((mobj_t*)&poly->startSpot, SEQ_DOOR_STONE + static_cast<int>(poly->seqType));
+		SN_StartSequence((mobj_t*)&poly->startSpot, std::to_underlying(SoundSequence::DoorStone) + poly->seqType);
 	}
-	else if(type == PODOOR_SWING)
+	else if(type == PolyDoorType::Swing)
 	{
 		pd->waitTics = distance;
 		pd->direction = 1; // ADD:  PODOOR_SWINGL, PODOOR_SWINGR
 		pd->speed = (speed * pd->direction * (ANG90 / 64)) >> 3;
 		pd->totalDist = angle * (ANG90 / 64);
 		pd->dist = pd->totalDist;
-		SN_StartSequence((mobj_t*)&poly->startSpot, SEQ_DOOR_STONE + static_cast<int>(poly->seqType));
+		SN_StartSequence((mobj_t*)&poly->startSpot, std::to_underlying(SoundSequence::DoorStone) + poly->seqType);
 	}
 
 	poly->specialdata = pd;
@@ -565,7 +567,7 @@ dboolean EV_OpenZDoomPolyDoor(line_t* line, int polyNum, int speed,
 		pd->polyobj = mirror;
 		pd->type = type;
 		poly->specialdata = pd;
-		if(type == PODOOR_SLIDE)
+		if(type == PolyDoorType::Slide)
 		{
 			pd->waitTics = delay;
 			pd->speed = speed * (FRACUNIT / 8);
@@ -575,23 +577,23 @@ dboolean EV_OpenZDoomPolyDoor(line_t* line, int polyNum, int speed,
 			pd->direction = an >> ANGLETOFINESHIFT;
 			pd->xSpeed = FixedMul(pd->speed, finecosine[pd->direction]);
 			pd->ySpeed = FixedMul(pd->speed, finesine[pd->direction]);
-			SN_StartSequence((mobj_t*)&poly->startSpot, SEQ_DOOR_STONE + static_cast<int>(poly->seqType));
+			SN_StartSequence((mobj_t*)&poly->startSpot, std::to_underlying(SoundSequence::DoorStone) + poly->seqType);
 		}
-		else if(type == PODOOR_SWING)
+		else if(type == PolyDoorType::Swing)
 		{
 			pd->waitTics = distance;
 			pd->direction = -1; // ADD:  same as above
 			pd->speed = (speed * pd->direction * (ANG90 / 64)) >> 3;
 			pd->totalDist = angle * (ANG90 / 64);
 			pd->dist = pd->totalDist;
-			SN_StartSequence((mobj_t*)&poly->startSpot, SEQ_DOOR_STONE + static_cast<int>(poly->seqType));
+			SN_StartSequence((mobj_t*)&poly->startSpot, std::to_underlying(SoundSequence::DoorStone) + poly->seqType);
 		}
 		polyNum = mirror;
 	}
 	return true;
 }
 
-dboolean EV_OpenPolyDoor(line_t* line, byte* args, podoortype_t type)
+dboolean EV_OpenPolyDoor(line_t* line, byte* args, PolyDoorType type)
 {
 	return EV_OpenZDoomPolyDoor(line, args[0], args[1], args[2], args[3], args[4], type);
 }
@@ -708,19 +710,19 @@ static void UpdateSegBBox(seg_t* seg, polyobj_t* po)
 	{
 		int i;
 
-		line->bbox[BOXRIGHT] = line->bbox[BOXLEFT] = seg->v1->x;
-		line->bbox[BOXTOP] = line->bbox[BOXBOTTOM] = seg->v1->y;
+		line->bbox[std::to_underlying(BoxEdge::Right)] = line->bbox[std::to_underlying(BoxEdge::Left)] = seg->v1->x;
+		line->bbox[std::to_underlying(BoxEdge::Top)] = line->bbox[std::to_underlying(BoxEdge::Bottom)] = seg->v1->y;
 
 		for(i = 0; i < po->numsegs; ++i)
 		{
 			seg = po->segs[i];
 			if(seg->linedef == line)
 			{
-				ExpandBoxByVertex(seg->v1, &line->bbox[BOXLEFT], &line->bbox[BOXRIGHT],
-					&line->bbox[BOXTOP], &line->bbox[BOXBOTTOM]);
+				ExpandBoxByVertex(seg->v1, &line->bbox[std::to_underlying(BoxEdge::Left)], &line->bbox[std::to_underlying(BoxEdge::Right)],
+					&line->bbox[std::to_underlying(BoxEdge::Top)], &line->bbox[std::to_underlying(BoxEdge::Bottom)]);
 
-				ExpandBoxByVertex(seg->v2, &line->bbox[BOXLEFT], &line->bbox[BOXRIGHT],
-					&line->bbox[BOXTOP], &line->bbox[BOXBOTTOM]);
+				ExpandBoxByVertex(seg->v2, &line->bbox[std::to_underlying(BoxEdge::Left)], &line->bbox[std::to_underlying(BoxEdge::Right)],
+					&line->bbox[std::to_underlying(BoxEdge::Top)], &line->bbox[std::to_underlying(BoxEdge::Bottom)]);
 			}
 		}
 	}
@@ -728,23 +730,23 @@ static void UpdateSegBBox(seg_t* seg, polyobj_t* po)
 	{
 		if(seg->v1->x < seg->v2->x)
 		{
-			line->bbox[BOXLEFT] = seg->v1->x;
-			line->bbox[BOXRIGHT] = seg->v2->x;
+			line->bbox[std::to_underlying(BoxEdge::Left)] = seg->v1->x;
+			line->bbox[std::to_underlying(BoxEdge::Right)] = seg->v2->x;
 		}
 		else
 		{
-			line->bbox[BOXLEFT] = seg->v2->x;
-			line->bbox[BOXRIGHT] = seg->v1->x;
+			line->bbox[std::to_underlying(BoxEdge::Left)] = seg->v2->x;
+			line->bbox[std::to_underlying(BoxEdge::Right)] = seg->v1->x;
 		}
 		if(seg->v1->y < seg->v2->y)
 		{
-			line->bbox[BOXBOTTOM] = seg->v1->y;
-			line->bbox[BOXTOP] = seg->v2->y;
+			line->bbox[std::to_underlying(BoxEdge::Bottom)] = seg->v1->y;
+			line->bbox[std::to_underlying(BoxEdge::Top)] = seg->v2->y;
 		}
 		else
 		{
-			line->bbox[BOXBOTTOM] = seg->v2->y;
-			line->bbox[BOXTOP] = seg->v1->y;
+			line->bbox[std::to_underlying(BoxEdge::Bottom)] = seg->v2->y;
+			line->bbox[std::to_underlying(BoxEdge::Top)] = seg->v1->y;
 		}
 	}
 
@@ -753,21 +755,21 @@ static void UpdateSegBBox(seg_t* seg, polyobj_t* po)
 	line->dy = line->v2->y - line->v1->y;
 	if(!line->dx)
 	{
-		line->slopetype = ST_VERTICAL;
+		line->slopetype = SlopeType::Vertical;
 	}
 	else if(!line->dy)
 	{
-		line->slopetype = ST_HORIZONTAL;
+		line->slopetype = SlopeType::Horizontal;
 	}
 	else
 	{
 		if(FixedDiv(line->dy, line->dx) > 0)
 		{
-			line->slopetype = ST_POSITIVE;
+			line->slopetype = SlopeType::Positive;
 		}
 		else
 		{
-			line->slopetype = ST_NEGATIVE;
+			line->slopetype = SlopeType::Negative;
 		}
 	}
 }
@@ -797,10 +799,10 @@ dboolean PO_MovePolyobj(int num, int x, int y)
 	{
 		if((*segList)->linedef->validcount != validcount)
 		{
-			(*segList)->linedef->bbox[BOXTOP] += y;
-			(*segList)->linedef->bbox[BOXBOTTOM] += y;
-			(*segList)->linedef->bbox[BOXLEFT] += x;
-			(*segList)->linedef->bbox[BOXRIGHT] += x;
+			(*segList)->linedef->bbox[std::to_underlying(BoxEdge::Top)] += y;
+			(*segList)->linedef->bbox[std::to_underlying(BoxEdge::Bottom)] += y;
+			(*segList)->linedef->bbox[std::to_underlying(BoxEdge::Left)] += x;
+			(*segList)->linedef->bbox[std::to_underlying(BoxEdge::Right)] += x;
 			(*segList)->linedef->validcount = validcount;
 		}
 		for(veryTempSeg = po->segs; veryTempSeg != segList; veryTempSeg++)
@@ -836,10 +838,10 @@ dboolean PO_MovePolyobj(int num, int x, int y)
 		{
 			if((*segList)->linedef->validcount != validcount)
 			{
-				(*segList)->linedef->bbox[BOXTOP] -= y;
-				(*segList)->linedef->bbox[BOXBOTTOM] -= y;
-				(*segList)->linedef->bbox[BOXLEFT] -= x;
-				(*segList)->linedef->bbox[BOXRIGHT] -= x;
+				(*segList)->linedef->bbox[std::to_underlying(BoxEdge::Top)] -= y;
+				(*segList)->linedef->bbox[std::to_underlying(BoxEdge::Bottom)] -= y;
+				(*segList)->linedef->bbox[std::to_underlying(BoxEdge::Left)] -= x;
+				(*segList)->linedef->bbox[std::to_underlying(BoxEdge::Right)] -= x;
 				(*segList)->linedef->validcount = validcount;
 			}
 			for(veryTempSeg = po->segs; veryTempSeg != segList;
@@ -972,10 +974,10 @@ extern "C" void UnLinkPolyobj(polyobj_t* po)
 	int index;
 
 	// remove the polyobj from each blockmap section
-	for(j = po->bbox[BOXBOTTOM]; j <= po->bbox[BOXTOP]; j++)
+	for(j = po->bbox[std::to_underlying(BoxEdge::Bottom)]; j <= po->bbox[std::to_underlying(BoxEdge::Top)]; j++)
 	{
 		index = j * bmapwidth;
-		for(i = po->bbox[BOXLEFT]; i <= po->bbox[BOXRIGHT]; i++)
+		for(i = po->bbox[std::to_underlying(BoxEdge::Left)]; i <= po->bbox[std::to_underlying(BoxEdge::Right)]; i++)
 		{
 			if(i >= 0 && i < bmapwidth && j >= 0 && j < bmapheight)
 			{
@@ -1028,15 +1030,15 @@ extern "C" void LinkPolyobj(polyobj_t* po)
 			bottomY = (*tempSeg)->v1->y;
 		}
 	}
-	po->bbox[BOXRIGHT] = (rightX - bmaporgx) >> MAPBLOCKSHIFT;
-	po->bbox[BOXLEFT] = (leftX - bmaporgx) >> MAPBLOCKSHIFT;
-	po->bbox[BOXTOP] = (topY - bmaporgy) >> MAPBLOCKSHIFT;
-	po->bbox[BOXBOTTOM] = (bottomY - bmaporgy) >> MAPBLOCKSHIFT;
+	po->bbox[std::to_underlying(BoxEdge::Right)] = (rightX - bmaporgx) >> MAPBLOCKSHIFT;
+	po->bbox[std::to_underlying(BoxEdge::Left)] = (leftX - bmaporgx) >> MAPBLOCKSHIFT;
+	po->bbox[std::to_underlying(BoxEdge::Top)] = (topY - bmaporgy) >> MAPBLOCKSHIFT;
+	po->bbox[std::to_underlying(BoxEdge::Bottom)] = (bottomY - bmaporgy) >> MAPBLOCKSHIFT;
 	// add the polyobj to each blockmap section
-	for(j = po->bbox[BOXBOTTOM] * bmapwidth;
-		j <= po->bbox[BOXTOP] * bmapwidth; j += bmapwidth)
+	for(j = po->bbox[std::to_underlying(BoxEdge::Bottom)] * bmapwidth;
+		j <= po->bbox[std::to_underlying(BoxEdge::Top)] * bmapwidth; j += bmapwidth)
 	{
-		for(i = po->bbox[BOXLEFT]; i <= po->bbox[BOXRIGHT]; i++)
+		for(i = po->bbox[std::to_underlying(BoxEdge::Left)]; i <= po->bbox[std::to_underlying(BoxEdge::Right)]; i++)
 		{
 			if(i >= 0 && i < bmapwidth && j >= 0
 				&& j < bmapheight * bmapwidth)
@@ -1089,10 +1091,10 @@ static dboolean CheckMobjBlocking(seg_t* seg, polyobj_t* po)
 
 	ld = seg->linedef;
 
-	top = (ld->bbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
-	bottom = (ld->bbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
-	left = (ld->bbox[BOXLEFT] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
-	right = (ld->bbox[BOXRIGHT] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
+	top = (ld->bbox[std::to_underlying(BoxEdge::Top)] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
+	bottom = (ld->bbox[std::to_underlying(BoxEdge::Bottom)] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
+	left = (ld->bbox[std::to_underlying(BoxEdge::Left)] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
+	right = (ld->bbox[std::to_underlying(BoxEdge::Right)] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
 
 	blocked = false;
 
@@ -1113,15 +1115,15 @@ static dboolean CheckMobjBlocking(seg_t* seg, polyobj_t* po)
 			{
 				if(mobj->flags & MF_SOLID || mobj->player)
 				{
-					tmbbox[BOXTOP] = mobj->y + mobj->radius;
-					tmbbox[BOXBOTTOM] = mobj->y - mobj->radius;
-					tmbbox[BOXLEFT] = mobj->x - mobj->radius;
-					tmbbox[BOXRIGHT] = mobj->x + mobj->radius;
+					tmbbox[std::to_underlying(BoxEdge::Top)] = mobj->y + mobj->radius;
+					tmbbox[std::to_underlying(BoxEdge::Bottom)] = mobj->y - mobj->radius;
+					tmbbox[std::to_underlying(BoxEdge::Left)] = mobj->x - mobj->radius;
+					tmbbox[std::to_underlying(BoxEdge::Right)] = mobj->x + mobj->radius;
 
-					if(tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT]
-						|| tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT]
-						|| tmbbox[BOXTOP] <= ld->bbox[BOXBOTTOM]
-						|| tmbbox[BOXBOTTOM] >= ld->bbox[BOXTOP])
+					if(tmbbox[std::to_underlying(BoxEdge::Right)] <= ld->bbox[std::to_underlying(BoxEdge::Left)]
+						|| tmbbox[std::to_underlying(BoxEdge::Left)] >= ld->bbox[std::to_underlying(BoxEdge::Right)]
+						|| tmbbox[std::to_underlying(BoxEdge::Top)] <= ld->bbox[std::to_underlying(BoxEdge::Bottom)]
+						|| tmbbox[std::to_underlying(BoxEdge::Bottom)] >= ld->bbox[std::to_underlying(BoxEdge::Top)])
 					{
 						continue;
 					}
@@ -1250,7 +1252,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 			polyobjs[index].tag = tag;
 			polyobjs[index].seqType = segs[i].linedef->special_args[2];
 			if(polyobjs[index].seqType < 0
-				|| polyobjs[index].seqType >= SEQTYPE_NUMSEQ)
+				|| polyobjs[index].seqType >= std::to_underlying(SeqType::Numseq))
 			{
 				polyobjs[index].seqType = 0;
 			}
@@ -1396,10 +1398,10 @@ static void TranslateToStartSpot(int tag, int originX, int originY)
 	{
 		if((*tempSeg)->linedef->validcount != validcount)
 		{
-			(*tempSeg)->linedef->bbox[BOXTOP] -= deltaY;
-			(*tempSeg)->linedef->bbox[BOXBOTTOM] -= deltaY;
-			(*tempSeg)->linedef->bbox[BOXLEFT] -= deltaX;
-			(*tempSeg)->linedef->bbox[BOXRIGHT] -= deltaX;
+			(*tempSeg)->linedef->bbox[std::to_underlying(BoxEdge::Top)] -= deltaY;
+			(*tempSeg)->linedef->bbox[std::to_underlying(BoxEdge::Bottom)] -= deltaY;
+			(*tempSeg)->linedef->bbox[std::to_underlying(BoxEdge::Left)] -= deltaX;
+			(*tempSeg)->linedef->bbox[std::to_underlying(BoxEdge::Right)] -= deltaX;
 			(*tempSeg)->linedef->validcount = validcount;
 		}
 		for(veryTempSeg = po->segs; veryTempSeg != tempSeg; veryTempSeg++)

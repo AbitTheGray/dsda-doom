@@ -15,12 +15,12 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include <stdint.h>
 
 static const uint16_t logsin_wf[8][1024] = {
 	{

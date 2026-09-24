@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA HUD Component Base
 
+#include <utility>
+
 #include <math.h>
 
 #include "base.hpp"
@@ -11,16 +13,16 @@ static char digit_lump[9];
 static const char* digit_lump_format;
 
 extern "C" int dsda_ExHudVerticalOffset();
-int dsda_HudComponentY(int y_offset, int vpt, double ratio)
+int dsda_HudComponentY(int y_offset, PatchTranslation vpt, double ratio)
 {
 
 	int y = 0;
-	int vpt_align;
+	PatchTranslation vpt_align;
 
 	if(ratio)
 		y_offset *= ratio;
 
-	vpt_align = vpt & VPT_ALIGN_MASK;
+	vpt_align = PatchAlignment(vpt);
 	if(BOTTOM_ALIGNMENT(vpt_align))
 	{
 		y = 200;
@@ -32,7 +34,7 @@ int dsda_HudComponentY(int y_offset, int vpt, double ratio)
 	return y + y_offset;
 }
 
-void dsda_InitTextHC(dsda_text_t* component, int x_offset, int y_offset, int vpt)
+void dsda_InitTextHC(dsda_text_t* component, int x_offset, int y_offset, PatchTranslation vpt)
 {
 	static double ratio;
 	int x, y;
@@ -45,10 +47,10 @@ void dsda_InitTextHC(dsda_text_t* component, int x_offset, int y_offset, int vpt
 	x = x_offset;
 	y = dsda_HudComponentY(y_offset, vpt, ratio);
 
-	HUlib_initTextLine(&component->text, x, y, &exhud_font, CR_GRAY, (enum patch_translation_e)vpt);
+	HUlib_initTextLine(&component->text, x, y, &exhud_font, ColorRange::Gray, (PatchTranslation)vpt);
 }
 
-void dsda_InitBlockyHC(dsda_text_t* component, int x_offset, int y_offset, int vpt)
+void dsda_InitBlockyHC(dsda_text_t* component, int x_offset, int y_offset, PatchTranslation vpt)
 {
 	static double ratio;
 	int x, y;
@@ -61,10 +63,10 @@ void dsda_InitBlockyHC(dsda_text_t* component, int x_offset, int y_offset, int v
 	x = x_offset;
 	y = dsda_HudComponentY(y_offset, vpt, ratio);
 
-	HUlib_initTextLine(&component->text, x, y, &hud_font, CR_GRAY, (enum patch_translation_e)vpt);
+	HUlib_initTextLine(&component->text, x, y, &hud_font, ColorRange::Gray, (PatchTranslation)vpt);
 }
 
-void dsda_InitPatchHC(dsda_patch_component_t* component, int x_offset, int y_offset, int vpt)
+void dsda_InitPatchHC(dsda_patch_component_t* component, int x_offset, int y_offset, PatchTranslation vpt)
 {
 	int x, y;
 
@@ -83,28 +85,28 @@ void dsda_InitPatchHC(dsda_patch_component_t* component, int x_offset, int y_off
 
 int dsda_HexenArmor(player_t* player)
 {
-	int temp = pclass[player->pclass].auto_armor_save
-		+ player->armorpoints[ARMOR_ARMOR]
-		+ player->armorpoints[ARMOR_SHIELD]
-		+ player->armorpoints[ARMOR_HELMET]
-		+ player->armorpoints[ARMOR_AMULET];
+	int temp = pclass[std::to_underlying(player->pclass)].auto_armor_save
+		+ player->armorpoints[std::to_underlying(ArmorType::Armor)]
+		+ player->armorpoints[std::to_underlying(ArmorType::Shield)]
+		+ player->armorpoints[std::to_underlying(ArmorType::Helmet)]
+		+ player->armorpoints[std::to_underlying(ArmorType::Amulet)];
 	return FixedDiv(temp, 5 * FRACUNIT) >> FRACBITS;
 }
 
-static void dsda_DrawBigDigit(int x, int y, int cm, int vpt, int digit)
+static void dsda_DrawBigDigit(int x, int y, ColorRange cm, PatchTranslation vpt, int digit)
 {
 	extern int sts_colored_numbers;
 	if(digit > 9 || digit < 0)
 		return;
 
 	snprintf(digit_lump, sizeof(digit_lump), digit_lump_format, digit);
-	V_DrawNamePatch(x, y, FG, digit_lump, cm, static_cast<enum patch_translation_e>((enum patch_translation_e)(vpt | ((sts_colored_numbers ? VPT_TRANS : VPT_NONE)))));
+	V_DrawNamePatch(x, y, FG, digit_lump, cm, static_cast<PatchTranslation>((PatchTranslation)(vpt | ((sts_colored_numbers ? PatchTranslation::Trans : PatchTranslation::None)))));
 }
 
 static int digit_mod[6] = {1, 10, 100, 1000, 10000, 100000};
 static int digit_div[6] = {1, 1, 10, 100, 1000, 10000};
 
-void dsda_DrawBigNumber(int x, int y, int delta_x, int delta_y, int cm, int vpt, int count, int n)
+void dsda_DrawBigNumber(int x, int y, int delta_x, int delta_y, ColorRange cm, PatchTranslation vpt, int count, int n)
 {
 	int i;
 	int digit, any_digit;

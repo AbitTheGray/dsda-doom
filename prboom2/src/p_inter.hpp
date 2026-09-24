@@ -6,13 +6,15 @@
 
 #pragma once
 
+#include <utility>
+
+#include "d_player.hpp"
+#include "p_mobj.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_player.hpp"
-#include "p_mobj.hpp"
 
 /* Ty 03/09/98 Moved to an int in p_inter.c for deh and externalization */
 #define MAXHEALTH maxhealth
@@ -22,7 +24,7 @@ extern "C"
 /* follow a player exlusively for 3 seconds */
 #define BASETHRESHOLD   (100)
 
-dboolean P_GivePower(player_t*, int);
+dboolean P_GivePower(player_t*, PowerType);
 void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher);
 void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage);
 void P_HealMobj(mobj_t* mo, int num);
@@ -54,12 +56,12 @@ extern int maxammo[], clipammo[];
 
 #define MAXCHICKENHEALTH 30
 
-extern int GetWeaponAmmo[NUMWEAPONS];
+extern int GetWeaponAmmo[std::to_underlying(WeaponType::Count)];
 
 dboolean P_GiveBody(player_t* player, int num);
 void P_SetMessage(player_t* player, const char* message, dboolean ultmsg);
-dboolean P_GiveArtifact(player_t* player, artitype_t arti, mobj_t* mo);
-dboolean Heretic_P_GiveWeapon(player_t* player, weapontype_t weapon);
+dboolean P_GiveArtifact(player_t* player, ArtiType arti, mobj_t* mo);
+dboolean Heretic_P_GiveWeapon(player_t* player, WeaponType weapon);
 void P_SetDormantArtifact(mobj_t* arti);
 void P_HideSpecialThing(mobj_t* thing);
 dboolean P_ChickenMorphPlayer(player_t* player);
@@ -78,7 +80,7 @@ void P_FallingDamage(player_t* player);
 void P_PoisonPlayer(player_t* player, mobj_t* poisoner, int poison);
 void P_PoisonDamage(player_t* player, mobj_t* source, int damage, dboolean playPainSound);
 dboolean P_GiveMana(player_t* player, manatype_t mana, int count);
-dboolean Hexen_P_GiveArmor(player_t* player, armortype_t armortype, int amount);
+dboolean Hexen_P_GiveArmor(player_t* player, ArmorType armortype, int amount);
 dboolean P_MorphPlayer(player_t* player);
 
 #ifdef __cplusplus

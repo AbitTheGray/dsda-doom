@@ -17,7 +17,7 @@ dboolean dsda_Paused()
 
 dboolean dsda_PausedViaMenu()
 {
-	return menuactive && !netgame;
+	return menuactive != MenuActive::Inactive && !netgame;
 }
 
 dboolean dsda_PausedOutsideDemo()

@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //  DSDA MapInfo U
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "f_finale.hpp"
 #include "g_game.hpp"
@@ -75,7 +77,7 @@ int dsda_UNextMap(int* episode, int* map)
 		name = gamemapinfo->nextsecret;
 	else if(gamemapinfo->nextmap[0])
 		name = gamemapinfo->nextmap;
-	else if(gamemapinfo->flags & MapInfo_EndGameAny)
+	else if((gamemapinfo->flags & UMapinfoFlags::EndGameAny) != UMapinfoFlags{})
 	{
 		*episode = 1;
 		*map = 1;
@@ -123,9 +125,11 @@ int dsda_UShowNextLocBehaviour(int* behaviour)
 	// Heretic: "finalintermission -> endgame"
 	// Doom:    "intermission -> next map or endgame"
 
-	int intermission_end = heretic ? (gamemapinfo->flags & MapInfo_EndGameAny) : (gamemapinfo->flags & (MapInfo_EndGameAny | MapInfo_EndGameClear));
+	const UMapinfoFlags intermission_end = heretic
+		? (gamemapinfo->flags & UMapinfoFlags::EndGameAny)
+		: (gamemapinfo->flags & (UMapinfoFlags::EndGameAny | UMapinfoFlags::EndGameClear));
 
-	if(intermission_end)
+	if(intermission_end != UMapinfoFlags{})
 		*behaviour = WI_SHOW_NEXT_DONE;
 	else
 		*behaviour = WI_SHOW_NEXT_LOC | WI_SHOW_NEXT_EPISODAL;
@@ -138,7 +142,7 @@ int dsda_USkipDrawShowNextLoc(int* skip)
 	if(!gamemapinfo)
 		return false;
 
-	*skip = ((gamemapinfo->flags & MapInfo_EndGameAny) != 0);
+	*skip = (gamemapinfo->flags & UMapinfoFlags::EndGameAny) != UMapinfoFlags{};
 
 	return true;
 }
@@ -226,7 +230,7 @@ int dsda_UInterMusic(int* music_index, int* music_lump)
 	return true;
 }
 
-extern finalestage_t finalestage;
+extern FinaleScreen finalestage;
 extern int finalecount;
 extern const char* finaletext;
 extern const char* finaleflat;
@@ -235,16 +239,16 @@ extern const char* endpic;
 extern const char* endpalette;
 extern int acceleratestage;
 extern int midstage;
-extern int endgameflags;
+extern UMapinfoFlags endgameflags;
 
 int dsda_UStartFinale()
 {
 	if(!gamemapinfo)
 		return false;
 
-	if(secretexit && gamemapinfo->intertextsecret && !(gamemapinfo->flags & MapInfo_InterTextSecretClear))
+	if(secretexit && gamemapinfo->intertextsecret && (gamemapinfo->flags & UMapinfoFlags::InterTextSecretClear) == UMapinfoFlags{})
 		finaletext = gamemapinfo->intertextsecret;
-	else if(!secretexit && gamemapinfo->intertext && !(gamemapinfo->flags & MapInfo_InterTextClear))
+	else if(!secretexit && gamemapinfo->intertext && (gamemapinfo->flags & UMapinfoFlags::InterTextClear) == UMapinfoFlags{})
 		finaletext = gamemapinfo->intertext;
 
 	// this is to avoid a crash on a missing text in the last map.
@@ -254,7 +258,7 @@ int dsda_UStartFinale()
 	if(gamemapinfo->interbackdrop[0])
 	{
 		if(W_LumpNameExists(gamemapinfo->interbackdrop) &&
-			!W_LumpNameExists2(gamemapinfo->interbackdrop, ns_flats))
+			!W_LumpNameExists2(gamemapinfo->interbackdrop, LumpNamespace::Flats))
 			finalepatch = gamemapinfo->interbackdrop;
 		else
 			finaleflat = gamemapinfo->interbackdrop;
@@ -269,8 +273,8 @@ int dsda_UStartFinale()
 
 	if(gamemapinfo->endpalette[0])
 	{
-		dsda_PlayPalData(playpal_custom)->lump_name = gamemapinfo->endpalette;
-		dsda_InitPlayPal(playpal_custom);
+		dsda_PlayPalData(PlaypalIndex::Custom)->lump_name = gamemapinfo->endpalette;
+		dsda_InitPlayPal(PlaypalIndex::Custom);
 	}
 
 	return true;
@@ -293,7 +297,7 @@ int dsda_UFTicker()
 		int i;
 
 		for(i = 0; i < g_maxplayers; i++)
-			if(players[i].cmd.buttons)
+			if(players[i].cmd.buttons != static_cast<ButtonCode>(0))
 				next_level = true;
 	}
 
@@ -302,7 +306,7 @@ int dsda_UFTicker()
 		// advance animation
 		finalecount++;
 
-		if(finalestage == FINALE_STAGE_TEXT)
+		if(finalestage == FinaleScreen::Text)
 		{
 			float speed = demo_compatibility ? TEXTSPEED : Get_TextSpeed();
 
@@ -316,27 +320,27 @@ int dsda_UFTicker()
 
 	if(next_level)
 	{
-		if(!secretexit && gamemapinfo->flags & MapInfo_EndGameAny)
+		if(!secretexit && (gamemapinfo->flags & UMapinfoFlags::EndGameAny) != UMapinfoFlags{})
 		{
-			if(gamemapinfo->flags & MapInfo_EndGameCast)
+			if((gamemapinfo->flags & UMapinfoFlags::EndGameCast) != UMapinfoFlags{})
 			{
 				F_StartCast(nullptr, nullptr, true);
 				return false; // let go of finale ownership
 			}
 			else
 			{
-				if(gamemapinfo->flags & MapInfo_EndGameStandard)
+				if((gamemapinfo->flags & UMapinfoFlags::EndGameStandard) != UMapinfoFlags{})
 					return false; // let legacy code select episode ending
 
 				finalecount = 0;
-				finalestage = FINALE_STAGE_ART;
-				wipegamestate = (gamestate_t)-1; // force a wipe
-				if(gamemapinfo->flags & MapInfo_EndGameScroll)
+				finalestage = FinaleScreen::Art;
+				wipegamestate = (GameState)-1; // force a wipe
+				if((gamemapinfo->flags & UMapinfoFlags::EndGameScroll) != UMapinfoFlags{})
 					F_StartScroll(nullptr, nullptr, nullptr, true);
 			}
 		}
 		else
-			gameaction = ga_worlddone; // next level, e.g. MAP07
+			gameaction = GameAction::WorldDone; // next level, e.g. MAP07
 	}
 
 	return true; // keep finale ownership
@@ -350,19 +354,19 @@ void dsda_UFDrawer()
 
 	switch(finalestage)
 	{
-		case FINALE_STAGE_TEXT:
+		case FinaleScreen::Text:
 			if(finaletext)
 			{
 				F_TextWrite();
 			}
 			break;
-		case FINALE_STAGE_ART:
-			if(gamemapinfo->endpalette[0] && playpal_index != playpal_custom)
+		case FinaleScreen::Art:
+			if(gamemapinfo->endpalette[0] && playpal_index != PlaypalIndex::Custom)
 			{
-				V_SetPlayPal(playpal_custom);
+				V_SetPlayPal(PlaypalIndex::Custom);
 			}
 
-			if(gamemapinfo->flags & MapInfo_EndGameScroll)
+			if((gamemapinfo->flags & UMapinfoFlags::EndGameScroll) != UMapinfoFlags{})
 			{
 				F_BunnyScroll();
 			}
@@ -370,13 +374,13 @@ void dsda_UFDrawer()
 			{
 				// e6y: wide-res
 				V_ClearBorder();
-				V_DrawNamePatchFS(0, 0, 0, gamemapinfo->endpic, CR_DEFAULT, VPT_STRETCH);
+				V_DrawNamePatchFS(0, 0, 0, gamemapinfo->endpic, ColorRange::Default, PatchTranslation::Stretch);
 			}
 			break;
-		case FINALE_STAGE_CAST:
+		case FinaleScreen::Cast:
 			F_CastDrawer();
 			break;
-		case FINALE_STAGE_TITLE:
+		case FinaleScreen::Title:
 			V_DrawRawScreen("TITLEPIC"); // Palette change has ended, just show the title
 			break;
 	}
@@ -395,7 +399,7 @@ int dsda_UBossAction(mobj_t* mo)
 		return false;
 
 	// bossactions have been cleared, clear legacy as well
-	if(gamemapinfo->flags & MapInfo_BossActionClear)
+	if((gamemapinfo->flags & UMapinfoFlags::BossActionClear) != UMapinfoFlags{})
 		return true;
 
 	// umapinfo bossaction exists, but is incomplete / invalid, use legacy fallback
@@ -453,7 +457,7 @@ int dsda_UHUTitle(dsda_string_t* str)
 
 	s = (gamemapinfo->label) ? gamemapinfo->label : gamemapinfo->lumpname;
 
-	if(!(gamemapinfo->flags & MapInfo_LabelClear))
+	if((gamemapinfo->flags & UMapinfoFlags::LabelClear) == UMapinfoFlags{})
 		dsda_StringPrintF(str, "%s: %s", s, gamemapinfo->levelname);
 	else
 		dsda_StringPrintF(str, "%s", gamemapinfo->levelname);
@@ -483,8 +487,8 @@ int dsda_UPrepareIntermission(int* result)
 	if(!gamemapinfo)
 		return false;
 
-	if(gamemapinfo->flags & MapInfo_EndGameAny
-		&& gamemapinfo->flags & MapInfo_NoIntermission)
+	if((gamemapinfo->flags & UMapinfoFlags::EndGameAny) != UMapinfoFlags{}
+		&& (gamemapinfo->flags & UMapinfoFlags::NoIntermission) != UMapinfoFlags{})
 	{
 		*result = DC_VICTORY;
 
@@ -536,21 +540,21 @@ int dsda_UPrepareFinale(int* result)
 	if(!gamemapinfo)
 		return false;
 
-	if(secretexit && (gamemapinfo->intertextsecret || gamemapinfo->flags & MapInfo_InterTextSecretClear))
+	if(secretexit && (gamemapinfo->intertextsecret || (gamemapinfo->flags & UMapinfoFlags::InterTextSecretClear) != UMapinfoFlags{}))
 	{
-		*result = !(gamemapinfo->flags & MapInfo_InterTextSecretClear)
+		*result = (gamemapinfo->flags & UMapinfoFlags::InterTextSecretClear) == UMapinfoFlags{}
 			? WD_START_FINALE
 			: 0;
 		return true;
 	}
-	else if(!secretexit && (gamemapinfo->intertext || gamemapinfo->flags & MapInfo_InterTextClear))
+	else if(!secretexit && (gamemapinfo->intertext || (gamemapinfo->flags & UMapinfoFlags::InterTextClear) != UMapinfoFlags{}))
 	{
-		*result = !(gamemapinfo->flags & MapInfo_InterTextClear)
+		*result = (gamemapinfo->flags & UMapinfoFlags::InterTextClear) == UMapinfoFlags{}
 			? WD_START_FINALE
 			: 0;
 		return true;
 	}
-	else if(gamemapinfo->flags & MapInfo_EndGameAny && !secretexit)
+	else if((gamemapinfo->flags & UMapinfoFlags::EndGameAny) != UMapinfoFlags{} && !secretexit)
 	{
 		*result = WD_VICTORY;
 
@@ -564,7 +568,7 @@ void dsda_ULoadMapInfo()
 {
 	int p;
 
-	if(dsda_Flag(dsda_arg_nomapinfo) || hexen)
+	if(dsda_Flag(ArgId::Nomapinfo) || hexen)
 		return;
 
 	p = -1;

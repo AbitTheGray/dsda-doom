@@ -7,6 +7,15 @@
 
 #pragma once
 
+#include "z_zone.hpp"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <limits.h>
+#include "m_swap.hpp"
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -23,56 +32,46 @@ extern "C"
 #endif
 
 // This must come first, since it redefines malloc(), free(), etc. -- killough:
-#include "z_zone.hpp"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <limits.h>
-
-#include "m_swap.hpp"
-#include "doomtype.hpp"
 
 extern dboolean bfgedition;
 
 // Game mode handling - identify IWAD version
 //  to handle IWAD dependend animations etc.
-typedef enum
+enum struct GameMode : int32_t
 {
-	shareware,   // DOOM 1 shareware, E1, M9
-	registered,  // DOOM 1 registered, E3, M27
-	commercial,  // DOOM 2 retail, E1 M34  (DOOM 2 german edition not handled)
-	retail,      // DOOM 1 retail, E4, M36
-	indetermined // Well, no IWAD found.
-} GameMode_t;
+	Shareware,   // DOOM 1 shareware, E1, M9
+	Registered,  // DOOM 1 registered, E3, M27
+	Commercial,  // DOOM 2 retail, E1 M34  (DOOM 2 german edition not handled)
+	Retail,      // DOOM 1 retail, E4, M36
+	Indetermined // Well, no IWAD found.
+};
 
 // Mission packs - might be useful for TC stuff?
-typedef enum
+enum struct GameMission : int32_t
 {
-	doom,        // DOOM 1
-	doom2,       // DOOM 2
-	pack_tnt,    // TNT mission pack
-	pack_plut,   // Plutonia pack
-	pack_nerve,  // No Rest For The Living
-	tc_hacx,     // HACX - Twitch 'n Kill
-	tc_chex,     // Chex Quest
-	tc_chex3v,   // Chex Quest 3: Vanilla/Modding Edition
-	tc_rekkr,    // REKKR
-	tc_freedoom, // Freedoom
-	none
-} GameMission_t;
+	Doom,        // DOOM 1
+	Doom2,       // DOOM 2
+	PackTnt,    // TNT mission pack
+	PackPlut,   // Plutonia pack
+	PackNerve,  // No Rest For The Living
+	TcHacx,     // HACX - Twitch 'n Kill
+	TcChex,     // Chex Quest
+	TcChex3v,   // Chex Quest 3: Vanilla/Modding Edition
+	TcRekkr,    // REKKR
+	TcFreedoom, // Freedoom
+	None
+};
 
 extern dboolean tc_game;
 
 // Identify language to use, software localization.
-typedef enum
+enum struct Language : int32_t
 {
-	english,
-	french,
-	german,
-	unknown
-} Language_t;
+	English,
+	French,
+	German,
+	Unknown
+};
 
 //
 // For resize of screen, at start of game.
@@ -132,14 +131,14 @@ extern int SCREEN_320x200;
 // The current state of the game: whether we are playing, gazing
 // at the intermission screen, the game final animation, or a demo.
 
-typedef enum
+enum struct GameState : int32_t
 {
-	GS_DEFAULT = -1,
-	GS_LEVEL,
-	GS_INTERMISSION,
-	GS_FINALE,
-	GS_DEMOSCREEN
-} gamestate_t;
+	Default = -1,
+	Level,
+	Intermission,
+	Finale,
+	Demoscreen
+};
 
 //
 // Difficulty/skill settings/filters.
@@ -185,137 +184,137 @@ typedef enum
 // Key cards.
 //
 
-typedef enum
+enum struct Card : int32_t
 {
-	it_bluecard,
-	it_yellowcard,
-	it_redcard,
-	it_blueskull,
-	it_yellowskull,
-	it_redskull,
-	DOOM_NUMCARDS,
+	BlueCard,
+	YellowCard,
+	RedCard,
+	BlueSkull,
+	YellowSkull,
+	RedSkull,
+	DoomCount,
 
 	// heretic
-	key_blue = 0,
-	key_yellow,
-	key_green,
+	KeyBlue = 0,
+	KeyYellow,
+	KeyGreen,
 
 	// hexen
-	key_1 = 0,
-	key_2,
-	key_3,
-	key_4,
-	key_5,
-	key_6,
-	key_7,
-	key_8,
-	key_9,
-	key_a,
-	key_b,
-	NUMCARDS
-} card_t;
+	Key1 = 0,
+	Key2,
+	Key3,
+	Key4,
+	Key5,
+	Key6,
+	Key7,
+	Key8,
+	Key9,
+	KeyA,
+	KeyB,
+	Count
+};
 
 // The defined weapons, including a marker
 // indicating user has not changed weapon.
-typedef enum
+enum struct WeaponType : int32_t
 {
-	wp_fist,
-	wp_pistol,
-	wp_shotgun,
-	wp_chaingun,
-	wp_missile,
-	wp_plasma,
-	wp_bfg,
-	wp_chainsaw,
-	wp_supershotgun,
+	Fist,
+	Pistol,
+	Shotgun,
+	Chaingun,
+	Missile,
+	Plasma,
+	Bfg,
+	Chainsaw,
+	Supershotgun,
 
 	// heretic
-	wp_staff = 0,
-	wp_goldwand,
-	wp_crossbow,
-	wp_blaster,
-	wp_skullrod,
-	wp_phoenixrod,
-	wp_mace,
-	wp_gauntlets,
-	wp_beak,
+	Staff = 0,
+	GoldWand,
+	Crossbow,
+	Blaster,
+	SkullRod,
+	PhoenixRod,
+	Mace,
+	Gauntlets,
+	Beak,
 
-	NUMWEAPONS,
-	wp_nochange, // No pending weapon change.
+	Count,
+	Nochange, // No pending weapon change.
 
 	// hexen
-	wp_first = 0,
-	wp_second,
-	wp_third,
-	wp_fourth,
-	HEXEN_NUMWEAPONS
-} weapontype_t;
+	First = 0,
+	Second,
+	Third,
+	Fourth,
+	HexenCount
+};
 
 // Ammunition types defined.
-typedef enum
+enum struct AmmoType : int32_t
 {
-	am_clip,  // Pistol / chaingun ammo.
-	am_shell, // Shotgun / double barreled shotgun.
-	am_cell,  // Plasma rifle, BFG.
-	am_misl,  // Missile launcher.
-	DOOM_NUMAMMO,
+	Clip,  // Pistol / chaingun ammo.
+	Shell, // Shotgun / double barreled shotgun.
+	Cell,  // Plasma rifle, BFG.
+	Misl,  // Missile launcher.
+	DoomCount,
 
 	// heretic
-	am_goldwand = 0,
-	am_crossbow,
-	am_blaster,
-	am_skullrod,
-	am_phoenixrod,
-	am_mace,
-	HERETIC_NUMAMMO,
+	GoldWand = 0,
+	Crossbow,
+	Blaster,
+	SkullRod,
+	PhoenixRod,
+	Mace,
+	HereticCount,
 
-	NUMAMMO = HERETIC_NUMAMMO,
-	am_noammo, // fist, chainsaw, staff, gauntlets
+	Count = HereticCount,
+	NoAmmo, // fist, chainsaw, staff, gauntlets
 
 	// hexen
-	MANA_1 = 0,
-	MANA_2,
-	NUMMANA,
-	MANA_BOTH,
-	MANA_NONE = am_noammo
-} ammotype_t;
+	Mana1 = 0,
+	Mana2,
+	ManaCount,
+	ManaBoth,
+	ManaNone = NoAmmo
+};
 
 // Power up artifacts.
-typedef enum
+enum struct PowerType : int32_t
 {
-	pw_invulnerability,
-	pw_strength,
-	pw_invisibility,
-	pw_ironfeet,
-	pw_allmap,
-	pw_infrared,
+	Invulnerability,
+	Strength,
+	Invisibility,
+	IronFeet,
+	AllMap,
+	Infrared,
 
 	// heretic
-	pw_weaponlevel2,
-	pw_flight,
-	pw_shield,
-	pw_health2,
+	WeaponLevel2,
+	Flight,
+	Shield,
+	Health2,
 
 	// hexen
-	pw_speed,
-	pw_minotaur,
+	Speed,
+	Minotaur,
 
-	NUMPOWERS
-} powertype_t;
+	Count
+};
 
 // Power up durations (how many seconds till expiration).
-typedef enum
+enum struct PowerDuration : int32_t
 {
-	INVULNTICS   = (30 * TICRATE),
-	INVISTICS    = (60 * TICRATE),
-	INFRATICS    = (120 * TICRATE),
-	IRONTICS     = (60 * TICRATE),
-	WPNLEV2TICS  = (40 * TICRATE),
-	FLIGHTTICS   = (60 * TICRATE),
-	SPEEDTICS    = (45 * TICRATE),
-	MORPHTICS    = (40 * TICRATE),
-	MAULATORTICS = (25 * TICRATE)
-} powerduration_t;
+	Invulntics   = (30 * TICRATE),
+	Invistics    = (60 * TICRATE),
+	Infratics    = (120 * TICRATE),
+	Irontics     = (60 * TICRATE),
+	Wpnlev2tics  = (40 * TICRATE),
+	Flighttics   = (60 * TICRATE),
+	Speedtics    = (45 * TICRATE),
+	Morphtics    = (40 * TICRATE),
+	Maulatortics = (25 * TICRATE)
+};
 
 // DOOM keyboard definition.
 // This is the stuff configured by Setup.Exe.
@@ -419,15 +418,15 @@ extern dboolean raven;
 #define FOOTCLIPSIZE 10*FRACUNIT
 
 // Any floor type >= FLOOR_LIQUID will floorclip sprites (hexen)
-typedef enum
+enum struct FloorType : int32_t
 {
-	FLOOR_SOLID,
-	FLOOR_ICE,
-	FLOOR_LIQUID,
-	FLOOR_WATER,
-	FLOOR_LAVA,
-	FLOOR_SLUDGE
-} floortype_t;
+	Solid,
+	Ice,
+	Liquid,
+	Water,
+	Lava,
+	Sludge
+};
 
 #define USE_GWND_AMMO_1 1
 #define USE_GWND_AMMO_2 1
@@ -458,26 +457,26 @@ extern dboolean heretic;
 #define AFLAG_SUICIDE 0x40
 #define AFLAG_JUMP    0x80
 
-typedef enum
+enum struct ArmorType : int32_t
 {
-	ARMOR_ARMOR,
-	ARMOR_SHIELD,
-	ARMOR_HELMET,
-	ARMOR_AMULET,
-	NUMARMOR
-} armortype_t;
+	Armor,
+	Shield,
+	Helmet,
+	Amulet,
+	Count
+};
 
-typedef enum
+enum struct PClass : int32_t
 {
-	PCLASS_NULL,
-	PCLASS_FIGHTER,
-	PCLASS_CLERIC,
-	PCLASS_MAGE,
-	PCLASS_PIG,
-	NUMCLASSES
-} pclass_t;
+	Null,
+	Fighter,
+	Cleric,
+	Mage,
+	Pig,
+	Count
+};
 
-typedef ammotype_t manatype_t;
+typedef AmmoType manatype_t;
 
 #define MAX_MANA 200
 
@@ -485,46 +484,46 @@ typedef ammotype_t manatype_t;
 #define WPIECE2 2
 #define WPIECE3 4
 
-enum
+enum struct SoundSequence : int32_t
 {
-	SEQ_PLATFORM,
-	SEQ_PLATFORM_HEAVY, // same script as a normal platform
-	SEQ_PLATFORM_METAL,
-	SEQ_PLATFORM_CREAK, // same script as a normal platform
-	SEQ_PLATFORM_SILENCE,
-	SEQ_PLATFORM_LAVA,
-	SEQ_PLATFORM_WATER,
-	SEQ_PLATFORM_ICE,
-	SEQ_PLATFORM_EARTH,
-	SEQ_PLATFORM_METAL2,
-	SEQ_DOOR_STONE,
-	SEQ_DOOR_HEAVY,
-	SEQ_DOOR_METAL,
-	SEQ_DOOR_CREAK,
-	SEQ_DOOR_SILENCE,
-	SEQ_DOOR_LAVA,
-	SEQ_DOOR_WATER,
-	SEQ_DOOR_ICE,
-	SEQ_DOOR_EARTH,
-	SEQ_DOOR_METAL2,
-	SEQ_ESOUND_WIND,
-	SEQ_NUMSEQ
+	Platform,
+	PlatformHeavy, // same script as a normal platform
+	PlatformMetal,
+	PlatformCreak, // same script as a normal platform
+	PlatformSilence,
+	PlatformLava,
+	PlatformWater,
+	PlatformIce,
+	PlatformEarth,
+	PlatformMetal2,
+	DoorStone,
+	DoorHeavy,
+	DoorMetal,
+	DoorCreak,
+	DoorSilence,
+	DoorLava,
+	DoorWater,
+	DoorIce,
+	DoorEarth,
+	DoorMetal2,
+	EsoundWind,
+	Numseq
 };
 
-typedef enum
+enum struct SeqType : int32_t
 {
-	SEQTYPE_STONE,
-	SEQTYPE_HEAVY,
-	SEQTYPE_METAL,
-	SEQTYPE_CREAK,
-	SEQTYPE_SILENCE,
-	SEQTYPE_LAVA,
-	SEQTYPE_WATER,
-	SEQTYPE_ICE,
-	SEQTYPE_EARTH,
-	SEQTYPE_METAL2,
-	SEQTYPE_NUMSEQ
-} seqtype_t;
+	Stone,
+	Heavy,
+	Metal,
+	Creak,
+	Silence,
+	Lava,
+	Water,
+	Ice,
+	Earth,
+	Metal2,
+	Numseq
+};
 
 #define MAX_INTRMSN_MESSAGE_SIZE 1024
 

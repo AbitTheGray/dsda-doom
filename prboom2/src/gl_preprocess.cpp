@@ -913,7 +913,7 @@ static void gld_PreprocessSectors()
 		if(sectors[i].linecount < 3)
 		{
 #ifdef PRBOOM_DEBUG
-			lprintf(LO_ERROR, "sector %i is not closed! %i lines in sector\n", i, sectors[i].linecount);
+			lprintf(OutputLevels::Error, "sector %i is not closed! %i lines in sector\n", i, sectors[i].linecount);
 #endif
 			if(levelinfo) fprintf(levelinfo, "sector %i is not closed! %i lines in sector\n", i, sectors[i].linecount);
 			sectors[i].flags &= ~SECTOR_IS_CLOSED;
@@ -926,7 +926,7 @@ static void gld_PreprocessSectors()
 				if((vertexcheck[j] == 1) || (vertexcheck[j] == 2))
 				{
 #ifdef PRBOOM_DEBUG
-					lprintf(LO_ERROR, "sector %i is not closed at vertex %i ! %i lines in sector\n", i, j, sectors[i].linecount);
+					lprintf(OutputLevels::Error, "sector %i is not closed at vertex %i ! %i lines in sector\n", i, j, sectors[i].linecount);
 #endif
 					if(levelinfo) fprintf(levelinfo, "sector %i is not closed at vertex %i ! %i lines in sector\n", i, j, sectors[i].linecount);
 					sectors[i].flags &= ~SECTOR_IS_CLOSED;

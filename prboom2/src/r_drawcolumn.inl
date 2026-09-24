@@ -15,11 +15,11 @@
 #define GETCOL(frac) GETCOL_DEPTH(source[(frac)>>FRACBITS])
 
 #if (R_DRAWCOLUMN_PIPELINE & RDC_TRANSLUCENT)
-#define COLTYPE (COL_TRANS)
+#define COLTYPE (ColumnType::Trans)
 #elif (R_DRAWCOLUMN_PIPELINE & RDC_FUZZ)
-#define COLTYPE (COL_FUZZ)
+#define COLTYPE (ColumnType::Fuzz)
 #else
-#define COLTYPE (COL_OPAQUE)
+#define COLTYPE (ColumnType::Opaque)
 #endif
 
 static void R_DRAWCOLUMN_FUNCNAME(draw_column_vars_t* dcvars)
@@ -71,7 +71,7 @@ static void R_DRAWCOLUMN_FUNCNAME(draw_column_vars_t* dcvars)
 #endif
 
 #if (!(R_DRAWCOLUMN_PIPELINE & RDC_FUZZ))
-	if(dcvars->flags & DRAW_COLUMN_ISPATCH)
+	if((dcvars->flags & DrawColumnFlag::IsPatch) != DrawColumnFlag{})
 		frac = ((dcvars->yl - dcvars->dy) * fracstep) & 0xFFFF;
 	else
 		frac = dcvars->texturemid + (dcvars->yl - centery) * fracstep;

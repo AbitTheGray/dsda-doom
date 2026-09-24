@@ -6,6 +6,8 @@
  *  Handle lighting linedef types
  */
 
+#include <utility>
+
 #include "doomstat.hpp" //jff 5/18/98
 #include "doomdef.hpp"
 #include "m_random.hpp"
@@ -36,7 +38,7 @@ void T_FireFlicker(fireflicker_t* flick)
 	if(--flick->count)
 		return;
 
-	amount = (P_Random(pr_lights) & 3) * 16;
+	amount = (P_Random(RandomClass::Lights) & 3) * 16;
 
 	if(flick->sector->lightlevel - amount < flick->minlight)
 		flick->sector->lightlevel = flick->minlight;
@@ -62,12 +64,12 @@ void T_LightFlash(lightflash_t* flash)
 	if(flash->sector->lightlevel == flash->maxlight)
 	{
 		flash->sector->lightlevel = flash->minlight;
-		flash->count = (P_Random(pr_lights) & flash->mintime) + 1;
+		flash->count = (P_Random(RandomClass::Lights) & flash->mintime) + 1;
 	}
 	else
 	{
 		flash->sector->lightlevel = flash->maxlight;
-		flash->count = (P_Random(pr_lights) & flash->maxtime) + 1;
+		flash->count = (P_Random(RandomClass::Lights) & flash->maxtime) + 1;
 	}
 }
 
@@ -194,7 +196,7 @@ void P_SpawnLightFlash(sector_t* sector)
 	flash->minlight = P_FindMinSurroundingLight(sector, sector->lightlevel);
 	flash->maxtime = 64;
 	flash->mintime = 7;
-	flash->count = (P_Random(pr_lights) & flash->maxtime) + 1;
+	flash->count = (P_Random(RandomClass::Lights) & flash->maxtime) + 1;
 }
 
 //
@@ -233,7 +235,7 @@ void P_SpawnStrobeFlash
 	P_ClearNonGeneralizedSectorSpecial(sector);
 
 	if(!inSync)
-		flash->count = (P_Random(pr_lights) & 7) + 1;
+		flash->count = (P_Random(RandomClass::Lights) & 7) + 1;
 	else
 		flash->count = 1;
 }
@@ -368,7 +370,7 @@ int EV_LightTurnOn(line_t* line, int bright)
 
 		//jff 5/17/98 unless compatibility optioned
 		//then maximum near ANY tagged sector
-		if(comp[comp_model])
+		if(comp[std::to_underlying(CompOption::Model)])
 			bright = tbright;
 	}
 	return 1;
@@ -574,12 +576,12 @@ void T_ZDoom_Flicker(zdoom_flicker_t* g)
 	else if(g->sector->lightlevel == g->upper)
 	{
 		g->sector->lightlevel = g->lower;
-		g->count = (P_Random(pr_lights) & 7) + 1;
+		g->count = (P_Random(RandomClass::Lights) & 7) + 1;
 	}
 	else
 	{
 		g->sector->lightlevel = g->upper;
-		g->count = (P_Random(pr_lights) & 31) + 1;
+		g->count = (P_Random(RandomClass::Lights) & 31) + 1;
 	}
 }
 
@@ -597,7 +599,7 @@ static void P_SpawnZDoomLightFlicker(sector_t* sec, short upper, short lower)
 	sec->lightingdata = g;
 	g->upper = upper;
 	g->lower = lower;
-	g->count = (P_Random(pr_lights) & 64) + 1;
+	g->count = (P_Random(RandomClass::Lights) & 64) + 1;
 }
 
 void EV_StartLightFlickering(int tag, short upper, short lower)
@@ -641,7 +643,7 @@ static void P_SpawnZDoomLightStrobe(sector_t* sector, int upper, int lower,
 
 static void P_SpawnZDoomLightStrobeDoom(sector_t* sector, int brighttime, int darktime)
 {
-	int count = (P_Random(pr_lights) & 7) + 1;
+	int count = (P_Random(RandomClass::Lights) & 7) + 1;
 
 	P_SpawnZDoomLightStrobe(
 		sector, sector->lightlevel, P_FindMinSurroundingLight(sector, sector->lightlevel),
@@ -706,7 +708,7 @@ void T_Light(light_t* light)
 	}
 	switch(light->type)
 	{
-		case LITE_FADE:
+		case LightType::Fade:
 			light->sector->lightlevel =
 			((light->sector->lightlevel << FRACBITS) +
 				light->value2) >> FRACBITS;
@@ -724,7 +726,7 @@ void T_Light(light_t* light)
 				P_RemoveThinker(&light->thinker);
 			}
 			break;
-		case LITE_GLOW:
+		case LightType::Glow:
 			light->sector->lightlevel =
 			((light->sector->lightlevel << FRACBITS) +
 				light->tics1) >> FRACBITS;
@@ -744,19 +746,19 @@ void T_Light(light_t* light)
 				light->tics2 = 1; // reverse direction
 			}
 			break;
-		case LITE_FLICKER:
+		case LightType::Flicker:
 			if(light->sector->lightlevel == light->value1)
 			{
 				light->sector->lightlevel = light->value2;
-				light->count = (P_Random(pr_hexen) & 7) + 1;
+				light->count = (P_Random(RandomClass::Hexen) & 7) + 1;
 			}
 			else
 			{
 				light->sector->lightlevel = light->value1;
-				light->count = (P_Random(pr_hexen) & 31) + 1;
+				light->count = (P_Random(RandomClass::Hexen) & 31) + 1;
 			}
 			break;
-		case LITE_STROBE:
+		case LightType::Strobe:
 			if(light->sector->lightlevel == light->value1)
 			{
 				light->sector->lightlevel = light->value2;
@@ -773,7 +775,7 @@ void T_Light(light_t* light)
 	}
 }
 
-dboolean EV_SpawnLight(line_t* line, byte* arg, lighttype_t type)
+dboolean EV_SpawnLight(line_t* line, byte* arg, LightType type)
 {
 	light_t* light;
 	sector_t* sec;
@@ -800,21 +802,21 @@ dboolean EV_SpawnLight(line_t* line, byte* arg, lighttype_t type)
 		rtn = true;
 		switch(type)
 		{
-			case LITE_RAISEBYVALUE:
+			case LightType::RaiseByValue:
 				sec->lightlevel += arg1;
 				if(sec->lightlevel > 255)
 				{
 					sec->lightlevel = 255;
 				}
 				break;
-			case LITE_LOWERBYVALUE:
+			case LightType::LowerByValue:
 				sec->lightlevel -= arg1;
 				if(sec->lightlevel < 0)
 				{
 					sec->lightlevel = 0;
 				}
 				break;
-			case LITE_CHANGETOVALUE:
+			case LightType::ChangeToValue:
 				sec->lightlevel = arg1;
 				if(sec->lightlevel < 0)
 				{
@@ -825,7 +827,7 @@ dboolean EV_SpawnLight(line_t* line, byte* arg, lighttype_t type)
 					sec->lightlevel = 255;
 				}
 				break;
-			case LITE_FADE:
+			case LightType::Fade:
 				think = true;
 				light->value1 = arg1;                                                             // destination lightlevel
 				light->value2 = FixedDiv((arg1 - sec->lightlevel) << FRACBITS, arg2 << FRACBITS); // delta lightlevel
@@ -838,7 +840,7 @@ dboolean EV_SpawnLight(line_t* line, byte* arg, lighttype_t type)
 					light->tics2 = -1;
 				}
 				break;
-			case LITE_GLOW:
+			case LightType::Glow:
 				think = true;
 				light->value1 = arg1;                                                            // upper lightlevel
 				light->value2 = arg2;                                                            // lower lightlevel
@@ -852,14 +854,14 @@ dboolean EV_SpawnLight(line_t* line, byte* arg, lighttype_t type)
 					light->tics2 = -1;
 				}
 				break;
-			case LITE_FLICKER:
+			case LightType::Flicker:
 				think = true;
 				light->value1 = arg1; // upper lightlevel
 				light->value2 = arg2; // lower lightlevel
 				sec->lightlevel = light->value1;
-				light->count = (P_Random(pr_hexen) & 64) + 1;
+				light->count = (P_Random(RandomClass::Hexen) & 64) + 1;
 				break;
-			case LITE_STROBE:
+			case LightType::Strobe:
 				think = true;
 				light->value1 = arg1; // upper lightlevel
 				light->value2 = arg2; // lower lightlevel

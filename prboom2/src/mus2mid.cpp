@@ -7,6 +7,8 @@
 // All tabs are replaced with spaces.
 // Fixed eol style of files.
 
+#include <utility>
+
 #include <stdio.h>
 
 #include "doomtype.hpp"
@@ -21,27 +23,27 @@
 #define MUS_PERCUSSION_CHAN 15
 
 // MUS event codes
-typedef enum
+enum struct MusEvent : int32_t
 {
-	mus_releasekey       = 0x00,
-	mus_presskey         = 0x10,
-	mus_pitchwheel       = 0x20,
-	mus_systemevent      = 0x30,
-	mus_changecontroller = 0x40,
-	mus_scoreend         = 0x60
-} musevent;
+	ReleaseKey       = 0x00,
+	PressKey         = 0x10,
+	PitchWheel       = 0x20,
+	SystemEvent      = 0x30,
+	ChangeController = 0x40,
+	ScoreEnd         = 0x60
+};
 
 // MIDI event codes
-typedef enum
+enum struct MidiEvent : int32_t
 {
-	midi_releasekey        = 0x80,
-	midi_presskey          = 0x90,
-	midi_aftertouchkey     = 0xA0,
-	midi_changecontroller  = 0xB0,
-	midi_changepatch       = 0xC0,
-	midi_aftertouchchannel = 0xD0,
-	midi_pitchwheel        = 0xE0
-} midievent;
+	ReleaseKey        = 0x80,
+	PressKey          = 0x90,
+	AfterTouchKey     = 0xA0,
+	ChangeController  = 0xB0,
+	ChangePatch       = 0xC0,
+	AfterTouchChannel = 0xD0,
+	PitchWheel        = 0xE0
+};
 
 // Standard MIDI type 0 header + track header
 static const byte midiheader[] =
@@ -138,7 +140,7 @@ static dboolean WriteEndTrack(MEMFILE* midioutput)
 static dboolean WritePressKey(byte channel, byte key,
 	byte velocity, MEMFILE* midioutput)
 {
-	byte working = midi_presskey | channel;
+	byte working = std::to_underlying(MidiEvent::PressKey) | channel;
 
 	if(WriteTime(queuedtime, midioutput))
 	{
@@ -173,7 +175,7 @@ static dboolean WritePressKey(byte channel, byte key,
 static dboolean WriteReleaseKey(byte channel, byte key,
 	MEMFILE* midioutput)
 {
-	byte working = midi_releasekey | channel;
+	byte working = std::to_underlying(MidiEvent::ReleaseKey) | channel;
 
 	if(WriteTime(queuedtime, midioutput))
 	{
@@ -208,7 +210,7 @@ static dboolean WriteReleaseKey(byte channel, byte key,
 static dboolean WritePitchWheel(byte channel, short wheel,
 	MEMFILE* midioutput)
 {
-	byte working = midi_pitchwheel | channel;
+	byte working = std::to_underlying(MidiEvent::PitchWheel) | channel;
 
 	if(WriteTime(queuedtime, midioutput))
 	{
@@ -242,7 +244,7 @@ static dboolean WritePitchWheel(byte channel, short wheel,
 static dboolean WriteChangePatch(byte channel, byte patch,
 	MEMFILE* midioutput)
 {
-	byte working = midi_changepatch | channel;
+	byte working = std::to_underlying(MidiEvent::ChangePatch) | channel;
 
 	if(WriteTime(queuedtime, midioutput))
 	{
@@ -273,7 +275,7 @@ static dboolean WriteChangeController_Valued(byte channel,
 	byte value,
 	MEMFILE* midioutput)
 {
-	byte working = midi_changecontroller | channel;
+	byte working = std::to_underlying(MidiEvent::ChangeController) | channel;
 
 	if(WriteTime(queuedtime, midioutput))
 	{
@@ -429,7 +431,7 @@ dboolean mus2mid(MEMFILE* musinput, MEMFILE* midioutput)
 	// Descriptor for the current MUS event
 	byte eventdescriptor;
 	int channel; // Channel number
-	musevent event;
+	MusEvent event;
 
 
 	// Bunch of vars read from MUS lump
@@ -473,7 +475,7 @@ dboolean mus2mid(MEMFILE* musinput, MEMFILE* midioutput)
 
 	// Seek to where the data is held
 	if(mem_fseek(musinput, (long)musfileheader.scorestart,
-		MEM_SEEK_SET) != 0)
+		MemSeek::Set) != 0)
 	{
 		return true;
 	}
@@ -499,11 +501,11 @@ dboolean mus2mid(MEMFILE* musinput, MEMFILE* midioutput)
 			}
 
 			channel = GetMIDIChannel(eventdescriptor & 0x0F, midioutput);
-			event = static_cast<musevent>(eventdescriptor & 0x70);
+			event = static_cast<MusEvent>(eventdescriptor & 0x70);
 
 			switch(event)
 			{
-				case mus_releasekey:
+				case MusEvent::ReleaseKey:
 					if(mem_fread(&key, 1, 1, musinput) != 1)
 					{
 						return true;
@@ -516,7 +518,7 @@ dboolean mus2mid(MEMFILE* musinput, MEMFILE* midioutput)
 
 					break;
 
-				case mus_presskey:
+				case MusEvent::PressKey:
 					if(mem_fread(&key, 1, 1, musinput) != 1)
 					{
 						return true;
@@ -540,7 +542,7 @@ dboolean mus2mid(MEMFILE* musinput, MEMFILE* midioutput)
 
 					break;
 
-				case mus_pitchwheel:
+				case MusEvent::PitchWheel:
 					if(mem_fread(&key, 1, 1, musinput) != 1)
 					{
 						break;
@@ -552,7 +554,7 @@ dboolean mus2mid(MEMFILE* musinput, MEMFILE* midioutput)
 
 					break;
 
-				case mus_systemevent:
+				case MusEvent::SystemEvent:
 					if(mem_fread(&controllernumber, 1, 1, musinput) != 1)
 					{
 						return true;
@@ -571,7 +573,7 @@ dboolean mus2mid(MEMFILE* musinput, MEMFILE* midioutput)
 
 					break;
 
-				case mus_changecontroller:
+				case MusEvent::ChangeController:
 					if(mem_fread(&controllernumber, 1, 1, musinput) != 1)
 					{
 						return true;
@@ -608,7 +610,7 @@ dboolean mus2mid(MEMFILE* musinput, MEMFILE* midioutput)
 
 					break;
 
-				case mus_scoreend:
+				case MusEvent::ScoreEnd:
 					hitscoreend = 1;
 					break;
 
@@ -650,7 +652,7 @@ dboolean mus2mid(MEMFILE* musinput, MEMFILE* midioutput)
 	}
 
 	// Write the track size into the stream
-	if(mem_fseek(midioutput, 18, MEM_SEEK_SET))
+	if(mem_fseek(midioutput, 18, MemSeek::Set))
 	{
 		return true;
 	}

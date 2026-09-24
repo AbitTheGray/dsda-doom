@@ -6,6 +6,11 @@
 
 #pragma once
 
+#include <SDL_opengl.h>
+#include "doomtype.hpp"
+#include "v_video.hpp"
+#include "SDL.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -14,12 +19,6 @@ extern "C"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#include <SDL_opengl.h>
-
-#include "doomtype.hpp"
-#include "v_video.hpp"
-#include "SDL.h"
 
 extern SDL_Window* sdl_window;
 extern SDL_Renderer* sdl_renderer;

@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Stretch
 
+#include <utility>
+
 #include "am_map.hpp"
 #include "doomdef.hpp"
 #include "doomtype.hpp"
@@ -32,7 +34,7 @@ static cb_video_t video_full;
 static cb_video_t video_ex_text;
 
 static stretch_param_t* stretch_params;
-static stretch_param_t stretch_params_table[patch_stretch_max][VPT_ALIGN_MAX];
+static stretch_param_t stretch_params_table[std::to_underlying(PatchStretch::Max)][std::to_underlying(PatchTranslation::AlignMax)];
 
 static int ex_text_screenwidth;
 static int ex_text_screenheight;
@@ -88,8 +90,8 @@ static void GenLookup(short* lookup1, short* lookup2, int size, int max, int ste
 
 static void EvaluateExTextScale()
 {
-	ex_text_scale_x = dsda_IntConfig(dsda_config_ex_text_scale_x) / 100.0;
-	ex_text_scale_y = dsda_IntConfig(dsda_config_ex_text_ratio_y) / 100.0;
+	ex_text_scale_x = dsda_IntConfig(ConfigId::ExTextScaleX) / 100.0;
+	ex_text_scale_y = dsda_IntConfig(ConfigId::ExTextRatioY) / 100.0;
 
 	if(!ex_text_scale_x)
 		ex_text_scale_x = (double)WIDE_SCREENWIDTH / 320;
@@ -104,15 +106,15 @@ static void EvaluateExTextScale()
 	ex_text_st_scaled_height = g_st_height * ex_text_scale_y;
 }
 
-stretch_param_t* dsda_StretchParams(int flags)
+stretch_param_t* dsda_StretchParams(PatchTranslation flags)
 {
-	if(flags & VPT_EX_TEXT)
-		return &stretch_params_table[patch_stretch_ex_text][flags & VPT_ALIGN_MASK];
+	if((flags & PatchTranslation::ExText) != PatchTranslation{})
+		return &stretch_params_table[std::to_underlying(PatchStretch::ExText)][std::to_underlying(PatchAlignment(flags))];
 
-	return &stretch_params[flags & VPT_ALIGN_MASK];
+	return &stretch_params[std::to_underlying(PatchAlignment(flags))];
 }
 
-static void InitExTextParam(stretch_param_t* offsets, enum patch_translation_e flags)
+static void InitExTextParam(stretch_param_t* offsets, PatchTranslation flags)
 {
 	int offset2x, offset2y;
 
@@ -124,25 +126,25 @@ static void InitExTextParam(stretch_param_t* offsets, enum patch_translation_e f
 
 	offsets->video = &video_ex_text;
 
-	if(flags == VPT_ALIGN_LEFT || flags == VPT_ALIGN_LEFT_BOTTOM || flags == VPT_ALIGN_LEFT_TOP)
+	if(flags == PatchTranslation::AlignLeft || flags == PatchTranslation::AlignLeftBottom || flags == PatchTranslation::AlignLeftTop)
 	{
 		offsets->deltax1 = 0;
 		offsets->deltax2 = 0;
 	}
 
-	if(flags == VPT_ALIGN_RIGHT || flags == VPT_ALIGN_RIGHT_BOTTOM || flags == VPT_ALIGN_RIGHT_TOP)
+	if(flags == PatchTranslation::AlignRight || flags == PatchTranslation::AlignRightBottom || flags == PatchTranslation::AlignRightTop)
 	{
 		offsets->deltax1 = offset2x;
 		offsets->deltax2 = offset2x;
 	}
 
-	if(flags == VPT_ALIGN_BOTTOM || flags == VPT_ALIGN_LEFT_BOTTOM || flags == VPT_ALIGN_RIGHT_BOTTOM)
+	if(flags == PatchTranslation::AlignBottom || flags == PatchTranslation::AlignLeftBottom || flags == PatchTranslation::AlignRightBottom)
 		offsets->deltay1 = offset2y;
 }
 
-extern "C" void dsda_UpdateExTextOffset(enum patch_translation_e flags, int offset)
+extern "C" void dsda_UpdateExTextOffset(PatchTranslation flags, int offset)
 {
-	stretch_params_table[patch_stretch_ex_text][flags].deltay1 +=
+	stretch_params_table[std::to_underlying(PatchStretch::ExText)][std::to_underlying(flags)].deltay1 +=
 		(ST_SCALED_HEIGHT - ex_text_st_scaled_height) * offset * hud_font.line_height / g_st_height +
 		(hud_font.line_height - exhud_font.line_height) * ex_text_scale_y * (offset > 0 ? 1 : -1);
 }
@@ -151,18 +153,18 @@ extern "C" void dsda_ResetExTextOffsets()
 {
 	int k;
 
-	for(k = 0; k < VPT_ALIGN_MAX; k++)
-		InitExTextParam(&stretch_params_table[patch_stretch_ex_text][k], (enum patch_translation_e)k);
+	for(k = 0; k < std::to_underlying(PatchTranslation::AlignMax); k++)
+		InitExTextParam(&stretch_params_table[std::to_underlying(PatchStretch::ExText)][k], (PatchTranslation)k);
 }
 
-static void InitStretchParam(stretch_param_t* offsets, int stretch, enum patch_translation_e flags)
+static void InitStretchParam(stretch_param_t* offsets, PatchStretch stretch, PatchTranslation flags)
 {
 	memset(offsets, 0, sizeof(*offsets));
 
 	switch(stretch_hud(stretch))
 	{
-		case patch_stretch_not_adjusted:
-			if(flags == VPT_ALIGN_WIDE)
+		case PatchStretch::NotAdjusted:
+			if(flags == PatchTranslation::AlignWide)
 			{
 				offsets->video = &video_stretch;
 				offsets->deltax1 = (SCREENWIDTH - WIDE_SCREENWIDTH) / 2;
@@ -175,25 +177,25 @@ static void InitStretchParam(stretch_param_t* offsets, int stretch, enum patch_t
 				offsets->deltax2 = wide_offsetx;
 			}
 			break;
-		case patch_stretch_doom_format:
+		case PatchStretch::DoomFormat:
 			offsets->video = &video_stretch;
 			offsets->deltax1 = (SCREENWIDTH - WIDE_SCREENWIDTH) / 2;
 			offsets->deltax2 = (SCREENWIDTH - WIDE_SCREENWIDTH) / 2;
 			break;
-		case patch_stretch_fit_to_width:
+		case PatchStretch::FitToWidth:
 			offsets->video = &video_full;
 			offsets->deltax1 = 0;
 			offsets->deltax2 = 0;
 			break;
 	}
 
-	if(flags == VPT_ALIGN_LEFT || flags == VPT_ALIGN_LEFT_BOTTOM || flags == VPT_ALIGN_LEFT_TOP)
+	if(flags == PatchTranslation::AlignLeft || flags == PatchTranslation::AlignLeftBottom || flags == PatchTranslation::AlignLeftTop)
 	{
 		offsets->deltax1 = 0;
 		offsets->deltax2 = 0;
 	}
 
-	if(flags == VPT_ALIGN_RIGHT || flags == VPT_ALIGN_RIGHT_BOTTOM || flags == VPT_ALIGN_RIGHT_TOP)
+	if(flags == PatchTranslation::AlignRight || flags == PatchTranslation::AlignRightBottom || flags == PatchTranslation::AlignRightTop)
 	{
 		offsets->deltax1 *= 2;
 		offsets->deltax2 *= 2;
@@ -201,13 +203,13 @@ static void InitStretchParam(stretch_param_t* offsets, int stretch, enum patch_t
 
 	offsets->deltay1 = wide_offsety;
 
-	if(flags == VPT_ALIGN_BOTTOM || flags == VPT_ALIGN_LEFT_BOTTOM || flags == VPT_ALIGN_RIGHT_BOTTOM)
+	if(flags == PatchTranslation::AlignBottom || flags == PatchTranslation::AlignLeftBottom || flags == PatchTranslation::AlignRightBottom)
 		offsets->deltay1 = wide_offset2y;
 
-	if(flags == VPT_ALIGN_TOP || flags == VPT_ALIGN_LEFT_TOP || flags == VPT_ALIGN_RIGHT_TOP)
+	if(flags == PatchTranslation::AlignTop || flags == PatchTranslation::AlignLeftTop || flags == PatchTranslation::AlignRightTop)
 		offsets->deltay1 = 0;
 
-	if(flags == VPT_ALIGN_WIDE && !tallscreen)
+	if(flags == PatchTranslation::AlignWide && !tallscreen)
 		offsets->deltay1 = 0;
 }
 
@@ -217,9 +219,9 @@ void dsda_SetupStretchParams()
 
 	EvaluateExTextScale();
 
-	for(k = 0; k < VPT_ALIGN_MAX; k++)
-		for(i = 0; i < patch_stretch_max_config; i++)
-			InitStretchParam(&stretch_params_table[i][k], i, (enum patch_translation_e)k);
+	for(k = 0; k < std::to_underlying(PatchTranslation::AlignMax); k++)
+		for(i = 0; i < std::to_underlying(PatchStretch::MaxConfig); i++)
+			InitStretchParam(&stretch_params_table[i][k], static_cast<PatchStretch>(i), (PatchTranslation)k);
 
 	dsda_ResetExTextOffsets();
 
@@ -266,8 +268,8 @@ void dsda_EvaluatePatchScale()
 	int render_patches_scalex;
 	int render_patches_scaley;
 
-	render_patches_scalex = dsda_IntConfig(dsda_config_render_patches_scalex);
-	render_patches_scaley = dsda_IntConfig(dsda_config_render_patches_scaley);
+	render_patches_scalex = dsda_IntConfig(ConfigId::RenderPatchesScalex);
+	render_patches_scaley = dsda_IntConfig(ConfigId::RenderPatchesScaley);
 
 	patches_scalex = MIN(SCREENWIDTH / 320, SCREENHEIGHT / 200);
 	patches_scalex = MAX(1, patches_scalex);
@@ -283,21 +285,21 @@ void dsda_EvaluatePatchScale()
 
 	if(SCREENWIDTH < 320 || WIDE_SCREENWIDTH < 320 ||
 		SCREENHEIGHT < 200 || WIDE_SCREENHEIGHT < 200)
-		render_stretch_hud = patch_stretch_fit_to_width;
+		render_stretch_hud = std::to_underlying(PatchStretch::FitToWidth);
 
-	switch(stretch_hud(render_stretch_hud))
+	switch(stretch_hud(static_cast<PatchStretch>(render_stretch_hud)))
 	{
-		case patch_stretch_not_adjusted:
+		case PatchStretch::NotAdjusted:
 			wide_offset2x = SCREENWIDTH - patches_scalex * 320;
 			wide_offset2y = SCREENHEIGHT - patches_scaley * 200;
 			break;
-		case patch_stretch_doom_format:
+		case PatchStretch::DoomFormat:
 			ST_SCALED_HEIGHT = g_st_height * WIDE_SCREENHEIGHT / 200;
 
 			wide_offset2x = SCREENWIDTH - WIDE_SCREENWIDTH;
 			wide_offset2y = SCREENHEIGHT - WIDE_SCREENHEIGHT;
 			break;
-		case patch_stretch_fit_to_width:
+		case PatchStretch::FitToWidth:
 			ST_SCALED_HEIGHT = g_st_height * SCREENHEIGHT / 200;
 
 			wide_offset2x = 0;

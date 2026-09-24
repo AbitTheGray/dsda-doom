@@ -6,13 +6,13 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+#include "d_event.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
-#include "d_event.hpp"
 
 /* Called by main loop. */
 dboolean F_Responder(event_t* ev);
@@ -30,13 +30,13 @@ void F_StartCast(const char* background, const char* music, dboolean loop_music)
 void F_StartScroll(const char* right, const char* left, const char* music, dboolean loop_music);
 void F_StartPostFinale();
 
-typedef enum finalestage_e
+enum struct FinaleScreen : int32_t
 {
-	FINALE_STAGE_TEXT,
-	FINALE_STAGE_ART,
-	FINALE_STAGE_CAST,
-	FINALE_STAGE_TITLE
-} finalestage_t;
+	Text,
+	Art,
+	Cast,
+	Title
+};
 
 #ifdef __cplusplus
 }

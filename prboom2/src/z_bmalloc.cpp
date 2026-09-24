@@ -5,6 +5,8 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -39,14 +41,19 @@ inline static PUREFUNC int iselem(const bmalpool_t* pool, size_t size, const voi
 	return (((size_t)dif >= pool->blocks) ? -1 : dif);
 }
 
-enum { unused_block = 0, used_block = 1 };
+// the pool marks each block with one of these bytes
+enum struct BlockState : uint8_t
+{
+	Unused = 0,
+	Used   = 1
+};
 
 void* Z_BMalloc(struct block_memory_alloc_s* pzone)
 {
 	bmalpool_t** pool = (bmalpool_t**)&(pzone->firstpool);
 	while(*pool != nullptr)
 	{
-		byte* p = static_cast<byte *>(memchr((*pool)->used, unused_block, (*pool)->blocks)); // Scan for unused marker
+		byte* p = static_cast<byte *>(memchr((*pool)->used, std::to_underlying(BlockState::Unused), (*pool)->blocks)); // Scan for unused marker
 		if(p)
 		{
 			int n = p - (*pool)->used;
@@ -54,7 +61,7 @@ void* Z_BMalloc(struct block_memory_alloc_s* pzone)
 			if((n < 0) || ((size_t)n >= (*pool)->blocks))
 				I_Error("Z_BMalloc: memchr returned pointer outside of array");
 #endif
-			(*pool)->used[n] = used_block;
+			(*pool)->used[n] = std::to_underlying(BlockState::Used);
 			return getelem(*pool, pzone->size, n);
 		}
 		else
@@ -71,7 +78,7 @@ void* Z_BMalloc(struct block_memory_alloc_s* pzone)
 		newpool->nextpool = nullptr; // NULL = (void*)0 so this is redundant
 
 		// Return element 0 from this pool to satisfy the request
-		newpool->used[0] = used_block;
+		newpool->used[0] = std::to_underlying(BlockState::Used);
 		newpool->blocks = pzone->perpool;
 		return getelem(newpool, pzone->size, 0);
 	}
@@ -87,11 +94,11 @@ void Z_BFree(struct block_memory_alloc_s* pzone, void* p)
 		if(n >= 0)
 		{
 #ifdef SIMPLECHECKS
-			if((*pool)->used[n] == unused_block)
+			if((*pool)->used[n] == std::to_underlying(BlockState::Unused))
 				I_Error("Z_BFree: Refree in zone %s", pzone->desc);
 #endif
-			(*pool)->used[n] = unused_block;
-			if(memchr(((*pool)->used), used_block, (*pool)->blocks) == nullptr)
+			(*pool)->used[n] = std::to_underlying(BlockState::Unused);
+			if(memchr(((*pool)->used), std::to_underlying(BlockState::Used), (*pool)->blocks) == nullptr)
 			{
 				// Block is all unused, can be freed
 				bmalpool_t* oldpool = *pool;

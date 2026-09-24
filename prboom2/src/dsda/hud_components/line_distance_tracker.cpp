@@ -24,7 +24,7 @@ void dsda_LineDistanceTrackerHC(char* str, size_t max_size, int id)
 		str,
 		max_size,
 		"%sld %d: %.03f",
-		distance < radius ? dsda_TextColor(dsda_tc_exhud_line_close) : dsda_TextColor(dsda_tc_exhud_line_far),
+		distance < radius ? dsda_TextColor(TextColorIndex::ExhudLineClose) : dsda_TextColor(TextColorIndex::ExhudLineFar),
 		id,
 		distance
 	);

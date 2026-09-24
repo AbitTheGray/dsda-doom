@@ -5,14 +5,13 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+#include "dsda/utility.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "p_mobj.hpp"
-
-#include "dsda/utility.hpp"
 
 #define WI_SHOW_NEXT_LOC      0x01
 #define WI_SHOW_NEXT_DONE     0x02

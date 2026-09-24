@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "doomstat.hpp"
 #include "m_random.hpp"
@@ -93,25 +95,25 @@ extern "C" void A_PotteryExplode(mobj_t* actor)
 	mobj_t* mo = nullptr;
 	int i;
 
-	for(i = (P_Random(pr_hexen) & 3) + 3; i; i--)
+	for(i = (P_Random(RandomClass::Hexen) & 3) + 3; i; i--)
 	{
-		mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_POTTERYBIT1);
-		P_SetMobjState(mo, static_cast<statenum_t>(mo->info->spawnstate + (P_Random(pr_hexen) % 5)));
-		mo->momz = ((P_Random(pr_hexen) & 7) + 5) * (3 * FRACUNIT / 4);
+		mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenPotterybit1);
+		P_SetMobjState(mo, StateVariant(mo->info->spawnstate, (P_Random(RandomClass::Hexen) % 5)));
+		mo->momz = ((P_Random(RandomClass::Hexen) & 7) + 5) * (3 * FRACUNIT / 4);
 		mo->momx = P_SubRandom() << (FRACBITS - 6);
 		mo->momy = P_SubRandom() << (FRACBITS - 6);
 	}
-	S_StartMobjSound(mo, hexen_sfx_pottery_explode);
+	S_StartMobjSound(mo, SfxId::HexenPotteryExplode);
 	if(actor->special_args[0])
 	{
 		// Spawn an item
 		if(!nomonsters
-			|| !(mobjinfo[TranslateThingType[actor->special_args[0]]].
+			|| !(mobjinfo[std::to_underlying(TranslateThingType[actor->special_args[0]])].
 				flags & MF_COUNTKILL))
 		{
 			// Only spawn monsters if not -nomonsters
 			P_SpawnMobj(actor->x, actor->y, actor->z,
-				static_cast<mobjtype_t>(TranslateThingType[actor->special_args[0]]));
+				static_cast<MobjType>(TranslateThingType[actor->special_args[0]]));
 		}
 	}
 	P_RemoveMobj(actor);
@@ -119,8 +121,8 @@ extern "C" void A_PotteryExplode(mobj_t* actor)
 
 extern "C" void A_PotteryChooseBit(mobj_t* actor)
 {
-	P_SetMobjState(actor, static_cast<statenum_t>(actor->info->deathstate + (P_Random(pr_hexen) % 5) + 1));
-	actor->tics = 256 + (P_Random(pr_hexen) << 1);
+	P_SetMobjState(actor, StateVariant(actor->info->deathstate, (P_Random(RandomClass::Hexen) % 5) + 1));
+	actor->tics = 256 + (P_Random(RandomClass::Hexen) << 1);
 }
 
 extern "C" void A_PotteryCheck(mobj_t* actor)
@@ -137,7 +139,7 @@ extern "C" void A_PotteryCheck(mobj_t* actor)
 				pmo->angle)) <= ANG45))
 		{
 			// Previous state (pottery bit waiting state)
-			P_SetMobjState(actor, static_cast<statenum_t>(actor->state - &states[0] - 1));
+			P_SetMobjState(actor, static_cast<StateId>(actor->state - states - 1));
 		}
 		else
 		{
@@ -159,7 +161,7 @@ extern "C" void A_PotteryCheck(mobj_t* actor)
 					pmo->angle)) <= ANG45))
 			{
 				// Previous state (pottery bit waiting state)
-				P_SetMobjState(actor, static_cast<statenum_t>(actor->state - &states[0] - 1));
+				P_SetMobjState(actor, static_cast<StateId>(actor->state - states - 1));
 				return;
 			}
 		}
@@ -169,50 +171,50 @@ extern "C" void A_PotteryCheck(mobj_t* actor)
 void P_SpawnDirt(mobj_t* actor, fixed_t radius)
 {
 	fixed_t x, y, z;
-	int dtype = 0;
+	MobjType dtype = MobjType::Null;
 	mobj_t* mo;
 	angle_t angle;
 
-	angle = P_Random(pr_hexen) << 5; // <<24 >>19
+	angle = P_Random(RandomClass::Hexen) << 5; // <<24 >>19
 	x = actor->x + FixedMul(radius, finecosine[angle]);
 	y = actor->y + FixedMul(radius, finesine[angle]);
-	z = actor->z + (P_Random(pr_hexen) << 9) + FRACUNIT;
-	switch(P_Random(pr_hexen) % 6)
+	z = actor->z + (P_Random(RandomClass::Hexen) << 9) + FRACUNIT;
+	switch(P_Random(RandomClass::Hexen) % 6)
 	{
 		case 0:
-			dtype = HEXEN_MT_DIRT1;
+			dtype = MobjType::HexenDirt1;
 			break;
 		case 1:
-			dtype = HEXEN_MT_DIRT2;
+			dtype = MobjType::HexenDirt2;
 			break;
 		case 2:
-			dtype = HEXEN_MT_DIRT3;
+			dtype = MobjType::HexenDirt3;
 			break;
 		case 3:
-			dtype = HEXEN_MT_DIRT4;
+			dtype = MobjType::HexenDirt4;
 			break;
 		case 4:
-			dtype = HEXEN_MT_DIRT5;
+			dtype = MobjType::HexenDirt5;
 			break;
 		case 5:
-			dtype = HEXEN_MT_DIRT6;
+			dtype = MobjType::HexenDirt6;
 			break;
 	}
-	mo = P_SpawnMobj(x, y, z, static_cast<mobjtype_t>(dtype));
+	mo = P_SpawnMobj(x, y, z, dtype);
 	if(mo)
 	{
-		mo->momz = P_Random(pr_hexen) << 10;
+		mo->momz = P_Random(RandomClass::Hexen) << 10;
 	}
 }
 
 extern "C" void A_CorpseBloodDrip(mobj_t* actor)
 {
-	if(P_Random(pr_hexen) > 128)
+	if(P_Random(RandomClass::Hexen) > 128)
 	{
 		return;
 	}
 	P_SpawnMobj(actor->x, actor->y, actor->z + actor->height / 2,
-		HEXEN_MT_CORPSEBLOODDRIP);
+		MobjType::HexenCorpseblooddrip);
 }
 
 extern "C" void A_CorpseExplode(mobj_t* actor)
@@ -220,23 +222,23 @@ extern "C" void A_CorpseExplode(mobj_t* actor)
 	mobj_t* mo;
 	int i;
 
-	for(i = (P_Random(pr_hexen) & 3) + 3; i; i--)
+	for(i = (P_Random(RandomClass::Hexen) & 3) + 3; i; i--)
 	{
-		mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_CORPSEBIT);
-		P_SetMobjState(mo, static_cast<statenum_t>(mo->info->spawnstate + (P_Random(pr_hexen) % 3)));
-		mo->momz = ((P_Random(pr_hexen) & 7) + 5) * (3 * FRACUNIT / 4);
+		mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenCorpsebit);
+		P_SetMobjState(mo, StateVariant(mo->info->spawnstate, (P_Random(RandomClass::Hexen) % 3)));
+		mo->momz = ((P_Random(RandomClass::Hexen) & 7) + 5) * (3 * FRACUNIT / 4);
 		mo->momx = P_SubRandom() << (FRACBITS - 6);
 		mo->momy = P_SubRandom() << (FRACBITS - 6);
 	}
 	// Spawn a skull
-	mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_CORPSEBIT);
-	P_SetMobjState(mo, HEXEN_S_CORPSEBIT_4);
+	mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenCorpsebit);
+	P_SetMobjState(mo, StateId::HexenCorpsebit4);
 	if(mo)
 	{
-		mo->momz = ((P_Random(pr_hexen) & 7) + 5) * (3 * FRACUNIT / 4);
+		mo->momz = ((P_Random(RandomClass::Hexen) & 7) + 5) * (3 * FRACUNIT / 4);
 		mo->momx = P_SubRandom() << (FRACBITS - 6);
 		mo->momy = P_SubRandom() << (FRACBITS - 6);
-		S_StartMobjSound(mo, hexen_sfx_fired_death);
+		S_StartMobjSound(mo, SfxId::HexenFiredDeath);
 	}
 	P_RemoveMobj(actor);
 }
@@ -246,20 +248,20 @@ extern "C" void A_LeafSpawn(mobj_t* actor)
 	mobj_t* mo;
 	int i;
 
-	for(i = (P_Random(pr_hexen) & 3) + 1; i; i--)
+	for(i = (P_Random(RandomClass::Hexen) & 3) + 1; i; i--)
 	{
 		// Official release of Hexen's source code relies on unspecified behavior
 		// the in order of function's argument evaluation,
 		// see ISO-IEC 9899-1999, [6.5.2.2.10]
-		mobjtype_t type = static_cast<mobjtype_t>(HEXEN_MT_LEAF1 + (P_Random(pr_hexen) & 1));
-		fixed_t z = actor->z + (P_Random(pr_hexen) << 14);
+		MobjType type = MobjVariant(MobjType::HexenLeaf1, (P_Random(RandomClass::Hexen) & 1));
+		fixed_t z = actor->z + (P_Random(RandomClass::Hexen) << 14);
 		fixed_t y = actor->y + (P_SubRandom() << 14);
 		fixed_t x = actor->x + (P_SubRandom() << 14);
 
-		mo = P_SpawnMobj(x, y, z, static_cast<mobjtype_t>(type));
+		mo = P_SpawnMobj(x, y, z, static_cast<MobjType>(type));
 		if(mo)
 		{
-			P_ThrustMobj(mo, actor->angle, (P_Random(pr_hexen) << 9) + 3 * FRACUNIT);
+			P_ThrustMobj(mo, actor->angle, (P_Random(RandomClass::Hexen) << 9) + 3 * FRACUNIT);
 			P_SetTarget(&mo->target, actor);
 			mo->special1.i = 0;
 		}
@@ -268,11 +270,11 @@ extern "C" void A_LeafSpawn(mobj_t* actor)
 
 extern "C" void A_LeafThrust(mobj_t* actor)
 {
-	if(P_Random(pr_hexen) > 96)
+	if(P_Random(RandomClass::Hexen) > 96)
 	{
 		return;
 	}
-	actor->momz += (P_Random(pr_hexen) << 9) + FRACUNIT;
+	actor->momz += (P_Random(RandomClass::Hexen) << 9) + FRACUNIT;
 }
 
 extern "C" void A_LeafCheck(mobj_t* actor)
@@ -280,22 +282,22 @@ extern "C" void A_LeafCheck(mobj_t* actor)
 	actor->special1.i++;
 	if(actor->special1.i >= 20)
 	{
-		P_SetMobjState(actor, HEXEN_S_NULL);
+		P_SetMobjState(actor, StateId::HexenNull);
 		return;
 	}
-	if(P_Random(pr_hexen) > 64)
+	if(P_Random(RandomClass::Hexen) > 64)
 	{
 		if(!actor->momx && !actor->momy)
 		{
 			P_ThrustMobj(actor, actor->target->angle,
-				(P_Random(pr_hexen) << 9) + FRACUNIT);
+				(P_Random(RandomClass::Hexen) << 9) + FRACUNIT);
 		}
 		return;
 	}
-	P_SetMobjState(actor, HEXEN_S_LEAF1_8);
-	actor->momz = (P_Random(pr_hexen) << 9) + FRACUNIT;
+	P_SetMobjState(actor, StateId::HexenLeaf18);
+	actor->momz = (P_Random(RandomClass::Hexen) << 9) + FRACUNIT;
 	P_ThrustMobj(actor, actor->target->angle,
-		(P_Random(pr_hexen) << 9) + 2 * FRACUNIT);
+		(P_Random(RandomClass::Hexen) << 9) + 2 * FRACUNIT);
 	actor->flags |= MF_MISSILE;
 }
 
@@ -303,7 +305,7 @@ extern "C" void A_BridgeOrbit(mobj_t* actor)
 {
 	if(actor->target->special1.i)
 	{
-		P_SetMobjState(actor, HEXEN_S_NULL);
+		P_SetMobjState(actor, StateId::HexenNull);
 	}
 	actor->special_args[0] += 3;
 	actor->special_args[0] &= 0xff;
@@ -321,19 +323,19 @@ extern "C" void A_BridgeInit(mobj_t* actor)
 	cx = actor->x;
 	cy = actor->y;
 	cz = actor->z;
-	startangle = P_Random(pr_hexen);
+	startangle = P_Random(RandomClass::Hexen);
 	actor->special1.i = 0;
 
 	// Spawn triad into world
-	ball1 = P_SpawnMobj(cx, cy, cz, HEXEN_MT_BRIDGEBALL);
+	ball1 = P_SpawnMobj(cx, cy, cz, MobjType::HexenBridgeball);
 	ball1->special_args[0] = startangle;
 	P_SetTarget(&ball1->target, actor);
 
-	ball2 = P_SpawnMobj(cx, cy, cz, HEXEN_MT_BRIDGEBALL);
+	ball2 = P_SpawnMobj(cx, cy, cz, MobjType::HexenBridgeball);
 	ball2->special_args[0] = (startangle + 85) & 255;
 	P_SetTarget(&ball2->target, actor);
 
-	ball3 = P_SpawnMobj(cx, cy, cz, HEXEN_MT_BRIDGEBALL);
+	ball3 = P_SpawnMobj(cx, cy, cz, MobjType::HexenBridgeball);
 	ball3->special_args[0] = (startangle + 170) & 255;
 	P_SetTarget(&ball3->target, actor);
 
@@ -346,7 +348,7 @@ extern "C" void A_BridgeRemove(mobj_t* actor)
 {
 	actor->special1.i = true; // Removing the bridge
 	actor->flags &= ~MF_SOLID;
-	P_SetMobjState(actor, HEXEN_S_FREE_BRIDGE1);
+	P_SetMobjState(actor, StateId::HexenFreeBridge1);
 }
 
 extern "C" void A_SetShootable(mobj_t* actor)
@@ -372,14 +374,14 @@ extern "C" void A_Summon(mobj_t* actor)
 	mobj_t* mo;
 	mobj_t* master;
 
-	mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_MINOTAUR);
+	mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenMinotaur);
 	if(mo)
 	{
 		if(P_TestMobjLocation(mo) == false || !actor->special1.m)
 		{
 			// Didn't fit - change back to artifact
-			P_SetMobjState(mo, HEXEN_S_NULL);
-			mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_SUMMONMAULATOR);
+			P_SetMobjState(mo, StateId::HexenNull);
+			mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenSummonmaulator);
 			if(mo)
 				mo->flags |= MF_DROPPED;
 			return;
@@ -399,12 +401,12 @@ extern "C" void A_Summon(mobj_t* actor)
 		else
 		{
 			P_SetTarget(&mo->special1.m, actor->special1.m); // Pointer to master (mobj_t *)
-			P_GivePower(master->player, pw_minotaur);
+			P_GivePower(master->player, PowerType::Minotaur);
 		}
 
 		// Make smoke puff
-		P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_MNTRSMOKE);
-		S_StartMobjSound(actor, hexen_sfx_maulator_active);
+		P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenMntrsmoke);
+		S_StartMobjSound(actor, SfxId::HexenMaulatorActive);
 	}
 }
 
@@ -431,16 +433,16 @@ extern "C" void A_FogSpawn(mobj_t* actor)
 
 	actor->special1.i = actor->special_args[2]; // Reset frequency count
 
-	switch(P_Random(pr_hexen) % 3)
+	switch(P_Random(RandomClass::Hexen) % 3)
 	{
 		case 0:
-			mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_FOGPATCHS);
+			mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenFogpatchs);
 			break;
 		case 1:
-			mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_FOGPATCHM);
+			mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenFogpatchm);
 			break;
 		case 2:
-			mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_FOGPATCHL);
+			mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenFogpatchl);
 			break;
 	}
 
@@ -450,14 +452,14 @@ extern "C" void A_FogSpawn(mobj_t* actor)
 		if(delta == 0)
 			delta = 1;
 		mo->angle =
-			actor->angle + (((P_Random(pr_hexen) % delta) - (delta >> 1)) << 24);
+			actor->angle + (((P_Random(RandomClass::Hexen) % delta) - (delta >> 1)) << 24);
 		P_SetTarget(&mo->target, actor);
 		if(actor->special_args[0] < 1)
 			actor->special_args[0] = 1;
-		mo->special_args[0] = (P_Random(pr_hexen) % (actor->special_args[0])) + 1; // Random speed
+		mo->special_args[0] = (P_Random(RandomClass::Hexen) % (actor->special_args[0])) + 1; // Random speed
 		mo->special_args[3] = actor->special_args[3];                              // Set lifetime
 		mo->special_args[4] = 1;                                                   // Set to moving
-		mo->special2.i = P_Random(pr_hexen) & 63;
+		mo->special2.i = P_Random(RandomClass::Hexen) & 63;
 	}
 }
 
@@ -472,7 +474,7 @@ extern "C" void A_FogMove(mobj_t* actor)
 
 	if(actor->special_args[3]-- <= 0)
 	{
-		P_SetMobjStateNF(actor, static_cast<statenum_t>(actor->info->deathstate));
+		P_SetMobjStateNF(actor, actor->info->deathstate);
 		return;
 	}
 
@@ -493,13 +495,13 @@ extern "C" void A_PoisonBagInit(mobj_t* actor)
 	mobj_t* mo;
 
 	mo = P_SpawnMobj(actor->x, actor->y, actor->z + 28 * FRACUNIT,
-		HEXEN_MT_POISONCLOUD);
+		MobjType::HexenPoisoncloud);
 	if(!mo)
 	{
 		return;
 	}
 	mo->momx = 1; // missile objects must move to impact other objects
-	mo->special1.i = 24 + (P_Random(pr_hexen) & 7);
+	mo->special1.i = 24 + (P_Random(RandomClass::Hexen) & 7);
 	mo->special2.i = 0;
 	P_SetTarget(&mo->target, actor->target);
 	mo->radius = 20 * FRACUNIT;
@@ -511,7 +513,7 @@ extern "C" void A_PoisonBagCheck(mobj_t* actor)
 {
 	if(!--actor->special1.i)
 	{
-		P_SetMobjState(actor, HEXEN_S_POISONCLOUD_X1);
+		P_SetMobjState(actor, StateId::HexenPoisoncloudX1);
 	}
 	else
 	{
@@ -534,16 +536,16 @@ extern "C" void A_PoisonBagDamage(mobj_t* actor)
 
 extern "C" void A_PoisonShroom(mobj_t* actor)
 {
-	actor->tics = 128 + (P_Random(pr_hexen) << 1);
+	actor->tics = 128 + (P_Random(RandomClass::Hexen) << 1);
 }
 
 extern "C" void A_CheckThrowBomb(mobj_t* actor)
 {
 	if(abs(actor->momx) < 1.5 * FRACUNIT && abs(actor->momy) < 1.5 * FRACUNIT
 		&& actor->momz < 2 * FRACUNIT
-		&& actor->state == &states[HEXEN_S_THROWINGBOMB6])
+		&& actor->state == &states[std::to_underlying(StateId::HexenThrowingbomb6)])
 	{
-		P_SetMobjState(actor, HEXEN_S_THROWINGBOMB7);
+		P_SetMobjState(actor, StateId::HexenThrowingbomb7);
 		actor->z = actor->floorz;
 		actor->momz = 0;
 		actor->flags2 &= ~MF2_FLOORBOUNCE;
@@ -551,7 +553,7 @@ extern "C" void A_CheckThrowBomb(mobj_t* actor)
 	}
 	if(!--actor->health)
 	{
-		P_SetMobjState(actor, static_cast<statenum_t>(actor->info->deathstate));
+		P_SetMobjState(actor, actor->info->deathstate);
 	}
 }
 
@@ -579,7 +581,7 @@ extern "C" dboolean A_LocalQuake(byte* args, mobj_t* actor)
 		if(target)
 		{
 			focus = P_SpawnMobj(target->x,
-				target->y, target->z, HEXEN_MT_QUAKE_FOCUS);
+				target->y, target->z, MobjType::HexenQuakeFocus);
 			if(focus)
 			{
 				focus->special_args[0] = args[0];
@@ -626,12 +628,12 @@ extern "C" void A_Quake(mobj_t* actor)
 			// Check if in damage radius
 			if((dist < actor->special_args[2]) && (victim->z <= victim->floorz))
 			{
-				if(P_Random(pr_hexen) < 50)
+				if(P_Random(RandomClass::Hexen) < 50)
 				{
 					P_DamageMobj(victim, nullptr, nullptr, HITDICE(1));
 				}
 				// Thrust player around
-				an = victim->angle + ANG1 * P_Random(pr_hexen);
+				an = victim->angle + ANG1 * P_Random(RandomClass::Hexen);
 				P_ThrustMobj(victim, an, richters << (FRACBITS - 1));
 			}
 		}
@@ -642,7 +644,7 @@ extern "C" void A_Quake(mobj_t* actor)
 		{
 			localQuakeHappening[playnum] = false;
 		}
-		P_SetMobjState(actor, HEXEN_S_NULL);
+		P_SetMobjState(actor, StateId::HexenNull);
 	}
 }
 
@@ -652,7 +654,7 @@ extern "C" void A_TeloSpawnA(mobj_t* actor)
 {
 	mobj_t* mo;
 
-	mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_TELOTHER_FX2);
+	mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenTelotherFx2);
 	if(mo)
 	{
 		mo->special1.i = TELEPORT_LIFE; // Lifetime countdown
@@ -668,7 +670,7 @@ extern "C" void A_TeloSpawnB(mobj_t* actor)
 {
 	mobj_t* mo;
 
-	mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_TELOTHER_FX3);
+	mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenTelotherFx3);
 	if(mo)
 	{
 		mo->special1.i = TELEPORT_LIFE; // Lifetime countdown
@@ -684,7 +686,7 @@ extern "C" void A_TeloSpawnC(mobj_t* actor)
 {
 	mobj_t* mo;
 
-	mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_TELOTHER_FX4);
+	mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenTelotherFx4);
 	if(mo)
 	{
 		mo->special1.i = TELEPORT_LIFE; // Lifetime countdown
@@ -700,7 +702,7 @@ extern "C" void A_TeloSpawnD(mobj_t* actor)
 {
 	mobj_t* mo;
 
-	mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_TELOTHER_FX5);
+	mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenTelotherFx5);
 	if(mo)
 	{
 		mo->special1.i = TELEPORT_LIFE; // Lifetime countdown
@@ -716,7 +718,7 @@ extern "C" void A_CheckTeleRing(mobj_t* actor)
 {
 	if(actor->special1.i-- <= 0)
 	{
-		P_SetMobjState(actor, static_cast<statenum_t>(actor->info->deathstate));
+		P_SetMobjState(actor, actor->info->deathstate);
 	}
 }
 
@@ -749,7 +751,7 @@ extern "C" void A_ThrustInitDn(mobj_t* actor)
 	actor->floorclip = actor->info->height;
 	actor->flags = 0;
 	actor->flags2 = MF2_NOTELEPORT | MF2_FOOTCLIP | MF2_DONTDRAW;
-	mo = P_SpawnMobj(actor->x, actor->y, actor->z, HEXEN_MT_DIRTCLUMP);
+	mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenDirtclump);
 	P_SetTarget(&actor->special1.m, mo);
 }
 
@@ -761,9 +763,9 @@ extern "C" void A_ThrustRaise(mobj_t* actor)
 		// Reached it's target height
 		actor->special_args[0] = 1;
 		if(actor->special_args[1])
-			P_SetMobjStateNF(actor, HEXEN_S_BTHRUSTINIT2_1);
+			P_SetMobjStateNF(actor, StateId::HexenBthrustinit21);
 		else
-			P_SetMobjStateNF(actor, HEXEN_S_THRUSTINIT2_1);
+			P_SetMobjStateNF(actor, StateId::HexenThrustinit21);
 	}
 
 	// Lose the dirt clump
@@ -774,7 +776,7 @@ extern "C" void A_ThrustRaise(mobj_t* actor)
 	}
 
 	// Spawn some dirt
-	if(P_Random(pr_hexen) < 40)
+	if(P_Random(RandomClass::Hexen) < 40)
 		P_SpawnDirt(actor, actor->radius);
 	actor->special2.i++; // Increase raise speed
 }
@@ -785,9 +787,9 @@ extern "C" void A_ThrustLower(mobj_t* actor)
 	{
 		actor->special_args[0] = 0;
 		if(actor->special_args[1])
-			P_SetMobjStateNF(actor, HEXEN_S_BTHRUSTINIT1_1);
+			P_SetMobjStateNF(actor, StateId::HexenBthrustinit11);
 		else
-			P_SetMobjStateNF(actor, HEXEN_S_THRUSTINIT1_1);
+			P_SetMobjStateNF(actor, StateId::HexenThrustinit11);
 	}
 }
 
@@ -810,15 +812,15 @@ extern "C" void A_SoAExplode(mobj_t* actor)
 
 	for(i = 0; i < 10; i++)
 	{
-		r1 = P_Random(pr_hexen);
-		r2 = P_Random(pr_hexen);
-		r3 = P_Random(pr_hexen);
+		r1 = P_Random(RandomClass::Hexen);
+		r2 = P_Random(RandomClass::Hexen);
+		r3 = P_Random(RandomClass::Hexen);
 		mo = P_SpawnMobj(actor->x + ((r3 - 128) << 12),
 			actor->y + ((r2 - 128) << 12),
 			actor->z + (r1 * actor->height / 256),
-			HEXEN_MT_ZARMORCHUNK);
-		P_SetMobjState(mo, static_cast<statenum_t>(mo->info->spawnstate + i));
-		mo->momz = ((P_Random(pr_hexen) & 7) + 5) * FRACUNIT;
+			MobjType::HexenZarmorchunk);
+		P_SetMobjState(mo, StateVariant(mo->info->spawnstate, i));
+		mo->momz = ((P_Random(RandomClass::Hexen) & 7) + 5) * FRACUNIT;
 		mo->momx = P_SubRandom() << (FRACBITS - 6);
 		mo->momy = P_SubRandom() << (FRACBITS - 6);
 	}
@@ -828,16 +830,16 @@ extern "C" void A_SoAExplode(mobj_t* actor)
 		// TODO: should this be on or off?
 #if 0 // Checks are not present in version 1.1
 		if(!nomonsters
-			|| !(mobjinfo[TranslateThingType[actor->special_args[0]]].
+			|| !(mobjinfo[std::to_underlying(TranslateThingType[actor->special_args[0]])].
 				flags & MF_COUNTKILL))
 #endif
 		{
 			// Only spawn monsters if not -nomonsters
 			P_SpawnMobj(actor->x, actor->y, actor->z,
-				static_cast<mobjtype_t>(TranslateThingType[actor->special_args[0]]));
+				static_cast<MobjType>(TranslateThingType[actor->special_args[0]]));
 		}
 	}
-	S_StartMobjSound(mo, hexen_sfx_suitofarmor_break);
+	S_StartMobjSound(mo, SfxId::HexenSuitofarmorBreak);
 	P_RemoveMobj(actor);
 }
 
@@ -858,7 +860,7 @@ extern "C" void A_FlameCheck(mobj_t* actor)
 {
 	if(!actor->special_args[0]--) // Called every 8 tics
 	{
-		P_SetMobjState(actor, HEXEN_S_NULL);
+		P_SetMobjState(actor, StateId::HexenNull);
 	}
 }
 
@@ -896,11 +898,11 @@ extern "C" void A_BatSpawn(mobj_t* actor)
 	delta = actor->special_args[1];
 	if(delta == 0)
 		delta = 1;
-	angle = actor->angle + (((P_Random(pr_hexen) % delta) - (delta >> 1)) << 24);
-	mo = P_SpawnMissileAngle(actor, HEXEN_MT_BAT, angle, 0);
+	angle = actor->angle + (((P_Random(RandomClass::Hexen) % delta) - (delta >> 1)) << 24);
+	mo = P_SpawnMissileAngle(actor, MobjType::HexenBat, angle, 0);
 	if(mo)
 	{
-		mo->special_args[0] = P_Random(pr_hexen) & 63; // floatbob index
+		mo->special_args[0] = P_Random(RandomClass::Hexen) & 63; // floatbob index
 		mo->special_args[4] = actor->special_args[4];  // turn degrees
 		mo->special2.i = actor->special_args[3] << 3;  // Set lifetime
 		P_SetTarget(&mo->target, actor);
@@ -914,11 +916,11 @@ extern "C" void A_BatMove(mobj_t* actor)
 
 	if(actor->special2.i < 0)
 	{
-		P_SetMobjState(actor, static_cast<statenum_t>(actor->info->deathstate));
+		P_SetMobjState(actor, actor->info->deathstate);
 	}
 	actor->special2.i -= 2; // Called every 2 tics
 
-	if(P_Random(pr_hexen) < 128)
+	if(P_Random(RandomClass::Hexen) < 128)
 	{
 		newangle = actor->angle + ANG1 * actor->special_args[4];
 	}
@@ -929,12 +931,12 @@ extern "C" void A_BatMove(mobj_t* actor)
 
 	// Adjust momentum vector to new direction
 	newangle >>= ANGLETOFINESHIFT;
-	speed = FixedMul(actor->info->speed, P_Random(pr_hexen) << 10);
+	speed = FixedMul(actor->info->speed, P_Random(RandomClass::Hexen) << 10);
 	actor->momx = FixedMul(speed, finecosine[newangle]);
 	actor->momy = FixedMul(speed, finesine[newangle]);
 
-	if(P_Random(pr_hexen) < 15)
-		S_StartMobjSound(actor, hexen_sfx_bat_scream);
+	if(P_Random(RandomClass::Hexen) < 15)
+		S_StartMobjSound(actor, SfxId::HexenBatScream);
 
 	// Handle Z movement
 	actor->z = actor->target->z + 2 * FloatBobOffsets[actor->special_args[0]];
@@ -953,7 +955,7 @@ extern "C" void A_TreeDeath(mobj_t* actor)
 	}
 	else
 	{
-		P_SetMobjState(actor, static_cast<statenum_t>(actor->info->meleestate));
+		P_SetMobjState(actor, actor->info->meleestate);
 	}
 }
 

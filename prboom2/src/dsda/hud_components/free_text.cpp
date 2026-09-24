@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Free Text HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "free_text.hpp"
@@ -21,7 +23,7 @@ extern "C" void dsda_UpdateFreeText()
 	int i, j;
 	const char* text;
 
-	text = dsda_StringConfig(dsda_config_free_text);
+	text = dsda_StringConfig(ConfigId::FreeText);
 
 	if(free_text)
 		Z_Free(free_text);
@@ -70,11 +72,11 @@ extern "C" void dsda_UpdateFreeText()
 					++i;
 				}
 
-				if(color < 0 || color >= CR_HUD_LIMIT)
+				if(color < 0 || color >= std::to_underlying(ColorRange::HudLimit))
 					color = 0;
 
 				free_text[j] = '\x1b';
-				free_text[j + 1] = HUlib_Color(color);
+				free_text[j + 1] = HUlib_Color(static_cast<ColorRange>(color));
 				++j;
 
 				continue;
@@ -94,14 +96,14 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 			str,
 			max_size,
 			"%s%s",
-			dsda_TextColor(dsda_tc_exhud_free_text),
+			dsda_TextColor(TextColorIndex::ExhudFreeText),
 			free_text
 		);
 	else
 		str[0] = '\0';
 }
 
-void dsda_InitFreeTextHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitFreeTextHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

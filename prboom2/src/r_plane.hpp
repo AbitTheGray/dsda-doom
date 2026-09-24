@@ -6,12 +6,12 @@
 
 #pragma once
 
+#include "r_data.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "r_data.hpp"
 
 #define PL_SKYFLAT_LINE (0x80000000)
 #define PL_SKYFLAT_SECTOR (0x40000000)

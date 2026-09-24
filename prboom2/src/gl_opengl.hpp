@@ -6,6 +6,25 @@
 
 #pragma once
 
+#include <SDL.h>
+#include <SDL_opengl.h>
+#include "doomtype.hpp"
+
+enum struct TexMode : uint32_t
+{
+	MaskBit   = 1,
+	OpaqueBit = 2,
+	InvertBit = 4,
+
+	Modulate     = 0,
+	Mask         = MaskBit,
+	Opaque       = OpaqueBit,
+	Invert       = InvertBit,
+	//TM_INVERTMASK = TMF_MASKBIT | TMF_INVERTBIT
+	InvertOpaque = InvertBit | OpaqueBit,
+};
+ENUM_FLAGS_FUNC(TexMode)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -14,9 +33,6 @@ extern "C"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#include <SDL.h>
-#include <SDL_opengl.h>
 
 #if SDL_VERSION_ATLEAST(1, 3, 0)
 #if defined(__MACOSX__)
@@ -30,8 +46,6 @@ extern "C"
 #include <GL/glu.h>	/* Header File For The GLU Library */
 #endif
 #endif
-
-#include "doomtype.hpp"
 
 #if !defined(GL_DEPTH_STENCIL_EXT)
 #define GL_DEPTH_STENCIL_EXT              0x84F9
@@ -119,21 +133,7 @@ void gld_EnableTexture2D(GLenum texture, int enable);
 void gld_EnableClientCoordArray(GLenum texture, int enable);
 void gld_EnableMultisample(int enable);
 
-typedef enum
-{
-	TMF_MASKBIT   = 1,
-	TMF_OPAQUEBIT = 2,
-	TMF_INVERTBIT = 4,
-
-	TM_MODULATE     = 0,
-	TM_MASK         = TMF_MASKBIT,
-	TM_OPAQUE       = TMF_OPAQUEBIT,
-	TM_INVERT       = TMF_INVERTBIT,
-	//TM_INVERTMASK = TMF_MASKBIT | TMF_INVERTBIT
-	TM_INVERTOPAQUE = TMF_INVERTBIT | TMF_OPAQUEBIT,
-} tex_mode_e;
-
-void SetTextureMode(tex_mode_e type);
+void SetTextureMode(TexMode type);
 
 #ifdef __cplusplus
 }

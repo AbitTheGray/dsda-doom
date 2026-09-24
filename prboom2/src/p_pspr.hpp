@@ -6,18 +6,18 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+#include "m_fixed.hpp"
+#include "tables.hpp"
+#include "info.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "p_mobj.hpp"
-
 /* Basic data types.
  * Needs fixed point, and BAM angles. */
-
-#include "m_fixed.hpp"
-#include "tables.hpp"
 
 /* Needs to include the precompiled sprite animation tables.
  *
@@ -25,8 +25,6 @@ extern "C"
  * This includes all the data for thing animation,
  * i.e. the Thing Atrributes table and the Frame Sequence table.
  */
-
-#include "info.hpp"
 
 /*
  * Frame flags:
@@ -42,12 +40,12 @@ extern "C"
  * coordinates are given for a 320*200 view screen.
  */
 
-typedef enum
+enum struct PspNum : int32_t
 {
-	ps_weapon,
-	ps_flash,
-	NUMPSPRITES
-} psprnum_t;
+	Weapon,
+	Flash,
+	Count
+};
 
 typedef struct
 {
@@ -57,25 +55,25 @@ typedef struct
 	fixed_t sy;
 } pspdef_t;
 
-enum
+enum struct CenterWeapon : int32_t
 {
-	CENTERWEAPON_OFF,
-	CENTERWEAPON_HOR,
-	CENTERWEAPON_HORVER,
-	CENTERWEAPON_BOB,
-	NUM_CENTERWEAPON,
+	Off,
+	Hor,
+	HorVer,
+	Bob,
+	Count,
 };
 
-int P_WeaponPreferred(int w1, int w2);
+int P_WeaponPreferred(WeaponType w1, WeaponType w2);
 
 struct player_s;
-int P_SwitchWeapon(struct player_s* player);
+WeaponType P_SwitchWeapon(struct player_s* player);
 dboolean P_CheckAmmo(struct player_s* player);
 void P_SubtractAmmo(struct player_s* player, int compat_amt);
 void P_SetupPsprites(struct player_s* curplayer);
 void P_MovePsprites(struct player_s* curplayer);
 void P_DropWeapon(struct player_s* player);
-int P_AmmoPercent(struct player_s* player, int weapon);
+int P_AmmoPercent(struct player_s* player, WeaponType weapon);
 
 void A_Light0(struct player_s* player, pspdef_t* psp);
 void A_WeaponReady(struct player_s* player, pspdef_t* psp);
@@ -119,9 +117,9 @@ void A_GunFlashTo(struct player_s* player, pspdef_t* psp);
 
 void P_RepositionMace(mobj_t* mo);
 void P_ActivateBeak(struct player_s* player);
-void P_PostChickenWeapon(struct player_s* player, weapontype_t weapon);
-void P_SetPsprite(struct player_s* player, int position, statenum_t stnum);
-void P_SetPspritePtr(struct player_s* player, pspdef_t* psp, statenum_t stnum);
+void P_PostChickenWeapon(struct player_s* player, WeaponType weapon);
+void P_SetPsprite(struct player_s* player, PspNum position, StateId stnum);
+void P_SetPspritePtr(struct player_s* player, pspdef_t* psp, StateId stnum);
 void P_OpenWeapons();
 void P_CloseWeapons();
 void P_AddMaceSpot(const mapthing_t* mthing);
@@ -130,8 +128,8 @@ void P_UpdateBeak(struct player_s* player, pspdef_t* psp);
 
 // hexen
 
-void P_SetPspriteNF(struct player_s* player, int position, statenum_t stnum);
-void P_PostMorphWeapon(struct player_s* player, weapontype_t weapon);
+void P_SetPspriteNF(struct player_s* player, PspNum position, StateId stnum);
+void P_PostMorphWeapon(struct player_s* player, WeaponType weapon);
 void P_ActivateMorphWeapon(struct player_s* player);
 
 #ifdef __cplusplus

@@ -296,22 +296,22 @@ static const char* cp437_to_utf8[256] = {
 	"\xc2\xa0",
 };
 
-typedef enum
+enum struct OutputFormat : int32_t
 {
-	format_null,
-	format_cp437,
-	format_utf8,
-} output_format_t;
+	Null,
+	Cp437,
+	Utf8,
+};
 
-typedef enum
+enum struct EndoomExport : int32_t
 {
-	endoom_window,
-	endoom_terminal,
-} endoom_export_t;
+	Window,
+	Terminal,
+};
 
 static byte* endoom;
-static output_format_t output_format;
-static endoom_export_t endoom_export;
+static OutputFormat output_format;
+static EndoomExport endoom_export;
 
 #ifdef _WIN32
 static HANDLE hConsole;
@@ -353,9 +353,9 @@ void dsda_CacheEndoom()
 	int show_endoom;
 	int pwad_only;
 
-	output_format = (output_format_t)dsda_IntConfig(dsda_config_ansi_endoom);
+	output_format = (OutputFormat)dsda_IntConfig(ConfigId::AnsiEndoom);
 
-	show_endoom = dsda_IntConfig(dsda_config_show_endoom);
+	show_endoom = dsda_IntConfig(ConfigId::ShowEndoom);
 
 	if(V_IsOpenGLMode())
 		is_opengl = true;
@@ -389,11 +389,11 @@ void dsda_CacheEndoom()
 
 void dsda_DumpEndoom()
 {
-	endoom_export = (endoom_export_t)dsda_IntConfig(dsda_config_export_endoom);
+	endoom_export = static_cast<EndoomExport>(dsda_IntConfig(ConfigId::ExportEndoom));
 
 	if(endoom)
 	{
-		if(endoom_export)
+		if(endoom_export == EndoomExport::Terminal)
 			dsda_TerminalEndoom();
 		else
 			dsda_WindowEndoom();
@@ -433,18 +433,18 @@ void dsda_TerminalEndoom()
 		if(!character)
 			character = ' ';
 
-		if(output_format == format_utf8)
-			lprintf(LO_INFO, "\033[3%sm\033[4%sm\033[%sm%s\033[0m",
+		if(output_format == OutputFormat::Utf8)
+			lprintf(OutputLevels::Info, "\033[3%sm\033[4%sm\033[%sm%s\033[0m",
 				foreground, background, blink, cp437_to_utf8[character]);
 		else
-			lprintf(LO_INFO, "\033[3%sm\033[4%sm\033[%sm%c\033[0m",
+			lprintf(OutputLevels::Info, "\033[3%sm\033[4%sm\033[%sm%c\033[0m",
 				foreground, background, blink, character);
 
 		if((i + 1) % 80 == 0)
-			lprintf(LO_INFO, "\n");
+			lprintf(OutputLevels::Info, "\n");
 	}
 
-	lprintf(LO_INFO, "\n");
+	lprintf(OutputLevels::Info, "\n");
 
 	Z_Free(endoom);
 	endoom = nullptr;
@@ -471,7 +471,7 @@ void dsda_WindowEndoom()
 
 	if(!TXT_Init())
 	{
-		lprintf(LO_ERROR, "Failed to initialize libtextscreen");
+		lprintf(OutputLevels::Error, "Failed to initialize libtextscreen");
 		return;
 	}
 

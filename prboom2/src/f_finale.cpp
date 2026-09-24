@@ -4,6 +4,10 @@
  *      Game completion, final screen animation.
  */
 
+#include "umapinfo.hpp"
+
+#include <utility>
+
 #include "doomstat.hpp"
 #include "d_event.hpp"
 #include "g_game.hpp"
@@ -33,14 +37,14 @@
 // Stage of animation:
 //  0 = text, 1 = art screen, 2 = character cast
 
-finalestage_t finalestage;
+FinaleScreen finalestage;
 int finalecount;
 const char* finaletext;
 const char* finaleflat;
 const char* finalepatch;
 const char* endpic;
 const char* endpalette;
-int endgameflags;
+UMapinfoFlags endgameflags;
 
 // defines for the end mission display text                     // phares
 
@@ -70,13 +74,13 @@ void F_StartFinale()
 	finalepatch = nullptr;
 	endpic = nullptr;
 	endpalette = nullptr;
-	endgameflags = 0;
+	endgameflags = static_cast<UMapinfoFlags>(0);
 
 	if(heretic) return Heretic_F_StartFinale();
 	if(hexen) return Hexen_F_StartFinale();
 
-	gameaction = ga_nothing;
-	gamestate = GS_FINALE;
+	gameaction = GameAction::Nothing;
+	gamestate = GameState::Finale;
 	automap_full = false;
 
 	// killough 3/28/98: clear accelerative text flags
@@ -90,7 +94,7 @@ void F_StartFinale()
 	}
 	else
 	{
-		S_ChangeMusic(mnum, true);
+		S_ChangeMusic(static_cast<MusicId>(mnum), true);
 	}
 
 	// Okay - IWAD dependend stuff.
@@ -99,9 +103,9 @@ void F_StartFinale()
 	switch(gamemode)
 	{
 		// DOOM 1 - E1, E3 or E4, but each nine missions
-		case shareware:
-		case registered:
-		case retail:
+		case GameMode::Shareware:
+		case GameMode::Registered:
+		case GameMode::Retail:
 		{
 			switch(gameepisode)
 			{
@@ -129,40 +133,40 @@ void F_StartFinale()
 		}
 
 		// DOOM II and missions packs with E1, M34
-		case commercial:
+		case GameMode::Commercial:
 		{
 			// Ty 08/27/98 - added the gamemission logic
 			switch(gamemap)
 			{
 				case 6:
 					finaleflat = bgflat06;
-					finaletext = (gamemission == pack_tnt) ? s_T1TEXT : (gamemission == pack_plut) ? s_P1TEXT : s_C1TEXT;
+					finaletext = (gamemission == GameMission::PackTnt) ? s_T1TEXT : (gamemission == GameMission::PackPlut) ? s_P1TEXT : s_C1TEXT;
 					break;
 				case 11:
 					finaleflat = bgflat11;
-					finaletext = (gamemission == pack_tnt) ? s_T2TEXT : (gamemission == pack_plut) ? s_P2TEXT : s_C2TEXT;
+					finaletext = (gamemission == GameMission::PackTnt) ? s_T2TEXT : (gamemission == GameMission::PackPlut) ? s_P2TEXT : s_C2TEXT;
 					break;
 				case 20:
 					finaleflat = bgflat20;
-					finaletext = (gamemission == pack_tnt) ? s_T3TEXT : (gamemission == pack_plut) ? s_P3TEXT : s_C3TEXT;
+					finaletext = (gamemission == GameMission::PackTnt) ? s_T3TEXT : (gamemission == GameMission::PackPlut) ? s_P3TEXT : s_C3TEXT;
 					break;
 				case 30:
 					finaleflat = bgflat30;
-					finaletext = (gamemission == pack_tnt) ? s_T4TEXT : (gamemission == pack_plut) ? s_P4TEXT : s_C4TEXT;
+					finaletext = (gamemission == GameMission::PackTnt) ? s_T4TEXT : (gamemission == GameMission::PackPlut) ? s_P4TEXT : s_C4TEXT;
 					break;
 				case 15:
 					finaleflat = bgflat15;
-					finaletext = (gamemission == pack_tnt) ? s_T5TEXT : (gamemission == pack_plut) ? s_P5TEXT : s_C5TEXT;
+					finaletext = (gamemission == GameMission::PackTnt) ? s_T5TEXT : (gamemission == GameMission::PackPlut) ? s_P5TEXT : s_C5TEXT;
 					break;
 				case 31:
 					finaleflat = bgflat31;
-					finaletext = (gamemission == pack_tnt) ? s_T6TEXT : (gamemission == pack_plut) ? s_P6TEXT : s_C6TEXT;
+					finaletext = (gamemission == GameMission::PackTnt) ? s_T6TEXT : (gamemission == GameMission::PackPlut) ? s_P6TEXT : s_C6TEXT;
 					break;
 				default:
 					// Ouch.
 					break;
 			}
-			if(gamemission == pack_nerve && gamemap == 8)
+			if(gamemission == GameMission::PackNerve && gamemap == 8)
 			{
 				finaleflat = bgflat06;
 				finaletext = s_C6TEXT;
@@ -182,9 +186,9 @@ void F_StartFinale()
 	{
 		switch(gamemode)
 		{
-			case shareware:
-			case registered:
-			case retail:
+			case GameMode::Shareware:
+			case GameMode::Registered:
+			case GameMode::Retail:
 				switch(gameepisode)
 				{
 					case 1:
@@ -206,8 +210,8 @@ void F_StartFinale()
 						break;
 				}
 				break;
-			case commercial:
-				if(gamemission == pack_nerve)
+			case GameMode::Commercial:
+				if(gamemission == GameMission::PackNerve)
 				{
 					finaleflat = bgflat06;
 					finaletext = s_C6TEXT;
@@ -215,17 +219,17 @@ void F_StartFinale()
 				else
 				{
 					finaleflat = bgflat30;
-					finaletext = (gamemission == pack_tnt) ? s_T4TEXT : (gamemission == pack_plut) ? s_P4TEXT : s_C4TEXT;
+					finaletext = (gamemission == GameMission::PackTnt) ? s_T4TEXT : (gamemission == GameMission::PackPlut) ? s_P4TEXT : s_C4TEXT;
 				}
 				break;
-			case indetermined:
+			case GameMode::Indetermined:
 				break;
 		}
 	}
 
 	dsda_StartFinale();
 
-	finalestage = FINALE_STAGE_TEXT;
+	finalestage = FinaleScreen::Text;
 	finalecount = 0;
 }
 
@@ -233,7 +237,7 @@ void F_StartFinale()
 
 static dboolean F_BlockingInput()
 {
-	return finalestage == FINALE_STAGE_ART && endpalette && endpalette[0];
+	return finalestage == FinaleScreen::Art && endpalette && endpalette[0];
 }
 
 dboolean F_Responder(event_t* event)
@@ -241,16 +245,16 @@ dboolean F_Responder(event_t* event)
 	if(heretic) return Heretic_F_Responder(event);
 	if(hexen) return Hexen_F_Responder(event);
 
-	if(finalestage == FINALE_STAGE_CAST)
+	if(finalestage == FinaleScreen::Cast)
 		return F_CastResponder(event);
-	else if(finalestage == FINALE_STAGE_ART)
+	else if(finalestage == FinaleScreen::Art)
 	{
 		// If the palette is changed, kick to title instead of opening the menu
-		if(F_BlockingInput() && event->type == ev_keydown)
+		if(F_BlockingInput() && event->type == EventType::KeyDown)
 		{
-			finalestage = FINALE_STAGE_TITLE;
+			finalestage = FinaleScreen::Title;
 			S_StartVoidSound(g_sfx_swtchx);
-			V_SetPlayPal(playpal_default);
+			V_SetPlayPal(PlaypalIndex::Default);
 			V_DrawRawScreen("TITLEPIC");
 			return true;
 		}
@@ -284,7 +288,7 @@ extern "C" float Get_TextSpeed()
 dboolean F_ShowCast()
 {
 	return gamemap == 30 ||
-		(gamemission == pack_nerve && allow_incompatibility && gamemap == 8) ||
+		(gamemission == GameMission::PackNerve && allow_incompatibility && gamemap == 8) ||
 		dsda_FinaleShortcut();
 }
 
@@ -302,25 +306,25 @@ void F_Ticker()
 
 	if(!demo_compatibility)
 		WI_checkForAccelerate();                        // killough 3/28/98: check for acceleration
-	else if(gamemode == commercial && finalecount > 50) // check for skipping
+	else if(gamemode == GameMode::Commercial && finalecount > 50) // check for skipping
 		for(i = 0; i < g_maxplayers; i++)
-			if(players[i].cmd.buttons)
+			if(players[i].cmd.buttons != static_cast<ButtonCode>(0))
 				goto next_level; // go on to the next level
 
 	// advance animation
 	finalecount++;
 
-	if(finalestage == FINALE_STAGE_CAST)
+	if(finalestage == FinaleScreen::Cast)
 		F_CastTicker();
 
-	if(finalestage == FINALE_STAGE_TEXT)
+	if(finalestage == FinaleScreen::Text)
 	{
 		/* killough 2/28/98: changed to allow acceleration */
 		if(finalecount > strlen(finaletext) * (demo_compatibility ? TEXTSPEED : Get_TextSpeed()) +
 			(midstage ? NEWTEXTWAIT : TEXTWAIT) ||
 			(midstage && acceleratestage))
 		{
-			if(gamemode != commercial) // Doom 1 / Ultimate Doom episode end
+			if(gamemode != GameMode::Commercial) // Doom 1 / Ultimate Doom episode end
 			{
 				// with enough time, it's automatic
 				if(gameepisode == 3)
@@ -335,7 +339,7 @@ void F_Ticker()
 					if(F_ShowCast())
 						F_StartCast(nullptr, nullptr, true); // cast of Doom 2 characters
 					else
-						gameaction = ga_worlddone; // next level, e.g. MAP07
+						gameaction = GameAction::WorldDone; // next level, e.g. MAP07
 				}
 		}
 	}
@@ -360,7 +364,7 @@ extern "C" void F_TextWrite()
 	if(finalepatch)
 	{
 		V_ClearBorder();
-		V_DrawNamePatchFS(0, 0, 0, finalepatch, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatchFS(0, 0, 0, finalepatch, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	else
 		V_DrawBackground(finaleflat, 0);
@@ -402,7 +406,7 @@ extern "C" void F_TextWrite()
 				break;
 
 			// CPhipps - patch drawing updated
-			V_DrawNumPatch(cx, cy, 0, hud_font.font[c].lumpnum, CR_DEFAULT, VPT_STRETCH);
+			V_DrawNumPatch(cx, cy, 0, hud_font.font[c].lumpnum, ColorRange::Default, PatchTranslation::Stretch);
 			cx += w;
 		}
 	}
@@ -416,42 +420,42 @@ extern "C" void F_TextWrite()
 typedef struct
 {
 	const char** name; // CPhipps - const**
-	mobjtype_t type;
+	MobjType type;
 } castinfo_t;
 
 static const castinfo_t castorder_d2[] = {
-	{&s_CC_ZOMBIE, MT_POSSESSED},
-	{&s_CC_SHOTGUN, MT_SHOTGUY},
-	{&s_CC_HEAVY, MT_CHAINGUY},
-	{&s_CC_IMP, MT_TROOP},
-	{&s_CC_DEMON, MT_SERGEANT},
-	{&s_CC_LOST, MT_SKULL},
-	{&s_CC_CACO, MT_HEAD},
-	{&s_CC_HELL, MT_KNIGHT},
-	{&s_CC_BARON, MT_BRUISER},
-	{&s_CC_ARACH, MT_BABY},
-	{&s_CC_PAIN, MT_PAIN},
-	{&s_CC_REVEN, MT_UNDEAD},
-	{&s_CC_MANCU, MT_FATSO},
-	{&s_CC_ARCH, MT_VILE},
-	{&s_CC_SPIDER, MT_SPIDER},
-	{&s_CC_CYBER, MT_CYBORG},
-	{&s_CC_HERO, MT_PLAYER},
-	{nullptr, static_cast<mobjtype_t>(0)}
+	{&s_CC_ZOMBIE, MobjType::Possessed},
+	{&s_CC_SHOTGUN, MobjType::Shotguy},
+	{&s_CC_HEAVY, MobjType::Chainguy},
+	{&s_CC_IMP, MobjType::Troop},
+	{&s_CC_DEMON, MobjType::Sergeant},
+	{&s_CC_LOST, MobjType::Skull},
+	{&s_CC_CACO, MobjType::Head},
+	{&s_CC_HELL, MobjType::Knight},
+	{&s_CC_BARON, MobjType::Bruiser},
+	{&s_CC_ARACH, MobjType::Baby},
+	{&s_CC_PAIN, MobjType::Pain},
+	{&s_CC_REVEN, MobjType::Undead},
+	{&s_CC_MANCU, MobjType::Fatso},
+	{&s_CC_ARCH, MobjType::Vile},
+	{&s_CC_SPIDER, MobjType::Spider},
+	{&s_CC_CYBER, MobjType::Cyborg},
+	{&s_CC_HERO, MobjType::Player},
+	{nullptr, static_cast<MobjType>(0)}
 };
 
 static const castinfo_t castorder_d1[] = {
-	{&s_CC_ZOMBIE, MT_POSSESSED},
-	{&s_CC_SHOTGUN, MT_SHOTGUY},
-	{&s_CC_IMP, MT_TROOP},
-	{&s_CC_DEMON, MT_SERGEANT},
-	{&s_CC_LOST, MT_SKULL},
-	{&s_CC_CACO, MT_HEAD},
-	{&s_CC_BARON, MT_BRUISER},
-	{&s_CC_SPIDER, MT_SPIDER},
-	{&s_CC_CYBER, MT_CYBORG},
-	{&s_CC_HERO, MT_PLAYER},
-	{nullptr, static_cast<mobjtype_t>(0)}
+	{&s_CC_ZOMBIE, MobjType::Possessed},
+	{&s_CC_SHOTGUN, MobjType::Shotguy},
+	{&s_CC_IMP, MobjType::Troop},
+	{&s_CC_DEMON, MobjType::Sergeant},
+	{&s_CC_LOST, MobjType::Skull},
+	{&s_CC_CACO, MobjType::Head},
+	{&s_CC_BARON, MobjType::Bruiser},
+	{&s_CC_SPIDER, MobjType::Spider},
+	{&s_CC_CYBER, MobjType::Cyborg},
+	{&s_CC_HERO, MobjType::Player},
+	{nullptr, static_cast<MobjType>(0)}
 };
 
 static const castinfo_t* castorder = castorder_d2;
@@ -474,30 +478,30 @@ static void F_StartCastMusic(const char* music, dboolean loop_music)
 	if(music)
 	{
 		if(!S_ChangeMusicByName(music, loop_music))
-			lprintf(LO_WARN, "Finale cast music not found: %s\n", music);
+			lprintf(OutputLevels::Warn, "Finale cast music not found: %s\n", music);
 	}
-	else if(gamemode == commercial)
+	else if(gamemode == GameMode::Commercial)
 	{
-		S_ChangeMusic(mus_evil, loop_music);
+		S_ChangeMusic(MusicId::Evil, loop_music);
 	}
 	else
 	{
-		lprintf(LO_WARN, "Finale cast music unspecified\n");
+		lprintf(OutputLevels::Warn, "Finale cast music unspecified\n");
 		S_StopMusic();
 	}
 }
 
 void F_StartCast(const char* background, const char* music, dboolean loop_music)
 {
-	castorder = (gamemode == commercial ? castorder_d2 : castorder_d1);
+	castorder = (gamemode == GameMode::Commercial ? castorder_d2 : castorder_d1);
 	castbackground = (background ? background : bgcastcall);
 
-	wipegamestate = static_cast<gamestate_t>(-1); // force a screen wipe
+	wipegamestate = static_cast<GameState>(-1); // force a screen wipe
 	castnum = 0;
-	caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+	caststate = &states[std::to_underlying(mobjinfo[std::to_underlying(castorder[castnum].type)].seestate)];
 	casttics = caststate->tics;
 	castdeath = false;
-	finalestage = FINALE_STAGE_CAST;
+	finalestage = FinaleScreen::Cast;
 	castframes = 0;
 	castonmelee = 0;
 	castattacking = false;
@@ -510,84 +514,84 @@ void F_StartCast(const char* background, const char* music, dboolean loop_music)
 //
 extern "C" void F_CastTicker()
 {
-	int st;
-	int sfx;
+	StateId st;
+	SfxId sfx;
 
 	if(--casttics > 0)
 		return; // not time to change state yet
 
-	if(caststate->tics == -1 || caststate->nextstate == S_NULL)
+	if(caststate->tics == -1 || caststate->nextstate == StateId::Null)
 	{
 		// switch from deathstate to next monster
 		castnum++;
 		castdeath = false;
 		if(castorder[castnum].name == nullptr)
 			castnum = 0;
-		if(mobjinfo[castorder[castnum].type].seesound)
-			S_StartVoidSound(mobjinfo[castorder[castnum].type].seesound);
-		caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+		if(mobjinfo[std::to_underlying(castorder[castnum].type)].seesound != SfxId::None)
+			S_StartVoidSound(mobjinfo[std::to_underlying(castorder[castnum].type)].seesound);
+		caststate = &states[std::to_underlying(mobjinfo[std::to_underlying(castorder[castnum].type)].seestate)];
 		castframes = 0;
 	}
 	else
 	{
 		// just advance to next state in animation
-		if(caststate == &states[S_PLAY_ATK1])
+		if(caststate == &states[std::to_underlying(StateId::PlayAtk1)])
 			goto stopattack; // Oh, gross hack!
 		st = caststate->nextstate;
-		caststate = &states[st];
+		caststate = &states[std::to_underlying(st)];
 		castframes++;
 
 		// sound hacks....
 		switch(st)
 		{
-			case S_PLAY_ATK1: sfx = sfx_dshtgn;
+			case StateId::PlayAtk1: sfx = SfxId::Dshtgn;
 				break;
-			case S_POSS_ATK2: sfx = sfx_pistol;
+			case StateId::PossAtk2: sfx = SfxId::Pistol;
 				break;
-			case S_SPOS_ATK2: sfx = sfx_shotgn;
+			case StateId::SposAtk2: sfx = SfxId::Shotgn;
 				break;
-			case S_VILE_ATK2: sfx = sfx_vilatk;
+			case StateId::VileAtk2: sfx = SfxId::Vilatk;
 				break;
-			case S_SKEL_FIST2: sfx = sfx_skeswg;
+			case StateId::SkelFist2: sfx = SfxId::Skeswg;
 				break;
-			case S_SKEL_FIST4: sfx = sfx_skepch;
+			case StateId::SkelFist4: sfx = SfxId::Skepch;
 				break;
-			case S_SKEL_MISS2: sfx = sfx_skeatk;
+			case StateId::SkelMiss2: sfx = SfxId::Skeatk;
 				break;
-			case S_FATT_ATK8:
-			case S_FATT_ATK5:
-			case S_FATT_ATK2: sfx = sfx_firsht;
+			case StateId::FattAtk8:
+			case StateId::FattAtk5:
+			case StateId::FattAtk2: sfx = SfxId::Firsht;
 				break;
-			case S_CPOS_ATK2:
-			case S_CPOS_ATK3:
-			case S_CPOS_ATK4: sfx = sfx_shotgn;
+			case StateId::CposAtk2:
+			case StateId::CposAtk3:
+			case StateId::CposAtk4: sfx = SfxId::Shotgn;
 				break;
-			case S_TROO_ATK3: sfx = sfx_claw;
+			case StateId::TrooAtk3: sfx = SfxId::Claw;
 				break;
-			case S_SARG_ATK2: sfx = sfx_sgtatk;
+			case StateId::SargAtk2: sfx = SfxId::Sgtatk;
 				break;
-			case S_BOSS_ATK2:
-			case S_BOS2_ATK2:
-			case S_HEAD_ATK2: sfx = sfx_firsht;
+			case StateId::BossAtk2:
+			case StateId::Bos2Atk2:
+			case StateId::HeadAtk2: sfx = SfxId::Firsht;
 				break;
-			case S_SKULL_ATK2: sfx = sfx_sklatk;
+			case StateId::SkullAtk2: sfx = SfxId::Sklatk;
 				break;
-			case S_SPID_ATK2:
-			case S_SPID_ATK3: sfx = sfx_shotgn;
+			case StateId::SpidAtk2:
+			case StateId::SpidAtk3: sfx = SfxId::Shotgn;
 				break;
-			case S_BSPI_ATK2: sfx = sfx_plasma;
+			case StateId::BspiAtk2: sfx = SfxId::Plasma;
 				break;
-			case S_CYBER_ATK2:
-			case S_CYBER_ATK4:
-			case S_CYBER_ATK6: sfx = sfx_rlaunc;
+			case StateId::CyberAtk2:
+			case StateId::CyberAtk4:
+			case StateId::CyberAtk6: sfx = SfxId::Rlaunc;
 				break;
-			case S_PAIN_ATK3: sfx = sfx_sklatk;
+			case StateId::PainAtk3: sfx = SfxId::Sklatk;
 				break;
-			default: sfx = 0;
+			default: sfx = SfxId::None;
 				break;
 		}
 
-		if(sfx)
+		if(sfx != SfxId::None)
 			S_StartVoidSound(sfx);
 	}
 
@@ -596,30 +600,30 @@ extern "C" void F_CastTicker()
 		// go into attack frame
 		castattacking = true;
 		if(castonmelee)
-			caststate = &states[mobjinfo[castorder[castnum].type].meleestate];
+			caststate = &states[std::to_underlying(mobjinfo[std::to_underlying(castorder[castnum].type)].meleestate)];
 		else
-			caststate = &states[mobjinfo[castorder[castnum].type].missilestate];
+			caststate = &states[std::to_underlying(mobjinfo[std::to_underlying(castorder[castnum].type)].missilestate)];
 		castonmelee ^= 1;
-		if(caststate == &states[S_NULL])
+		if(caststate == &states[std::to_underlying(StateId::Null)])
 		{
 			if(castonmelee)
 				caststate =
-					&states[mobjinfo[castorder[castnum].type].meleestate];
+					&states[std::to_underlying(mobjinfo[std::to_underlying(castorder[castnum].type)].meleestate)];
 			else
 				caststate =
-					&states[mobjinfo[castorder[castnum].type].missilestate];
+					&states[std::to_underlying(mobjinfo[std::to_underlying(castorder[castnum].type)].missilestate)];
 		}
 	}
 
 	if(castattacking)
 	{
 		if(castframes == 24
-			|| caststate == &states[mobjinfo[castorder[castnum].type].seestate])
+			|| caststate == &states[std::to_underlying(mobjinfo[std::to_underlying(castorder[castnum].type)].seestate)])
 		{
 		stopattack:
 			castattacking = false;
 			castframes = 0;
-			caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+			caststate = &states[std::to_underlying(mobjinfo[std::to_underlying(castorder[castnum].type)].seestate)];
 		}
 	}
 
@@ -635,7 +639,7 @@ extern "C" void F_CastTicker()
 
 extern "C" dboolean F_CastResponder(event_t* ev)
 {
-	if(ev->type != ev_keydown)
+	if(ev->type != EventType::KeyDown)
 		return false;
 
 	if(castdeath)
@@ -643,12 +647,12 @@ extern "C" dboolean F_CastResponder(event_t* ev)
 
 	// go into death frame
 	castdeath = true;
-	caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
+	caststate = &states[std::to_underlying(mobjinfo[std::to_underlying(castorder[castnum].type)].deathstate)];
 	casttics = caststate->tics;
 	castframes = 0;
 	castattacking = false;
-	if(mobjinfo[castorder[castnum].type].deathsound)
-		S_StartVoidSound(mobjinfo[castorder[castnum].type].deathsound);
+	if(mobjinfo[std::to_underlying(castorder[castnum].type)].deathsound != SfxId::None)
+		S_StartVoidSound(mobjinfo[std::to_underlying(castorder[castnum].type)].deathsound);
 
 	return true;
 }
@@ -699,7 +703,7 @@ static void F_CastPrint(const char* text) // CPhipps - static, const char*
 
 		w = hud_font.font[c].width;
 		// CPhipps - patch drawing updated
-		V_DrawNumPatch(cx, 180, 0, hud_font.font[c].lumpnum, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNumPatch(cx, 180, 0, hud_font.font[c].lumpnum, ColorRange::Default, PatchTranslation::Stretch);
 		cx += w;
 	}
 }
@@ -720,19 +724,19 @@ extern "C" void F_CastDrawer()
 	V_ClearBorder();
 	// erase the entire screen to a background
 	// CPhipps - patch drawing updated
-	V_DrawNamePatchFS(0, 0, 0, castbackground, CR_DEFAULT, VPT_STRETCH); // Ty 03/30/98 bg texture extern
+	V_DrawNamePatchFS(0, 0, 0, castbackground, ColorRange::Default, PatchTranslation::Stretch); // Ty 03/30/98 bg texture extern
 
 	F_CastPrint(*(castorder[castnum].name));
 
 	// draw the current frame in the middle of the screen
-	sprdef = &sprites[caststate->sprite];
+	sprdef = &sprites[std::to_underlying(caststate->sprite)];
 	sprframe = &sprdef->spriteframes[caststate->frame & FF_FRAMEMASK];
 	lump = sprframe->lump[0];
 	flip = (dboolean)(sprframe->flip & 1);
 
 	// CPhipps - patch drawing updated
-	V_DrawNumPatch(160, 170, 0, lump+firstspritelump, CR_DEFAULT,
-		static_cast<enum patch_translation_e>(VPT_STRETCH | (flip ? VPT_FLIP : 0)));
+	V_DrawNumPatch(160, 170, 0, lump+firstspritelump, ColorRange::Default,
+		(flip ? PatchTranslation::Stretch | PatchTranslation::Flip : PatchTranslation::Stretch));
 }
 
 //
@@ -749,13 +753,13 @@ static void F_StartScrollMusic(const char* music, dboolean loop_music)
 	if(music)
 	{
 		if(!S_ChangeMusicByName(music, loop_music))
-			lprintf(LO_WARN, "Finale scroll music not found: %s\n", music);
+			lprintf(OutputLevels::Warn, "Finale scroll music not found: %s\n", music);
 	}
 	else if(W_LumpNameExists("D_BUNNY"))
-		S_ChangeMusic(mus_bunny, loop_music);
+		S_ChangeMusic(MusicId::Bunny, loop_music);
 	else
 	{
-		lprintf(LO_WARN, "Finale scroll music unspecified\n");
+		lprintf(OutputLevels::Warn, "Finale scroll music unspecified\n");
 		S_StopMusic();
 	}
 }
@@ -764,11 +768,11 @@ static dboolean end_patches_exist;
 
 void F_StartScroll(const char* right, const char* left, const char* music, dboolean loop_music)
 {
-	wipegamestate = static_cast<gamestate_t>(-1); // force a wipe
+	wipegamestate = static_cast<GameState>(-1); // force a wipe
 	scrollpic1 = right ? right : pfub1;
 	scrollpic2 = left ? left : pfub2;
 	finalecount = 0;
-	finalestage = FINALE_STAGE_ART;
+	finalestage = FinaleScreen::Art;
 
 	end_patches_exist = W_CheckNumForName("END0") != LUMP_NOT_FOUND &&
 		W_CheckNumForName("END1") != LUMP_NOT_FOUND &&
@@ -811,18 +815,18 @@ extern "C" void F_BunnyScroll()
 		int scrolled = 320 - (finalecount - 230) / 2;
 		if(scrolled <= 0)
 		{
-			V_DrawNamePatchFS(0, 0, 0, scrollpic2, CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatchFS(0, 0, 0, scrollpic2, ColorRange::Default, PatchTranslation::Stretch);
 		}
 		else if(scrolled >= 320)
 		{
-			V_DrawNamePatchFS(p1offset, 0, 0, scrollpic1, CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatchFS(p1offset, 0, 0, scrollpic1, ColorRange::Default, PatchTranslation::Stretch);
 			if(p1offset > 0)
-				V_DrawNamePatchFS(-320, 0, 0, scrollpic2, CR_DEFAULT, VPT_STRETCH);
+				V_DrawNamePatchFS(-320, 0, 0, scrollpic2, ColorRange::Default, PatchTranslation::Stretch);
 		}
 		else
 		{
-			V_DrawNamePatchFS(p1offset + 320 - scrolled, 0, 0, scrollpic1, CR_DEFAULT, VPT_STRETCH);
-			V_DrawNamePatchFS(-scrolled, 0, 0, scrollpic2, CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatchFS(p1offset + 320 - scrolled, 0, 0, scrollpic1, ColorRange::Default, PatchTranslation::Stretch);
+			V_DrawNamePatchFS(-scrolled, 0, 0, scrollpic2, ColorRange::Default, PatchTranslation::Stretch);
 		}
 		if(p2width == 320)
 			V_ClearBorder();
@@ -836,7 +840,7 @@ extern "C" void F_BunnyScroll()
 	if(finalecount < 1180)
 	{
 		// CPhipps - patch drawing updated
-		V_DrawNamePatch((320-13*8)/2, (200-8*8)/2, 0, "END0", CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatch((320-13*8)/2, (200-8*8)/2, 0, "END0", ColorRange::Default, PatchTranslation::Stretch);
 		laststage = 0;
 		return;
 	}
@@ -846,20 +850,20 @@ extern "C" void F_BunnyScroll()
 		stage = 6;
 	if(stage > laststage)
 	{
-		S_StartVoidSound(sfx_pistol);
+		S_StartVoidSound(SfxId::Pistol);
 		laststage = stage;
 	}
 
 	snprintf(name, sizeof name, "END%i", stage);
 	// CPhipps - patch drawing updated
-	V_DrawNamePatch((320-13*8)/2, (200-8*8)/2, 0, name, CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch((320-13*8)/2, (200-8*8)/2, 0, name, ColorRange::Default, PatchTranslation::Stretch);
 }
 
 void F_StartPostFinale()
 {
 	finalecount = 0;
-	finalestage = FINALE_STAGE_ART;
-	wipegamestate = static_cast<gamestate_t>(-1); // force a wipe
+	finalestage = FinaleScreen::Art;
+	wipegamestate = static_cast<GameState>(-1); // force a wipe
 }
 
 //
@@ -875,14 +879,14 @@ void F_Drawer()
 		return;
 	}
 
-	if(finalestage == FINALE_STAGE_TEXT)
+	if(finalestage == FinaleScreen::Text)
 		F_TextWrite();
-	else if(finalestage == FINALE_STAGE_ART)
+	else if(finalestage == FinaleScreen::Art)
 	{
 		const char* finalelump = nullptr;
 
 		// Allows use of HELP2 screen for PWADs under DOOM 1
-		dboolean showhelp2 = (gamemode == retail && pwad_help2_check) || gamemode <= registered;
+		dboolean showhelp2 = (gamemode == GameMode::Retail && pwad_help2_check) || gamemode <= GameMode::Registered;
 
 		switch(gameepisode)
 		{
@@ -904,11 +908,11 @@ void F_Drawer()
 		if(finalelump)
 		{
 			V_ClearBorder(); // e6y: wide-res
-			V_DrawNamePatchFS(0, 0, 0, finalelump, CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatchFS(0, 0, 0, finalelump, ColorRange::Default, PatchTranslation::Stretch);
 		}
 	}
-	else if(finalestage == FINALE_STAGE_CAST)
+	else if(finalestage == FinaleScreen::Cast)
 		F_CastDrawer();
-	else if(finalestage == FINALE_STAGE_TITLE)
+	else if(finalestage == FinaleScreen::Title)
 		V_DrawRawScreen("TITLEPIC"); // Palette change has ended, just show the title
 }

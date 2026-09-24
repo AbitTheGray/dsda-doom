@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Mobj Info
 
+#include <utility>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,10 +26,10 @@ static void dsda_ResetMobjInfo(int from, int to)
 
 	for(i = from; i < to; ++i)
 	{
-		mobjinfo[i].droppeditem = MT_NULL;
-		mobjinfo[i].infighting_group = IG_DEFAULT;
-		mobjinfo[i].projectile_group = PG_DEFAULT;
-		mobjinfo[i].splash_group = SG_DEFAULT;
+		mobjinfo[i].droppeditem = MobjType::Null;
+		mobjinfo[i].infighting_group = std::to_underlying(InfightingGroup::Default);
+		mobjinfo[i].projectile_group = std::to_underlying(ProjectileGroup::Default);
+		mobjinfo[i].splash_group = std::to_underlying(SplashGroup::Default);
 		mobjinfo[i].altspeed = NO_ALTSPEED;
 		mobjinfo[i].meleerange = MELEERANGE;
 		mobjinfo[i].visibility = VF_DOOM;
@@ -107,43 +109,43 @@ void dsda_FreeDehMobjInfo()
 	// free(edited_mobjinfo_bits);
 }
 
-int ZMT_MAPSPOT = ZMT_UNDEFINED;
-int ZMT_MAPSPOT_GRAVITY = ZMT_UNDEFINED;
-int ZMT_TELEPORTDEST2 = ZMT_UNDEFINED;
-int ZMT_TELEPORTDEST3 = ZMT_UNDEFINED;
-int ZMT_AMBIENTSOUND = ZMT_UNDEFINED;
+MobjType ZMT_MAPSPOT = ZMT_UNDEFINED;
+MobjType ZMT_MAPSPOT_GRAVITY = ZMT_UNDEFINED;
+MobjType ZMT_TELEPORTDEST2 = ZMT_UNDEFINED;
+MobjType ZMT_TELEPORTDEST3 = ZMT_UNDEFINED;
+MobjType ZMT_AMBIENTSOUND = ZMT_UNDEFINED;
 
 static mobjinfo_t zmt_mapspot_info = {
 	.doomednum = 9001,
-	.spawnstate = S_NULL,
+	.spawnstate = StateId::Null,
 	.spawnhealth = 1000,
-	.seestate = S_NULL,
-	.seesound = sfx_None,
+	.seestate = StateId::Null,
+	.seesound = SfxId::None,
 	.reactiontime = 8,
-	.attacksound = sfx_None,
-	.painstate = S_NULL,
+	.attacksound = SfxId::None,
+	.painstate = StateId::Null,
 	.painchance = 0,
-	.painsound = sfx_None,
-	.meleestate = S_NULL,
-	.missilestate = S_NULL,
-	.deathstate = S_NULL,
-	.xdeathstate = S_NULL,
-	.deathsound = sfx_None,
+	.painsound = SfxId::None,
+	.meleestate = StateId::Null,
+	.missilestate = StateId::Null,
+	.deathstate = StateId::Null,
+	.xdeathstate = StateId::Null,
+	.deathsound = SfxId::None,
 	.speed = 0,
 	.radius = 20 * FRACUNIT,
 	.height = 16 * FRACUNIT,
 	.mass = 100,
 	.damage = 0,
-	.activesound = sfx_None,
+	.activesound = SfxId::None,
 	.flags = MF_NOBLOCKMAP | MF_NOSECTOR | MF_NOGRAVITY,
-	.raisestate = S_NULL,
-	.droppeditem = MT_NULL,
-	.crashstate = S_NULL,
+	.raisestate = StateId::Null,
+	.droppeditem = MobjType::Null,
+	.crashstate = StateId::Null,
 	.flags2 = 0,
-	.infighting_group = IG_DEFAULT,
-	.projectile_group = PG_DEFAULT,
-	.splash_group = SG_DEFAULT,
-	.ripsound = sfx_None,
+	.infighting_group = std::to_underlying(InfightingGroup::Default),
+	.projectile_group = std::to_underlying(ProjectileGroup::Default),
+	.splash_group = std::to_underlying(SplashGroup::Default),
+	.ripsound = SfxId::None,
 	.altspeed = NO_ALTSPEED,
 	.meleerange = MELEERANGE,
 	.bloodcolor = 0,
@@ -152,35 +154,35 @@ static mobjinfo_t zmt_mapspot_info = {
 
 static mobjinfo_t zmt_mapspot_gravity_info = {
 	.doomednum = 9013,
-	.spawnstate = S_NULL,
+	.spawnstate = StateId::Null,
 	.spawnhealth = 1000,
-	.seestate = S_NULL,
-	.seesound = sfx_None,
+	.seestate = StateId::Null,
+	.seesound = SfxId::None,
 	.reactiontime = 8,
-	.attacksound = sfx_None,
-	.painstate = S_NULL,
+	.attacksound = SfxId::None,
+	.painstate = StateId::Null,
 	.painchance = 0,
-	.painsound = sfx_None,
-	.meleestate = S_NULL,
-	.missilestate = S_NULL,
-	.deathstate = S_NULL,
-	.xdeathstate = S_NULL,
-	.deathsound = sfx_None,
+	.painsound = SfxId::None,
+	.meleestate = StateId::Null,
+	.missilestate = StateId::Null,
+	.deathstate = StateId::Null,
+	.xdeathstate = StateId::Null,
+	.deathsound = SfxId::None,
 	.speed = 0,
 	.radius = 20 * FRACUNIT,
 	.height = 16 * FRACUNIT,
 	.mass = 100,
 	.damage = 0,
-	.activesound = sfx_None,
+	.activesound = SfxId::None,
 	.flags = 0,
-	.raisestate = S_NULL,
-	.droppeditem = MT_NULL,
-	.crashstate = S_NULL,
+	.raisestate = StateId::Null,
+	.droppeditem = MobjType::Null,
+	.crashstate = StateId::Null,
 	.flags2 = MF2_DONTDRAW,
-	.infighting_group = IG_DEFAULT,
-	.projectile_group = PG_DEFAULT,
-	.splash_group = SG_DEFAULT,
-	.ripsound = sfx_None,
+	.infighting_group = std::to_underlying(InfightingGroup::Default),
+	.projectile_group = std::to_underlying(ProjectileGroup::Default),
+	.splash_group = std::to_underlying(SplashGroup::Default),
+	.ripsound = SfxId::None,
 	.altspeed = NO_ALTSPEED,
 	.meleerange = MELEERANGE,
 	.bloodcolor = 0,
@@ -189,35 +191,35 @@ static mobjinfo_t zmt_mapspot_gravity_info = {
 
 static mobjinfo_t zmt_teleportdest2_info = {
 	.doomednum = 9044,
-	.spawnstate = S_NULL,
+	.spawnstate = StateId::Null,
 	.spawnhealth = 1000,
-	.seestate = S_NULL,
-	.seesound = sfx_None,
+	.seestate = StateId::Null,
+	.seesound = SfxId::None,
 	.reactiontime = 8,
-	.attacksound = sfx_None,
-	.painstate = S_NULL,
+	.attacksound = SfxId::None,
+	.painstate = StateId::Null,
 	.painchance = 0,
-	.painsound = sfx_None,
-	.meleestate = S_NULL,
-	.missilestate = S_NULL,
-	.deathstate = S_NULL,
-	.xdeathstate = S_NULL,
-	.deathsound = sfx_None,
+	.painsound = SfxId::None,
+	.meleestate = StateId::Null,
+	.missilestate = StateId::Null,
+	.deathstate = StateId::Null,
+	.xdeathstate = StateId::Null,
+	.deathsound = SfxId::None,
 	.speed = 0,
 	.radius = 20 * FRACUNIT,
 	.height = 16 * FRACUNIT,
 	.mass = 100,
 	.damage = 0,
-	.activesound = sfx_None,
+	.activesound = SfxId::None,
 	.flags = MF_NOBLOCKMAP | MF_NOSECTOR | MF_NOGRAVITY,
-	.raisestate = S_NULL,
-	.droppeditem = MT_NULL,
-	.crashstate = S_NULL,
+	.raisestate = StateId::Null,
+	.droppeditem = MobjType::Null,
+	.crashstate = StateId::Null,
 	.flags2 = 0,
-	.infighting_group = IG_DEFAULT,
-	.projectile_group = PG_DEFAULT,
-	.splash_group = SG_DEFAULT,
-	.ripsound = sfx_None,
+	.infighting_group = std::to_underlying(InfightingGroup::Default),
+	.projectile_group = std::to_underlying(ProjectileGroup::Default),
+	.splash_group = std::to_underlying(SplashGroup::Default),
+	.ripsound = SfxId::None,
 	.altspeed = NO_ALTSPEED,
 	.meleerange = MELEERANGE,
 	.bloodcolor = 0,
@@ -226,35 +228,35 @@ static mobjinfo_t zmt_teleportdest2_info = {
 
 static mobjinfo_t zmt_teleportdest3_info = {
 	.doomednum = 9043,
-	.spawnstate = S_NULL,
+	.spawnstate = StateId::Null,
 	.spawnhealth = 1000,
-	.seestate = S_NULL,
-	.seesound = sfx_None,
+	.seestate = StateId::Null,
+	.seesound = SfxId::None,
 	.reactiontime = 8,
-	.attacksound = sfx_None,
-	.painstate = S_NULL,
+	.attacksound = SfxId::None,
+	.painstate = StateId::Null,
 	.painchance = 0,
-	.painsound = sfx_None,
-	.meleestate = S_NULL,
-	.missilestate = S_NULL,
-	.deathstate = S_NULL,
-	.xdeathstate = S_NULL,
-	.deathsound = sfx_None,
+	.painsound = SfxId::None,
+	.meleestate = StateId::Null,
+	.missilestate = StateId::Null,
+	.deathstate = StateId::Null,
+	.xdeathstate = StateId::Null,
+	.deathsound = SfxId::None,
 	.speed = 0,
 	.radius = 20 * FRACUNIT,
 	.height = 16 * FRACUNIT,
 	.mass = 100,
 	.damage = 0,
-	.activesound = sfx_None,
+	.activesound = SfxId::None,
 	.flags = MF_NOBLOCKMAP | MF_NOSECTOR,
-	.raisestate = S_NULL,
-	.droppeditem = MT_NULL,
-	.crashstate = S_NULL,
+	.raisestate = StateId::Null,
+	.droppeditem = MobjType::Null,
+	.crashstate = StateId::Null,
 	.flags2 = 0,
-	.infighting_group = IG_DEFAULT,
-	.projectile_group = PG_DEFAULT,
-	.splash_group = SG_DEFAULT,
-	.ripsound = sfx_None,
+	.infighting_group = std::to_underlying(InfightingGroup::Default),
+	.projectile_group = std::to_underlying(ProjectileGroup::Default),
+	.splash_group = std::to_underlying(SplashGroup::Default),
+	.ripsound = SfxId::None,
 	.altspeed = NO_ALTSPEED,
 	.meleerange = MELEERANGE,
 	.bloodcolor = 0,
@@ -263,35 +265,35 @@ static mobjinfo_t zmt_teleportdest3_info = {
 
 static mobjinfo_t zmt_ambient_sound = {
 	.doomednum = 14064,
-	.spawnstate = S_NULL,
+	.spawnstate = StateId::Null,
 	.spawnhealth = 1000,
-	.seestate = S_NULL,
-	.seesound = sfx_None,
+	.seestate = StateId::Null,
+	.seesound = SfxId::None,
 	.reactiontime = 8,
-	.attacksound = sfx_None,
-	.painstate = S_NULL,
+	.attacksound = SfxId::None,
+	.painstate = StateId::Null,
 	.painchance = 0,
-	.painsound = sfx_None,
-	.meleestate = S_NULL,
-	.missilestate = S_NULL,
-	.deathstate = S_NULL,
-	.xdeathstate = S_NULL,
-	.deathsound = sfx_None,
+	.painsound = SfxId::None,
+	.meleestate = StateId::Null,
+	.missilestate = StateId::Null,
+	.deathstate = StateId::Null,
+	.xdeathstate = StateId::Null,
+	.deathsound = SfxId::None,
 	.speed = 0,
 	.radius = 20 * FRACUNIT,
 	.height = 16 * FRACUNIT,
 	.mass = 100,
 	.damage = 0,
-	.activesound = sfx_None,
+	.activesound = SfxId::None,
 	.flags = MF_NOBLOCKMAP | MF_NOSECTOR,
-	.raisestate = S_NULL,
-	.droppeditem = MT_NULL,
-	.crashstate = S_NULL,
+	.raisestate = StateId::Null,
+	.droppeditem = MobjType::Null,
+	.crashstate = StateId::Null,
 	.flags2 = 0,
-	.infighting_group = IG_DEFAULT,
-	.projectile_group = PG_DEFAULT,
-	.splash_group = SG_DEFAULT,
-	.ripsound = sfx_None,
+	.infighting_group = std::to_underlying(InfightingGroup::Default),
+	.projectile_group = std::to_underlying(ProjectileGroup::Default),
+	.splash_group = std::to_underlying(SplashGroup::Default),
+	.ripsound = SfxId::None,
 	.altspeed = NO_ALTSPEED,
 	.meleerange = MELEERANGE,
 	.bloodcolor = 0,
@@ -300,7 +302,7 @@ static mobjinfo_t zmt_ambient_sound = {
 
 typedef struct
 {
-	int* index_p;
+	MobjType* index_p;
 	mobjinfo_t* mobjinfo_p;
 } append_mobjinfo_t;
 
@@ -324,7 +326,7 @@ void dsda_AppendZDoomMobjInfo()
 	for(i = 0; i < append_mobjinfo_count; ++i)
 	{
 		mobjinfo = dsda_GetDehMobjInfo(index);
-		*(append_mobjinfo[i].index_p) = index;
+		*(append_mobjinfo[i].index_p) = static_cast<MobjType>(index);
 		*(mobjinfo.info) = *(append_mobjinfo[i].mobjinfo_p);
 		++index;
 	}

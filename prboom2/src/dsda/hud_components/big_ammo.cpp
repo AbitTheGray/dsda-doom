@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Big Ammo HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "big_ammo.hpp"
@@ -16,44 +18,44 @@ typedef struct
 
 static local_component_t* local;
 
-int dsda_AmmoColorBig(player_t* player)
+TextColorIndex dsda_AmmoColorBig(player_t* player)
 {
 	int ammo_percent;
 
 	ammo_percent = P_AmmoPercent(player, player->readyweapon);
 
 	if(ammo_percent < hud_ammo_red)
-		return dsda_tc_stbar_ammo_bad;
+		return TextColorIndex::StbarAmmoBad;
 	else if(ammo_percent < hud_ammo_yellow)
-		return dsda_tc_stbar_ammo_warning;
+		return TextColorIndex::StbarAmmoWarning;
 	else if(ammo_percent < 100)
-		return dsda_tc_stbar_ammo_ok;
+		return TextColorIndex::StbarAmmoOk;
 	else
-		return dsda_tc_stbar_ammo_full;
+		return TextColorIndex::StbarAmmoFull;
 }
 
 static void dsda_DrawComponent()
 {
 	player_t* player;
-	ammotype_t ammo_type;
+	AmmoType ammo_type;
 	int ammo;
 
 	if(hexen)
 		return;
 
 	player = &players[displayplayer];
-	ammo_type = weaponinfo[player->readyweapon].ammo;
+	ammo_type = weaponinfo[std::to_underlying(player->readyweapon)].ammo;
 
-	if(ammo_type == am_noammo || !player->maxammo[ammo_type])
+	if(ammo_type == AmmoType::NoAmmo || !player->maxammo[std::to_underlying(ammo_type)])
 		return;
 
-	ammo = player->ammo[ammo_type];
+	ammo = player->ammo[std::to_underlying(ammo_type)];
 
 	dsda_DrawBigNumber(local->component.x, local->component.y, PATCH_DELTA_X, 0,
-		dsda_TextCR((dsda_text_color_index_t)dsda_AmmoColorBig(player)), local->component.vpt, 3, ammo);
+		dsda_TextCR(dsda_AmmoColorBig(player)), local->component.vpt, 3, ammo);
 }
 
-void dsda_InitBigAmmoHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitBigAmmoHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

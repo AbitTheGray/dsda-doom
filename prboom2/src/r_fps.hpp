@@ -6,12 +6,12 @@
 
 #pragma once
 
+#include "doomstat.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomstat.hpp"
 
 extern int movement_smooth;
 extern dboolean isExtraDDisplay;

@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Death
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "d_player.hpp"
 #include "v_video.hpp"
@@ -20,29 +22,30 @@ extern int curpos;
 extern int newtorch;
 extern int newtorchdelta;
 
-typedef enum
+enum struct DeathUseAction : int32_t
 {
-	death_use_default,
-	death_use_nothing,
-	death_use_reload,
-} death_use_action_t;
+	Default,
+	Nothing,
+	Reload,
+};
 
-static int dsda_DeathUseAction()
+static DeathUseAction dsda_DeathUseAction()
 {
 	// TODO: possible "allow respawn" mapinfo flag
 	dboolean mapinfo_respawn = skill_info.flags & SI_PLAYER_RESPAWN;
 
 	if(demoplayback || demorecording || mapinfo_respawn)
-		return death_use_default;
+		return DeathUseAction::Default;
 
-	return dsda_IntConfig(dsda_config_death_use_action);
+	// the config stores the action as a plain int
+	return static_cast<DeathUseAction>(dsda_IntConfig(ConfigId::DeathUseAction));
 }
 
 void dsda_DeathUse(player_t* player)
 {
 	switch(dsda_DeathUseAction())
 	{
-		case death_use_default:
+		case DeathUseAction::Default:
 		default:
 			if(raven)
 			{
@@ -57,7 +60,7 @@ void dsda_DeathUse(player_t* player)
 
 				if(hexen)
 				{
-					player->mo->special1.i = player->pclass;
+					player->mo->special1.i = std::to_underlying(player->pclass);
 					if(player->mo->special1.i > 2)
 					{
 						player->mo->special1.i = 0;
@@ -69,11 +72,11 @@ void dsda_DeathUse(player_t* player)
 				player->mo->special2.i = 666;
 			}
 
-			player->playerstate = PST_REBORN;
+			player->playerstate = PlayerState::Reborn;
 			break;
-		case death_use_nothing:
+		case DeathUseAction::Nothing:
 			break;
-		case death_use_reload:
+		case DeathUseAction::Reload:
 		{
 			int slot = dsda_LastSaveSlot();
 			static int last_load_tic;

@@ -4,6 +4,9 @@
 
 #pragma once
 
+// declared in v_video.hpp; the fixed underlying type makes this enough
+enum struct ColorRange : int32_t;
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -21,8 +24,8 @@ void MN_DrawLoad();
 void MN_DrawSave();
 void MN_DrawPause();
 void MN_DrawMessage(const char* messageString);
-void MN_DrawSlider(int x, int y, int width, int range, int slot, int color);
-void MN_DrawTitle(int y, const char* text, int cm);
+void MN_DrawSlider(int x, int y, int width, int range, int slot, ColorRange color);
+void MN_DrawTitle(int y, const char* text, ColorRange cm);
 void MN_DrTextA(const char* text, int x, int y);
 int MN_TextAHeight(const char* text);
 int MN_TextAWidth(const char* text);

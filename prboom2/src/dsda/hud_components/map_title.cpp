@@ -22,12 +22,12 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 		str,
 		max_size,
 		"%s%s",
-		dsda_TextColor(dsda_tc_map_title),
+		dsda_TextColor(TextColorIndex::MapTitle),
 		hud_title.string
 	);
 }
 
-void dsda_InitMapTitleHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitMapTitleHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

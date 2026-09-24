@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "sounds.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "sounds.hpp"
 
 int dsda_GetDehSFXIndex(const char* key, size_t length);
 int dsda_GetOriginalSFXIndex(const char* key);

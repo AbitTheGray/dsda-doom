@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Tools
 
+#include <utility>
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -110,7 +112,7 @@ static void dsda_HandleTurbo()
 {
 	dsda_arg_t* arg;
 
-	arg = dsda_Arg(dsda_arg_turbo);
+	arg = dsda_Arg(ArgId::Turbo);
 
 	if(arg->found)
 		turbo_scale = arg->value.v_int;
@@ -141,7 +143,7 @@ void dsda_ToggleFrozenMode()
 
 static void dsda_HandleBuild()
 {
-	start_in_build_mode = dsda_Flag(dsda_arg_build);
+	start_in_build_mode = dsda_Flag(ArgId::Build);
 }
 
 int dsda_StartInBuildMode()
@@ -154,16 +156,16 @@ void dsda_ReadCommandLine()
 	dsda_arg_t* arg;
 	int dsda_time_all;
 
-	dsda_track_pacifist = dsda_Flag(dsda_arg_track_pacifist);
-	dsda_track_100k = dsda_Flag(dsda_arg_track_100k);
-	dsda_track_reality = dsda_Flag(dsda_arg_track_reality);
-	dsda_analysis = dsda_Flag(dsda_arg_analysis);
-	dsda_time_keys = dsda_SimpleIntArg(dsda_arg_time_keys);
-	dsda_time_use = dsda_SimpleIntArg(dsda_arg_time_use);
-	dsda_time_secrets = dsda_SimpleIntArg(dsda_arg_time_secrets);
-	dsda_time_all = dsda_SimpleIntArg(dsda_arg_time_all);
+	dsda_track_pacifist = dsda_Flag(ArgId::TrackPacifist);
+	dsda_track_100k = dsda_Flag(ArgId::Track100k);
+	dsda_track_reality = dsda_Flag(ArgId::TrackReality);
+	dsda_analysis = dsda_Flag(ArgId::Analysis);
+	dsda_time_keys = dsda_SimpleIntArg(ArgId::TimeKeys);
+	dsda_time_use = dsda_SimpleIntArg(ArgId::TimeUse);
+	dsda_time_secrets = dsda_SimpleIntArg(ArgId::TimeSecrets);
+	dsda_time_all = dsda_SimpleIntArg(ArgId::TimeAll);
 
-	if((arg = dsda_Arg(dsda_arg_movie))->found)
+	if((arg = dsda_Arg(ArgId::Movie))->found)
 		dsda_movie_target = arg->value.v_int;
 
 	if(dsda_time_all)
@@ -173,14 +175,14 @@ void dsda_ReadCommandLine()
 		dsda_time_secrets = dsda_time_all;
 	}
 
-	arg = dsda_Arg(dsda_arg_export_ghost);
+	arg = dsda_Arg(ArgId::ExportGhost);
 	if(arg->found)
 		dsda_InitGhostExport(arg->value.v_string);
 
 	dsda_HandleTurbo();
 	dsda_HandleBuild();
 
-	arg = dsda_Arg(dsda_arg_import_ghost);
+	arg = dsda_Arg(ArgId::ImportGhost);
 	if(arg->found)
 		dsda_InitGhostImport(arg->value.v_string_array, arg->count);
 
@@ -212,7 +214,7 @@ void dsda_DisplayNotifications()
 
 	if(dsda_100k_on_map && dsda_track_100k && !dsda_100k_note_shown)
 	{
-		dsda_TrackFeature(uf_100k);
+		dsda_TrackFeature(FeatureFlag::Track100k);
 
 		dsda_100k_note_shown = true;
 		dsda_DisplayNotification("100K achieved!");
@@ -251,7 +253,7 @@ void dsda_DecomposeMovieTime(dsda_movie_time_t* total_time)
 
 extern "C" void dsda_DisplayNotification(const char* msg)
 {
-	S_StartVoidSound(gamemode == commercial ? sfx_radio : sfx_itmbk);
+	S_StartVoidSound(gamemode == GameMode::Commercial ? SfxId::Radio : SfxId::Itmbk);
 	doom_printf("%s", msg);
 }
 
@@ -260,22 +262,22 @@ void dsda_WatchReborn(int playernum)
 	dsda_reborn = true;
 }
 
-void dsda_WatchCard(card_t card)
+void dsda_WatchCard(Card card)
 {
 	if(dsda_time_keys)
 		switch(card)
 		{
-			case it_bluecard:
-			case it_blueskull:
-				dsda_AddSplit(DSDA_SPLIT_BLUE_KEY, dsda_time_keys);
+			case Card::BlueCard:
+			case Card::BlueSkull:
+				dsda_AddSplit(SplitClass::BlueKey, dsda_time_keys);
 				break;
-			case it_yellowcard:
-			case it_yellowskull:
-				dsda_AddSplit(DSDA_SPLIT_YELLOW_KEY, dsda_time_keys);
+			case Card::YellowCard:
+			case Card::YellowSkull:
+				dsda_AddSplit(SplitClass::YellowKey, dsda_time_keys);
 				break;
-			case it_redcard:
-			case it_redskull:
-				dsda_AddSplit(DSDA_SPLIT_RED_KEY, dsda_time_keys);
+			case Card::RedCard:
+			case Card::RedSkull:
+				dsda_AddSplit(SplitClass::RedKey, dsda_time_keys);
 				break;
 			default:
 				break;
@@ -288,7 +290,7 @@ int player_damage_last_tic;
 void dsda_WatchDamage(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 {
 	if(
-		((source && source->player) || (inflictor && inflictor->intflags & MIF_PLAYER_DAMAGED_BARREL))
+		((source && source->player) || (inflictor && (inflictor->intflags & MobjIntFlag::PlayerDamagedBarrel) != MobjIntFlag{}))
 		&& damage != TELEFRAG_DAMAGE
 	)
 	{
@@ -303,8 +305,8 @@ void dsda_WatchDamage(mobj_t* target, mobj_t* inflictor, mobj_t* source, int dam
 			player_damage_last_tic += damage;
 		}
 
-		if(target->type == MT_BARREL || (heretic && target->type == HERETIC_MT_POD))
-			target->intflags |= MIF_PLAYER_DAMAGED_BARREL;
+		if(target->type == MobjType::Barrel || (heretic && target->type == MobjType::HereticPod))
+			target->intflags |= MobjIntFlag::PlayerDamagedBarrel;
 		else if(!target->player)
 			dsda_pacifist = false;
 	}
@@ -333,7 +335,7 @@ void dsda_WatchDeath(mobj_t* thing)
 void dsda_WatchKill(player_t* player, mobj_t* target)
 {
 	player->killcount++;
-	if(target->intflags & MIF_SPAWNED_BY_ICON) player->maxkilldiscount++;
+	if((target->intflags & MobjIntFlag::SpawnedByIcon) != MobjIntFlag{}) player->maxkilldiscount++;
 	dsda_WadStatsKill();
 }
 
@@ -341,14 +343,14 @@ void dsda_WatchResurrection(mobj_t* target, mobj_t* raiser)
 {
 	int i;
 
-	if(raiser && raiser->intflags & MIF_SPAWNED_BY_ICON)
-		target->intflags |= MIF_SPAWNED_BY_ICON;
+	if(raiser && (raiser->intflags & MobjIntFlag::SpawnedByIcon) != MobjIntFlag{})
+		target->intflags |= MobjIntFlag::SpawnedByIcon;
 
 	if(
 		(
 			(target->flags ^ MF_COUNTKILL) &
 			(MF_FRIEND | MF_COUNTKILL)
-		) || target->intflags & MIF_SPAWNED_BY_ICON
+		) || (target->intflags & MobjIntFlag::SpawnedByIcon) != MobjIntFlag{}
 	)
 		return;
 
@@ -373,8 +375,8 @@ void dsda_WatchCrush(mobj_t* thing, int damage)
 
 	// invincible
 	if(
-		(damage < 1000 || (!comp[comp_god] && (player->cheats & CF_GODMODE)))
-		&& (player->cheats & CF_GODMODE || player->powers[pw_invulnerability])
+		(damage < 1000 || (!comp[std::to_underlying(CompOption::God)] && (player->cheats & CF_GODMODE)))
+		&& (player->cheats & CF_GODMODE || player->powers[std::to_underlying(PowerType::Invulnerability)])
 	)
 		return;
 
@@ -385,8 +387,8 @@ void dsda_WatchSpawn(mobj_t* spawned)
 {
 	if(
 		(spawned->flags & MF_COUNTKILL)
-		|| spawned->type == MT_SKULL
-		|| spawned->type == MT_BOSSBRAIN
+		|| spawned->type == MobjType::Skull
+		|| spawned->type == MobjType::Bossbrain
 	)
 		dsda_any_monsters = true;
 
@@ -419,7 +421,7 @@ void dsda_WatchUnMorph(mobj_t* morphed)
 
 void dsda_WatchIconSpawn(mobj_t* spawned)
 {
-	spawned->intflags |= MIF_SPAWNED_BY_ICON;
+	spawned->intflags |= MobjIntFlag::SpawnedByIcon;
 
 	// Fix count from dsda_WatchSpawn
 	// We can't know inside P_SpawnMobj what the source is
@@ -449,10 +451,10 @@ void dsda_WatchCommand()
 		if(!playeringame[i]) continue;
 
 		cmd = &players[i].cmd;
-		player_class = &pclass[players[i].pclass];
+		player_class = &pclass[std::to_underlying(players[i].pclass)];
 
-		if(cmd->buttons & BT_USE && dsda_time_use)
-			dsda_AddSplit(DSDA_SPLIT_USE, dsda_time_use);
+		if((cmd->buttons & ButtonCode::Use) != ButtonCode{} && dsda_time_use)
+			dsda_AddSplit(SplitClass::Use, dsda_time_use);
 
 		if(cmd->sidemove != 0 || abs(cmd->forwardmove) > player_class->stroller_threshold)
 			dsda_stroller = false;
@@ -531,7 +533,7 @@ void dsda_WatchLevelCompletion()
 		// max rules: everything dead that affects kill counter except icon spawns
 		if(
 			!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL))
-			&& !(mobj->intflags & MIF_SPAWNED_BY_ICON)
+			&& (mobj->intflags & MobjIntFlag::SpawnedByIcon) == MobjIntFlag{}
 			&& mobj->health > 0
 		)
 		{
@@ -574,22 +576,22 @@ extern "C" dboolean dsda_IsWeapon(mobj_t* thing)
 {
 	switch(thing->sprite)
 	{
-		case SPR_BFUG:
-		case SPR_MGUN:
-		case SPR_CSAW:
-		case SPR_LAUN:
-		case SPR_PLAS:
-		case SPR_SHOT:
-		case SPR_SGN2:
+		case SpriteId::Bfug:
+		case SpriteId::Mgun:
+		case SpriteId::Csaw:
+		case SpriteId::Laun:
+		case SpriteId::Plas:
+		case SpriteId::Shot:
+		case SpriteId::Sgn2:
 			return true;
 		default:
 			return false;
 	}
 }
 
-void dsda_WatchWeaponFire(weapontype_t weapon)
+void dsda_WatchWeaponFire(WeaponType weapon)
 {
-	if(weapon == wp_fist || weapon == wp_pistol || weapon == wp_chainsaw) return;
+	if(weapon == WeaponType::Fist || weapon == WeaponType::Pistol || weapon == WeaponType::Chainsaw) return;
 
 	dsda_tyson_weapons = false;
 }
@@ -597,7 +599,7 @@ void dsda_WatchWeaponFire(weapontype_t weapon)
 void dsda_WatchSecret()
 {
 	if(dsda_time_secrets)
-		dsda_AddSplit(DSDA_SPLIT_SECRET, dsda_time_secrets);
+		dsda_AddSplit(SplitClass::Secret, dsda_time_secrets);
 }
 
 static void dsda_ResetTracking()

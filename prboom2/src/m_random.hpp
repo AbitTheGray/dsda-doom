@@ -6,13 +6,15 @@
 
 #pragma once
 
+#include <utility>
+
+#include "m_fixed.hpp"
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "m_fixed.hpp"
-#include "doomtype.hpp"
 
 // killough 1/19/98: rewritten to use to use a better random number generator
 // in the new engine, although the old one is available for compatibility.
@@ -36,83 +38,83 @@ extern "C"
 // indicated by the #'s, because they're critical for preserving demo
 // sync. Do not remove entries simply because they become unused later.
 
-typedef enum
+enum struct RandomClass : int32_t
 {
-	pr_skullfly,     // #1
-	pr_damage,       // #2
-	pr_crush,        // #3
-	pr_genlift,      // #4
-	pr_killtics,     // #5
-	pr_damagemobj,   // #6
-	pr_painchance,   // #7
-	pr_lights,       // #8
-	pr_explode,      // #9
-	pr_respawn,      // #10
-	pr_lastlook,     // #11
-	pr_spawnthing,   // #12
-	pr_spawnpuff,    // #13
-	pr_spawnblood,   // #14
-	pr_missile,      // #15
-	pr_shadow,       // #16
-	pr_plats,        // #17
-	pr_punch,        // #18
-	pr_punchangle,   // #19
-	pr_saw,          // #20
-	pr_plasma,       // #21
-	pr_gunshot,      // #22
-	pr_misfire,      // #23
-	pr_shotgun,      // #24
-	pr_bfg,          // #25
-	pr_slimehurt,    // #26
-	pr_dmspawn,      // #27
-	pr_missrange,    // #28
-	pr_trywalk,      // #29
-	pr_newchase,     // #30
-	pr_newchasedir,  // #31
-	pr_see,          // #32
-	pr_facetarget,   // #33
-	pr_posattack,    // #34
-	pr_sposattack,   // #35
-	pr_cposattack,   // #36
-	pr_spidrefire,   // #37
-	pr_troopattack,  // #38
-	pr_sargattack,   // #39
-	pr_headattack,   // #40
-	pr_bruisattack,  // #41
-	pr_tracer,       // #42
-	pr_skelfist,     // #43
-	pr_scream,       // #44
-	pr_brainscream,  // #45
-	pr_cposrefire,   // #46
-	pr_brainexp,     // #47
-	pr_spawnfly,     // #48
-	pr_misc,         // #49
-	pr_all_in_one,   // #50
+	Skullfly,     // #1
+	Damage,       // #2
+	Crush,        // #3
+	Genlift,      // #4
+	Killtics,     // #5
+	Damagemobj,   // #6
+	Painchance,   // #7
+	Lights,       // #8
+	Explode,      // #9
+	Respawn,      // #10
+	Lastlook,     // #11
+	Spawnthing,   // #12
+	Spawnpuff,    // #13
+	Spawnblood,   // #14
+	Missile,      // #15
+	Shadow,       // #16
+	Plats,        // #17
+	Punch,        // #18
+	Punchangle,   // #19
+	Saw,          // #20
+	Plasma,       // #21
+	Gunshot,      // #22
+	Misfire,      // #23
+	Shotgun,      // #24
+	Bfg,          // #25
+	Slimehurt,    // #26
+	Dmspawn,      // #27
+	Missrange,    // #28
+	Trywalk,      // #29
+	Newchase,     // #30
+	Newchasedir,  // #31
+	See,          // #32
+	Facetarget,   // #33
+	Posattack,    // #34
+	Sposattack,   // #35
+	Cposattack,   // #36
+	Spidrefire,   // #37
+	Troopattack,  // #38
+	Sargattack,   // #39
+	Headattack,   // #40
+	Bruisattack,  // #41
+	Tracer,       // #42
+	Skelfist,     // #43
+	Scream,       // #44
+	Brainscream,  // #45
+	Cposrefire,   // #46
+	Brainexp,     // #47
+	Spawnfly,     // #48
+	Misc,         // #49
+	AllInOne,   // #50
 	/* CPhipps - new entries from MBF, mostly unused for now */
-	pr_opendoor,     // #51
-	pr_targetsearch, // #52
-	pr_friends,      // #53
-	pr_threshold,    // #54
-	pr_skiptarget,   // #55
-	pr_enemystrafe,  // #56
-	pr_avoidcrush,   // #57
-	pr_stayonlift,   // #58
-	pr_helpfriend,   // #59
-	pr_dropoff,      // #60
-	pr_randomjump,   // #61
-	pr_defect,       // #62  // Start new entries -- add new entries below
-	pr_heretic,      // #63
-	pr_mbf21,        // #64
-	pr_hexen,        // #65
+	Opendoor,     // #51
+	Targetsearch, // #52
+	Friends,      // #53
+	Threshold,    // #54
+	Skiptarget,   // #55
+	Enemystrafe,  // #56
+	Avoidcrush,   // #57
+	Stayonlift,   // #58
+	Helpfriend,   // #59
+	Dropoff,      // #60
+	Randomjump,   // #61
+	Defect,       // #62  // Start new entries -- add new entries below
+	Heretic,      // #63
+	Mbf21,        // #64
+	Hexen,        // #65
 
 	// End of new entries
-	NUMPRCLASS // MUST be last item in list
-} pr_class_t;
+	Count // MUST be last item in list
+};
 
 // The random number generator's state.
 typedef struct
 {
-	unsigned int seed[NUMPRCLASS]; // Each block's random seed
+	unsigned int seed[std::to_underlying(RandomClass::Count)]; // Each block's random seed
 	int rndindex, prndindex;       // For compatibility support
 } rng_t;
 
@@ -121,21 +123,21 @@ extern rng_t rng; // The rng's state
 extern unsigned int rngseed; // The starting seed (not part of state)
 
 // As M_Random, but used by the play simulation.
-int P_Random(pr_class_t);
+int P_Random(RandomClass);
 
 // Returns a number from 0 to 255,
-#define M_Random() P_Random(pr_misc)
+#define M_Random() P_Random(RandomClass::Misc)
 
 // Fix randoms for demos.
 void M_ClearRandom();
 
 // [XA] Common random formulas used by codepointers
-int P_RandomHitscanAngle(pr_class_t pr_class, fixed_t spread);
-int P_RandomHitscanSlope(pr_class_t pr_class, fixed_t spread);
+int P_RandomHitscanAngle(RandomClass pr_class, fixed_t spread);
+int P_RandomHitscanSlope(RandomClass pr_class, fixed_t spread);
 
 // heretic
 
-#define HITDICE(a) ((1+(P_Random(pr_heretic)&7))*a)
+#define HITDICE(a) ((1+(P_Random(RandomClass::Heretic)&7))*a)
 
 int P_SubRandom();
 

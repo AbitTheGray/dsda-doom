@@ -24,12 +24,12 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 		str,
 		max_size,
 		"%sHEL %3d%%",
-		player->health <= hud_health_red ? dsda_TextColor(dsda_tc_exhud_health_bad) : player->health <= hud_health_yellow ? dsda_TextColor(dsda_tc_exhud_health_warning) : player->health <= hud_health_green ? dsda_TextColor(dsda_tc_exhud_health_ok) : dsda_TextColor(dsda_tc_exhud_health_super),
+		player->health <= hud_health_red ? dsda_TextColor(TextColorIndex::ExhudHealthBad) : player->health <= hud_health_yellow ? dsda_TextColor(TextColorIndex::ExhudHealthWarning) : player->health <= hud_health_green ? dsda_TextColor(TextColorIndex::ExhudHealthOk) : dsda_TextColor(TextColorIndex::ExhudHealthSuper),
 		player->health
 	);
 }
 
-void dsda_InitHealthTextHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitHealthTextHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

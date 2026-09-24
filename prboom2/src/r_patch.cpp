@@ -296,7 +296,7 @@ static void FillEmptySpace(rpatch_t* patch)
 	}
 
 	if(has_holes)
-		patch->flags |= PATCH_HASHOLES;
+		patch->flags |= PatchFlag::HasHoles;
 }
 
 //==========================================================================
@@ -396,9 +396,9 @@ static void createPatch(int id)
 	patch->height = LittleShort(oldPatch->height);
 	patch->leftoffset = LittleShort(oldPatch->leftoffset);
 	patch->topoffset = LittleShort(oldPatch->topoffset);
-	patch->flags = 0;
+	patch->flags = static_cast<PatchFlag>(0);
 	if(getPatchIsNotTileable(oldPatch))
-		patch->flags |= PATCH_ISNOTTILEABLE;
+		patch->flags |= PatchFlag::IsNotTileable;
 
 	// Width of M_THERMM patch is 9, but Doom interprets it as 8-columns lump
 	// during drawing. It is not a problem for software mode and GL_NEAREST,
@@ -457,7 +457,7 @@ static void createPatch(int id)
 
 		oldColumn = (const column_t*)((const byte*)oldPatch + LittleLong(oldPatch->columnofs[x]));
 
-		if(patch->flags & PATCH_ISNOTTILEABLE)
+		if((patch->flags & PatchFlag::IsNotTileable) != PatchFlag{})
 		{
 			// non-tiling
 			if(x == 0) oldPrevColumn = nullptr;
@@ -506,15 +506,15 @@ static void createPatch(int id)
 				// set up the post's data
 				patch->posts[numPostsUsedSoFar].topdelta = top;
 				patch->posts[numPostsUsedSoFar].length = len;
-				patch->posts[numPostsUsedSoFar].slope = static_cast<edgeslope_t>(0);
+				patch->posts[numPostsUsedSoFar].slope = static_cast<EdgeSlope>(0);
 
 				edgeSlope = getColumnEdgeSlope(oldPrevColumn, oldNextColumn, top);
-				if(edgeSlope == 1) patch->posts[numPostsUsedSoFar].slope = static_cast<edgeslope_t>(patch->posts[numPostsUsedSoFar].slope | RDRAW_EDGESLOPE_TOP_UP);
-				else if(edgeSlope == -1) patch->posts[numPostsUsedSoFar].slope = static_cast<edgeslope_t>(patch->posts[numPostsUsedSoFar].slope | RDRAW_EDGESLOPE_TOP_DOWN);
+				if(edgeSlope == 1) patch->posts[numPostsUsedSoFar].slope = static_cast<EdgeSlope>(patch->posts[numPostsUsedSoFar].slope | EdgeSlope::TopUp);
+				else if(edgeSlope == -1) patch->posts[numPostsUsedSoFar].slope = static_cast<EdgeSlope>(patch->posts[numPostsUsedSoFar].slope | EdgeSlope::TopDown);
 
 				edgeSlope = getColumnEdgeSlope(oldPrevColumn, oldNextColumn, top + len);
-				if(edgeSlope == 1) patch->posts[numPostsUsedSoFar].slope = static_cast<edgeslope_t>(patch->posts[numPostsUsedSoFar].slope | RDRAW_EDGESLOPE_BOT_UP);
-				else if(edgeSlope == -1) patch->posts[numPostsUsedSoFar].slope = static_cast<edgeslope_t>(patch->posts[numPostsUsedSoFar].slope | RDRAW_EDGESLOPE_BOT_DOWN);
+				if(edgeSlope == 1) patch->posts[numPostsUsedSoFar].slope = static_cast<EdgeSlope>(patch->posts[numPostsUsedSoFar].slope | EdgeSlope::BotUp);
+				else if(edgeSlope == -1) patch->posts[numPostsUsedSoFar].slope = static_cast<EdgeSlope>(patch->posts[numPostsUsedSoFar].slope | EdgeSlope::BotDown);
 
 				// fill in the post's pixels
 				oldColumnPixelData = (const byte*)oldColumn + 3;
@@ -609,7 +609,7 @@ static void createTextureCompositePatch(int id)
 	composite_patch->widthmask = texture->widthmask;
 	composite_patch->leftoffset = 0;
 	composite_patch->topoffset = 0;
-	composite_patch->flags = 0;
+	composite_patch->flags = static_cast<PatchFlag>(0);
 
 	// work out how much memory we need to allocate for this patch's data
 	pixelDataSize = (composite_patch->width * composite_patch->height + 4) & ~3;
@@ -771,15 +771,15 @@ static void createTextureCompositePatch(int id)
 						post->length -= post->topdelta;
 					post->topdelta = 0;
 				}
-				post->slope = static_cast<edgeslope_t>(0);
+				post->slope = static_cast<EdgeSlope>(0);
 
 				edgeSlope = getColumnEdgeSlope(oldPrevColumn, oldNextColumn, top);
-				if(edgeSlope == 1) post->slope = static_cast<edgeslope_t>(post->slope | RDRAW_EDGESLOPE_TOP_UP);
-				else if(edgeSlope == -1) post->slope = static_cast<edgeslope_t>(post->slope | RDRAW_EDGESLOPE_TOP_DOWN);
+				if(edgeSlope == 1) post->slope = static_cast<EdgeSlope>(post->slope | EdgeSlope::TopUp);
+				else if(edgeSlope == -1) post->slope = static_cast<EdgeSlope>(post->slope | EdgeSlope::TopDown);
 
 				edgeSlope = getColumnEdgeSlope(oldPrevColumn, oldNextColumn, top + count);
-				if(edgeSlope == 1) post->slope = static_cast<edgeslope_t>(post->slope | RDRAW_EDGESLOPE_BOT_UP);
-				else if(edgeSlope == -1) post->slope = static_cast<edgeslope_t>(post->slope | RDRAW_EDGESLOPE_BOT_DOWN);
+				if(edgeSlope == 1) post->slope = static_cast<EdgeSlope>(post->slope | EdgeSlope::BotUp);
+				else if(edgeSlope == -1) post->slope = static_cast<EdgeSlope>(post->slope | EdgeSlope::BotDown);
 
 				// fill in the post's pixels
 				for(y = 0; y < count; y++)
@@ -893,6 +893,6 @@ const rcolumn_t* R_GetPatchColumnClamped(const rpatch_t* patch, int columnIndex)
 //---------------------------------------------------------------------------
 const rcolumn_t* R_GetPatchColumn(const rpatch_t* patch, int columnIndex)
 {
-	if(patch->flags & PATCH_ISNOTTILEABLE) return R_GetPatchColumnClamped(patch, columnIndex);
+	if((patch->flags & PatchFlag::IsNotTileable) != PatchFlag{}) return R_GetPatchColumnClamped(patch, columnIndex);
 	else return R_GetPatchColumnWrapped(patch, columnIndex);
 }

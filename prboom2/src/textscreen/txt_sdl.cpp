@@ -2,6 +2,8 @@
 
 // Text mode emulation in SDL
 
+#include <utility>
+
 #include "SDL.h"
 #include "SDL_opengl.h"
 
@@ -48,7 +50,7 @@ static SDL_Renderer* renderer;
 static SDL_Texture* texture_upscaled;
 
 // Current input mode.
-static txt_input_mode_t input_mode = TXT_INPUT_NORMAL;
+static TxtInputMode input_mode = TxtInputMode::Normal;
 
 // Dimensions of the screen image in screen coordinates (not pixels); this
 // is the value that was passed to SDL_CreateWindow().
@@ -410,7 +412,7 @@ int GL_TXT_Init()
 	screenbuffer = SDL_CreateRGBSurface(0, screen_image_w, screen_image_h, 8, 0, 0, 0, 0);
 	if(!screenbuffer)
 	{
-		lprintf(LO_ERROR, "Failed to create software screenbuffer!\n");
+		lprintf(OutputLevels::Error, "Failed to create software screenbuffer!\n");
 		return 0;
 	}
 
@@ -593,17 +595,17 @@ static int TranslateScancode(SDL_Scancode scancode)
 	{
 		case SDL_SCANCODE_LCTRL:
 		case SDL_SCANCODE_RCTRL:
-			return KEY_RCTRL;
+			return std::to_underlying(Key::Rctrl);
 
 		case SDL_SCANCODE_LSHIFT:
 		case SDL_SCANCODE_RSHIFT:
-			return KEY_RSHIFT;
+			return std::to_underlying(Key::Rshift);
 
 		case SDL_SCANCODE_LALT:
-			return KEY_LALT;
+			return std::to_underlying(Key::Lalt);
 
 		case SDL_SCANCODE_RALT:
-			return KEY_RALT;
+			return std::to_underlying(Key::Ralt);
 
 		default:
 			if(scancode < arrlen(scancode_translate_table))
@@ -722,11 +724,11 @@ signed int TXT_GetChar()
 			case SDL_KEYDOWN:
 				switch(input_mode)
 				{
-					case TXT_INPUT_RAW:
+					case TxtInputMode::Raw:
 						return TranslateScancode(ev.key.keysym.scancode);
-					case TXT_INPUT_NORMAL:
+					case TxtInputMode::Normal:
 						return TranslateKeysym(&ev.key.keysym);
-					case TXT_INPUT_TEXT:
+					case TxtInputMode::Text:
 						// We ignore key inputs in this mode, except for a
 						// few special cases needed during text input:
 						if(ev.key.keysym.sym == SDLK_ESCAPE
@@ -740,7 +742,7 @@ signed int TXT_GetChar()
 				break;
 
 			case SDL_TEXTINPUT:
-				if(input_mode == TXT_INPUT_TEXT)
+				if(input_mode == TxtInputMode::Text)
 				{
 					// TODO: Support input of more than just the first char?
 					const char* p = ev.text.text;

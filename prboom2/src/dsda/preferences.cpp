@@ -54,7 +54,7 @@ void dsda_LoadWadPreferences()
 		else if(!strcasecmp(key, "prefer_software"))
 			wad_preferences.software = !!value;
 		else
-			lprintf(LO_WARN, "Unknown DSDAPREF key: %s\n", key);
+			lprintf(OutputLevels::Warn, "Unknown DSDAPREF key: %s\n", key);
 	}
 
 	Z_Free(lines);

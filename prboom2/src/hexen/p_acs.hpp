@@ -2,13 +2,13 @@
 
 #pragma once
 
+#include "r_defs.hpp"
+#include "p_mobj.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "r_defs.hpp"
-#include "p_mobj.hpp"
 
 #define MAX_ACS_SCRIPT_VARS 10
 #define MAX_ACS_MAP_VARS 32
@@ -16,16 +16,16 @@ extern "C"
 #define ACS_STACK_DEPTH 32
 #define MAX_ACS_STORE 20
 
-typedef enum
+enum struct AcsState : int32_t
 {
-	ASTE_INACTIVE,
-	ASTE_RUNNING,
-	ASTE_SUSPENDED,
-	ASTE_WAITINGFORTAG,
-	ASTE_WAITINGFORPOLY,
-	ASTE_WAITINGFORSCRIPT,
-	ASTE_TERMINATING
-} aste_t;
+	Inactive,
+	Running,
+	Suspended,
+	WaitingForTag,
+	WaitingForPoly,
+	WaitingForScript,
+	Terminating
+};
 
 typedef struct acs_s acs_t;
 typedef struct acsInfo_s acsInfo_t;
@@ -35,7 +35,7 @@ struct acsInfo_s
 	int number;
 	int offset;
 	int argCount;
-	aste_t state;
+	AcsState state;
 	int waitValue;
 };
 

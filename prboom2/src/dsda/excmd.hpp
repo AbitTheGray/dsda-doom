@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "d_ticcmd.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_ticcmd.hpp"
 
 #define XC_JUMP   0x01
 #define XC_SAVE   0x02

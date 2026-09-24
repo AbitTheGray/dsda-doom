@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Global - define top level globals for doom vs heretic
 
+#include <utility>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,13 +42,13 @@ int g_maxplayers = 4;
 int g_viewheight = 41 * FRACUNIT;
 int g_numammo;
 
-int g_mt_player;
-int g_mt_tfog;
-int g_mt_blood;
-int g_skullpop_mt;
-int g_s_bloodyskullx1;
-int g_s_bloodyskullx2;
-int g_s_play_fdth20;
+MobjType g_mt_player;
+MobjType g_mt_tfog;
+MobjType g_mt_blood;
+MobjType g_skullpop_mt;
+StateId g_s_bloodyskullx1;
+StateId g_s_bloodyskullx2;
+StateId g_s_play_fdth20;
 
 int g_wp_fist;
 int g_wp_chainsaw;
@@ -57,71 +59,71 @@ int g_thrust_factor;
 int g_fuzzy_aim_shift;
 int g_jump;
 
-int g_s_null;
+StateId g_s_null;
 
-int g_mt_bloodsplatter;
+MobjType g_mt_bloodsplatter;
 int g_bloodsplatter_shift;
 int g_bloodsplatter_weight;
 int g_mons_look_range;
-int g_hide_state;
-int g_lava_type;
+StateId g_hide_state;
+MobjType g_lava_type;
 
 int g_mntr_charge_speed;
-int g_mntr_atk1_sfx;
+SfxId g_mntr_atk1_sfx;
 int g_mntr_decide_range;
 int g_mntr_charge_rng;
 int g_mntr_fire_rng;
-int g_mntr_charge_state;
-int g_mntr_fire_state;
-int g_mntr_charge_puff;
-int g_mntr_atk2_sfx;
+StateId g_mntr_charge_state;
+StateId g_mntr_fire_state;
+MobjType g_mntr_charge_puff;
+SfxId g_mntr_atk2_sfx;
 int g_mntr_atk2_dice;
-int g_mntr_atk2_missile;
-int g_mntr_atk3_sfx;
+MobjType g_mntr_atk2_missile;
+SfxId g_mntr_atk3_sfx;
 int g_mntr_atk3_dice;
-int g_mntr_atk3_missile;
-int g_mntr_atk3_state;
-int g_mntr_fire;
+MobjType g_mntr_atk3_missile;
+StateId g_mntr_atk3_state;
+MobjType g_mntr_fire;
 
 int g_arti_health;
 int g_arti_superhealth;
 int g_arti_fly;
 int g_arti_limit;
 
-int g_sfx_sawup;
-int g_sfx_telept;
-int g_sfx_stnmov;
-int g_sfx_stnmov_plats;
-int g_sfx_swtchn;
-int g_sfx_swtchx;
-int g_sfx_dorcls;
-int g_sfx_doropn;
-int g_sfx_dorlnd;
-int g_sfx_pstart;
-int g_sfx_pstop;
-int g_sfx_itemup;
-int g_sfx_pistol;
-int g_sfx_oof;
-int g_sfx_menu;
-int g_sfx_respawn;
-int g_sfx_secret;
-int g_sfx_revive;
-int g_sfx_console;
+SfxId g_sfx_sawup;
+SfxId g_sfx_telept;
+SfxId g_sfx_stnmov;
+SfxId g_sfx_stnmov_plats;
+SfxId g_sfx_swtchn;
+SfxId g_sfx_swtchx;
+SfxId g_sfx_dorcls;
+SfxId g_sfx_doropn;
+SfxId g_sfx_dorlnd;
+SfxId g_sfx_pstart;
+SfxId g_sfx_pstop;
+SfxId g_sfx_itemup;
+SfxId g_sfx_pistol;
+SfxId g_sfx_oof;
+SfxId g_sfx_menu;
+SfxId g_sfx_respawn;
+SfxId g_sfx_secret;
+SfxId g_sfx_revive;
+SfxId g_sfx_console;
 
 // Optional menu/intermission sounds
-int g_sfx_mnuopn;
-int g_sfx_mnucls;
-int g_sfx_mnuact;
-int g_sfx_mnubak;
-int g_sfx_mnumov;
-int g_sfx_mnusli;
-int g_sfx_mnusel;
-int g_sfx_mnuerr;
-int g_sfx_inttic;
-int g_sfx_inttot;
-int g_sfx_intnex;
-int g_sfx_intnet;
-int g_sfx_intdms;
+SfxId g_sfx_mnuopn;
+SfxId g_sfx_mnucls;
+SfxId g_sfx_mnuact;
+SfxId g_sfx_mnubak;
+SfxId g_sfx_mnumov;
+SfxId g_sfx_mnusli;
+SfxId g_sfx_mnusel;
+SfxId g_sfx_mnuerr;
+SfxId g_sfx_inttic;
+SfxId g_sfx_inttot;
+SfxId g_sfx_intnex;
+SfxId g_sfx_intnet;
+SfxId g_sfx_intdms;
 
 int g_door_normal;
 int g_door_raise_in_5_mins;
@@ -148,11 +150,11 @@ static void dsda_InitDoom()
 	int i;
 	doom_mobjinfo_t* mobjinfo_p;
 
-	dsda_InitializeMobjInfo(DOOM_MT_ZERO, DOOM_NUMMOBJTYPES, DOOM_NUMMOBJTYPES);
-	dsda_InitializeStates(doom_states, DOOM_NUMSTATES);
-	dsda_InitializeSprites(doom_sprnames, DOOM_NUMSPRITES);
-	dsda_InitializeSFX(doom_S_sfx, DOOM_NUMSFX);
-	dsda_InitializeMusic(doom_S_music, DOOM_NUMMUSIC);
+	dsda_InitializeMobjInfo(std::to_underlying(MobjType::DoomZero), std::to_underlying(MobjType::DoomCount), std::to_underlying(MobjType::DoomCount));
+	dsda_InitializeStates(doom_states, std::to_underlying(StateId::DoomCount));
+	dsda_InitializeSprites(doom_sprnames, std::to_underlying(SpriteId::DoomNumsprites));
+	dsda_InitializeSFX(doom_S_sfx, std::to_underlying(SfxId::DoomCount));
+	dsda_InitializeMusic(doom_S_music, std::to_underlying(MusicId::DoomNummusic));
 
 	demostates = doom_demostates;
 
@@ -160,61 +162,61 @@ static void dsda_InitDoom()
 
 	g_maxplayers = 4;
 	g_viewheight = 41 * FRACUNIT;
-	g_numammo = DOOM_NUMAMMO;
+	g_numammo = std::to_underlying(AmmoType::DoomCount);
 
-	g_mt_player = MT_PLAYER;
-	g_mt_tfog = MT_TFOG;
-	g_mt_blood = MT_BLOOD;
-	g_skullpop_mt = MT_NULL;
+	g_mt_player = MobjType::Player;
+	g_mt_tfog = MobjType::Tfog;
+	g_mt_blood = MobjType::Blood;
+	g_skullpop_mt = MobjType::Null;
 
-	g_wp_fist = wp_fist;
-	g_wp_chainsaw = wp_chainsaw;
-	g_wp_pistol = wp_pistol;
+	g_wp_fist = std::to_underlying(WeaponType::Fist);
+	g_wp_chainsaw = std::to_underlying(WeaponType::Chainsaw);
+	g_wp_pistol = std::to_underlying(WeaponType::Pistol);
 
 	g_telefog_height = 0;
 	g_thrust_factor = 100;
 	g_fuzzy_aim_shift = 20;
 	g_jump = 8;
 
-	g_s_null = S_NULL;
+	g_s_null = StateId::Null;
 
-	g_sfx_sawup = sfx_sawup;
-	g_sfx_telept = sfx_telept;
-	g_sfx_stnmov = sfx_stnmov;
-	g_sfx_stnmov_plats = sfx_stnmov;
-	g_sfx_swtchn = sfx_swtchn;
-	g_sfx_swtchx = sfx_swtchx;
-	g_sfx_dorcls = sfx_dorcls;
-	g_sfx_doropn = sfx_doropn;
-	g_sfx_dorlnd = sfx_dorcls;
-	g_sfx_pstart = sfx_pstart;
-	g_sfx_pstop = sfx_pstop;
-	g_sfx_itemup = sfx_itemup;
-	g_sfx_pistol = sfx_pistol;
-	g_sfx_oof = sfx_oof;
-	g_sfx_menu = sfx_pstop;
-	g_sfx_secret = sfx_secret;
-	g_sfx_revive = sfx_slop;
-	g_sfx_console = sfx_radio;
+	g_sfx_sawup = SfxId::Sawup;
+	g_sfx_telept = SfxId::Telept;
+	g_sfx_stnmov = SfxId::Stnmov;
+	g_sfx_stnmov_plats = SfxId::Stnmov;
+	g_sfx_swtchn = SfxId::Swtchn;
+	g_sfx_swtchx = SfxId::Swtchx;
+	g_sfx_dorcls = SfxId::Dorcls;
+	g_sfx_doropn = SfxId::Doropn;
+	g_sfx_dorlnd = SfxId::Dorcls;
+	g_sfx_pstart = SfxId::Pstart;
+	g_sfx_pstop = SfxId::Pstop;
+	g_sfx_itemup = SfxId::Itemup;
+	g_sfx_pistol = SfxId::Pistol;
+	g_sfx_oof = SfxId::Oof;
+	g_sfx_menu = SfxId::Pstop;
+	g_sfx_secret = SfxId::Secret;
+	g_sfx_revive = SfxId::Slop;
+	g_sfx_console = SfxId::Radio;
 
 	// Optional menu/intermission sounds
-	g_sfx_mnuopn = sfx_mnuopn;
-	g_sfx_mnucls = sfx_mnucls;
-	g_sfx_mnuact = sfx_mnuact;
-	g_sfx_mnubak = sfx_mnubak;
-	g_sfx_mnumov = sfx_mnumov;
-	g_sfx_mnusli = sfx_mnusli;
-	g_sfx_mnusel = sfx_mnusel;
-	g_sfx_mnuerr = sfx_mnuerr;
-	g_sfx_inttic = sfx_inttic;
-	g_sfx_inttot = sfx_inttot;
-	g_sfx_intnex = sfx_intnex;
-	g_sfx_intnet = sfx_intnet;
-	g_sfx_intdms = sfx_intdms;
+	g_sfx_mnuopn = SfxId::Mnuopn;
+	g_sfx_mnucls = SfxId::Mnucls;
+	g_sfx_mnuact = SfxId::Mnuact;
+	g_sfx_mnubak = SfxId::Mnubak;
+	g_sfx_mnumov = SfxId::Mnumov;
+	g_sfx_mnusli = SfxId::Mnusli;
+	g_sfx_mnusel = SfxId::Mnusel;
+	g_sfx_mnuerr = SfxId::Mnuerr;
+	g_sfx_inttic = SfxId::Inttic;
+	g_sfx_inttot = SfxId::Inttot;
+	g_sfx_intnex = SfxId::Intnex;
+	g_sfx_intnet = SfxId::Intnet;
+	g_sfx_intdms = SfxId::Intdms;
 
-	g_door_normal = normal;
-	g_door_raise_in_5_mins = waitRaiseDoor;
-	g_door_open = openDoor;
+	g_door_normal = std::to_underlying(VerticalDoorType::Normal);
+	g_door_raise_in_5_mins = std::to_underlying(VerticalDoorType::WaitRaiseDoor);
+	g_door_open = std::to_underlying(VerticalDoorType::OpenDoor);
 
 	g_st_height = 32;
 	g_border_offset = 8;
@@ -228,7 +230,7 @@ static void dsda_InitDoom()
 	g_skyflatname = "F_SKY1";
 
 	// convert doom mobj types to shared type
-	for(i = 0; i < DOOM_NUMMOBJTYPES; ++i)
+	for(i = 0; i < std::to_underlying(MobjType::DoomCount); ++i)
 	{
 		mobjinfo_p = &doom_mobjinfo[i];
 
@@ -255,15 +257,15 @@ static void dsda_InitDoom()
 		mobjinfo[i].activesound = mobjinfo_p->activesound;
 		mobjinfo[i].flags = mobjinfo_p->flags;
 		mobjinfo[i].raisestate = mobjinfo_p->raisestate;
-		mobjinfo[i].droppeditem = MT_NULL;
-		mobjinfo[i].crashstate = 0; // not in doom
+		mobjinfo[i].droppeditem = MobjType::Null;
+		mobjinfo[i].crashstate = StateId::Null; // not in doom
 		mobjinfo[i].flags2 = 0;     // not in doom
 
 		// mbf21
-		mobjinfo[i].infighting_group = IG_DEFAULT;
-		mobjinfo[i].projectile_group = PG_DEFAULT;
-		mobjinfo[i].splash_group = SG_DEFAULT;
-		mobjinfo[i].ripsound = sfx_None;
+		mobjinfo[i].infighting_group = std::to_underlying(InfightingGroup::Default);
+		mobjinfo[i].projectile_group = std::to_underlying(ProjectileGroup::Default);
+		mobjinfo[i].splash_group = std::to_underlying(SplashGroup::Default);
+		mobjinfo[i].ripsound = SfxId::None;
 		mobjinfo[i].altspeed = NO_ALTSPEED;
 		mobjinfo[i].meleerange = MELEERANGE;
 
@@ -273,30 +275,30 @@ static void dsda_InitDoom()
 	}
 
 	// don't want to reorganize info.c structure for a few tweaks...
-	mobjinfo[MT_WOLFSS].droppeditem = MT_CLIP;
-	mobjinfo[MT_POSSESSED].droppeditem = MT_CLIP;
-	mobjinfo[MT_SHOTGUY].droppeditem = MT_SHOTGUN;
-	mobjinfo[MT_CHAINGUY].droppeditem = MT_CHAINGUN;
+	mobjinfo[std::to_underlying(MobjType::Wolfss)].droppeditem = MobjType::Clip;
+	mobjinfo[std::to_underlying(MobjType::Possessed)].droppeditem = MobjType::Clip;
+	mobjinfo[std::to_underlying(MobjType::Shotguy)].droppeditem = MobjType::Shotgun;
+	mobjinfo[std::to_underlying(MobjType::Chainguy)].droppeditem = MobjType::Chaingun;
 
-	mobjinfo[MT_VILE].flags2 = MF2_SHORTMRANGE | MF2_DMGIGNORED | MF2_NOTHRESHOLD;
-	mobjinfo[MT_CYBORG].flags2 = MF2_NORADIUSDMG | MF2_HIGHERMPROB | MF2_RANGEHALF |
+	mobjinfo[std::to_underlying(MobjType::Vile)].flags2 = MF2_SHORTMRANGE | MF2_DMGIGNORED | MF2_NOTHRESHOLD;
+	mobjinfo[std::to_underlying(MobjType::Cyborg)].flags2 = MF2_NORADIUSDMG | MF2_HIGHERMPROB | MF2_RANGEHALF |
 		MF2_FULLVOLSOUNDS | MF2_E2M8BOSS | MF2_E4M6BOSS;
-	mobjinfo[MT_SPIDER].flags2 = MF2_NORADIUSDMG | MF2_RANGEHALF | MF2_FULLVOLSOUNDS |
+	mobjinfo[std::to_underlying(MobjType::Spider)].flags2 = MF2_NORADIUSDMG | MF2_RANGEHALF | MF2_FULLVOLSOUNDS |
 		MF2_E3M8BOSS | MF2_E4M8BOSS;
-	mobjinfo[MT_SKULL].flags2 = MF2_RANGEHALF;
-	mobjinfo[MT_FATSO].flags2 = MF2_MAP07BOSS1;
-	mobjinfo[MT_BABY].flags2 = MF2_MAP07BOSS2;
-	mobjinfo[MT_BRUISER].flags2 = MF2_E1M8BOSS;
-	mobjinfo[MT_UNDEAD].flags2 = MF2_LONGMELEE | MF2_RANGEHALF;
+	mobjinfo[std::to_underlying(MobjType::Skull)].flags2 = MF2_RANGEHALF;
+	mobjinfo[std::to_underlying(MobjType::Fatso)].flags2 = MF2_MAP07BOSS1;
+	mobjinfo[std::to_underlying(MobjType::Baby)].flags2 = MF2_MAP07BOSS2;
+	mobjinfo[std::to_underlying(MobjType::Bruiser)].flags2 = MF2_E1M8BOSS;
+	mobjinfo[std::to_underlying(MobjType::Undead)].flags2 = MF2_LONGMELEE | MF2_RANGEHALF;
 
-	mobjinfo[MT_BRUISER].projectile_group = PG_BARON;
-	mobjinfo[MT_KNIGHT].projectile_group = PG_BARON;
+	mobjinfo[std::to_underlying(MobjType::Bruiser)].projectile_group = std::to_underlying(ProjectileGroup::Baron);
+	mobjinfo[std::to_underlying(MobjType::Knight)].projectile_group = std::to_underlying(ProjectileGroup::Baron);
 
-	mobjinfo[MT_BRUISERSHOT].altspeed = 20 * FRACUNIT;
-	mobjinfo[MT_HEADSHOT].altspeed = 20 * FRACUNIT;
-	mobjinfo[MT_TROOPSHOT].altspeed = 20 * FRACUNIT;
+	mobjinfo[std::to_underlying(MobjType::Bruisershot)].altspeed = 20 * FRACUNIT;
+	mobjinfo[std::to_underlying(MobjType::Headshot)].altspeed = 20 * FRACUNIT;
+	mobjinfo[std::to_underlying(MobjType::Troopshot)].altspeed = 20 * FRACUNIT;
 
-	for(i = S_SARG_RUN1; i <= S_SARG_PAIN2; ++i)
+	for(i = std::to_underlying(StateId::SargRun1); i <= std::to_underlying(StateId::SargPain2); ++i)
 		states[i].flags |= STATEF_SKILL5FAST;
 }
 
@@ -305,11 +307,11 @@ static void dsda_InitHeretic()
 	int i, j;
 	raven_mobjinfo_t* mobjinfo_p;
 
-	dsda_InitializeMobjInfo(HERETIC_MT_ZERO, HERETIC_NUMMOBJTYPES, HERETIC_NUMMOBJTYPES);
-	dsda_InitializeStates(heretic_states, HERETIC_NUMSTATES);
-	dsda_InitializeSprites(heretic_sprnames, HERETIC_NUMSPRITES);
-	dsda_InitializeSFX(heretic_S_sfx, HERETIC_NUMSFX);
-	dsda_InitializeMusic(heretic_S_music, HERETIC_NUMMUSIC);
+	dsda_InitializeMobjInfo(std::to_underlying(MobjType::HereticZero), std::to_underlying(MobjType::HereticCount), std::to_underlying(MobjType::HereticCount));
+	dsda_InitializeStates(heretic_states, std::to_underlying(StateId::HereticCount));
+	dsda_InitializeSprites(heretic_sprnames, std::to_underlying(SpriteId::HereticCount));
+	dsda_InitializeSFX(heretic_S_sfx, std::to_underlying(SfxId::HereticCount));
+	dsda_InitializeMusic(heretic_S_music, std::to_underlying(MusicId::HereticCount));
 
 	demostates = heretic_demostates;
 
@@ -317,94 +319,94 @@ static void dsda_InitHeretic()
 
 	g_maxplayers = 4;
 	g_viewheight = 41 * FRACUNIT;
-	g_numammo = HERETIC_NUMAMMO;
+	g_numammo = std::to_underlying(AmmoType::HereticCount);
 
-	g_mt_player = HERETIC_MT_PLAYER;
-	g_mt_tfog = HERETIC_MT_TFOG;
-	g_mt_blood = HERETIC_MT_BLOOD;
-	g_skullpop_mt = HERETIC_MT_BLOODYSKULL;
-	g_s_bloodyskullx1 = HERETIC_S_BLOODYSKULLX1;
-	g_s_bloodyskullx2 = HERETIC_S_BLOODYSKULLX2;
-	g_s_play_fdth20 = HERETIC_S_PLAY_FDTH20;
+	g_mt_player = MobjType::HereticPlayer;
+	g_mt_tfog = MobjType::HereticTfog;
+	g_mt_blood = MobjType::HereticBlood;
+	g_skullpop_mt = MobjType::HereticBloodyskull;
+	g_s_bloodyskullx1 = StateId::HereticBloodyskullx1;
+	g_s_bloodyskullx2 = StateId::HereticBloodyskullx2;
+	g_s_play_fdth20 = StateId::HereticPlayFdth20;
 
-	g_wp_fist = wp_staff;
-	g_wp_chainsaw = wp_gauntlets;
-	g_wp_pistol = wp_goldwand;
+	g_wp_fist = std::to_underlying(WeaponType::Staff);
+	g_wp_chainsaw = std::to_underlying(WeaponType::Gauntlets);
+	g_wp_pistol = std::to_underlying(WeaponType::GoldWand);
 
 	g_telefog_height = TELEFOGHEIGHT;
 	g_thrust_factor = 150;
 	g_fuzzy_aim_shift = 21;
 	g_jump = 8;
 
-	g_s_null = HERETIC_S_NULL;
+	g_s_null = StateId::HereticNull;
 
-	g_mt_bloodsplatter = HERETIC_MT_BLOODSPLATTER;
+	g_mt_bloodsplatter = MobjType::HereticBloodsplatter;
 	g_bloodsplatter_shift = 9;
 	g_bloodsplatter_weight = 2;
 	g_mons_look_range = 20 * 64 * FRACUNIT;
-	g_hide_state = HERETIC_S_HIDESPECIAL1;
-	g_lava_type = HERETIC_MT_PHOENIXFX2;
+	g_hide_state = StateId::HereticHidespecial1;
+	g_lava_type = MobjType::HereticPhoenixfx2;
 
-	g_mntr_atk1_sfx = heretic_sfx_stfpow;
+	g_mntr_atk1_sfx = SfxId::HereticStfpow;
 	g_mntr_charge_speed = 13 * FRACUNIT;
 	g_mntr_decide_range = 8;
 	g_mntr_charge_rng = 150;
-	g_mntr_charge_state = HERETIC_S_MNTR_ATK4_1;
+	g_mntr_charge_state = StateId::HereticMntrAtk41;
 	g_mntr_fire_rng = 220;
-	g_mntr_fire_state = HERETIC_S_MNTR_ATK3_1;
-	g_mntr_charge_puff = HERETIC_MT_PHOENIXPUFF;
-	g_mntr_atk2_sfx = heretic_sfx_minat2;
+	g_mntr_fire_state = StateId::HereticMntrAtk31;
+	g_mntr_charge_puff = MobjType::HereticPhoenixpuff;
+	g_mntr_atk2_sfx = SfxId::HereticMinat2;
 	g_mntr_atk2_dice = 5;
-	g_mntr_atk2_missile = HERETIC_MT_MNTRFX1;
-	g_mntr_atk3_sfx = heretic_sfx_minat1;
+	g_mntr_atk2_missile = MobjType::HereticMntrfx1;
+	g_mntr_atk3_sfx = SfxId::HereticMinat1;
 	g_mntr_atk3_dice = 5;
-	g_mntr_atk3_missile = HERETIC_MT_MNTRFX2;
-	g_mntr_atk3_state = HERETIC_S_MNTR_ATK3_4;
-	g_mntr_fire = HERETIC_MT_MNTRFX3;
+	g_mntr_atk3_missile = MobjType::HereticMntrfx2;
+	g_mntr_atk3_state = StateId::HereticMntrAtk34;
+	g_mntr_fire = MobjType::HereticMntrfx3;
 
-	g_arti_health = arti_health;
-	g_arti_superhealth = arti_superhealth;
-	g_arti_fly = arti_fly;
+	g_arti_health = std::to_underlying(ArtiType::Health);
+	g_arti_superhealth = std::to_underlying(ArtiType::SuperHealth);
+	g_arti_fly = std::to_underlying(ArtiType::Fly);
 	g_arti_limit = 16;
 
-	g_sfx_sawup = heretic_sfx_gntact;
-	g_sfx_telept = heretic_sfx_telept;
-	g_sfx_stnmov = heretic_sfx_dormov;
-	g_sfx_stnmov_plats = heretic_sfx_stnmov;
-	g_sfx_swtchn = heretic_sfx_switch;
-	g_sfx_swtchx = heretic_sfx_switch;
-	g_sfx_dorcls = heretic_sfx_doropn;
-	g_sfx_doropn = heretic_sfx_doropn;
-	g_sfx_dorlnd = heretic_sfx_dorcls;
-	g_sfx_pstart = heretic_sfx_pstart;
-	g_sfx_pstop = heretic_sfx_pstop;
-	g_sfx_itemup = heretic_sfx_itemup;
-	g_sfx_pistol = heretic_sfx_gldhit;
-	g_sfx_oof = heretic_sfx_plroof;
-	g_sfx_menu = heretic_sfx_dorcls;
-	g_sfx_secret = heretic_sfx_secret;
-	g_sfx_respawn = heretic_sfx_respawn;
-	g_sfx_revive = heretic_sfx_telept;
-	g_sfx_console = heretic_sfx_chat;
+	g_sfx_sawup = SfxId::HereticGntact;
+	g_sfx_telept = SfxId::HereticTelept;
+	g_sfx_stnmov = SfxId::HereticDormov;
+	g_sfx_stnmov_plats = SfxId::HereticStnmov;
+	g_sfx_swtchn = SfxId::HereticSwitch;
+	g_sfx_swtchx = SfxId::HereticSwitch;
+	g_sfx_dorcls = SfxId::HereticDoropn;
+	g_sfx_doropn = SfxId::HereticDoropn;
+	g_sfx_dorlnd = SfxId::HereticDorcls;
+	g_sfx_pstart = SfxId::HereticPstart;
+	g_sfx_pstop = SfxId::HereticPstop;
+	g_sfx_itemup = SfxId::HereticItemup;
+	g_sfx_pistol = SfxId::HereticGldhit;
+	g_sfx_oof = SfxId::HereticPlroof;
+	g_sfx_menu = SfxId::HereticDorcls;
+	g_sfx_secret = SfxId::HereticSecret;
+	g_sfx_respawn = SfxId::HereticRespawn;
+	g_sfx_revive = SfxId::HereticTelept;
+	g_sfx_console = SfxId::HereticChat;
 
 	// Optional menu/intermission sounds
-	g_sfx_mnuopn = heretic_sfx_mnuopn;
-	g_sfx_mnucls = heretic_sfx_mnucls;
-	g_sfx_mnuact = heretic_sfx_mnuact;
-	g_sfx_mnubak = heretic_sfx_mnubak;
-	g_sfx_mnumov = heretic_sfx_mnumov;
-	g_sfx_mnusli = heretic_sfx_mnusli;
-	g_sfx_mnusel = heretic_sfx_mnusel;
-	g_sfx_mnuerr = heretic_sfx_mnuerr;
-	g_sfx_inttic = heretic_sfx_inttic;
-	g_sfx_inttot = heretic_sfx_inttot;
-	g_sfx_intnex = heretic_sfx_intnex;
-	g_sfx_intnet = heretic_sfx_intnet;
-	g_sfx_intdms = heretic_sfx_intdms;
+	g_sfx_mnuopn = SfxId::HereticMnuopn;
+	g_sfx_mnucls = SfxId::HereticMnucls;
+	g_sfx_mnuact = SfxId::HereticMnuact;
+	g_sfx_mnubak = SfxId::HereticMnubak;
+	g_sfx_mnumov = SfxId::HereticMnumov;
+	g_sfx_mnusli = SfxId::HereticMnusli;
+	g_sfx_mnusel = SfxId::HereticMnusel;
+	g_sfx_mnuerr = SfxId::HereticMnuerr;
+	g_sfx_inttic = SfxId::HereticInttic;
+	g_sfx_inttot = SfxId::HereticInttot;
+	g_sfx_intnex = SfxId::HereticIntnex;
+	g_sfx_intnet = SfxId::HereticIntnet;
+	g_sfx_intdms = SfxId::HereticIntdms;
 
-	g_door_normal = vld_normal;
-	g_door_raise_in_5_mins = vld_raiseIn5Mins;
-	g_door_open = vld_open;
+	g_door_normal = std::to_underlying(VerticalDoorType::VldNormal);
+	g_door_raise_in_5_mins = std::to_underlying(VerticalDoorType::VldRaiseIn5Mins);
+	g_door_open = std::to_underlying(VerticalDoorType::VldOpen);
 
 	g_st_height = 42;
 	g_border_offset = 4;
@@ -418,11 +420,11 @@ static void dsda_InitHeretic()
 	g_skyflatname = "F_SKY1";
 
 	// convert heretic mobj types to shared type
-	for(i = 0; i < HERETIC_NUMMOBJTYPES - HERETIC_MT_ZERO; ++i)
+	for(i = 0; i < std::to_underlying(MobjType::HereticCount) - std::to_underlying(MobjType::HereticZero); ++i)
 	{
 		mobjinfo_p = &heretic_mobjinfo[i];
 
-		j = i + HERETIC_MT_ZERO;
+		j = i + std::to_underlying(MobjType::HereticZero);
 		mobjinfo[j].doomednum = mobjinfo_p->doomednum;
 		mobjinfo[j].spawnstate = mobjinfo_p->spawnstate;
 		mobjinfo[j].spawnhealth = mobjinfo_p->spawnhealth;
@@ -445,16 +447,16 @@ static void dsda_InitHeretic()
 		mobjinfo[j].damage = mobjinfo_p->damage;
 		mobjinfo[j].activesound = mobjinfo_p->activesound;
 		mobjinfo[j].flags = mobjinfo_p->flags;
-		mobjinfo[j].raisestate = 0;  // not in heretic
+		mobjinfo[j].raisestate = StateId::Null;  // not in heretic
 		mobjinfo[j].droppeditem = {}; // not in heretic
 		mobjinfo[j].crashstate = mobjinfo_p->crashstate;
 		mobjinfo[j].flags2 = mobjinfo_p->flags2;
 
 		// mbf21
-		mobjinfo[j].infighting_group = IG_DEFAULT;
-		mobjinfo[j].projectile_group = PG_DEFAULT;
-		mobjinfo[j].splash_group = SG_DEFAULT;
-		mobjinfo[j].ripsound = sfx_None;
+		mobjinfo[j].infighting_group = std::to_underlying(InfightingGroup::Default);
+		mobjinfo[j].projectile_group = std::to_underlying(ProjectileGroup::Default);
+		mobjinfo[j].splash_group = std::to_underlying(SplashGroup::Default);
+		mobjinfo[j].ripsound = SfxId::None;
 		mobjinfo[j].altspeed = NO_ALTSPEED;
 		mobjinfo[j].meleerange = MELEERANGE;
 
@@ -464,7 +466,7 @@ static void dsda_InitHeretic()
 	}
 
 	// heretic doesn't use "clip" concept
-	for(i = 0; i < NUMAMMO; ++i) clipammo[i] = 1;
+	for(i = 0; i < std::to_underlying(AmmoType::Count); ++i) clipammo[i] = 1;
 
 	// so few it's not worth implementing a pointer swap
 	maxammo[0] = 100; // gold wand
@@ -481,11 +483,11 @@ static void dsda_InitHexen()
 	int i, j;
 	raven_mobjinfo_t* mobjinfo_p;
 
-	dsda_InitializeMobjInfo(HEXEN_MT_ZERO, HEXEN_NUMMOBJTYPES, TOTAL_NUMMOBJTYPES);
-	dsda_InitializeStates(hexen_states, HEXEN_NUMSTATES);
-	dsda_InitializeSprites(hexen_sprnames, HEXEN_NUMSPRITES);
-	dsda_InitializeSFX(hexen_S_sfx, HEXEN_NUMSFX);
-	dsda_InitializeMusic(hexen_S_music, HEXEN_NUMMUSIC);
+	dsda_InitializeMobjInfo(std::to_underlying(MobjType::HexenZero), std::to_underlying(MobjType::HexenCount), std::to_underlying(MobjType::TotalCount));
+	dsda_InitializeStates(hexen_states, std::to_underlying(StateId::HexenCount));
+	dsda_InitializeSprites(hexen_sprnames, std::to_underlying(SpriteId::HexenCount));
+	dsda_InitializeSFX(hexen_S_sfx, std::to_underlying(SfxId::HexenCount));
+	dsda_InitializeMusic(hexen_S_music, std::to_underlying(MusicId::HexenCount));
 
 	demostates = hexen_demostates;
 
@@ -493,15 +495,15 @@ static void dsda_InitHexen()
 
 	g_maxplayers = 8;
 	g_viewheight = 48 * FRACUNIT;
-	g_numammo = NUMMANA;
+	g_numammo = std::to_underlying(AmmoType::ManaCount);
 
 	// g_mt_player = HERETIC_MT_PLAYER;
-	g_mt_tfog = HEXEN_MT_TFOG;
-	g_mt_blood = HEXEN_MT_BLOOD;
-	g_skullpop_mt = HEXEN_MT_BLOODYSKULL;
-	g_s_bloodyskullx1 = HEXEN_S_BLOODYSKULLX1;
-	g_s_bloodyskullx2 = HEXEN_S_BLOODYSKULLX2;
-	g_s_play_fdth20 = HEXEN_S_PLAY_FDTH20;
+	g_mt_tfog = MobjType::HexenTfog;
+	g_mt_blood = MobjType::HexenBlood;
+	g_skullpop_mt = MobjType::HexenBloodyskull;
+	g_s_bloodyskullx1 = StateId::HexenBloodyskullx1;
+	g_s_bloodyskullx2 = StateId::HexenBloodyskullx2;
+	g_s_play_fdth20 = StateId::HexenPlayFdth20;
 
 	// g_wp_fist = wp_staff;
 	// g_wp_chainsaw = wp_gauntlets;
@@ -512,67 +514,67 @@ static void dsda_InitHexen()
 	g_fuzzy_aim_shift = 21;
 	g_jump = 9;
 
-	g_s_null = HEXEN_S_NULL;
+	g_s_null = StateId::HexenNull;
 
-	g_mt_bloodsplatter = HEXEN_MT_BLOODSPLATTER;
+	g_mt_bloodsplatter = MobjType::HexenBloodsplatter;
 	g_bloodsplatter_shift = 10;
 	g_bloodsplatter_weight = 3;
 	g_mons_look_range = 16 * 64 * FRACUNIT;
-	g_hide_state = HEXEN_S_HIDESPECIAL1;
-	g_lava_type = HEXEN_MT_CIRCLEFLAME;
+	g_hide_state = StateId::HexenHidespecial1;
+	g_lava_type = MobjType::HexenCircleflame;
 
-	g_mntr_atk1_sfx = hexen_sfx_maulator_hammer_swing;
+	g_mntr_atk1_sfx = SfxId::HexenMaulatorHammerSwing;
 	g_mntr_charge_speed = 23 * FRACUNIT;
 	g_mntr_decide_range = 16;
 	g_mntr_charge_rng = 230;
-	g_mntr_charge_state = HEXEN_S_MNTR_ATK4_1;
+	g_mntr_charge_state = StateId::HexenMntrAtk41;
 	g_mntr_fire_rng = 100;
-	g_mntr_fire_state = HEXEN_S_MNTR_ATK3_1;
-	g_mntr_charge_puff = HEXEN_MT_PUNCHPUFF;
-	g_mntr_atk2_sfx = hexen_sfx_maulator_hammer_swing;
+	g_mntr_fire_state = StateId::HexenMntrAtk31;
+	g_mntr_charge_puff = MobjType::HexenPunchpuff;
+	g_mntr_atk2_sfx = SfxId::HexenMaulatorHammerSwing;
 	g_mntr_atk2_dice = 3;
-	g_mntr_atk2_missile = HEXEN_MT_MNTRFX1;
-	g_mntr_atk3_sfx = hexen_sfx_maulator_hammer_hit;
+	g_mntr_atk2_missile = MobjType::HexenMntrfx1;
+	g_mntr_atk3_sfx = SfxId::HexenMaulatorHammerHit;
 	g_mntr_atk3_dice = 3;
-	g_mntr_atk3_missile = HEXEN_MT_MNTRFX2;
-	g_mntr_atk3_state = HEXEN_S_MNTR_ATK3_4;
-	g_mntr_fire = HEXEN_MT_MNTRFX3;
+	g_mntr_atk3_missile = MobjType::HexenMntrfx2;
+	g_mntr_atk3_state = StateId::HexenMntrAtk34;
+	g_mntr_fire = MobjType::HexenMntrfx3;
 
-	g_arti_health = hexen_arti_health;
-	g_arti_superhealth = hexen_arti_superhealth;
-	g_arti_fly = hexen_arti_fly;
+	g_arti_health = std::to_underlying(ArtiType::HexenHealth);
+	g_arti_superhealth = std::to_underlying(ArtiType::HexenSuperhealth);
+	g_arti_fly = std::to_underlying(ArtiType::HexenFly);
 	g_arti_limit = 25;
 
-	g_sfx_telept = hexen_sfx_teleport;
-	g_sfx_stnmov = hexen_sfx_door_light_close;
-	g_sfx_swtchn = hexen_sfx_fighter_hammer_hitwall;
-	g_sfx_swtchx = hexen_sfx_fighter_hammer_hitwall;
-	g_sfx_dorcls = hexen_sfx_door_light_close;
-	g_sfx_doropn = hexen_sfx_door_open;
-	g_sfx_dorlnd = hexen_sfx_door_light_close;
-	g_sfx_itemup = hexen_sfx_pickup_key;
-	g_sfx_pistol = hexen_sfx_fighter_hammer_hitwall;
-	g_sfx_oof = hexen_sfx_player_fighter_grunt;
-	g_sfx_menu = hexen_sfx_door_light_close;
-	g_sfx_secret = hexen_sfx_secret;
-	g_sfx_respawn = hexen_sfx_respawn;
-	g_sfx_revive = hexen_sfx_teleport;
-	g_sfx_console = hexen_sfx_chat;
+	g_sfx_telept = SfxId::HexenTeleport;
+	g_sfx_stnmov = SfxId::HexenDoorLightClose;
+	g_sfx_swtchn = SfxId::HexenFighterHammerHitwall;
+	g_sfx_swtchx = SfxId::HexenFighterHammerHitwall;
+	g_sfx_dorcls = SfxId::HexenDoorLightClose;
+	g_sfx_doropn = SfxId::HexenDoorOpen;
+	g_sfx_dorlnd = SfxId::HexenDoorLightClose;
+	g_sfx_itemup = SfxId::HexenPickupKey;
+	g_sfx_pistol = SfxId::HexenFighterHammerHitwall;
+	g_sfx_oof = SfxId::HexenPlayerFighterGrunt;
+	g_sfx_menu = SfxId::HexenDoorLightClose;
+	g_sfx_secret = SfxId::HexenSecret;
+	g_sfx_respawn = SfxId::HexenRespawn;
+	g_sfx_revive = SfxId::HexenTeleport;
+	g_sfx_console = SfxId::HexenChat;
 
 	// Optional menu/intermission sounds
-	g_sfx_mnuopn = hexen_sfx_mnuopn;
-	g_sfx_mnucls = hexen_sfx_mnucls;
-	g_sfx_mnuact = hexen_sfx_mnuact;
-	g_sfx_mnubak = hexen_sfx_mnubak;
-	g_sfx_mnumov = hexen_sfx_mnumov;
-	g_sfx_mnusli = hexen_sfx_mnusli;
-	g_sfx_mnusel = hexen_sfx_mnusel;
-	g_sfx_mnuerr = hexen_sfx_mnuerr;
-	g_sfx_inttic = hexen_sfx_inttic;
-	g_sfx_inttot = hexen_sfx_inttot;
-	g_sfx_intnex = hexen_sfx_intnex;
-	g_sfx_intnet = hexen_sfx_intnet;
-	g_sfx_intdms = hexen_sfx_intdms;
+	g_sfx_mnuopn = SfxId::HexenMnuopn;
+	g_sfx_mnucls = SfxId::HexenMnucls;
+	g_sfx_mnuact = SfxId::HexenMnuact;
+	g_sfx_mnubak = SfxId::HexenMnubak;
+	g_sfx_mnumov = SfxId::HexenMnumov;
+	g_sfx_mnusli = SfxId::HexenMnusli;
+	g_sfx_mnusel = SfxId::HexenMnusel;
+	g_sfx_mnuerr = SfxId::HexenMnuerr;
+	g_sfx_inttic = SfxId::HexenInttic;
+	g_sfx_inttot = SfxId::HexenInttot;
+	g_sfx_intnex = SfxId::HexenIntnex;
+	g_sfx_intnet = SfxId::HexenIntnet;
+	g_sfx_intdms = SfxId::HexenIntdms;
 
 	g_st_height = 39;
 	g_border_offset = 4;
@@ -586,11 +588,11 @@ static void dsda_InitHexen()
 	g_skyflatname = "F_SKY";
 
 	// convert hexen mobj types to shared type
-	for(i = 0; i < HEXEN_NUMMOBJTYPES - HEXEN_MT_ZERO; ++i)
+	for(i = 0; i < std::to_underlying(MobjType::HexenCount) - std::to_underlying(MobjType::HexenZero); ++i)
 	{
 		mobjinfo_p = &hexen_mobjinfo[i];
 
-		j = i + HEXEN_MT_ZERO;
+		j = i + std::to_underlying(MobjType::HexenZero);
 		mobjinfo[j].doomednum = mobjinfo_p->doomednum;
 		mobjinfo[j].spawnstate = mobjinfo_p->spawnstate;
 		mobjinfo[j].spawnhealth = mobjinfo_p->spawnhealth;
@@ -613,16 +615,16 @@ static void dsda_InitHexen()
 		mobjinfo[j].damage = mobjinfo_p->damage;
 		mobjinfo[j].activesound = mobjinfo_p->activesound;
 		mobjinfo[j].flags = mobjinfo_p->flags;
-		mobjinfo[j].raisestate = 0;  // not in hexen
+		mobjinfo[j].raisestate = StateId::Null;  // not in hexen
 		mobjinfo[j].droppeditem = {}; // not in hexen
 		mobjinfo[j].crashstate = mobjinfo_p->crashstate;
 		mobjinfo[j].flags2 = mobjinfo_p->flags2;
 
 		// mbf21
-		mobjinfo[j].infighting_group = IG_DEFAULT;
-		mobjinfo[j].projectile_group = PG_DEFAULT;
-		mobjinfo[j].splash_group = SG_DEFAULT;
-		mobjinfo[j].ripsound = sfx_None;
+		mobjinfo[j].infighting_group = std::to_underlying(InfightingGroup::Default);
+		mobjinfo[j].projectile_group = std::to_underlying(ProjectileGroup::Default);
+		mobjinfo[j].splash_group = std::to_underlying(SplashGroup::Default);
+		mobjinfo[j].ripsound = SfxId::None;
 		mobjinfo[j].altspeed = NO_ALTSPEED;
 		mobjinfo[j].meleerange = MELEERANGE;
 
@@ -641,7 +643,7 @@ static dboolean dsda_AutoDetectHeretic()
 {
 	dsda_arg_t* arg;
 	int length;
-	arg = dsda_Arg(dsda_arg_iwad);
+	arg = dsda_Arg(ArgId::Iwad);
 	if(arg->found)
 	{
 		length = strlen(arg->value.v_string);
@@ -658,7 +660,7 @@ static dboolean dsda_AutoDetectHexen()
 {
 	dsda_arg_t* arg;
 	int length;
-	arg = dsda_Arg(dsda_arg_iwad);
+	arg = dsda_Arg(ArgId::Iwad);
 	if(arg->found)
 	{
 		length = strlen(arg->value.v_string);
@@ -673,8 +675,8 @@ extern "C" void dsda_ResetNullPClass();
 
 void dsda_InitGlobal()
 {
-	heretic = dsda_Flag(dsda_arg_heretic) || dsda_AutoDetectHeretic();
-	hexen = dsda_Flag(dsda_arg_hexen) || dsda_AutoDetectHexen();
+	heretic = dsda_Flag(ArgId::Heretic) || dsda_AutoDetectHeretic();
+	hexen = dsda_Flag(ArgId::Hexen) || dsda_AutoDetectHexen();
 	raven = heretic || hexen;
 
 	if(hexen)

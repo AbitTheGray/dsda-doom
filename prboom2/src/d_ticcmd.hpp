@@ -6,12 +6,17 @@
 
 #pragma once
 
+#include <stdint.h>
+
+// declared in d_event.hpp; the fixed underlying type makes this enough
+enum struct ButtonCode : uint8_t;
+
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
 
 typedef struct
 {
@@ -32,7 +37,7 @@ typedef struct
 	signed char forwardmove; /* *2048 for move       */
 	signed char sidemove;    /* *2048 for move       */
 	signed short angleturn;  /* <<16 for angle delta */
-	byte buttons;
+	ButtonCode buttons;
 
 	// heretic
 	byte lookfly; // look/fly up/down/centering

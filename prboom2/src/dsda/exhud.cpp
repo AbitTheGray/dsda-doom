@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Extended HUD
 
+#include <utility>
+
 #include <stdio.h>
 
 #include "am_map.hpp"
@@ -26,11 +28,11 @@
 
 typedef struct
 {
-	void (*init)(int x_offset, int y_offset, int vpt_flags, int* args, int arg_count, void** data);
+	void (*init)(int x_offset, int y_offset, PatchTranslation vpt_flags, int* args, int arg_count, void** data);
 	void (*update)(void* data);
 	void (*draw)(void* data);
 	const char* name;
-	const int default_vpt;
+	const PatchTranslation default_vpt;
 	const dboolean strict;
 	const dboolean off_by_default;
 	const dboolean intermission;
@@ -40,291 +42,291 @@ typedef struct
 	void* data;
 } exhud_component_t;
 
-typedef enum
+enum struct ExHudComponentId : int32_t
 {
-	exhud_ammo_text,
-	exhud_armor_text,
-	exhud_big_ammo,
-	exhud_big_armor,
-	exhud_big_armor_text,
-	exhud_big_artifact,
-	exhud_big_health,
-	exhud_big_health_text,
-	exhud_composite_time,
-	exhud_health_text,
-	exhud_keys,
-	exhud_ready_ammo_text,
-	exhud_speed_text,
-	exhud_stat_totals,
-	exhud_tracker,
-	exhud_weapon_text,
-	exhud_render_stats,
-	exhud_fps,
-	exhud_attempts,
-	exhud_local_time,
-	exhud_coordinate_display,
-	exhud_line_display,
-	exhud_command_display,
-	exhud_event_split,
-	exhud_level_splits,
-	exhud_color_test,
-	exhud_free_text,
-	exhud_message,
-	exhud_secret_message,
-	exhud_map_coordinates,
-	exhud_map_time,
-	exhud_map_title,
-	exhud_map_totals,
-	exhud_minimap,
-	exhud_component_count,
-} exhud_component_id_t;
+	AmmoText,
+	ArmorText,
+	BigAmmo,
+	BigArmor,
+	BigArmorText,
+	BigArtifact,
+	BigHealth,
+	BigHealthText,
+	CompositeTime,
+	HealthText,
+	Keys,
+	ReadyAmmoText,
+	SpeedText,
+	StatTotals,
+	Tracker,
+	WeaponText,
+	RenderStats,
+	Fps,
+	Attempts,
+	LocalTime,
+	CoordinateDisplay,
+	LineDisplay,
+	CommandDisplay,
+	EventSplit,
+	LevelSplits,
+	ColorTest,
+	FreeText,
+	Message,
+	SecretMessage,
+	MapCoordinates,
+	MapTime,
+	MapTitle,
+	MapTotals,
+	Minimap,
+	ComponentCount,
+};
 
-exhud_component_t components_template[exhud_component_count] = {
-	[exhud_ammo_text] = {
+exhud_component_t components_template[std::to_underlying(ExHudComponentId::ComponentCount)] = {
+	[std::to_underlying(ExHudComponentId::AmmoText)] = {
 		dsda_InitAmmoTextHC,
 		dsda_UpdateAmmoTextHC,
 		dsda_DrawAmmoTextHC,
 		"ammo_text",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_armor_text] = {
+	[std::to_underlying(ExHudComponentId::ArmorText)] = {
 		dsda_InitArmorTextHC,
 		dsda_UpdateArmorTextHC,
 		dsda_DrawArmorTextHC,
 		"armor_text",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_big_ammo] = {
+	[std::to_underlying(ExHudComponentId::BigAmmo)] = {
 		dsda_InitBigAmmoHC,
 		dsda_UpdateBigAmmoHC,
 		dsda_DrawBigAmmoHC,
 		"big_ammo",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_big_armor] = {
+	[std::to_underlying(ExHudComponentId::BigArmor)] = {
 		dsda_InitBigArmorHC,
 		dsda_UpdateBigArmorHC,
 		dsda_DrawBigArmorHC,
 		"big_armor",
-		.default_vpt = VPT_EX_TEXT | VPT_NOOFFSET,
+		.default_vpt = PatchTranslation::ExText | PatchTranslation::NoOffset,
 	},
-	[exhud_big_armor_text] = {
+	[std::to_underlying(ExHudComponentId::BigArmorText)] = {
 		dsda_InitBigArmorTextHC,
 		dsda_UpdateBigArmorTextHC,
 		dsda_DrawBigArmorTextHC,
 		"big_armor_text",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_big_artifact] = {
+	[std::to_underlying(ExHudComponentId::BigArtifact)] = {
 		dsda_InitBigArtifactHC,
 		dsda_UpdateBigArtifactHC,
 		dsda_DrawBigArtifactHC,
 		"big_artifact",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_big_health] = {
+	[std::to_underlying(ExHudComponentId::BigHealth)] = {
 		dsda_InitBigHealthHC,
 		dsda_UpdateBigHealthHC,
 		dsda_DrawBigHealthHC,
 		"big_health",
-		.default_vpt = VPT_EX_TEXT | VPT_NOOFFSET,
+		.default_vpt = PatchTranslation::ExText | PatchTranslation::NoOffset,
 	},
-	[exhud_big_health_text] = {
+	[std::to_underlying(ExHudComponentId::BigHealthText)] = {
 		dsda_InitBigHealthTextHC,
 		dsda_UpdateBigHealthTextHC,
 		dsda_DrawBigHealthTextHC,
 		"big_health_text",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_composite_time] = {
+	[std::to_underlying(ExHudComponentId::CompositeTime)] = {
 		dsda_InitCompositeTimeHC,
 		dsda_UpdateCompositeTimeHC,
 		dsda_DrawCompositeTimeHC,
 		"composite_time",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_health_text] = {
+	[std::to_underlying(ExHudComponentId::HealthText)] = {
 		dsda_InitHealthTextHC,
 		dsda_UpdateHealthTextHC,
 		dsda_DrawHealthTextHC,
 		"health_text",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_keys] = {
+	[std::to_underlying(ExHudComponentId::Keys)] = {
 		dsda_InitKeysHC,
 		dsda_UpdateKeysHC,
 		dsda_DrawKeysHC,
 		"keys",
-		.default_vpt = VPT_EX_TEXT | VPT_NOOFFSET,
+		.default_vpt = PatchTranslation::ExText | PatchTranslation::NoOffset,
 	},
-	[exhud_ready_ammo_text] = {
+	[std::to_underlying(ExHudComponentId::ReadyAmmoText)] = {
 		dsda_InitReadyAmmoTextHC,
 		dsda_UpdateReadyAmmoTextHC,
 		dsda_DrawReadyAmmoTextHC,
 		"ready_ammo_text",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_speed_text] = {
+	[std::to_underlying(ExHudComponentId::SpeedText)] = {
 		dsda_InitSpeedTextHC,
 		dsda_UpdateSpeedTextHC,
 		dsda_DrawSpeedTextHC,
 		"speed_text",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_stat_totals] = {
+	[std::to_underlying(ExHudComponentId::StatTotals)] = {
 		dsda_InitStatTotalsHC,
 		dsda_UpdateStatTotalsHC,
 		dsda_DrawStatTotalsHC,
 		"stat_totals",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_tracker] = {
+	[std::to_underlying(ExHudComponentId::Tracker)] = {
 		dsda_InitTrackerHC,
 		dsda_UpdateTrackerHC,
 		dsda_DrawTrackerHC,
 		"tracker",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 		.strict = true,
 	},
-	[exhud_weapon_text] = {
+	[std::to_underlying(ExHudComponentId::WeaponText)] = {
 		dsda_InitWeaponTextHC,
 		dsda_UpdateWeaponTextHC,
 		dsda_DrawWeaponTextHC,
 		"weapon_text",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_render_stats] = {
+	[std::to_underlying(ExHudComponentId::RenderStats)] = {
 		dsda_InitRenderStatsHC,
 		dsda_UpdateRenderStatsHC,
 		dsda_DrawRenderStatsHC,
 		"render_stats",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 		.strict = true,
 		.off_by_default = true,
 	},
-	[exhud_fps] = {
+	[std::to_underlying(ExHudComponentId::Fps)] = {
 		dsda_InitFPSHC,
 		dsda_UpdateFPSHC,
 		dsda_DrawFPSHC,
 		"fps",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 		.off_by_default = true,
 	},
-	[exhud_attempts] = {
+	[std::to_underlying(ExHudComponentId::Attempts)] = {
 		dsda_InitAttemptsHC,
 		dsda_UpdateAttemptsHC,
 		dsda_DrawAttemptsHC,
 		"attempts",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_local_time] = {
+	[std::to_underlying(ExHudComponentId::LocalTime)] = {
 		dsda_InitLocalTimeHC,
 		dsda_UpdateLocalTimeHC,
 		dsda_DrawLocalTimeHC,
 		"local_time",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_coordinate_display] = {
+	[std::to_underlying(ExHudComponentId::CoordinateDisplay)] = {
 		dsda_InitCoordinateDisplayHC,
 		dsda_UpdateCoordinateDisplayHC,
 		dsda_DrawCoordinateDisplayHC,
 		"coordinate_display",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 		.strict = true,
 		.off_by_default = true,
 	},
-	[exhud_line_display] = {
+	[std::to_underlying(ExHudComponentId::LineDisplay)] = {
 		dsda_InitLineDisplayHC,
 		dsda_UpdateLineDisplayHC,
 		dsda_DrawLineDisplayHC,
 		"line_display",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 		.strict = true,
 		.off_by_default = true,
 	},
-	[exhud_command_display] = {
+	[std::to_underlying(ExHudComponentId::CommandDisplay)] = {
 		dsda_InitCommandDisplayHC,
 		dsda_UpdateCommandDisplayHC,
 		dsda_DrawCommandDisplayHC,
 		"command_display",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 		.strict = true,
 		.off_by_default = true,
 		.intermission = true,
 	},
-	[exhud_event_split] = {
+	[std::to_underlying(ExHudComponentId::EventSplit)] = {
 		dsda_InitEventSplitHC,
 		dsda_UpdateEventSplitHC,
 		dsda_DrawEventSplitHC,
 		"event_split",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_level_splits] = {
+	[std::to_underlying(ExHudComponentId::LevelSplits)] = {
 		dsda_InitLevelSplitsHC,
 		dsda_UpdateLevelSplitsHC,
 		dsda_DrawLevelSplitsHC,
 		"level_splits",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 		.intermission = true,
 		.not_level = true,
 	},
-	[exhud_color_test] = {
+	[std::to_underlying(ExHudComponentId::ColorTest)] = {
 		dsda_InitColorTestHC,
 		dsda_UpdateColorTestHC,
 		dsda_DrawColorTestHC,
 		"color_test",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_free_text] = {
+	[std::to_underlying(ExHudComponentId::FreeText)] = {
 		dsda_InitFreeTextHC,
 		dsda_UpdateFreeTextHC,
 		dsda_DrawFreeTextHC,
 		"free_text",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 	},
-	[exhud_message] = {
+	[std::to_underlying(ExHudComponentId::Message)] = {
 		dsda_InitMessageHC,
 		dsda_UpdateMessageHC,
 		dsda_DrawMessageHC,
 		"message",
 	},
-	[exhud_secret_message] = {
+	[std::to_underlying(ExHudComponentId::SecretMessage)] = {
 		dsda_InitSecretMessageHC,
 		dsda_UpdateSecretMessageHC,
 		dsda_DrawSecretMessageHC,
 		"secret_message",
 	},
-	[exhud_map_coordinates] = {
+	[std::to_underlying(ExHudComponentId::MapCoordinates)] = {
 		dsda_InitMapCoordinatesHC,
 		dsda_UpdateMapCoordinatesHC,
 		dsda_DrawMapCoordinatesHC,
 		"map_coordinates",
 		.strict = true,
 	},
-	[exhud_map_time] = {
+	[std::to_underlying(ExHudComponentId::MapTime)] = {
 		dsda_InitMapTimeHC,
 		dsda_UpdateMapTimeHC,
 		dsda_DrawMapTimeHC,
 		"map_time",
 	},
-	[exhud_map_title] = {
+	[std::to_underlying(ExHudComponentId::MapTitle)] = {
 		dsda_InitMapTitleHC,
 		dsda_UpdateMapTitleHC,
 		dsda_DrawMapTitleHC,
 		"map_title",
 	},
-	[exhud_map_totals] = {
+	[std::to_underlying(ExHudComponentId::MapTotals)] = {
 		dsda_InitMapTotalsHC,
 		dsda_UpdateMapTotalsHC,
 		dsda_DrawMapTotalsHC,
 		"map_totals",
 	},
-	[exhud_minimap] = {
+	[std::to_underlying(ExHudComponentId::Minimap)] = {
 		dsda_InitMinimapHC,
 		dsda_UpdateMinimapHC,
 		dsda_DrawMinimapHC,
 		"minimap",
-		.default_vpt = VPT_EX_TEXT,
+		.default_vpt = PatchTranslation::ExText,
 		.off_by_default = true,
 	},
 };
@@ -335,25 +337,25 @@ typedef struct
 	dboolean status_bar;
 	dboolean allow_offset;
 	dboolean loaded;
-	exhud_component_t components[exhud_component_count];
-	int y_offset[VPT_ALIGN_MAX];
+	exhud_component_t components[std::to_underlying(ExHudComponentId::ComponentCount)];
+	int y_offset[std::to_underlying(PatchTranslation::AlignMax)];
 } dsda_hud_container_t;
 
-typedef enum
+enum struct HudVariant : int32_t
 {
-	hud_ex,
-	hud_off,
-	hud_full,
-	hud_map,
-	hud_null,
-} dsda_hud_variant_t;
+	Ex,
+	Off,
+	Full,
+	Map,
+	Null,
+};
 
 static dsda_hud_container_t containers[] = {
-	[hud_ex] = {"ex", true, true},
-	[hud_off] = {"off", true, true},
-	[hud_full] = {"full", false, true},
-	[hud_map] = {"map", true, false},
-	[hud_null] = {nullptr}
+	[std::to_underlying(HudVariant::Ex)] = {"ex", true, true},
+	[std::to_underlying(HudVariant::Off)] = {"off", true, true},
+	[std::to_underlying(HudVariant::Full)] = {"full", false, true},
+	[std::to_underlying(HudVariant::Map)] = {"map", true, false},
+	[std::to_underlying(HudVariant::Null)] = {nullptr}
 };
 
 static dsda_hud_container_t* container;
@@ -369,26 +371,26 @@ extern "C" int dsda_ExHudVerticalOffset()
 	return 0;
 }
 
-static void dsda_TurnComponentOn(int id)
+static void dsda_TurnComponentOn(ExHudComponentId id)
 {
-	if(!components[id].initialized)
+	if(!components[std::to_underlying(id)].initialized)
 		return;
 
-	components[id].on = true;
+	components[std::to_underlying(id)].on = true;
 }
 
-static void dsda_TurnComponentOff(int id)
+static void dsda_TurnComponentOff(ExHudComponentId id)
 {
-	components[id].on = false;
+	components[std::to_underlying(id)].on = false;
 }
 
-static void dsda_InitializeComponent(int id, int x, int y, int vpt, int* args, int arg_count)
+static void dsda_InitializeComponent(ExHudComponentId id, int x, int y, PatchTranslation vpt, int* args, int arg_count)
 {
-	components[id].initialized = true;
-	components[id].init(x, y, vpt | components[id].default_vpt,
-		args, arg_count, &components[id].data);
+	components[std::to_underlying(id)].initialized = true;
+	components[std::to_underlying(id)].init(x, y, vpt | components[std::to_underlying(id)].default_vpt,
+		args, arg_count, &components[std::to_underlying(id)].data);
 
-	if(components[id].off_by_default)
+	if(components[std::to_underlying(id)].off_by_default)
 		dsda_TurnComponentOff(id);
 	else
 		dsda_TurnComponentOn(id);
@@ -397,23 +399,23 @@ static void dsda_InitializeComponent(int id, int x, int y, int vpt, int* args, i
 static int dsda_AlignmentToVPT(const char* alignment)
 {
 	if(!strcmp(alignment, "bottom_left"))
-		return VPT_ALIGN_LEFT_BOTTOM;
+		return std::to_underlying(PatchTranslation::AlignLeftBottom);
 	else if(!strcmp(alignment, "bottom_right"))
-		return VPT_ALIGN_RIGHT_BOTTOM;
+		return std::to_underlying(PatchTranslation::AlignRightBottom);
 	else if(!strcmp(alignment, "top_left"))
-		return VPT_ALIGN_LEFT_TOP;
+		return std::to_underlying(PatchTranslation::AlignLeftTop);
 	else if(!strcmp(alignment, "top_right"))
-		return VPT_ALIGN_RIGHT_TOP;
+		return std::to_underlying(PatchTranslation::AlignRightTop);
 	else if(!strcmp(alignment, "top"))
-		return VPT_ALIGN_TOP;
+		return std::to_underlying(PatchTranslation::AlignTop);
 	else if(!strcmp(alignment, "bottom"))
-		return VPT_ALIGN_BOTTOM;
+		return std::to_underlying(PatchTranslation::AlignBottom);
 	else if(!strcmp(alignment, "left"))
-		return VPT_ALIGN_LEFT;
+		return std::to_underlying(PatchTranslation::AlignLeft);
 	else if(!strcmp(alignment, "right"))
-		return VPT_ALIGN_RIGHT;
+		return std::to_underlying(PatchTranslation::AlignRight);
 	else if(!strcmp(alignment, "none"))
-		return VPT_STRETCH;
+		return std::to_underlying(PatchTranslation::Stretch);
 	else
 		return -1;
 }
@@ -446,7 +448,7 @@ static int dsda_ParseHUDConfig(char** hud_config, int line_i)
 
 		found = false;
 
-		for(i = 0; i < exhud_component_count; ++i)
+		for(i = 0; i < std::to_underlying(ExHudComponentId::ComponentCount); ++i)
 			if(!strncmp(command, components[i].name, sizeof(command)))
 			{
 				int x, y;
@@ -467,7 +469,7 @@ static int dsda_ParseHUDConfig(char** hud_config, int line_i)
 				if(vpt < 0)
 					I_Error("Invalid hud component alignment \"%s\"", line);
 
-				dsda_InitializeComponent(i, x, y, vpt, component_args, count - 3);
+				dsda_InitializeComponent(static_cast<ExHudComponentId>(i), x, y, static_cast<PatchTranslation>(vpt), component_args, count - 3);
 			}
 
 		if(!strncmp(command, "add_offset", sizeof(command)))
@@ -494,7 +496,7 @@ static int dsda_ParseHUDConfig(char** hud_config, int line_i)
 
 			container->y_offset[vpt] = offset;
 
-			if(BOTTOM_ALIGNMENT(vpt))
+			if(BOTTOM_ALIGNMENT(static_cast<PatchTranslation>(vpt)))
 				container->y_offset[vpt] = -container->y_offset[vpt];
 		}
 
@@ -548,7 +550,7 @@ static void dsda_LoadHUDConfig()
 		int lump;
 		int length = 0;
 
-		arg = dsda_Arg(dsda_arg_hud);
+		arg = dsda_Arg(ArgId::Hud);
 		if(arg->found)
 			length = M_ReadFileToString(arg->value.v_string, &hud_config);
 
@@ -588,8 +590,8 @@ static void dsda_LoadHUDConfig()
 
 static dboolean dsda_HideHUD()
 {
-	return dsda_Flag(dsda_arg_nodraw) ||
-		(R_FullView() && !dsda_IntConfig(dsda_config_hud_displayed));
+	return dsda_Flag(ArgId::Nodraw) ||
+		(R_FullView() && !dsda_IntConfig(ConfigId::HudDisplayed));
 }
 
 static dboolean dsda_HUDActive()
@@ -605,7 +607,7 @@ static void dsda_ResetActiveHUD()
 
 static void dsda_UpdateActiveHUD()
 {
-	container = R_FullView() ? &containers[hud_full] : dsda_IntConfig(dsda_config_exhud) ? &containers[hud_ex] : &containers[hud_off];
+	container = R_FullView() ? &containers[std::to_underlying(HudVariant::Full)] : dsda_IntConfig(ConfigId::Exhud) ? &containers[std::to_underlying(HudVariant::Ex)] : &containers[std::to_underlying(HudVariant::Off)];
 
 	if(container->loaded)
 		components = container->components;
@@ -614,7 +616,7 @@ static void dsda_UpdateActiveHUD()
 }
 
 extern "C" void dsda_ResetExTextOffsets();
-extern "C" void dsda_UpdateExTextOffset(enum patch_translation_e flags, int offset);
+extern "C" void dsda_UpdateExTextOffset(PatchTranslation flags, int offset);
 static void dsda_ResetOffsets()
 {
 
@@ -622,9 +624,9 @@ static void dsda_ResetOffsets()
 
 	dsda_ResetExTextOffsets();
 
-	for(i = 0; i < VPT_ALIGN_MAX; ++i)
+	for(i = 0; i < std::to_underlying(PatchTranslation::AlignMax); ++i)
 		if(container->y_offset[i])
-			dsda_UpdateExTextOffset((enum patch_translation_e)i, container->y_offset[i]);
+			dsda_UpdateExTextOffset((PatchTranslation)i, container->y_offset[i]);
 }
 
 static void dsda_RefreshHUD()
@@ -635,7 +637,7 @@ static void dsda_RefreshHUD()
 	dsda_ResetOffsets();
 
 	if(dsda_show_render_stats)
-		dsda_TurnComponentOn(exhud_render_stats);
+		dsda_TurnComponentOn(ExHudComponentId::RenderStats);
 
 	dsda_RefreshExHudFPS();
 	dsda_RefreshExHudMinimap();
@@ -647,7 +649,7 @@ static void dsda_RefreshHUD()
 	dsda_RefreshMapTime();
 	dsda_RefreshMapTitle();
 
-	if(in_game && gamestate == GS_LEVEL)
+	if(in_game && gamestate == GameState::Level)
 		dsda_UpdateExHud();
 }
 
@@ -667,7 +669,7 @@ static void dsda_UpdateComponents(exhud_component_t* update_components)
 {
 	int i;
 
-	for(i = 0; i < exhud_component_count; ++i)
+	for(i = 0; i < std::to_underlying(ExHudComponentId::ComponentCount); ++i)
 		if(
 			update_components[i].on &&
 			!update_components[i].not_level &&
@@ -680,8 +682,8 @@ void dsda_UpdateExHud()
 {
 	if(automap_stbar)
 	{
-		if(containers[hud_map].loaded)
-			dsda_UpdateComponents(containers[hud_map].components);
+		if(containers[std::to_underlying(HudVariant::Map)].loaded)
+			dsda_UpdateComponents(containers[std::to_underlying(HudVariant::Map)].components);
 
 		return;
 	}
@@ -696,7 +698,7 @@ static void dsda_DrawComponents(exhud_component_t* draw_components)
 {
 	int i;
 
-	for(i = 0; i < exhud_component_count; ++i)
+	for(i = 0; i < std::to_underlying(ExHudComponentId::ComponentCount); ++i)
 		if(
 			draw_components[i].on &&
 			!draw_components[i].not_level &&
@@ -713,8 +715,8 @@ void dsda_DrawExHud()
 
 	if(automap_stbar)
 	{
-		if(containers[hud_map].loaded)
-			dsda_DrawComponents(containers[hud_map].components);
+		if(containers[std::to_underlying(HudVariant::Map)].loaded)
+			dsda_DrawComponents(containers[std::to_underlying(HudVariant::Map)].components);
 	}
 	else if(dsda_HUDActive())
 		dsda_DrawComponents(components);
@@ -729,7 +731,7 @@ void dsda_DrawExIntermission()
 	if(!dsda_HUDActive())
 		return;
 
-	for(i = 0; i < exhud_component_count; ++i)
+	for(i = 0; i < std::to_underlying(ExHudComponentId::ComponentCount); ++i)
 		if(
 			components[i].on &&
 			components[i].intermission &&
@@ -745,16 +747,16 @@ void dsda_ToggleRenderStats()
 	if(!dsda_HUDActive())
 		return;
 
-	if(components[exhud_render_stats].on && !dsda_show_render_stats)
-		dsda_TurnComponentOff(exhud_render_stats);
-	else if(!components[exhud_render_stats].on && dsda_show_render_stats)
+	if(components[std::to_underlying(ExHudComponentId::RenderStats)].on && !dsda_show_render_stats)
+		dsda_TurnComponentOff(ExHudComponentId::RenderStats);
+	else if(!components[std::to_underlying(ExHudComponentId::RenderStats)].on && dsda_show_render_stats)
 	{
 		dsda_BeginRenderStats();
-		dsda_TurnComponentOn(exhud_render_stats);
+		dsda_TurnComponentOn(ExHudComponentId::RenderStats);
 	}
 }
 
-static void dsda_BasicRefresh(dboolean (*show_component)(), exhud_component_id_t id)
+static void dsda_BasicRefresh(dboolean (*show_component)(), ExHudComponentId id)
 {
 	if(!dsda_HUDActive())
 		return;
@@ -765,7 +767,7 @@ static void dsda_BasicRefresh(dboolean (*show_component)(), exhud_component_id_t
 		dsda_TurnComponentOff(id);
 }
 
-static void dsda_BasicMapRefresh(dboolean (*show_component)(), exhud_component_id_t id)
+static void dsda_BasicMapRefresh(dboolean (*show_component)(), ExHudComponentId id)
 {
 	exhud_component_t* old_components;
 
@@ -773,7 +775,7 @@ static void dsda_BasicMapRefresh(dboolean (*show_component)(), exhud_component_i
 		return;
 
 	old_components = components;
-	components = containers[hud_map].components;
+	components = containers[std::to_underlying(HudVariant::Map)].components;
 
 	if(show_component())
 		dsda_TurnComponentOn(id);
@@ -785,7 +787,7 @@ static void dsda_BasicMapRefresh(dboolean (*show_component)(), exhud_component_i
 
 void dsda_RefreshExHudFPS()
 {
-	dsda_BasicRefresh(dsda_ShowFPS, exhud_fps);
+	dsda_BasicRefresh(dsda_ShowFPS, ExHudComponentId::Fps);
 }
 
 void dsda_RefreshExHudMinimap()
@@ -795,22 +797,22 @@ void dsda_RefreshExHudMinimap()
 
 	if(dsda_ShowMinimap())
 	{
-		dsda_TurnComponentOn(exhud_minimap);
+		dsda_TurnComponentOn(ExHudComponentId::Minimap);
 
 		// Need to update the component before calling AM_Start
-		if(components[exhud_minimap].initialized)
-			components[exhud_minimap].update(components[exhud_minimap].data);
+		if(components[std::to_underlying(ExHudComponentId::Minimap)].initialized)
+			components[std::to_underlying(ExHudComponentId::Minimap)].update(components[std::to_underlying(ExHudComponentId::Minimap)].data);
 
-		if(in_game && gamestate == GS_LEVEL && !automap_full)
-			AM_Start(AM_OPEN_MINIMAP);
+		if(in_game && gamestate == GameState::Level && !automap_full)
+			AM_Start(AutomapStart::Minimap);
 	}
 	else
-		dsda_TurnComponentOff(exhud_minimap);
+		dsda_TurnComponentOff(ExHudComponentId::Minimap);
 }
 
 void dsda_RefreshExHudLevelSplits()
 {
-	dsda_BasicRefresh(dsda_ShowLevelSplits, exhud_level_splits);
+	dsda_BasicRefresh(dsda_ShowLevelSplits, ExHudComponentId::LevelSplits);
 }
 
 void dsda_RefreshExHudCoordinateDisplay()
@@ -820,37 +822,37 @@ void dsda_RefreshExHudCoordinateDisplay()
 
 	if(dsda_CoordinateDisplay())
 	{
-		dsda_TurnComponentOn(exhud_coordinate_display);
-		dsda_TurnComponentOn(exhud_line_display);
+		dsda_TurnComponentOn(ExHudComponentId::CoordinateDisplay);
+		dsda_TurnComponentOn(ExHudComponentId::LineDisplay);
 	}
 	else
 	{
-		dsda_TurnComponentOff(exhud_coordinate_display);
-		dsda_TurnComponentOff(exhud_line_display);
+		dsda_TurnComponentOff(ExHudComponentId::CoordinateDisplay);
+		dsda_TurnComponentOff(ExHudComponentId::LineDisplay);
 	}
 }
 
 void dsda_RefreshExHudCommandDisplay()
 {
-	dsda_BasicRefresh(dsda_CommandDisplay, exhud_command_display);
+	dsda_BasicRefresh(dsda_CommandDisplay, ExHudComponentId::CommandDisplay);
 }
 
 void dsda_RefreshMapCoordinates()
 {
-	dsda_BasicMapRefresh(dsda_MapCoordinates, exhud_map_coordinates);
+	dsda_BasicMapRefresh(dsda_MapCoordinates, ExHudComponentId::MapCoordinates);
 }
 
 void dsda_RefreshMapTotals()
 {
-	dsda_BasicMapRefresh(dsda_MapTotals, exhud_map_totals);
+	dsda_BasicMapRefresh(dsda_MapTotals, ExHudComponentId::MapTotals);
 }
 
 void dsda_RefreshMapTime()
 {
-	dsda_BasicMapRefresh(dsda_MapTime, exhud_map_time);
+	dsda_BasicMapRefresh(dsda_MapTime, ExHudComponentId::MapTime);
 }
 
 void dsda_RefreshMapTitle()
 {
-	dsda_BasicMapRefresh(dsda_MapTitle, exhud_map_title);
+	dsda_BasicMapRefresh(dsda_MapTitle, ExHudComponentId::MapTitle);
 }

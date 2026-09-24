@@ -129,7 +129,7 @@ const char* dsda_ParsePlaybackOptions()
 {
 	dsda_arg_t* arg;
 
-	arg = dsda_Arg(dsda_arg_playdemo);
+	arg = dsda_Arg(ArgId::Playdemo);
 	if(arg->found)
 	{
 		playdemo_arg = arg;
@@ -140,7 +140,7 @@ const char* dsda_ParsePlaybackOptions()
 		return playback_filename;
 	}
 
-	arg = dsda_Arg(dsda_arg_playlump);
+	arg = dsda_Arg(ArgId::Playlump);
 	if(arg->found)
 	{
 		playlump_arg = arg;
@@ -149,7 +149,7 @@ const char* dsda_ParsePlaybackOptions()
 		return playback_filename;
 	}
 
-	arg = dsda_Arg(dsda_arg_fastdemo);
+	arg = dsda_Arg(ArgId::Fastdemo);
 	if(arg->found)
 	{
 		fastdemo_arg = arg;
@@ -161,7 +161,7 @@ const char* dsda_ParsePlaybackOptions()
 		return playback_filename;
 	}
 
-	arg = dsda_Arg(dsda_arg_timedemo);
+	arg = dsda_Arg(ArgId::Timedemo);
 	if(arg->found)
 	{
 		timedemo_arg = arg;
@@ -172,7 +172,7 @@ const char* dsda_ParsePlaybackOptions()
 		return playback_filename;
 	}
 
-	arg = dsda_Arg(dsda_arg_recordfromto);
+	arg = dsda_Arg(ArgId::Recordfromto);
 	if(arg->found)
 	{
 		recordfromto_arg = arg;
@@ -275,6 +275,6 @@ void dsda_TryPlaybackOneTick(ticcmd_t* cmd)
 		else
 			G_CheckDemoStatus();
 	}
-	else if(dsda_InputActive(dsda_input_join_demo) || dsda_InputJoyBActive(dsda_input_use))
+	else if(dsda_InputActive(InputId::JoinDemo) || dsda_InputJoyBActive(InputId::Use))
 		dsda_JoinDemo(cmd);
 }

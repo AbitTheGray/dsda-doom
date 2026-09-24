@@ -30,7 +30,7 @@ static void dsda_UpdateIntermissionTime(dsda_split_t* split)
 	const char* color;
 
 	delta[0] = '\0';
-	color = dsda_TextColor(dsda_tc_inter_split_normal);
+	color = dsda_TextColor(TextColorIndex::InterSplitNormal);
 
 	if(split && !split->first_time)
 	{
@@ -39,7 +39,7 @@ static void dsda_UpdateIntermissionTime(dsda_split_t* split)
 
 		diff = dsda_SplitComparisonDelta(&split->leveltime);
 		sign = diff >= 0 ? "+" : "-";
-		color = diff >= 0 ? dsda_TextColor(dsda_tc_inter_split_normal) : split->leveltime.best_delta >= 0 ? dsda_TextColor(dsda_tc_inter_split_good) : dsda_TextColor(dsda_tc_inter_split_best);
+		color = diff >= 0 ? dsda_TextColor(TextColorIndex::InterSplitNormal) : split->leveltime.best_delta >= 0 ? dsda_TextColor(TextColorIndex::InterSplitGood) : dsda_TextColor(TextColorIndex::InterSplitBest);
 		diff = abs(diff);
 
 		if(diff >= 2100)
@@ -79,7 +79,7 @@ static void dsda_UpdateIntermissionTotal(dsda_split_t* split)
 	const char* color;
 
 	delta[0] = '\0';
-	color = dsda_TextColor(dsda_tc_inter_split_normal);
+	color = dsda_TextColor(TextColorIndex::InterSplitNormal);
 
 	if(split && !split->first_time)
 	{
@@ -88,7 +88,7 @@ static void dsda_UpdateIntermissionTotal(dsda_split_t* split)
 
 		diff = dsda_SplitComparisonDelta(&split->totalleveltimes) / TICRATE;
 		sign = diff >= 0 ? "+" : "-";
-		color = diff >= 0 ? dsda_TextColor(dsda_tc_inter_split_normal) : dsda_TextColor(dsda_tc_inter_split_good);
+		color = diff >= 0 ? dsda_TextColor(TextColorIndex::InterSplitNormal) : dsda_TextColor(TextColorIndex::InterSplitGood);
 		diff = abs(diff);
 
 		if(diff >= 60)
@@ -122,7 +122,7 @@ static void dsda_UpdateIntermissionTotal(dsda_split_t* split)
 	dsda_RefreshHudText(&local->total_component);
 }
 
-void dsda_InitLevelSplitsHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitLevelSplitsHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

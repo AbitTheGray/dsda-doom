@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <utility>
+
 #include "am_map.hpp"
 #include "doomstat.hpp"
 #include "d_event.hpp"
@@ -26,12 +28,12 @@
 #define TEXTSPEED 3
 #define TEXTWAIT 140
 
-typedef enum
+enum struct GameType : int32_t
 {
-	SINGLE,
-	COOPERATIVE,
-	DEATHMATCH
-} gametype_t;
+	Single,
+	Cooperative,
+	Deathmatch
+};
 
 static void WaitStop();
 static void Stop();
@@ -49,7 +51,7 @@ char ClusterMessage[MAX_INTRMSN_MESSAGE_SIZE];
 static dboolean skipintermission;
 static int interstate = 0;
 static int intertime = -1;
-static gametype_t gametype;
+static GameType gametype;
 static int cnt;
 static int slaughterboy; // in DM, the player with the most kills
 static int FontABaseLump;
@@ -79,7 +81,7 @@ static void WaitStop()
 	if(!--cnt)
 	{
 		Stop();
-		gameaction = ga_leavemap;
+		gameaction = GameAction::LeaveMap;
 	}
 }
 
@@ -112,7 +114,7 @@ static void InitStats()
 
 	if(!deathmatch)
 	{
-		gametype = SINGLE;
+		gametype = GameType::Single;
 		HubCount = 0;
 		oldCluster = dsda_MapCluster(gamemap);
 		if(oldCluster != dsda_MapCluster(leave_data.map))
@@ -136,7 +138,7 @@ static void InitStats()
 	}
 	else
 	{
-		gametype = DEATHMATCH;
+		gametype = GameType::Deathmatch;
 		slaughterboy = 0;
 		slaughterfrags = -9999;
 		playercount = 0;
@@ -178,7 +180,7 @@ static void InitStats()
 
 static void LoadPics()
 {
-	if(HubCount || gametype == DEATHMATCH)
+	if(HubCount || gametype == GameType::Deathmatch)
 	{
 		FontABaseLump = W_GetNumForName("FONTA_S") + 1;
 	}
@@ -198,7 +200,7 @@ void Hexen_IN_Ticker()
 	skipintermission = false;
 	CheckForSkip();
 	intertime++;
-	if(skipintermission || (gametype == SINGLE && !HubCount))
+	if(skipintermission || (gametype == GameType::Single && !HubCount))
 	{
 		interstate = 1;
 		cnt = 10;
@@ -216,7 +218,7 @@ static void CheckForSkip()
 	{
 		if(playeringame[i])
 		{
-			if(player->cmd.buttons & BT_ATTACK)
+			if((player->cmd.buttons & ButtonCode::Attack) != ButtonCode{})
 			{
 				if(!player->attackdown)
 				{
@@ -228,7 +230,7 @@ static void CheckForSkip()
 			{
 				player->attackdown = false;
 			}
-			if(player->cmd.buttons & BT_USE)
+			if((player->cmd.buttons & ButtonCode::Use) != ButtonCode{})
 			{
 				if(!player->usedown)
 				{
@@ -274,7 +276,7 @@ void Hexen_IN_Drawer()
 
 	V_DrawRawScreen("INTERPIC");
 
-	if(gametype == SINGLE)
+	if(gametype == GameType::Single)
 	{
 		if(HubCount)
 		{
@@ -312,8 +314,8 @@ static void DrDeathTally()
 	static dboolean showTotals;
 	int temp;
 
-	V_DrawNamePatch(TALLY_TOP_X, TALLY_TOP_Y, 0, "tallytop", CR_DEFAULT, VPT_STRETCH);
-	V_DrawNamePatch(TALLY_LEFT_X, TALLY_LEFT_Y, 0, "tallylft", CR_DEFAULT, VPT_STRETCH);
+	V_DrawNamePatch(TALLY_TOP_X, TALLY_TOP_Y, 0, "tallytop", ColorRange::Default, PatchTranslation::Stretch);
+	V_DrawNamePatch(TALLY_LEFT_X, TALLY_LEFT_Y, 0, "tallylft", ColorRange::Default, PatchTranslation::Stretch);
 	if(intertime < TALLY_EFFECT_TICKS)
 	{
 		showTotals = false;
@@ -337,7 +339,7 @@ static void DrDeathTally()
 	if(intertime >= TALLY_EFFECT_TICKS && showTotals == false)
 	{
 		showTotals = true;
-		S_StartVoidSound(hexen_sfx_platform_stop);
+		S_StartVoidSound(SfxId::HexenPlatformStop);
 	}
 	y = yPos >> FRACBITS;
 	for(i = 0; i < g_maxplayers; i++)
@@ -449,7 +451,7 @@ static void DrawHubText()
 		{
 			break;
 		}
-		V_DrawNumPatch(cx, cy, 0, lump, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNumPatch(cx, cy, 0, lump, ColorRange::Default, PatchTranslation::Stretch);
 		cx += width;
 	}
 }

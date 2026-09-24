@@ -4,6 +4,8 @@
  *  Refresh of things, i.e. objects represented by sprites.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "w_wad.hpp"
 #include "r_main.hpp"
@@ -550,27 +552,27 @@ static void R_DrawVisSprite(vissprite_t* vis)
 	if(!dcvars.colormap) // NULL colormap = shadow draw
 	{
 		R_ResetFuzzCol(colheight);                                            // Reset fuzz column for new sprite
-		colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_FUZZ, RDRAW_FILTER_POINT); // killough 3/14/98
+		colfunc = R_GetDrawColumnFunc(ColumnPipeline::Fuzz, DrawFilterType::Point); // killough 3/14/98
 	}
 	else if(vis->color)
 	{
-		colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLATED, RDRAW_FILTER_POINT);
+		colfunc = R_GetDrawColumnFunc(ColumnPipeline::Translated, DrawFilterType::Point);
 		dcvars.translation = colrngs[vis->color];
 	}
 	else if(vis->mobjflags & MF_TRANSLATION)
 	{
-		colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLATED, RDRAW_FILTER_POINT);
+		colfunc = R_GetDrawColumnFunc(ColumnPipeline::Translated, DrawFilterType::Point);
 		dcvars.translation = translationtables - 256 +
 			((vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT - 8));
 	}
 	else if(vis->tranmap) // phares
 	{
-		colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLUCENT, RDRAW_FILTER_POINT);
+		colfunc = R_GetDrawColumnFunc(ColumnPipeline::Translucent, DrawFilterType::Point);
 		tranmap = vis->tranmap;
 	}
 	else
 	{
-		colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_STANDARD, RDRAW_FILTER_POINT); // killough 3/14/98, 4/11/98
+		colfunc = R_GetDrawColumnFunc(ColumnPipeline::Standard, DrawFilterType::Point); // killough 3/14/98, 4/11/98
 	}
 
 	// proff 11/06/98: Changed for high-res
@@ -709,7 +711,7 @@ static void R_ProjectSprite(mobj_t* thing, int lightlevel)
 		I_Error("R_ProjectSprite: Invalid sprite number %i", thing->sprite);
 #endif
 
-	sprdef = &sprites[thing->sprite];
+	sprdef = &sprites[std::to_underlying(thing->sprite)];
 
 #ifdef RANGECHECK
 	if((thing->frame & FF_FRAMEMASK) >= sprdef->numframes)
@@ -840,7 +842,7 @@ static void R_ProjectSprite(mobj_t* thing, int lightlevel)
 		{
 			if(thing->player)
 			{
-				vis->pclass = thing->player->pclass;
+				vis->pclass = std::to_underlying(thing->player->pclass);
 			}
 			else
 			{
@@ -911,7 +913,7 @@ void R_AddSprites(subsector_t* subsec, int lightlevel)
 	sector_t* sec = subsec->sector;
 	mobj_t* thing;
 
-	if(compatibility_level <= boom_202_compatibility)
+	if(compatibility_level <= CompLevel::Boom202)
 		lightlevel = sec->lightlevel;
 
 	// Handle all things in sector.
@@ -993,7 +995,7 @@ static void R_ApplyWeaponBob(fixed_t* sx, dboolean bobx, fixed_t* sy, dboolean b
 //
 
 // heretic
-static int PSpriteSY[NUMCLASSES][NUMWEAPONS] = {
+static int PSpriteSY[std::to_underlying(PClass::Count)][std::to_underlying(WeaponType::Count)] = {
 	{
 		0,             // staff
 		5 * FRACUNIT,  // goldwand
@@ -1033,7 +1035,7 @@ static void R_DrawPSprite(pspdef_t* psp)
 		I_Error("R_ProjectSprite: Invalid sprite number %i", psp->state->sprite);
 #endif
 
-	sprdef = &sprites[psp->state->sprite];
+	sprdef = &sprites[std::to_underlying(psp->state->sprite)];
 
 #ifdef RANGECHECK
 	if((psp->state->frame & FF_FRAMEMASK) >= sprdef->numframes)
@@ -1047,12 +1049,12 @@ static void R_DrawPSprite(pspdef_t* psp)
 	flip = (dboolean)(sprframe->flip & 1);
 
 	{
-		int weapon_attack_alignment = dsda_IntConfig(dsda_config_weapon_attack_alignment);
+		int weapon_attack_alignment = dsda_IntConfig(ConfigId::WeaponAttackAlignment);
 
 		// [crispy] don't align swiping weapons
-		const dboolean swiping_weapon = hexen && (viewplayer->pclass == PCLASS_FIGHTER ||
-			(viewplayer->pclass == PCLASS_CLERIC &&
-				viewplayer->readyweapon == wp_first));
+		const dboolean swiping_weapon = hexen && (viewplayer->pclass == PClass::Fighter ||
+			(viewplayer->pclass == PClass::Cleric &&
+				viewplayer->readyweapon == WeaponType::First));
 
 		if(!dsda_WeaponBob() && !(swiping_weapon && viewplayer->attackdown))
 		{
@@ -1074,13 +1076,13 @@ static void R_DrawPSprite(pspdef_t* psp)
 		else if(weapon_attack_alignment && viewplayer->attackdown && !psp->state->misc1)
 		{
 			// [crispy] center the weapon sprite horizontally and vertically
-			R_ApplyWeaponBob(&psp_sx, weapon_attack_alignment == CENTERWEAPON_BOB, nullptr, false);
+			R_ApplyWeaponBob(&psp_sx, weapon_attack_alignment == std::to_underlying(CenterWeapon::Bob), nullptr, false);
 
 			// [crispy] don't center vertically during lowering and raising states
-			if(weapon_attack_alignment >= CENTERWEAPON_HORVER &&
+			if(weapon_attack_alignment >= std::to_underlying(CenterWeapon::HorVer) &&
 				psp->state->action != reinterpret_cast<actionf_t>(A_Lower) && psp->state->action != reinterpret_cast<actionf_t>(A_Raise) && !swiping_weapon)
 			{
-				R_ApplyWeaponBob(nullptr, false, &psp_sy, weapon_attack_alignment == CENTERWEAPON_BOB);
+				R_ApplyWeaponBob(nullptr, false, &psp_sy, weapon_attack_alignment == std::to_underlying(CenterWeapon::Bob));
 			}
 		}
 		else if(psp->state->action == reinterpret_cast<actionf_t>(A_WeaponReady) && psp->state->tics > 1 && movement_smooth)
@@ -1129,7 +1131,7 @@ static void R_DrawPSprite(pspdef_t* psp)
 
 	if(R_FullView() && raven)
 	{
-		vis->texturemid -= PSpriteSY[viewplayer->pclass][players[consoleplayer].readyweapon];
+		vis->texturemid -= PSpriteSY[std::to_underlying(viewplayer->pclass)][std::to_underlying(players[consoleplayer].readyweapon)];
 	}
 
 	// Move the weapon down for 1280x1024.
@@ -1161,8 +1163,8 @@ static void R_DrawPSprite(pspdef_t* psp)
 
 	vis->patch = lump;
 
-	if(viewplayer->powers[pw_invisibility] > 4 * 32
-		|| viewplayer->powers[pw_invisibility] & 8)
+	if(viewplayer->powers[std::to_underlying(PowerType::Invisibility)] > 4 * 32
+		|| viewplayer->powers[std::to_underlying(PowerType::Invisibility)] & 8)
 	{
 		if(heretic)
 		{
@@ -1174,10 +1176,10 @@ static void R_DrawPSprite(pspdef_t* psp)
 			vis->colormap = nullptr; // shadow draw
 		}
 	}
-	else if(viewplayer->powers[pw_invulnerability] && viewplayer->pclass == PCLASS_CLERIC)
+	else if(viewplayer->powers[std::to_underlying(PowerType::Invulnerability)] && viewplayer->pclass == PClass::Cleric)
 	{
 		vis->colormap = spritelights[MAXLIGHTSCALE - 1];
-		if(viewplayer->powers[pw_invulnerability] > 4 * 32)
+		if(viewplayer->powers[std::to_underlying(PowerType::Invulnerability)] > 4 * 32)
 		{
 			if(viewplayer->mo->flags2 & MF2_DONTDRAW)
 			{
@@ -1189,7 +1191,7 @@ static void R_DrawPSprite(pspdef_t* psp)
 				vis->mobjflags |= MF_ALTSHADOW;
 			}
 		}
-		else if(viewplayer->powers[pw_invulnerability] & 8)
+		else if(viewplayer->powers[std::to_underlying(PowerType::Invulnerability)] & 8)
 		{
 			vis->mobjflags |= MF_SHADOW;
 		}
@@ -1304,7 +1306,7 @@ void R_DrawPlayerSprites()
 	mceilingclip = negonearray;
 
 	// add all active psprites
-	for(i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
+	for(i = 0, psp = viewplayer->psprites; i < std::to_underlying(PspNum::Count); i++, psp++)
 		if(psp->state)
 			R_DrawPSprite(psp);
 }

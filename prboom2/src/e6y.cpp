@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "dsda/demo.hpp"
 #include "r_patch.hpp"
@@ -128,56 +130,56 @@ const char* WINError()
 void ParamsMatchingCheck()
 {
 	dboolean recording_attempt =
-		dsda_Flag(dsda_arg_record) ||
-		dsda_Flag(dsda_arg_recordfromto);
+		dsda_Flag(ArgId::Record) ||
+		dsda_Flag(ArgId::Recordfromto);
 
 	dboolean playbacking_attempt =
-		dsda_Flag(dsda_arg_playdemo) ||
-		dsda_Flag(dsda_arg_timedemo) ||
-		dsda_Flag(dsda_arg_fastdemo);
+		dsda_Flag(ArgId::Playdemo) ||
+		dsda_Flag(ArgId::Timedemo) ||
+		dsda_Flag(ArgId::Fastdemo);
 
 	if(recording_attempt && playbacking_attempt)
 		I_Error("Params are not matching: Can not being played back and recorded at the same time.");
 }
 
-prboom_comp_t prboom_comp[PC_MAX] = {
-	{0xffffffff, 0x02020615, 0, dsda_arg_force_monster_avoid_hazards},
-	{0x00000000, 0x02040601, 0, dsda_arg_force_remove_slime_trails},
-	{0x02020200, 0x02040801, 0, dsda_arg_force_no_dropoff},
-	{0x00000000, 0x02040801, 0, dsda_arg_force_truncated_sector_specials},
-	{0x00000000, 0x02040802, 0, dsda_arg_force_boom_brainawake},
-	{0x00000000, 0x02040802, 0, dsda_arg_force_prboom_friction},
-	{0x02020500, 0x02040000, 0, dsda_arg_reject_pad_with_ff},
-	{0xffffffff, 0x02040802, 0, dsda_arg_force_lxdoom_demo_compatibility},
-	{0x00000000, 0x0202061b, 0, dsda_arg_allow_ssg_direct},
-	{0x00000000, 0x02040601, 0, dsda_arg_treat_no_clipping_things_as_not_blocking},
-	{0x00000000, 0x02040803, 0, dsda_arg_force_incorrect_processing_of_respawn_frame_entry},
-	{0x00000000, 0x02040601, 0, dsda_arg_force_correct_code_for_3_keys_doors_in_mbf},
-	{0x00000000, 0x02040601, 0, dsda_arg_uninitialize_crush_field_for_stairs},
-	{0x00000000, 0x02040802, 0, dsda_arg_force_boom_findnexthighestfloor},
-	{0x00000000, 0x02040802, 0, dsda_arg_allow_sky_transfer_in_boom},
-	{0x00000000, 0x02040803, 0, dsda_arg_apply_green_armor_class_to_armor_bonuses},
-	{0x00000000, 0x02040803, 0, dsda_arg_apply_blue_armor_class_to_megasphere},
-	{0x02020200, 0x02050003, 0, dsda_arg_force_incorrect_bobbing_in_boom},
-	{0xffffffff, 0x00000000, 0, dsda_arg_boom_deh_parser},
-	{0x00000000, 0x02050007, 0, dsda_arg_mbf_remove_thinker_in_killmobj},
-	{0x00000000, 0x02050007, 0, dsda_arg_do_not_inherit_friendlyness_flag_on_spawn},
-	{0x00000000, 0x02050007, 0, dsda_arg_do_not_use_misc12_frame_parameters_in_a_mushroom},
-	{0x00000000, 0x02050102, 0, dsda_arg_apply_mbf_codepointers_to_any_complevel},
-	{0x00000000, 0x02050104, 0, dsda_arg_reset_monsterspawner_params_after_loading},
+prboom_comp_t prboom_comp[std::to_underlying(PrboomComp::Max)] = {
+	{0xffffffff, 0x02020615, 0, std::to_underlying(ArgId::ForceMonsterAvoidHazards)},
+	{0x00000000, 0x02040601, 0, std::to_underlying(ArgId::ForceRemoveSlimeTrails)},
+	{0x02020200, 0x02040801, 0, std::to_underlying(ArgId::ForceNoDropoff)},
+	{0x00000000, 0x02040801, 0, std::to_underlying(ArgId::ForceTruncatedSectorSpecials)},
+	{0x00000000, 0x02040802, 0, std::to_underlying(ArgId::ForceBoomBrainawake)},
+	{0x00000000, 0x02040802, 0, std::to_underlying(ArgId::ForcePrboomFriction)},
+	{0x02020500, 0x02040000, 0, std::to_underlying(ArgId::RejectPadWithFf)},
+	{0xffffffff, 0x02040802, 0, std::to_underlying(ArgId::ForceLxdoomDemoCompatibility)},
+	{0x00000000, 0x0202061b, 0, std::to_underlying(ArgId::AllowSsgDirect)},
+	{0x00000000, 0x02040601, 0, std::to_underlying(ArgId::TreatNoClippingThingsAsNotBlocking)},
+	{0x00000000, 0x02040803, 0, std::to_underlying(ArgId::ForceIncorrectProcessingOfRespawnFrameEntry)},
+	{0x00000000, 0x02040601, 0, std::to_underlying(ArgId::ForceCorrectCodeFor3KeysDoorsInMbf)},
+	{0x00000000, 0x02040601, 0, std::to_underlying(ArgId::UninitializeCrushFieldForStairs)},
+	{0x00000000, 0x02040802, 0, std::to_underlying(ArgId::ForceBoomFindnexthighestfloor)},
+	{0x00000000, 0x02040802, 0, std::to_underlying(ArgId::AllowSkyTransferInBoom)},
+	{0x00000000, 0x02040803, 0, std::to_underlying(ArgId::ApplyGreenArmorClassToArmorBonuses)},
+	{0x00000000, 0x02040803, 0, std::to_underlying(ArgId::ApplyBlueArmorClassToMegasphere)},
+	{0x02020200, 0x02050003, 0, std::to_underlying(ArgId::ForceIncorrectBobbingInBoom)},
+	{0xffffffff, 0x00000000, 0, std::to_underlying(ArgId::BoomDehParser)},
+	{0x00000000, 0x02050007, 0, std::to_underlying(ArgId::MbfRemoveThinkerInKillmobj)},
+	{0x00000000, 0x02050007, 0, std::to_underlying(ArgId::DoNotInheritFriendlynessFlagOnSpawn)},
+	{0x00000000, 0x02050007, 0, std::to_underlying(ArgId::DoNotUseMisc12FrameParametersInAMushroom)},
+	{0x00000000, 0x02050102, 0, std::to_underlying(ArgId::ApplyMbfCodepointersToAnyComplevel)},
+	{0x00000000, 0x02050104, 0, std::to_underlying(ArgId::ResetMonsterspawnerParamsAfterLoading)},
 };
 
 extern "C" void M_ChangeShorttics()
 {
-	shorttics = dsda_IntConfig(dsda_config_movement_shorttics) || dsda_Flag(dsda_arg_shorttics);
+	shorttics = dsda_IntConfig(ConfigId::MovementShorttics) || dsda_Flag(ArgId::Shorttics);
 }
 
 void e6y_InitCommandLine()
 {
-	stats_level = dsda_Flag(dsda_arg_levelstat);
+	stats_level = dsda_Flag(ArgId::Levelstat);
 
-	if((stroller = dsda_Flag(dsda_arg_stroller)))
-		dsda_UpdateIntArg(dsda_arg_turbo, "50");
+	if((stroller = dsda_Flag(ArgId::Stroller)))
+		dsda_UpdateIntArg(ArgId::Turbo, "50");
 
 	dsda_ReadCommandLine();
 
@@ -188,9 +190,9 @@ int G_ReloadLevel()
 {
 	int result = false;
 
-	if((gamestate == GS_LEVEL || gamestate == GS_INTERMISSION) &&
+	if((gamestate == GameState::Level || gamestate == GameState::Intermission) &&
 		allow_incompatibility &&
-		!menuactive)
+		menuactive == MenuActive::Inactive)
 	{
 		G_DeferedInitNew(gameskill, gameepisode, gamemap);
 		result = true;
@@ -214,9 +216,9 @@ int G_GotoNextLevel()
 
 	dsda_NextMap(&epsd, &map);
 
-	if((gamestate == GS_LEVEL) &&
+	if((gamestate == GameState::Level) &&
 		allow_incompatibility &&
-		!menuactive)
+		menuactive == MenuActive::Inactive)
 	{
 		G_DeferedInitNew(gameskill, epsd, map);
 		changed = true;
@@ -232,9 +234,9 @@ int G_GotoPrevLevel()
 
 	dsda_PrevMap(&epsd, &map);
 
-	if((gamestate == GS_LEVEL) &&
+	if((gamestate == GameState::Level) &&
 		allow_incompatibility &&
-		!menuactive)
+		menuactive == MenuActive::Inactive)
 	{
 		G_DeferedInitNew(gameskill, epsd, map);
 		changed = true;
@@ -256,12 +258,12 @@ void M_ChangeSkyMode()
 
 	R_InitSkyMap();
 
-	gl_skymode = dsda_IntConfig(dsda_config_gl_skymode);
+	gl_skymode = dsda_IntConfig(ConfigId::GlSkymode);
 
-	if(gl_skymode == skytype_auto)
-		gl_drawskys = (dsda_FreeAim() ? skytype_skydome : skytype_standard);
+	if(gl_skymode == std::to_underlying(SkyType::Auto))
+		gl_drawskys = dsda_FreeAim() ? SkyType::Skydome : SkyType::Standard;
 	else
-		gl_drawskys = gl_skymode;
+		gl_drawskys = static_cast<SkyType>(gl_skymode);
 }
 
 static const int upViewPitchLimit = -ANG90 + (1 << ANGLETOFINESHIFT);
@@ -303,7 +305,7 @@ void M_ChangeAspectRatio()
 
 void M_ChangeStretch()
 {
-	render_stretch_hud = dsda_IntConfig(dsda_config_render_stretch_hud);
+	render_stretch_hud = dsda_IntConfig(ConfigId::RenderStretchHud);
 
 	R_SetViewSize();
 }
@@ -314,7 +316,7 @@ void M_ChangeFOV()
 	dsda_arg_t* arg;
 	int gl_render_aspect_width, gl_render_aspect_height;
 
-	arg = dsda_Arg(dsda_arg_aspect);
+	arg = dsda_Arg(ArgId::Aspect);
 	if(
 		arg->found &&
 		sscanf(arg->value.v_string, "%dx%d", &gl_render_aspect_width, &gl_render_aspect_height) == 2
@@ -389,7 +391,7 @@ void I_vWarning(const char* message, va_list argList)
 {
 	char msg[1024];
 	vsnprintf(msg, sizeof(msg), message, argList);
-	lprintf(LO_ERROR, "%s\n", msg);
+	lprintf(OutputLevels::Error, "%s\n", msg);
 #ifdef _WIN32
 	I_MessageBox(msg, PRB_MB_OK);
 #endif
@@ -400,7 +402,7 @@ int I_MessageBox(const char* text, unsigned int type)
 #ifdef _WIN32
 	int result = PRB_IDCANCEL;
 
-	if(!dsda_Flag(dsda_arg_no_message_box))
+	if(!dsda_Flag(ArgId::NoMessageBox))
 	{
 		HWND current_hwnd = GetForegroundWindow();
 		wchar_t* wtext = ConvertUtf8ToWide(text);
@@ -448,11 +450,11 @@ void e6y_G_DoCompleted()
 			stats[numlevels].map[end_of_string] = 's';
 	}
 
-	stats[numlevels].stat[TT_TIME] = leveltime;
-	stats[numlevels].stat[TT_TOTALTIME] = totalleveltimes;
-	stats[numlevels].stat[TT_TOTALKILL] = totalkills;
-	stats[numlevels].stat[TT_TOTALITEM] = totalitems;
-	stats[numlevels].stat[TT_TOTALSECRET] = totalsecret;
+	stats[numlevels].stat[std::to_underlying(TotalsDisplay::Time)] = leveltime;
+	stats[numlevels].stat[std::to_underlying(TotalsDisplay::TotalTime)] = totalleveltimes;
+	stats[numlevels].stat[std::to_underlying(TotalsDisplay::TotalKill)] = totalkills;
+	stats[numlevels].stat[std::to_underlying(TotalsDisplay::TotalItem)] = totalitems;
+	stats[numlevels].stat[std::to_underlying(TotalsDisplay::TotalSecret)] = totalsecret;
 
 	for(i = 0; i < g_maxplayers; i++)
 	{
@@ -462,9 +464,9 @@ void e6y_G_DoCompleted()
 			stats[numlevels].item[i] = players[i].itemcount;
 			stats[numlevels].secret[i] = players[i].secretcount;
 
-			stats[numlevels].stat[TT_ALLKILL] += stats[numlevels].kill[i];
-			stats[numlevels].stat[TT_ALLITEM] += stats[numlevels].item[i];
-			stats[numlevels].stat[TT_ALLSECRET] += stats[numlevels].secret[i];
+			stats[numlevels].stat[std::to_underlying(TotalsDisplay::AllKill)] += stats[numlevels].kill[i];
+			stats[numlevels].stat[std::to_underlying(TotalsDisplay::AllItem)] += stats[numlevels].item[i];
+			stats[numlevels].stat[std::to_underlying(TotalsDisplay::AllSecret)] += stats[numlevels].secret[i];
 		}
 	}
 
@@ -494,7 +496,7 @@ void e6y_WriteStats()
 
 	if(f == nullptr)
 	{
-		lprintf(LO_ERROR, "Unable to open levelstat.txt for writing\n");
+		lprintf(OutputLevels::Error, "Unable to open levelstat.txt for writing\n");
 		return;
 	}
 
@@ -542,14 +544,14 @@ void e6y_WriteStats()
 		if(strlen(all[level].secret) > allsecrets_len)
 			allsecrets_len = strlen(all[level].secret);
 
-		for(i = 0; i < TT_MAX; i++)
+		for(i = 0; i < std::to_underlying(TotalsDisplay::Max); i++)
 			if(stats[level].stat[i] > max.stat[i])
 				max.stat[i] = stats[level].stat[i];
 	}
-	max.stat[TT_TIME] = max.stat[TT_TIME] / TICRATE / 60;
-	max.stat[TT_TOTALTIME] = max.stat[TT_TOTALTIME] / TICRATE / 60;
+	max.stat[std::to_underlying(TotalsDisplay::Time)] = max.stat[std::to_underlying(TotalsDisplay::Time)] / TICRATE / 60;
+	max.stat[std::to_underlying(TotalsDisplay::TotalTime)] = max.stat[std::to_underlying(TotalsDisplay::TotalTime)] / TICRATE / 60;
 
-	for(i = 0; i < TT_MAX; i++)
+	for(i = 0; i < std::to_underlying(TotalsDisplay::Max); i++)
 	{
 		snprintf(str, sizeof(str), "%d", max.stat[i]);
 		max.stat[i] = strlen(str);
@@ -559,19 +561,19 @@ void e6y_WriteStats()
 	{
 		snprintf(str, sizeof(str),
 			"%%s - %%%dd:%%05.2f (%%%dd:%%02d)  K: %%%dd/%%-%dd%%%lds  I: %%%dd/%%-%dd%%%lds  S: %%%dd/%%-%dd %%%lds\r\n",
-			max.stat[TT_TIME], max.stat[TT_TOTALTIME],
-			max.stat[TT_ALLKILL], max.stat[TT_TOTALKILL], (long)allkills_len,
-			max.stat[TT_ALLITEM], max.stat[TT_TOTALITEM], (long)allitems_len,
-			max.stat[TT_ALLSECRET], max.stat[TT_TOTALSECRET], (long)allsecrets_len);
+			max.stat[std::to_underlying(TotalsDisplay::Time)], max.stat[std::to_underlying(TotalsDisplay::TotalTime)],
+			max.stat[std::to_underlying(TotalsDisplay::AllKill)], max.stat[std::to_underlying(TotalsDisplay::TotalKill)], (long)allkills_len,
+			max.stat[std::to_underlying(TotalsDisplay::AllItem)], max.stat[std::to_underlying(TotalsDisplay::TotalItem)], (long)allitems_len,
+			max.stat[std::to_underlying(TotalsDisplay::AllSecret)], max.stat[std::to_underlying(TotalsDisplay::TotalSecret)], (long)allsecrets_len);
 
 		fprintf(f, str, stats[level].map,
-			stats[level].stat[TT_TIME] / TICRATE / 60,
-			(float)(stats[level].stat[TT_TIME] % (60 * TICRATE)) / TICRATE,
-			(stats[level].stat[TT_TOTALTIME]) / TICRATE / 60,
-			(stats[level].stat[TT_TOTALTIME] % (60 * TICRATE)) / TICRATE,
-			stats[level].stat[TT_ALLKILL], stats[level].stat[TT_TOTALKILL], all[level].kill,
-			stats[level].stat[TT_ALLITEM], stats[level].stat[TT_TOTALITEM], all[level].item,
-			stats[level].stat[TT_ALLSECRET], stats[level].stat[TT_TOTALSECRET], all[level].secret
+			stats[level].stat[std::to_underlying(TotalsDisplay::Time)] / TICRATE / 60,
+			(float)(stats[level].stat[std::to_underlying(TotalsDisplay::Time)] % (60 * TICRATE)) / TICRATE,
+			(stats[level].stat[std::to_underlying(TotalsDisplay::TotalTime)]) / TICRATE / 60,
+			(stats[level].stat[std::to_underlying(TotalsDisplay::TotalTime)] % (60 * TICRATE)) / TICRATE,
+			stats[level].stat[std::to_underlying(TotalsDisplay::AllKill)], stats[level].stat[std::to_underlying(TotalsDisplay::TotalKill)], all[level].kill,
+			stats[level].stat[std::to_underlying(TotalsDisplay::AllItem)], stats[level].stat[std::to_underlying(TotalsDisplay::TotalItem)], all[level].item,
+			stats[level].stat[std::to_underlying(TotalsDisplay::AllSecret)], stats[level].stat[std::to_underlying(TotalsDisplay::TotalSecret)], all[level].secret
 		);
 	}
 
@@ -589,10 +591,10 @@ void AccelChanging()
 	int mouse_acceleration;
 	int analog_acceleration;
 
-	mouse_acceleration = dsda_IntConfig(dsda_config_mouse_acceleration);
+	mouse_acceleration = dsda_IntConfig(ConfigId::MouseAcceleration);
 	mouse_accelfactor = (double)mouse_acceleration / 100.0 + 1.0;
 
-	analog_acceleration = dsda_IntConfig(dsda_config_analog_look_acceleration);
+	analog_acceleration = dsda_IntConfig(ConfigId::AnalogLookAcceleration);
 	analog_accelfactor = (double)analog_acceleration / 100.0 + 1.0;
 }
 
@@ -630,7 +632,7 @@ void e6y_G_Compatibility()
 		dsda_arg_t* arg;
 
 		//"2.4.8.2" -> 0x02040802
-		arg = dsda_Arg(dsda_arg_emulate);
+		arg = dsda_Arg(ArgId::Emulate);
 		if(arg->found)
 		{
 			unsigned int emulated_version = 0;
@@ -646,7 +648,7 @@ void e6y_G_Compatibility()
 				emulated_version += b[i] * k;
 			}
 
-			for(i = 0; i < PC_MAX; i++)
+			for(i = 0; i < std::to_underlying(PrboomComp::Max); i++)
 			{
 				prboom_comp[i].state =
 				(emulated_version >= prboom_comp[i].minver &&
@@ -654,26 +656,26 @@ void e6y_G_Compatibility()
 			}
 		}
 
-		for(i = 0; i < PC_MAX; i++)
+		for(i = 0; i < std::to_underlying(PrboomComp::Max); i++)
 		{
-			if(dsda_Flag((dsda_arg_identifier_t)prboom_comp[i].arg_id))
+			if(dsda_Flag((ArgId)prboom_comp[i].arg_id))
 				prboom_comp[i].state = true;
 		}
 	}
 
 	P_CrossSubsector = P_CrossSubsector_PrBoom;
-	if(!prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state)
+	if(!prboom_comp[std::to_underlying(PrboomComp::ForceLxdoomDemoCompatibility)].state)
 	{
 		if(demo_compatibility)
 			P_CrossSubsector = P_CrossSubsector_Doom;
 
 		switch(compatibility_level)
 		{
-			case boom_compatibility_compatibility:
-			case boom_201_compatibility:
-			case boom_202_compatibility:
-			case mbf_compatibility:
-			case mbf21_compatibility:
+			case CompLevel::BoomCompatibility:
+			case CompLevel::Boom201:
+			case CompLevel::Boom202:
+			case CompLevel::Mbf:
+			case CompLevel::Mbf21:
 				P_CrossSubsector = P_CrossSubsector_Boom;
 				break;
 		}
@@ -706,7 +708,7 @@ dboolean HU_MouseOnDemoProgressBar(int* position_x)
 	int mouse_x;
 	int mouse_y;
 
-	if(!dsda_IntConfig(dsda_config_playback_mouse_controls) ||
+	if(!dsda_IntConfig(ConfigId::PlaybackMouseControls) ||
 		!demoplayback || timingdemo || walkcamera.type || viewport_rect.h <= 0)
 		return false;
 
@@ -731,7 +733,7 @@ int HU_DrawDemoProgress(int force)
 	int len, tics_count, diff;
 	unsigned int tick, max_period;
 
-	if(gamestate == GS_DEMOSCREEN || !demoplayback)
+	if(gamestate == GameState::Demoscreen || !demoplayback)
 		return false;
 
 	tics_count = demo_tics_count * demo_playerscount;
@@ -756,7 +758,7 @@ int HU_DrawDemoProgress(int force)
 
 	prev_len = len;
 
-	if(dsda_IntConfig(dsda_config_playback_mouse_controls) && mouse_hide_timer > 0 && !timingdemo && !walkcamera.type)
+	if(dsda_IntConfig(ConfigId::PlaybackMouseControls) && mouse_hide_timer > 0 && !timingdemo && !walkcamera.type)
 	{
 		extern auto_kf_t* auto_key_frames;
 		extern int auto_kf_size;
@@ -779,7 +781,7 @@ int HU_DrawDemoProgress(int force)
 		{
 			if(!playback_key_frames[i].buffer) continue;
 			x = MIN(SCREENWIDTH, (int)((int64_t)SCREENWIDTH * playback_key_frames[i].game_tic_count / tics_count));
-			V_FillRect(0, x, inner_y, 1, inner_h, colrngs[CR_LIGHTBLUE][playpal_lightest]);
+			V_FillRect(0, x, inner_y, 1, inner_h, colrngs[std::to_underlying(ColorRange::Lightblue)][playpal_lightest]);
 		}
 
 		// rewind key frames in green
@@ -787,21 +789,21 @@ int HU_DrawDemoProgress(int force)
 		{
 			if(!auto_key_frames[i].kf.buffer) continue;
 			x = MIN(SCREENWIDTH, (int)((int64_t)SCREENWIDTH * auto_key_frames[i].kf.game_tic_count / tics_count));
-			V_FillRect(0, x, inner_y, 1, inner_h, colrngs[CR_GREEN][playpal_lightest]);
+			V_FillRect(0, x, inner_y, 1, inner_h, colrngs[std::to_underlying(ColorRange::Green)][playpal_lightest]);
 		}
 
 		// quick key frame in red
 		if(quick_kf.buffer)
 		{
 			x = MIN(SCREENWIDTH, (int)((int64_t)SCREENWIDTH * quick_kf.game_tic_count / tics_count));
-			V_FillRect(0, x, inner_y, 1, inner_h, colrngs[CR_RED][playpal_lightest]);
+			V_FillRect(0, x, inner_y, 1, inner_h, colrngs[std::to_underlying(ColorRange::Red)][playpal_lightest]);
 		}
 
 		V_FillRect(0, len - 1, bar_y, 2, bar_h, playpal_lightest);
 
 		return true;
 	}
-	else if(dsda_IntConfig(dsda_config_hudadd_demoprogressbar))
+	else if(dsda_IntConfig(ConfigId::HudaddDemoprogressbar))
 	{
 		V_FillRect(0, 0, SCREENHEIGHT - 4, len - 0, 4, playpal_lightest);
 		if(len > 4)

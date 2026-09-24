@@ -411,11 +411,11 @@ void P_LoadACScripts(int lump)
 			// Auto-activate
 			info->number -= OPEN_SCRIPTS_BASE;
 			StartOpenACS(info->number, i, info->offset);
-			info->state = ASTE_RUNNING;
+			info->state = AcsState::Running;
 		}
 		else
 		{
-			info->state = ASTE_INACTIVE;
+			info->state = AcsState::Inactive;
 		}
 	}
 
@@ -477,7 +477,7 @@ dboolean P_StartACS(int number, int map, byte* args, mobj_t* activator,
 	int i;
 	acs_t* script;
 	int infoIndex;
-	aste_t* statePtr;
+	AcsState* statePtr;
 
 	NewScript = nullptr;
 	if(map && map != gamemap)
@@ -494,13 +494,13 @@ dboolean P_StartACS(int number, int map, byte* args, mobj_t* activator,
 		P_SetMessage(&players[consoleplayer], ErrorMsg, true);
 	}
 	statePtr = &ACSInfo[infoIndex].state;
-	if(*statePtr == ASTE_SUSPENDED)
+	if(*statePtr == AcsState::Suspended)
 	{
 		// Resume a suspended script
-		*statePtr = ASTE_RUNNING;
+		*statePtr = AcsState::Running;
 		return true;
 	}
-	if(*statePtr != ASTE_INACTIVE)
+	if(*statePtr != AcsState::Inactive)
 	{
 		// Script is already executing
 		return false;
@@ -518,7 +518,7 @@ dboolean P_StartACS(int number, int map, byte* args, mobj_t* activator,
 	{
 		script->vars[i] = args[i];
 	}
-	*statePtr = ASTE_RUNNING;
+	*statePtr = AcsState::Running;
 	P_AddThinker(&script->thinker);
 	NewScript = script;
 	return true;
@@ -581,7 +581,7 @@ dboolean P_StartLockedACS(line_t* line, byte* args, mobj_t* mo, int side)
 			snprintf(LockedBuffer, sizeof(LockedBuffer),
 				"YOU NEED THE %s\n", TextKeyMessages[lock - 1]);
 			P_SetMessage(mo->player, LockedBuffer, true);
-			S_StartMobjSound(mo, hexen_sfx_door_locked);
+			S_StartMobjSound(mo, SfxId::HexenDoorLocked);
 			return false;
 		}
 	}
@@ -603,13 +603,13 @@ dboolean P_TerminateACS(int number, int map)
 		// Script not found
 		return false;
 	}
-	if(ACSInfo[infoIndex].state == ASTE_INACTIVE
-		|| ACSInfo[infoIndex].state == ASTE_TERMINATING)
+	if(ACSInfo[infoIndex].state == AcsState::Inactive
+		|| ACSInfo[infoIndex].state == AcsState::Terminating)
 	{
 		// States that disallow termination
 		return false;
 	}
-	ACSInfo[infoIndex].state = ASTE_TERMINATING;
+	ACSInfo[infoIndex].state = AcsState::Terminating;
 	return true;
 }
 
@@ -623,14 +623,14 @@ dboolean P_SuspendACS(int number, int map)
 		// Script not found
 		return false;
 	}
-	if(ACSInfo[infoIndex].state == ASTE_INACTIVE
-		|| ACSInfo[infoIndex].state == ASTE_SUSPENDED
-		|| ACSInfo[infoIndex].state == ASTE_TERMINATING)
+	if(ACSInfo[infoIndex].state == AcsState::Inactive
+		|| ACSInfo[infoIndex].state == AcsState::Suspended
+		|| ACSInfo[infoIndex].state == AcsState::Terminating)
 	{
 		// States that disallow suspension
 		return false;
 	}
-	ACSInfo[infoIndex].state = ASTE_SUSPENDED;
+	ACSInfo[infoIndex].state = AcsState::Suspended;
 	return true;
 }
 
@@ -645,14 +645,14 @@ void T_InterpretACS(acs_t* script)
 	int cmd;
 	int action;
 
-	if(ACSInfo[script->infoIndex].state == ASTE_TERMINATING)
+	if(ACSInfo[script->infoIndex].state == AcsState::Terminating)
 	{
-		ACSInfo[script->infoIndex].state = ASTE_INACTIVE;
+		ACSInfo[script->infoIndex].state = AcsState::Inactive;
 		ScriptFinished(ACScript->number);
 		P_RemoveThinker(&ACScript->thinker);
 		return;
 	}
-	if(ACSInfo[script->infoIndex].state != ASTE_RUNNING)
+	if(ACSInfo[script->infoIndex].state != AcsState::Running)
 	{
 		return;
 	}
@@ -684,7 +684,7 @@ void T_InterpretACS(acs_t* script)
 
 	if(action == SCRIPT_TERMINATE)
 	{
-		ACSInfo[script->infoIndex].state = ASTE_INACTIVE;
+		ACSInfo[script->infoIndex].state = AcsState::Inactive;
 		ScriptFinished(ACScript->number);
 		P_RemoveThinker(&ACScript->thinker);
 	}
@@ -702,10 +702,10 @@ void P_TagFinished(int tag)
 	}
 	for(i = 0; i < ACScriptCount; i++)
 	{
-		if(ACSInfo[i].state == ASTE_WAITINGFORTAG
+		if(ACSInfo[i].state == AcsState::WaitingForTag
 			&& ACSInfo[i].waitValue == tag)
 		{
-			ACSInfo[i].state = ASTE_RUNNING;
+			ACSInfo[i].state = AcsState::Running;
 		}
 	}
 }
@@ -720,10 +720,10 @@ void P_PolyobjFinished(int po)
 	}
 	for(i = 0; i < ACScriptCount; i++)
 	{
-		if(ACSInfo[i].state == ASTE_WAITINGFORPOLY
+		if(ACSInfo[i].state == AcsState::WaitingForPoly
 			&& ACSInfo[i].waitValue == po)
 		{
-			ACSInfo[i].state = ASTE_RUNNING;
+			ACSInfo[i].state = AcsState::Running;
 		}
 	}
 }
@@ -734,10 +734,10 @@ static void ScriptFinished(int number)
 
 	for(i = 0; i < ACScriptCount; i++)
 	{
-		if(ACSInfo[i].state == ASTE_WAITINGFORSCRIPT
+		if(ACSInfo[i].state == AcsState::WaitingForScript
 			&& ACSInfo[i].waitValue == number)
 		{
-			ACSInfo[i].state = ASTE_RUNNING;
+			ACSInfo[i].state = AcsState::Running;
 		}
 	}
 }
@@ -816,7 +816,7 @@ static int CmdTerminate()
 
 static int CmdSuspend()
 {
-	ACSInfo[ACScript->infoIndex].state = ASTE_SUSPENDED;
+	ACSInfo[ACScript->infoIndex].state = AcsState::Suspended;
 	return SCRIPT_STOP;
 }
 
@@ -1249,7 +1249,7 @@ static int CmdRandom()
 
 	high = Pop();
 	low = Pop();
-	Push(low + (P_Random(pr_hexen) % (high - low + 1)));
+	Push(low + (P_Random(RandomClass::Hexen) % (high - low + 1)));
 	return SCRIPT_CONTINUE;
 }
 
@@ -1260,7 +1260,7 @@ static int CmdRandomDirect()
 
 	low = ReadCodeInt();
 	high = ReadCodeInt();
-	Push(low + (P_Random(pr_hexen) % (high - low + 1)));
+	Push(low + (P_Random(RandomClass::Hexen) % (high - low + 1)));
 	return SCRIPT_CONTINUE;
 }
 
@@ -1287,7 +1287,7 @@ static void ThingCount(int type, int tid)
 	int count;
 	int searcher;
 	mobj_t* mobj;
-	mobjtype_t moType;
+	MobjType moType;
 	thinker_t* think;
 
 	if(!(type + tid))
@@ -1350,28 +1350,28 @@ static void ThingCount(int type, int tid)
 static int CmdTagWait()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = Pop();
-	ACSInfo[ACScript->infoIndex].state = ASTE_WAITINGFORTAG;
+	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForTag;
 	return SCRIPT_STOP;
 }
 
 static int CmdTagWaitDirect()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = ReadCodeInt();
-	ACSInfo[ACScript->infoIndex].state = ASTE_WAITINGFORTAG;
+	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForTag;
 	return SCRIPT_STOP;
 }
 
 static int CmdPolyWait()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = Pop();
-	ACSInfo[ACScript->infoIndex].state = ASTE_WAITINGFORPOLY;
+	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForPoly;
 	return SCRIPT_STOP;
 }
 
 static int CmdPolyWaitDirect()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = ReadCodeInt();
-	ACSInfo[ACScript->infoIndex].state = ASTE_WAITINGFORPOLY;
+	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForPoly;
 	return SCRIPT_STOP;
 }
 
@@ -1523,14 +1523,14 @@ static int CmdLineSide()
 static int CmdScriptWait()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = Pop();
-	ACSInfo[ACScript->infoIndex].state = ASTE_WAITINGFORSCRIPT;
+	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForScript;
 	return SCRIPT_STOP;
 }
 
 static int CmdScriptWaitDirect()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = ReadCodeInt();
-	ACSInfo[ACScript->infoIndex].state = ASTE_WAITINGFORSCRIPT;
+	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForScript;
 	return SCRIPT_STOP;
 }
 
@@ -1686,7 +1686,7 @@ static int CmdSectorSound()
 static int CmdThingSound()
 {
 	int tid;
-	int sound;
+	SfxId sound;
 	int volume;
 	mobj_t* mobj;
 	int searcher;

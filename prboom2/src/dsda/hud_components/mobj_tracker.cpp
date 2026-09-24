@@ -20,7 +20,7 @@ void dsda_MobjTrackerHC(char* str, size_t max_size, int id, mobj_t* mobj)
 		str,
 		max_size,
 		"%sm %d: %d",
-		health > 0 ? dsda_TextColor(dsda_tc_exhud_mobj_alive) : dsda_TextColor(dsda_tc_exhud_mobj_dead),
+		health > 0 ? dsda_TextColor(TextColorIndex::ExhudMobjAlive) : dsda_TextColor(TextColorIndex::ExhudMobjDead),
 		id, health
 	);
 }

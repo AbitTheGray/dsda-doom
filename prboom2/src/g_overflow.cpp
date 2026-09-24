@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -20,8 +22,8 @@
 
 int overflows_enabled = true;
 
-overrun_param_t overflows[OVERFLOW_MAX];
-const char* overflow_cfgname[OVERFLOW_MAX] =
+overrun_param_t overflows[std::to_underlying(OverrunList::Max)];
+const char* overflow_cfgname[std::to_underlying(OverrunList::Max)] =
 {
 	"overrun_spechit_emulate",
 	"overrun_reject_emulate",
@@ -33,22 +35,22 @@ const char* overflow_cfgname[OVERFLOW_MAX] =
 
 extern "C" void ResetOverruns()
 {
-	for(int overflow = 0; overflow < OVERFLOW_MAX; ++overflow)
+	for(int overflow = 0; overflow < std::to_underlying(OverrunList::Max); ++overflow)
 	{
 		overflows[overflow].happened = false;
 	}
 }
 
-static void ShowOverflowWarning(overrun_list_t overflow, int fatal, const char* params, ...)
+static void ShowOverflowWarning(OverrunList overflow, int fatal, const char* params, ...)
 {
-	overflows[overflow].happened = true;
+	overflows[std::to_underlying(overflow)].happened = true;
 
-	if(overflows[overflow].warn && !overflows[overflow].promted)
+	if(overflows[std::to_underlying(overflow)].warn && !overflows[std::to_underlying(overflow)].promted)
 	{
 		va_list argptr;
 		char buffer[1024];
 
-		static const char* name[OVERFLOW_MAX] = {
+		static const char* name[std::to_underlying(OverrunList::Max)] = {
 			"SPECHIT", "REJECT", "INTERCEPT", "PLYERINGAME", "DONUT", "MISSEDBACKSIDE"
 		};
 
@@ -66,11 +68,11 @@ static void ShowOverflowWarning(overrun_list_t overflow, int fatal, const char* 
 			"hence desync or crash can occur soon "
 			"or during playback with the vanilla engine in case you're recording demo.%s%s";
 
-		overflows[overflow].promted = true;
+		overflows[std::to_underlying(overflow)].promted = true;
 
 		snprintf(buffer, sizeof(buffer),
 			(fatal ? str1 : (EMULATE(overflow) ? str2 : str3)),
-			name[overflow],
+			name[std::to_underlying(overflow)],
 			"\nYou can change PrBoom behaviour for this overflow through in-game menu.",
 			params);
 
@@ -140,11 +142,11 @@ extern "C" void P_MustRebuildBlockmap();
 void InterceptsOverrun(int num_intercepts, intercept_t* intercept)
 {
 
-	if(!hexen && num_intercepts > MAXINTERCEPTS_ORIGINAL && demo_compatibility && PROCESS(OVERFLOW_INTERCEPT))
+	if(!hexen && num_intercepts > MAXINTERCEPTS_ORIGINAL && demo_compatibility && PROCESS(OverrunList::Intercept))
 	{
-		ShowOverflowWarning(OVERFLOW_INTERCEPT, false, "");
+		ShowOverflowWarning(OverrunList::Intercept, false, "");
 
-		if(EMULATE(OVERFLOW_INTERCEPT))
+		if(EMULATE(OverrunList::Intercept))
 		{
 			int location = (num_intercepts - MAXINTERCEPTS_ORIGINAL - 1) * 12;
 
@@ -171,12 +173,12 @@ void InterceptsOverrun(int num_intercepts, intercept_t* intercept)
 
 int PlayeringameOverrun(const mapthing_t* mthing)
 {
-	if(mthing->type == 0 && PROCESS(OVERFLOW_PLAYERINGAME))
+	if(mthing->type == 0 && PROCESS(OverrunList::Playeringame))
 	{
 		// playeringame[-1] == players[3].didsecret
-		ShowOverflowWarning(OVERFLOW_PLAYERINGAME, (players + 3)->didsecret, "");
+		ShowOverflowWarning(OverrunList::Playeringame, (players + 3)->didsecret, "");
 
-		if(EMULATE(OVERFLOW_PLAYERINGAME))
+		if(EMULATE(OverrunList::Playeringame))
 		{
 			return true;
 		}
@@ -205,10 +207,10 @@ void SpechitOverrun(spechit_overrun_param_t* params)
 	{
 		line_t** spechit = *(params->spechit);
 
-		ShowOverflowWarning(OVERFLOW_SPECHIT,
+		ShowOverflowWarning(OverrunList::Spechit,
 			numspechit >
-			(compatibility_level == dosdoom_compatibility ||
-				compatibility_level == tasdoom_compatibility
+			(compatibility_level == CompLevel::Dosdoom ||
+				compatibility_level == CompLevel::Tasdoom
 				? 10
 				: 14),
 			"\n\nThe list of LineID leading to overrun:\n%d, %d, %d, %d, %d, %d, %d, %d, %d.",
@@ -216,7 +218,7 @@ void SpechitOverrun(spechit_overrun_param_t* params)
 			spechit[3]->iLineID, spechit[4]->iLineID, spechit[5]->iLineID,
 			spechit[6]->iLineID, spechit[7]->iLineID, spechit[8]->iLineID);
 
-		if(EMULATE(OVERFLOW_SPECHIT))
+		if(EMULATE(OverrunList::Spechit))
 		{
 			unsigned int addr;
 
@@ -232,7 +234,7 @@ void SpechitOverrun(spechit_overrun_param_t* params)
 				// Use the specified magic value when emulating spechit overruns.
 				//
 
-				arg = dsda_Arg(dsda_arg_spechit);
+				arg = dsda_Arg(ArgId::Spechit);
 				if(arg->found)
 				{
 					spechit_baseaddr = (unsigned int)arg->value.v_int;
@@ -247,7 +249,7 @@ void SpechitOverrun(spechit_overrun_param_t* params)
 
 			addr = spechit_baseaddr + (params->line - lines) * 0x3E;
 
-			if(compatibility_level == dosdoom_compatibility || compatibility_level == tasdoom_compatibility)
+			if(compatibility_level == CompLevel::Dosdoom || compatibility_level == CompLevel::Tasdoom)
 			{
 				// There are no more desyncs in the following dosdoom demos:
 				// flsofdth.wad\fod3uv.lmp - http://www.doomworld.com/sda/flsofdth.htm
@@ -297,7 +299,7 @@ void SpechitOverrun(spechit_overrun_param_t* params)
 						break;
 
 					default:
-						lprintf(LO_ERROR, "SpechitOverrun: Warning: unable to emulate"
+						lprintf(OutputLevels::Error, "SpechitOverrun: Warning: unable to emulate"
 							" an overrun where numspechit=%i\n",
 							numspechit);
 						break;
@@ -340,15 +342,15 @@ void RejectOverrun(unsigned int length, const byte** rejectmatrix, int totalline
 		// This command line switch is needed for all potential demos
 		// recorded with these versions of PrBoom on maps with too short REJECT
 		// I don't think there are any demos that will need it but yes that seems sensible
-		pad = prboom_comp[PC_REJECT_PAD_WITH_FF].state ? 0xff : 0;
+		pad = prboom_comp[std::to_underlying(PrboomComp::RejectPadWithFf)].state ? 0xff : 0;
 
 		memset(newreject + length, pad, required - length);
 
-		if(!hexen && demo_compatibility && PROCESS(OVERFLOW_REJECT))
+		if(!hexen && demo_compatibility && PROCESS(OverrunList::Reject))
 		{
-			ShowOverflowWarning(OVERFLOW_REJECT, (required - length > 16) || (length % 4 != 0), "");
+			ShowOverflowWarning(OverrunList::Reject, (required - length > 16) || (length % 4 != 0), "");
 
-			if(EMULATE(OVERFLOW_REJECT))
+			if(EMULATE(OverrunList::Reject))
 			{
 				// merged in RejectOverrunAddInt(), and the 4 calls to it, here
 				unsigned int rejectpad[4] = {
@@ -376,7 +378,7 @@ void RejectOverrun(unsigned int length, const byte** rejectmatrix, int totalline
 		}
 
 		if(length)
-			lprintf(LO_WARN, "P_LoadReject: REJECT too short (%u<%u) - padded\n", length, required);
+			lprintf(OutputLevels::Warn, "P_LoadReject: REJECT too short (%u<%u) - padded\n", length, required);
 	}
 }
 
@@ -422,7 +424,7 @@ static int GetMemoryValue(unsigned int offset, void* value, int size)
 		firsttime = false;
 		i = 0;
 
-		arg = dsda_Arg(dsda_arg_setmem);
+		arg = dsda_Arg(ArgId::Setmem);
 		if(arg->found)
 		{
 			if(!strcasecmp(arg->value.v_string_array[0], "dos622"))
@@ -468,11 +470,11 @@ static int GetMemoryValue(unsigned int offset, void* value, int size)
 #define DONUT_FLOORPIC_DEFAULT 0x16
 int DonutOverrun(fixed_t* pfloorheight, short* pfloorpic)
 {
-	if(demo_compatibility && PROCESS(OVERFLOW_DONUT))
+	if(demo_compatibility && PROCESS(OverrunList::Donut))
 	{
-		ShowOverflowWarning(OVERFLOW_DONUT, 0, "");
+		ShowOverflowWarning(OverrunList::Donut, 0, "");
 
-		if(EMULATE(OVERFLOW_DONUT))
+		if(EMULATE(OverrunList::Donut))
 		{
 			if(pfloorheight && pfloorpic)
 			{
@@ -500,13 +502,13 @@ int MissedBackSideOverrun(line_t* line)
 	{
 		if(line)
 		{
-			ShowOverflowWarning(OVERFLOW_MISSEDBACKSIDE, 0,
+			ShowOverflowWarning(OverrunList::Missedbackside, 0,
 				"\n\nLinedef %d has two-sided flag set, but no second sidedef",
 				line->iLineID);
 		}
 		else
 		{
-			ShowOverflowWarning(OVERFLOW_MISSEDBACKSIDE, 0, "");
+			ShowOverflowWarning(OverrunList::Missedbackside, 0, "");
 		}
 	}
 
@@ -521,7 +523,7 @@ sector_t* GetSectorAtNullAddress()
 	static int null_sector_is_initialized = false;
 	static sector_t null_sector;
 
-	if(demo_compatibility && EMULATE(OVERFLOW_MISSEDBACKSIDE))
+	if(demo_compatibility && EMULATE(OverrunList::Missedbackside))
 	{
 		if(!null_sector_is_initialized)
 		{

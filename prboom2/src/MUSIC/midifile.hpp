@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
 
 typedef struct midi_file_s midi_file_t;
 typedef struct midi_track_iter_s midi_track_iter_t;
@@ -24,58 +24,57 @@ typedef struct
 	size_t pos;
 } midimem_t;
 
-
-typedef enum
+enum struct MidiEventType : int32_t
 {
-	MIDI_EVENT_NOTE_OFF        = 0x80,
-	MIDI_EVENT_NOTE_ON         = 0x90,
-	MIDI_EVENT_AFTERTOUCH      = 0xa0,
-	MIDI_EVENT_CONTROLLER      = 0xb0,
-	MIDI_EVENT_PROGRAM_CHANGE  = 0xc0,
-	MIDI_EVENT_CHAN_AFTERTOUCH = 0xd0,
-	MIDI_EVENT_PITCH_BEND      = 0xe0,
+	NoteOff        = 0x80,
+	NoteOn         = 0x90,
+	Aftertouch      = 0xa0,
+	Controller      = 0xb0,
+	ProgramChange  = 0xc0,
+	ChanAftertouch = 0xd0,
+	End      = 0xe0,
 
-	MIDI_EVENT_SYSEX       = 0xf0,
-	MIDI_EVENT_SYSEX_SPLIT = 0xf7,
-	MIDI_EVENT_META        = 0xff,
-} midi_event_type_t;
+	Sysex       = 0xf0,
+	SysexSplit = 0xf7,
+	Meta        = 0xff,
+};
 
-typedef enum
+enum struct MidiController : int32_t
 {
-	MIDI_CONTROLLER_BANK_SELECT    = 0x0,
-	MIDI_CONTROLLER_MODULATION     = 0x1,
-	MIDI_CONTROLLER_BREATH_CONTROL = 0x2,
-	MIDI_CONTROLLER_FOOT_CONTROL   = 0x3,
-	MIDI_CONTROLLER_PORTAMENTO     = 0x4,
-	MIDI_CONTROLLER_DATA_ENTRY     = 0x5,
+	BankSelect    = 0x0,
+	Modulation     = 0x1,
+	BreathControl = 0x2,
+	FootControl   = 0x3,
+	Portamento     = 0x4,
+	DataEntry     = 0x5,
 
-	MIDI_CONTROLLER_MAIN_VOLUME = 0x7,
-	MIDI_CONTROLLER_PAN         = 0xa,
+	MainVolume = 0x7,
+	Pan         = 0xa,
 
-	MIDI_CONTROLLER_ALL_NOTES_OFF = 0x7b
-} midi_controller_t;
+	AllNotesOff = 0x7b
+};
 
-typedef enum
+enum struct MidiMetaEventType : int32_t
 {
-	MIDI_META_SEQUENCE_NUMBER = 0x0,
+	SequenceNumber = 0x0,
 
-	MIDI_META_TEXT       = 0x1,
-	MIDI_META_COPYRIGHT  = 0x2,
-	MIDI_META_TRACK_NAME = 0x3,
-	MIDI_META_INSTR_NAME = 0x4,
-	MIDI_META_LYRICS     = 0x5,
-	MIDI_META_MARKER     = 0x6,
-	MIDI_META_CUE_POINT  = 0x7,
+	Text       = 0x1,
+	Copyright  = 0x2,
+	TrackName = 0x3,
+	InstrName = 0x4,
+	Lyrics     = 0x5,
+	Marker     = 0x6,
+	CuePoint  = 0x7,
 
-	MIDI_META_CHANNEL_PREFIX = 0x20,
-	MIDI_META_END_OF_TRACK   = 0x2f,
+	ChannelPrefix = 0x20,
+	EndOfTrack   = 0x2f,
 
-	MIDI_META_SET_TEMPO          = 0x51,
-	MIDI_META_SMPTE_OFFSET       = 0x54,
-	MIDI_META_TIME_SIGNATURE     = 0x58,
-	MIDI_META_KEY_SIGNATURE      = 0x59,
-	MIDI_META_SEQUENCER_SPECIFIC = 0x7f,
-} midi_meta_event_type_t;
+	SetTempo          = 0x51,
+	SmpteOffset       = 0x54,
+	TimeSignature     = 0x58,
+	KeySignature      = 0x59,
+	SequencerSpecific = 0x7f,
+};
 
 typedef struct
 {
@@ -121,7 +120,7 @@ typedef struct
 	unsigned int delta_time;
 
 	// Type of event:
-	midi_event_type_t event_type;
+	MidiEventType event_type;
 
 	union
 	{

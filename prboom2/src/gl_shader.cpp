@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -33,26 +35,26 @@
 #define UNIF_VAL_END (-1)
 
 #define UNIF(num, name, type) [num] = {(name), (type)}
-#define UNIF_END {NULL, UNIF_COUNT}
+#define UNIF_END {NULL, ShaderUniformType::Count}
 
-typedef enum
+enum struct ShaderUniformType : int32_t
 {
-	UNIF_1F,
-	UNIF_2F,
-	UNIF_1I,
-	UNIF_TEX0,
-	UNIF_TEX1,
-	UNIF_TEX2,
-	UNIF_TEX0D,
-	UNIF_TEX1D,
-	UNIF_TEX2D,
-	UNIF_COUNT
-} shader_uniform_type_t;
+	Float1,
+	Float2,
+	Int1,
+	Tex0,
+	Tex1,
+	Tex2,
+	Tex0D,
+	Tex1D,
+	Tex2D,
+	Count
+};
 
 typedef struct
 {
 	const char* name;
-	shader_uniform_type_t type;
+	ShaderUniformType type;
 } shader_uniform_t;
 
 typedef struct
@@ -140,7 +142,7 @@ static void glsl_ShaderSrcAppend(shader_source_t* src, const GLchar* str, GLint 
 
 static void glsl_ShaderLookup(const char* name, GLchar const** text, GLint* len)
 {
-	int lump = W_CheckNumForName2(name, ns_prboom);
+	int lump = W_CheckNumForName2(name, LumpNamespace::Prboom);
 
 	if(lump == LUMP_NOT_FOUND)
 		I_Error("Could not find shader source: %s\n", name);
@@ -277,7 +279,7 @@ static shader_t* glsl_ShaderLoad(const shader_info_t* info,
 	GLEXT_glGetObjectParameterivARB(shader->hVertProg,
 		GL_OBJECT_COMPILE_STATUS_ARB, &status);
 	if(status)
-		lprintf(LO_DEBUG, "ShaderLoad: Shader \"%s\" (vertex) compiled OK: %s\n",
+		lprintf(OutputLevels::Debug, "ShaderLoad: Shader \"%s\" (vertex) compiled OK: %s\n",
 			info->name, buffer);
 	else
 		I_Error("ShaderLoad: Error compiling shader \"%s\" (vertex): %s\n",
@@ -293,7 +295,7 @@ static shader_t* glsl_ShaderLoad(const shader_info_t* info,
 	GLEXT_glGetObjectParameterivARB(shader->hFragProg,
 		GL_OBJECT_COMPILE_STATUS_ARB, &status);
 	if(status)
-		lprintf(LO_DEBUG, "ShaderLoad: Shader \"%s\" (fragment) compiled OK: %s\n",
+		lprintf(OutputLevels::Debug, "ShaderLoad: Shader \"%s\" (fragment) compiled OK: %s\n",
 			info->name, buffer);
 	else
 		I_Error("ShaderLoad: Error compiling shader \"%s\" (fragment): %s\n",
@@ -308,7 +310,7 @@ static shader_t* glsl_ShaderLoad(const shader_info_t* info,
 		&status);
 
 	if(status)
-		lprintf(LO_DEBUG, "ShaderLoad: Shader \"%s\" linked OK: %s\n", info->name,
+		lprintf(OutputLevels::Debug, "ShaderLoad: Shader \"%s\" linked OK: %s\n", info->name,
 			buffer);
 	else
 		I_Error("ShaderLoad: Error linking shader \"%s\": %s\n", info->name,
@@ -331,19 +333,19 @@ static shader_t* glsl_ShaderLoad(const shader_info_t* info,
 
 		switch(unif->type)
 		{
-			case UNIF_TEX0:
+			case ShaderUniformType::Tex0:
 				GLEXT_glUniform1iARB(idx, 0);
 				break;
-			case UNIF_TEX1:
+			case ShaderUniformType::Tex1:
 				GLEXT_glUniform1iARB(idx, 1);
 				break;
-			case UNIF_TEX2:
+			case ShaderUniformType::Tex2:
 				GLEXT_glUniform1iARB(idx, 2);
 				break;
-			case UNIF_TEX0D:
-			case UNIF_TEX1D:
-			case UNIF_TEX2D:
-				t = unif->type - UNIF_TEX0D;
+			case ShaderUniformType::Tex0D:
+			case ShaderUniformType::Tex1D:
+			case ShaderUniformType::Tex2D:
+				t = std::to_underlying(unif->type) - std::to_underlying(ShaderUniformType::Tex0D);
 				if(shader->texds[t] != -1)
 					I_Error("ShaderLoad: Duplicate texture dimension uniform: %i\n", i);
 				shader->texds[t] = idx;
@@ -388,13 +390,13 @@ static void glsl_ShaderFrameActivate(const shader_frame_t* frame)
 
 		switch(unif->type)
 		{
-			case UNIF_1I:
+			case ShaderUniformType::Int1:
 				GLEXT_glUniform1iARB(idx, val->i[0]);
 				break;
-			case UNIF_1F:
+			case ShaderUniformType::Float1:
 				GLEXT_glUniform1fARB(idx, val->f[0]);
 				break;
-			case UNIF_2F:
+			case ShaderUniformType::Float2:
 				GLEXT_glUniform2fARB(idx, val->f[0], val->f[1]);
 				break;
 			default:
@@ -431,13 +433,13 @@ static void glsl_ShaderPush(shader_t* shader, ...)
 
 			switch(unif->type)
 			{
-				case UNIF_1I:
+				case ShaderUniformType::Int1:
 					val->i[0] = va_arg(ap, GLint);
 					break;
-				case UNIF_1F:
+				case ShaderUniformType::Float1:
 					val->f[0] = va_arg(ap, double);
 					break;
-				case UNIF_2F:
+				case ShaderUniformType::Float2:
 					val->f[0] = va_arg(ap, double);
 					val->f[1] = va_arg(ap, double);
 					break;
@@ -488,15 +490,15 @@ static void glsl_ShaderUniform(shader_t* shader, int num, ...)
 
 	switch(unif->type)
 	{
-		case UNIF_1I:
+		case ShaderUniformType::Int1:
 			val->i[0] = va_arg(ap, GLint);
 			GLEXT_glUniform1iARB(idx, val->i[0]);
 			break;
-		case UNIF_1F:
+		case ShaderUniformType::Float1:
 			val->f[0] = va_arg(ap, double);
 			GLEXT_glUniform1fARB(idx, val->f[0]);
 			break;
-		case UNIF_2F:
+		case ShaderUniformType::Float2:
 			val->f[0] = va_arg(ap, double);
 			val->f[1] = va_arg(ap, double);
 			GLEXT_glUniform2fARB(idx, val->f[0], val->f[1]);
@@ -526,22 +528,22 @@ void glsl_SetTextureDims(int unit, unsigned int width, unsigned int height)
 	}
 }
 
-enum
+enum struct MainShaderUniform : int32_t
 {
-	MAIN_UNIF_TEX,
-	MAIN_UNIF_COLORMAP,
-	MAIN_UNIF_LIGHTLEVEL,
-	MAIN_UNIF_FADE_MODE
+	Tex,
+	ColorMap,
+	LightLevel,
+	FadeMode
 };
 
-enum
+enum struct FuzzShaderUniform : int32_t
 {
-	FUZZ_UNIF_TEX,
-	FUZZ_UNIF_FUZZ,
-	FUZZ_UNIF_TEX_D,
-	FUZZ_UNIF_FUZZ_D,
-	FUZZ_UNIF_RATIO,
-	FUZZ_UNIF_SEED
+	Tex,
+	Fuzz,
+	TexD,
+	FuzzD,
+	Ratio,
+	Seed
 };
 
 static shader_t* sh_main = nullptr;
@@ -552,10 +554,10 @@ static const shader_info_t main_info =
 	.name = "gls_main",
 	.unifs =
 	{
-		UNIF(MAIN_UNIF_TEX, "tex", UNIF_TEX0),
-		UNIF(MAIN_UNIF_COLORMAP, "colormap", UNIF_TEX2),
-		UNIF(MAIN_UNIF_LIGHTLEVEL, "lightlevel", UNIF_1F),
-		UNIF(MAIN_UNIF_FADE_MODE, "fade_mode", UNIF_1I),
+		UNIF(std::to_underlying(MainShaderUniform::Tex), "tex", ShaderUniformType::Tex0),
+		UNIF(std::to_underlying(MainShaderUniform::ColorMap), "colormap", ShaderUniformType::Tex2),
+		UNIF(std::to_underlying(MainShaderUniform::LightLevel), "lightlevel", ShaderUniformType::Float1),
+		UNIF(std::to_underlying(MainShaderUniform::FadeMode), "fade_mode", ShaderUniformType::Int1),
 		UNIF_END
 	}
 };
@@ -565,12 +567,12 @@ static const shader_info_t fuzz_info =
 	.name = "gls_fuzz",
 	.unifs =
 	{
-		UNIF(FUZZ_UNIF_TEX, "tex", UNIF_TEX0),
-		UNIF(FUZZ_UNIF_TEX_D, "tex_d", UNIF_TEX0D),
-		UNIF(FUZZ_UNIF_FUZZ, "fuzz", UNIF_TEX1),
-		UNIF(FUZZ_UNIF_FUZZ_D, "fuzz_d", UNIF_TEX1D),
-		UNIF(FUZZ_UNIF_RATIO, "ratio", UNIF_1F),
-		UNIF(FUZZ_UNIF_SEED, "seed", UNIF_1F),
+		UNIF(std::to_underlying(FuzzShaderUniform::Tex), "tex", ShaderUniformType::Tex0),
+		UNIF(std::to_underlying(FuzzShaderUniform::TexD), "tex_d", ShaderUniformType::Tex0D),
+		UNIF(std::to_underlying(FuzzShaderUniform::Fuzz), "fuzz", ShaderUniformType::Tex1),
+		UNIF(std::to_underlying(FuzzShaderUniform::FuzzD), "fuzz_d", ShaderUniformType::Tex1D),
+		UNIF(std::to_underlying(FuzzShaderUniform::Ratio), "ratio", ShaderUniformType::Float1),
+		UNIF(std::to_underlying(FuzzShaderUniform::Seed), "seed", ShaderUniformType::Float1),
 		UNIF_END
 	}
 };
@@ -593,10 +595,10 @@ void glsl_PopNullShader()
 
 void glsl_PushMainShader()
 {
-	int mode = dsda_IntConfig(dsda_config_gl_fade_mode);
+	int mode = dsda_IntConfig(ConfigId::GlFadeMode);
 
 	glsl_ShaderPush(sh_main,
-		MAIN_UNIF_FADE_MODE, mode,
+		std::to_underlying(MainShaderUniform::FadeMode), mode,
 		UNIF_VAL_END);
 }
 
@@ -607,7 +609,7 @@ void glsl_PopMainShader()
 
 void glsl_SetLightLevel(float lightlevel)
 {
-	glsl_ShaderUniform(sh_main, MAIN_UNIF_LIGHTLEVEL, lightlevel);
+	glsl_ShaderUniform(sh_main, std::to_underlying(MainShaderUniform::LightLevel), lightlevel);
 }
 
 void glsl_PushFuzzShader(int tic, int sprite, float ratio)
@@ -624,8 +626,8 @@ void glsl_PushFuzzShader(int tic, int sprite, float ratio)
 	seed *= factor;
 
 	glsl_ShaderPush(sh_fuzz,
-		FUZZ_UNIF_RATIO, ratio,
-		FUZZ_UNIF_SEED, (double)seed / INT_MAX,
+		std::to_underlying(FuzzShaderUniform::Ratio), ratio,
+		std::to_underlying(FuzzShaderUniform::Seed), (double)seed / INT_MAX,
 		UNIF_VAL_END);
 }
 

@@ -5,17 +5,17 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "doomtype.hpp"
-
 #define UNSPECIFIED_COMPLEVEL -2
 
 void dsda_InitSettings();
-int dsda_CompatibilityLevel();
+CompLevel dsda_CompatibilityLevel();
 void dsda_SetTas(dboolean t);
 int dsda_ViewBob();
 int dsda_WeaponBob();

@@ -6,24 +6,25 @@
 
 #pragma once
 
+#include "doomdef.hpp"
+#include "m_fixed.hpp"
+#include "d_think.hpp"
+#include "p_mobj.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 // Screenwidth.
-#include "doomdef.hpp"
 
 // Some more or less basic data types
 // we depend on.
-#include "m_fixed.hpp"
 
 // We rely on the thinker data struct
 // to handle sound origins in sectors.
-#include "d_think.hpp"
 
 // SECTORS do store MObjs anyway.
-#include "p_mobj.hpp"
 
 // Silhouette, needed for clipping Segs (mainly)
 // and sprites representing things.
@@ -174,7 +175,7 @@ typedef struct sector_s
 	int fakegroup[2];
 
 	// hexen
-	seqtype_t seqType; // stone, metal, heavy, etc...
+	SeqType seqType; // stone, metal, heavy, etc...
 
 	// zdoom
 	fixed_t gravity;
@@ -245,13 +246,13 @@ typedef struct
 //
 // Move clipping aid for LineDefs.
 //
-typedef enum
+enum struct SlopeType : int32_t
 {
-	ST_HORIZONTAL,
-	ST_VERTICAL,
-	ST_POSITIVE,
-	ST_NEGATIVE
-} slopetype_t;
+	Horizontal,
+	Vertical,
+	Positive,
+	Negative
+};
 
 typedef byte r_flags_t;
 #define RF_TOP_TILE 0x01 // Upper texture needs tiling
@@ -261,33 +262,33 @@ typedef byte r_flags_t;
 #define RF_CLOSED   0x10 // Line blocks view
 #define RF_ISOLATED 0x20 // Isolated line
 
-typedef enum
+enum struct AutomapStyle : int32_t
 {
 	// Exposed via Action Specials or UDMF
-	ams_default,
-	ams_one_sided,
-	ams_two_sided,
-	ams_floor_diff,
-	ams_ceiling_diff,
-	ams_extra_floor,
-	ams_special,
-	ams_secret,
-	ams_unseen,
-	ams_locked,
-	ams_teleport,
-	ams_exit,
-	ams_unseen_secret,
-	ams_portal,
+	Default,
+	OneSided,
+	TwoSided,
+	FloorDiff,
+	CeilingDiff,
+	ExtraFloor,
+	Special,
+	Secret,
+	Unseen,
+	Locked,
+	Teleport,
+	Exit,
+	UnseenSecret,
+	Portal,
 
 	// Internal-only
-	ams_exit_secret,
-	ams_invisible,
-	ams_revealed_secret,
-	ams_closed_door,
+	ExitSecret,
+	Invisible,
+	RevealedSecret,
+	ClosedDoor,
 
-	AMS_COUNT     = ams_portal + 1,
-	AMS_COUNT_EXT = ams_closed_door + 1,
-} automap_style_t;
+	Count     = Portal + 1,
+	CountExt = ClosedDoor + 1,
+};
 
 typedef unsigned short line_activation_t;
 typedef unsigned int line_flags_t;
@@ -303,7 +304,7 @@ typedef struct line_s
 	short id;
 	int32_t sidenum[2];    // Visual appearance: SideDefs.
 	fixed_t bbox[4];       // A bounding box, for the linedef's extent
-	slopetype_t slopetype; // To aid move clipping.
+	SlopeType slopetype; // To aid move clipping.
 	sector_t* frontsector; // Front and back sector.
 	sector_t* backsector;
 	int validcount; // if == validcount, already checked
@@ -323,7 +324,7 @@ typedef struct line_s
 	// zdoom
 	line_activation_t activation;
 	byte locknumber;
-	automap_style_t automap_style;
+	AutomapStyle automap_style;
 	int health;
 	int healthgroup;
 	const byte* tranmap;
@@ -413,7 +414,6 @@ typedef struct subsector_s
 	// hexen
 	struct polyobj_s* poly;
 } subsector_t;
-
 
 //
 // BSP node.

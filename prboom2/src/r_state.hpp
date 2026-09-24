@@ -6,14 +6,15 @@
 
 #pragma once
 
+#include "d_player.hpp"
+#include "r_data.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 // Need data structure definitions.
-#include "d_player.hpp"
-#include "r_data.hpp"
 
 //
 // Refresh internal data structures,

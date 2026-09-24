@@ -5,6 +5,8 @@
  *      generation of lookups, caching, retrieval by name.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "w_wad.hpp"
 #include "r_draw.hpp"
@@ -114,8 +116,8 @@ static int R_FilterValidPatch(int lump_num, const char* name)
 	{
 		if(R_IsPNGLump(lump_num))
 		{
-			lprintf(LO_WARN, "Warning: patch %s is in an unsupported format (PNG)\n", name);
-			lump_num = W_CheckNumForName2("TNT1A0", ns_sprites);
+			lprintf(OutputLevels::Warn, "Warning: patch %s is in an unsupported format (PNG)\n", name);
+			lump_num = W_CheckNumForName2("TNT1A0", LumpNamespace::Sprites);
 		}
 	}
 
@@ -165,7 +167,7 @@ static void R_InitTextures()
 			// appear first in a wad. This is a kludgy solution to the wad
 			// lump namespace problem.
 
-			patchlookup[i] = W_CheckNumForName2(name, ns_sprites);
+			patchlookup[i] = W_CheckNumForName2(name, LumpNamespace::Sprites);
 		}
 
 		patchlookup[i] = R_FilterValidPatch(patchlookup[i], name);
@@ -271,7 +273,7 @@ static void R_InitTextures()
 			// Check if patch is in PNAMES bounds
 			if(patchindex < 0 || patchindex >= nummappatches)
 			{
-				lprintf(LO_WARN, "\nR_InitTextures: Texture %.8s references patch index %d outside PNAMES table (%d entries)",
+				lprintf(OutputLevels::Warn, "\nR_InitTextures: Texture %.8s references patch index %d outside PNAMES table (%d entries)",
 					texture->name, patchindex, nummappatches);
 				continue;
 			}
@@ -282,7 +284,7 @@ static void R_InitTextures()
 			if(patch->patch == -1)
 			{
 				//jff 8/3/98 use logical output routine
-				lprintf(LO_ERROR, "\nR_InitTextures: Missing patch %d in texture %.8s",
+				lprintf(OutputLevels::Error, "\nR_InitTextures: Missing patch %d in texture %.8s",
 					patchindex, texture->name); // killough 4/17/98
 				++errors;
 			}
@@ -405,7 +407,7 @@ int R_ColormapNumForName(const char* name)
 {
 	int i = 0;
 	if(strncasecmp(name, "COLORMAP", 8)) // COLORMAP predefined to return 0
-		if((i = W_CheckNumForName2(name, ns_colormaps)) != LUMP_NOT_FOUND)
+		if((i = W_CheckNumForName2(name, LumpNamespace::Colormaps)) != LUMP_NOT_FOUND)
 			i -= firstcolormaplump;
 	return i;
 }
@@ -419,11 +421,11 @@ int R_ColormapNumForName(const char* name)
 
 void R_InitData()
 {
-	lprintf(LO_DEBUG, "Textures ");
+	lprintf(OutputLevels::Debug, "Textures ");
 	R_InitTextures();
-	lprintf(LO_DEBUG, "Flats ");
+	lprintf(OutputLevels::Debug, "Flats ");
 	R_InitFlats();
-	lprintf(LO_DEBUG, "Sprites ");
+	lprintf(OutputLevels::Debug, "Sprites ");
 	R_InitSpriteLumps();
 	R_InitColormaps(); // killough 3/20/98
 }
@@ -437,14 +439,14 @@ void R_InitData()
 
 int R_FlatNumForName(const char* name) // killough -- const added
 {
-	int i = W_CheckNumForName2(name, ns_flats);
+	int i = W_CheckNumForName2(name, LumpNamespace::Flats);
 	if(i == LUMP_NOT_FOUND)
 	{
 		// e6y
 		// Ability to play wads with wrong flat names
 		// Unknown flats will be replaced with "NO TEXTURE" preset from dsda-doom.wad
-		lprintf(LO_DEBUG, "R_FlatNumForName: %.8s not found\n", name);
-		i = W_CheckNumForName2("-N0_TEX-", ns_flats);
+		lprintf(OutputLevels::Debug, "R_FlatNumForName: %.8s not found\n", name);
+		i = W_CheckNumForName2("-N0_TEX-", LumpNamespace::Flats);
 		if(i == LUMP_NOT_FOUND)
 		{
 			I_Error("R_FlatNumForName: -N0_TEX- not found");
@@ -509,7 +511,7 @@ int PUREFUNC R_SafeTextureNumForName(const char* name, int snum)
 	if(i == -1)
 	{
 		i = NO_TEXTURE; // e6y - return "no texture"
-		lprintf(LO_DEBUG, "bad texture '%.8s' in sidedef %d\n", name, snum);
+		lprintf(OutputLevels::Debug, "bad texture '%.8s' in sidedef %d\n", name, snum);
 	}
 	return i;
 }
@@ -591,9 +593,9 @@ void R_PrecacheLevel()
 
 	{
 		thinker_t* th = nullptr;
-		while((th = P_NextThinker(th, th_all)) != nullptr)
+		while((th = P_NextThinker(th, ThinkerClass::All)) != nullptr)
 			if(th->function == reinterpret_cast<think_t>(P_MobjThinker))
-				hitlist[((mobj_t*)th)->sprite] = 1;
+				hitlist[std::to_underlying(((mobj_t*)th)->sprite)] = 1;
 	}
 
 	for(i = num_sprites; --i >= 0;)
@@ -633,32 +635,32 @@ void R_SetSpriteByNum(patchnum_t* patchnum, int lump)
 	patchnum->lumpnum = lump;
 }
 
-int R_SetSpriteByIndex(patchnum_t* patchnum, spritenum_t item)
+int R_SetSpriteByIndex(patchnum_t* patchnum, SpriteId item)
 {
 	int result = false;
-	if(item < num_sprites)
+	if(std::to_underlying(item) < num_sprites)
 	{
-		int lump = firstspritelump + sprites[item].spriteframes->lump[0];
+		int lump = firstspritelump + sprites[std::to_underlying(item)].spriteframes->lump[0];
 		R_SetSpriteByNum(patchnum, lump);
 		result = true;
 	}
 	return result;
 }
 
-int R_NumPatchForSpriteIndex(spritenum_t item)
+int R_NumPatchForSpriteIndex(SpriteId item)
 {
-	if(item < 0 || item >= num_sprites)
+	if(std::to_underlying(item) < 0 || std::to_underlying(item) >= num_sprites)
 	{
 		return -1;
 	}
 
-	return firstspritelump + sprites[item].spriteframes->lump[0];
+	return firstspritelump + sprites[std::to_underlying(item)].spriteframes->lump[0];
 }
 
 int R_SetSpriteByName(patchnum_t* patchnum, const char* name)
 {
 	int result = false;
-	patchnum->lumpnum = W_CheckNumForName2(name, ns_sprites);
+	patchnum->lumpnum = W_CheckNumForName2(name, LumpNamespace::Sprites);
 	if(patchnum->lumpnum != LUMP_NOT_FOUND)
 	{
 		R_SetSpriteByNum(patchnum, patchnum->lumpnum);

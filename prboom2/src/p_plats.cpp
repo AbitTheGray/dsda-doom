@@ -4,6 +4,8 @@
  *  Plats (i.e. elevator platforms) code, raising/lowering.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "m_random.hpp"
 #include "r_main.hpp"
@@ -35,12 +37,12 @@ platlist_t* activeplats; // killough 2/14/98: made global again
 
 extern "C" void T_CompatiblePlatRaise(plat_t* plat)
 {
-	result_e res;
+	MoveResult res;
 
 	// handle plat moving, up, down, waiting, or in stasis,
 	switch(plat->status)
 	{
-		case up: // plat moving up
+		case PlatState::Up: // plat moving up
 			res = T_MoveFloorPlane(plat->sector, plat->speed, plat->high, plat->crush, 1, false);
 
 			if(heretic && !(leveltime & 31))
@@ -49,28 +51,28 @@ extern "C" void T_CompatiblePlatRaise(plat_t* plat)
 			}
 
 			// if a pure raise type, make the plat moving sound
-			if(plat->type == raiseAndChange
-				|| plat->type == raiseToNearestAndChange)
+			if(plat->type == PlatType::RaiseAndChange
+				|| plat->type == PlatType::RaiseToNearestAndChange)
 			{
 				if(!(leveltime & 7))
 					S_LoopSectorSound(plat->sector, g_sfx_stnmov_plats, 8);
 			}
 
 			// if encountered an obstacle, and not a crush type, reverse direction
-			if(res == crushed && plat->crush == NO_CRUSH)
+			if(res == MoveResult::Crushed && plat->crush == NO_CRUSH)
 			{
 				plat->count = plat->wait;
-				plat->status = down;
+				plat->status = PlatState::Down;
 				S_StartSectorSound(plat->sector, g_sfx_pstart);
 
 				if(demo_compatibility &&
-					(plat->type == raiseToNearestAndChange ||
-						plat->type == raiseAndChange))
+					(plat->type == PlatType::RaiseToNearestAndChange ||
+						plat->type == PlatType::RaiseAndChange))
 				{
 					// For these types vanilla did not initialize plat->low in EV_DoPlat,
 					// so they may descend to any depth, or not at all.
 					// See https://sourceforge.net/p/prboom-plus/bugs/211/ .
-					lprintf(LO_WARN, "T_PlatRaise: raise-and-change type has reversed "
+					lprintf(OutputLevels::Warn, "T_PlatRaise: raise-and-change type has reversed "
 						"direction in compatibility mode - may lead to desync\n"
 						" gametic: %d sector: %d complevel: %d\n",
 						gametic, plat->sector->iSectorID, compatibility_level);
@@ -78,31 +80,31 @@ extern "C" void T_CompatiblePlatRaise(plat_t* plat)
 			}
 			else // else handle reaching end of up stroke
 			{
-				if(res == pastdest) // end of stroke
+				if(res == MoveResult::PastDest) // end of stroke
 				{
 					// if not an instant toggle type, wait, make plat stop sound
-					if(plat->type != toggleUpDn)
+					if(plat->type != PlatType::ToggleUpDn)
 					{
 						plat->count = plat->wait;
-						plat->status = waiting;
+						plat->status = PlatState::Waiting;
 						S_StartSectorSound(plat->sector, g_sfx_pstop);
 					}
 					else // else go into stasis awaiting next toggle activation
 					{
 						plat->oldstatus = plat->status; //jff 3/14/98 after action wait
-						plat->status = in_stasis;       //for reactivation of toggle
+						plat->status = PlatState::InStasis;       //for reactivation of toggle
 					}
 
 					// lift types and pure raise types are done at end of up stroke
 					// only the perpetual type waits then goes back up
 					switch(plat->type)
 					{
-						case blazeDWUS:
-						case downWaitUpStay:
-						case raiseAndChange:
-						case raiseToNearestAndChange:
-						case genLift:
-							if(heretic && plat->type == raiseToNearestAndChange) break;
+						case PlatType::BlazeDWUS:
+						case PlatType::DownWaitUpStay:
+						case PlatType::RaiseAndChange:
+						case PlatType::RaiseToNearestAndChange:
+						case PlatType::GenLift:
+							if(heretic && plat->type == PlatType::RaiseToNearestAndChange) break;
 							P_RemoveActivePlat(plat); // killough
 						default:
 							break;
@@ -111,24 +113,24 @@ extern "C" void T_CompatiblePlatRaise(plat_t* plat)
 			}
 			break;
 
-		case down: // plat moving down
+		case PlatState::Down: // plat moving down
 			res = T_MoveFloorPlane(plat->sector, plat->speed, plat->low, NO_CRUSH, -1, false);
 
 			// handle reaching end of down stroke
-			if(res == pastdest)
+			if(res == MoveResult::PastDest)
 			{
 				// if not an instant toggle, start waiting, make plat stop sound
-				if(plat->type != toggleUpDn) //jff 3/14/98 toggle up down
+				if(plat->type != PlatType::ToggleUpDn) //jff 3/14/98 toggle up down
 				{
 					// is silent, instant, no waiting
 					plat->count = plat->wait;
-					plat->status = waiting;
+					plat->status = PlatState::Waiting;
 					S_StartSectorSound(plat->sector, g_sfx_pstop);
 				}
 				else // instant toggles go into stasis awaiting next activation
 				{
 					plat->oldstatus = plat->status; //jff 3/14/98 after action wait
-					plat->status = in_stasis;       //for reactivation of toggle
+					plat->status = PlatState::InStasis;       //for reactivation of toggle
 				}
 
 				//jff 1/26/98 remove the plat if it bounced so it can be tried again
@@ -136,12 +138,12 @@ extern "C" void T_CompatiblePlatRaise(plat_t* plat)
 				//killough 1/31/98: relax compatibility to demo_compatibility
 
 				// remove the plat if its a pure raise type
-				if(!comp[comp_floors])
+				if(!comp[std::to_underlying(CompOption::Floors)])
 				{
 					switch(plat->type)
 					{
-						case raiseAndChange:
-						case raiseToNearestAndChange:
+						case PlatType::RaiseAndChange:
+						case PlatType::RaiseToNearestAndChange:
 							P_RemoveActivePlat(plat);
 						default:
 							break;
@@ -154,66 +156,66 @@ extern "C" void T_CompatiblePlatRaise(plat_t* plat)
 			}
 			break;
 
-		case waiting:          // plat is waiting
+		case PlatState::Waiting:          // plat is waiting
 			if(!--plat->count) // downcount and check for delay elapsed
 			{
 				if(plat->sector->floorheight == plat->low)
-					plat->status = up; // if at bottom, start up
+					plat->status = PlatState::Up; // if at bottom, start up
 				else
-					plat->status = down; // if at top, start down
+					plat->status = PlatState::Down; // if at top, start down
 
 				// make plat start sound
 				S_StartSectorSound(plat->sector, g_sfx_pstart);
 			}
 			break; //jff 1/27/98 don't pickup code added later to in_stasis
 
-		case in_stasis: // do nothing if in stasis
+		case PlatState::InStasis: // do nothing if in stasis
 			break;
 	}
 }
 
 extern "C" void T_ZDoomPlatRaise(plat_t* plat)
 {
-	result_e res;
+	MoveResult res;
 
 	switch(plat->status)
 	{
-		case up:
+		case PlatState::Up:
 			res = T_MoveFloorPlane(plat->sector, plat->speed, plat->high, plat->crush, 1, false);
 
 			// if a pure raise type, make the plat moving sound
-			if(plat->type == platUpByValueStay
-				|| plat->type == platRaiseAndStay
-				|| plat->type == platRaiseAndStayLockout)
+			if(plat->type == PlatType::PlatUpByValueStay
+				|| plat->type == PlatType::PlatRaiseAndStay
+				|| plat->type == PlatType::PlatRaiseAndStayLockout)
 			{
 				if(!(leveltime & 7))
 					S_LoopSectorSound(plat->sector, g_sfx_stnmov_plats, 8);
 			}
 
-			if(res == crushed && plat->crush == NO_CRUSH)
+			if(res == MoveResult::Crushed && plat->crush == NO_CRUSH)
 			{
 				plat->count = plat->wait;
-				plat->status = down;
+				plat->status = PlatState::Down;
 				S_StartSectorSound(plat->sector, g_sfx_pstart);
 			}
-			else if(res == pastdest)
+			else if(res == MoveResult::PastDest)
 			{
-				if(plat->type != platToggle)
+				if(plat->type != PlatType::PlatToggle)
 				{
 					plat->count = plat->wait;
-					plat->status = waiting;
+					plat->status = PlatState::Waiting;
 					S_StartSectorSound(plat->sector, g_sfx_pstop);
 
 					switch(plat->type)
 					{
-						case platRaiseAndStayLockout:
-						case platRaiseAndStay:
-						case platDownByValue:
-						case platDownWaitUpStay:
-						case platDownWaitUpStayStone:
-						case platUpByValueStay:
-						case platDownToNearestFloor:
-						case platDownToLowestCeiling:
+						case PlatType::PlatRaiseAndStayLockout:
+						case PlatType::PlatRaiseAndStay:
+						case PlatType::PlatDownByValue:
+						case PlatType::PlatDownWaitUpStay:
+						case PlatType::PlatDownWaitUpStayStone:
+						case PlatType::PlatUpByValueStay:
+						case PlatType::PlatDownToNearestFloor:
+						case PlatType::PlatDownToLowestCeiling:
 							P_RemoveActivePlat(plat);
 							break;
 						default:
@@ -223,26 +225,26 @@ extern "C" void T_ZDoomPlatRaise(plat_t* plat)
 				else
 				{
 					plat->oldstatus = plat->status;
-					plat->status = in_stasis;
+					plat->status = PlatState::InStasis;
 				}
 			}
 			break;
-		case down:
+		case PlatState::Down:
 			res = T_MoveFloorPlane(plat->sector, plat->speed, plat->low, NO_CRUSH, -1, false);
 
-			if(res == pastdest)
+			if(res == MoveResult::PastDest)
 			{
-				if(plat->type != platToggle)
+				if(plat->type != PlatType::PlatToggle)
 				{
 					plat->count = plat->wait;
-					plat->status = waiting;
+					plat->status = PlatState::Waiting;
 					S_StartSectorSound(plat->sector, g_sfx_pstop);
 
 					switch(plat->type)
 					{
-						case platUpWaitDownStay:
-						case platUpNearestWaitDownStay:
-						case platUpByValue:
+						case PlatType::PlatUpWaitDownStay:
+						case PlatType::PlatUpNearestWaitDownStay:
+						case PlatType::PlatUpByValue:
 							P_RemoveActivePlat(plat);
 							break;
 						default:
@@ -252,13 +254,13 @@ extern "C" void T_ZDoomPlatRaise(plat_t* plat)
 				else
 				{
 					plat->oldstatus = plat->status;
-					plat->status = in_stasis;
+					plat->status = PlatState::InStasis;
 				}
 			}
-			else if(res == crushed && plat->crush == NO_CRUSH && plat->type != platToggle)
+			else if(res == MoveResult::Crushed && plat->crush == NO_CRUSH && plat->type != PlatType::PlatToggle)
 			{
 				plat->count = plat->wait;
-				plat->status = up;
+				plat->status = PlatState::Up;
 				S_StartSectorSound(plat->sector, g_sfx_pstart);
 			}
 
@@ -267,9 +269,9 @@ extern "C" void T_ZDoomPlatRaise(plat_t* plat)
 			// remove the plat if it's a pure raise type
 			switch(plat->type)
 			{
-				case platUpByValueStay:
-				case platRaiseAndStay:
-				case platRaiseAndStayLockout:
+				case PlatType::PlatUpByValueStay:
+				case PlatType::PlatRaiseAndStay:
+				case PlatType::PlatRaiseAndStayLockout:
 					P_RemoveActivePlat(plat);
 					break;
 				default:
@@ -277,19 +279,19 @@ extern "C" void T_ZDoomPlatRaise(plat_t* plat)
 			}
 
 			break;
-		case waiting:
+		case PlatState::Waiting:
 			if(!plat->count || !--plat->count)
 			{
 				if(plat->sector->floorheight == plat->low)
-					plat->status = up;
+					plat->status = PlatState::Up;
 				else
-					plat->status = down;
+					plat->status = PlatState::Down;
 
-				if(plat->type != platToggle)
+				if(plat->type != PlatType::PlatToggle)
 					S_StartSectorSound(plat->sector, g_sfx_pstart);
 			}
 			break;
-		case in_stasis:
+		case PlatState::InStasis:
 			break;
 	}
 }
@@ -310,7 +312,7 @@ void T_PlatRaise(plat_t* plat)
 // Returns true if a thinker is started, or restarted from stasis
 //
 
-int EV_DoZDoomPlat(int tag, line_t* line, plattype_e type, fixed_t height,
+int EV_DoZDoomPlat(int tag, line_t* line, PlatType type, fixed_t height,
 	fixed_t speed, int delay, fixed_t lip, int change)
 {
 	plat_t* plat;
@@ -326,9 +328,9 @@ int EV_DoZDoomPlat(int tag, line_t* line, plattype_e type, fixed_t height,
 		// Activate all <type> plats that are in_stasis
 		switch(type)
 		{
-			case platToggle:
+			case PlatType::PlatToggle:
 				rtn = 1;
-			case platPerpetualRaise:
+			case PlatType::PlatPerpetualRaise:
 				P_ActivateInStasis(tag);
 				break;
 			default:
@@ -370,69 +372,69 @@ int EV_DoZDoomPlat(int tag, line_t* line, plattype_e type, fixed_t height,
 
 		switch(type)
 		{
-			case platRaiseAndStay:
-			case platRaiseAndStayLockout:
+			case PlatType::PlatRaiseAndStay:
+			case PlatType::PlatRaiseAndStayLockout:
 				plat->high = P_FindNextHighestFloor(sec, sec->floorheight);
-				plat->status = up;
+				plat->status = PlatState::Up;
 				P_ResetSectorSpecial(sec);
 				S_StartSectorSound(sec, g_sfx_stnmov_plats);
 				break;
-			case platUpByValue:
-			case platUpByValueStay:
+			case PlatType::PlatUpByValue:
+			case PlatType::PlatUpByValueStay:
 				plat->high = sec->floorheight + height;
-				plat->status = up;
+				plat->status = PlatState::Up;
 				S_StartSectorSound(sec, g_sfx_stnmov_plats);
 				break;
-			case platDownByValue:
+			case PlatType::PlatDownByValue:
 				plat->low = sec->floorheight - height;
-				plat->status = down;
+				plat->status = PlatState::Down;
 				S_StartSectorSound(sec, g_sfx_stnmov_plats);
 				break;
-			case platDownWaitUpStay:
-			case platDownWaitUpStayStone:
+			case PlatType::PlatDownWaitUpStay:
+			case PlatType::PlatDownWaitUpStayStone:
 				plat->low = P_FindLowestFloorSurrounding(sec) + lip;
 				if(plat->low > sec->floorheight)
 					plat->low = sec->floorheight;
-				plat->status = down;
-				S_StartSectorSound(sec, type == platDownWaitUpStay ? g_sfx_pstart : g_sfx_stnmov_plats);
+				plat->status = PlatState::Down;
+				S_StartSectorSound(sec, type == PlatType::PlatDownWaitUpStay ? g_sfx_pstart : g_sfx_stnmov_plats);
 				break;
-			case platUpNearestWaitDownStay:
+			case PlatType::PlatUpNearestWaitDownStay:
 				plat->high = P_FindNextHighestFloor(sec, sec->floorheight);
-				plat->status = up;
+				plat->status = PlatState::Up;
 				S_StartSectorSound(sec, g_sfx_pstart);
 				break;
-			case platUpWaitDownStay:
+			case PlatType::PlatUpWaitDownStay:
 				plat->high = P_FindHighestFloorSurrounding(sec);
 				if(plat->high < sec->floorheight)
 					plat->high = sec->floorheight;
-				plat->status = up;
+				plat->status = PlatState::Up;
 				S_StartSectorSound(sec, g_sfx_pstart);
 				break;
-			case platPerpetualRaise:
+			case PlatType::PlatPerpetualRaise:
 				plat->low = P_FindLowestFloorSurrounding(sec) + lip;
 				if(plat->low > sec->floorheight)
 					plat->low = sec->floorheight;
 				plat->high = P_FindHighestFloorSurrounding(sec);
 				if(plat->high < sec->floorheight)
 					plat->high = sec->floorheight;
-				plat->status = (P_Random(pr_plats) & 1) ? up : down;
+				plat->status = (P_Random(RandomClass::Plats) & 1) ? PlatState::Up : PlatState::Down;
 				S_StartSectorSound(sec, g_sfx_pstart);
 				break;
-			case platToggle:
+			case PlatType::PlatToggle:
 				plat->crush = DOOM_CRUSH;
 				plat->low = sec->ceilingheight;
-				plat->status = down;
+				plat->status = PlatState::Down;
 				break;
-			case platDownToNearestFloor:
+			case PlatType::PlatDownToNearestFloor:
 				plat->low = P_FindNextLowestFloor(sec, sec->floorheight) + lip;
-				plat->status = down;
+				plat->status = PlatState::Down;
 				S_StartSectorSound(sec, g_sfx_pstart);
 				break;
-			case platDownToLowestCeiling:
+			case PlatType::PlatDownToLowestCeiling:
 				plat->low = P_FindLowestCeilingSurrounding(sec);
 				if(plat->low > sec->floorheight)
 					plat->low = sec->floorheight;
-				plat->status = down;
+				plat->status = PlatState::Down;
 				S_StartSectorSound(sec, g_sfx_pstart);
 				break;
 			default:
@@ -447,7 +449,7 @@ int EV_DoZDoomPlat(int tag, line_t* line, plattype_e type, fixed_t height,
 
 int EV_DoPlat
 (line_t* line,
-	plattype_e type,
+	PlatType type,
 	int amount)
 {
 	plat_t* plat;
@@ -460,11 +462,11 @@ int EV_DoPlat
 	// Activate all <type> plats that are in_stasis
 	switch(type)
 	{
-		case perpetualRaise:
+		case PlatType::PerpetualRaise:
 			P_ActivateInStasis(line->special_args[0]);
 			break;
 
-		case toggleUpDn:
+		case PlatType::ToggleUpDn:
 			P_ActivateInStasis(line->special_args[0]);
 			rtn = 1;
 			break;
@@ -502,28 +504,28 @@ int EV_DoPlat
 		// set up plat according to type
 		switch(type)
 		{
-			case raiseToNearestAndChange:
+			case PlatType::RaiseToNearestAndChange:
 				plat->speed = PLATSPEED / 2;
 				sec->floorpic = sides[line->sidenum[0]].sector->floorpic;
 				plat->high = P_FindNextHighestFloor(sec, sec->floorheight);
 				plat->wait = 0;
-				plat->status = up;
+				plat->status = PlatState::Up;
 				P_ResetSectorSpecial(sec);
 
 				S_StartSectorSound(sec, g_sfx_stnmov_plats);
 				break;
 
-			case raiseAndChange:
+			case PlatType::RaiseAndChange:
 				plat->speed = PLATSPEED / 2;
 				sec->floorpic = sides[line->sidenum[0]].sector->floorpic;
 				plat->high = sec->floorheight + amount * FRACUNIT;
 				plat->wait = 0;
-				plat->status = up;
+				plat->status = PlatState::Up;
 
 				S_StartSectorSound(sec, g_sfx_stnmov_plats);
 				break;
 
-			case downWaitUpStay:
+			case PlatType::DownWaitUpStay:
 				plat->speed = PLATSPEED * 4;
 				plat->low = P_FindLowestFloorSurrounding(sec);
 
@@ -532,11 +534,11 @@ int EV_DoPlat
 
 				plat->high = sec->floorheight;
 				plat->wait = TICRATE * PLATWAIT;
-				plat->status = down;
+				plat->status = PlatState::Down;
 				S_StartSectorSound(sec, g_sfx_pstart);
 				break;
 
-			case blazeDWUS:
+			case PlatType::BlazeDWUS:
 				plat->speed = PLATSPEED * 8;
 				plat->low = P_FindLowestFloorSurrounding(sec);
 
@@ -545,11 +547,11 @@ int EV_DoPlat
 
 				plat->high = sec->floorheight;
 				plat->wait = TICRATE * PLATWAIT;
-				plat->status = down;
-				S_StartSectorSound(sec, sfx_pstart);
+				plat->status = PlatState::Down;
+				S_StartSectorSound(sec, SfxId::Pstart);
 				break;
 
-			case perpetualRaise:
+			case PlatType::PerpetualRaise:
 				plat->speed = PLATSPEED;
 				plat->low = P_FindLowestFloorSurrounding(sec);
 
@@ -562,12 +564,12 @@ int EV_DoPlat
 					plat->high = sec->floorheight;
 
 				plat->wait = TICRATE * PLATWAIT;
-				plat->status = static_cast<plat_e>(P_Random(pr_plats) & 1);
+				plat->status = static_cast<PlatState>(P_Random(RandomClass::Plats) & 1);
 
 				S_StartSectorSound(sec, g_sfx_pstart);
 				break;
 
-			case toggleUpDn:                //jff 3/14/98 add new type to support instant toggle
+			case PlatType::ToggleUpDn:                //jff 3/14/98 add new type to support instant toggle
 				plat->speed = PLATSPEED;    //not used
 				plat->wait = TICRATE * PLATWAIT; //not used
 				plat->crush = DOOM_CRUSH;   //jff 3/14/98 crush anything in the way
@@ -575,7 +577,7 @@ int EV_DoPlat
 				// set up toggling between ceiling, floor inclusive
 				plat->low = sec->ceilingheight;
 				plat->high = sec->floorheight;
-				plat->status = down;
+				plat->status = PlatState::Down;
 				break;
 
 			default:
@@ -609,10 +611,10 @@ void P_ActivateInStasis(int tag)
 	for(pl = activeplats; pl; pl = pl->next) // search the active plats
 	{
 		plat_t* plat = pl->plat; // for one in stasis with right tag
-		if(plat->tag == tag && plat->status == in_stasis)
+		if(plat->tag == tag && plat->status == PlatState::InStasis)
 		{
-			if(plat->type == toggleUpDn) //jff 3/14/98 reactivate toggle type
-				plat->status = plat->oldstatus == up ? down : up;
+			if(plat->type == PlatType::ToggleUpDn) //jff 3/14/98 reactivate toggle type
+				plat->status = plat->oldstatus == PlatState::Up ? PlatState::Down : PlatState::Up;
 			else
 				plat->status = plat->oldstatus;
 			plat->thinker.function = reinterpret_cast<think_t>(T_PlatRaise);
@@ -638,12 +640,12 @@ void EV_StopZDoomPlat(int tag, dboolean remove)
 	for(pl = activeplats; pl; pl = pl->next)
 	{
 		plat_t* plat = pl->plat;
-		if(plat->status != in_stasis && plat->tag == tag)
+		if(plat->status != PlatState::InStasis && plat->tag == tag)
 		{
 			if(!remove)
 			{
 				plat->oldstatus = plat->status;
-				plat->status = in_stasis;
+				plat->status = PlatState::InStasis;
 			}
 			else
 			{
@@ -659,10 +661,10 @@ int EV_StopPlat(line_t* line)
 	for(pl = activeplats; pl; pl = pl->next) // search the active plats
 	{
 		plat_t* plat = pl->plat; // for one with the tag not in stasis
-		if(plat->status != in_stasis && plat->tag == line->special_args[0])
+		if(plat->status != PlatState::InStasis && plat->tag == line->special_args[0])
 		{
 			plat->oldstatus = plat->status; // put it in stasis
-			plat->status = in_stasis;
+			plat->status = PlatState::InStasis;
 			plat->thinker.function = nullptr;
 		}
 	}
@@ -728,28 +730,28 @@ void P_RemoveAllActivePlats()
 
 extern "C" void T_HexenPlatRaise(plat_t* plat)
 {
-	result_e res;
+	MoveResult res;
 
 	switch(plat->status)
 	{
-		case up:
+		case PlatState::Up:
 			res = T_MoveFloorPlane(plat->sector, plat->speed, plat->high, plat->crush, 1, true);
-			if(res == crushed && plat->crush == NO_CRUSH)
+			if(res == MoveResult::Crushed && plat->crush == NO_CRUSH)
 			{
 				plat->count = plat->wait;
-				plat->status = down;
+				plat->status = PlatState::Down;
 				SN_StartSequence((mobj_t*)&plat->sector->soundorg,
-					SEQ_PLATFORM + static_cast<int>(plat->sector->seqType));
+					std::to_underlying(SoundSequence::Platform) + static_cast<int>(plat->sector->seqType));
 			}
-			else if(res == pastdest)
+			else if(res == MoveResult::PastDest)
 			{
 				plat->count = plat->wait;
-				plat->status = waiting;
+				plat->status = PlatState::Waiting;
 				SN_StopSequence((mobj_t*)&plat->sector->soundorg);
 				switch(plat->type)
 				{
-					case PLAT_DOWNWAITUPSTAY:
-					case PLAT_DOWNBYVALUEWAITUPSTAY:
+					case PlatType::PlatDownwaitupstay:
+					case PlatType::PlatDownbyvaluewaitupstay:
 						P_RemoveActivePlat(plat);
 						break;
 					default:
@@ -757,16 +759,16 @@ extern "C" void T_HexenPlatRaise(plat_t* plat)
 				}
 			}
 			break;
-		case down:
+		case PlatState::Down:
 			res = T_MoveFloorPlane(plat->sector, plat->speed, plat->low, NO_CRUSH, -1, true);
-			if(res == pastdest)
+			if(res == MoveResult::PastDest)
 			{
 				plat->count = plat->wait;
-				plat->status = waiting;
+				plat->status = PlatState::Waiting;
 				switch(plat->type)
 				{
-					case PLAT_UPWAITDOWNSTAY:
-					case PLAT_UPBYVALUEWAITDOWNSTAY:
+					case PlatType::PlatUpwaitdownstay:
+					case PlatType::PlatUpbyvaluewaitdownstay:
 						P_RemoveActivePlat(plat);
 						break;
 					default:
@@ -775,22 +777,22 @@ extern "C" void T_HexenPlatRaise(plat_t* plat)
 				SN_StopSequence((mobj_t*)&plat->sector->soundorg);
 			}
 			break;
-		case waiting:
+		case PlatState::Waiting:
 			if(!--plat->count)
 			{
 				if(plat->sector->floorheight == plat->low)
-					plat->status = up;
+					plat->status = PlatState::Up;
 				else
-					plat->status = down;
+					plat->status = PlatState::Down;
 				SN_StartSequence((mobj_t*)&plat->sector->soundorg,
-					SEQ_PLATFORM + static_cast<int>(plat->sector->seqType));
+					std::to_underlying(SoundSequence::Platform) + static_cast<int>(plat->sector->seqType));
 			}
 		default:
 			break;
 	}
 }
 
-int EV_DoHexenPlat(line_t* line, byte* args, plattype_e type, int amount)
+int EV_DoHexenPlat(line_t* line, byte* args, PlatType type, int amount)
 {
 	plat_t* plat;
 	const int* id_p;
@@ -822,39 +824,39 @@ int EV_DoHexenPlat(line_t* line, byte* args, plattype_e type, int amount)
 		plat->speed = args[1] * (FRACUNIT / 8);
 		switch(type)
 		{
-			case PLAT_DOWNWAITUPSTAY:
+			case PlatType::PlatDownwaitupstay:
 				plat->low = P_FindLowestFloorSurrounding(sec) + 8 * FRACUNIT;
 				if(plat->low > sec->floorheight)
 					plat->low = sec->floorheight;
 				plat->high = sec->floorheight;
 				plat->wait = args[2];
-				plat->status = down;
+				plat->status = PlatState::Down;
 				break;
-			case PLAT_DOWNBYVALUEWAITUPSTAY:
+			case PlatType::PlatDownbyvaluewaitupstay:
 				plat->low = sec->floorheight - args[3] * 8 * FRACUNIT;
 				if(plat->low > sec->floorheight)
 					plat->low = sec->floorheight;
 				plat->high = sec->floorheight;
 				plat->wait = args[2];
-				plat->status = down;
+				plat->status = PlatState::Down;
 				break;
-			case PLAT_UPWAITDOWNSTAY:
+			case PlatType::PlatUpwaitdownstay:
 				plat->high = P_FindHighestFloorSurrounding(sec);
 				if(plat->high < sec->floorheight)
 					plat->high = sec->floorheight;
 				plat->low = sec->floorheight;
 				plat->wait = args[2];
-				plat->status = up;
+				plat->status = PlatState::Up;
 				break;
-			case PLAT_UPBYVALUEWAITDOWNSTAY:
+			case PlatType::PlatUpbyvaluewaitdownstay:
 				plat->high = sec->floorheight + args[3] * 8 * FRACUNIT;
 				if(plat->high < sec->floorheight)
 					plat->high = sec->floorheight;
 				plat->low = sec->floorheight;
 				plat->wait = args[2];
-				plat->status = up;
+				plat->status = PlatState::Up;
 				break;
-			case PLAT_PERPETUALRAISE:
+			case PlatType::PlatPerpetualraise:
 				plat->low = P_FindLowestFloorSurrounding(sec) + 8 * FRACUNIT;
 				if(plat->low > sec->floorheight)
 					plat->low = sec->floorheight;
@@ -862,14 +864,14 @@ int EV_DoHexenPlat(line_t* line, byte* args, plattype_e type, int amount)
 				if(plat->high < sec->floorheight)
 					plat->high = sec->floorheight;
 				plat->wait = args[2];
-				plat->status = static_cast<plat_e>(P_Random(pr_hexen) & 1);
+				plat->status = static_cast<PlatState>(P_Random(RandomClass::Hexen) & 1);
 				break;
 			default:
 				break;
 		}
 		P_AddActivePlat(plat);
 		SN_StartSequence((mobj_t*)&sec->soundorg,
-			SEQ_PLATFORM + static_cast<int>(sec->seqType));
+			std::to_underlying(SoundSequence::Platform) + static_cast<int>(sec->seqType));
 	}
 	return rtn;
 }

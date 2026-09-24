@@ -10,7 +10,7 @@ extern "C"
 {
 #endif
 
-int dsda_ThingTypeFromSpawnNumber(int spawn_number);
+MobjType dsda_ThingTypeFromSpawnNumber(int spawn_number);
 
 #ifdef __cplusplus
 }

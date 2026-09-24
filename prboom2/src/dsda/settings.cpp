@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Settings
 
+#include <utility>
+
 #include <errno.h>
 #include <stdlib.h>
 
@@ -49,9 +51,9 @@ static int dsda_ComplvlStrToNum(const char* data, int length)
 {
 	if(length == 7 && !strncasecmp("vanilla", data, 7))
 	{
-		if(gamemode == commercial)
+		if(gamemode == GameMode::Commercial)
 		{
-			if(gamemission == pack_plut || gamemission == pack_tnt)
+			if(gamemission == GameMission::PackPlut || gamemission == GameMission::PackTnt)
 				return 4;
 			else
 				return 2;
@@ -85,23 +87,23 @@ static int dsda_WadCompatibilityLevel()
 			const char* data = (const char*)W_LumpByNum(num);
 
 			complvl = dsda_ComplvlStrToNum(data, length);
-			lprintf(LO_INFO, "Detected COMPLVL lump: %i\n", complvl);
+			lprintf(OutputLevels::Info, "Detected COMPLVL lump: %i\n", complvl);
 		}
 	}
 
 	return complvl;
 }
 
-int dsda_CompatibilityLevel()
+CompLevel dsda_CompatibilityLevel()
 {
 	int level;
 	dsda_arg_t* complevel_arg;
 
-	if(raven) return doom_12_compatibility;
+	if(raven) return CompLevel::Doom12;
 
-	if(map_format.zdoom) return mbf21_compatibility;
+	if(map_format.zdoom) return CompLevel::Mbf21;
 
-	complevel_arg = dsda_Arg(dsda_arg_complevel);
+	complevel_arg = dsda_Arg(ArgId::Complevel);
 
 	if(complevel_arg->count)
 	{
@@ -111,9 +113,9 @@ int dsda_CompatibilityLevel()
 		level = strtol(arg_val, &str_end, 0);
 		if(errno == 0 && *str_end == '\0')
 		{
-			if(level >= -1 && level < MAX_COMPATIBILITY_LEVEL)
+			if(level >= -1 && level < std::to_underlying(CompLevel::Max))
 			{
-				return level;
+				return static_cast<CompLevel>(level);
 			}
 		}
 		else
@@ -121,7 +123,7 @@ int dsda_CompatibilityLevel()
 			level = dsda_ComplvlStrToNum(arg_val, strlen(arg_val));
 			if(level != -1)
 			{
-				return level;
+				return static_cast<CompLevel>(level);
 			}
 		}
 		I_Error("-complevel value of \"%s\" did not match any known complevel.", arg_val);
@@ -132,192 +134,192 @@ int dsda_CompatibilityLevel()
 		level = dsda_WadCompatibilityLevel();
 
 		if(level >= 0)
-			return level;
+			return static_cast<CompLevel>(level);
 	}
 
-	return UNSPECIFIED_COMPLEVEL;
+	return static_cast<CompLevel>(UNSPECIFIED_COMPLEVEL);
 }
 
 void dsda_SetTas(dboolean t)
 {
-	dsda_UpdateIntConfig(dsda_config_strict_mode, !t, true);
+	dsda_UpdateIntConfig(ConfigId::StrictMode, !t, true);
 }
 
 int dsda_ViewBob()
 {
-	return dsda_IntConfig(dsda_config_viewbob);
+	return dsda_IntConfig(ConfigId::Viewbob);
 }
 
 int dsda_WeaponBob()
 {
-	return dsda_IntConfig(dsda_config_weaponbob);
+	return dsda_IntConfig(ConfigId::Weaponbob);
 }
 
 dboolean dsda_FixViewBobFloorJolt()
 {
-	return dsda_IntConfig(dsda_config_fix_viewbob_floor_jolt);
+	return dsda_IntConfig(ConfigId::FixViewbobFloorJolt);
 }
 
 dboolean dsda_ShowMessages()
 {
-	return dsda_IntConfig(dsda_config_show_messages);
+	return dsda_IntConfig(ConfigId::ShowMessages);
 }
 
 dboolean dsda_AutoRun()
 {
-	return dsda_IntConfig(dsda_config_autorun);
+	return dsda_IntConfig(ConfigId::Autorun);
 }
 
 dboolean dsda_MouseLook()
 {
-	return dsda_IntConfig(dsda_config_freelook);
+	return dsda_IntConfig(ConfigId::Freelook);
 }
 
 dboolean dsda_VertMouse()
 {
-	return dsda_IntConfig(dsda_config_vertmouse);
+	return dsda_IntConfig(ConfigId::Vertmouse);
 }
 
 dboolean dsda_StrictMode()
 {
-	return dsda_IntConfig(dsda_config_strict_mode) && demorecording;
+	return dsda_IntConfig(ConfigId::StrictMode) && demorecording;
 }
 
 dboolean dsda_MuteSfx()
 {
-	return dsda_IntConfig(dsda_config_mute_sfx) ||
-		(!I_WindowFocused() && dsda_IntConfig(dsda_config_mute_unfocused_window) && !capturing_video);
+	return dsda_IntConfig(ConfigId::MuteSfx) ||
+		(!I_WindowFocused() && dsda_IntConfig(ConfigId::MuteUnfocusedWindow) && !capturing_video);
 }
 
 dboolean dsda_MuteMusic()
 {
-	return dsda_IntConfig(dsda_config_mute_music) ||
-		(!I_WindowFocused() && dsda_IntConfig(dsda_config_mute_unfocused_window) && !capturing_video);
+	return dsda_IntConfig(ConfigId::MuteMusic) ||
+		(!I_WindowFocused() && dsda_IntConfig(ConfigId::MuteUnfocusedWindow) && !capturing_video);
 }
 
 dboolean dsda_ProcessCheatCodes()
 {
-	return dsda_IntConfig(dsda_config_cheat_codes);
+	return dsda_IntConfig(ConfigId::CheatCodes);
 }
 
 dboolean dsda_CycleGhostColors()
 {
-	return dsda_IntConfig(dsda_config_cycle_ghost_colors);
+	return dsda_IntConfig(ConfigId::CycleGhostColors);
 }
 
 dboolean dsda_AlwaysSR50()
 {
-	return dsda_IntConfig(dsda_config_movement_strafe50);
+	return dsda_IntConfig(ConfigId::MovementStrafe50);
 }
 
 dboolean dsda_HideHorns()
 {
-	return dsda_IntConfig(dsda_config_hide_horns);
+	return dsda_IntConfig(ConfigId::HideHorns);
 }
 
 dboolean dsda_HideWeapon()
 {
-	return dsda_IntConfig(dsda_config_hide_weapon);
+	return dsda_IntConfig(ConfigId::HideWeapon);
 }
 
 dboolean dsda_SwitchWhenAmmoRunsOut()
 {
-	return dsda_IntConfig(dsda_config_switch_when_ammo_runs_out);
+	return dsda_IntConfig(ConfigId::SwitchWhenAmmoRunsOut);
 }
 
 dboolean dsda_SkipQuitPrompt()
 {
-	return dsda_IntConfig(dsda_config_skip_quit_prompt) || dsda_SkipMode();
+	return dsda_IntConfig(ConfigId::SkipQuitPrompt) || dsda_SkipMode();
 }
 
 dboolean dsda_TrackSplits()
 {
-	return demorecording || (demoplayback && dsda_Flag(dsda_arg_track_playback));
+	return demorecording || (demoplayback && dsda_Flag(ArgId::TrackPlayback));
 }
 
 dboolean dsda_ShowSplitData()
 {
-	return dsda_IntConfig(dsda_config_show_split_data);
+	return dsda_IntConfig(ConfigId::ShowSplitData);
 }
 
 dboolean dsda_CommandDisplay()
 {
-	return dsda_IntConfig(dsda_config_command_display) || dsda_BuildMode();
+	return dsda_IntConfig(ConfigId::CommandDisplay) || dsda_BuildMode();
 }
 
 dboolean dsda_CoordinateDisplay()
 {
-	return dsda_IntConfig(dsda_config_coordinate_display);
+	return dsda_IntConfig(ConfigId::CoordinateDisplay);
 }
 
 dboolean dsda_ShowFPS()
 {
-	return dsda_IntConfig(dsda_config_show_fps);
+	return dsda_IntConfig(ConfigId::ShowFps);
 }
 
 dboolean dsda_ShowMinimap()
 {
-	return dsda_IntConfig(dsda_config_show_minimap);
+	return dsda_IntConfig(ConfigId::ShowMinimap);
 }
 
 dboolean dsda_ShowLevelSplits()
 {
-	return dsda_IntConfig(dsda_config_show_level_splits);
+	return dsda_IntConfig(ConfigId::ShowLevelSplits);
 }
 
 dboolean dsda_ShowDemoAttempts()
 {
-	return dsda_IntConfig(dsda_config_show_demo_attempts) && demorecording;
+	return dsda_IntConfig(ConfigId::ShowDemoAttempts) && demorecording;
 }
 
 dboolean dsda_MapCoordinates()
 {
-	return dsda_IntConfig(dsda_config_map_coordinates);
+	return dsda_IntConfig(ConfigId::MapCoordinates);
 }
 
 dboolean dsda_MapTotals()
 {
-	return dsda_IntConfig(dsda_config_map_totals);
+	return dsda_IntConfig(ConfigId::MapTotals);
 }
 
 dboolean dsda_MapTime()
 {
-	return dsda_IntConfig(dsda_config_map_time);
+	return dsda_IntConfig(ConfigId::MapTime);
 }
 
 dboolean dsda_MapTitle()
 {
-	return dsda_IntConfig(dsda_config_map_title);
+	return dsda_IntConfig(ConfigId::MapTitle);
 }
 
 dboolean dsda_PainPalette()
 {
-	return dsda_IntConfig(dsda_config_palette_ondamage);
+	return dsda_IntConfig(ConfigId::PaletteOndamage);
 }
 
 dboolean dsda_BonusPalette()
 {
-	return dsda_IntConfig(dsda_config_palette_onbonus);
+	return dsda_IntConfig(ConfigId::PaletteOnbonus);
 }
 
 dboolean dsda_PowerPalette()
 {
-	return dsda_IntConfig(dsda_config_palette_onpowers);
+	return dsda_IntConfig(ConfigId::PaletteOnpowers);
 }
 
 dboolean dsda_ShowHealthBars()
 {
-	return dsda_IntConfig(dsda_config_gl_health_bar);
+	return dsda_IntConfig(ConfigId::GlHealthBar);
 }
 
 dboolean dsda_WipeAtFullSpeed()
 {
-	return dsda_IntConfig(dsda_config_wipe_at_full_speed);
+	return dsda_IntConfig(ConfigId::WipeAtFullSpeed);
 }
 
 int dsda_ShowAliveMonsters()
 {
-	return dsda_IntConfig(dsda_config_show_alive_monsters);
+	return dsda_IntConfig(ConfigId::ShowAliveMonsters);
 }
 
 int dsda_reveal_map;
@@ -336,12 +338,12 @@ void dsda_ResetRevealMap()
 
 int dsda_GameSpeed()
 {
-	return dsda_IntConfig(dsda_config_game_speed);
+	return dsda_IntConfig(ConfigId::GameSpeed);
 }
 
 void dsda_UpdateGameSpeed(int value)
 {
-	dsda_UpdateIntConfig(dsda_config_game_speed, value, true);
+	dsda_UpdateIntConfig(ConfigId::GameSpeed, value, true);
 }
 
 void dsda_SkipNextWipe()
@@ -352,7 +354,7 @@ void dsda_SkipNextWipe()
 // In raven, strict mode does not affect this setting
 dboolean dsda_RenderWipeScreen()
 {
-	return raven ? dsda_TransientIntConfig(dsda_config_render_wipescreen) : dsda_IntConfig(dsda_config_render_wipescreen);
+	return raven ? dsda_TransientIntConfig(ConfigId::RenderWipescreen) : dsda_IntConfig(ConfigId::RenderWipescreen);
 }
 
 dboolean dsda_PendingSkipWipe()
@@ -397,7 +399,7 @@ void dsda_WatchGameControllerEvent()
 	game_controller_used = true;
 
 	if(mouse_used)
-		dsda_TrackFeature(uf_mouse_and_controller);
+		dsda_TrackFeature(FeatureFlag::MouseAndController);
 }
 
 void dsda_WatchMouseEvent()
@@ -405,7 +407,7 @@ void dsda_WatchMouseEvent()
 	mouse_used = true;
 
 	if(game_controller_used)
-		dsda_TrackFeature(uf_mouse_and_controller);
+		dsda_TrackFeature(FeatureFlag::MouseAndController);
 }
 
 void dsda_LiftInputRestrictions()

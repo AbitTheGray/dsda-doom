@@ -24,17 +24,17 @@ static void dsda_UpdateCurrentComponentText(char* str, size_t max_size)
 	snprintf(
 		str, max_size,
 		"%sFPS %s%4d %sSEGS %s%4d %sPLANES %s%4d %sSPRITES %s%4d",
-		dsda_TextColor(dsda_tc_exhud_render_label),
-		dsda_render_stats_fps < TICRATE ? dsda_TextColor(dsda_tc_exhud_render_bad) : dsda_TextColor(dsda_tc_exhud_render_good),
+		dsda_TextColor(TextColorIndex::ExhudRenderLabel),
+		dsda_render_stats_fps < TICRATE ? dsda_TextColor(TextColorIndex::ExhudRenderBad) : dsda_TextColor(TextColorIndex::ExhudRenderGood),
 		dsda_render_stats_fps,
-		dsda_TextColor(dsda_tc_exhud_render_label),
-		dsda_render_stats.drawsegs > 256 ? dsda_TextColor(dsda_tc_exhud_render_bad) : dsda_TextColor(dsda_tc_exhud_render_good),
+		dsda_TextColor(TextColorIndex::ExhudRenderLabel),
+		dsda_render_stats.drawsegs > 256 ? dsda_TextColor(TextColorIndex::ExhudRenderBad) : dsda_TextColor(TextColorIndex::ExhudRenderGood),
 		dsda_render_stats.drawsegs,
-		dsda_TextColor(dsda_tc_exhud_render_label),
-		dsda_render_stats.visplanes > 128 ? dsda_TextColor(dsda_tc_exhud_render_bad) : dsda_TextColor(dsda_tc_exhud_render_good),
+		dsda_TextColor(TextColorIndex::ExhudRenderLabel),
+		dsda_render_stats.visplanes > 128 ? dsda_TextColor(TextColorIndex::ExhudRenderBad) : dsda_TextColor(TextColorIndex::ExhudRenderGood),
 		dsda_render_stats.visplanes,
-		dsda_TextColor(dsda_tc_exhud_render_label),
-		dsda_render_stats.vissprites > 128 ? dsda_TextColor(dsda_tc_exhud_render_bad) : dsda_TextColor(dsda_tc_exhud_render_good),
+		dsda_TextColor(TextColorIndex::ExhudRenderLabel),
+		dsda_render_stats.vissprites > 128 ? dsda_TextColor(TextColorIndex::ExhudRenderBad) : dsda_TextColor(TextColorIndex::ExhudRenderGood),
 		dsda_render_stats.vissprites
 	);
 }
@@ -46,19 +46,19 @@ static void dsda_UpdateMaxComponentText(char* str, size_t max_size)
 	snprintf(
 		str, max_size,
 		"%sMAX      SEGS %s%4d %sPLANES %s%4d %sSPRITES %s%4d",
-		dsda_TextColor(dsda_tc_exhud_render_label),
-		dsda_render_stats_max.drawsegs > 256 ? dsda_TextColor(dsda_tc_exhud_render_bad) : dsda_TextColor(dsda_tc_exhud_render_good),
+		dsda_TextColor(TextColorIndex::ExhudRenderLabel),
+		dsda_render_stats_max.drawsegs > 256 ? dsda_TextColor(TextColorIndex::ExhudRenderBad) : dsda_TextColor(TextColorIndex::ExhudRenderGood),
 		dsda_render_stats_max.drawsegs,
-		dsda_TextColor(dsda_tc_exhud_render_label),
-		dsda_render_stats_max.visplanes > 128 ? dsda_TextColor(dsda_tc_exhud_render_bad) : dsda_TextColor(dsda_tc_exhud_render_good),
+		dsda_TextColor(TextColorIndex::ExhudRenderLabel),
+		dsda_render_stats_max.visplanes > 128 ? dsda_TextColor(TextColorIndex::ExhudRenderBad) : dsda_TextColor(TextColorIndex::ExhudRenderGood),
 		dsda_render_stats_max.visplanes,
-		dsda_TextColor(dsda_tc_exhud_render_label),
-		dsda_render_stats_max.vissprites > 128 ? dsda_TextColor(dsda_tc_exhud_render_bad) : dsda_TextColor(dsda_tc_exhud_render_good),
+		dsda_TextColor(TextColorIndex::ExhudRenderLabel),
+		dsda_render_stats_max.vissprites > 128 ? dsda_TextColor(TextColorIndex::ExhudRenderBad) : dsda_TextColor(TextColorIndex::ExhudRenderGood),
 		dsda_render_stats_max.vissprites
 	);
 }
 
-void dsda_InitRenderStatsHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitRenderStatsHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

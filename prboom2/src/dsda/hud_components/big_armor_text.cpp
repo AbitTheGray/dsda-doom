@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Big Armor Text HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "big_armor_text.hpp"
@@ -19,7 +21,7 @@ static int patch_delta_x;
 static void dsda_DrawComponent()
 {
 	player_t* player;
-	int cm;
+	ColorRange cm;
 	int armor;
 
 	player = &players[displayplayer];
@@ -27,24 +29,24 @@ static void dsda_DrawComponent()
 	if(hexen)
 	{
 		armor = dsda_HexenArmor(player);
-		cm = dsda_TextCR(dsda_tc_stbar_armor_zero);
+		cm = dsda_TextCR(TextColorIndex::StbarArmorZero);
 	}
 	else
 	{
-		armor = player->armorpoints[ARMOR_ARMOR];
+		armor = player->armorpoints[std::to_underlying(ArmorType::Armor)];
 		if(armor <= 0)
-			cm = dsda_TextCR(dsda_tc_stbar_armor_zero);
+			cm = dsda_TextCR(TextColorIndex::StbarArmorZero);
 		else if(player->armortype < 2)
-			cm = dsda_TextCR(dsda_tc_stbar_armor_one);
+			cm = dsda_TextCR(TextColorIndex::StbarArmorOne);
 		else
-			cm = dsda_TextCR(dsda_tc_stbar_armor_two);
+			cm = dsda_TextCR(TextColorIndex::StbarArmorTwo);
 	}
 
 	dsda_DrawBigNumber(local->component.x, local->component.y, patch_delta_x, 0,
 		cm, local->component.vpt, 3, armor);
 }
 
-void dsda_InitBigArmorTextHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitBigArmorTextHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

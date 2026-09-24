@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+
+#include <array>
+#include <utility>
 #ifdef _MSC_VER
 #include <io.h>
 #else
@@ -95,24 +98,24 @@ int pwad_help2_check;
 
 struct
 {
-	int type; // mobjtype_t
+	MobjType type;
 	int speed[2];
 } MonsterMissileInfo[] = {
-	{HERETIC_MT_IMPBALL, {10, 20}},
-	{HERETIC_MT_MUMMYFX1, {9, 18}},
-	{HERETIC_MT_KNIGHTAXE, {9, 18}},
-	{HERETIC_MT_REDAXE, {9, 18}},
-	{HERETIC_MT_BEASTBALL, {12, 20}},
-	{HERETIC_MT_WIZFX1, {18, 24}},
-	{HERETIC_MT_SNAKEPRO_A, {14, 20}},
-	{HERETIC_MT_SNAKEPRO_B, {14, 20}},
-	{HERETIC_MT_HEADFX1, {13, 20}},
-	{HERETIC_MT_HEADFX3, {10, 18}},
-	{HERETIC_MT_MNTRFX1, {20, 26}},
-	{HERETIC_MT_MNTRFX2, {14, 20}},
-	{HERETIC_MT_SRCRFX1, {20, 28}},
-	{HERETIC_MT_SOR2FX1, {20, 28}},
-	{-1, {-1, -1}} // Terminator
+	{MobjType::HereticImpball, {10, 20}},
+	{MobjType::HereticMummyfx1, {9, 18}},
+	{MobjType::HereticKnightaxe, {9, 18}},
+	{MobjType::HereticRedaxe, {9, 18}},
+	{MobjType::HereticBeastball, {12, 20}},
+	{MobjType::HereticWizfx1, {18, 24}},
+	{MobjType::HereticSnakeproA, {14, 20}},
+	{MobjType::HereticSnakeproB, {14, 20}},
+	{MobjType::HereticHeadfx1, {13, 20}},
+	{MobjType::HereticHeadfx3, {10, 18}},
+	{MobjType::HereticMntrfx1, {20, 26}},
+	{MobjType::HereticMntrfx2, {14, 20}},
+	{MobjType::HereticSrcrfx1, {20, 28}},
+	{MobjType::HereticSor2fx1, {20, 28}},
+	{MobjType::Null, {-1, -1}} // Terminator
 };
 
 // e6y
@@ -125,8 +128,8 @@ struct
 static const byte* demobuffer; /* cph - only used for playback */
 static int demolength;         // check for overrun (missing DEMOMARKER)
 
-gameaction_t gameaction;
-gamestate_t gamestate;
+GameAction gameaction;
+GameState gamestate;
 dboolean in_game;
 int gameskill;
 int gameepisode;
@@ -144,7 +147,7 @@ dboolean deathmatch; // only if started as net death
 dboolean netgame;    // only true if packets are broadcast
 dboolean playeringame[MAX_MAXPLAYERS];
 player_t players[MAX_MAXPLAYERS];
-pclass_t PlayerClass[MAX_MAXPLAYERS];
+PClass PlayerClass[MAX_MAXPLAYERS];
 int upmove;
 int consoleplayer; // player taking events and displaying
 int displayplayer; // view being displayed
@@ -192,18 +195,18 @@ static int next_weapon = 0;
 
 static const struct
 {
-	weapontype_t weapon;
-	weapontype_t weapon_num;
+	WeaponType weapon;
+	WeaponType weapon_num;
 } weapon_order_table[] = {
-	{wp_fist, wp_fist},
-	{wp_chainsaw, wp_fist},
-	{wp_pistol, wp_pistol},
-	{wp_shotgun, wp_shotgun},
-	{wp_supershotgun, wp_shotgun},
-	{wp_chaingun, wp_chaingun},
-	{wp_missile, wp_missile},
-	{wp_plasma, wp_plasma},
-	{wp_bfg, wp_bfg}
+	{WeaponType::Fist, WeaponType::Fist},
+	{WeaponType::Chainsaw, WeaponType::Fist},
+	{WeaponType::Pistol, WeaponType::Pistol},
+	{WeaponType::Shotgun, WeaponType::Shotgun},
+	{WeaponType::Supershotgun, WeaponType::Shotgun},
+	{WeaponType::Chaingun, WeaponType::Chaingun},
+	{WeaponType::Missile, WeaponType::Missile},
+	{WeaponType::Plasma, WeaponType::Plasma},
+	{WeaponType::Bfg, WeaponType::Bfg}
 };
 
 // HERETIC_TODO: dynamically set these
@@ -237,7 +240,7 @@ static int left_analog_x;
 static int left_analog_y;
 
 // Game events info
-static buttoncode_t special_event; // Event triggered by local player, to send
+static ButtonCode special_event; // Event triggered by local player, to send
 static int savegameslot;           // Slot to load if gameaction == ga_loadgame
 char savedescription[SAVEDESCLEN]; // Description to save in savegame if gameaction == ga_savegame
 
@@ -268,24 +271,24 @@ extern "C" void G_DoTeleportNewMap();
 static void Hexen_G_DoReborn(int playernum);
 // end hexen
 
-typedef enum
+enum struct DoubleCarry : int32_t
 {
-	carry_vertmouse,
-	carry_mousex,
-	carry_mousey,
-	NUMDOUBLECARRY
-} double_carry_t;
+	VertMouse,
+	MouseX,
+	MouseY,
+	Count
+};
 
-static double double_carry[NUMDOUBLECARRY];
+static std::array<double, std::to_underlying(DoubleCarry::Count)> double_carry;
 
-static int G_CarryDouble(double_carry_t c, double value)
+static int G_CarryDouble(DoubleCarry c, double value)
 {
 	int truncated_result;
 	double true_result;
 
-	true_result = double_carry[c] + value;
+	true_result = double_carry[std::to_underlying(c)] + value;
 	truncated_result = (int)true_result;
-	double_carry[c] = true_result - truncated_result;
+	double_carry[std::to_underlying(c)] = true_result - truncated_result;
 
 	return truncated_result;
 }
@@ -313,7 +316,7 @@ void G_SetSpeed(dboolean reset)
 	dsda_pclass_t* player_class;
 	static dsda_pclass_t* last_player_class = nullptr;
 
-	player_class = &pclass[players[consoleplayer].pclass];
+	player_class = &pclass[std::to_underlying(players[consoleplayer].pclass)];
 
 	if(last_player_class == player_class && !reset)
 		return;
@@ -359,31 +362,31 @@ void G_SetSpeed(dboolean reset)
 	}
 }
 
-static dboolean WeaponSelectable(weapontype_t weapon)
+static dboolean WeaponSelectable(WeaponType weapon)
 {
 	if(heretic)
 	{
-		return weapon != wp_beak && players[consoleplayer].weaponowned[weapon];
+		return weapon != WeaponType::Beak && players[consoleplayer].weaponowned[std::to_underlying(weapon)];
 	}
 	else if(hexen)
 	{
-		return weapon < HEXEN_NUMWEAPONS && players[consoleplayer].weaponowned[weapon];
+		return weapon < WeaponType::HexenCount && players[consoleplayer].weaponowned[std::to_underlying(weapon)];
 	}
 
-	if(gamemode == shareware)
+	if(gamemode == GameMode::Shareware)
 	{
-		if(weapon == wp_plasma || weapon == wp_bfg)
+		if(weapon == WeaponType::Plasma || weapon == WeaponType::Bfg)
 			return false;
 	}
 
 	// Can't select the super shotgun in Doom 1.
-	if(weapon == wp_supershotgun && gamemission == doom)
+	if(weapon == WeaponType::Supershotgun && gamemission == GameMission::Doom)
 	{
 		return false;
 	}
 
 	// Can't select a weapon if we don't own it.
-	if(!players[consoleplayer].weaponowned[weapon])
+	if(!players[consoleplayer].weaponowned[std::to_underlying(weapon)])
 	{
 		return false;
 	}
@@ -391,9 +394,9 @@ static dboolean WeaponSelectable(weapontype_t weapon)
 	// Can't select the fist if we have the chainsaw, unless
 	// we also have the berserk pack.
 	if((demo_compatibility)
-		&& weapon == wp_fist
-		&& players[consoleplayer].weaponowned[wp_chainsaw]
-		&& !players[consoleplayer].powers[pw_strength])
+		&& weapon == WeaponType::Fist
+		&& players[consoleplayer].weaponowned[std::to_underlying(WeaponType::Chainsaw)]
+		&& !players[consoleplayer].powers[std::to_underlying(PowerType::Strength)])
 	{
 		return false;
 	}
@@ -401,13 +404,13 @@ static dboolean WeaponSelectable(weapontype_t weapon)
 	return true;
 }
 
-static int G_NextWeapon(int direction)
+static WeaponType G_NextWeapon(int direction)
 {
-	weapontype_t weapon;
+	WeaponType weapon;
 	int start_i, i, arrlen;
 
 	// Find index in the table.
-	if(players[consoleplayer].pendingweapon == wp_nochange)
+	if(players[consoleplayer].pendingweapon == WeaponType::Nochange)
 	{
 		weapon = players[consoleplayer].readyweapon;
 	}
@@ -446,13 +449,13 @@ extern "C" void G_UpdateMouseSensitivity()
 {
 	double horizontal_sensitivity, fine_sensitivity;
 
-	horizontal_sensitivity = dsda_IntConfig(dsda_config_mouse_sensitivity_horiz);
-	fine_sensitivity = dsda_IntConfig(dsda_config_fine_sensitivity);
+	horizontal_sensitivity = dsda_IntConfig(ConfigId::MouseSensitivityHoriz);
+	fine_sensitivity = dsda_IntConfig(ConfigId::FineSensitivity);
 
 	mouse_sensitivity_horiz = horizontal_sensitivity + fine_sensitivity / 100;
-	mouse_sensitivity_vert = dsda_IntConfig(dsda_config_mouse_sensitivity_vert);
-	mouse_sensitivity_mlook = dsda_IntConfig(dsda_config_mouse_sensitivity_mlook);
-	mouse_strafe_divisor = dsda_IntConfig(dsda_config_movement_mousestrafedivisor);
+	mouse_sensitivity_vert = dsda_IntConfig(ConfigId::MouseSensitivityVert);
+	mouse_sensitivity_mlook = dsda_IntConfig(ConfigId::MouseSensitivityMlook);
+	mouse_strafe_divisor = dsda_IntConfig(ConfigId::MovementMousestrafedivisor);
 }
 
 void G_ResetMotion()
@@ -488,10 +491,10 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 	int tspeed;
 	int forward;
 	int side;
-	int newweapon; // phares
+	WeaponType newweapon; // phares
 	dboolean strict_input;
 
-	dsda_pclass_t* player_class = &pclass[players[consoleplayer].pclass];
+	dsda_pclass_t* player_class = &pclass[std::to_underlying(players[consoleplayer].pclass)];
 
 	strict_input = dsda_StrictMode();
 
@@ -506,14 +509,14 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 		return;
 	}
 
-	strafe = dsda_InputActive(dsda_input_strafe);
+	strafe = dsda_InputActive(InputId::Strafe);
 	//e6y: the "RUN" key inverts the autorun state
-	speed = (dsda_InputActive(dsda_input_speed) ? !dsda_AutoRun() : dsda_AutoRun()); // phares
+	speed = (dsda_InputActive(InputId::Speed) ? !dsda_AutoRun() : dsda_AutoRun()); // phares
 
 	forward = side = 0;
 
 	// use two stage accelerative turning on the keyboard
-	if(dsda_InputActive(dsda_input_turnright) || dsda_InputActive(dsda_input_turnleft))
+	if(dsda_InputActive(InputId::Turnright) || dsda_InputActive(InputId::Turnleft))
 		++turnheld;
 	else
 		turnheld = 0;
@@ -524,7 +527,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 		tspeed = speed;
 
 	// turn 180 degrees in one keystroke?
-	if(dsda_InputTickActivated(dsda_input_reverse))
+	if(dsda_InputTickActivated(InputId::Reverse))
 	{
 		if(!strafe)
 		{
@@ -539,26 +542,26 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 
 	if(strafe)
 	{
-		if(dsda_InputActive(dsda_input_turnright))
+		if(dsda_InputActive(InputId::Turnright))
 			side += sidemove[speed];
-		if(dsda_InputActive(dsda_input_turnleft))
+		if(dsda_InputActive(InputId::Turnleft))
 			side -= sidemove[speed];
 	}
 	else
 	{
-		if(dsda_InputActive(dsda_input_turnright))
+		if(dsda_InputActive(InputId::Turnright))
 			cmd->angleturn -= angleturn[tspeed];
-		if(dsda_InputActive(dsda_input_turnleft))
+		if(dsda_InputActive(InputId::Turnleft))
 			cmd->angleturn += angleturn[tspeed];
 	}
 
-	if(dsda_InputActive(dsda_input_forward))
+	if(dsda_InputActive(InputId::Forward))
 		forward += forwardmove[speed];
-	if(dsda_InputActive(dsda_input_backward))
+	if(dsda_InputActive(InputId::Backward))
 		forward -= forwardmove[speed];
-	if(dsda_InputActive(dsda_input_straferight))
+	if(dsda_InputActive(InputId::Straferight))
 		side += sidemove[speed];
-	if(dsda_InputActive(dsda_input_strafeleft))
+	if(dsda_InputActive(InputId::Strafeleft))
 		side -= sidemove[speed];
 
 	if(raven)
@@ -569,7 +572,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 
 		look = arti = flyheight = 0;
 
-		if(dsda_InputActive(dsda_input_lookdown) || dsda_InputActive(dsda_input_lookup))
+		if(dsda_InputActive(InputId::Lookdown) || dsda_InputActive(InputId::Lookup))
 		{
 			++lookheld;
 		}
@@ -587,41 +590,41 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 		}
 
 		// Look up/down/center keys
-		if(dsda_InputActive(dsda_input_lookup))
+		if(dsda_InputActive(InputId::Lookup))
 		{
 			look = lspeed;
 		}
-		if(dsda_InputActive(dsda_input_lookdown))
+		if(dsda_InputActive(InputId::Lookdown))
 		{
 			look = -lspeed;
 		}
 
-		if(dsda_InputActive(dsda_input_lookcenter))
+		if(dsda_InputActive(InputId::Lookcenter))
 		{
 			look = TOCENTER;
 		}
 
 		// Fly up/down/drop keys
-		if(dsda_InputActive(dsda_input_flyup))
+		if(dsda_InputActive(InputId::Flyup))
 		{
 			flyheight = 5; // note that the actual flyheight will be twice this
 		}
-		if(dsda_InputActive(dsda_input_flydown))
+		if(dsda_InputActive(InputId::Flydown))
 		{
 			flyheight = -5;
 		}
-		if(dsda_InputActive(dsda_input_flycenter))
+		if(dsda_InputActive(InputId::Flycenter))
 		{
 			flyheight = TOCENTER;
 			look = TOCENTER;
 		}
 
 		// Use artifact key
-		if(dsda_InputTickActivated(dsda_input_use_artifact))
+		if(dsda_InputTickActivated(InputId::UseArtifact))
 		{
 			if(inventory)
 			{
-				players[consoleplayer].readyArtifact = static_cast<artitype_t>(players[consoleplayer].inventory[inv_ptr].type);
+				players[consoleplayer].readyArtifact = static_cast<ArtiType>(players[consoleplayer].inventory[inv_ptr].type);
 				inventory = false;
 				cmd->arti = 0;
 			}
@@ -635,7 +638,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 		{
 			extern int mn_SuicideConsole;
 
-			if(dsda_InputActive(dsda_input_jump))
+			if(dsda_InputActive(InputId::Jump))
 			{
 				cmd->arti |= AFLAG_JUMP;
 			}
@@ -648,118 +651,118 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 
 			if(!cmd->arti)
 			{
-				if(dsda_InputTickActivated(dsda_input_arti_ring))
+				if(dsda_InputTickActivated(InputId::ArtiRing))
 				{
-					cmd->arti = hexen_arti_invulnerability;
+					cmd->arti = std::to_underlying(ArtiType::HexenInvulnerability);
 				}
-				else if(dsda_InputTickActivated(dsda_input_arti_quartz) &&
+				else if(dsda_InputTickActivated(InputId::ArtiQuartz) &&
 					players[consoleplayer].mo &&
 					players[consoleplayer].mo->health < MAXHEALTH)
 				{
-					cmd->arti = hexen_arti_health;
+					cmd->arti = std::to_underlying(ArtiType::HexenHealth);
 				}
-				else if(dsda_InputTickActivated(dsda_input_arti_urn))
+				else if(dsda_InputTickActivated(InputId::ArtiUrn))
 				{
-					cmd->arti = hexen_arti_superhealth;
+					cmd->arti = std::to_underlying(ArtiType::HexenSuperhealth);
 				}
-				else if(dsda_InputTickActivated(dsda_input_hexen_arti_incant))
+				else if(dsda_InputTickActivated(InputId::HexenArtiIncant))
 				{
-					cmd->arti = hexen_arti_healingradius;
+					cmd->arti = std::to_underlying(ArtiType::HexenHealingradius);
 				}
-				else if(dsda_InputTickActivated(dsda_input_hexen_arti_summon))
+				else if(dsda_InputTickActivated(InputId::HexenArtiSummon))
 				{
-					cmd->arti = hexen_arti_summon;
+					cmd->arti = std::to_underlying(ArtiType::HexenSummon);
 				}
-				else if(dsda_InputTickActivated(dsda_input_arti_torch))
+				else if(dsda_InputTickActivated(InputId::ArtiTorch))
 				{
-					cmd->arti = hexen_arti_torch;
+					cmd->arti = std::to_underlying(ArtiType::HexenTorch);
 				}
-				else if(dsda_InputTickActivated(dsda_input_arti_morph))
+				else if(dsda_InputTickActivated(InputId::ArtiMorph))
 				{
-					cmd->arti = hexen_arti_egg;
+					cmd->arti = std::to_underlying(ArtiType::HexenEgg);
 				}
-				else if(dsda_InputTickActivated(dsda_input_arti_wings))
+				else if(dsda_InputTickActivated(InputId::ArtiWings))
 				{
-					cmd->arti = hexen_arti_fly;
+					cmd->arti = std::to_underlying(ArtiType::HexenFly);
 				}
-				else if(dsda_InputTickActivated(dsda_input_hexen_arti_disk))
+				else if(dsda_InputTickActivated(InputId::HexenArtiDisk))
 				{
-					cmd->arti = hexen_arti_blastradius;
+					cmd->arti = std::to_underlying(ArtiType::HexenBlastradius);
 				}
-				else if(dsda_InputTickActivated(dsda_input_hexen_arti_flechette))
+				else if(dsda_InputTickActivated(InputId::HexenArtiFlechette))
 				{
-					cmd->arti = hexen_arti_poisonbag;
+					cmd->arti = std::to_underlying(ArtiType::HexenPoisonbag);
 				}
-				else if(dsda_InputTickActivated(dsda_input_hexen_arti_banishment))
+				else if(dsda_InputTickActivated(InputId::HexenArtiBanishment))
 				{
-					cmd->arti = hexen_arti_teleportother;
+					cmd->arti = std::to_underlying(ArtiType::HexenTeleportother);
 				}
-				else if(dsda_InputTickActivated(dsda_input_hexen_arti_boots))
+				else if(dsda_InputTickActivated(InputId::HexenArtiBoots))
 				{
-					cmd->arti = hexen_arti_speed;
+					cmd->arti = std::to_underlying(ArtiType::HexenSpeed);
 				}
-				else if(dsda_InputTickActivated(dsda_input_hexen_arti_krater))
+				else if(dsda_InputTickActivated(InputId::HexenArtiKrater))
 				{
-					cmd->arti = hexen_arti_boostmana;
+					cmd->arti = std::to_underlying(ArtiType::HexenBoostmana);
 				}
-				else if(dsda_InputTickActivated(dsda_input_hexen_arti_bracers))
+				else if(dsda_InputTickActivated(InputId::HexenArtiBracers))
 				{
-					cmd->arti = hexen_arti_boostarmor;
+					cmd->arti = std::to_underlying(ArtiType::HexenBoostarmor);
 				}
-				else if(dsda_InputTickActivated(dsda_input_arti_chaosdevice))
+				else if(dsda_InputTickActivated(InputId::ArtiChaosdevice))
 				{
-					cmd->arti = hexen_arti_teleport;
+					cmd->arti = std::to_underlying(ArtiType::HexenTeleport);
 				}
 			}
 		}
 		else
 		{
-			if(dsda_InputTickActivated(dsda_input_arti_tome) && !cmd->arti
-				&& !players[consoleplayer].powers[pw_weaponlevel2])
+			if(dsda_InputTickActivated(InputId::ArtiTome) && !cmd->arti
+				&& !players[consoleplayer].powers[std::to_underlying(PowerType::WeaponLevel2)])
 			{
-				cmd->arti = arti_tomeofpower;
+				cmd->arti = std::to_underlying(ArtiType::TomeOfPower);
 			}
-			else if(dsda_InputTickActivated(dsda_input_arti_quartz) && !cmd->arti &&
+			else if(dsda_InputTickActivated(InputId::ArtiQuartz) && !cmd->arti &&
 				players[consoleplayer].mo &&
 				players[consoleplayer].mo->health < MAXHEALTH)
 			{
-				cmd->arti = arti_health;
+				cmd->arti = std::to_underlying(ArtiType::Health);
 			}
-			else if(dsda_InputTickActivated(dsda_input_arti_urn) && !cmd->arti)
+			else if(dsda_InputTickActivated(InputId::ArtiUrn) && !cmd->arti)
 			{
-				cmd->arti = arti_superhealth;
+				cmd->arti = std::to_underlying(ArtiType::SuperHealth);
 			}
-			else if(dsda_InputTickActivated(dsda_input_arti_bomb) && !cmd->arti)
+			else if(dsda_InputTickActivated(InputId::ArtiBomb) && !cmd->arti)
 			{
-				cmd->arti = arti_firebomb;
+				cmd->arti = std::to_underlying(ArtiType::Firebomb);
 			}
-			else if(dsda_InputTickActivated(dsda_input_arti_ring) && !cmd->arti)
+			else if(dsda_InputTickActivated(InputId::ArtiRing) && !cmd->arti)
 			{
-				cmd->arti = arti_invulnerability;
+				cmd->arti = std::to_underlying(ArtiType::Invulnerability);
 			}
-			else if(dsda_InputTickActivated(dsda_input_arti_chaosdevice) && !cmd->arti)
+			else if(dsda_InputTickActivated(InputId::ArtiChaosdevice) && !cmd->arti)
 			{
-				cmd->arti = arti_teleport;
+				cmd->arti = std::to_underlying(ArtiType::Teleport);
 			}
-			else if(dsda_InputTickActivated(dsda_input_arti_shadowsphere) && !cmd->arti)
+			else if(dsda_InputTickActivated(InputId::ArtiShadowsphere) && !cmd->arti)
 			{
-				cmd->arti = arti_invisibility;
+				cmd->arti = std::to_underlying(ArtiType::Invisibility);
 			}
-			else if(dsda_InputTickActivated(dsda_input_arti_wings) && !cmd->arti)
+			else if(dsda_InputTickActivated(InputId::ArtiWings) && !cmd->arti)
 			{
-				cmd->arti = arti_fly;
+				cmd->arti = std::to_underlying(ArtiType::Fly);
 			}
-			else if(dsda_InputTickActivated(dsda_input_arti_torch) && !cmd->arti)
+			else if(dsda_InputTickActivated(InputId::ArtiTorch) && !cmd->arti)
 			{
-				cmd->arti = arti_torch;
+				cmd->arti = std::to_underlying(ArtiType::Torch);
 			}
-			else if(dsda_InputTickActivated(dsda_input_arti_morph) && !cmd->arti)
+			else if(dsda_InputTickActivated(InputId::ArtiMorph) && !cmd->arti)
 			{
-				cmd->arti = arti_egg;
+				cmd->arti = std::to_underlying(ArtiType::Egg);
 			}
 		}
 
-		if(players[consoleplayer].playerstate == PST_LIVE && !dsda_FreeAim())
+		if(players[consoleplayer].playerstate == PlayerState::Live && !dsda_FreeAim())
 		{
 			if(look < 0)
 			{
@@ -776,7 +779,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 
 	if(dsda_AllowJumping())
 	{
-		if(!hexen && dsda_InputActive(dsda_input_jump))
+		if(!hexen && dsda_InputActive(InputId::Jump))
 		{
 			dsda_QueueExCmdJump();
 		}
@@ -808,12 +811,12 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 		}
 	}
 
-	if(dsda_InputActive(dsda_input_fire))
-		cmd->buttons |= BT_ATTACK;
+	if(dsda_InputActive(InputId::Fire))
+		cmd->buttons |= ButtonCode::Attack;
 
-	if(dsda_InputActive(dsda_input_use) || dsda_InputTickActivated(dsda_input_use))
+	if(dsda_InputActive(InputId::Use) || dsda_InputTickActivated(InputId::Use))
 	{
-		cmd->buttons |= BT_USE;
+		cmd->buttons |= ButtonCode::Use;
 		// clear double clicks if hit use button
 		dclicks = 0;
 	}
@@ -852,11 +855,11 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 						) &&
 						!done_autoswitch
 					) || (
-						cmd->buttons & BT_ATTACK &&
-						players[consoleplayer].pendingweapon == wp_nochange
+						(cmd->buttons & ButtonCode::Attack) != ButtonCode{} &&
+						players[consoleplayer].pendingweapon == WeaponType::Nochange
 					)
 				)
-			) || (!hexen && dsda_InputActive(dsda_input_toggleweapon))
+			) || (!hexen && dsda_InputActive(InputId::Toggleweapon))
 		)
 		{
 			done_autoswitch = true;
@@ -873,41 +876,41 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 			else if(hexen)
 			{
 				newweapon =
-					dsda_InputActive(dsda_input_weapon1)
-					? wp_first
+					dsda_InputActive(InputId::Weapon1)
+					? WeaponType::First
 					: // killough 5/2/98: reformatted
-					dsda_InputActive(dsda_input_weapon2)
-					? wp_second
-					: dsda_InputActive(dsda_input_weapon3)
-					? wp_third
-					: dsda_InputActive(dsda_input_weapon4)
-					? wp_fourth
-					: wp_nochange;
+					dsda_InputActive(InputId::Weapon2)
+					? WeaponType::Second
+					: dsda_InputActive(InputId::Weapon3)
+					? WeaponType::Third
+					: dsda_InputActive(InputId::Weapon4)
+					? WeaponType::Fourth
+					: WeaponType::Nochange;
 			}
 			else
 			{
 				// HERETIC_TODO: fix this
 				newweapon =
-					dsda_InputTickActivated(dsda_input_weapon1)
-					? wp_fist
+					dsda_InputTickActivated(InputId::Weapon1)
+					? WeaponType::Fist
 					: // killough 5/2/98: reformatted
-					dsda_InputTickActivated(dsda_input_weapon2)
-					? wp_pistol
-					: dsda_InputTickActivated(dsda_input_weapon3)
-					? wp_shotgun
-					: dsda_InputTickActivated(dsda_input_weapon4)
-					? wp_chaingun
-					: dsda_InputTickActivated(dsda_input_weapon5)
-					? wp_missile
-					: dsda_InputTickActivated(dsda_input_weapon6) && gamemode != shareware
-					? wp_plasma
-					: dsda_InputTickActivated(dsda_input_weapon7) && gamemode != shareware
-					? wp_bfg
-					: dsda_InputTickActivated(dsda_input_weapon8)
-					? wp_chainsaw
-					: (!demo_compatibility && dsda_InputTickActivated(dsda_input_weapon9) && gamemode == commercial)
-					? wp_supershotgun
-					: wp_nochange;
+					dsda_InputTickActivated(InputId::Weapon2)
+					? WeaponType::Pistol
+					: dsda_InputTickActivated(InputId::Weapon3)
+					? WeaponType::Shotgun
+					: dsda_InputTickActivated(InputId::Weapon4)
+					? WeaponType::Chaingun
+					: dsda_InputTickActivated(InputId::Weapon5)
+					? WeaponType::Missile
+					: dsda_InputTickActivated(InputId::Weapon6) && gamemode != GameMode::Shareware
+					? WeaponType::Plasma
+					: dsda_InputTickActivated(InputId::Weapon7) && gamemode != GameMode::Shareware
+					? WeaponType::Bfg
+					: dsda_InputTickActivated(InputId::Weapon8)
+					? WeaponType::Chainsaw
+					: (!demo_compatibility && dsda_InputTickActivated(InputId::Weapon9) && gamemode == GameMode::Commercial)
+					? WeaponType::Supershotgun
+					: WeaponType::Nochange;
 			}
 
 			// killough 3/22/98: For network and demo consistency with the
@@ -930,51 +933,51 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 				// the fist is already in use, or the player does not
 				// have the berserker strength.
 
-				if(newweapon == wp_fist && player->weaponowned[wp_chainsaw] &&
-					player->readyweapon != wp_chainsaw &&
-					(player->readyweapon == wp_fist ||
-						!player->powers[pw_strength] ||
-						P_WeaponPreferred(wp_chainsaw, wp_fist)))
-					newweapon = wp_chainsaw;
+				if(newweapon == WeaponType::Fist && player->weaponowned[std::to_underlying(WeaponType::Chainsaw)] &&
+					player->readyweapon != WeaponType::Chainsaw &&
+					(player->readyweapon == WeaponType::Fist ||
+						!player->powers[std::to_underlying(PowerType::Strength)] ||
+						P_WeaponPreferred(WeaponType::Chainsaw, WeaponType::Fist)))
+					newweapon = WeaponType::Chainsaw;
 
 				// Select SSG from '3' only if it's owned and the player
 				// does not have a shotgun, or if the shotgun is already
 				// in use, or if the SSG is not already in use and the
 				// player prefers it.
 
-				if(newweapon == wp_shotgun && gamemode == commercial &&
-					player->weaponowned[wp_supershotgun] &&
-					(!player->weaponowned[wp_shotgun] ||
-						player->readyweapon == wp_shotgun ||
-						(player->readyweapon != wp_supershotgun &&
-							P_WeaponPreferred(wp_supershotgun, wp_shotgun))))
-					newweapon = wp_supershotgun;
+				if(newweapon == WeaponType::Shotgun && gamemode == GameMode::Commercial &&
+					player->weaponowned[std::to_underlying(WeaponType::Supershotgun)] &&
+					(!player->weaponowned[std::to_underlying(WeaponType::Shotgun)] ||
+						player->readyweapon == WeaponType::Shotgun ||
+						(player->readyweapon != WeaponType::Supershotgun &&
+							P_WeaponPreferred(WeaponType::Supershotgun, WeaponType::Shotgun))))
+					newweapon = WeaponType::Supershotgun;
 			}
 		}
 	}
 
 	next_weapon = 0;
 
-	if(newweapon != wp_nochange && players[consoleplayer].chickenTics == 0)
+	if(newweapon != WeaponType::Nochange && players[consoleplayer].chickenTics == 0)
 	{
-		cmd->buttons |= BT_CHANGE;
-		cmd->buttons |= newweapon << BT_WEAPONSHIFT;
+		cmd->buttons |= ButtonCode::Change;
+		cmd->buttons |= static_cast<ButtonCode>(std::to_underlying(newweapon) << std::to_underlying(ButtonCode::WeaponShift));
 	}
 
 	// mouse
 
-	if(dsda_IntConfig(dsda_config_mouse_doubleclick_as_use))
+	if(dsda_IntConfig(ConfigId::MouseDoubleclickAsUse))
 	{
 		//e6y
 		// forward double click
-		if(dsda_InputMouseBActive(dsda_input_forward) != dclickstate && dclicktime > 1)
+		if(dsda_InputMouseBActive(InputId::Forward) != dclickstate && dclicktime > 1)
 		{
-			dclickstate = dsda_InputMouseBActive(dsda_input_forward);
+			dclickstate = dsda_InputMouseBActive(InputId::Forward);
 			if(dclickstate)
 				dclicks++;
 			if(dclicks == 2)
 			{
-				cmd->buttons |= BT_USE;
+				cmd->buttons |= ButtonCode::Use;
 				dclicks = 0;
 			}
 			else
@@ -987,7 +990,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 		}
 
 		// strafe double click
-		bstrafe = dsda_InputMouseBActive(dsda_input_strafe) || dsda_InputJoyBActive(dsda_input_strafe);
+		bstrafe = dsda_InputMouseBActive(InputId::Strafe) || dsda_InputJoyBActive(InputId::Strafe);
 		if(bstrafe != dclickstate2 && dclicktime2 > 1)
 		{
 			dclickstate2 = bstrafe;
@@ -995,7 +998,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 				dclicks2++;
 			if(dclicks2 == 2)
 			{
-				cmd->buttons |= BT_USE;
+				cmd->buttons |= ButtonCode::Use;
 				dclicks2 = 0;
 			}
 			else
@@ -1036,7 +1039,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 
 	G_ConvertAnalogMotion(speed, &forward, &side);
 
-	if(!walkcamera.type || menuactive) //e6y
+	if(!walkcamera.type || menuactive != MenuActive::Inactive) //e6y
 		G_ResetMotion();
 
 	if(forward > MAXPLMOVE)
@@ -1059,7 +1062,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 			else if(side < -player_class->forwardmove[0])
 				side = -player_class->forwardmove[0];
 		}
-		else if(!dsda_IntConfig(dsda_config_movement_strafe50onturns) && !strafe && cmd->angleturn)
+		else if(!dsda_IntConfig(ConfigId::MovementStrafe50onturns) && !strafe && cmd->angleturn)
 		{
 			if(side > player_class->sidemove[1])
 				side = player_class->sidemove[1];
@@ -1068,7 +1071,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 		}
 	}
 
-	if(players[consoleplayer].powers[pw_speed] && !players[consoleplayer].morphTics)
+	if(players[consoleplayer].powers[std::to_underlying(PowerType::Speed)] && !players[consoleplayer].morphTics)
 	{
 		// Adjust for a player with a speed artifact
 		forward = (3 * forward) >> 1;
@@ -1085,7 +1088,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 		// Chocolate Doom Mouse Behaviour
 		// Don't discard mouse delta even if value is too small to
 		// turn the player this tic
-		if(dsda_IntConfig(dsda_config_mouse_carrytics))
+		if(dsda_IntConfig(ConfigId::MouseCarrytics))
 		{
 			static signed short carry = 0;
 			signed short desired_angleturn = cmd->angleturn + carry;
@@ -1097,16 +1100,16 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 	}
 
 	upmove = 0;
-	if(dsda_InputActive(dsda_input_flyup))
+	if(dsda_InputActive(InputId::Flyup))
 		upmove += flyspeed[speed];
-	if(dsda_InputActive(dsda_input_flydown))
+	if(dsda_InputActive(InputId::Flydown))
 		upmove -= flyspeed[speed];
 
 	// CPhipps - special events (game new/load/save/pause)
-	if(special_event & BT_SPECIAL)
+	if((special_event & ButtonCode::Special) != ButtonCode{})
 	{
-		cmd->buttons = special_event;
-		special_event = static_cast<buttoncode_t>(0);
+		cmd->buttons = static_cast<ButtonCode>(special_event);
+		special_event = static_cast<ButtonCode>(0);
 	}
 
 	dsda_PopExCmdQueue(cmd);
@@ -1117,10 +1120,10 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 		{
 			dsda_arg_t* arg;
 
-			arg = dsda_Arg(dsda_arg_first_input);
+			arg = dsda_Arg(ArgId::FirstInput);
 			if(arg->found)
 			{
-				dsda_TrackFeature(uf_buildzero);
+				dsda_TrackFeature(FeatureFlag::Buildzero);
 
 				cmd->forwardmove = (signed char)arg->value.v_int_array[0];
 				cmd->sidemove = (signed char)arg->value.v_int_array[1];
@@ -1143,21 +1146,21 @@ static void G_SetInitialInventory(player_t* p)
 
 	if(hexen)
 	{
-		p->readyweapon = p->pendingweapon = wp_first;
-		p->weaponowned[wp_first] = true;
+		p->readyweapon = p->pendingweapon = WeaponType::First;
+		p->weaponowned[std::to_underlying(WeaponType::First)] = true;
 	}
 	else
 	{
-		p->readyweapon = p->pendingweapon = static_cast<weapontype_t>(g_wp_pistol);
+		p->readyweapon = p->pendingweapon = static_cast<WeaponType>(g_wp_pistol);
 		p->weaponowned[g_wp_fist] = true;
 		p->weaponowned[g_wp_pistol] = true;
 		if(heretic)
-			p->ammo[am_goldwand] = 50;
+			p->ammo[std::to_underlying(AmmoType::GoldWand)] = 50;
 		else
-			p->ammo[am_clip] = initial_bullets; // Ty 03/12/98 - use dehacked values
+			p->ammo[std::to_underlying(AmmoType::Clip)] = initial_bullets; // Ty 03/12/98 - use dehacked values
 	}
 
-	for(i = 0; i < NUMAMMO; i++)
+	for(i = 0; i < std::to_underlying(AmmoType::Count); i++)
 		p->maxammo[i] = maxammo[i];
 }
 
@@ -1209,16 +1212,16 @@ static void G_DoLoadLevel()
 	if(!demo_compatibility && !mbf_features) // killough 9/29/98
 		boom_basetic = gametic;
 
-	if(wipegamestate == GS_LEVEL)
-		wipegamestate = static_cast<gamestate_t>(-1); // force a wipe
+	if(wipegamestate == GameState::Level)
+		wipegamestate = static_cast<GameState>(-1); // force a wipe
 
-	gamestate = GS_LEVEL;
+	gamestate = GameState::Level;
 
 	for(i = 0; i < g_maxplayers; i++)
 	{
 		// TODO: possible "reset inventory/health" mapinfo flag
-		if(playeringame[i] && players[i].playerstate == PST_DEAD)
-			players[i].playerstate = PST_REBORN;
+		if(playeringame[i] && players[i].playerstate == PlayerState::Dead)
+			players[i].playerstate = PlayerState::Reborn;
 		memset(players[i].frags, 0, sizeof(players[i].frags));
 	}
 
@@ -1239,13 +1242,13 @@ static void G_DoLoadLevel()
 	P_SetupLevel(gameepisode, gamemap, gameskill);
 	if(!demoplayback)                  // Don't switch views if playing a demo
 		displayplayer = consoleplayer; // view the guy you are playing
-	gameaction = ga_nothing;
+	gameaction = GameAction::Nothing;
 
 	// clear cmd building stuff
 	dsda_InputFlush();
 	G_ResetMotion();
 	mlooky = 0; //e6y
-	special_event = static_cast<buttoncode_t>(0);
+	special_event = static_cast<ButtonCode>(0);
 	dsda_ResetPauseMode();
 	dsda_ResetExCmdQueue();
 
@@ -1290,7 +1293,7 @@ static void G_DoLoadLevel()
 dboolean G_Responder(event_t* ev)
 {
 	if(
-		gamestate == GS_LEVEL && (
+		gamestate == GameState::Level && (
 			HU_Responder(ev) ||
 			ST_Responder(ev) ||
 			AM_Responder(ev)
@@ -1298,8 +1301,8 @@ dboolean G_Responder(event_t* ev)
 	)
 		return true;
 
-	if(dsda_IntConfig(dsda_config_playback_mouse_controls) &&
-		demoplayback && !timingdemo && dsda_InputActivated(dsda_input_fire))
+	if(dsda_IntConfig(ConfigId::PlaybackMouseControls) &&
+		demoplayback && !timingdemo && dsda_InputActivated(InputId::Fire))
 	{
 		int x;
 
@@ -1314,9 +1317,9 @@ dboolean G_Responder(event_t* ev)
 	// killough 2/22/98: even during DM demo
 	//
 	// killough 11/98: don't autorepeat spy mode switch
-	if(dsda_InputActivated(dsda_input_spy) &&
+	if(dsda_InputActivated(InputId::Spy) &&
 		netgame && (demoplayback || !deathmatch) &&
-		gamestate == GS_LEVEL)
+		gamestate == GameState::Level)
 	{
 		do // spy mode
 			if(++displayplayer >= g_maxplayers)
@@ -1338,10 +1341,10 @@ dboolean G_Responder(event_t* ev)
 	// killough 9/29/98: make any key pop up menu regardless of
 	// which kind of demo, and allow other events during playback
 
-	if(gameaction == ga_nothing && (demoplayback || gamestate == GS_DEMOSCREEN))
+	if(gameaction == GameAction::Nothing && (demoplayback || gamestate == GameState::Demoscreen))
 	{
 		// killough 9/29/98: allow user to pause demos during playback
-		if(dsda_InputActivated(dsda_input_pause))
+		if(dsda_InputActivated(InputId::Pause))
 		{
 			dsda_TogglePauseMode(PAUSE_PLAYBACK);
 			if(dsda_Paused())
@@ -1357,27 +1360,27 @@ dboolean G_Responder(event_t* ev)
 
 	// If the next/previous weapon keys are pressed, set the next_weapon
 	// variable to change weapons when the next ticcmd is generated.
-	if(dsda_InputActivated(dsda_input_prevweapon))
+	if(dsda_InputActivated(InputId::Prevweapon))
 	{
 		next_weapon = -1;
 	}
-	else if(dsda_InputActivated(dsda_input_nextweapon))
+	else if(dsda_InputActivated(InputId::Nextweapon))
 	{
 		next_weapon = 1;
 	}
 
-	if(dsda_InputActivated(dsda_input_invleft))
+	if(dsda_InputActivated(InputId::Invleft))
 	{
 		return InventoryMoveLeft();
 	}
-	if(dsda_InputActivated(dsda_input_invright))
+	if(dsda_InputActivated(InputId::Invright))
 	{
 		return InventoryMoveRight();
 	}
 
-	if(dsda_InputActivated(dsda_input_pause))
+	if(dsda_InputActivated(InputId::Pause))
 	{
-		special_event = static_cast<buttoncode_t>(BT_SPECIAL | (BT_PAUSE & BT_SPECIALMASK));
+		special_event = static_cast<ButtonCode>(std::to_underlying(ButtonCode::Special) | (std::to_underlying(ButtonCode::Pause) & std::to_underlying(ButtonCode::SpecialMask)));
 		return true;
 	}
 
@@ -1386,48 +1389,48 @@ dboolean G_Responder(event_t* ev)
 
 	switch(ev->type)
 	{
-		case ev_keydown:
+		case EventType::KeyDown:
 			return true; // eat key down events
 
-		case ev_mousemotion:
+		case EventType::MouseMotion:
 		{
 			double value;
 
 			dsda_WatchMouseEvent();
 
 			value = mouse_sensitivity_horiz * AccelerateMouse(ev->data1.i);
-			mousex += G_CarryDouble(carry_mousex, value);
+			mousex += G_CarryDouble(DoubleCarry::MouseX, value);
 			if(dsda_MouseLook())
 			{
 				value = mouse_sensitivity_mlook * AccelerateMouse(ev->data2.i);
-				if(dsda_IntConfig(dsda_config_movement_mouseinvert))
-					mlooky += G_CarryDouble(carry_mousey, value);
+				if(dsda_IntConfig(ConfigId::MovementMouseinvert))
+					mlooky += G_CarryDouble(DoubleCarry::MouseY, value);
 				else
-					mlooky -= G_CarryDouble(carry_mousey, value);
+					mlooky -= G_CarryDouble(DoubleCarry::MouseY, value);
 			}
 			else
 			{
 				value = mouse_sensitivity_vert * AccelerateMouse(ev->data2.i) / 8;
-				mousey += G_CarryDouble(carry_vertmouse, value);
+				mousey += G_CarryDouble(DoubleCarry::VertMouse, value);
 			}
 
 			return true; // eat events
 		}
 
-		case ev_move_analog:
+		case EventType::MoveAnalog:
 			dsda_WatchGameControllerEvent();
 
 			left_analog_x = dsda_StrictMode() ? lroundf(ev->data1.f * 0.5f) * 2 : ev->data1.f;
 			left_analog_y = ev->data2.f;
 			return true; // eat events
 
-		case ev_look_analog:
+		case EventType::LookAnalog:
 			dsda_WatchGameControllerEvent();
 
 			mousex += AccelerateAnalog(ev->data1.f);
 			if(dsda_MouseLook())
 			{
-				if(dsda_IntConfig(dsda_config_invert_analog_look))
+				if(dsda_IntConfig(ConfigId::InvertAnalogLook))
 					mlooky += AccelerateAnalog(ev->data2.f);
 				else
 					mlooky -= AccelerateAnalog(ev->data2.f);
@@ -1451,7 +1454,7 @@ void G_Ticker()
 	int entry_leveltime;
 	int pause_mask;
 	dboolean advance_frame = false;
-	static gamestate_t prevgamestate;
+	static GameState prevgamestate;
 
 	entry_leveltime = leveltime;
 
@@ -1464,56 +1467,56 @@ void G_Ticker()
 	P_MapStart();
 	// do player reborns if needed
 	for(i = 0; i < g_maxplayers; i++)
-		if(playeringame[i] && players[i].playerstate == PST_REBORN)
+		if(playeringame[i] && players[i].playerstate == PlayerState::Reborn)
 			G_DoReborn(i);
 	P_MapEnd();
 
 	// do things to change the game state
-	while(gameaction != ga_nothing)
+	while(gameaction != GameAction::Nothing)
 	{
 		switch(gameaction)
 		{
-			case ga_loadlevel:
+			case GameAction::LoadLevel:
 				// force players to be initialized on level reload
 				if(!hexen)
 					for(i = 0; i < g_maxplayers; i++)
-						players[i].playerstate = PST_REBORN;
+						players[i].playerstate = PlayerState::Reborn;
 				G_DoLoadLevel();
 				break;
-			case ga_newgame:
+			case GameAction::NewGame:
 				G_DoNewGame();
 				break;
-			case ga_loadgame:
+			case GameAction::LoadGame:
 				G_DoLoadGame();
 				break;
-			case ga_playdemo:
+			case GameAction::PlayDemo:
 				G_DoPlayDemo();
 				break;
-			case ga_completed:
+			case GameAction::Completed:
 				G_DoCompleted();
 				break;
-			case ga_victory:
+			case GameAction::Victory:
 				F_StartFinale();
 				break;
-			case ga_worlddone:
+			case GameAction::WorldDone:
 				G_DoWorldDone();
 				break;
-			case ga_leavemap:
+			case GameAction::LeaveMap:
 				G_DoTeleportNewMap();
 				break;
-			case ga_nothing:
+			case GameAction::Nothing:
 				break;
 		}
 	}
 
 	dsda_EvaluateSkipModeGTicker();
 
-	if(!dsda_SkipMode() && gamestate == GS_LEVEL)
+	if(!dsda_SkipMode() && gamestate == GameState::Level)
 	{
 		DO_ONCE
 			dsda_arg_t* arg;
 
-			arg = dsda_Arg(dsda_arg_command);
+			arg = dsda_Arg(ArgId::Command);
 			if(arg->found)
 				dsda_InterpretConsoleCommands(arg->value.v_string, false, true);
 		END_ONCE
@@ -1532,7 +1535,7 @@ void G_Ticker()
 	}
 	else if(dsda_BuildMode() &&
 		dsda_BruteForceEnded() &&
-		dsda_Flag(dsda_arg_quit_after_brute_force))
+		dsda_Flag(ArgId::QuitAfterBruteForce))
 	{
 		I_SafeExit(0);
 	}
@@ -1591,11 +1594,11 @@ void G_Ticker()
 		{
 			if(playeringame[i])
 			{
-				if(players[i].cmd.buttons & BT_SPECIAL)
+				if((players[i].cmd.buttons & ButtonCode::Special) != ButtonCode{})
 				{
-					switch(players[i].cmd.buttons & BT_SPECIALMASK)
+					switch(ButtonSpecial(players[i].cmd.buttons))
 					{
-						case BT_PAUSE:
+						case ButtonCode::Pause:
 							dsda_TogglePauseMode(PAUSE_COMMAND);
 							if(dsda_Paused())
 								S_PauseSound();
@@ -1603,7 +1606,7 @@ void G_Ticker()
 								S_ResumeSound();
 							break;
 					}
-					if(!raven) players[i].cmd.buttons = 0;
+					if(!raven) players[i].cmd.buttons = static_cast<ButtonCode>(0);
 				}
 
 				if(dsda_AllowExCmd())
@@ -1619,7 +1622,7 @@ void G_Ticker()
 					if(ex->actions & XC_LOAD)
 					{
 						savegameslot = ex->load_slot;
-						gameaction = ga_loadgame;
+						gameaction = GameAction::LoadGame;
 						forced_loadgame = true;
 						commandline_loadgame = false;
 						load_via_cmd = true;
@@ -1638,7 +1641,7 @@ void G_Ticker()
 
 					if(ex->actions & XC_LOOK && ex->look != XC_LOOK_RESET && !dsda_MouseLook())
 					{
-						dsda_UpdateIntConfig(dsda_config_freelook, 1, false);
+						dsda_UpdateIntConfig(ConfigId::Freelook, 1, false);
 					}
 				}
 			}
@@ -1648,7 +1651,7 @@ void G_Ticker()
 		if(inventory && !(--inventoryTics))
 		{
 			players[consoleplayer].readyArtifact =
-				static_cast<artitype_t>(players[consoleplayer].inventory[inv_ptr].type);
+				static_cast<ArtiType>(players[consoleplayer].inventory[inv_ptr].type);
 			inventory = false;
 		}
 
@@ -1660,9 +1663,9 @@ void G_Ticker()
 	{
 		switch(prevgamestate)
 		{
-			case GS_LEVEL:
+			case GameState::Level:
 				break;
-			case GS_INTERMISSION:
+			case GameState::Intermission:
 				WI_End();
 			default:
 				break;
@@ -1673,13 +1676,13 @@ void G_Ticker()
 	// e6y
 	// do nothing if a pause has been pressed during playback
 	// pausing during intermission can cause desynchs without that
-	if(dsda_PausedOutsideDemo() && gamestate != GS_LEVEL)
+	if(dsda_PausedOutsideDemo() && gamestate != GameState::Level)
 		return;
 
 	// do main actions
 	switch(gamestate)
 	{
-		case GS_LEVEL:
+		case GameState::Level:
 			P_Ticker();
 			P_WalkTicker();
 			mlooky = 0;
@@ -1688,19 +1691,19 @@ void G_Ticker()
 			HU_Ticker();
 			break;
 
-		case GS_INTERMISSION:
+		case GameState::Intermission:
 			WI_Ticker();
 			break;
 
-		case GS_FINALE:
+		case GameState::Finale:
 			F_Ticker();
 			break;
 
-		case GS_DEMOSCREEN:
+		case GameState::Demoscreen:
 			D_PageTicker();
 			break;
 
-		case GS_DEFAULT:
+		case GameState::Default:
 			break;
 	}
 
@@ -1737,7 +1740,7 @@ static void G_FinishLevelBehaviour(finish_level_behaviour_t* flb, player_t* p)
 	different_cluster = (dsda_MapCluster(gamemap) != dsda_MapCluster(leave_data.map));
 
 	if(hexen && !deathmatch && !different_cluster)
-		flb->flight_carryover = p->powers[pw_flight];
+		flb->flight_carryover = p->powers[std::to_underlying(PowerType::Flight)];
 	else
 		flb->flight_carryover = 0;
 
@@ -1745,17 +1748,17 @@ static void G_FinishLevelBehaviour(finish_level_behaviour_t* flb, player_t* p)
 
 	if(heretic && !deathmatch)
 	{
-		flb->use_flight_artifact = arti_fly;
+		flb->use_flight_artifact = std::to_underlying(ArtiType::Fly);
 		flb->use_flight_count = 16;
 	}
 	else if(hexen && !deathmatch && different_cluster)
 	{
-		flb->use_flight_artifact = hexen_arti_fly;
+		flb->use_flight_artifact = std::to_underlying(ArtiType::HexenFly);
 		flb->use_flight_count = 25;
 	}
 	else
 	{
-		flb->use_flight_artifact = arti_none;
+		flb->use_flight_artifact = std::to_underlying(ArtiType::None);
 		flb->use_flight_count = 0;
 	}
 
@@ -1784,15 +1787,15 @@ static void G_PlayerFinishLevel(int player)
 		for(i = 0; i < flb.use_flight_count; i++)
 		{
 			if(hexen)
-				p->powers[pw_flight] = 0;
+				p->powers[std::to_underlying(PowerType::Flight)] = 0;
 
-			P_PlayerUseArtifact(p, static_cast<artitype_t>(flb.use_flight_artifact));
+			P_PlayerUseArtifact(p, static_cast<ArtiType>(flb.use_flight_artifact));
 		}
 	}
 
 	if(p->chickenTics || p->morphTics)
 	{
-		p->readyweapon = static_cast<weapontype_t>(p->mo->special1.i); // Restore weapon
+		p->readyweapon = static_cast<WeaponType>(p->mo->special1.i); // Restore weapon
 		p->chickenTics = 0;
 		p->morphTics = 0;
 	}
@@ -1806,7 +1809,7 @@ static void G_PlayerFinishLevel(int player)
 
 	memset(p->powers, 0, sizeof p->powers);
 	if(flb.flight_carryover)
-		p->powers[pw_flight] = flb.flight_carryover;
+		p->powers[std::to_underlying(PowerType::Flight)] = flb.flight_carryover;
 
 	if(flb.remove_cards)
 		memset(p->cards, 0, sizeof p->cards);
@@ -1849,7 +1852,7 @@ void G_ChangedPlayerColour(int pn, int cl)
 	// Change translations on existing player mobj's
 	for(i = 0; i < g_maxplayers; i++)
 	{
-		if((gamestate == GS_LEVEL) && playeringame[i] && (players[i].mo != nullptr))
+		if((gamestate == GameState::Level) && playeringame[i] && (players[i].mo != nullptr))
 		{
 			players[i].mo->flags &= ~MF_TRANSLATION;
 			players[i].mo->flags |= ((uint64_t)playernumtotrans[i]) << MF_TRANSSHIFT;
@@ -1898,7 +1901,7 @@ void G_PlayerReborn(int player)
 	players[player].pclass = PlayerClass[player];
 
 	p->usedown = p->attackdown = true; // don't do anything immediately
-	p->playerstate = PST_LIVE;
+	p->playerstate = PlayerState::Live;
 
 	G_SetInitialHealth(p);
 	G_SetInitialInventory(p);
@@ -1959,7 +1962,7 @@ static dboolean G_CheckSpot(int playernum, mapthing_t* mthing)
 		an = ((unsigned)ANG45 * (mthing->angle / 45)) >> ANGLETOFINESHIFT;
 
 		mo = P_SpawnMobj(x + 20 * finecosine[an], y + 20 * finesine[an],
-			sec->floorheight + TELEFOGHEIGHT, static_cast<mobjtype_t>(g_mt_tfog));
+			sec->floorheight + TELEFOGHEIGHT, static_cast<MobjType>(g_mt_tfog));
 
 		if(players[consoleplayer].viewz != 1)
 			S_StartMobjSound(mo, g_sfx_telept); // don't start sound on first frame
@@ -2000,7 +2003,7 @@ static dboolean G_CheckSpot(int playernum, mapthing_t* mthing)
 		xa = finecosine[an];
 		ya = finesine[an];
 
-		if(compatibility_level <= finaldoom_compatibility || compatibility_level == prboom_4_compatibility)
+		if(compatibility_level <= CompLevel::Finaldoom || compatibility_level == CompLevel::Prboom4)
 			switch(an)
 			{
 				case -4096: xa = finetangent[2048]; // finecosine[-4096]
@@ -2023,10 +2026,10 @@ static dboolean G_CheckSpot(int playernum, mapthing_t* mthing)
 				default: I_Error("G_CheckSpot: unexpected angle %d\n", an);
 			}
 
-		mo = P_SpawnMobj(x + 20 * xa, y + 20 * ya, sec->floorheight, MT_TFOG);
+		mo = P_SpawnMobj(x + 20 * xa, y + 20 * ya, sec->floorheight, MobjType::Tfog);
 
 		if(players[consoleplayer].viewz != 1)
-			S_StartMobjSound(mo, sfx_telept); // don't start sound on first frame
+			S_StartMobjSound(mo, SfxId::Telept); // don't start sound on first frame
 	}
 
 	return true;
@@ -2047,7 +2050,7 @@ void G_DeathMatchSpawnPlayer(int playernum)
 
 	for(j = 0; j < 20; j++)
 	{
-		int i = P_Random(pr_dmspawn) % selections;
+		int i = P_Random(RandomClass::Dmspawn) % selections;
 		if(G_CheckSpot(playernum, &deathmatchstarts[i]))
 		{
 			deathmatchstarts[i].type = playernum + 1;
@@ -2073,7 +2076,7 @@ void G_DoReborn(int playernum)
 
 	// TODO: possible "allow respawn" mapinfo flag
 	if(!netgame && !(skill_info.flags & SI_PLAYER_RESPAWN))
-		gameaction = ga_loadlevel; // reload the level from scratch
+		gameaction = GameAction::LoadLevel; // reload the level from scratch
 	else
 	{
 		// respawn at the start
@@ -2132,7 +2135,7 @@ dboolean secretexit;
 void G_ExitLevel(int position)
 {
 	secretexit = false;
-	gameaction = ga_completed;
+	gameaction = GameAction::Completed;
 	dsda_UpdateLeaveData(0, position, 0, 0);
 }
 
@@ -2141,11 +2144,11 @@ void G_ExitLevel(int position)
 
 void G_SecretExitLevel(int position)
 {
-	if(gamemode != commercial || haswolflevels)
+	if(gamemode != GameMode::Commercial || haswolflevels)
 		secretexit = true;
 	else
 		secretexit = false;
-	gameaction = ga_completed;
+	gameaction = GameAction::Completed;
 	dsda_UpdateLeaveData(0, position, 0, 0);
 }
 
@@ -2166,7 +2169,7 @@ void G_DoCompleted()
 		totalleveltimes += leveltime - leveltime % TICRATE;
 	++levels_completed;
 
-	gameaction = ga_nothing;
+	gameaction = GameAction::Nothing;
 
 	for(i = 0; i < g_maxplayers; i++)
 		if(playeringame[i])
@@ -2186,7 +2189,7 @@ void G_DoCompleted()
 
 	if(completed_behaviour & DC_VICTORY)
 	{
-		gameaction = ga_victory;
+		gameaction = GameAction::Victory;
 		return;
 	}
 
@@ -2210,13 +2213,13 @@ void G_DoCompleted()
 
 	wminfo.totaltimes = totalleveltimes;
 
-	gamestate = GS_INTERMISSION;
+	gamestate = GameState::Intermission;
 	automap_full = false;
 
 	// lmpwatch.pl engine-side demo testing support
 	// print "FINISHED: <mapname>" when the player exits the current map
 	if(nodrawers && (demoplayback || timingdemo))
-		lprintf(LO_INFO, "FINISHED: %s\n", dsda_MapLumpName(gameepisode, gamemap));
+		lprintf(OutputLevels::Info, "FINISHED: %s\n", dsda_MapLumpName(gameepisode, gamemap));
 
 	// TODO: tenuous "no intermission" mapinfo flag
 	// umapinfo already partially handles it, but not in a friendly way
@@ -2232,7 +2235,7 @@ void G_WorldDone()
 {
 	int done_behaviour;
 
-	gameaction = ga_worlddone;
+	gameaction = GameAction::WorldDone;
 
 	if(secretexit)
 		players[consoleplayer].didsecret = true;
@@ -2241,7 +2244,7 @@ void G_WorldDone()
 
 	if(done_behaviour & WD_VICTORY)
 	{
-		if(dsda_Flag(dsda_arg_chain_episodes))
+		if(dsda_Flag(ArgId::ChainEpisodes))
 		{
 			int epi, map;
 
@@ -2253,7 +2256,7 @@ void G_WorldDone()
 
 				for(i = 0; i < g_maxplayers; ++i)
 					if(playeringame[i])
-						players[i].playerstate = PST_DEAD;
+						players[i].playerstate = PlayerState::Dead;
 
 				wminfo.nextep = epi - 1;
 				wminfo.next = map - 1;
@@ -2262,7 +2265,7 @@ void G_WorldDone()
 			}
 		}
 
-		gameaction = ga_victory;
+		gameaction = GameAction::Victory;
 
 		return;
 	}
@@ -2278,10 +2281,10 @@ void G_WorldDone()
 void G_DoWorldDone()
 {
 	idmusnum = -1; //jff 3/17/98 allow new level's music to be loaded
-	gamestate = GS_LEVEL;
+	gamestate = GameState::Level;
 	dsda_UpdateGameMap(wminfo.nextep + 1, wminfo.next + 1);
 	G_DoLoadLevel();
-	gameaction = ga_nothing;
+	gameaction = GameAction::Nothing;
 	AM_clearMarks(); //jff 4/12/98 clear any marks on the automap
 	dsda_EvaluateSkipModeDoWorldDone();
 }
@@ -2320,11 +2323,11 @@ static uint64_t G_Signature()
 	if(!computed)
 	{
 		computed = true;
-		if(gamemode == commercial)
+		if(gamemode == GameMode::Commercial)
 			for(map = haswolflevels ? 32 : 30; map; map--)
 				s = G_UpdateSignature(s, dsda_MapLumpName(1, map));
 		else
-			for(episode = gamemode == retail ? 4 : gamemode == shareware ? 1 : 3; episode; episode--)
+			for(episode = gamemode == GameMode::Retail ? 4 : gamemode == GameMode::Shareware ? 1 : 3; episode; episode--)
 				for(map = 9; map; map--)
 					s = G_UpdateSignature(s, dsda_MapLumpName(episode, map));
 	}
@@ -2339,7 +2342,7 @@ void G_ForcedLoadGame()
 {
 	// CPhipps - net loadgames are always forced, so we only reach here
 	//  in single player
-	gameaction = ga_loadgame;
+	gameaction = GameAction::LoadGame;
 	forced_loadgame = true;
 }
 
@@ -2365,7 +2368,7 @@ void G_LoadGame(int slot, dboolean via_commandline)
 		netgame = false;
 	}
 
-	gameaction = ga_loadgame;
+	gameaction = GameAction::LoadGame;
 	savegameslot = slot;
 	commandline_loadgame = via_commandline;
 	load_via_cmd = false;
@@ -2382,11 +2385,11 @@ static void G_LoadGameErr(const char* msg)
 	if(commandline_loadgame)
 	{
 		D_StartTitle();
-		gamestate = GS_DEMOSCREEN;
+		gamestate = GameState::Demoscreen;
 	}
 }
 
-const char* comp_lev_str[MAX_COMPATIBILITY_LEVEL] =
+const char* comp_lev_str[std::to_underlying(CompLevel::Max)] =
 {
 	"Doom v1.2", "Doom v1.666", "Doom/Doom2 v1.9", "Ultimate Doom/Doom95", "Final Doom",
 	"early DosDoom", "TASDoom", "\"boom compatibility\"", "boom v2.01", "boom v2.02", "lxdoom v1.3.2+",
@@ -2445,7 +2448,7 @@ extern "C" void G_AfterLoad()
 
 	if(raven)
 	{
-		players[consoleplayer].readyArtifact = static_cast<artitype_t>(players[consoleplayer].inventory[inv_ptr].type);
+		players[consoleplayer].readyArtifact = static_cast<ArtiType>(players[consoleplayer].inventory[inv_ptr].type);
 	}
 
 	if(setsizeneeded)
@@ -2475,7 +2478,7 @@ void G_DoLoadGame()
 		deathmatch = false;
 	}
 
-	gameaction = ga_nothing;
+	gameaction = GameAction::Nothing;
 
 	length = M_ReadFile(name, &savebuffer);
 	if(length <= 0)
@@ -2558,7 +2561,7 @@ static void G_DoSaveGame(dboolean via_cmd)
 	const char* maplump;
 	int time, ttime;
 
-	gameaction = ga_nothing; // cph - cancel savegame at top of this function,
+	gameaction = GameAction::Nothing; // cph - cancel savegame at top of this function,
 	// in case later problems cause a premature exit
 
 	dsda_SetLastSaveSlot(savegameslot);
@@ -2605,7 +2608,7 @@ static void G_DoSaveGame(dboolean via_cmd)
 	time = leveltime / TICRATE;
 	ttime = (totalleveltimes + leveltime) / TICRATE;
 
-	lprintf(LO_INFO, "G_DoSaveGame: [%d] %s (%s), Skill %d, Level Time %02d:%02d:%02d, Total Time %02d:%02d:%02d\n",
+	lprintf(OutputLevels::Info, "G_DoSaveGame: [%d] %s (%s), Skill %d, Level Time %02d:%02d:%02d, Total Time %02d:%02d:%02d\n",
 		savegameslot + 1, maplump, W_GetLumpInfoByNum(W_GetNumForName(maplump))->wadfile->name, gameskill + 1,
 		time / 3600, (time % 3600) / 60, time % 60, ttime / 3600, (ttime % 3600) / 60, ttime % 60);
 
@@ -2624,7 +2627,7 @@ void G_DeferedInitNew(int skill, int episode, int map)
 	d_skill = skill;
 	d_episode = episode;
 	d_map = map;
-	gameaction = ga_newgame;
+	gameaction = GameAction::NewGame;
 
 	dsda_WatchDeferredInitNew(skill, episode, map);
 }
@@ -2649,76 +2652,76 @@ void G_Compatibility()
 		complevel_t opt; // level at which fix/change was made optional
 	} levels[] = {
 		// comp_telefrag - monsters used to telefrag only on MAP30, now they do it for spawners only
-		{mbf_compatibility, mbf_compatibility},
+		{CompLevel::Mbf, CompLevel::Mbf},
 		// comp_dropoff - MBF encourages things to drop off of overhangs
-		{mbf_compatibility, mbf_compatibility},
+		{CompLevel::Mbf, CompLevel::Mbf},
 		// comp_vile - original Doom archville bugs like ghosts
-		{boom_compatibility, mbf_compatibility},
+		{CompLevel::Boom, CompLevel::Mbf},
 		// comp_pain - original Doom limits Pain Elementals from spawning too many skulls
-		{boom_compatibility, mbf_compatibility},
+		{CompLevel::Boom, CompLevel::Mbf},
 		// comp_skull - original Doom let skulls be spit through walls by Pain Elementals
-		{boom_compatibility, mbf_compatibility},
+		{CompLevel::Boom, CompLevel::Mbf},
 		// comp_blazing - original Doom duplicated blazing door sound
-		{boom_compatibility, mbf_compatibility},
+		{CompLevel::Boom, CompLevel::Mbf},
 		// e6y: "Tagged doors don't trigger special lighting" handled wrong
 		// http://sourceforge.net/tracker/index.php?func=detail&aid=1411400&group_id=148658&atid=772943
 		// comp_doorlight - MBF made door lighting changes more gradual
-		{boom_compatibility, mbf_compatibility},
+		{CompLevel::Boom, CompLevel::Mbf},
 		// comp_model - improvements to the game physics
-		{boom_compatibility, mbf_compatibility},
+		{CompLevel::Boom, CompLevel::Mbf},
 		// comp_god - fixes to God mode
-		{boom_compatibility, mbf_compatibility},
+		{CompLevel::Boom, CompLevel::Mbf},
 		// comp_falloff - MBF encourages things to drop off of overhangs
-		{mbf_compatibility, mbf_compatibility},
+		{CompLevel::Mbf, CompLevel::Mbf},
 		// comp_floors - fixes for moving floors bugs
-		{boom_compatibility_compatibility, mbf_compatibility},
+		{CompLevel::BoomCompatibility, CompLevel::Mbf},
 		// comp_skymap
-		{mbf_compatibility, mbf_compatibility},
+		{CompLevel::Mbf, CompLevel::Mbf},
 		// comp_pursuit - MBF AI change, limited pursuit?
-		{mbf_compatibility, mbf_compatibility},
+		{CompLevel::Mbf, CompLevel::Mbf},
 		// comp_doorstuck - monsters stuck in doors fix
-		{boom_202_compatibility, mbf_compatibility},
+		{CompLevel::Boom202, CompLevel::Mbf},
 		// comp_staylift - MBF AI change, monsters try to stay on lifts
-		{mbf_compatibility, mbf_compatibility},
+		{CompLevel::Mbf, CompLevel::Mbf},
 		// comp_zombie - prevent dead players triggering stuff
-		{lxdoom_1_compatibility, mbf_compatibility},
+		{CompLevel::Lxdoom1, CompLevel::Mbf},
 		// comp_stairs - see p_floor.c
-		{boom_202_compatibility, mbf_compatibility},
+		{CompLevel::Boom202, CompLevel::Mbf},
 		// comp_infcheat - FIXME
-		{mbf_compatibility, mbf_compatibility},
+		{CompLevel::Mbf, CompLevel::Mbf},
 		// comp_zerotags - allow zero tags in wads */
-		{boom_compatibility, mbf_compatibility},
+		{CompLevel::Boom, CompLevel::Mbf},
 		// comp_moveblock - enables keygrab and mancubi shots going thru walls
-		{lxdoom_1_compatibility, prboom_2_compatibility},
+		{CompLevel::Lxdoom1, CompLevel::Prboom2},
 		// comp_respawn - objects which aren't on the map at game start respawn at (0,0)
-		{prboom_2_compatibility, prboom_2_compatibility},
+		{CompLevel::Prboom2, CompLevel::Prboom2},
 		// comp_sound - see s_sound.c
-		{boom_compatibility_compatibility, prboom_3_compatibility},
+		{CompLevel::BoomCompatibility, CompLevel::Prboom3},
 		// comp_666 - emulate pre-Ultimate BossDeath behaviour
-		{ultdoom_compatibility, prboom_4_compatibility},
+		{CompLevel::Ultdoom, CompLevel::Prboom4},
 		// comp_soul - enables lost souls bouncing (see P_ZMovement)
-		{prboom_4_compatibility, prboom_4_compatibility},
+		{CompLevel::Prboom4, CompLevel::Prboom4},
 		// comp_maskedanim - 2s mid textures don't animate
-		{doom_1666_compatibility, prboom_4_compatibility},
+		{CompLevel::Doom1666, CompLevel::Prboom4},
 		//e6y
 		// comp_ouchface - Use Doom's buggy "Ouch" face code
-		{prboom_1_compatibility, prboom_6_compatibility},
+		{CompLevel::Prboom1, CompLevel::Prboom6},
 		// comp_maxhealth - Max Health in DEH applies only to potions
-		{boom_compatibility_compatibility, prboom_6_compatibility},
+		{CompLevel::BoomCompatibility, CompLevel::Prboom6},
 		// comp_translucency - No predefined translucency for some things
-		{boom_compatibility_compatibility, prboom_6_compatibility},
+		{CompLevel::BoomCompatibility, CompLevel::Prboom6},
 		// comp_ledgeblock - ground monsters are blocked by ledges
-		{boom_compatibility, mbf21_compatibility},
+		{CompLevel::Boom, CompLevel::Mbf21},
 		// comp_friendlyspawn - A_Spawn new mobj inherits friendliness
-		{prboom_1_compatibility, mbf21_compatibility},
+		{CompLevel::Prboom1, CompLevel::Mbf21},
 		// comp_voodooscroller - Voodoo dolls on slow scrollers move too slowly
-		{mbf21_compatibility, mbf21_compatibility},
+		{CompLevel::Mbf21, CompLevel::Mbf21},
 		// comp_reservedlineflag - ML_RESERVED clears extended flags
-		{mbf21_compatibility, mbf21_compatibility}
+		{CompLevel::Mbf21, CompLevel::Mbf21}
 	};
 	unsigned int i;
 
-	if(sizeof(levels) / sizeof(*levels) != MBF_COMP_TOTAL)
+	if(sizeof(levels) / sizeof(*levels) != std::to_underlying(CompOption::MbfCompTotal))
 		I_Error("G_Compatibility: consistency error");
 
 	for(i = 0; i < sizeof(levels) / sizeof(*levels); i++)
@@ -2728,13 +2731,13 @@ void G_Compatibility()
 	// These options were deoptionalized in mbf21
 	if(mbf21)
 	{
-		comp[comp_moveblock] = 0;
-		comp[comp_sound] = 0;
-		comp[comp_666] = 0;
-		comp[comp_maskedanim] = 0;
-		comp[comp_ouchface] = 0;
-		comp[comp_maxhealth] = 0;
-		comp[comp_translucency] = 0;
+		comp[std::to_underlying(CompOption::MoveBlock)] = 0;
+		comp[std::to_underlying(CompOption::Sound)] = 0;
+		comp[std::to_underlying(CompOption::Value666)] = 0;
+		comp[std::to_underlying(CompOption::MaskedAnim)] = 0;
+		comp[std::to_underlying(CompOption::OuchFace)] = 0;
+		comp[std::to_underlying(CompOption::MaxHealth)] = 0;
+		comp[std::to_underlying(CompOption::Translucency)] = 0;
 	}
 
 	e6y_G_Compatibility(); //e6y
@@ -2761,17 +2764,17 @@ void G_ReloadDefaults()
 {
 	const dsda_options_t* options;
 
-	compatibility_level = dsda_IntConfig(dsda_config_default_complevel);
+	compatibility_level = static_cast<CompLevel>(dsda_IntConfig(ConfigId::DefaultComplevel));
 	{
-		int l;
+		CompLevel l;
 		l = dsda_CompatibilityLevel();
-		if(l != UNSPECIFIED_COMPLEVEL)
+		if(l != static_cast<CompLevel>(UNSPECIFIED_COMPLEVEL))
 			compatibility_level = l;
 		else
 			dsda_MarkCompatibilityLevelUnspecified();
 	}
-	if(compatibility_level == -1)
-		compatibility_level = best_compatibility;
+	if(compatibility_level == static_cast<CompLevel>(-1))
+		compatibility_level = CompLevel::Best;
 
 	// killough 3/1/98: Initialize options based on config file
 	// (allows functions above to load different values for demos
@@ -2780,7 +2783,7 @@ void G_ReloadDefaults()
 	// Allows PWAD HELP2 screen for DOOM 1 wads.
 	// there's no easy way to set it only to complevel 0-2, so
 	// I just allowed it for complevel 3 if HELP2 is present
-	if((compatibility_level <= 3) && (gamemode != commercial) && (gamemode != shareware) && !raven)
+	if((std::to_underlying(compatibility_level) <= 3) && (gamemode != GameMode::Commercial) && (gamemode != GameMode::Shareware) && !raven)
 		pwad_help2_check = W_PWADLumpNameExists("HELP2");
 
 	options = dsda_Options();
@@ -2826,39 +2829,39 @@ void G_ReloadDefaults()
 	// MBF introduced configurable compatibility settings
 	if(mbf_features)
 	{
-		comp[comp_telefrag] = options->comp_telefrag;
-		comp[comp_dropoff] = options->comp_dropoff;
-		comp[comp_vile] = options->comp_vile;
-		comp[comp_pain] = options->comp_pain;
-		comp[comp_skull] = options->comp_skull;
-		comp[comp_blazing] = options->comp_blazing;
-		comp[comp_doorlight] = options->comp_doorlight;
-		comp[comp_model] = options->comp_model;
-		comp[comp_god] = options->comp_god;
-		comp[comp_falloff] = options->comp_falloff;
-		comp[comp_floors] = options->comp_floors;
-		comp[comp_skymap] = options->comp_skymap;
-		comp[comp_pursuit] = options->comp_pursuit;
-		comp[comp_doorstuck] = options->comp_doorstuck;
-		comp[comp_staylift] = options->comp_staylift;
-		comp[comp_zombie] = options->comp_zombie;
-		comp[comp_stairs] = options->comp_stairs;
-		comp[comp_infcheat] = options->comp_infcheat;
-		comp[comp_zerotags] = options->comp_zerotags;
+		comp[std::to_underlying(CompOption::Telefrag)] = options->comp_telefrag;
+		comp[std::to_underlying(CompOption::DropOff)] = options->comp_dropoff;
+		comp[std::to_underlying(CompOption::Vile)] = options->comp_vile;
+		comp[std::to_underlying(CompOption::Pain)] = options->comp_pain;
+		comp[std::to_underlying(CompOption::Skull)] = options->comp_skull;
+		comp[std::to_underlying(CompOption::Blazing)] = options->comp_blazing;
+		comp[std::to_underlying(CompOption::DoorLight)] = options->comp_doorlight;
+		comp[std::to_underlying(CompOption::Model)] = options->comp_model;
+		comp[std::to_underlying(CompOption::God)] = options->comp_god;
+		comp[std::to_underlying(CompOption::FallOff)] = options->comp_falloff;
+		comp[std::to_underlying(CompOption::Floors)] = options->comp_floors;
+		comp[std::to_underlying(CompOption::SkyMap)] = options->comp_skymap;
+		comp[std::to_underlying(CompOption::Pursuit)] = options->comp_pursuit;
+		comp[std::to_underlying(CompOption::DoorStuck)] = options->comp_doorstuck;
+		comp[std::to_underlying(CompOption::StayLift)] = options->comp_staylift;
+		comp[std::to_underlying(CompOption::Zombie)] = options->comp_zombie;
+		comp[std::to_underlying(CompOption::Stairs)] = options->comp_stairs;
+		comp[std::to_underlying(CompOption::InfCheat)] = options->comp_infcheat;
+		comp[std::to_underlying(CompOption::ZeroTags)] = options->comp_zerotags;
 
-		comp[comp_moveblock] = options->comp_moveblock;
-		comp[comp_respawn] = options->comp_respawn;
-		comp[comp_sound] = options->comp_sound;
-		comp[comp_666] = options->comp_666;
-		comp[comp_soul] = options->comp_soul;
-		comp[comp_maskedanim] = options->comp_maskedanim;
-		comp[comp_ouchface] = options->comp_ouchface;
-		comp[comp_maxhealth] = options->comp_maxhealth;
-		comp[comp_translucency] = options->comp_translucency;
-		comp[comp_ledgeblock] = options->comp_ledgeblock;
-		comp[comp_friendlyspawn] = options->comp_friendlyspawn;
-		comp[comp_voodooscroller] = options->comp_voodooscroller;
-		comp[comp_reservedlineflag] = options->comp_reservedlineflag;
+		comp[std::to_underlying(CompOption::MoveBlock)] = options->comp_moveblock;
+		comp[std::to_underlying(CompOption::Respawn)] = options->comp_respawn;
+		comp[std::to_underlying(CompOption::Sound)] = options->comp_sound;
+		comp[std::to_underlying(CompOption::Value666)] = options->comp_666;
+		comp[std::to_underlying(CompOption::Soul)] = options->comp_soul;
+		comp[std::to_underlying(CompOption::MaskedAnim)] = options->comp_maskedanim;
+		comp[std::to_underlying(CompOption::OuchFace)] = options->comp_ouchface;
+		comp[std::to_underlying(CompOption::MaxHealth)] = options->comp_maxhealth;
+		comp[std::to_underlying(CompOption::Translucency)] = options->comp_translucency;
+		comp[std::to_underlying(CompOption::LedgeBlock)] = options->comp_ledgeblock;
+		comp[std::to_underlying(CompOption::FriendlySpawn)] = options->comp_friendlyspawn;
+		comp[std::to_underlying(CompOption::VoodooScroller)] = options->comp_voodooscroller;
+		comp[std::to_underlying(CompOption::ReservedLineFlag)] = options->comp_reservedlineflag;
 	}
 
 	G_Compatibility();
@@ -2885,7 +2888,7 @@ void G_DoNewGame()
 	dsda_ResetLeaveData();
 
 	G_InitNew(d_skill, realEpisode, realMap, true);
-	gameaction = ga_nothing;
+	gameaction = GameAction::Nothing;
 
 	dsda_WatchNewGame();
 
@@ -2912,9 +2915,9 @@ void G_RefreshFastMonsters()
 
 	if(heretic)
 	{
-		for(i = 0; MonsterMissileInfo[i].type != -1; i++)
+		for(i = 0; MonsterMissileInfo[i].type != MobjType::Null; i++)
 		{
-			mobjinfo[MonsterMissileInfo[i].type].speed =
+			mobjinfo[std::to_underlying(MonsterMissileInfo[i].type)].speed =
 				MonsterMissileInfo[i].speed[fast_pending] << FRACBITS;
 		}
 
@@ -2958,7 +2961,7 @@ int G_ValidateMapName(const char* mapname, int* pEpi, int* pMap)
 	mapuname[8] = 0;
 	M_Strupr(mapuname);
 
-	if(gamemode != commercial)
+	if(gamemode != GameMode::Commercial)
 	{
 		if(sscanf(mapuname, "E%dM%d", &epi, &map) != 2) return 0;
 		snprintf(lumpname, sizeof(lumpname), "E%dM%d", epi, map);
@@ -2992,8 +2995,8 @@ void G_InitNew(int skill, int episode, int map, dboolean prepare)
 	// "if (episode == 0) episode = 3/4" check instead of
 	// "if (episode > 3/4) episode = 3/4"
 	dboolean fake_episode_check =
-		compatibility_level == ultdoom_compatibility ||
-		compatibility_level == finaldoom_compatibility;
+		compatibility_level == CompLevel::Ultdoom ||
+		compatibility_level == CompLevel::Finaldoom;
 
 	in_game = true;
 
@@ -3030,18 +3033,18 @@ void G_InitNew(int skill, int episode, int map, dboolean prepare)
 		else
 		{
 			//e6y: We need to remove the fourth episode for pre-ultimate complevels.
-			if(compatibility_level < ultdoom_compatibility && episode > 3)
+			if(compatibility_level < CompLevel::Ultdoom && episode > 3)
 			{
 				episode = 3;
 			}
 
 			//e6y: DosDoom has only this check
-			if(compatibility_level == dosdoom_compatibility)
+			if(compatibility_level == CompLevel::Dosdoom)
 			{
-				if(gamemode == shareware)
+				if(gamemode == GameMode::Shareware)
 					episode = 1; // only start episode 1 on shareware
 			}
-			else if(gamemode == retail)
+			else if(gamemode == GameMode::Retail)
 			{
 				// e6y: Ability to play any episode with Ultimate Doom,
 				// Final Doom or Doom95 compatibility and -warp command line switch
@@ -3051,7 +3054,7 @@ void G_InitNew(int skill, int episode, int map, dboolean prepare)
 				if(fake_episode_check ? episode == 0 : episode > 4)
 					episode = 4;
 			}
-			else if(gamemode == shareware)
+			else if(gamemode == GameMode::Shareware)
 			{
 				if(episode > 1)
 					episode = 1; // only start episode 1 on shareware
@@ -3064,7 +3067,7 @@ void G_InitNew(int skill, int episode, int map, dboolean prepare)
 
 			if(map < 1)
 				map = 1;
-			if(map > 9 && gamemode != commercial)
+			if(map > 9 && gamemode != GameMode::Commercial)
 				map = 9;
 		}
 	}
@@ -3080,7 +3083,7 @@ void G_InitNew(int skill, int episode, int map, dboolean prepare)
 	// force players to be initialized upon first level load
 	for(i = 0; i < g_maxplayers; i++)
 	{
-		players[i].playerstate = PST_REBORN;
+		players[i].playerstate = PlayerState::Reborn;
 		players[i].worldTimer = 0;
 	}
 
@@ -3127,7 +3130,7 @@ void G_ReadOneTick(ticcmd_t* cmd, const byte** data_p)
 		unsigned int lowbyte = (unsigned char)(*(*data_p)++);
 		cmd->angleturn = (((signed int)(*(*data_p)++)) << 8) + lowbyte;
 	}
-	cmd->buttons = (unsigned char)(*(*data_p)++);
+	cmd->buttons = static_cast<ButtonCode>(*(*data_p)++);
 
 	if(raven)
 	{
@@ -3136,13 +3139,13 @@ void G_ReadOneTick(ticcmd_t* cmd, const byte** data_p)
 	}
 
 	// e6y: ability to play tasdoom demos directly
-	if(compatibility_level == tasdoom_compatibility)
+	if(compatibility_level == CompLevel::Tasdoom)
 	{
 		signed char tmp = cmd->forwardmove;
 		cmd->forwardmove = cmd->sidemove;
 		cmd->sidemove = (signed char)at;
 		cmd->angleturn = static_cast<int16_t>(static_cast<uint32_t>(cmd->buttons) << 8);
-		cmd->buttons = (byte)tmp;
+		cmd->buttons = static_cast<ButtonCode>(tmp);
 	}
 
 	dsda_ReadExCmd(cmd, data_p);
@@ -3157,9 +3160,9 @@ void G_WriteDemoTiccmd(ticcmd_t* cmd)
 	char* p = buf;
 	const byte* data_p = (byte*)buf;
 
-	if(compatibility_level == tasdoom_compatibility)
+	if(compatibility_level == CompLevel::Tasdoom)
 	{
-		*p++ = cmd->buttons;
+		*p++ = std::to_underlying(cmd->buttons);
 		*p++ = cmd->forwardmove;
 		*p++ = cmd->sidemove;
 		*p++ = (cmd->angleturn + 128) >> 8;
@@ -3178,7 +3181,7 @@ void G_WriteDemoTiccmd(ticcmd_t* cmd)
 			*p++ = a & 0xff;
 			*p++ = (a >> 8) & 0xff;
 		}
-		*p++ = cmd->buttons;
+		*p++ = std::to_underlying(cmd->buttons);
 
 		if(raven)
 		{
@@ -3265,7 +3268,7 @@ byte* G_WriteOptions(byte* demo_p)
 	{
 		// killough 10/98: a compatibility vector now
 		int i;
-		for(i = 0; i < MBF_COMP_TOTAL; i++)
+		for(i = 0; i < std::to_underlying(CompOption::MbfCompTotal); i++)
 			*demo_p++ = comp[i] != 0;
 	}
 
@@ -3359,7 +3362,7 @@ const byte* G_ReadOptions(const byte* demo_p)
 		{
 			// killough 10/98: a compatibility vector now
 			int i;
-			for(i = 0; i < MBF_COMP_TOTAL; i++)
+			for(i = 0; i < std::to_underlying(CompOption::MbfCompTotal); i++)
 				comp[i] = *demo_p++;
 		}
 
@@ -3394,24 +3397,24 @@ void G_BeginRecording()
 			unsigned char v = 0;
 			switch(compatibility_level)
 			{
-				case mbf_compatibility: v = 203;
+				case CompLevel::Mbf: v = 203;
 					break; // e6y: Bug in MBF compatibility mode fixed
-				case prboom_2_compatibility: v = 210;
+				case CompLevel::Prboom2: v = 210;
 					break;
-				case prboom_3_compatibility: v = 211;
+				case CompLevel::Prboom3: v = 211;
 					break;
-				case prboom_4_compatibility: v = 212;
+				case CompLevel::Prboom4: v = 212;
 					break;
-				case prboom_5_compatibility: v = 213;
+				case CompLevel::Prboom5: v = 213;
 					break;
-				case prboom_6_compatibility:
+				case CompLevel::Prboom6:
 					v = 214;
 					longtics = 1;
 					break;
-				case mbf21_compatibility:
+				case CompLevel::Mbf21:
 					v = 221;
 					longtics = 1;
-					shorttics = !dsda_Flag(dsda_arg_longtics);
+					shorttics = !dsda_Flag(ArgId::Longtics);
 					break;
 				default: I_Error("G_BeginRecording: PrBoom compatibility level unrecognised?");
 			}
@@ -3452,17 +3455,17 @@ void G_BeginRecording()
 
 		// FIXME } else if (compatibility_level >= boom_compatibility_compatibility) { //e6y
 	}
-	else if(compatibility_level > boom_compatibility_compatibility)
+	else if(compatibility_level > CompLevel::BoomCompatibility)
 	{
 		byte v = 0, c = 0; /* Nominally, version and compatibility bits */
 		switch(compatibility_level)
 		{
-			case boom_compatibility_compatibility: v = 202, c = 1;
+			case CompLevel::BoomCompatibility: v = 202, c = 1;
 				break;
-			case boom_201_compatibility: v = 201;
+			case CompLevel::Boom201: v = 201;
 				c = 0;
 				break;
-			case boom_202_compatibility: v = 202, c = 0;
+			case CompLevel::Boom202: v = 202, c = 0;
 				break;
 			default: I_Error("G_BeginRecording: Boom compatibility level unrecognised?");
 		}
@@ -3501,7 +3504,7 @@ void G_BeginRecording()
 	{
 		// cph - write old v1.9 demos (might even sync)
 		unsigned char v = 109;
-		longtics = dsda_Flag(dsda_arg_longtics);
+		longtics = dsda_Flag(ArgId::Longtics);
 		if(longtics)
 		{
 			v = 111;
@@ -3510,10 +3513,10 @@ void G_BeginRecording()
 		{
 			switch(compatibility_level)
 			{
-				case doom_1666_compatibility:
+				case CompLevel::Doom1666:
 					v = 106;
 					break;
-				case tasdoom_compatibility:
+				case CompLevel::Tasdoom:
 					v = 110;
 					break;
 			}
@@ -3558,11 +3561,11 @@ void G_BeginRecording()
 		}
 		else
 		{
-			*demo_p++ = PlayerClass[0] - 1;
+			*demo_p++ = std::to_underlying(PlayerClass[0]) - 1;
 			for(i = 1; i < g_maxplayers; i++)
 			{
 				*demo_p++ = playeringame[i];
-				*demo_p++ = PlayerClass[i] - 1;
+				*demo_p++ = std::to_underlying(PlayerClass[i]) - 1;
 			}
 		}
 	}
@@ -3585,21 +3588,19 @@ static const char* defdemoname;
 void G_DeferedPlayDemo(const char* name)
 {
 	defdemoname = name;
-	gameaction = ga_playdemo;
+	gameaction = GameAction::PlayDemo;
 }
 
-static int G_GetOriginalDoomCompatLevel(int ver)
+static CompLevel G_GetOriginalDoomCompatLevel(int ver)
 {
-	int level;
+	const CompLevel level = dsda_CompatibilityLevel();
+	if(std::to_underlying(level) >= 0) return level;
 
-	level = dsda_CompatibilityLevel();
-	if(level >= 0) return level;
-
-	if(ver == 110) return tasdoom_compatibility;
-	if(ver < 107) return doom_1666_compatibility;
-	if(gamemode == retail) return ultdoom_compatibility;
-	if(gamemission == pack_tnt || gamemission == pack_plut) return finaldoom_compatibility;
-	return doom2_19_compatibility;
+	if(ver == 110) return CompLevel::Tasdoom;
+	if(ver < 107) return CompLevel::Doom1666;
+	if(gamemode == GameMode::Retail) return CompLevel::Ultdoom;
+	if(gamemission == GameMission::PackTnt || gamemission == GameMission::PackPlut) return CompLevel::Finaldoom;
+	return CompLevel::Doom219;
 }
 
 //e6y: Check for overrun
@@ -3734,7 +3735,7 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 			if(CheckForOverrun(header_p, demo_p, size, 2, failonerror))
 				return nullptr;
 
-			compatibility_level = doom_12_compatibility;
+			compatibility_level = CompLevel::Doom12;
 			episode = *demo_p++;
 			map = *demo_p++;
 			deathmatch = respawnparm = fastparm =
@@ -3748,9 +3749,9 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 			// There is no more desynch on mesh.lmp @ mesh.wad
 			// prboom -iwad doom.wad -file mesh.wad -playdemo mesh.lmp -nomonsters
 			// http://www.doomworld.com/idgames/index.php?id=13976
-			respawnparm = dsda_Flag(dsda_arg_respawn);
-			fastparm = dsda_Flag(dsda_arg_fast);
-			nomonsters = dsda_Flag(dsda_arg_nomonsters);
+			respawnparm = dsda_Flag(ArgId::Respawn);
+			fastparm = dsda_Flag(ArgId::Fast);
+			nomonsters = dsda_Flag(ArgId::Nomonsters);
 
 			// Read special parameter bits from player one byte.
 			// This aligns with vvHeretic demo usage:
@@ -3761,7 +3762,7 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 			{
 				if(*demo_p & DEMOHEADER_RESPAWN)
 					respawnparm = true;
-				if(*demo_p & DEMOHEADER_LONGTICS || dsda_Flag(dsda_arg_longtics))
+				if(*demo_p & DEMOHEADER_LONGTICS || dsda_Flag(ArgId::Longtics))
 					longtics = true;
 				if(*demo_p & DEMOHEADER_NOMONSTERS)
 					nomonsters = true;
@@ -3795,9 +3796,9 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 					return nullptr;
 
 				if(!*demo_p++)
-					compatibility_level = boom_201_compatibility;
+					compatibility_level = CompLevel::Boom201;
 				else
-					compatibility_level = boom_compatibility_compatibility;
+					compatibility_level = CompLevel::BoomCompatibility;
 				break;
 			case 202:
 				//e6y: check for overrun
@@ -3805,9 +3806,9 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 					return nullptr;
 
 				if(!*demo_p++)
-					compatibility_level = boom_202_compatibility;
+					compatibility_level = CompLevel::Boom202;
 				else
-					compatibility_level = boom_compatibility_compatibility;
+					compatibility_level = CompLevel::BoomCompatibility;
 				break;
 			case 203:
 				/* LxDoom or MBF - determine from signature
@@ -3816,37 +3817,37 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 				{
 					case 'B': /* LxDoom */
 						/* cph - DEMOSYNC - LxDoom demos recorded in compatibility modes support dropped */
-						compatibility_level = lxdoom_1_compatibility;
+						compatibility_level = CompLevel::Lxdoom1;
 						break;
 					case 'M':
-						compatibility_level = mbf_compatibility;
+						compatibility_level = CompLevel::Mbf;
 						demo_p++;
 						break;
 				}
 				break;
 			case 210:
-				compatibility_level = prboom_2_compatibility;
+				compatibility_level = CompLevel::Prboom2;
 				demo_p++;
 				break;
 			case 211:
-				compatibility_level = prboom_3_compatibility;
+				compatibility_level = CompLevel::Prboom3;
 				demo_p++;
 				break;
 			case 212:
-				compatibility_level = prboom_4_compatibility;
+				compatibility_level = CompLevel::Prboom4;
 				demo_p++;
 				break;
 			case 213:
-				compatibility_level = prboom_5_compatibility;
+				compatibility_level = CompLevel::Prboom5;
 				demo_p++;
 				break;
 			case 214:
-				compatibility_level = prboom_6_compatibility;
+				compatibility_level = CompLevel::Prboom6;
 				longtics = 1;
 				demo_p++;
 				break;
 			case 221:
-				compatibility_level = mbf21_compatibility;
+				compatibility_level = CompLevel::Mbf21;
 				longtics = 1;
 				break;
 		}
@@ -3884,7 +3885,7 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 			for(i = 0; i < g_maxplayers; i++)
 			{
 				playeringame[i] = (*demo_p++) != 0;
-				PlayerClass[i] = static_cast<pclass_t>(*demo_p++ + 1);
+				PlayerClass[i] = static_cast<PClass>(*demo_p++ + 1);
 			}
 		}
 		else
@@ -3911,7 +3912,7 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 	{
 		dsda_arg_t* arg;
 
-		arg = dsda_Arg(dsda_arg_consoleplayer);
+		arg = dsda_Arg(ArgId::Consoleplayer);
 		if(arg->found)
 		{
 			consoleplayer = arg->value.v_int;
@@ -3928,7 +3929,7 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 		netgame = true;
 	}
 
-	if(!(params & RDH_SKIP_HEADER) && gameaction != ga_loadgame)
+	if(!(params & RDH_SKIP_HEADER) && gameaction != GameAction::LoadGame)
 	{
 		G_InitNew(skill, episode, map, true);
 		demo_p = dsda_EvaluateDemoStartPoint(demo_p);
@@ -3997,7 +3998,7 @@ static int LoadDemo(const char* name, const byte** buffer, int* length)
 	basename[8] = 0;
 
 	// check ns_demos namespace first, then ns_global
-	num = W_CheckNumForName2(basename, ns_demos);
+	num = W_CheckNumForName2(basename, LumpNamespace::Demos);
 
 	if(num == LUMP_NOT_FOUND)
 		num = W_CheckNumForName(basename);
@@ -4026,13 +4027,13 @@ void G_DoPlayDemo()
 	{
 		G_StartDemoPlayback(demobuffer, demolength, PLAYBACK_NORMAL);
 
-		if(dsda_Flag(dsda_arg_track_playback))
+		if(dsda_Flag(ArgId::TrackPlayback))
 			dsda_ResetSplits();
 
-		lprintf(LO_INFO, "Playing demo:\n  Name: %s\n  Compatibility: %s\n",
-			defdemoname, comp_lev_str[compatibility_level]);
+		lprintf(OutputLevels::Info, "Playing demo:\n  Name: %s\n  Compatibility: %s\n",
+			defdemoname, comp_lev_str[std::to_underlying(compatibility_level)]);
 
-		gameaction = ga_nothing;
+		gameaction = GameAction::Nothing;
 	}
 	else
 	{
@@ -4045,7 +4046,7 @@ void G_DoPlayDemo()
 		// message after playing of DEMO3, because DEMO4 is not present
 		// in the corresponding IWADs.
 		D_StartTitle();            // Start the title screen
-		gamestate = GS_DEMOSCREEN; // And set the game state accordingly
+		gamestate = GameState::Demoscreen; // And set the game state accordingly
 	}
 }
 
@@ -4073,11 +4074,11 @@ dboolean G_CheckDemoStatus()
 
 		M_SaveDefaults();
 
-		lprintf(LO_INFO, "Timed %u gametics in %u realtics = %-.1f frames per second\n",
+		lprintf(OutputLevels::Info, "Timed %u gametics in %u realtics = %-.1f frames per second\n",
 			(unsigned)gametic, realtics,
 			(unsigned)gametic * (double)TICRATE / realtics);
 
-		if(dsda_IntConfig(dsda_config_demo_end_quit))
+		if(dsda_IntConfig(ConfigId::DemoEndQuit))
 			I_SafeExit(0);
 		else
 		{
@@ -4091,7 +4092,7 @@ dboolean G_CheckDemoStatus()
 	{
 		if(userdemo)
 		{
-			if(dsda_IntConfig(dsda_config_demo_end_quit))
+			if(dsda_IntConfig(ConfigId::DemoEndQuit))
 				I_SafeExit(0); // killough
 			else
 			{
@@ -4140,20 +4141,20 @@ void P_WalkTicker()
 	int side;
 	int angturn;
 
-	if(!walkcamera.type || menuactive)
+	if(!walkcamera.type || menuactive != MenuActive::Inactive)
 		return;
 
 	G_SetSpeed(false);
 
-	strafe = dsda_InputActive(dsda_input_strafe);
-	speed = dsda_AutoRun() || dsda_InputActive(dsda_input_speed); // phares
+	strafe = dsda_InputActive(InputId::Strafe);
+	speed = dsda_AutoRun() || dsda_InputActive(InputId::Speed); // phares
 
 	forward = side = 0;
 	angturn = 0;
 	turnheld = 0;
 
 	// use two stage accelerative turning on the keyboard
-	if(dsda_InputActive(dsda_input_turnright) || dsda_InputActive(dsda_input_turnleft))
+	if(dsda_InputActive(InputId::Turnright) || dsda_InputActive(InputId::Turnleft))
 		++turnheld;
 	else
 		turnheld = 0;
@@ -4167,29 +4168,29 @@ void P_WalkTicker()
 
 	if(strafe)
 	{
-		if(dsda_InputActive(dsda_input_turnright))
+		if(dsda_InputActive(InputId::Turnright))
 			side += sidemove[speed];
-		if(dsda_InputActive(dsda_input_turnleft))
+		if(dsda_InputActive(InputId::Turnleft))
 			side -= sidemove[speed];
 	}
 	else
 	{
-		if(dsda_InputActive(dsda_input_turnright))
+		if(dsda_InputActive(InputId::Turnright))
 			angturn -= angleturn[tspeed];
-		if(dsda_InputActive(dsda_input_turnleft))
+		if(dsda_InputActive(InputId::Turnleft))
 			angturn += angleturn[tspeed];
 	}
 
-	if(dsda_InputActive(dsda_input_forward))
+	if(dsda_InputActive(InputId::Forward))
 		forward += forwardmove[speed];
-	if(dsda_InputActive(dsda_input_backward))
+	if(dsda_InputActive(InputId::Backward))
 		forward -= forwardmove[speed];
-	if(dsda_InputActive(dsda_input_straferight))
+	if(dsda_InputActive(InputId::Straferight))
 		side += sidemove[speed];
-	if(dsda_InputActive(dsda_input_strafeleft))
+	if(dsda_InputActive(InputId::Strafeleft))
 		side -= sidemove[speed];
 
-	if(dsda_IntConfig(dsda_config_vertmouse))
+	if(dsda_IntConfig(ConfigId::Vertmouse))
 		forward += mousey;
 
 	if(strafe)
@@ -4206,7 +4207,7 @@ void P_WalkTicker()
 		CheckPitch((signed int*)&walkcamera.pitch);
 	}
 
-	if(dsda_InputActive(dsda_input_fire))
+	if(dsda_InputActive(InputId::Fire))
 	{
 		walkcamera.x = players[0].mo->x;
 		walkcamera.y = players[0].mo->y;
@@ -4304,7 +4305,7 @@ static dboolean InventoryMoveLeft()
 		{
 			inv_ptr = 0;
 		}
-		plr->readyArtifact = static_cast<artitype_t>(plr->inventory[inv_ptr].type);
+		plr->readyArtifact = static_cast<ArtiType>(plr->inventory[inv_ptr].type);
 		return true;
 	}
 
@@ -4345,7 +4346,7 @@ static dboolean InventoryMoveRight()
 			if(inv_ptr < 0)
 				inv_ptr = 0;
 		}
-		plr->readyArtifact = static_cast<artitype_t>(plr->inventory[inv_ptr].type);
+		plr->readyArtifact = static_cast<ArtiType>(plr->inventory[inv_ptr].type);
 		return true;
 	}
 
@@ -4377,23 +4378,23 @@ static dboolean InventoryMoveRight()
 
 void G_Completed(int map, int position, int flags, angle_t angle)
 {
-	if(hexen && gamemode == shareware && map > 4)
+	if(hexen && gamemode == GameMode::Shareware && map > 4)
 	{
 		P_SetMessage(&players[consoleplayer], "ACCESS DENIED -- DEMO", true);
-		S_StartVoidSound(hexen_sfx_chat);
+		S_StartVoidSound(SfxId::HexenChat);
 		return;
 	}
 
 	secretexit = false;
-	gameaction = ga_completed;
+	gameaction = GameAction::Completed;
 	dsda_UpdateLeaveData(map, position, flags, angle);
 }
 
 extern "C" void G_DoTeleportNewMap()
 {
 	SV_MapTeleport(leave_data.map, leave_data.position);
-	gamestate = GS_LEVEL;
-	gameaction = ga_nothing;
+	gamestate = GameState::Level;
+	gameaction = GameAction::Nothing;
 	RebornPosition = leave_data.position;
 	dsda_EvaluateSkipModeDoTeleportNewMap();
 }
@@ -4401,15 +4402,15 @@ extern "C" void G_DoTeleportNewMap()
 void Hexen_G_DoReborn(int playernum)
 {
 	int i;
-	dboolean oldWeaponowned[HEXEN_NUMWEAPONS];
-	dboolean oldKeys[NUMCARDS];
+	dboolean oldWeaponowned[std::to_underlying(WeaponType::HexenCount)];
+	dboolean oldKeys[std::to_underlying(Card::Count)];
 	int oldPieces;
 	dboolean foundSpot;
 	int bestWeapon;
 
 	if(!netgame)
 	{
-		gameaction = ga_loadlevel;
+		gameaction = GameAction::LoadLevel;
 	}
 	else
 	{
@@ -4424,10 +4425,10 @@ void Hexen_G_DoReborn(int playernum)
 		}
 
 		// Cooperative net-play, retain keys and weapons
-		for(i = 0; i < NUMCARDS; ++i)
+		for(i = 0; i < std::to_underlying(Card::Count); ++i)
 			oldKeys[i] = players[playernum].cards[i];
 		oldPieces = players[playernum].pieces;
-		for(i = 0; i < HEXEN_NUMWEAPONS; i++)
+		for(i = 0; i < std::to_underlying(WeaponType::HexenCount); i++)
 		{
 			oldWeaponowned[i] = players[playernum].weaponowned[i];
 		}
@@ -4468,10 +4469,10 @@ void Hexen_G_DoReborn(int playernum)
 		}
 
 		// Restore keys and weapons
-		for(i = 0; i < NUMCARDS; ++i)
+		for(i = 0; i < std::to_underlying(Card::Count); ++i)
 			players[playernum].cards[i] = oldKeys[i];
 		players[playernum].pieces = oldPieces;
-		for(bestWeapon = 0, i = 0; i < HEXEN_NUMWEAPONS; i++)
+		for(bestWeapon = 0, i = 0; i < std::to_underlying(WeaponType::HexenCount); i++)
 		{
 			if(oldWeaponowned[i])
 			{
@@ -4479,12 +4480,12 @@ void Hexen_G_DoReborn(int playernum)
 				players[playernum].weaponowned[i] = true;
 			}
 		}
-		players[playernum].ammo[MANA_1] = 25;
-		players[playernum].ammo[MANA_2] = 25;
+		players[playernum].ammo[std::to_underlying(AmmoType::Mana1)] = 25;
+		players[playernum].ammo[std::to_underlying(AmmoType::Mana2)] = 25;
 		if(bestWeapon)
 		{
 			// Bring up the best weapon
-			players[playernum].pendingweapon = static_cast<weapontype_t>(bestWeapon);
+			players[playernum].pendingweapon = static_cast<WeaponType>(bestWeapon);
 		}
 	}
 }

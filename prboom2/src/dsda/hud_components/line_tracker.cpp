@@ -13,7 +13,7 @@ void dsda_LineTrackerHC(char* str, size_t max_size, int id)
 		str,
 		max_size,
 		"%sl %d: %d %d",
-		lines[id].special ? dsda_TextColor(dsda_tc_exhud_line_special) : dsda_TextColor(dsda_tc_exhud_line_normal),
+		lines[id].special ? dsda_TextColor(TextColorIndex::ExhudLineSpecial) : dsda_TextColor(TextColorIndex::ExhudLineNormal),
 		id,
 		lines[id].special,
 		lines[id].player_activations

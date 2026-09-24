@@ -5,13 +5,13 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+#include "dsda/utility.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "p_mobj.hpp"
-#include "dsda/utility.hpp"
 
 int dsda_HexenNameToMap(int* found, const char* name, int* episode, int* map);
 int dsda_HexenFirstMap(int* episode, int* map);

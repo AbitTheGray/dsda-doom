@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <stdlib.h>
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -14,9 +17,6 @@ extern "C"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#include <stdlib.h>
-#include "doomtype.hpp"
 
 /*
  * Fixed point, 32bit as 16.16.
@@ -51,7 +51,6 @@ typedef unsigned int ufixed_t;
 /*
  * Fixed Point Multiplication
  */
-
 
 /* CPhipps - made __inline__ to inline, as specified in the gcc docs
  * Also made const */

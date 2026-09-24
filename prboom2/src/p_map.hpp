@@ -6,13 +6,13 @@
 
 #pragma once
 
+#include "r_defs.hpp"
+#include "d_player.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "r_defs.hpp"
-#include "d_player.hpp"
 
 #define USERANGE        (64*FRACUNIT)
 #define MELEERANGE      (64*FRACUNIT)

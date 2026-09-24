@@ -467,50 +467,50 @@ void I_CapturePrep(const char* fn)
 	const char* cap_videocommand;
 	const char* cap_muxcommand;
 
-	cap_soundcommand = dsda_StringConfig(dsda_config_cap_soundcommand);
-	cap_videocommand = dsda_StringConfig(dsda_config_cap_videocommand);
-	cap_muxcommand = dsda_StringConfig(dsda_config_cap_muxcommand);
-	cap_wipescreen = dsda_IntConfig(dsda_config_cap_wipescreen);
-	cap_fps = dsda_IntConfig(dsda_config_cap_fps);
+	cap_soundcommand = dsda_StringConfig(ConfigId::CapSoundcommand);
+	cap_videocommand = dsda_StringConfig(ConfigId::CapVideocommand);
+	cap_muxcommand = dsda_StringConfig(ConfigId::CapMuxcommand);
+	cap_wipescreen = dsda_IntConfig(ConfigId::CapWipescreen);
+	cap_fps = dsda_IntConfig(ConfigId::CapFps);
 
 	vid_fname = fn;
 
 	if(!parsecommand(soundpipe.command, cap_soundcommand, sizeof(soundpipe.command)))
 	{
-		lprintf(LO_ERROR, "I_CapturePrep: malformed command %s\n", cap_soundcommand);
+		lprintf(OutputLevels::Error, "I_CapturePrep: malformed command %s\n", cap_soundcommand);
 		capturing_video = 0;
 		return;
 	}
 	if(!parsecommand(videopipe.command, cap_videocommand, sizeof(videopipe.command)))
 	{
-		lprintf(LO_ERROR, "I_CapturePrep: malformed command %s\n", cap_videocommand);
+		lprintf(OutputLevels::Error, "I_CapturePrep: malformed command %s\n", cap_videocommand);
 		capturing_video = 0;
 		return;
 	}
 	if(!parsecommand(muxpipe.command, cap_muxcommand, sizeof(muxpipe.command)))
 	{
-		lprintf(LO_ERROR, "I_CapturePrep: malformed command %s\n", cap_muxcommand);
+		lprintf(OutputLevels::Error, "I_CapturePrep: malformed command %s\n", cap_muxcommand);
 		capturing_video = 0;
 		return;
 	}
 
-	lprintf(LO_INFO, "I_CapturePrep: opening pipe \"%s\"\n", soundpipe.command);
+	lprintf(OutputLevels::Info, "I_CapturePrep: opening pipe \"%s\"\n", soundpipe.command);
 	if(!my_popen3(&soundpipe))
 	{
-		lprintf(LO_ERROR, "I_CapturePrep: sound pipe failed\n");
+		lprintf(OutputLevels::Error, "I_CapturePrep: sound pipe failed\n");
 		capturing_video = 0;
 		return;
 	}
-	lprintf(LO_INFO, "I_CapturePrep: opening pipe \"%s\"\n", videopipe.command);
+	lprintf(OutputLevels::Info, "I_CapturePrep: opening pipe \"%s\"\n", videopipe.command);
 	if(!my_popen3(&videopipe))
 	{
-		lprintf(LO_ERROR, "I_CapturePrep: video pipe failed\n");
+		lprintf(OutputLevels::Error, "I_CapturePrep: video pipe failed\n");
 		my_pclose3(&soundpipe);
 		capturing_video = 0;
 		return;
 	}
 	I_SetSoundCap();
-	lprintf(LO_INFO, "I_CapturePrep: video capture started\n");
+	lprintf(OutputLevels::Info, "I_CapturePrep: video capture started\n");
 	capturing_video = 1;
 
 	// start reader threads
@@ -523,7 +523,7 @@ void I_CapturePrep(const char* fn)
 	videopipe.outthread = SDL_CreateThread(threadstdoutproc, "videopipe.outthread", &videopipe);
 	videopipe.errthread = SDL_CreateThread(threadstderrproc, "videopipe.errthread", &videopipe);
 
-	I_AtExit(I_CaptureFinish, true, "I_CaptureFinish", exit_priority_normal);
+	I_AtExit(I_CaptureFinish, true, "I_CaptureFinish", ExitPriority::Normal);
 }
 
 
@@ -553,14 +553,14 @@ void I_CaptureFrame()
 	if(snd)
 	{
 		if(fwrite(snd, nsampreq * 4, 1, soundpipe.f_stdin) != 1)
-			lprintf(LO_WARN, "I_CaptureFrame: error writing soundpipe.\n");
+			lprintf(OutputLevels::Warn, "I_CaptureFrame: error writing soundpipe.\n");
 		//Z_Free (snd); // static buffer
 	}
 	vid = I_GrabScreen();
 	if(vid)
 	{
 		if(fwrite(vid, renderW * renderH * 3, 1, videopipe.f_stdin) != 1)
-			lprintf(LO_WARN, "I_CaptureFrame: error writing videopipe.\n");
+			lprintf(OutputLevels::Warn, "I_CaptureFrame: error writing videopipe.\n");
 		//Z_Free (vid); // static buffer
 	}
 }
@@ -590,11 +590,11 @@ void I_CaptureFinish()
 
 	// muxing and temp file cleanup
 
-	lprintf(LO_INFO, "I_CaptureFinish: opening pipe \"%s\"\n", muxpipe.command);
+	lprintf(OutputLevels::Info, "I_CaptureFinish: opening pipe \"%s\"\n", muxpipe.command);
 
 	if(!my_popen3(&muxpipe))
 	{
-		lprintf(LO_ERROR, "I_CaptureFinish: finalize pipe failed\n");
+		lprintf(OutputLevels::Error, "I_CaptureFinish: finalize pipe failed\n");
 		return;
 	}
 
@@ -609,13 +609,13 @@ void I_CaptureFinish()
 
 
 	// unlink any files user wants gone
-	if(dsda_IntConfig(dsda_config_cap_remove_tempfiles))
+	if(dsda_IntConfig(ConfigId::CapRemoveTempfiles))
 	{
 		const char* cap_tempfile1;
 		const char* cap_tempfile2;
 
-		cap_tempfile1 = dsda_StringConfig(dsda_config_cap_tempfile1);
-		cap_tempfile2 = dsda_StringConfig(dsda_config_cap_tempfile2);
+		cap_tempfile1 = dsda_StringConfig(ConfigId::CapTempfile1);
+		cap_tempfile2 = dsda_StringConfig(ConfigId::CapTempfile2);
 
 		M_remove(cap_tempfile1);
 		M_remove(cap_tempfile2);

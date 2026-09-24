@@ -4,6 +4,8 @@
  *  DOOM graphics stuff for SDL
  */
 
+#include <utility>
+
 #include <SDL_render.h>
 #include <SDL_video.h>
 #ifdef HAVE_CONFIG_H
@@ -194,7 +196,7 @@ static int I_TranslateKey(SDL_Keysym* key)
 {
 	int rc = 0;
 
-	if(dsda_IntConfig(dsda_config_vanilla_keymap))
+	if(dsda_IntConfig(ConfigId::VanillaKeymap))
 		return VanillaTranslateKey(key);
 
 	switch(key->sym)
@@ -379,14 +381,14 @@ static void I_GetEvent()
 					}
 				}
 #endif
-				event.type = ev_keydown;
+				event.type = EventType::KeyDown;
 				event.data1.i = I_TranslateKey(&Event->key.keysym);
 				D_PostEvent(&event);
 				break;
 
 			case SDL_KEYUP:
 			{
-				event.type = ev_keyup;
+				event.type = EventType::KeyUp;
 				event.data1.i = I_TranslateKey(&Event->key.keysym);
 				D_PostEvent(&event);
 			}
@@ -396,7 +398,7 @@ static void I_GetEvent()
 			case SDL_MOUSEBUTTONUP:
 				if(mouse_enabled && window_focused)
 				{
-					event.type = ev_mouse;
+					event.type = EventType::Mouse;
 					event.data1.i = I_SDLtoDoomMouseState(SDL_GetMouseState(nullptr, nullptr));
 					D_PostEvent(&event);
 				}
@@ -422,10 +424,10 @@ static void I_GetEvent()
 					{
 						event.data1.i = mouseb;
 
-						event.type = ev_keydown;
+						event.type = EventType::KeyDown;
 						D_PostEvent(&event);
 
-						event.type = ev_keyup;
+						event.type = EventType::KeyUp;
 						D_PostEvent(&event);
 					}
 				}
@@ -438,7 +440,7 @@ static void I_GetEvent()
 				break;
 
 			case SDL_TEXTINPUT:
-				event.type = ev_text;
+				event.type = EventType::Text;
 				event.text = Event->text.text;
 				D_PostEvent(&event);
 				break;
@@ -513,7 +515,7 @@ extern "C" void I_InitMouse()
 	static Uint8 empty_cursor_data = 0;
 
 	// check if the user wants to use the mouse
-	mouse_enabled = dsda_IntConfig(dsda_config_use_mouse) && !dsda_Flag(dsda_arg_nomouse);
+	mouse_enabled = dsda_IntConfig(ConfigId::UseMouse) && !dsda_Flag(ArgId::Nomouse);
 
 	SDL_PumpEvents();
 
@@ -562,7 +564,7 @@ static void I_UploadNewPalette(int pal, int force)
 		int i;
 
 		pplump = W_GetNumForName(playpal_data->lump_name);
-		gtlump = W_CheckNumForName2("GAMMATBL", ns_prboom);
+		gtlump = W_CheckNumForName2("GAMMATBL", LumpNamespace::Prboom);
 		palette = (const byte*)W_LumpByNum(pplump);
 		gtable = (const byte*)W_LumpByNum(gtlump) + 256 * (cachedgamma = usegamma);
 
@@ -657,7 +659,7 @@ void I_FinishUpdate()
 
 		if(SDL_LockSurface(screen) < 0)
 		{
-			lprintf(LO_INFO, "I_FinishUpdate: %s\n", SDL_GetError());
+			lprintf(OutputLevels::Info, "I_FinishUpdate: %s\n", SDL_GetError());
 			return;
 		}
 
@@ -729,7 +731,7 @@ static void I_ShutdownSDL()
 
 void dsda_Shutdown()
 {
-	I_AtExit(I_ShutdownSDL, true, "I_ShutdownSDL", exit_priority_normal);
+	I_AtExit(I_ShutdownSDL, true, "I_ShutdownSDL", ExitPriority::Normal);
 }
 
 void I_PreInitGraphics()
@@ -738,7 +740,7 @@ void I_PreInitGraphics()
 
 	// Initialize SDL
 	unsigned int flags = 0;
-	if(!(dsda_Flag(dsda_arg_nodraw) && dsda_Flag(dsda_arg_nosound)))
+	if(!(dsda_Flag(ArgId::Nodraw) && dsda_Flag(ArgId::Nosound)))
 		flags = SDL_INIT_VIDEO;
 #ifdef PRBOOM_DEBUG
 	flags |= SDL_INIT_NOPARACHUTE;
@@ -779,7 +781,7 @@ void I_GetScreenResolution()
 	desired_screenwidth = 640;
 	desired_screenheight = 480;
 
-	screen_resolution = dsda_StringConfig(dsda_config_screen_resolution);
+	screen_resolution = dsda_StringConfig(ConfigId::ScreenResolution);
 
 	if(screen_resolution)
 	{
@@ -848,7 +850,7 @@ static void I_AppendCustomResolution(int* current_resolution_index, int* list_si
 {
 	const char* custom_resolution;
 
-	custom_resolution = dsda_StringConfig(dsda_config_custom_resolution);
+	custom_resolution = dsda_StringConfig(ConfigId::CustomResolution);
 
 	if(strlen(custom_resolution))
 	{
@@ -866,7 +868,7 @@ static void I_AppendCustomResolution(int* current_resolution_index, int* list_si
 // Get all the supported screen resolutions
 // and fill the list with them
 //
-extern "C" const char* dsda_HackStringConfig(dsda_config_identifier_t id, const char* value, dboolean persist);
+extern "C" const char* dsda_HackStringConfig(ConfigId id, const char* value, dboolean persist);
 static void I_FillScreenResolutionsList()
 {
 	int display_index = 0;
@@ -950,7 +952,7 @@ static void I_FillScreenResolutionsList()
 	// This code is inside of the onUpdate for screen resolution, so it must avoid recursion
 	{
 
-		dsda_HackStringConfig(dsda_config_screen_resolution,
+		dsda_HackStringConfig(ConfigId::ScreenResolution,
 			screen_resolutions_list[current_resolution_index], false);
 	}
 }
@@ -1024,47 +1026,47 @@ void I_CalculateRes(int width, int height)
 			count1 = I_TestCPUCacheMisses(pitch1, SCREENHEIGHT, mintime);
 			count2 = I_TestCPUCacheMisses(pitch2, SCREENHEIGHT, mintime);
 
-			lprintf(LO_DEBUG, "I_CalculateRes: trying to optimize screen pitch\n");
-			lprintf(LO_DEBUG, " test case for pitch=%d is processed %d times for %d msec\n", pitch1, count1, mintime);
-			lprintf(LO_DEBUG, " test case for pitch=%d is processed %d times for %d msec\n", pitch2, count2, mintime);
+			lprintf(OutputLevels::Debug, "I_CalculateRes: trying to optimize screen pitch\n");
+			lprintf(OutputLevels::Debug, " test case for pitch=%d is processed %d times for %d msec\n", pitch1, count1, mintime);
+			lprintf(OutputLevels::Debug, " test case for pitch=%d is processed %d times for %d msec\n", pitch2, count2, mintime);
 
 			SCREENPITCH = (count2 > count1 ? pitch2 : pitch1);
 
-			lprintf(LO_DEBUG, " optimized screen pitch is %d\n", SCREENPITCH);
+			lprintf(OutputLevels::Debug, " optimized screen pitch is %d\n", SCREENPITCH);
 		}
 	}
 }
 
-static video_mode_t I_GetModeFromString(const char* modestr)
+static VideoMode I_GetModeFromString(const char* modestr)
 {
-	video_mode_t mode;
+	VideoMode mode;
 
 	if(!stricmp(modestr, "gl"))
 	{
-		mode = VID_MODEGL;
+		mode = VideoMode::OpenGl;
 	}
 	else if(!stricmp(modestr, "OpenGL"))
 	{
-		mode = VID_MODEGL;
+		mode = VideoMode::OpenGl;
 	}
 	else
 	{
-		mode = VID_MODESW;
+		mode = VideoMode::Software;
 	}
 
 	return mode;
 }
 
-static video_mode_t I_DesiredVideoMode()
+static VideoMode I_DesiredVideoMode()
 {
 	dsda_arg_t* arg;
-	video_mode_t mode;
+	VideoMode mode;
 
-	arg = dsda_Arg(dsda_arg_vidmode);
+	arg = dsda_Arg(ArgId::Vidmode);
 	if(arg->found)
 		mode = I_GetModeFromString(arg->value.v_string);
 	else
-		mode = I_GetModeFromString(dsda_StringConfig(dsda_config_videomode));
+		mode = I_GetModeFromString(dsda_StringConfig(ConfigId::Videomode));
 
 	return mode;
 }
@@ -1077,30 +1079,30 @@ void I_InitScreenResolution()
 	int i, w, h;
 	char c, x;
 	dsda_arg_t* arg;
-	video_mode_t mode;
+	VideoMode mode;
 	int init = (sdl_window == nullptr);
 
 	I_GetScreenResolution();
 
-	desired_fullscreen = dsda_IntConfig(dsda_config_use_fullscreen);
+	desired_fullscreen = dsda_IntConfig(ConfigId::UseFullscreen);
 
 	if(init)
 	{
 		//e6y: ability to change screen resolution from GUI
 		I_FillScreenResolutionsList();
 
-		if(dsda_Flag(dsda_arg_fullscreen))
+		if(dsda_Flag(ArgId::Fullscreen))
 			desired_fullscreen = 1;
 
-		if(dsda_Flag(dsda_arg_window))
+		if(dsda_Flag(ArgId::Window))
 			desired_fullscreen = 0;
 
 		// Video stuff
-		arg = dsda_Arg(dsda_arg_width);
+		arg = dsda_Arg(ArgId::Width);
 		if(arg->found)
 			desired_screenwidth = arg->value.v_int;
 
-		arg = dsda_Arg(dsda_arg_height);
+		arg = dsda_Arg(ArgId::Height);
 		if(arg->found)
 			desired_screenheight = arg->value.v_int;
 
@@ -1111,7 +1113,7 @@ void I_InitScreenResolution()
 		w = desired_screenwidth;
 		h = desired_screenheight;
 
-		arg = dsda_Arg(dsda_arg_geometry);
+		arg = dsda_Arg(ArgId::Geometry);
 		if(arg->found)
 		{
 			int count = sscanf(arg->value.v_string, "%d%c%d%c", &w, &x, &h, &c);
@@ -1163,7 +1165,7 @@ void I_InitScreenResolution()
 
 	I_InitBuffersRes();
 
-	lprintf(LO_DEBUG, "I_InitScreenResolution: Using resolution %dx%d\n", SCREENWIDTH, SCREENHEIGHT);
+	lprintf(OutputLevels::Debug, "I_InitScreenResolution: Using resolution %dx%d\n", SCREENWIDTH, SCREENHEIGHT);
 }
 
 //
@@ -1207,8 +1209,8 @@ void I_InitGraphics()
 	{
 		firsttime = 0;
 
-		I_AtExit(I_ShutdownGraphics, true, "I_ShutdownGraphics", exit_priority_normal);
-		lprintf(LO_DEBUG, "I_InitGraphics: %dx%d\n", SCREENWIDTH, SCREENHEIGHT);
+		I_AtExit(I_ShutdownGraphics, true, "I_ShutdownGraphics", ExitPriority::Normal);
+		lprintf(OutputLevels::Debug, "I_InitGraphics: %dx%d\n", SCREENWIDTH, SCREENHEIGHT);
 
 		/* Set the video mode */
 		I_UpdateVideoMode();
@@ -1237,16 +1239,16 @@ void I_UpdateVideoMode()
 	const char* sdl_video_window_pos;
 	int sdl_video_display_index;
 	int x, y;
-	const dboolean novsync = dsda_Flag(dsda_arg_timedemo) ||
-		dsda_Flag(dsda_arg_fastdemo);
+	const dboolean novsync = dsda_Flag(ArgId::Timedemo) ||
+		dsda_Flag(ArgId::Fastdemo);
 
-	exclusive_fullscreen = dsda_IntConfig(dsda_config_exclusive_fullscreen) &&
-		I_DesiredVideoMode() == VID_MODESW;
-	render_vsync = dsda_IntConfig(dsda_config_render_vsync) && !novsync;
-	sdl_video_window_pos = dsda_StringConfig(dsda_config_sdl_video_window_pos);
-	sdl_video_display_index = dsda_IntConfig(dsda_config_sdl_video_display_index);
-	screen_multiply = dsda_IntConfig(dsda_config_render_screen_multiply);
-	integer_scaling = dsda_IntConfig(dsda_config_integer_scaling);
+	exclusive_fullscreen = dsda_IntConfig(ConfigId::ExclusiveFullscreen) &&
+		I_DesiredVideoMode() == VideoMode::Software;
+	render_vsync = dsda_IntConfig(ConfigId::RenderVsync) && !novsync;
+	sdl_video_window_pos = dsda_StringConfig(ConfigId::SdlVideoWindowPos);
+	sdl_video_display_index = dsda_IntConfig(ConfigId::SdlVideoDisplayIndex);
+	screen_multiply = dsda_IntConfig(ConfigId::RenderScreenMultiply);
+	integer_scaling = dsda_IntConfig(ConfigId::IntegerScaling);
 
 	if(sdl_window)
 	{
@@ -1283,7 +1285,7 @@ void I_UpdateVideoMode()
 	}
 
 	// [FG] aspect ratio correction for the canonical video modes
-	if((SCREENHEIGHT == 200 || SCREENHEIGHT == 400) && dsda_IntConfig(dsda_config_aspect_ratio_correction))
+	if((SCREENHEIGHT == 200 || SCREENHEIGHT == 400) && dsda_IntConfig(ConfigId::AspectRatioCorrection))
 	{
 		ACTUALHEIGHT = 6 * SCREENHEIGHT / 5;
 	}
@@ -1408,7 +1410,7 @@ void I_UpdateVideoMode()
 
 	if(V_IsSoftwareMode())
 	{
-		lprintf(LO_DEBUG, "I_UpdateVideoMode: 0x%x, %s, %s\n", init_flags, screen && screen->pixels ? "SDL buffer" : "own buffer", screen && SDL_MUSTLOCK(screen) ? "lock-and-copy" : "direct access");
+		lprintf(OutputLevels::Debug, "I_UpdateVideoMode: 0x%x, %s, %s\n", init_flags, screen && screen->pixels ? "SDL buffer" : "own buffer", screen && SDL_MUSTLOCK(screen) ? "lock-and-copy" : "direct access");
 
 		// Get the info needed to render to the display
 		if(!SDL_MUSTLOCK(screen))
@@ -1437,35 +1439,35 @@ void I_UpdateVideoMode()
 	if(V_IsOpenGLMode())
 	{
 		int temp;
-		lprintf(LO_DEBUG, "SDL OpenGL PixelFormat:\n");
+		lprintf(OutputLevels::Debug, "SDL OpenGL PixelFormat:\n");
 		SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_RED_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_RED_SIZE: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_GREEN_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_GREEN_SIZE: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_BLUE_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_BLUE_SIZE: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_STENCIL_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_STENCIL_SIZE: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_ACCUM_RED_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_ACCUM_RED_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_ACCUM_RED_SIZE: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_ACCUM_GREEN_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_ACCUM_GREEN_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_ACCUM_GREEN_SIZE: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_ACCUM_BLUE_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_ACCUM_BLUE_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_ACCUM_BLUE_SIZE: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_ACCUM_ALPHA_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_ACCUM_ALPHA_SIZE: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_DOUBLEBUFFER: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_DOUBLEBUFFER: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_BUFFER_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_BUFFER_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_BUFFER_SIZE: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_DEPTH_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_DEPTH_SIZE: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_MULTISAMPLESAMPLES: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_MULTISAMPLESAMPLES: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_MULTISAMPLEBUFFERS: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_MULTISAMPLEBUFFERS: %i\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &temp);
-		lprintf(LO_DEBUG, "    SDL_GL_STENCIL_SIZE: %i\n", temp);
+		lprintf(OutputLevels::Debug, "    SDL_GL_STENCIL_SIZE: %i\n", temp);
 
 		gld_Init(SCREENWIDTH, SCREENHEIGHT);
 	}
@@ -1506,7 +1508,7 @@ static void CorrectMouseStutter(int* x, int* y)
 	int x_remainder, y_remainder;
 	fixed_t fractic, correction_factor;
 
-	if(!dsda_IntConfig(dsda_config_mouse_stutter_correction))
+	if(!dsda_IntConfig(ConfigId::MouseStutterCorrection))
 	{
 		return;
 	}
@@ -1529,7 +1531,7 @@ static void CorrectMouseStutter(int* x, int* y)
 
 static void UpdatePlaybackMouseTimer()
 {
-	if(demoplayback && !menuactive && mouse_hide_timer > 0 && !dsda_SkipMode())
+	if(demoplayback && menuactive == MenuActive::Inactive && mouse_hide_timer > 0 && !dsda_SkipMode())
 		mouse_hide_timer--;
 }
 
@@ -1547,7 +1549,7 @@ static void I_ReadMouse()
 	UpdateGrab();
 
 	// Don't pull mouse away if outside window
-	if(demoplayback && !menuactive && !desired_fullscreen && !MouseIsInWindow())
+	if(demoplayback && menuactive == MenuActive::Inactive && !desired_fullscreen && !MouseIsInWindow())
 		return;
 
 	if(window_focused)
@@ -1560,13 +1562,13 @@ static void I_ReadMouse()
 		if(x != 0 || y != 0)
 		{
 			event_t event;
-			event.type = ev_mousemotion;
+			event.type = EventType::MouseMotion;
 			event.data1.i = x;
 			event.data2.i = -y;
 
 			D_PostEvent(&event);
 
-			if(!menuactive)
+			if(menuactive == MenuActive::Inactive)
 				mouse_hide_timer = 2 * TICRATE;
 		}
 	}
@@ -1593,7 +1595,7 @@ static dboolean MouseShouldBeGrabbed()
 	//    return false;
 
 	// In windowed demo playback, only hide/grab the cursor while it's inside the window
-	if(demoplayback && !menuactive && !desired_fullscreen && !MouseIsInWindow())
+	if(demoplayback && menuactive == MenuActive::Inactive && !desired_fullscreen && !MouseIsInWindow())
 	{
 		return false;
 	}
@@ -1609,18 +1611,18 @@ static dboolean MouseShouldBeGrabbed()
 	// always grab the mouse in camera mode when playing levels
 	// and menu is not active
 	if(walkcamera.type)
-		return (demoplayback && gamestate == GS_LEVEL && !menuactive);
+		return (demoplayback && gamestate == GameState::Level && menuactive == MenuActive::Inactive);
 
 	// during playback the mouse should be hidden when not moving
-	if(demoplayback && !menuactive && mouse_hide_timer > 0 &&
-		(dsda_IntConfig(dsda_config_playback_mouse_controls) || !desired_fullscreen))
+	if(demoplayback && menuactive == MenuActive::Inactive && mouse_hide_timer > 0 &&
+		(dsda_IntConfig(ConfigId::PlaybackMouseControls) || !desired_fullscreen))
 	{
 		// moved hide playback bar timer logic to not be tied to "inside window" logic
 		return false;
 	}
 
 	// when menu is active, release the mouse even in fullscreen
-	if(menuactive)
+	if(menuactive != MenuActive::Inactive)
 		return false;
 
 	// always grab the mouse when full screen (dont want to

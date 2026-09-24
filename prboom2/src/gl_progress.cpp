@@ -91,8 +91,8 @@ static void gld_InitProgressUpdate()
 		16,
 		186,
 		&hud_font,
-		CR_DEFAULT,
-		VPT_ALIGN_LEFT_BOTTOM
+		ColorRange::Default,
+		PatchTranslation::AlignLeftBottom
 	);
 }
 

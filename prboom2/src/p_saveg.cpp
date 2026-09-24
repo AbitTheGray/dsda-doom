@@ -4,6 +4,8 @@
  *      Archiving: SaveGame I/O.
  */
 
+#include <utility>
+
 #include <stdint.h>
 
 #include "doomstat.hpp"
@@ -91,7 +93,7 @@ void P_ArchivePlayers()
 			player_t* dest;
 
 			P_SAVE_TYPE_REF(&players[i], dest, player_t);
-			for(j = 0; j < NUMPSPRITES; j++)
+			for(j = 0; j < std::to_underlying(PspNum::Count); j++)
 				if(dest->psprites[j].state)
 					dest->psprites[j].state =
 						(state_t*)(dest->psprites[j].state - states);
@@ -122,7 +124,7 @@ void P_UnArchivePlayers()
 			// hexen_note: poisoner not reloaded
 			players[i].poisoner = nullptr;
 
-			for(j = 0; j < NUMPSPRITES; j++)
+			for(j = 0; j < std::to_underlying(PspNum::Count); j++)
 				if(players[i].psprites[j].state)
 					players[i].psprites[j].state =
 						&states[(size_t)players[i].psprites[j].state];
@@ -441,7 +443,7 @@ void P_UnArchiveMap()
 	P_LOAD_X(automap_full);
 
 	if(automap_full)
-		AM_Start(AM_OPEN_FULLAUTOMAP);
+		AM_Start(AutomapStart::FullAutomap);
 
 	P_LOAD_X(markpointnum);
 
@@ -462,13 +464,13 @@ void P_UnArchiveMap()
 	}
 }
 
-void P_ArchiveThinkerSubclass(th_class class_)
+void P_ArchiveThinkerSubclass(ThinkerClass class_)
 {
 	int count;
 	thinker_t *cap, *th;
 
 	count = 0;
-	cap = &thinkerclasscap[class_];
+	cap = &thinkerclasscap[std::to_underlying(class_)];
 	for(th = cap->cnext; th != cap; th = th->cnext)
 		count++;
 
@@ -483,20 +485,20 @@ void P_ArchiveThinkerSubclass(th_class class_)
 void P_ArchiveThinkerSubclasses()
 {
 	// Other subclass ordering is not relevant
-	P_ArchiveThinkerSubclass(th_friends);
-	P_ArchiveThinkerSubclass(th_enemies);
+	P_ArchiveThinkerSubclass(ThinkerClass::Friends);
+	P_ArchiveThinkerSubclass(ThinkerClass::Enemies);
 }
 
-void P_UnArchiveThinkerSubclass(th_class class_, mobj_t** mobj_p, int mobj_count)
+void P_UnArchiveThinkerSubclass(ThinkerClass class_, mobj_t** mobj_p, int mobj_count)
 {
 	int i;
 	int count;
 
 	// Reset thinker subclass list
-	thinkerclasscap[class_].cprev->cnext = thinkerclasscap[class_].cnext;
-	thinkerclasscap[class_].cnext->cprev = thinkerclasscap[class_].cprev;
-	thinkerclasscap[class_].cprev =
-		thinkerclasscap[class_].cnext = &thinkerclasscap[class_];
+	thinkerclasscap[std::to_underlying(class_)].cprev->cnext = thinkerclasscap[std::to_underlying(class_)].cnext;
+	thinkerclasscap[std::to_underlying(class_)].cnext->cprev = thinkerclasscap[std::to_underlying(class_)].cprev;
+	thinkerclasscap[std::to_underlying(class_)].cprev =
+		thinkerclasscap[std::to_underlying(class_)].cnext = &thinkerclasscap[std::to_underlying(class_)];
 
 	P_LOAD_X(count);
 
@@ -519,7 +521,7 @@ void P_UnArchiveThinkerSubclass(th_class class_, mobj_t** mobj_p, int mobj_count
 				th->cprev->cnext = th;
 			}
 
-			th = &thinkerclasscap[class_];
+			th = &thinkerclasscap[std::to_underlying(class_)];
 			th->cprev->cnext = &mobj->thinker;
 			mobj->thinker.cnext = th;
 			mobj->thinker.cprev = th->cprev;
@@ -534,8 +536,8 @@ void P_UnArchiveThinkerSubclass(th_class class_, mobj_t** mobj_p, int mobj_count
 
 void P_UnArchiveThinkerSubclasses(mobj_t** mobj_p, int mobj_count)
 {
-	P_UnArchiveThinkerSubclass(th_friends, mobj_p, mobj_count);
-	P_UnArchiveThinkerSubclass(th_enemies, mobj_p, mobj_count);
+	P_UnArchiveThinkerSubclass(ThinkerClass::Friends, mobj_p, mobj_count);
+	P_UnArchiveThinkerSubclass(ThinkerClass::Enemies, mobj_p, mobj_count);
 }
 
 extern mobj_t** blocklinks;
@@ -675,47 +677,47 @@ void P_UnArchivePolyObjSpecialData()
 
 // dsda - fix save / load synchronization
 // merges thinkerclass_t and specials_e
-typedef enum
+enum struct TrueThinkerClass : int32_t
 {
-	tc_mobj,
-	tc_ceiling,
-	tc_door,
-	tc_floor,
-	tc_plat,
-	tc_flash,
-	tc_strobe,
-	tc_glow,
-	tc_zdoom_glow,
-	tc_elevator,
-	tc_scroll_side,
-	tc_scroll_side_control,
-	tc_scroll_floor,
-	tc_scroll_floor_control,
-	tc_scroll_ceiling,
-	tc_scroll_ceiling_control,
-	tc_scroll_floor_carry,
-	tc_scroll_floor_carry_control,
-	tc_zdoom_scroll_floor,
-	tc_zdoom_scroll_ceiling,
-	tc_thrust,
-	tc_pusher,
-	tc_flicker,
-	tc_zdoom_flicker,
-	tc_friction,
-	tc_light,
-	tc_phase,
-	tc_acs,
-	tc_pillar,
-	tc_floor_waggle,
-	tc_ceiling_waggle,
-	tc_poly_rotate,
-	tc_poly_move,
-	tc_poly_door,
-	tc_quake,
-	tc_ambient_source,
-	tc_button,
-	tc_end
-} true_thinkerclass_t;
+	Mobj,
+	Ceiling,
+	Door,
+	Floor,
+	Plat,
+	Flash,
+	Strobe,
+	Glow,
+	ZDoomGlow,
+	Elevator,
+	ScrollSide,
+	ScrollSideControl,
+	ScrollFloor,
+	ScrollFloorControl,
+	ScrollCeiling,
+	ScrollCeilingControl,
+	ScrollFloorCarry,
+	ScrollFloorCarryControl,
+	ZDoomScrollFloor,
+	ZDoomScrollCeiling,
+	Thrust,
+	Pusher,
+	Flicker,
+	ZDoomFlicker,
+	Friction,
+	Light,
+	Phase,
+	Acs,
+	Pillar,
+	FloorWaggle,
+	CeilingWaggle,
+	PolyRotate,
+	PolyMove,
+	PolyDoor,
+	Quake,
+	AmbientSource,
+	Button,
+	End
+};
 
 // dsda - fix save / load synchronization
 // merges P_ArchiveThinkers & P_ArchiveSpecials
@@ -753,7 +755,7 @@ void P_ArchiveThinkers()
 		{
 			ceiling_t* ceiling;
 		ceiling: // killough 2/14/98
-			P_SAVE_BYTE(tc_ceiling);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Ceiling));
 			P_SAVE_TYPE_REF(th, ceiling, ceiling_t);
 			ceiling->sector = (sector_t*)(intptr_t)(ceiling->sector->iSectorID);
 			continue;
@@ -762,7 +764,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_VerticalDoor))
 		{
 			vldoor_t* door;
-			P_SAVE_BYTE(tc_door);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Door));
 			P_SAVE_TYPE_REF(th, door, vldoor_t);
 			door->sector = (sector_t*)(intptr_t)(door->sector->iSectorID);
 			//jff 1/31/98 archive line remembered by door as well
@@ -773,7 +775,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_MoveFloor))
 		{
 			floormove_t* floor;
-			P_SAVE_BYTE(tc_floor);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Floor));
 			P_SAVE_TYPE_REF(th, floor, floormove_t);
 			floor->sector = (sector_t*)(intptr_t)(floor->sector->iSectorID);
 			continue;
@@ -783,7 +785,7 @@ void P_ArchiveThinkers()
 		{
 			plat_t* plat;
 		plat: // killough 2/14/98: added fix for original plat height above
-			P_SAVE_BYTE(tc_plat);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Plat));
 			P_SAVE_TYPE_REF(th, plat, plat_t);
 			plat->sector = (sector_t*)(intptr_t)(plat->sector->iSectorID);
 			continue;
@@ -792,7 +794,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_LightFlash))
 		{
 			lightflash_t* flash;
-			P_SAVE_BYTE(tc_flash);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Flash));
 			P_SAVE_TYPE_REF(th, flash, lightflash_t);
 			flash->sector = (sector_t*)(intptr_t)(flash->sector->iSectorID);
 			continue;
@@ -801,7 +803,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_StrobeFlash))
 		{
 			strobe_t* strobe;
-			P_SAVE_BYTE(tc_strobe);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Strobe));
 			P_SAVE_TYPE_REF(th, strobe, strobe_t);
 			strobe->sector = (sector_t*)(intptr_t)(strobe->sector->iSectorID);
 			continue;
@@ -810,7 +812,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_Glow))
 		{
 			glow_t* glow;
-			P_SAVE_BYTE(tc_glow);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Glow));
 			P_SAVE_TYPE_REF(th, glow, glow_t);
 			glow->sector = (sector_t*)(intptr_t)(glow->sector->iSectorID);
 			continue;
@@ -819,7 +821,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_ZDoom_Glow))
 		{
 			zdoom_glow_t* glow;
-			P_SAVE_BYTE(tc_zdoom_glow);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ZDoomGlow));
 			P_SAVE_TYPE_REF(th, glow, zdoom_glow_t);
 			glow->sector = (sector_t*)(intptr_t)(glow->sector->iSectorID);
 			continue;
@@ -829,7 +831,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_FireFlicker))
 		{
 			fireflicker_t* flicker;
-			P_SAVE_BYTE(tc_flicker);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Flicker));
 			P_SAVE_TYPE_REF(th, flicker, fireflicker_t);
 			flicker->sector = (sector_t*)(intptr_t)(flicker->sector->iSectorID);
 			continue;
@@ -838,7 +840,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_ZDoom_Flicker))
 		{
 			zdoom_flicker_t* flicker;
-			P_SAVE_BYTE(tc_zdoom_flicker);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ZDoomFlicker));
 			P_SAVE_TYPE_REF(th, flicker, zdoom_flicker_t);
 			flicker->sector = (sector_t*)(intptr_t)(flicker->sector->iSectorID);
 			continue;
@@ -848,7 +850,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_MoveElevator))
 		{
 			elevator_t* elevator; //jff 2/22/98
-			P_SAVE_BYTE(tc_elevator);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Elevator));
 			P_SAVE_TYPE_REF(th, elevator, elevator_t);
 			elevator->sector = (sector_t*)(intptr_t)(elevator->sector->iSectorID);
 			continue;
@@ -856,77 +858,77 @@ void P_ArchiveThinkers()
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateSideScroller))
 		{
-			P_SAVE_BYTE(tc_scroll_side);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ScrollSide));
 			P_SAVE_TYPE(th, scroll_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateFloorScroller))
 		{
-			P_SAVE_BYTE(tc_scroll_floor);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ScrollFloor));
 			P_SAVE_TYPE(th, scroll_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateCeilingScroller))
 		{
-			P_SAVE_BYTE(tc_scroll_ceiling);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ScrollCeiling));
 			P_SAVE_TYPE(th, scroll_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateFloorCarryScroller))
 		{
-			P_SAVE_BYTE(tc_scroll_floor_carry);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ScrollFloorCarry));
 			P_SAVE_TYPE(th, scroll_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateZDoomFloorScroller))
 		{
-			P_SAVE_BYTE(tc_zdoom_scroll_floor);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ZDoomScrollFloor));
 			P_SAVE_TYPE(th, scroll_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateZDoomCeilingScroller))
 		{
-			P_SAVE_BYTE(tc_zdoom_scroll_ceiling);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ZDoomScrollCeiling));
 			P_SAVE_TYPE(th, scroll_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateThruster))
 		{
-			P_SAVE_BYTE(tc_thrust);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Thrust));
 			P_SAVE_TYPE(th, scroll_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateControlSideScroller))
 		{
-			P_SAVE_BYTE(tc_scroll_side_control);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ScrollSideControl));
 			P_SAVE_TYPE(th, control_scroll_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateControlFloorScroller))
 		{
-			P_SAVE_BYTE(tc_scroll_floor_control);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ScrollFloorControl));
 			P_SAVE_TYPE(th, control_scroll_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateControlCeilingScroller))
 		{
-			P_SAVE_BYTE(tc_scroll_ceiling_control);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ScrollCeilingControl));
 			P_SAVE_TYPE(th, control_scroll_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateControlFloorCarryScroller))
 		{
-			P_SAVE_BYTE(tc_scroll_floor_carry_control);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::ScrollFloorCarryControl));
 			P_SAVE_TYPE(th, control_scroll_t);
 			continue;
 		}
@@ -935,14 +937,14 @@ void P_ArchiveThinkers()
 
 		if(th->function == reinterpret_cast<think_t>(T_Pusher))
 		{
-			P_SAVE_BYTE(tc_pusher);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Pusher));
 			P_SAVE_TYPE(th, pusher_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(T_Friction))
 		{
-			P_SAVE_BYTE(tc_friction);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Friction));
 			P_SAVE_TYPE(th, friction_t);
 			continue;
 		}
@@ -950,7 +952,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_Light))
 		{
 			light_t* light;
-			P_SAVE_BYTE(tc_light);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Light));
 			P_SAVE_TYPE_REF(th, light, light_t);
 			light->sector = (sector_t*)(intptr_t)(light->sector->iSectorID);
 			continue;
@@ -959,7 +961,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_Phase))
 		{
 			phase_t* phase;
-			P_SAVE_BYTE(tc_phase);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Phase));
 			P_SAVE_TYPE_REF(th, phase, phase_t);
 			phase->sector = (sector_t*)(intptr_t)(phase->sector->iSectorID);
 			continue;
@@ -968,7 +970,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_InterpretACS))
 		{
 			acs_t* acs;
-			P_SAVE_BYTE(tc_acs);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Acs));
 			P_SAVE_TYPE_REF(th, acs, acs_t);
 			P_ReplaceMobjWithIndex(&acs->activator);
 			acs->line = (line_t*)(acs->line ? acs->line - lines : -1);
@@ -979,7 +981,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_BuildPillar))
 		{
 			pillar_t* pillar;
-			P_SAVE_BYTE(tc_pillar);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Pillar));
 			P_SAVE_TYPE_REF(th, pillar, pillar_t);
 			pillar->sector = (sector_t*)(intptr_t)(pillar->sector->iSectorID);
 			continue;
@@ -988,7 +990,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_FloorWaggle))
 		{
 			planeWaggle_t* floor_waggle;
-			P_SAVE_BYTE(tc_floor_waggle);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::FloorWaggle));
 			P_SAVE_TYPE_REF(th, floor_waggle, planeWaggle_t);
 			floor_waggle->sector = (sector_t*)(intptr_t)(floor_waggle->sector->iSectorID);
 			continue;
@@ -997,7 +999,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(T_CeilingWaggle))
 		{
 			planeWaggle_t* ceiling_waggle;
-			P_SAVE_BYTE(tc_ceiling_waggle);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::CeilingWaggle));
 			P_SAVE_TYPE_REF(th, ceiling_waggle, planeWaggle_t);
 			ceiling_waggle->sector = (sector_t*)(intptr_t)(ceiling_waggle->sector->iSectorID);
 			continue;
@@ -1005,21 +1007,21 @@ void P_ArchiveThinkers()
 
 		if(th->function == reinterpret_cast<think_t>(T_RotatePoly))
 		{
-			P_SAVE_BYTE(tc_poly_rotate);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::PolyRotate));
 			P_SAVE_TYPE(th, polyevent_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(T_MovePoly))
 		{
-			P_SAVE_BYTE(tc_poly_move);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::PolyMove));
 			P_SAVE_TYPE(th, polyevent_t);
 			continue;
 		}
 
 		if(th->function == reinterpret_cast<think_t>(T_PolyDoor))
 		{
-			P_SAVE_BYTE(tc_poly_door);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::PolyDoor));
 			P_SAVE_TYPE(th, polydoor_t);
 			continue;
 		}
@@ -1027,7 +1029,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateQuake))
 		{
 			quake_t* quake;
-			P_SAVE_BYTE(tc_quake);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Quake));
 			P_SAVE_TYPE_REF(th, quake, quake_t);
 			P_ReplaceMobjWithIndex(&quake->location);
 			continue;
@@ -1036,7 +1038,7 @@ void P_ArchiveThinkers()
 		if(th->function == reinterpret_cast<think_t>(dsda_UpdateAmbientSource))
 		{
 			ambient_source_t* ambient_source;
-			P_SAVE_BYTE(tc_ambient_source);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::AmbientSource));
 			P_SAVE_TYPE_REF(th, ambient_source, ambient_source_t);
 			P_ReplaceMobjWithIndex(&ambient_source->mobj);
 			continue;
@@ -1046,7 +1048,7 @@ void P_ArchiveThinkers()
 		{
 			mobj_t* mobj;
 
-			P_SAVE_BYTE(tc_mobj);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Mobj));
 			P_SAVE_TYPE_REF(th, mobj, mobj_t);
 
 			mobj->state = (state_t*)(mobj->state - states);
@@ -1093,14 +1095,14 @@ void P_ArchiveThinkers()
 		if(buttonlist[i].btimer != 0)
 		{
 			button_t* button;
-			P_SAVE_BYTE(tc_button);
+			P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::Button));
 			P_SAVE_TYPE_REF(&buttonlist[i], button, button_t);
 			button->line = (line_t*)(button->line - lines);
 		}
 	}
 
 	// add a terminating marker
-	P_SAVE_BYTE(tc_end);
+	P_SAVE_BYTE(std::to_underlying(TrueThinkerClass::End));
 
 	P_ArchivePolyObjSpecialData();
 
@@ -1130,7 +1132,7 @@ void P_UnArchiveThinkers()
 	thinker_t* th;
 	mobj_t** mobj_p; // killough 2/14/98: Translation table
 	int mobj_count;  // killough 2/14/98: size of or index into table
-	true_thinkerclass_t tc;
+	TrueThinkerClass tc;
 
 	totallive = 0;
 
@@ -1161,16 +1163,16 @@ void P_UnArchiveThinkers()
 
 		while(true)
 		{
-			tc = static_cast<true_thinkerclass_t>(*save_p++);
-			if(tc == tc_end)
+			tc = static_cast<TrueThinkerClass>(*save_p++);
+			if(tc == TrueThinkerClass::End)
 				break;
 
-			if(tc == tc_mobj) mobj_count++;
+			if(tc == TrueThinkerClass::Mobj) mobj_count++;
 			save_p +=
-				tc == tc_ceiling ? sizeof(ceiling_t) : tc == tc_door ? sizeof(vldoor_t) : tc == tc_floor ? sizeof(floormove_t) : tc == tc_plat ? sizeof(plat_t) : tc == tc_flash ? sizeof(lightflash_t) : tc == tc_strobe ? sizeof(strobe_t) : tc == tc_glow ? sizeof(glow_t) : tc == tc_zdoom_glow ? sizeof(zdoom_glow_t) : tc == tc_elevator ? sizeof(elevator_t) : tc == tc_scroll_side ? sizeof(scroll_t) : tc == tc_scroll_floor ? sizeof(scroll_t) : tc == tc_scroll_ceiling ? sizeof(scroll_t) : tc == tc_scroll_floor_carry ? sizeof(scroll_t) : tc == tc_zdoom_scroll_floor ? sizeof(scroll_t) : tc == tc_zdoom_scroll_ceiling ? sizeof(scroll_t) : tc == tc_thrust ? sizeof(scroll_t) : tc == tc_scroll_side_control ? sizeof(control_scroll_t) : tc == tc_scroll_floor_control ? sizeof(control_scroll_t) : tc == tc_scroll_ceiling_control ? sizeof(control_scroll_t) : tc == tc_scroll_floor_carry_control ? sizeof(control_scroll_t) : tc == tc_pusher ? sizeof(pusher_t) : tc == tc_flicker ? sizeof(fireflicker_t) : tc == tc_zdoom_flicker ? sizeof(zdoom_flicker_t) : tc == tc_friction ? sizeof(friction_t) : tc == tc_light ? sizeof(light_t) : tc == tc_phase ? sizeof(phase_t) : tc == tc_acs ? sizeof(acs_t) : tc == tc_pillar ? sizeof(pillar_t) : tc == tc_floor_waggle ? sizeof(planeWaggle_t) : tc == tc_ceiling_waggle ? sizeof(planeWaggle_t) : tc == tc_poly_rotate ? sizeof(polyevent_t) : tc == tc_poly_move ? sizeof(polyevent_t) : tc == tc_poly_door ? sizeof(polydoor_t) : tc == tc_quake ? sizeof(quake_t) : tc == tc_ambient_source ? sizeof(ambient_source_t) : tc == tc_mobj ? sizeof(mobj_t) : tc == tc_button ? sizeof(button_t) : 0;
+				tc == TrueThinkerClass::Ceiling ? sizeof(ceiling_t) : tc == TrueThinkerClass::Door ? sizeof(vldoor_t) : tc == TrueThinkerClass::Floor ? sizeof(floormove_t) : tc == TrueThinkerClass::Plat ? sizeof(plat_t) : tc == TrueThinkerClass::Flash ? sizeof(lightflash_t) : tc == TrueThinkerClass::Strobe ? sizeof(strobe_t) : tc == TrueThinkerClass::Glow ? sizeof(glow_t) : tc == TrueThinkerClass::ZDoomGlow ? sizeof(zdoom_glow_t) : tc == TrueThinkerClass::Elevator ? sizeof(elevator_t) : tc == TrueThinkerClass::ScrollSide ? sizeof(scroll_t) : tc == TrueThinkerClass::ScrollFloor ? sizeof(scroll_t) : tc == TrueThinkerClass::ScrollCeiling ? sizeof(scroll_t) : tc == TrueThinkerClass::ScrollFloorCarry ? sizeof(scroll_t) : tc == TrueThinkerClass::ZDoomScrollFloor ? sizeof(scroll_t) : tc == TrueThinkerClass::ZDoomScrollCeiling ? sizeof(scroll_t) : tc == TrueThinkerClass::Thrust ? sizeof(scroll_t) : tc == TrueThinkerClass::ScrollSideControl ? sizeof(control_scroll_t) : tc == TrueThinkerClass::ScrollFloorControl ? sizeof(control_scroll_t) : tc == TrueThinkerClass::ScrollCeilingControl ? sizeof(control_scroll_t) : tc == TrueThinkerClass::ScrollFloorCarryControl ? sizeof(control_scroll_t) : tc == TrueThinkerClass::Pusher ? sizeof(pusher_t) : tc == TrueThinkerClass::Flicker ? sizeof(fireflicker_t) : tc == TrueThinkerClass::ZDoomFlicker ? sizeof(zdoom_flicker_t) : tc == TrueThinkerClass::Friction ? sizeof(friction_t) : tc == TrueThinkerClass::Light ? sizeof(light_t) : tc == TrueThinkerClass::Phase ? sizeof(phase_t) : tc == TrueThinkerClass::Acs ? sizeof(acs_t) : tc == TrueThinkerClass::Pillar ? sizeof(pillar_t) : tc == TrueThinkerClass::FloorWaggle ? sizeof(planeWaggle_t) : tc == TrueThinkerClass::CeilingWaggle ? sizeof(planeWaggle_t) : tc == TrueThinkerClass::PolyRotate ? sizeof(polyevent_t) : tc == TrueThinkerClass::PolyMove ? sizeof(polyevent_t) : tc == TrueThinkerClass::PolyDoor ? sizeof(polydoor_t) : tc == TrueThinkerClass::Quake ? sizeof(quake_t) : tc == TrueThinkerClass::AmbientSource ? sizeof(ambient_source_t) : tc == TrueThinkerClass::Mobj ? sizeof(mobj_t) : tc == TrueThinkerClass::Button ? sizeof(button_t) : 0;
 		}
 
-		if(*--save_p != tc_end)
+		if(*--save_p != std::to_underlying(TrueThinkerClass::End))
 			I_Error("P_UnArchiveThinkers: Unknown tc %i in size calculation", *save_p);
 
 		// first table entry special: 0 maps to NULL
@@ -1182,13 +1184,13 @@ void P_UnArchiveThinkers()
 	mobj_count = 0;
 	while(true)
 	{
-		tc = static_cast<true_thinkerclass_t>(*save_p++);
-		if(tc == tc_end)
+		tc = static_cast<TrueThinkerClass>(*save_p++);
+		if(tc == TrueThinkerClass::End)
 			break;
 
 		switch(tc)
 		{
-			case tc_ceiling:
+			case TrueThinkerClass::Ceiling:
 			{
 				ceiling_t* ceiling = static_cast<ceiling_t*>(Z_MallocLevel(sizeof(*ceiling)));
 				P_LOAD_P(ceiling);
@@ -1203,7 +1205,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_door:
+			case TrueThinkerClass::Door:
 			{
 				vldoor_t* door = static_cast<vldoor_t*>(Z_MallocLevel(sizeof(*door)));
 				P_LOAD_P(door);
@@ -1218,7 +1220,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_floor:
+			case TrueThinkerClass::Floor:
 			{
 				floormove_t* floor = static_cast<floormove_t*>(Z_MallocLevel(sizeof(*floor)));
 				P_LOAD_P(floor);
@@ -1229,7 +1231,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_plat:
+			case TrueThinkerClass::Plat:
 			{
 				plat_t* plat = static_cast<plat_t*>(Z_MallocLevel(sizeof(*plat)));
 				P_LOAD_P(plat);
@@ -1244,7 +1246,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_flash:
+			case TrueThinkerClass::Flash:
 			{
 				lightflash_t* flash = static_cast<lightflash_t*>(Z_MallocLevel(sizeof(*flash)));
 				P_LOAD_P(flash);
@@ -1255,7 +1257,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_strobe:
+			case TrueThinkerClass::Strobe:
 			{
 				strobe_t* strobe = static_cast<strobe_t*>(Z_MallocLevel(sizeof(*strobe)));
 				P_LOAD_P(strobe);
@@ -1266,7 +1268,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_glow:
+			case TrueThinkerClass::Glow:
 			{
 				glow_t* glow = static_cast<glow_t*>(Z_MallocLevel(sizeof(*glow)));
 				P_LOAD_P(glow);
@@ -1277,7 +1279,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_zdoom_glow:
+			case TrueThinkerClass::ZDoomGlow:
 			{
 				zdoom_glow_t* glow = static_cast<zdoom_glow_t*>(Z_MallocLevel(sizeof(*glow)));
 				P_LOAD_P(glow);
@@ -1288,7 +1290,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_flicker: // killough 10/4/98
+			case TrueThinkerClass::Flicker: // killough 10/4/98
 			{
 				fireflicker_t* flicker = static_cast<fireflicker_t*>(Z_MallocLevel(sizeof(*flicker)));
 				P_LOAD_P(flicker);
@@ -1299,7 +1301,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_zdoom_flicker:
+			case TrueThinkerClass::ZDoomFlicker:
 			{
 				zdoom_flicker_t* flicker = static_cast<zdoom_flicker_t*>(Z_MallocLevel(sizeof(*flicker)));
 				P_LOAD_P(flicker);
@@ -1311,7 +1313,7 @@ void P_UnArchiveThinkers()
 			}
 
 			//jff 2/22/98 new case for elevators
-			case tc_elevator:
+			case TrueThinkerClass::Elevator:
 			{
 				elevator_t* elevator = static_cast<elevator_t*>(Z_MallocLevel(sizeof(*elevator)));
 				P_LOAD_P(elevator);
@@ -1323,7 +1325,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_scroll_side:
+			case TrueThinkerClass::ScrollSide:
 			{
 				scroll_t* scroll = static_cast<scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1332,7 +1334,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_scroll_floor:
+			case TrueThinkerClass::ScrollFloor:
 			{
 				scroll_t* scroll = static_cast<scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1341,7 +1343,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_scroll_ceiling:
+			case TrueThinkerClass::ScrollCeiling:
 			{
 				scroll_t* scroll = static_cast<scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1350,7 +1352,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_scroll_floor_carry:
+			case TrueThinkerClass::ScrollFloorCarry:
 			{
 				scroll_t* scroll = static_cast<scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1359,7 +1361,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_zdoom_scroll_floor:
+			case TrueThinkerClass::ZDoomScrollFloor:
 			{
 				scroll_t* scroll = static_cast<scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1368,7 +1370,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_zdoom_scroll_ceiling:
+			case TrueThinkerClass::ZDoomScrollCeiling:
 			{
 				scroll_t* scroll = static_cast<scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1377,7 +1379,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_thrust:
+			case TrueThinkerClass::Thrust:
 			{
 				scroll_t* scroll = static_cast<scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1386,7 +1388,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_scroll_side_control:
+			case TrueThinkerClass::ScrollSideControl:
 			{
 				control_scroll_t* scroll = static_cast<control_scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1395,7 +1397,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_scroll_floor_control:
+			case TrueThinkerClass::ScrollFloorControl:
 			{
 				control_scroll_t* scroll = static_cast<control_scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1404,7 +1406,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_scroll_ceiling_control:
+			case TrueThinkerClass::ScrollCeilingControl:
 			{
 				control_scroll_t* scroll = static_cast<control_scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1413,7 +1415,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_scroll_floor_carry_control:
+			case TrueThinkerClass::ScrollFloorCarryControl:
 			{
 				control_scroll_t* scroll = static_cast<control_scroll_t*>(Z_MallocLevel(sizeof(*scroll)));
 				P_LOAD_P(scroll);
@@ -1422,7 +1424,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_pusher: // phares 3/22/98: new Push/Pull effect thinkers
+			case TrueThinkerClass::Pusher: // phares 3/22/98: new Push/Pull effect thinkers
 			{
 				pusher_t* pusher = static_cast<pusher_t*>(Z_MallocLevel(sizeof(pusher_t)));
 				P_LOAD_P(pusher);
@@ -1432,7 +1434,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_friction:
+			case TrueThinkerClass::Friction:
 			{
 				friction_t* friction = static_cast<friction_t*>(Z_MallocLevel(sizeof(friction_t)));
 				P_LOAD_P(friction);
@@ -1441,7 +1443,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_light:
+			case TrueThinkerClass::Light:
 			{
 				light_t* light = static_cast<light_t*>(Z_MallocLevel(sizeof(*light)));
 				P_LOAD_P(light);
@@ -1451,7 +1453,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_phase:
+			case TrueThinkerClass::Phase:
 			{
 				phase_t* phase = static_cast<phase_t*>(Z_MallocLevel(sizeof(*phase)));
 				P_LOAD_P(phase);
@@ -1462,7 +1464,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_acs:
+			case TrueThinkerClass::Acs:
 			{
 				acs_t* acs = static_cast<acs_t*>(Z_MallocLevel(sizeof(*acs)));
 				P_LOAD_P(acs);
@@ -1472,7 +1474,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_pillar:
+			case TrueThinkerClass::Pillar:
 			{
 				pillar_t* pillar = static_cast<pillar_t*>(Z_MallocLevel(sizeof(*pillar)));
 				P_LOAD_P(pillar);
@@ -1483,7 +1485,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_floor_waggle:
+			case TrueThinkerClass::FloorWaggle:
 			{
 				planeWaggle_t* waggle = static_cast<planeWaggle_t*>(Z_MallocLevel(sizeof(*waggle)));
 				P_LOAD_P(waggle);
@@ -1494,7 +1496,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_ceiling_waggle:
+			case TrueThinkerClass::CeilingWaggle:
 			{
 				planeWaggle_t* waggle = static_cast<planeWaggle_t*>(Z_MallocLevel(sizeof(*waggle)));
 				P_LOAD_P(waggle);
@@ -1505,7 +1507,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_poly_rotate:
+			case TrueThinkerClass::PolyRotate:
 			{
 				polyevent_t* poly = static_cast<polyevent_t*>(Z_MallocLevel(sizeof(*poly)));
 				P_LOAD_P(poly);
@@ -1514,7 +1516,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_poly_move:
+			case TrueThinkerClass::PolyMove:
 			{
 				polyevent_t* poly = static_cast<polyevent_t*>(Z_MallocLevel(sizeof(*poly)));
 				P_LOAD_P(poly);
@@ -1523,7 +1525,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_poly_door:
+			case TrueThinkerClass::PolyDoor:
 			{
 				polydoor_t* poly = static_cast<polydoor_t*>(Z_MallocLevel(sizeof(*poly)));
 				P_LOAD_P(poly);
@@ -1532,7 +1534,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_quake:
+			case TrueThinkerClass::Quake:
 			{
 				quake_t* quake = static_cast<quake_t*>(Z_MallocLevel(sizeof(*quake)));
 				P_LOAD_P(quake);
@@ -1541,7 +1543,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_ambient_source:
+			case TrueThinkerClass::AmbientSource:
 			{
 				ambient_source_t* ambient_source = static_cast<ambient_source_t*>(Z_MallocLevel(sizeof(*ambient_source)));
 				P_LOAD_P(ambient_source);
@@ -1550,7 +1552,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_mobj:
+			case TrueThinkerClass::Mobj:
 			{
 				mobj_t* mobj = static_cast<mobj_t*>(Z_MallocLevel(sizeof(mobj_t)));
 
@@ -1569,7 +1571,7 @@ void P_UnArchiveThinkers()
 				if(mobj->player)
 					(mobj->player = &players[(size_t)mobj->player - 1])->mo = mobj;
 
-				mobj->info = &mobjinfo[mobj->type];
+				mobj->info = &mobjinfo[std::to_underlying(mobj->type)];
 
 				// Don't place objects marked for deletion
 				if(mobj->index == MARKED_FOR_DELETION)
@@ -1601,7 +1603,7 @@ void P_UnArchiveThinkers()
 				mobj->thinker.function = reinterpret_cast<think_t>(P_MobjThinker);
 				P_AddThinker(&mobj->thinker);
 
-				if(heretic && mobj->type == HERETIC_MT_BLASTERFX1)
+				if(heretic && mobj->type == MobjType::HereticBlasterfx1)
 					mobj->thinker.function = reinterpret_cast<think_t>(P_BlasterMobjThinker);
 
 				if(!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL | MF_CORPSE)))
@@ -1609,7 +1611,7 @@ void P_UnArchiveThinkers()
 				break;
 			}
 
-			case tc_button:
+			case TrueThinkerClass::Button:
 			{
 				button_t button;
 				P_LOAD_SIZE(&button, sizeof(button_t));
@@ -1696,7 +1698,7 @@ void P_UnArchiveThinkers()
 	}
 
 	// killough 3/26/98: Spawn icon landings:
-	if(gamemode == commercial && !hexen)
+	if(gamemode == GameMode::Commercial && !hexen)
 	{
 		// P_SpawnBrainTargets overwrites brain.targeton and brain.easy with zero.
 		struct brain_s brain_tmp = brain; // saving
@@ -1704,7 +1706,7 @@ void P_UnArchiveThinkers()
 		P_SpawnBrainTargets();
 
 		// old demos with save/load tics should not be affected by this fix
-		if(!prboom_comp[PC_RESET_MONSTERSPAWNER_PARAMS_AFTER_LOADING].state)
+		if(!prboom_comp[std::to_underlying(PrboomComp::ResetMonsterspawnerParamsAfterLoading)].state)
 		{
 			brain = brain_tmp; // restoring
 		}
@@ -1951,7 +1953,7 @@ void P_UnArchiveSounds()
 			sndMobj = (mobj_t*)&polyobjs[secNum].startSpot;
 		}
 		SN_StartSequence(sndMobj, sequence);
-		SN_ChangeNodeData(i, seqOffset, delayTics, volume, soundID);
+		SN_ChangeNodeData(i, seqOffset, delayTics, volume, static_cast<SfxId>(soundID));
 		i++;
 	}
 }

@@ -117,7 +117,7 @@ void gld_InitOpenGL()
 
 	gl_ext_texture_filter_anisotropic = isExtensionSupported("GL_EXT_texture_filter_anisotropic") != nullptr;
 	if(gl_ext_texture_filter_anisotropic)
-		lprintf(LO_DEBUG, "using GL_EXT_texture_filter_anisotropic\n");
+		lprintf(OutputLevels::Debug, "using GL_EXT_texture_filter_anisotropic\n");
 
 	// Any textures sizes are allowed
 	gl_arb_texture_non_power_of_two = isExtensionSupported("GL_ARB_texture_non_power_of_two") != nullptr;
@@ -156,7 +156,7 @@ void gld_InitOpenGL()
 			gl_arb_texture_compression = false;
 	}
 	if(gl_arb_texture_compression)
-		lprintf(LO_DEBUG, "using GL_ARB_texture_compression\n");
+		lprintf(OutputLevels::Debug, "using GL_ARB_texture_compression\n");
 
 	//
 	// EXT_framebuffer_object
@@ -184,11 +184,11 @@ void gld_InitOpenGL()
 			gl_ext_framebuffer_object = false;
 	}
 	if(gl_ext_framebuffer_object)
-		lprintf(LO_DEBUG, "using GL_EXT_framebuffer_object\n");
+		lprintf(OutputLevels::Debug, "using GL_EXT_framebuffer_object\n");
 
 	gl_ext_packed_depth_stencil = isExtensionSupported("GL_EXT_packed_depth_stencil") != nullptr;
 	if(gl_ext_packed_depth_stencil)
-		lprintf(LO_DEBUG, "using GL_EXT_packed_depth_stencil\n");
+		lprintf(OutputLevels::Debug, "using GL_EXT_packed_depth_stencil\n");
 
 	//
 	// Blending
@@ -203,10 +203,10 @@ void gld_InitOpenGL()
 			gl_ext_blend_color = false;
 	}
 	if(gl_ext_blend_color)
-		lprintf(LO_DEBUG, "using GL_EXT_blend_color\n");
+		lprintf(OutputLevels::Debug, "using GL_EXT_blend_color\n");
 
 	// VBO
-	if(dsda_IntConfig(dsda_config_gl_usevbo))
+	if(dsda_IntConfig(ConfigId::GlUsevbo))
 	{
 		gl_ext_arb_vertex_buffer_object = isExtensionSupported("GL_ARB_vertex_buffer_object") != nullptr;
 		if(gl_ext_arb_vertex_buffer_object)
@@ -221,7 +221,7 @@ void gld_InitOpenGL()
 				gl_ext_arb_vertex_buffer_object = false;
 		}
 		if(gl_ext_arb_vertex_buffer_object)
-			lprintf(LO_DEBUG, "using GL_ARB_vertex_buffer_object\n");
+			lprintf(OutputLevels::Debug, "using GL_ARB_vertex_buffer_object\n");
 	}
 
 	gl_arb_pixel_buffer_object = isExtensionSupported("GL_ARB_pixel_buffer_object") != nullptr;
@@ -243,7 +243,7 @@ void gld_InitOpenGL()
 			gl_arb_pixel_buffer_object = false;
 	}
 	if(gl_arb_pixel_buffer_object)
-		lprintf(LO_DEBUG, "using GL_ARB_pixel_buffer_object\n");
+		lprintf(OutputLevels::Debug, "using GL_ARB_pixel_buffer_object\n");
 
 	//
 	// Stencil support
@@ -304,13 +304,13 @@ void gld_InitOpenGL()
 		I_Error("gld_InitOpenGL: Insufficient support for shader objects");
 	}
 
-	lprintf(LO_DEBUG, "using GL_ARB_shader_objects\n");
-	lprintf(LO_DEBUG, "using GL_ARB_vertex_shader\n");
-	lprintf(LO_DEBUG, "using GL_ARB_fragment_shader\n");
-	lprintf(LO_DEBUG, "using GL_ARB_shading_language_100\n");
+	lprintf(OutputLevels::Debug, "using GL_ARB_shader_objects\n");
+	lprintf(OutputLevels::Debug, "using GL_ARB_vertex_shader\n");
+	lprintf(OutputLevels::Debug, "using GL_ARB_fragment_shader\n");
+	lprintf(OutputLevels::Debug, "using GL_ARB_shading_language_100\n");
 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &gl_max_texture_size);
-	lprintf(LO_DEBUG, "GL_MAX_TEXTURE_SIZE=%i\n", gl_max_texture_size);
+	lprintf(OutputLevels::Debug, "GL_MAX_TEXTURE_SIZE=%i\n", gl_max_texture_size);
 
 	//init states manager
 	gld_EnableMultisample(true);
@@ -455,9 +455,9 @@ void gld_EnableMultisample(int enable)
 	}
 }
 
-void SetTextureMode(tex_mode_e type)
+void SetTextureMode(TexMode type)
 {
-	if(type == TM_MASK)
+	if(type == TexMode::Mask)
 	{
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
@@ -470,7 +470,7 @@ void SetTextureMode(tex_mode_e type)
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
 	}
-	else if(type == TM_OPAQUE)
+	else if(type == TexMode::Opaque)
 	{
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
@@ -483,7 +483,7 @@ void SetTextureMode(tex_mode_e type)
 		glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, GL_PRIMARY_COLOR);
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
 	}
-	else if(type == TM_INVERT)
+	else if(type == TexMode::Invert)
 	{
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
@@ -498,7 +498,7 @@ void SetTextureMode(tex_mode_e type)
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
 		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
 	}
-	else if(type == TM_INVERTOPAQUE)
+	else if(type == TexMode::InvertOpaque)
 	{
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
 		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);

@@ -10,7 +10,7 @@ extern "C"
 {
 #endif
 
-void dsda_InitKeysHC(int x_offset, int y_offset, int vpt_flags, int* args, int arg_count, void** data);
+void dsda_InitKeysHC(int x_offset, int y_offset, PatchTranslation vpt_flags, int* args, int arg_count, void** data);
 void dsda_UpdateKeysHC(void* data);
 void dsda_DrawKeysHC(void* data);
 

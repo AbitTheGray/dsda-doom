@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Palette Management
 
+#include <utility>
+
 #include <math.h>
 
 #include "r_main.hpp"
@@ -11,84 +13,84 @@
 
 #include "palette.hpp"
 
-int playpal_index = playpal_default;
+PlaypalIndex playpal_index = PlaypalIndex::Default;
 
-static dsda_playpal_t playpal_data[NUMPALETTES] = {
-	{playpal_default, "PLAYPAL"},
-	{playpal_1, "PLAYPAL1"},
-	{playpal_2, "PLAYPAL2"},
-	{playpal_3, "PLAYPAL3"},
-	{playpal_4, "PLAYPAL4"},
-	{playpal_5, "PLAYPAL5"},
-	{playpal_6, "PLAYPAL6"},
-	{playpal_7, "PLAYPAL7"},
-	{playpal_8, "PLAYPAL8"},
-	{playpal_9, "PLAYPAL9"},
-	{playpal_heretic_e2end, "E2PAL"},
-	{playpal_custom, ""},
+static dsda_playpal_t playpal_data[std::to_underlying(PlaypalIndex::Count)] = {
+	{PlaypalIndex::Default, "PLAYPAL"},
+	{PlaypalIndex::Pal1, "PLAYPAL1"},
+	{PlaypalIndex::Pal2, "PLAYPAL2"},
+	{PlaypalIndex::Pal3, "PLAYPAL3"},
+	{PlaypalIndex::Pal4, "PLAYPAL4"},
+	{PlaypalIndex::Pal5, "PLAYPAL5"},
+	{PlaypalIndex::Pal6, "PLAYPAL6"},
+	{PlaypalIndex::Pal7, "PLAYPAL7"},
+	{PlaypalIndex::Pal8, "PLAYPAL8"},
+	{PlaypalIndex::Pal9, "PLAYPAL9"},
+	{PlaypalIndex::HereticE2End, "E2PAL"},
+	{PlaypalIndex::Custom, ""},
 };
 
-dsda_playpal_t* dsda_PlayPalData(int playpal_i)
+dsda_playpal_t* dsda_PlayPalData(PlaypalIndex playpal_i)
 {
-	return &playpal_data[playpal_i];
+	return &playpal_data[std::to_underlying(playpal_i)];
 }
 
 void dsda_CyclePlayPal()
 {
 	int lump_num = -1;
-	int cycle_playpal_index;
+	PlaypalIndex cycle_playpal_index;
 
 	cycle_playpal_index = playpal_index;
 
 	do
 	{
-		cycle_playpal_index++;
+		cycle_playpal_index = static_cast<PlaypalIndex>(std::to_underlying(cycle_playpal_index) + 1);
 
-		if(cycle_playpal_index > playpal_9)
-			cycle_playpal_index = playpal_default;
+		if(cycle_playpal_index > PlaypalIndex::Pal9)
+			cycle_playpal_index = PlaypalIndex::Default;
 
 		// Looped around and found nothing
 		if(cycle_playpal_index == playpal_index)
 			return;
 
-		lump_num = W_CheckNumForName(playpal_data[cycle_playpal_index].lump_name);
+		lump_num = W_CheckNumForName(playpal_data[std::to_underlying(cycle_playpal_index)].lump_name);
 	}
 	while(lump_num == LUMP_NOT_FOUND);
 
 	V_SetPlayPal(cycle_playpal_index);
 }
 
-void dsda_SetPlayPal(int index)
+void dsda_SetPlayPal(PlaypalIndex index)
 {
-	if(index < 0 || index >= NUMPALETTES)
-		index = playpal_default;
+	if(index < PlaypalIndex::Default || index >= PlaypalIndex::Count)
+		index = PlaypalIndex::Default;
 
 	playpal_index = index;
 }
 
-void dsda_FreePlayPal(int playpal_i)
+void dsda_FreePlayPal(PlaypalIndex playpal_i)
 {
-	if(playpal_data[playpal_i].lump)
+	if(playpal_data[std::to_underlying(playpal_i)].lump)
 	{
-		Z_Free(playpal_data[playpal_i].lump);
-		playpal_data[playpal_i].lump = nullptr;
+		Z_Free(playpal_data[std::to_underlying(playpal_i)].lump);
+		playpal_data[std::to_underlying(playpal_i)].lump = nullptr;
 	}
-	if(playpal_data[playpal_i].colours)
+	if(playpal_data[std::to_underlying(playpal_i)].colours)
 	{
-		Z_Free(playpal_data[playpal_i].colours);
-		playpal_data[playpal_i].colours = nullptr;
+		Z_Free(playpal_data[std::to_underlying(playpal_i)].colours);
+		playpal_data[std::to_underlying(playpal_i)].colours = nullptr;
 	}
-	playpal_data[playpal_i].length = 0;
-	playpal_data[playpal_i].transparent = 0;
-	playpal_data[playpal_i].duplicate = 0;
-	playpal_data[playpal_i].darkest = 0;
-	playpal_data[playpal_i].lightest = 0;
+	playpal_data[std::to_underlying(playpal_i)].length = 0;
+	playpal_data[std::to_underlying(playpal_i)].transparent = 0;
+	playpal_data[std::to_underlying(playpal_i)].duplicate = 0;
+	playpal_data[std::to_underlying(playpal_i)].darkest = 0;
+	playpal_data[std::to_underlying(playpal_i)].lightest = 0;
 }
 
 void dsda_FreeAllPlayPals()
 {
-	for(int playpal_i = 0; playpal_i < NUMPALETTES; ++playpal_i)
-		dsda_FreePlayPal(playpal_i);
+	for(int32_t i = 0; i < std::to_underlying(PlaypalIndex::Count); ++i)
+		dsda_FreePlayPal(static_cast<PlaypalIndex>(i));
 }
 
 static dboolean dsda_DuplicatePaletteEntry(const byte* playpal, int i, int j)
@@ -152,7 +154,7 @@ double dsda_PaletteEntryLightness(const byte* playpal, int i)
 }
 
 // Moved from r_patch.c
-void dsda_InitPlayPal(int playpal_i)
+void dsda_InitPlayPal(PlaypalIndex playpal_i)
 {
 	double lightness;
 	double darkest, lightest;
@@ -162,13 +164,13 @@ void dsda_InitPlayPal(int playpal_i)
 
 	dsda_FreePlayPal(playpal_i);
 
-	lump = W_CheckNumForName(playpal_data[playpal_i].lump_name);
+	lump = W_CheckNumForName(playpal_data[std::to_underlying(playpal_i)].lump_name);
 	if(lump == LUMP_NOT_FOUND)
 		return;
 
 	playpal = (const byte*)W_LumpByNum(lump);
 
-	if(!playpal_data[playpal_i].duplicate)
+	if(!playpal_data[std::to_underlying(playpal_i)].duplicate)
 	{
 		// find two duplicate palette entries. use one for transparency.
 		// rewrite source pixels in patches to the other on composition.
@@ -191,14 +193,14 @@ void dsda_InitPlayPal(int playpal_i)
 		if(found)
 		{
 			// found duplicate
-			playpal_data[playpal_i].transparent = i;
-			playpal_data[playpal_i].duplicate = j;
+			playpal_data[std::to_underlying(playpal_i)].transparent = i;
+			playpal_data[std::to_underlying(playpal_i)].duplicate = j;
 		}
 		else
 		{
 			// no duplicate: use 255 for transparency, as done previously
-			playpal_data[playpal_i].transparent = 255;
-			playpal_data[playpal_i].duplicate = -1;
+			playpal_data[std::to_underlying(playpal_i)].transparent = 255;
+			playpal_data[std::to_underlying(playpal_i)].duplicate = -1;
 		}
 	}
 
@@ -212,21 +214,21 @@ void dsda_InitPlayPal(int playpal_i)
 		if(lightness < darkest)
 		{
 			darkest = lightness;
-			playpal_data[playpal_i].darkest = i;
+			playpal_data[std::to_underlying(playpal_i)].darkest = i;
 		}
 
 		if(lightness > lightest)
 		{
 			lightest = lightness;
-			playpal_data[playpal_i].lightest = i;
+			playpal_data[std::to_underlying(playpal_i)].lightest = i;
 		}
 	}
 }
 
 void dsda_InitAllPlayPals()
 {
-	for(int playpal_i = 0; playpal_i < NUMPALETTES; playpal_i++)
+	for(int32_t i = 0; i < std::to_underlying(PlaypalIndex::Count); ++i)
 	{
-		dsda_InitPlayPal(playpal_i);
+		dsda_InitPlayPal(static_cast<PlaypalIndex>(i));
 	}
 }

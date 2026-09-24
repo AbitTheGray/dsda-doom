@@ -6,14 +6,14 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+#include "tables.hpp"
+#include "d_player.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
-#include "tables.hpp"
-#include "d_player.hpp"
 
 #define SMOOTH_PLAYING_MAXFACTOR 16
 

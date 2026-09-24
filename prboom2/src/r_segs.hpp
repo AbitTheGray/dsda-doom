@@ -19,14 +19,14 @@ int R_MidLightLevel(side_t* side, int base_lightlevel);
 int R_BottomLightLevel(side_t* side, int base_lightlevel);
 void R_AddContrast(seg_t* seg, int* base_lightlevel);
 
-typedef enum
+enum struct FakeContrastMode : int32_t
 {
-	FAKE_CONTRAST_MODE_OFF,
-	FAKE_CONTRAST_MODE_ON,
-	FAKE_CONTRAST_MODE_SMOOTH
-} fake_contrast_mode_t;
+	Off,
+	On,
+	Smooth
+};
 
-extern fake_contrast_mode_t fake_contrast_mode;
+extern FakeContrastMode fake_contrast_mode;
 
 #ifdef __cplusplus
 }

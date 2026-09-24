@@ -5,15 +5,14 @@
 
 #pragma once
 
+#include <string.h>
+#include "d_ticcmd.hpp"
+#include "tables.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include <string.h>
-
-#include "d_ticcmd.hpp"
-#include "tables.hpp"
 
 #if !defined(__GNUC__) && !defined(__clang__)
 #define __attribute__(x)

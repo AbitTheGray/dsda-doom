@@ -6,6 +6,8 @@
  *       e.g. inline assembly, different algorithms.
  */
 
+#include <utility>
+
 #include <stdint.h>
 
 #include "doomstat.hpp"
@@ -48,15 +50,15 @@ const byte* main_tranmap; // killough 4/11/98
 //
 
 // SoM: OPTIMIZE for ANYRES
-typedef enum
+enum struct ColumnType : int32_t
 {
-	COL_NONE,
-	COL_OPAQUE,
-	COL_TRANS,
-	COL_FLEXTRANS,
-	COL_FUZZ,
-	COL_FLEXADD
-} columntype_e;
+	None,
+	Opaque,
+	Trans,
+	FlexTrans,
+	Fuzz,
+	FlexAdd
+};
 
 static int temp_x = 0;
 static int tempyl[4], tempyh[4];
@@ -65,7 +67,7 @@ static int tempyl[4], tempyh[4];
 static byte* tempbuf;
 
 static int startx = 0;
-static int temptype = COL_NONE;
+static ColumnType temptype = ColumnType::None;
 static int commontop, commonbot;
 static const byte* temptranmap = nullptr;
 // SoM 7-28-04: Fix the fuzz problem.
@@ -174,7 +176,7 @@ void R_ResetColumnBuffer()
 	// haleyjd 10/06/05: this must not be done if temp_x == 0!
 	if(temp_x)
 		R_FlushColumns();
-	temptype = COL_NONE;
+	temptype = ColumnType::None;
 	R_FlushWholeColumns = R_FlushWholeError;
 	R_FlushHTColumns = R_FlushHTError;
 	R_FlushQuadColumn = R_QuadFlushError;
@@ -212,7 +214,7 @@ void R_ResetColumnBuffer()
 
 byte* translationtables;
 
-#define R_DRAWCOLUMN_PIPELINE_TYPE RDC_PIPELINE_STANDARD
+#define R_DRAWCOLUMN_PIPELINE_TYPE ColumnPipeline::Standard
 #define R_DRAWCOLUMN_PIPELINE_BASE RDC_STANDARD
 
 #define R_DRAWCOLUMN_FUNCNAME_COMPOSITE(postfix) R_DrawColumn ## postfix
@@ -236,7 +238,7 @@ byte* translationtables;
 // opaque' decision is made outside this routine, not down where the
 // actual code differences are.
 
-#define R_DRAWCOLUMN_PIPELINE_TYPE RDC_PIPELINE_TRANSLUCENT
+#define R_DRAWCOLUMN_PIPELINE_TYPE ColumnPipeline::Translucent
 #define R_DRAWCOLUMN_PIPELINE_BASE RDC_TRANSLUCENT
 
 #define R_DRAWCOLUMN_FUNCNAME_COMPOSITE(postfix) R_DrawTLColumn ## postfix
@@ -258,7 +260,7 @@ byte* translationtables;
 //  identical sprites, kinda brightened up.
 //
 
-#define R_DRAWCOLUMN_PIPELINE_TYPE RDC_PIPELINE_TRANSLATED
+#define R_DRAWCOLUMN_PIPELINE_TYPE ColumnPipeline::Translated
 #define R_DRAWCOLUMN_PIPELINE_BASE RDC_TRANSLATED
 
 #define R_DRAWCOLUMN_FUNCNAME_COMPOSITE(postfix) R_DrawTranslatedColumn ## postfix
@@ -279,7 +281,7 @@ byte* translationtables;
 //  i.e. spectres and invisible players.
 //
 
-#define R_DRAWCOLUMN_PIPELINE_TYPE RDC_PIPELINE_FUZZ
+#define R_DRAWCOLUMN_PIPELINE_TYPE ColumnPipeline::Fuzz
 #define R_DRAWCOLUMN_PIPELINE_BASE RDC_FUZZ
 
 #define R_DRAWCOLUMN_FUNCNAME_COMPOSITE(postfix) R_DrawFuzzColumn ## postfix
@@ -291,7 +293,7 @@ byte* translationtables;
 #undef R_DRAWCOLUMN_PIPELINE_BASE
 #undef R_DRAWCOLUMN_PIPELINE_TYPE
 
-static R_DrawColumn_f drawcolumnfuncs[RDRAW_FILTER_MAXFILTERS][RDC_PIPELINE_MAXPIPELINES] = {
+static R_DrawColumn_f drawcolumnfuncs[std::to_underlying(DrawFilterType::Count)][std::to_underlying(ColumnPipeline::Count)] = {
 	{
 		R_DrawColumn_PointUV,
 		R_DrawTLColumn_PointUV,
@@ -306,11 +308,11 @@ static R_DrawColumn_f drawcolumnfuncs[RDRAW_FILTER_MAXFILTERS][RDC_PIPELINE_MAXP
 	},
 };
 
-R_DrawColumn_f R_GetDrawColumnFunc(enum column_pipeline_e type, enum draw_filter_type_e filterz)
+R_DrawColumn_f R_GetDrawColumnFunc(ColumnPipeline type, DrawFilterType filterz)
 {
-	R_DrawColumn_f result = drawcolumnfuncs[filterz][type];
+	R_DrawColumn_f result = drawcolumnfuncs[std::to_underlying(filterz)][std::to_underlying(type)];
 	if(result == nullptr)
-		I_Error("R_GetDrawColumnFunc: undefined function (%d, %d)", type, filterz);
+		I_Error("R_GetDrawColumnFunc: undefined function (%d, %d)", std::to_underlying(type), std::to_underlying(filterz));
 	return result;
 }
 
@@ -321,8 +323,9 @@ void R_SetDefaultDrawColumnVars(draw_column_vars_t* dcvars)
 	dcvars->source = dcvars->prevsource = dcvars->nextsource = nullptr;
 	dcvars->colormap = colormaps[0];
 	dcvars->translation = nullptr;
-	dcvars->edgeslope = dcvars->drawingmasked = 0;
-	dcvars->flags = 0;
+	dcvars->edgeslope = static_cast<EdgeSlope>(0);
+	dcvars->drawingmasked = 0;
+	dcvars->flags = static_cast<DrawColumnFlag>(0);
 
 	// [AR] mark weapon sprite
 	dcvars->isplayersprite = false;
@@ -544,7 +547,7 @@ void R_FillBackScreen()
 		if(only_stbar && ST_SCALED_OFFSETX > 0)
 		{
 			int stbar_top = SCREENHEIGHT - ST_SCALED_HEIGHT;
-			int stbar_solid_bg = dsda_IntConfig(dsda_config_sts_solid_bg_color);
+			int stbar_solid_bg = dsda_IntConfig(ConfigId::StsSolidBgColor);
 
 			if(stbar_solid_bg)
 			{
@@ -554,16 +557,16 @@ void R_FillBackScreen()
 			}
 
 			if(V_IsOpenGLMode()) // OpenGL has no way to adjust y-offset independent from height
-				V_FillFlat(grnrock.lumpnum, 1, 0, 0, SCREENWIDTH, SCREENHEIGHT, VPT_STRETCH);
+				V_FillFlat(grnrock.lumpnum, 1, 0, 0, SCREENWIDTH, SCREENHEIGHT, PatchTranslation::Stretch);
 			else
-				V_FillFlat(grnrock.lumpnum, 1, 0, stbar_top, SCREENWIDTH, ST_SCALED_HEIGHT, VPT_STRETCH);
+				V_FillFlat(grnrock.lumpnum, 1, 0, stbar_top, SCREENWIDTH, ST_SCALED_HEIGHT, PatchTranslation::Stretch);
 
 			// heretic_note: I think this looks bad, so I'm skipping it...
 			if(!heretic)
 			{
 				// line between view and status bar
-				V_FillPatch(brdr_b.lumpnum, 1, 0, stbar_top, ST_SCALED_OFFSETX, brdr_b.height, VPT_NONE);
-				V_FillPatch(brdr_b.lumpnum, 1, SCREENWIDTH - ST_SCALED_OFFSETX, stbar_top, ST_SCALED_OFFSETX, brdr_b.height, VPT_NONE);
+				V_FillPatch(brdr_b.lumpnum, 1, 0, stbar_top, ST_SCALED_OFFSETX, brdr_b.height, PatchTranslation::None);
+				V_FillPatch(brdr_b.lumpnum, 1, SCREENWIDTH - ST_SCALED_OFFSETX, stbar_top, ST_SCALED_OFFSETX, brdr_b.height, PatchTranslation::None);
 			}
 		}
 	}

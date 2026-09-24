@@ -79,14 +79,14 @@ dboolean I_StartDisplay()
 		saved_gametic = gametic;
 
 	InDisplay = true;
-	DSDA_ADD_CONTEXT(sf_display);
+	DSDA_ADD_CONTEXT(SignalContext::Display);
 	return true;
 }
 
 void I_EndDisplay()
 {
 	InDisplay = false;
-	DSDA_REMOVE_CONTEXT(sf_display);
+	DSDA_REMOVE_CONTEXT(SignalContext::Display);
 }
 
 int interpolation_method;
@@ -593,7 +593,7 @@ char* I_FindFileInternal(const char* wfname, const char* ext, dboolean isStatic)
 		if(M_FileExists(p))
 		{
 			if(!isStatic)
-				lprintf(LO_DEBUG, " found %s\n", p);
+				lprintf(OutputLevels::Debug, " found %s\n", p);
 			return p;
 		}
 		if(!isStatic)

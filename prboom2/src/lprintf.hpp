@@ -6,22 +6,22 @@
 
 #pragma once
 
+#include <stdarg.h>
+#include <stddef.h>
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <stdarg.h>
-#include <stddef.h>
-#include "doomtype.hpp"
-
-typedef enum
+enum struct OutputLevels : int32_t
 {
-	LO_INFO  = 1,
-	LO_WARN  = 2,
-	LO_ERROR = 4,
-	LO_DEBUG = 8,
-} OutputLevels;
+	Info  = 1,
+	Warn  = 2,
+	Error = 4,
+	Debug = 8,
+};
 
 #if !defined(__GNUC__) && !defined(__clang__)
 #define __attribute__(x)

@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
 
 #define PLAYBACK_NORMAL      0
 #define PLAYBACK_JOIN_ON_END 1

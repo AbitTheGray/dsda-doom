@@ -5,13 +5,13 @@
 
 #pragma once
 
+#include "doomdef.hpp"
+#include "m_fixed.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomdef.hpp"
-#include "m_fixed.hpp"
 
 #define SI_SPAWN_MULTI      0x0001
 #define SI_FAST_MONSTERS    0x0002

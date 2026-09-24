@@ -10,6 +10,8 @@
  * to reduce the chances of demo sync problems.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "m_random.hpp"
 #include "lprintf.hpp"
@@ -67,7 +69,7 @@ rng_t rng; // the random number state
 
 unsigned int rngseed = 1993; // killough 3/26/98: The seed
 
-int (P_Random)(pr_class_t pr_class)
+int (P_Random)(RandomClass pr_class)
 {
 	// killough 2/16/98:  We always update both sets of random number
 	// generators, to ensure repeatability if the demo_compatibility
@@ -78,7 +80,7 @@ int (P_Random)(pr_class_t pr_class)
 	// All of this RNG stuff is tricky as far as demo sync goes --
 	// it's like playing with explosives :) Lee
 
-	int compat = pr_class == pr_misc ? (rng.prndindex = (rng.prndindex + 1) & 255) : (rng.rndindex = (rng.rndindex + 1) & 255);
+	int compat = pr_class == RandomClass::Misc ? (rng.prndindex = (rng.prndindex + 1) & 255) : (rng.rndindex = (rng.rndindex + 1) & 255);
 
 	unsigned long boom;
 
@@ -87,14 +89,14 @@ int (P_Random)(pr_class_t pr_class)
 	// much more unstable method by putting everything
 	// except pr_misc into pr_all_in_one
 
-	if(pr_class != pr_misc && !demo_insurance) // killough 3/31/98
-		pr_class = pr_all_in_one;
+	if(pr_class != RandomClass::Misc && !demo_insurance) // killough 3/31/98
+		pr_class = RandomClass::AllInOne;
 
-	boom = rng.seed[pr_class];
+	boom = rng.seed[std::to_underlying(pr_class)];
 
 	// killough 3/26/98: add pr_class*2 to addend
 
-	rng.seed[pr_class] = boom * 1664525ul + 221297ul + pr_class * 2;
+	rng.seed[std::to_underlying(pr_class)] = boom * 1664525ul + 221297ul + std::to_underlying(pr_class) * 2;
 
 	if(demo_compatibility)
 		return rndtable[compat];
@@ -126,7 +128,7 @@ void M_ClearRandom()
 {
 	int i;
 	unsigned int seed = rngseed * 2 + 1; // add 3/26/98: add rngseed
-	for(i = 0; i < NUMPRCLASS; i++)      // go through each pr_class and set
+	for(i = 0; i < std::to_underlying(RandomClass::Count); i++)      // go through each pr_class and set
 		rng.seed[i] = seed *= 69069ul;   // each starting seed differently
 	rng.prndindex = rng.rndindex = 0;    // clear two compatibility indices
 }
@@ -138,7 +140,7 @@ void M_ClearRandom()
 // Outputs a random angle between (-spread, spread), as an int ('cause it can be negative).
 //   spread: Maximum angle (degrees, in fixed point -- not BAM!)
 //
-int P_RandomHitscanAngle(pr_class_t pr_class, fixed_t spread)
+int P_RandomHitscanAngle(RandomClass pr_class, fixed_t spread)
 {
 	int t;
 	int64_t spread_bam;
@@ -155,7 +157,7 @@ int P_RandomHitscanAngle(pr_class_t pr_class, fixed_t spread)
 // Outputs a random angle between (-spread, spread), converted to values used for slope
 //   spread: Maximum vertical angle (degrees, in fixed point -- not BAM!)
 //
-int P_RandomHitscanSlope(pr_class_t pr_class, fixed_t spread)
+int P_RandomHitscanSlope(RandomClass pr_class, fixed_t spread)
 {
 	int angle;
 
@@ -174,8 +176,8 @@ int P_RandomHitscanSlope(pr_class_t pr_class, fixed_t spread)
 
 int P_SubRandom()
 {
-	int r = P_Random(pr_heretic);
-	return r - P_Random(pr_heretic);
+	int r = P_Random(RandomClass::Heretic);
+	return r - P_Random(RandomClass::Heretic);
 }
 
 // hexen

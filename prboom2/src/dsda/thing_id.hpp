@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "p_mobj.hpp"
 
 typedef struct thing_id_list_entry_s
 {

@@ -16,8 +16,8 @@ void dsda_PlayerTrackerHC(char* str, size_t max_size)
 		max_size,
 		"%sp: %d",
 		player_damage_last_tic > 0
-		? dsda_TextColor(dsda_tc_exhud_player_damage)
-		: dsda_TextColor(dsda_tc_exhud_player_neutral),
+		? dsda_TextColor(TextColorIndex::ExhudPlayerDamage)
+		: dsda_TextColor(TextColorIndex::ExhudPlayerNeutral),
 		player_damage_last_tic
 	);
 }

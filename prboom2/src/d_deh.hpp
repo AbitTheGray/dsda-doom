@@ -14,12 +14,12 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
 
 void ProcessDehFile(const char* filename, const char* outfilename, int lumpnum);
 void PostProcessDeh();
@@ -618,7 +618,6 @@ extern const char* s_STSTR_CLEV;     // = STSTR_CLEV;
 */
 extern const char* s_E1TEXT; // = E1TEXT;
 
-
 /*
 #define E2TEXT \
 "You've done it! The hideous cyber-\n"\
@@ -640,7 +639,6 @@ extern const char* s_E1TEXT; // = E1TEXT;
 "DOOM! -- Inferno."
 */
 extern const char* s_E2TEXT; // = E2TEXT;
-
 
 /*
 #define E3TEXT \
@@ -664,7 +662,6 @@ extern const char* s_E2TEXT; // = E2TEXT;
 */
 extern const char* s_E3TEXT; // = E3TEXT;
 
-
 /*
 #define E4TEXT \
 "the spider mastermind must have sent forth\n"\
@@ -685,7 +682,6 @@ extern const char* s_E3TEXT; // = E3TEXT;
 "next stop, hell on earth!"
 */
 extern const char* s_E4TEXT; // = E4TEXT;
-
 
 // after level 6, put this:
 
@@ -730,7 +726,6 @@ extern const char* s_C1TEXT; // = C1TEXT;
 */
 extern const char* s_C2TEXT; // = C2TEXT;
 
-
 // After level 20, put this:
 
 /*
@@ -746,7 +741,6 @@ extern const char* s_C2TEXT; // = C2TEXT;
 "GOT TO GO THROUGH HELL TO GET TO IT?"
 */
 extern const char* s_C3TEXT; // = C3TEXT;
-
 
 // After level 29, put this:
 
@@ -770,8 +764,6 @@ extern const char* s_C3TEXT; // = C3TEXT;
 */
 extern const char* s_C4TEXT; // = C4TEXT;
 
-
-
 // Before level 31, put this:
 
 /*
@@ -784,7 +776,6 @@ extern const char* s_C4TEXT; // = C4TEXT;
 */
 extern const char* s_C5TEXT; // = C5TEXT;
 
-
 // Before level 32, put this:
 
 /*
@@ -794,7 +785,6 @@ extern const char* s_C5TEXT; // = C5TEXT;
 "BLAZE THROUGH THIS ONE!\n"
 */
 extern const char* s_C6TEXT; // = C6TEXT;
-
 
 // after map 06
 
@@ -815,7 +805,6 @@ extern const char* s_C6TEXT; // = C6TEXT;
 */
 extern const char* s_P1TEXT; // = P1TEXT;
 
-
 // after map 11
 
 /*
@@ -828,7 +817,6 @@ extern const char* s_P1TEXT; // = P1TEXT;
 "You're good at that kind of thing."
 */
 extern const char* s_P2TEXT; // = P2TEXT;
-
 
 // after map 20
 
@@ -887,7 +875,6 @@ extern const char* s_P5TEXT; // = P5TEXT;
 */
 extern const char* s_P6TEXT; // = P6TEXT;
 
-
 /*
 #define T1TEXT \
 "You've fought your way out of the infested\n"\
@@ -905,7 +892,6 @@ extern const char* s_P6TEXT; // = P6TEXT;
 */
 extern const char* s_T1TEXT; // = T1TEXT;
 
-
 /*
 #define T2TEXT \
 "You hear the grinding of heavy machinery\n"\
@@ -919,7 +905,6 @@ extern const char* s_T1TEXT; // = T1TEXT;
 "You don't plan to go down easy."
 */
 extern const char* s_T2TEXT; // = T2TEXT;
-
 
 /*
 #define T3TEXT \
@@ -950,7 +935,6 @@ extern const char* s_T3TEXT; // = T3TEXT;
 */
 extern const char* s_T4TEXT; // = T4TEXT;
 
-
 /*
 #define T5TEXT \
 "What now? Looks totally different. Kind\n"\
@@ -960,7 +944,6 @@ extern const char* s_T4TEXT; // = T4TEXT;
 "to let sleeping gods lie.."
 */
 extern const char* s_T5TEXT; // = T5TEXT;
-
 
 /*
 #define T6TEXT \

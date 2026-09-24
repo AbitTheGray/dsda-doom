@@ -3,13 +3,15 @@
 // DESCRIPTION:
 //	DSDA Input
 
+#include <utility>
+
 #include <string.h>
 #include <stdlib.h>
 
 #include "input.hpp"
 
 int dsda_input_profile;
-static dsda_input_t dsda_input[DSDA_INPUT_PROFILE_COUNT][DSDA_INPUT_IDENTIFIER_COUNT];
+static dsda_input_t dsda_input[DSDA_INPUT_PROFILE_COUNT][std::to_underlying(InputId::Count)];
 
 typedef struct
 {
@@ -78,16 +80,16 @@ void dsda_InputTrackEvent(event_t* ev)
 
 	switch(ev->type)
 	{
-		case ev_keydown:
+		case EventType::KeyDown:
 			dsda_InputTrackKeyDown(ev);
 			break;
-		case ev_keyup:
+		case EventType::KeyUp:
 			dsda_InputTrackKeyUp(ev);
 			break;
-		case ev_mouse:
+		case EventType::Mouse:
 			dsda_InputTrackButtons(mousebuttons, MAX_MOUSE_BUTTONS, ev);
 			break;
-		case ev_joystick:
+		case EventType::Joystick:
 			dsda_InputTrackButtons(joybuttons, MAX_JOY_BUTTONS, ev);
 			break;
 		default:
@@ -137,16 +139,16 @@ void dsda_InputTrackGameEvent(event_t* ev)
 {
 	switch(ev->type)
 	{
-		case ev_keydown:
+		case EventType::KeyDown:
 			dsda_InputTrackGameKeyDown(ev);
 			break;
-		case ev_keyup:
+		case EventType::KeyUp:
 			dsda_InputTrackGameKeyUp(ev);
 			break;
-		case ev_mouse:
+		case EventType::Mouse:
 			dsda_InputTrackGameButtons(mousebuttons, MAX_MOUSE_BUTTONS, ev);
 			break;
-		case ev_joystick:
+		case EventType::Joystick:
 			dsda_InputTrackGameButtons(joybuttons, MAX_JOY_BUTTONS, ev);
 			break;
 		default:
@@ -154,11 +156,11 @@ void dsda_InputTrackGameEvent(event_t* ev)
 	}
 }
 
-dboolean dsda_InputActivated(int identifier)
+dboolean dsda_InputActivated(InputId identifier)
 {
 	int i;
 	dsda_input_t* input;
-	input = &dsda_input[dsda_input_profile][identifier];
+	input = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 
 	for(i = 0; i < input->num_keys; ++i)
 		if(gamekeys[input->key[i]].activated_at == dsda_input_counter)
@@ -169,11 +171,11 @@ dboolean dsda_InputActivated(int identifier)
 		joybuttons[input->joyb].activated_at == dsda_input_counter;
 }
 
-dboolean dsda_InputTickActivated(int identifier)
+dboolean dsda_InputTickActivated(InputId identifier)
 {
 	int i;
 	dsda_input_t* input;
-	input = &dsda_input[dsda_input_profile][identifier];
+	input = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 
 	for(i = 0; i < input->num_keys; ++i)
 		if(gamekeys[input->key[i]].game_activated_at > dsda_input_tick_counter)
@@ -184,12 +186,12 @@ dboolean dsda_InputTickActivated(int identifier)
 		joybuttons[input->joyb].game_activated_at > dsda_input_tick_counter;
 }
 
-dboolean dsda_InputDeactivated(int identifier)
+dboolean dsda_InputDeactivated(InputId identifier)
 {
 	int i;
 	dboolean deactivated = false;
 	dsda_input_t* input;
-	input = &dsda_input[dsda_input_profile][identifier];
+	input = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 
 	for(i = 0; i < input->num_keys; ++i)
 		if(gamekeys[input->key[i]].on)
@@ -216,25 +218,25 @@ void dsda_InputFlush()
 	dsda_input_counter = 0;
 }
 
-dsda_input_t* dsda_Input(int identifier)
+dsda_input_t* dsda_Input(InputId identifier)
 {
-	return &dsda_input[dsda_input_profile][identifier];
+	return &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 }
 
-void dsda_InputCopy(int identifier, dsda_input_t* input[DSDA_INPUT_PROFILE_COUNT])
+void dsda_InputCopy(InputId identifier, dsda_input_t* input[DSDA_INPUT_PROFILE_COUNT])
 {
 	int i;
 
 	for(i = 0; i < DSDA_INPUT_PROFILE_COUNT; ++i)
 	{
-		input[i] = &dsda_input[i][identifier];
+		input[i] = &dsda_input[i][std::to_underlying(identifier)];
 	}
 }
 
-int dsda_InputMatchKey(int identifier, int value)
+int dsda_InputMatchKey(InputId identifier, int value)
 {
 	int i;
-	dsda_input_t* p = &dsda_input[dsda_input_profile][identifier];
+	dsda_input_t* p = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 
 	for(i = 0; i < p->num_keys; ++i)
 		if(p->key[i] == value)
@@ -243,38 +245,38 @@ int dsda_InputMatchKey(int identifier, int value)
 	return false;
 }
 
-int dsda_InputMatchMouseB(int identifier, int value)
+int dsda_InputMatchMouseB(InputId identifier, int value)
 {
-	return dsda_input[dsda_input_profile][identifier].mouseb == value;
+	return dsda_input[dsda_input_profile][std::to_underlying(identifier)].mouseb == value;
 }
 
-int dsda_InputMatchJoyB(int identifier, int value)
+int dsda_InputMatchJoyB(InputId identifier, int value)
 {
-	return dsda_input[dsda_input_profile][identifier].joyb == value;
+	return dsda_input[dsda_input_profile][std::to_underlying(identifier)].joyb == value;
 }
 
-void dsda_InputResetSpecific(int config_index, int identifier)
+void dsda_InputResetSpecific(int config_index, InputId identifier)
 {
-	dsda_input_t* p = &dsda_input[config_index][identifier];
+	dsda_input_t* p = &dsda_input[config_index][std::to_underlying(identifier)];
 
 	p->num_keys = 0;
 	p->mouseb = -1;
 	p->joyb = -1;
 }
 
-void dsda_InputReset(int identifier)
+void dsda_InputReset(InputId identifier)
 {
 	dsda_InputResetSpecific(dsda_input_profile, identifier);
 }
 
-void dsda_InputSet(int identifier, dsda_input_default_t input)
+void dsda_InputSet(InputId identifier, dsda_input_default_t input)
 {
 	dsda_InputSetSpecific(dsda_input_profile, identifier, input);
 }
 
-void dsda_InputSetSpecific(int config_index, int identifier, dsda_input_default_t input)
+void dsda_InputSetSpecific(int config_index, InputId identifier, dsda_input_default_t input)
 {
-	dsda_input_t* p = &dsda_input[config_index][identifier];
+	dsda_input_t* p = &dsda_input[config_index][std::to_underlying(identifier)];
 
 	if(p->num_keys == 0)
 		p->key = static_cast<decltype(p->key)>(realloc(p->key, sizeof(*p->key)));
@@ -301,40 +303,40 @@ static void dsda_InputAddThing(int** list, int* count, int value)
 	(*list)[(*count) - 1] = value;
 }
 
-void dsda_InputAddSpecificKey(int config_index, int identifier, int value)
+void dsda_InputAddSpecificKey(int config_index, InputId identifier, int value)
 {
-	dsda_input_t* p = &dsda_input[config_index][identifier];
+	dsda_input_t* p = &dsda_input[config_index][std::to_underlying(identifier)];
 
 	if(value < 1 || value >= NUMKEYS) return;
 
 	dsda_InputAddThing(&p->key, &p->num_keys, value);
 }
 
-void dsda_InputAddKey(int identifier, int value)
+void dsda_InputAddKey(InputId identifier, int value)
 {
 	dsda_InputAddSpecificKey(dsda_input_profile, identifier, value);
 }
 
-void dsda_InputAddSpecificMouseB(int config_index, int identifier, int value)
+void dsda_InputAddSpecificMouseB(int config_index, InputId identifier, int value)
 {
 	if(value < -1 || value >= MAX_MOUSE_BUTTONS) return;
 
-	dsda_input[config_index][identifier].mouseb = value;
+	dsda_input[config_index][std::to_underlying(identifier)].mouseb = value;
 }
 
-void dsda_InputAddMouseB(int identifier, int value)
+void dsda_InputAddMouseB(InputId identifier, int value)
 {
 	dsda_InputAddSpecificMouseB(dsda_input_profile, identifier, value);
 }
 
-void dsda_InputAddSpecificJoyB(int config_index, int identifier, int value)
+void dsda_InputAddSpecificJoyB(int config_index, InputId identifier, int value)
 {
 	if(value < -1 || value >= MAX_JOY_BUTTONS) return;
 
-	dsda_input[config_index][identifier].joyb = value;
+	dsda_input[config_index][std::to_underlying(identifier)].joyb = value;
 }
 
-void dsda_InputAddJoyB(int identifier, int value)
+void dsda_InputAddJoyB(InputId identifier, int value)
 {
 	dsda_InputAddSpecificJoyB(dsda_input_profile, identifier, value);
 }
@@ -360,28 +362,28 @@ static void dsda_InputRemoveThing(int* list, int* count, int value)
 	(*count)--;
 }
 
-void dsda_InputRemoveKey(int identifier, int value)
+void dsda_InputRemoveKey(InputId identifier, int value)
 {
-	dsda_input_t* p = &dsda_input[dsda_input_profile][identifier];
+	dsda_input_t* p = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 
 	dsda_InputRemoveThing(p->key, &p->num_keys, value);
 }
 
-void dsda_InputRemoveMouseB(int identifier, int value)
+void dsda_InputRemoveMouseB(InputId identifier, int value)
 {
-	dsda_input[dsda_input_profile][identifier].mouseb = -1;
+	dsda_input[dsda_input_profile][std::to_underlying(identifier)].mouseb = -1;
 }
 
-void dsda_InputRemoveJoyB(int identifier, int value)
+void dsda_InputRemoveJoyB(InputId identifier, int value)
 {
-	dsda_input[dsda_input_profile][identifier].joyb = -1;
+	dsda_input[dsda_input_profile][std::to_underlying(identifier)].joyb = -1;
 }
 
-dboolean dsda_InputActive(int identifier)
+dboolean dsda_InputActive(InputId identifier)
 {
 	int i;
 	dsda_input_t* input;
-	input = &dsda_input[dsda_input_profile][identifier];
+	input = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 
 	for(i = 0; i < input->num_keys; ++i)
 		if(gamekeys[input->key[i]].game_on)
@@ -391,11 +393,11 @@ dboolean dsda_InputActive(int identifier)
 		(input->joyb >= 0 && joybuttons[input->joyb].game_on);
 }
 
-dboolean dsda_InputKeyActive(int identifier)
+dboolean dsda_InputKeyActive(InputId identifier)
 {
 	int i;
 	dsda_input_t* input;
-	input = &dsda_input[dsda_input_profile][identifier];
+	input = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 
 	for(i = 0; i < input->num_keys; ++i)
 		if(gamekeys[input->key[i]].game_on)
@@ -404,18 +406,18 @@ dboolean dsda_InputKeyActive(int identifier)
 	return false;
 }
 
-dboolean dsda_InputMouseBActive(int identifier)
+dboolean dsda_InputMouseBActive(InputId identifier)
 {
 	dsda_input_t* input;
-	input = &dsda_input[dsda_input_profile][identifier];
+	input = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 
 	return input->mouseb >= 0 && mousebuttons[input->mouseb].game_on;
 }
 
-dboolean dsda_InputJoyBActive(int identifier)
+dboolean dsda_InputJoyBActive(InputId identifier)
 {
 	dsda_input_t* input;
-	input = &dsda_input[dsda_input_profile][identifier];
+	input = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 
 	return input->joyb >= 0 && joybuttons[input->joyb].game_on;
 }

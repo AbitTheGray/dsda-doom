@@ -6,12 +6,16 @@
 
 #pragma once
 
+#include <utility>
+
+#include "doomdef.hpp"
+
+enum struct StateId : int32_t;
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomdef.hpp"
 
 //
 // Internal weapon flags
@@ -31,28 +35,28 @@ extern "C"
 /* Weapon info: sprite frames, ammunition use. */
 typedef struct
 {
-	ammotype_t ammo;
-	int upstate;
-	int downstate;
-	int readystate;
-	int atkstate;
-	int holdatkstate;
-	int flashstate;
+	AmmoType ammo;
+	StateId upstate;
+	StateId downstate;
+	StateId readystate;
+	StateId atkstate;
+	StateId holdatkstate;
+	StateId flashstate;
 	int ammopershot;
 	int intflags;
 	int flags;
 } weaponinfo_t;
 
-extern weaponinfo_t doom_weaponinfo[NUMWEAPONS + 2];
+extern weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2];
 
 // heretic
 
-extern weaponinfo_t wpnlev1info[NUMWEAPONS];
-extern weaponinfo_t wpnlev2info[NUMWEAPONS];
+extern weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)];
+extern weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)];
 
 // hexen
 
-extern weaponinfo_t hexen_weaponinfo[HEXEN_NUMWEAPONS][NUMCLASSES];
+extern weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::to_underlying(PClass::Count)];
 
 // dynamically selected in global.c
 

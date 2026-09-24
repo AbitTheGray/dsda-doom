@@ -6,14 +6,19 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#include <stdint.h>
+
+// declared in sounds.hpp; the fixed underlying type makes this enough
+enum struct MusicId : int32_t;
 
 #include "m_fixed.hpp"
 #include "d_event.hpp"
 #include "w_wad.hpp"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 /* CPhipps - removed wadfiles[] stuff to w_wad.h */
 
@@ -42,7 +47,7 @@ void D_Display(fixed_t frac);
 void D_PageTicker();
 void D_StartTitle();
 void D_DoomMain();
-void D_AddFile(const char* file, wad_source_t source);
+void D_AddFile(const char* file, WadSource source);
 
 extern char* iwadlump;
 
@@ -56,7 +61,7 @@ typedef struct
 	const char* name;
 } demostate_t;
 
-void D_SetPage(const char* name, int tics, int music);
+void D_SetPage(const char* name, int tics, MusicId music);
 
 #ifdef __cplusplus
 }

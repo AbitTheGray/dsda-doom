@@ -6,6 +6,8 @@
  *      Pending weapon.
  */
 
+#include <utility>
+
 #include <math.h>
 
 #include "doomstat.hpp"
@@ -76,7 +78,7 @@ extern "C" void P_CompatiblePlayerThrust(player_t* player, angle_t angle, fixed_
 
 extern "C" void P_HereticPlayerThrust(player_t* player, angle_t angle, fixed_t move)
 {
-	if(player->powers[pw_flight] && !(player->mo->z <= player->mo->floorz))
+	if(player->powers[std::to_underlying(PowerType::Flight)] && !(player->mo->z <= player->mo->floorz))
 	{
 		player->mo->momx += FixedMul(move, finecosine[angle]);
 		player->mo->momy += FixedMul(move, finesine[angle]);
@@ -95,12 +97,12 @@ extern "C" void P_HereticPlayerThrust(player_t* player, angle_t angle, fixed_t m
 
 extern "C" void P_HexenPlayerThrust(player_t* player, angle_t angle, fixed_t move)
 {
-	if(player->powers[pw_flight] && !(player->mo->z <= player->mo->floorz))
+	if(player->powers[std::to_underlying(PowerType::Flight)] && !(player->mo->z <= player->mo->floorz))
 	{
 		player->mo->momx += FixedMul(move, finecosine[angle]);
 		player->mo->momy += FixedMul(move, finesine[angle]);
 	}
-	else if(P_GetThingFloorType(player->mo) == FLOOR_ICE) // Friction_Low
+	else if(P_GetThingFloorType(player->mo) == FloorType::Ice) // Friction_Low
 	{
 		player->mo->momx += FixedMul(move >> 1, finecosine[angle]);
 		player->mo->momy += FixedMul(move >> 1, finesine[angle]);
@@ -151,7 +153,7 @@ void P_Thrust(player_t* player, angle_t angle, fixed_t move)
 static void P_Bob(player_t* player, angle_t angle, fixed_t move)
 {
 	//e6y
-	if(!mbf_features && !prboom_comp[PC_PRBOOM_FRICTION].state)
+	if(!mbf_features && !prboom_comp[std::to_underlying(PrboomComp::PrboomFriction)].state)
 		return;
 
 	player->momx += FixedMul(move, finecosine[angle >>= ANGLETOFINESHIFT]);
@@ -200,7 +202,7 @@ void P_CalcHeight(player_t* player)
 	}
 	else
 	{
-		if(demo_compatibility || player_bobbing || prboom_comp[PC_FORCE_INCORRECT_BOBBING_IN_BOOM].state)
+		if(demo_compatibility || player_bobbing || prboom_comp[std::to_underlying(PrboomComp::ForceIncorrectBobbingInBoom)].state)
 		{
 			player->bob = (FixedMul(player->mo->momx, player->mo->momx) +
 				FixedMul(player->mo->momy, player->mo->momy)) >> 2;
@@ -208,9 +210,9 @@ void P_CalcHeight(player_t* player)
 	}
 
 	//e6y
-	if(!prboom_comp[PC_PRBOOM_FRICTION].state &&
-		compatibility_level >= boom_202_compatibility &&
-		compatibility_level <= lxdoom_1_compatibility &&
+	if(!prboom_comp[std::to_underlying(PrboomComp::PrboomFriction)].state &&
+		compatibility_level >= CompLevel::Boom202 &&
+		compatibility_level <= CompLevel::Lxdoom1 &&
 		player->mo->friction > ORIG_FRICTION) // ice?
 	{
 		if(player->bob > (MAXBOB >> 2))
@@ -245,7 +247,7 @@ void P_CalcHeight(player_t* player)
 
 	// move viewheight
 
-	if(player->playerstate == PST_LIVE && (onground || raven))
+	if(player->playerstate == PlayerState::Live && (onground || raven))
 	{
 		player->viewheight += player->deltaviewheight;
 
@@ -284,7 +286,7 @@ void P_CalcHeight(player_t* player)
 		player->viewz = player->mo->z + g_viewheight + totalviewoffset;
 	}
 
-	if(player->playerstate != PST_DEAD && player->mo->z <= player->mo->floorz)
+	if(player->playerstate != PlayerState::Dead && player->mo->z <= player->mo->floorz)
 	{
 		if(player->mo->floorclip)
 			player->viewz -= player->mo->floorclip;
@@ -358,7 +360,7 @@ void P_MovePlayer(player_t* player)
 	// thrust applied to the movement varies with 'movefactor'.
 
 	//e6y
-	if((!demo_compatibility && !mbf_features && !prboom_comp[PC_PRBOOM_FRICTION].state) ||
+	if((!demo_compatibility && !mbf_features && !prboom_comp[std::to_underlying(PrboomComp::PrboomFriction)].state) ||
 		(cmd->forwardmove | cmd->sidemove)) // killough 10/98
 	{
 		if(onground || mo->flags & MF_BOUNCES || (mo->flags & MF_FLY)) // killough 8/9/98
@@ -405,8 +407,8 @@ void P_MovePlayer(player_t* player)
 				P_Thrust(player, player->mo->angle - ANG90, cmd->sidemove * movefactor);
 			}
 		}
-		if(mo->state == states + S_PLAY)
-			P_SetMobjState(mo, S_PLAY_RUN1);
+		if(mo->state == states + std::to_underlying(StateId::Play))
+			P_SetMobjState(mo, StateId::PlayRun1);
 	}
 }
 
@@ -428,7 +430,7 @@ void P_DeathThink(player_t* player)
 	// fall to the ground
 
 	onground = (player->mo->z <= player->mo->floorz);
-	if(player->mo->type == g_skullpop_mt || (hexen && player->mo->type == HEXEN_MT_ICECHUNK))
+	if(player->mo->type == g_skullpop_mt || (hexen && player->mo->type == MobjType::HexenIcechunk))
 	{
 		// Flying bloody skull
 		player->viewheight = 6 * FRACUNIT;
@@ -572,7 +574,7 @@ void P_DeathThink(player_t* player)
 			player->poisoncount--;
 	}
 
-	if(player->cmd.buttons & BT_USE)
+	if((player->cmd.buttons & ButtonCode::Use) != ButtonCode{})
 	{
 		dsda_DeathUse(player);
 	}
@@ -600,8 +602,8 @@ extern "C" void P_MorphPlayerThink(player_t* player);
 void P_PlayerThink(player_t* player)
 {
 	ticcmd_t* cmd;
-	weapontype_t newweapon;
-	int floorType;
+	WeaponType newweapon;
+	FloorType floorType;
 
 	if(movement_smooth)
 	{
@@ -635,7 +637,7 @@ void P_PlayerThink(player_t* player)
 	if(hexen)
 		player->worldTimer++;
 
-	if(player->playerstate == PST_DEAD)
+	if(player->playerstate == PlayerState::Dead)
 	{
 		P_DeathThink(player);
 		return;
@@ -669,18 +671,18 @@ void P_PlayerThink(player_t* player)
 		if(hexen)
 		{
 			mobj_t* pmo = player->mo;
-			if(player->powers[pw_speed] && !(leveltime & 1)
+			if(player->powers[std::to_underlying(PowerType::Speed)] && !(leveltime & 1)
 				&& P_AproxDistance(pmo->momx, pmo->momy) > 12 * FRACUNIT)
 			{
 				mobj_t* speedMo;
 				int playerNum;
 
-				speedMo = P_SpawnMobj(pmo->x, pmo->y, pmo->z, HEXEN_MT_PLAYER_SPEED);
+				speedMo = P_SpawnMobj(pmo->x, pmo->y, pmo->z, MobjType::HexenPlayerSpeed);
 				if(speedMo)
 				{
 					speedMo->angle = pmo->angle;
 					playerNum = P_GetPlayerNum(player);
-					if(player->pclass == PCLASS_FIGHTER)
+					if(player->pclass == PClass::Fighter)
 					{
 						// The first type should be blue, and the
 						// third should be the Fighter's original gold color
@@ -699,7 +701,7 @@ void P_PlayerThink(player_t* player)
 						speedMo->flags |= playerNum << MF_TRANSSHIFT;
 					}
 					P_SetTarget(&speedMo->target, pmo);
-					speedMo->special1.i = player->pclass;
+					speedMo->special1.i = std::to_underlying(player->pclass);
 					if(speedMo->special1.i > 2)
 					{
 						speedMo->special1.i = 0;
@@ -725,38 +727,38 @@ void P_PlayerThink(player_t* player)
 
 	if(hexen)
 	{
-		if((floorType = P_GetThingFloorType(player->mo)) != FLOOR_SOLID)
+		if((floorType = P_GetThingFloorType(player->mo)) != FloorType::Solid)
 		{
 			P_PlayerOnSpecialFlat(player, floorType);
 		}
 
 		switch(player->pclass)
 		{
-			case PCLASS_FIGHTER:
+			case PClass::Fighter:
 				if(player->mo->momz <= -35 * FRACUNIT
 					&& player->mo->momz >= -40 * FRACUNIT && !player->morphTics
 					&& !S_GetSoundPlayingInfo(player->mo,
-						hexen_sfx_player_fighter_falling_scream))
+						SfxId::HexenPlayerFighterFallingScream))
 				{
-					S_StartMobjSound(player->mo, hexen_sfx_player_fighter_falling_scream);
+					S_StartMobjSound(player->mo, SfxId::HexenPlayerFighterFallingScream);
 				}
 				break;
-			case PCLASS_CLERIC:
+			case PClass::Cleric:
 				if(player->mo->momz <= -35 * FRACUNIT
 					&& player->mo->momz >= -40 * FRACUNIT && !player->morphTics
 					&& !S_GetSoundPlayingInfo(player->mo,
-						hexen_sfx_player_cleric_falling_scream))
+						SfxId::HexenPlayerClericFallingScream))
 				{
-					S_StartMobjSound(player->mo, hexen_sfx_player_cleric_falling_scream);
+					S_StartMobjSound(player->mo, SfxId::HexenPlayerClericFallingScream);
 				}
 				break;
-			case PCLASS_MAGE:
+			case PClass::Mage:
 				if(player->mo->momz <= -35 * FRACUNIT
 					&& player->mo->momz >= -40 * FRACUNIT && !player->morphTics
 					&& !S_GetSoundPlayingInfo(player->mo,
-						hexen_sfx_player_mage_falling_scream))
+						SfxId::HexenPlayerMageFallingScream))
 				{
-					S_StartMobjSound(player->mo, hexen_sfx_player_mage_falling_scream);
+					S_StartMobjSound(player->mo, SfxId::HexenPlayerMageFallingScream);
 				}
 				break;
 			default:
@@ -783,19 +785,19 @@ void P_PlayerThink(player_t* player)
 			{
 				P_DamageMobj(player->mo, nullptr, nullptr, 10000);
 			}
-			if(cmd->arti == HEXEN_NUMARTIFACTS)
+			if(cmd->arti == std::to_underlying(ArtiType::HexenCount))
 			{
 				// use one of each artifact (except puzzle artifacts)
 				int i;
 
-				for(i = 1; i < hexen_arti_firstpuzzitem; i++)
+				for(i = 1; i < std::to_underlying(ArtiType::HexenFirstpuzzitem); i++)
 				{
-					P_PlayerUseArtifact(player, static_cast<artitype_t>(i));
+					P_PlayerUseArtifact(player, static_cast<ArtiType>(i));
 				}
 			}
 			else
 			{
-				P_PlayerUseArtifact(player, static_cast<artitype_t>(cmd->arti & AFLAG_MASK));
+				P_PlayerUseArtifact(player, static_cast<ArtiType>(cmd->arti & AFLAG_MASK));
 			}
 		}
 	}
@@ -810,7 +812,7 @@ void P_PlayerThink(player_t* player)
 			}
 			else
 			{
-				P_PlayerUseArtifact(player, static_cast<artitype_t>(cmd->arti));
+				P_PlayerUseArtifact(player, static_cast<ArtiType>(cmd->arti));
 			}
 		}
 	}
@@ -825,19 +827,19 @@ void P_PlayerThink(player_t* player)
 		}
 	}
 
-	if(raven && cmd->buttons & BT_SPECIAL)
+	if(raven && (cmd->buttons & ButtonCode::Special) != ButtonCode{})
 	{
-		cmd->buttons = 0;
+		cmd->buttons = static_cast<ButtonCode>(0);
 	}
 
 	// Check for weapon change.
-	if(cmd->buttons & BT_CHANGE && !player->morphTics)
+	if((cmd->buttons & ButtonCode::Change) != ButtonCode{} && !player->morphTics)
 	{
 		// The actual changing of the weapon is done
 		//  when the weapon psprite can do it
 		//  (read: not in the middle of an attack).
 
-		newweapon = static_cast<weapontype_t>((cmd->buttons & BT_WEAPONMASK) >> BT_WEAPONSHIFT);
+		newweapon = static_cast<WeaponType>(ButtonWeapon(cmd->buttons));
 
 		// killough 3/22/98: For demo compatibility we must perform the fist
 		// and SSG weapons switches here, rather than in G_BuildTiccmd(). For
@@ -847,45 +849,45 @@ void P_PlayerThink(player_t* player)
 		{
 			// compatibility mode -- required for old demos -- killough
 			//e6y
-			if(!prboom_comp[PC_ALLOW_SSG_DIRECT].state)
-				newweapon = static_cast<weapontype_t>((cmd->buttons & BT_WEAPONMASK_OLD) >> BT_WEAPONSHIFT);
+			if(!prboom_comp[std::to_underlying(PrboomComp::AllowSsgDirect)].state)
+				newweapon = static_cast<WeaponType>((std::to_underlying(cmd->buttons) & std::to_underlying(ButtonCode::WeaponMaskOld)) >> std::to_underlying(ButtonCode::WeaponShift));
 
 			if(!hexen)
 			{
 				if(
-					newweapon == g_wp_fist && player->weaponowned[g_wp_chainsaw]
+					newweapon == static_cast<WeaponType>(g_wp_fist) && player->weaponowned[g_wp_chainsaw]
 					&& (
-						player->readyweapon != g_wp_chainsaw ||
-						(!heretic && !player->powers[pw_strength])
+						player->readyweapon != static_cast<WeaponType>(g_wp_chainsaw) ||
+						(!heretic && !player->powers[std::to_underlying(PowerType::Strength)])
 					)
 				)
-					newweapon = static_cast<weapontype_t>(g_wp_chainsaw);
+					newweapon = static_cast<WeaponType>(g_wp_chainsaw);
 
 				if(!heretic &&
-					gamemode == commercial &&
-					newweapon == wp_shotgun &&
-					player->weaponowned[wp_supershotgun] &&
-					player->readyweapon != wp_supershotgun)
-					newweapon = wp_supershotgun;
+					gamemode == GameMode::Commercial &&
+					newweapon == WeaponType::Shotgun &&
+					player->weaponowned[std::to_underlying(WeaponType::Supershotgun)] &&
+					player->readyweapon != WeaponType::Supershotgun)
+					newweapon = WeaponType::Supershotgun;
 			}
 		}
 
 		// killough 2/8/98, 3/22/98 -- end of weapon selection changes
 
-		if(player->weaponowned[newweapon] && newweapon != player->readyweapon)
+		if(player->weaponowned[std::to_underlying(newweapon)] && newweapon != player->readyweapon)
 
 			// Do not go to plasma or BFG in shareware,
 			//  even if cheated.
 
 			// heretic_note: ignoring this...not sure it's worth worrying about
-			if((newweapon != wp_plasma && newweapon != wp_bfg)
-				|| (gamemode != shareware))
+			if((newweapon != WeaponType::Plasma && newweapon != WeaponType::Bfg)
+				|| (gamemode != GameMode::Shareware))
 				player->pendingweapon = newweapon;
 	}
 
 	// check for use
 
-	if(cmd->buttons & BT_USE)
+	if((cmd->buttons & ButtonCode::Use) != ButtonCode{})
 	{
 		if(!player->usedown)
 		{
@@ -928,14 +930,14 @@ void P_PlayerThink(player_t* player)
 
 	// Strength counts up to diminish fade.
 
-	if(player->powers[pw_strength])
-		player->powers[pw_strength]++;
+	if(player->powers[std::to_underlying(PowerType::Strength)])
+		player->powers[std::to_underlying(PowerType::Strength)]++;
 
 	// killough 1/98: Make idbeholdx toggle:
 
-	if(player->powers[pw_invulnerability] > 0) // killough
+	if(player->powers[std::to_underlying(PowerType::Invulnerability)] > 0) // killough
 	{
-		if(player->pclass == PCLASS_CLERIC)
+		if(player->pclass == PClass::Cleric)
 		{
 			if(!(leveltime & 7) && player->mo->flags & MF_SHADOW
 				&& !(player->mo->flags2 & MF2_DONTDRAW))
@@ -968,10 +970,10 @@ void P_PlayerThink(player_t* player)
 			}
 		}
 
-		if(!(--player->powers[pw_invulnerability]))
+		if(!(--player->powers[std::to_underlying(PowerType::Invulnerability)]))
 		{
 			player->mo->flags2 &= ~(MF2_INVULNERABLE | MF2_REFLECTIVE);
-			if(player->pclass == PCLASS_CLERIC)
+			if(player->pclass == PClass::Cleric)
 			{
 				player->mo->flags2 &= ~(MF2_DONTDRAW | MF2_NONSHOOTABLE);
 				player->mo->flags &= ~(MF_SHADOW | MF_ALTSHADOW);
@@ -979,46 +981,46 @@ void P_PlayerThink(player_t* player)
 		}
 	}
 
-	if(player->powers[pw_minotaur])
-		player->powers[pw_minotaur]--;
+	if(player->powers[std::to_underlying(PowerType::Minotaur)])
+		player->powers[std::to_underlying(PowerType::Minotaur)]--;
 
-	if(player->powers[pw_speed])
-		player->powers[pw_speed]--;
+	if(player->powers[std::to_underlying(PowerType::Speed)])
+		player->powers[std::to_underlying(PowerType::Speed)]--;
 
-	if(player->powers[pw_invisibility] > 0) // killough
-		if(!--player->powers[pw_invisibility])
+	if(player->powers[std::to_underlying(PowerType::Invisibility)] > 0) // killough
+		if(!--player->powers[std::to_underlying(PowerType::Invisibility)])
 			player->mo->flags &= ~MF_SHADOW;
 
-	if(player->powers[pw_infrared] > 0) // killough
-		player->powers[pw_infrared]--;
+	if(player->powers[std::to_underlying(PowerType::Infrared)] > 0) // killough
+		player->powers[std::to_underlying(PowerType::Infrared)]--;
 
-	if(player->powers[pw_ironfeet] > 0) // killough
-		player->powers[pw_ironfeet]--;
+	if(player->powers[std::to_underlying(PowerType::IronFeet)] > 0) // killough
+		player->powers[std::to_underlying(PowerType::IronFeet)]--;
 
-	if(player->powers[pw_flight] && (!hexen || netgame))
+	if(player->powers[std::to_underlying(PowerType::Flight)] && (!hexen || netgame))
 	{
-		if(!--player->powers[pw_flight])
+		if(!--player->powers[std::to_underlying(PowerType::Flight)])
 		{
 			P_PlayerEndFlight(player);
 		}
 	}
 
-	if(player->powers[pw_weaponlevel2])
+	if(player->powers[std::to_underlying(PowerType::WeaponLevel2)])
 	{
-		if(!--player->powers[pw_weaponlevel2])
+		if(!--player->powers[std::to_underlying(PowerType::WeaponLevel2)])
 		{
-			if((player->readyweapon == wp_phoenixrod)
-				&& (player->psprites[ps_weapon].state
-					!= &states[HERETIC_S_PHOENIXREADY])
-				&& (player->psprites[ps_weapon].state
-					!= &states[HERETIC_S_PHOENIXUP]))
+			if((player->readyweapon == WeaponType::PhoenixRod)
+				&& (player->psprites[std::to_underlying(PspNum::Weapon)].state
+					!= &states[std::to_underlying(StateId::HereticPhoenixready)])
+				&& (player->psprites[std::to_underlying(PspNum::Weapon)].state
+					!= &states[std::to_underlying(StateId::HereticPhoenixup)]))
 			{
-				P_SetPsprite(player, ps_weapon, HERETIC_S_PHOENIXREADY);
-				player->ammo[am_phoenixrod] -= USE_PHRD_AMMO_2;
+				P_SetPsprite(player, PspNum::Weapon, StateId::HereticPhoenixready);
+				player->ammo[std::to_underlying(AmmoType::PhoenixRod)] -= USE_PHRD_AMMO_2;
 				player->refire = 0;
 			}
-			else if((player->readyweapon == wp_gauntlets)
-				|| (player->readyweapon == wp_staff))
+			else if((player->readyweapon == WeaponType::Gauntlets)
+				|| (player->readyweapon == WeaponType::Staff))
 			{
 				player->pendingweapon = player->readyweapon;
 			}
@@ -1052,16 +1054,16 @@ void P_PlayerThink(player_t* player)
 	// killough 3/20/98: reformat to terse C syntax
 	if(!raven)
 		player->fixedcolormap = dsda_PowerPalette() &&
-			(player->powers[pw_invulnerability] > 4 * 32 ||
-				player->powers[pw_invulnerability] & 8)
+			(player->powers[std::to_underlying(PowerType::Invulnerability)] > 4 * 32 ||
+				player->powers[std::to_underlying(PowerType::Invulnerability)] & 8)
 			? INVERSECOLORMAP
-			: player->powers[pw_infrared] > 4 * 32 || player->powers[pw_infrared] & 8;
+			: player->powers[std::to_underlying(PowerType::Infrared)] > 4 * 32 || player->powers[std::to_underlying(PowerType::Infrared)] & 8;
 	else
 	{
-		if(!hexen && player->powers[pw_invulnerability])
+		if(!hexen && player->powers[std::to_underlying(PowerType::Invulnerability)])
 		{
-			if(player->powers[pw_invulnerability] > BLINKTHRESHOLD
-				|| (player->powers[pw_invulnerability] & 8))
+			if(player->powers[std::to_underlying(PowerType::Invulnerability)] > BLINKTHRESHOLD
+				|| (player->powers[std::to_underlying(PowerType::Invulnerability)] & 8))
 			{
 				player->fixedcolormap = INVERSECOLORMAP;
 			}
@@ -1070,11 +1072,11 @@ void P_PlayerThink(player_t* player)
 				player->fixedcolormap = 0;
 			}
 		}
-		else if(player->powers[pw_infrared])
+		else if(player->powers[std::to_underlying(PowerType::Infrared)])
 		{
-			if(player->powers[pw_infrared] <= BLINKTHRESHOLD)
+			if(player->powers[std::to_underlying(PowerType::Infrared)] <= BLINKTHRESHOLD)
 			{
-				if(player->powers[pw_infrared] & 8)
+				if(player->powers[std::to_underlying(PowerType::Infrared)] & 8)
 				{
 					player->fixedcolormap = 0;
 				}
@@ -1142,7 +1144,7 @@ dboolean P_UndoPlayerChicken(player_t* player)
 	fixed_t z;
 	angle_t angle;
 	int playerNum;
-	weapontype_t weapon;
+	WeaponType weapon;
 	int oldFlags;
 	int oldFlags2;
 
@@ -1151,19 +1153,19 @@ dboolean P_UndoPlayerChicken(player_t* player)
 	y = pmo->y;
 	z = pmo->z;
 	angle = pmo->angle;
-	weapon = static_cast<weapontype_t>(pmo->special1.i);
+	weapon = static_cast<WeaponType>(pmo->special1.i);
 	oldFlags = pmo->flags;
 	oldFlags2 = pmo->flags2;
-	P_SetMobjState(pmo, HERETIC_S_FREETARGMOBJ);
-	mo = P_SpawnMobj(x, y, z, static_cast<mobjtype_t>(g_mt_player));
+	P_SetMobjState(pmo, StateId::HereticFreetargmobj);
+	mo = P_SpawnMobj(x, y, z, static_cast<MobjType>(g_mt_player));
 	if(P_TestMobjLocation(mo) == false)
 	{
 		// Didn't fit
 		P_RemoveMobj(mo);
-		mo = P_SpawnMobj(x, y, z, HERETIC_MT_CHICPLAYER);
+		mo = P_SpawnMobj(x, y, z, MobjType::HereticChicplayer);
 		mo->angle = angle;
 		mo->health = player->health;
-		mo->special1.i = weapon;
+		mo->special1.i = std::to_underlying(weapon);
 		mo->player = player;
 		mo->flags = oldFlags;
 		mo->flags2 = oldFlags2;
@@ -1186,13 +1188,13 @@ dboolean P_UndoPlayerChicken(player_t* player)
 		mo->flags |= MF_NOGRAVITY;
 	}
 	player->chickenTics = 0;
-	player->powers[pw_weaponlevel2] = 0;
+	player->powers[std::to_underlying(PowerType::WeaponLevel2)] = 0;
 	player->health = mo->health = MAXHEALTH;
 	player->mo = mo;
 	angle >>= ANGLETOFINESHIFT;
 	fog = P_SpawnMobj(x + 20 * finecosine[angle],
-		y + 20 * finesine[angle], z + TELEFOGHEIGHT, HERETIC_MT_TFOG);
-	S_StartMobjSound(fog, heretic_sfx_telept);
+		y + 20 * finesine[angle], z + TELEFOGHEIGHT, MobjType::HereticTfog);
+	S_StartMobjSound(fog, SfxId::HereticTelept);
 	P_PostChickenWeapon(player, weapon);
 	return (true);
 }
@@ -1208,7 +1210,7 @@ void P_ArtiTele(player_t* player)
 	if(deathmatch)
 	{
 		selections = deathmatch_p - deathmatchstarts;
-		i = P_Random(pr_heretic) % selections;
+		i = P_Random(RandomClass::Heretic) % selections;
 		destX = deathmatchstarts[i].x;
 		destY = deathmatchstarts[i].y;
 		destAngle = ANG45 * (deathmatchstarts[i].angle / 45);
@@ -1226,7 +1228,7 @@ void P_ArtiTele(player_t* player)
 		P_UndoPlayerMorph(player);
 	}
 	if(heretic)
-		S_StartVoidSound(heretic_sfx_wpnup); // Full volume laugh
+		S_StartVoidSound(SfxId::HereticWpnup); // Full volume laugh
 }
 
 void P_PlayerNextArtifact(player_t* player)
@@ -1254,7 +1256,7 @@ void P_PlayerNextArtifact(player_t* player)
 				curpos = 6;
 			}
 		}
-		player->readyArtifact = static_cast<artitype_t>(player->inventory[inv_ptr].type);
+		player->readyArtifact = static_cast<ArtiType>(player->inventory[inv_ptr].type);
 	}
 }
 
@@ -1265,8 +1267,8 @@ void P_PlayerRemoveArtifact(player_t* player, int slot)
 	if(!(--player->inventory[slot].count))
 	{
 		// Used last of a type - compact the artifact list
-		player->readyArtifact = arti_none;
-		player->inventory[slot].type = arti_none;
+		player->readyArtifact = ArtiType::None;
+		player->inventory[slot].type = std::to_underlying(ArtiType::None);
 		for(i = slot + 1; i < player->inventorySlotNum; i++)
 		{
 			player->inventory[i - 1] = player->inventory[i];
@@ -1292,18 +1294,18 @@ void P_PlayerRemoveArtifact(player_t* player, int slot)
 			{
 				inv_ptr = 0;
 			}
-			player->readyArtifact = static_cast<artitype_t>(player->inventory[inv_ptr].type);
+			player->readyArtifact = static_cast<ArtiType>(player->inventory[inv_ptr].type);
 		}
 	}
 }
 
-void P_PlayerUseArtifact(player_t* player, artitype_t arti)
+void P_PlayerUseArtifact(player_t* player, ArtiType arti)
 {
 	int i;
 
 	for(i = 0; i < player->inventorySlotNum; i++)
 	{
-		if(player->inventory[i].type == arti)
+		if(player->inventory[i].type == std::to_underlying(arti))
 		{
 			// Found match - try to use
 			if(P_UseArtifact(player, arti))
@@ -1314,23 +1316,23 @@ void P_PlayerUseArtifact(player_t* player, artitype_t arti)
 				{
 					if(hexen)
 					{
-						if(arti < hexen_arti_firstpuzzitem)
+						if(arti < ArtiType::HexenFirstpuzzitem)
 						{
-							S_StartVoidSound(hexen_sfx_artifact_use);
+							S_StartVoidSound(SfxId::HexenArtifactUse);
 						}
 						else
 						{
-							S_StartVoidSound(hexen_sfx_puzzle_success);
+							S_StartVoidSound(SfxId::HexenPuzzleSuccess);
 						}
 					}
 					else
 					{
-						S_StartVoidSound(heretic_sfx_artiuse);
+						S_StartVoidSound(SfxId::HereticArtiuse);
 					}
 					ArtifactFlash = 4;
 				}
 			}
-			else if(!hexen || arti < hexen_arti_firstpuzzitem)
+			else if(!hexen || arti < ArtiType::HexenFirstpuzzitem)
 			{
 				// Unable to use artifact, advance pointer
 				P_PlayerNextArtifact(player);
@@ -1340,9 +1342,9 @@ void P_PlayerUseArtifact(player_t* player, artitype_t arti)
 	}
 }
 
-static dboolean Hexen_P_UseArtifact(player_t* player, artitype_t arti);
+static dboolean Hexen_P_UseArtifact(player_t* player, ArtiType arti);
 
-dboolean P_UseArtifact(player_t* player, artitype_t arti)
+dboolean P_UseArtifact(player_t* player, ArtiType arti)
 {
 	mobj_t* mo;
 	angle_t angle;
@@ -1351,31 +1353,31 @@ dboolean P_UseArtifact(player_t* player, artitype_t arti)
 
 	switch(arti)
 	{
-		case arti_invulnerability:
-			if(!P_GivePower(player, pw_invulnerability))
+		case ArtiType::Invulnerability:
+			if(!P_GivePower(player, PowerType::Invulnerability))
 			{
 				return (false);
 			}
 			break;
-		case arti_invisibility:
-			if(!P_GivePower(player, pw_invisibility))
+		case ArtiType::Invisibility:
+			if(!P_GivePower(player, PowerType::Invisibility))
 			{
 				return (false);
 			}
 			break;
-		case arti_health:
+		case ArtiType::Health:
 			if(!P_GiveBody(player, 25))
 			{
 				return (false);
 			}
 			break;
-		case arti_superhealth:
+		case ArtiType::SuperHealth:
 			if(!P_GiveBody(player, 100))
 			{
 				return (false);
 			}
 			break;
-		case arti_tomeofpower:
+		case ArtiType::TomeOfPower:
 			if(player->chickenTics)
 			{
 				// Attempt to undo chicken
@@ -1388,32 +1390,32 @@ dboolean P_UseArtifact(player_t* player, artitype_t arti)
 				{
 					// Succeeded
 					player->chickenTics = 0;
-					S_StartMobjSound(player->mo, heretic_sfx_wpnup);
+					S_StartMobjSound(player->mo, SfxId::HereticWpnup);
 				}
 			}
 			else
 			{
-				if(!P_GivePower(player, pw_weaponlevel2))
+				if(!P_GivePower(player, PowerType::WeaponLevel2))
 				{
 					return (false);
 				}
-				if(player->readyweapon == wp_staff)
+				if(player->readyweapon == WeaponType::Staff)
 				{
-					P_SetPsprite(player, ps_weapon, HERETIC_S_STAFFREADY2_1);
+					P_SetPsprite(player, PspNum::Weapon, StateId::HereticStaffready21);
 				}
-				else if(player->readyweapon == wp_gauntlets)
+				else if(player->readyweapon == WeaponType::Gauntlets)
 				{
-					P_SetPsprite(player, ps_weapon, HERETIC_S_GAUNTLETREADY2_1);
+					P_SetPsprite(player, PspNum::Weapon, StateId::HereticGauntletready21);
 				}
 			}
 			break;
-		case arti_torch:
-			if(!P_GivePower(player, pw_infrared))
+		case ArtiType::Torch:
+			if(!P_GivePower(player, PowerType::Infrared))
 			{
 				return (false);
 			}
 			break;
-		case arti_firebomb:
+		case ArtiType::Firebomb:
 			angle = player->mo->angle >> ANGLETOFINESHIFT;
 
 			// Vanilla bug here:
@@ -1427,24 +1429,24 @@ dboolean P_UseArtifact(player_t* player, artitype_t arti)
 				player->mo->y + 24 * finesine[angle],
 				player->mo->z -
 				15 * FRACUNIT * (player->mo->flags2 & 1),
-				HERETIC_MT_FIREBOMB);
+				MobjType::HereticFirebomb);
 			P_SetTarget(&mo->target, player->mo);
 			break;
-		case arti_egg:
+		case ArtiType::Egg:
 			mo = player->mo;
-			P_SpawnPlayerMissile(mo, HERETIC_MT_EGGFX);
-			P_SPMAngle(mo, HERETIC_MT_EGGFX, mo->angle - (ANG45 / 6));
-			P_SPMAngle(mo, HERETIC_MT_EGGFX, mo->angle + (ANG45 / 6));
-			P_SPMAngle(mo, HERETIC_MT_EGGFX, mo->angle - (ANG45 / 3));
-			P_SPMAngle(mo, HERETIC_MT_EGGFX, mo->angle + (ANG45 / 3));
+			P_SpawnPlayerMissile(mo, MobjType::HereticEggfx);
+			P_SPMAngle(mo, MobjType::HereticEggfx, mo->angle - (ANG45 / 6));
+			P_SPMAngle(mo, MobjType::HereticEggfx, mo->angle + (ANG45 / 6));
+			P_SPMAngle(mo, MobjType::HereticEggfx, mo->angle - (ANG45 / 3));
+			P_SPMAngle(mo, MobjType::HereticEggfx, mo->angle + (ANG45 / 3));
 			break;
-		case arti_fly:
-			if(!P_GivePower(player, pw_flight))
+		case ArtiType::Fly:
+			if(!P_GivePower(player, PowerType::Flight))
 			{
 				return (false);
 			}
 			break;
-		case arti_teleport:
+		case ArtiType::Teleport:
 			P_ArtiTele(player);
 			break;
 		default:
@@ -1502,16 +1504,16 @@ void Raven_P_MovePlayer(player_t* player)
 	{
 		if(player->chickenTics)
 		{
-			if(player->mo->state == &states[HERETIC_S_CHICPLAY])
+			if(player->mo->state == &states[std::to_underlying(StateId::HereticChicplay)])
 			{
-				P_SetMobjState(player->mo, HERETIC_S_CHICPLAY_RUN1);
+				P_SetMobjState(player->mo, StateId::HereticChicplayRun1);
 			}
 		}
 		else
 		{
-			if(player->mo->state == &states[pclass[player->pclass].normal_state])
+			if(player->mo->state == &states[std::to_underlying(pclass[std::to_underlying(player->pclass)].normal_state)])
 			{
-				P_SetMobjState(player->mo, static_cast<statenum_t>(pclass[player->pclass].run_state));
+				P_SetMobjState(player->mo, static_cast<StateId>(pclass[std::to_underlying(player->pclass)].run_state));
 			}
 		}
 	}
@@ -1557,7 +1559,7 @@ void Raven_P_MovePlayer(player_t* player)
 	{
 		fly -= 16;
 	}
-	if(fly && player->powers[pw_flight])
+	if(fly && player->powers[std::to_underlying(PowerType::Flight)])
 	{
 		if(fly != TOCENTER)
 		{
@@ -1581,7 +1583,7 @@ void Raven_P_MovePlayer(player_t* player)
 	}
 	else if(fly > 0)
 	{
-		P_PlayerUseArtifact(player, static_cast<artitype_t>(g_arti_fly));
+		P_PlayerUseArtifact(player, static_cast<ArtiType>(g_arti_fly));
 	}
 	if(player->mo->flags2 & MF2_FLY)
 	{
@@ -1600,29 +1602,29 @@ void P_ChickenPlayerThink(player_t* player)
 	if(player->health > 0)
 	{
 		// Handle beak movement
-		P_UpdateBeak(player, &player->psprites[ps_weapon]);
+		P_UpdateBeak(player, &player->psprites[std::to_underlying(PspNum::Weapon)]);
 	}
 	if(player->chickenTics & 15)
 	{
 		return;
 	}
 	pmo = player->mo;
-	if(!(pmo->momx + pmo->momy) && P_Random(pr_heretic) < 160)
+	if(!(pmo->momx + pmo->momy) && P_Random(RandomClass::Heretic) < 160)
 	{
 		// Twitch view angle
 		pmo->angle += P_SubRandom() << 19;
 	}
-	if((pmo->z <= pmo->floorz) && (P_Random(pr_heretic) < 32))
+	if((pmo->z <= pmo->floorz) && (P_Random(RandomClass::Heretic) < 32))
 	{
 		// Jump and noise
 		pmo->momz += FRACUNIT;
-		P_SetMobjState(pmo, HERETIC_S_CHICPLAY_PAIN);
+		P_SetMobjState(pmo, StateId::HereticChicplayPain);
 		return;
 	}
-	if(P_Random(pr_heretic) < 48)
+	if(P_Random(RandomClass::Heretic) < 48)
 	{
 		// Just noise
-		S_StartMobjSound(pmo, heretic_sfx_chicact);
+		S_StartMobjSound(pmo, SfxId::HereticChicact);
 	}
 }
 
@@ -1669,12 +1671,12 @@ void P_BlastMobj(mobj_t* source, mobj_t* victim, fixed_t strength)
 		{
 			switch(victim->type)
 			{
-				case HEXEN_MT_SORCBALL1: // don't blast sorcerer balls
-				case HEXEN_MT_SORCBALL2:
-				case HEXEN_MT_SORCBALL3:
+				case MobjType::HexenSorcball1: // don't blast sorcerer balls
+				case MobjType::HexenSorcball2:
+				case MobjType::HexenSorcball3:
 					return;
 					break;
-				case HEXEN_MT_MSTAFF_FX2: // Reflect to originator
+				case MobjType::HexenMstaffFx2: // Reflect to originator
 					P_SetTarget(&victim->special1.m, victim->target);
 					P_SetTarget(&victim->target, source);
 					break;
@@ -1682,7 +1684,7 @@ void P_BlastMobj(mobj_t* source, mobj_t* victim, fixed_t strength)
 					break;
 			}
 		}
-		if(victim->type == HEXEN_MT_HOLY_FX)
+		if(victim->type == MobjType::HexenHolyFx)
 		{
 			if(victim->special1.m == source)
 			{
@@ -1699,7 +1701,7 @@ void P_BlastMobj(mobj_t* source, mobj_t* victim, fixed_t strength)
 		x = victim->x + FixedMul(victim->radius + FRACUNIT, finecosine[ang]);
 		y = victim->y + FixedMul(victim->radius + FRACUNIT, finesine[ang]);
 		z = victim->z - victim->floorclip + (victim->height >> 1);
-		mo = P_SpawnMobj(x, y, z, HEXEN_MT_BLASTEFFECT);
+		mo = P_SpawnMobj(x, y, z, MobjType::HexenBlasteffect);
 		if(mo)
 		{
 			mo->momx = victim->momx;
@@ -1735,7 +1737,7 @@ void P_BlastRadius(player_t* player)
 	thinker_t* think;
 	fixed_t dist;
 
-	S_StartMobjSound(pmo, hexen_sfx_artifact_blast);
+	S_StartMobjSound(pmo, SfxId::HexenArtifactBlast);
 	P_NoiseAlert(player->mo, player->mo);
 
 	for(think = thinkercap.next; think != &thinkercap; think = think->next)
@@ -1751,8 +1753,8 @@ void P_BlastRadius(player_t* player)
 			// Not a valid monster
 			continue;
 		}
-		if((mo->type == HEXEN_MT_POISONCLOUD) || // poison cloud
-			(mo->type == HEXEN_MT_HOLY_FX) ||    // holy fx
+		if((mo->type == MobjType::HexenPoisoncloud) || // poison cloud
+			(mo->type == MobjType::HexenHolyFx) ||    // holy fx
 			(mo->flags & MF_ICECORPSE))          // frozen corpse
 		{
 			// Let these special cases go
@@ -1771,15 +1773,15 @@ void P_BlastRadius(player_t* player)
 		{
 			continue; // no dormant creatures
 		}
-		if((mo->type == HEXEN_MT_WRAITHB) && (mo->flags2 & MF2_DONTDRAW))
+		if((mo->type == MobjType::HexenWraithb) && (mo->flags2 & MF2_DONTDRAW))
 		{
 			continue; // no underground wraiths
 		}
-		if((mo->type == HEXEN_MT_SPLASHBASE) || (mo->type == HEXEN_MT_SPLASH))
+		if((mo->type == MobjType::HexenSplashbase) || (mo->type == MobjType::HexenSplash))
 		{
 			continue;
 		}
-		if(mo->type == HEXEN_MT_SERPENT || mo->type == HEXEN_MT_SERPENTLEADER)
+		if(mo->type == MobjType::HexenSerpent || mo->type == MobjType::HexenSerpentleader)
 		{
 			continue;
 		}
@@ -1802,22 +1804,22 @@ void P_MorphPlayerThink(player_t* player)
 		return;
 	}
 	pmo = player->mo;
-	if(!(pmo->momx + pmo->momy) && P_Random(pr_hexen) < 64)
+	if(!(pmo->momx + pmo->momy) && P_Random(RandomClass::Hexen) < 64)
 	{
 		// Snout sniff
-		P_SetPspriteNF(player, ps_weapon, HEXEN_S_SNOUTATK2);
-		S_StartMobjSound(pmo, hexen_sfx_pig_active1); // snort
+		P_SetPspriteNF(player, PspNum::Weapon, StateId::HexenSnoutatk2);
+		S_StartMobjSound(pmo, SfxId::HexenPigActive1); // snort
 		return;
 	}
-	if(P_Random(pr_hexen) < 48)
+	if(P_Random(RandomClass::Hexen) < 48)
 	{
-		if(P_Random(pr_hexen) < 128)
+		if(P_Random(RandomClass::Hexen) < 128)
 		{
-			S_StartMobjSound(pmo, hexen_sfx_pig_active1);
+			S_StartMobjSound(pmo, SfxId::HexenPigActive1);
 		}
 		else
 		{
-			S_StartMobjSound(pmo, hexen_sfx_pig_active2);
+			S_StartMobjSound(pmo, SfxId::HexenPigActive2);
 		}
 	}
 }
@@ -1832,32 +1834,32 @@ dboolean P_UndoPlayerMorph(player_t* player)
 	fixed_t z;
 	angle_t angle;
 	int playerNum;
-	weapontype_t weapon;
+	WeaponType weapon;
 	int oldFlags;
 	int oldFlags2;
-	int oldBeast;
+	MobjType oldBeast;
 
 	pmo = player->mo;
 	x = pmo->x;
 	y = pmo->y;
 	z = pmo->z;
 	angle = pmo->angle;
-	weapon = static_cast<weapontype_t>(pmo->special1.i);
+	weapon = static_cast<WeaponType>(pmo->special1.i);
 	oldFlags = pmo->flags;
 	oldFlags2 = pmo->flags2;
 	oldBeast = pmo->type;
-	P_SetMobjState(pmo, HEXEN_S_FREETARGMOBJ);
+	P_SetMobjState(pmo, StateId::HexenFreetargmobj);
 	playerNum = P_GetPlayerNum(player);
 	switch(PlayerClass[playerNum])
 	{
-		case PCLASS_FIGHTER:
-			mo = P_SpawnMobj(x, y, z, HEXEN_MT_PLAYER_FIGHTER);
+		case PClass::Fighter:
+			mo = P_SpawnMobj(x, y, z, MobjType::HexenPlayerFighter);
 			break;
-		case PCLASS_CLERIC:
-			mo = P_SpawnMobj(x, y, z, HEXEN_MT_PLAYER_CLERIC);
+		case PClass::Cleric:
+			mo = P_SpawnMobj(x, y, z, MobjType::HexenPlayerCleric);
 			break;
-		case PCLASS_MAGE:
-			mo = P_SpawnMobj(x, y, z, HEXEN_MT_PLAYER_MAGE);
+		case PClass::Mage:
+			mo = P_SpawnMobj(x, y, z, MobjType::HexenPlayerMage);
 			break;
 		default:
 			I_Error("P_UndoPlayerMorph:  Unknown player class %d\n",
@@ -1868,10 +1870,10 @@ dboolean P_UndoPlayerMorph(player_t* player)
 	{
 		// Didn't fit
 		P_RemoveMobj(mo);
-		mo = P_SpawnMobj(x, y, z, static_cast<mobjtype_t>(oldBeast));
+		mo = P_SpawnMobj(x, y, z, static_cast<MobjType>(oldBeast));
 		mo->angle = angle;
 		mo->health = player->health;
-		mo->special1.i = weapon;
+		mo->special1.i = std::to_underlying(weapon);
 		mo->player = player;
 		mo->flags = oldFlags;
 		mo->flags2 = oldFlags2;
@@ -1879,7 +1881,7 @@ dboolean P_UndoPlayerMorph(player_t* player)
 		player->morphTics = 2 * TICRATE;
 		return (false);
 	}
-	if(player->pclass == PCLASS_FIGHTER)
+	if(player->pclass == PClass::Fighter)
 	{
 		// The first type should be blue, and the third should be the
 		// Fighter's original gold color
@@ -1911,8 +1913,8 @@ dboolean P_UndoPlayerMorph(player_t* player)
 	player->pclass = PlayerClass[playerNum];
 	angle >>= ANGLETOFINESHIFT;
 	fog = P_SpawnMobj(x + 20 * finecosine[angle],
-		y + 20 * finesine[angle], z + TELEFOGHEIGHT, HEXEN_MT_TFOG);
-	S_StartMobjSound(fog, hexen_sfx_teleport);
+		y + 20 * finesine[angle], z + TELEFOGHEIGHT, MobjType::HexenTfog);
+	S_StartMobjSound(fog, SfxId::HexenTeleport);
 	P_PostMorphWeapon(player, weapon);
 	return (true);
 }
@@ -1921,7 +1923,7 @@ void P_ArtiTeleportOther(player_t* player)
 {
 	mobj_t* mo;
 
-	mo = P_SpawnPlayerMissile(player->mo, HEXEN_MT_TELOTHER_FX1);
+	mo = P_SpawnPlayerMissile(player->mo, MobjType::HexenTelotherFx1);
 	if(mo)
 	{
 		P_SetTarget(&mo->target, player->mo);
@@ -1941,7 +1943,7 @@ void P_TeleportToPlayerStarts(mobj_t* victim)
 			continue;
 		selections++;
 	}
-	i = P_Random(pr_hexen) % selections;
+	i = P_Random(RandomClass::Hexen) % selections;
 	destX = playerstarts[0][i].x;
 	destY = playerstarts[0][i].y;
 	destAngle = ANG45 * (playerstarts[0][i].angle / 45);
@@ -1957,7 +1959,7 @@ void P_TeleportToDeathmatchStarts(mobj_t* victim)
 	selections = deathmatch_p - deathmatchstarts;
 	if(selections)
 	{
-		i = P_Random(pr_hexen) % selections;
+		i = P_Random(RandomClass::Hexen) % selections;
 		destX = deathmatchstarts[i].x;
 		destY = deathmatchstarts[i].y;
 		destAngle = ANG45 * (deathmatchstarts[i].angle / 45);
@@ -2027,34 +2029,34 @@ dboolean P_HealRadius(player_t* player)
 
 		switch(player->pclass)
 		{
-			case PCLASS_FIGHTER: // Radius armor boost
-				if((Hexen_P_GiveArmor(mo->player, ARMOR_ARMOR, 1)) ||
-					(Hexen_P_GiveArmor(mo->player, ARMOR_SHIELD, 1)) ||
-					(Hexen_P_GiveArmor(mo->player, ARMOR_HELMET, 1)) ||
-					(Hexen_P_GiveArmor(mo->player, ARMOR_AMULET, 1)))
+			case PClass::Fighter: // Radius armor boost
+				if((Hexen_P_GiveArmor(mo->player, ArmorType::Armor, 1)) ||
+					(Hexen_P_GiveArmor(mo->player, ArmorType::Shield, 1)) ||
+					(Hexen_P_GiveArmor(mo->player, ArmorType::Helmet, 1)) ||
+					(Hexen_P_GiveArmor(mo->player, ArmorType::Amulet, 1)))
 				{
 					effective = true;
-					S_StartMobjSound(mo, hexen_sfx_mysticincant);
+					S_StartMobjSound(mo, SfxId::HexenMysticincant);
 				}
 				break;
-			case PCLASS_CLERIC: // Radius heal
-				amount = 50 + (P_Random(pr_hexen) % 50);
+			case PClass::Cleric: // Radius heal
+				amount = 50 + (P_Random(RandomClass::Hexen) % 50);
 				if(P_GiveBody(mo->player, amount))
 				{
 					effective = true;
-					S_StartMobjSound(mo, hexen_sfx_mysticincant);
+					S_StartMobjSound(mo, SfxId::HexenMysticincant);
 				}
 				break;
-			case PCLASS_MAGE: // Radius mana boost
-				amount = 50 + (P_Random(pr_hexen) % 50);
-				if((P_GiveMana(mo->player, MANA_1, amount)) ||
-					(P_GiveMana(mo->player, MANA_2, amount)))
+			case PClass::Mage: // Radius mana boost
+				amount = 50 + (P_Random(RandomClass::Hexen) % 50);
+				if((P_GiveMana(mo->player, AmmoType::Mana1, amount)) ||
+					(P_GiveMana(mo->player, AmmoType::Mana2, amount)))
 				{
 					effective = true;
-					S_StartMobjSound(mo, hexen_sfx_mysticincant);
+					S_StartMobjSound(mo, SfxId::HexenMysticincant);
 				}
 				break;
-			case PCLASS_PIG:
+			case PClass::Pig:
 			default:
 				break;
 		}
@@ -2062,7 +2064,7 @@ dboolean P_HealRadius(player_t* player)
 	return (effective);
 }
 
-static dboolean Hexen_P_UseArtifact(player_t* player, artitype_t arti)
+static dboolean Hexen_P_UseArtifact(player_t* player, ArtiType arti)
 {
 	mobj_t* mo;
 	angle_t angle;
@@ -2071,46 +2073,46 @@ static dboolean Hexen_P_UseArtifact(player_t* player, artitype_t arti)
 
 	switch(arti)
 	{
-		case hexen_arti_invulnerability:
-			if(!P_GivePower(player, pw_invulnerability))
+		case ArtiType::HexenInvulnerability:
+			if(!P_GivePower(player, PowerType::Invulnerability))
 			{
 				return (false);
 			}
 			break;
-		case hexen_arti_health:
+		case ArtiType::HexenHealth:
 			if(!P_GiveBody(player, 25))
 			{
 				return (false);
 			}
 			break;
-		case hexen_arti_superhealth:
+		case ArtiType::HexenSuperhealth:
 			if(!P_GiveBody(player, 100))
 			{
 				return (false);
 			}
 			break;
-		case hexen_arti_healingradius:
+		case ArtiType::HexenHealingradius:
 			if(!P_HealRadius(player))
 			{
 				return (false);
 			}
 			break;
-		case hexen_arti_torch:
-			if(!P_GivePower(player, pw_infrared))
+		case ArtiType::HexenTorch:
+			if(!P_GivePower(player, PowerType::Infrared))
 			{
 				return (false);
 			}
 			break;
-		case hexen_arti_egg:
+		case ArtiType::HexenEgg:
 			mo = player->mo;
-			P_SpawnPlayerMissile(mo, HEXEN_MT_EGGFX);
-			P_SPMAngle(mo, HEXEN_MT_EGGFX, mo->angle - (ANG45 / 6));
-			P_SPMAngle(mo, HEXEN_MT_EGGFX, mo->angle + (ANG45 / 6));
-			P_SPMAngle(mo, HEXEN_MT_EGGFX, mo->angle - (ANG45 / 3));
-			P_SPMAngle(mo, HEXEN_MT_EGGFX, mo->angle + (ANG45 / 3));
+			P_SpawnPlayerMissile(mo, MobjType::HexenEggfx);
+			P_SPMAngle(mo, MobjType::HexenEggfx, mo->angle - (ANG45 / 6));
+			P_SPMAngle(mo, MobjType::HexenEggfx, mo->angle + (ANG45 / 6));
+			P_SPMAngle(mo, MobjType::HexenEggfx, mo->angle - (ANG45 / 3));
+			P_SPMAngle(mo, MobjType::HexenEggfx, mo->angle + (ANG45 / 3));
 			break;
-		case hexen_arti_fly:
-			if(!P_GivePower(player, pw_flight))
+		case ArtiType::HexenFly:
+			if(!P_GivePower(player, PowerType::Flight))
 			{
 				return (false);
 			}
@@ -2120,8 +2122,8 @@ static dboolean Hexen_P_UseArtifact(player_t* player, artitype_t arti)
 				S_StopSound(player->mo);
 			}
 			break;
-		case hexen_arti_summon:
-			mo = P_SpawnPlayerMissile(player->mo, HEXEN_MT_SUMMON_FX);
+		case ArtiType::HexenSummon:
+			mo = P_SpawnPlayerMissile(player->mo, MobjType::HexenSummonFx);
 			if(mo)
 			{
 				P_SetTarget(&mo->target, player->mo);
@@ -2129,31 +2131,31 @@ static dboolean Hexen_P_UseArtifact(player_t* player, artitype_t arti)
 				mo->momz = 5 * FRACUNIT;
 			}
 			break;
-		case hexen_arti_teleport:
+		case ArtiType::HexenTeleport:
 			P_ArtiTele(player);
 			break;
-		case hexen_arti_teleportother:
+		case ArtiType::HexenTeleportother:
 			P_ArtiTeleportOther(player);
 			break;
-		case hexen_arti_poisonbag:
+		case ArtiType::HexenPoisonbag:
 			angle = player->mo->angle >> ANGLETOFINESHIFT;
-			if(player->pclass == PCLASS_CLERIC)
+			if(player->pclass == PClass::Cleric)
 			{
 				mo = P_SpawnMobj(player->mo->x + 16 * finecosine[angle],
 					player->mo->y + 24 * finesine[angle],
 					player->mo->z - player->mo->floorclip +
-					8 * FRACUNIT, HEXEN_MT_POISONBAG);
+					8 * FRACUNIT, MobjType::HexenPoisonbag);
 				if(mo)
 				{
 					P_SetTarget(&mo->target, player->mo);
 				}
 			}
-			else if(player->pclass == PCLASS_MAGE)
+			else if(player->pclass == PClass::Mage)
 			{
 				mo = P_SpawnMobj(player->mo->x + 16 * finecosine[angle],
 					player->mo->y + 24 * finesine[angle],
 					player->mo->z - player->mo->floorclip +
-					8 * FRACUNIT, HEXEN_MT_FIREBOMB);
+					8 * FRACUNIT, MobjType::HexenFirebomb);
 				if(mo)
 				{
 					P_SetTarget(&mo->target, player->mo);
@@ -2163,11 +2165,11 @@ static dboolean Hexen_P_UseArtifact(player_t* player, artitype_t arti)
 			{
 				mo = P_SpawnMobj(player->mo->x, player->mo->y,
 					player->mo->z - player->mo->floorclip +
-					35 * FRACUNIT, HEXEN_MT_THROWINGBOMB);
+					35 * FRACUNIT, MobjType::HexenThrowingbomb);
 				if(mo)
 				{
 					mo->angle =
-						player->mo->angle + (((P_Random(pr_hexen) & 7) - 4) << 24);
+						player->mo->angle + (((P_Random(RandomClass::Hexen) & 7) - 4) << 24);
 					mo->momz =
 						4 * FRACUNIT + (dsda_PlayerLookDir(player) << (FRACBITS - 4));
 					mo->z += dsda_PlayerLookDir(player) << (FRACBITS - 4);
@@ -2175,64 +2177,64 @@ static dboolean Hexen_P_UseArtifact(player_t* player, artitype_t arti)
 					mo->momx += player->mo->momx >> 1;
 					mo->momy += player->mo->momy >> 1;
 					P_SetTarget(&mo->target, player->mo);
-					mo->tics -= P_Random(pr_hexen) & 3;
+					mo->tics -= P_Random(RandomClass::Hexen) & 3;
 					P_CheckMissileSpawn(mo);
 				}
 			}
 			break;
-		case hexen_arti_speed:
-			if(!P_GivePower(player, pw_speed))
+		case ArtiType::HexenSpeed:
+			if(!P_GivePower(player, PowerType::Speed))
 			{
 				return (false);
 			}
 			break;
-		case hexen_arti_boostmana:
-			if(!P_GiveMana(player, MANA_1, MAX_MANA))
+		case ArtiType::HexenBoostmana:
+			if(!P_GiveMana(player, AmmoType::Mana1, MAX_MANA))
 			{
-				if(!P_GiveMana(player, MANA_2, MAX_MANA))
+				if(!P_GiveMana(player, AmmoType::Mana2, MAX_MANA))
 				{
 					return false;
 				}
 			}
 			else
 			{
-				P_GiveMana(player, MANA_2, MAX_MANA);
+				P_GiveMana(player, AmmoType::Mana2, MAX_MANA);
 			}
 			break;
-		case hexen_arti_boostarmor:
+		case ArtiType::HexenBoostarmor:
 			count = 0;
 
-			for(i = 0; i < NUMARMOR; i++)
+			for(i = 0; i < std::to_underlying(ArmorType::Count); i++)
 			{
-				count += Hexen_P_GiveArmor(player, static_cast<armortype_t>(i), 1); // 1 point per armor type
+				count += Hexen_P_GiveArmor(player, static_cast<ArmorType>(i), 1); // 1 point per armor type
 			}
 			if(!count)
 			{
 				return false;
 			}
 			break;
-		case hexen_arti_blastradius:
+		case ArtiType::HexenBlastradius:
 			P_BlastRadius(player);
 			break;
 
-		case hexen_arti_puzzskull:
-		case hexen_arti_puzzgembig:
-		case hexen_arti_puzzgemred:
-		case hexen_arti_puzzgemgreen1:
-		case hexen_arti_puzzgemgreen2:
-		case hexen_arti_puzzgemblue1:
-		case hexen_arti_puzzgemblue2:
-		case hexen_arti_puzzbook1:
-		case hexen_arti_puzzbook2:
-		case hexen_arti_puzzskull2:
-		case hexen_arti_puzzfweapon:
-		case hexen_arti_puzzcweapon:
-		case hexen_arti_puzzmweapon:
-		case hexen_arti_puzzgear1:
-		case hexen_arti_puzzgear2:
-		case hexen_arti_puzzgear3:
-		case hexen_arti_puzzgear4:
-			if(P_UsePuzzleItem(player, arti - hexen_arti_firstpuzzitem))
+		case ArtiType::HexenPuzzskull:
+		case ArtiType::HexenPuzzgembig:
+		case ArtiType::HexenPuzzgemred:
+		case ArtiType::HexenPuzzgemgreen1:
+		case ArtiType::HexenPuzzgemgreen2:
+		case ArtiType::HexenPuzzgemblue1:
+		case ArtiType::HexenPuzzgemblue2:
+		case ArtiType::HexenPuzzbook1:
+		case ArtiType::HexenPuzzbook2:
+		case ArtiType::HexenPuzzskull2:
+		case ArtiType::HexenPuzzfweapon:
+		case ArtiType::HexenPuzzcweapon:
+		case ArtiType::HexenPuzzmweapon:
+		case ArtiType::HexenPuzzgear1:
+		case ArtiType::HexenPuzzgear2:
+		case ArtiType::HexenPuzzgear3:
+		case ArtiType::HexenPuzzgear4:
+			if(P_UsePuzzleItem(player, std::to_underlying(arti) - std::to_underlying(ArtiType::HexenFirstpuzzitem)))
 			{
 				return true;
 			}

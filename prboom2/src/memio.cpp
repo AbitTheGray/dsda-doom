@@ -15,11 +15,11 @@
 
 #include "z_zone.hpp"
 
-typedef enum
+enum struct MemFileMode : int32_t
 {
-	MODE_READ,
-	MODE_WRITE,
-} memfile_mode_t;
+	Read,
+	Write,
+};
 
 struct _MEMFILE
 {
@@ -27,7 +27,7 @@ struct _MEMFILE
 	size_t buflen;
 	size_t alloced;
 	unsigned int position;
-	memfile_mode_t mode;
+	MemFileMode mode;
 };
 
 // Open a memory area for reading
@@ -46,7 +46,7 @@ MEMFILE* mem_fopen_read(const void* buf, size_t buflen)
 #pragma GCC diagnostic pop
 	file->buflen = buflen;
 	file->position = 0;
-	file->mode = MODE_READ;
+	file->mode = MemFileMode::Read;
 
 	return file;
 }
@@ -57,7 +57,7 @@ size_t mem_fread(void* buf, size_t size, size_t nmemb, MEMFILE* stream)
 {
 	size_t items;
 
-	if(stream->mode != MODE_READ)
+	if(stream->mode != MemFileMode::Read)
 	{
 		printf("not a read stream\n");
 		return -1;
@@ -95,7 +95,7 @@ MEMFILE* mem_fopen_write()
 	file->buf = static_cast<decltype(file->buf)>(Z_Malloc(file->alloced));
 	file->buflen = 0;
 	file->position = 0;
-	file->mode = MODE_WRITE;
+	file->mode = MemFileMode::Write;
 
 	return file;
 }
@@ -106,7 +106,7 @@ size_t mem_fwrite(const void* ptr, size_t size, size_t nmemb, MEMFILE* stream)
 {
 	size_t bytes;
 
-	if(stream->mode != MODE_WRITE)
+	if(stream->mode != MemFileMode::Write)
 	{
 		return -1;
 	}
@@ -146,7 +146,7 @@ void mem_get_buf(MEMFILE* stream, void** buf, size_t* buflen)
 
 void mem_fclose(MEMFILE* stream)
 {
-	if(stream->mode == MODE_WRITE)
+	if(stream->mode == MemFileMode::Write)
 	{
 		Z_Free(stream->buf);
 	}
@@ -159,21 +159,21 @@ long mem_ftell(MEMFILE* stream)
 	return stream->position;
 }
 
-int mem_fseek(MEMFILE* stream, signed long position, mem_rel_t whence)
+int mem_fseek(MEMFILE* stream, signed long position, MemSeek whence)
 {
 	unsigned int newpos;
 
 	switch(whence)
 	{
-		case MEM_SEEK_SET:
+		case MemSeek::Set:
 			newpos = (int)position;
 			break;
 
-		case MEM_SEEK_CUR:
+		case MemSeek::Cur:
 			newpos = (int)(stream->position + position);
 			break;
 
-		case MEM_SEEK_END:
+		case MemSeek::End:
 			newpos = (int)(stream->buflen + position);
 			break;
 		default:

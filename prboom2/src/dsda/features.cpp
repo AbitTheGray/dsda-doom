@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Features
 
+#include <utility>
+
 #include <string.h>
 
 #include "z_zone.hpp"
@@ -14,53 +16,53 @@
 static byte used_features[FEATURE_SLOTS];
 
 static const char* feature_names[FEATURE_SIZE] = {
-	[uf_menu] = "Menu",
-	[uf_exhud] = "Extended HUD",
-	[uf_advhud] = "Advanced HUD",
-	[uf_crosshair] = "Crosshair",
-	[uf_quickstartcache] = "Quickstart Cache",
-	[uf_100k] = "100K Tracker",
-	[uf_console] = "Console",
+	[std::to_underlying(FeatureFlag::Menu)] = "Menu",
+	[std::to_underlying(FeatureFlag::Exhud)] = "Extended HUD",
+	[std::to_underlying(FeatureFlag::Advhud)] = "Advanced HUD",
+	[std::to_underlying(FeatureFlag::Crosshair)] = "Crosshair",
+	[std::to_underlying(FeatureFlag::Quickstartcache)] = "Quickstart Cache",
+	[std::to_underlying(FeatureFlag::Track100k)] = "100K Tracker",
+	[std::to_underlying(FeatureFlag::Console)] = "Console",
 
-	[uf_iddt] = "IDDT",
-	[uf_automap] = "IDBEHOLD Map",
-	[uf_liteamp] = "IDBEHOLD Light",
-	[uf_build] = "Build Mode",
-	[uf_buildzero] = "Build First Frame",
-	[uf_bruteforce] = "Brute Force",
-	[uf_tracker] = "TAS Tracker",
-	[uf_keyframe] = "Key Frame",
-	[uf_skip] = "Skip Forward",
-	[uf_wipescreen] = "Skip Wipe Screen",
-	[uf_speedup] = "Speed Up",
-	[uf_slowdown] = "Slow Down",
-	[uf_coordinates] = "Show Coordinates",
-	[uf_mouselook] = "Mouse Look",
-	[uf_weaponalignment] = "Weapon Alignment",
-	[uf_commanddisplay] = "Command Display",
-	[uf_crosshaircolor] = "Dynamic Crosshair Color",
-	[uf_crosshairlock] = "Crosshair Lock",
-	[uf_shadows] = "Shadows",
-	[uf_painpalette] = "Disable Pain Palette",
-	[uf_bonuspalette] = "Disable Bonus Palette",
-	[uf_powerpalette] = "Disable Power Palette",
-	[uf_healthbar] = "Show Health Bars",
-	[uf_alwayssr50] = "Always SR50",
-	[uf_maxplayercorpse] = "Edit Corpse Limit",
-	[uf_hideweapon] = "Hide Weapon",
-	[uf_showalive] = "Show Alive",
-	[uf_join] = "Join",
-	[uf_mouse_and_controller] = "Mouse and Controller",
-	[uf_ghost] = "Ghost",
-	[uf_advanced_map] = "Advanced Map",
-	[uf_vanillatrans] = "Vanilla Translucency",
-	[uf_ghosttrans] = "Ghost Translucency",
-	[uf_levelbrightness] = "Extra Lighting",
+	[std::to_underlying(FeatureFlag::Iddt)] = "IDDT",
+	[std::to_underlying(FeatureFlag::Automap)] = "IDBEHOLD Map",
+	[std::to_underlying(FeatureFlag::Liteamp)] = "IDBEHOLD Light",
+	[std::to_underlying(FeatureFlag::Build)] = "Build Mode",
+	[std::to_underlying(FeatureFlag::Buildzero)] = "Build First Frame",
+	[std::to_underlying(FeatureFlag::Bruteforce)] = "Brute Force",
+	[std::to_underlying(FeatureFlag::Tracker)] = "TAS Tracker",
+	[std::to_underlying(FeatureFlag::Keyframe)] = "Key Frame",
+	[std::to_underlying(FeatureFlag::Skip)] = "Skip Forward",
+	[std::to_underlying(FeatureFlag::Wipescreen)] = "Skip Wipe Screen",
+	[std::to_underlying(FeatureFlag::Speedup)] = "Speed Up",
+	[std::to_underlying(FeatureFlag::Slowdown)] = "Slow Down",
+	[std::to_underlying(FeatureFlag::Coordinates)] = "Show Coordinates",
+	[std::to_underlying(FeatureFlag::Mouselook)] = "Mouse Look",
+	[std::to_underlying(FeatureFlag::Weaponalignment)] = "Weapon Alignment",
+	[std::to_underlying(FeatureFlag::Commanddisplay)] = "Command Display",
+	[std::to_underlying(FeatureFlag::Crosshaircolor)] = "Dynamic Crosshair Color",
+	[std::to_underlying(FeatureFlag::Crosshairlock)] = "Crosshair Lock",
+	[std::to_underlying(FeatureFlag::Shadows)] = "Shadows",
+	[std::to_underlying(FeatureFlag::Painpalette)] = "Disable Pain Palette",
+	[std::to_underlying(FeatureFlag::Bonuspalette)] = "Disable Bonus Palette",
+	[std::to_underlying(FeatureFlag::Powerpalette)] = "Disable Power Palette",
+	[std::to_underlying(FeatureFlag::Healthbar)] = "Show Health Bars",
+	[std::to_underlying(FeatureFlag::Alwayssr50)] = "Always SR50",
+	[std::to_underlying(FeatureFlag::Maxplayercorpse)] = "Edit Corpse Limit",
+	[std::to_underlying(FeatureFlag::Hideweapon)] = "Hide Weapon",
+	[std::to_underlying(FeatureFlag::Showalive)] = "Show Alive",
+	[std::to_underlying(FeatureFlag::Join)] = "Join",
+	[std::to_underlying(FeatureFlag::MouseAndController)] = "Mouse and Controller",
+	[std::to_underlying(FeatureFlag::Ghost)] = "Ghost",
+	[std::to_underlying(FeatureFlag::AdvancedMap)] = "Advanced Map",
+	[std::to_underlying(FeatureFlag::Vanillatrans)] = "Vanilla Translucency",
+	[std::to_underlying(FeatureFlag::Ghosttrans)] = "Ghost Translucency",
+	[std::to_underlying(FeatureFlag::Levelbrightness)] = "Extra Lighting",
 };
 
-void dsda_TrackFeature(int feature)
+void dsda_TrackFeature(FeatureFlag feature)
 {
-	BITSET(used_features, feature);
+	BITSET(used_features, std::to_underlying(feature));
 }
 
 void dsda_ResetFeatures()

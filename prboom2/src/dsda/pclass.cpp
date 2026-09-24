@@ -3,12 +3,14 @@
 // DESCRIPTION:
 //	DSDA Player Class
 
+#include <utility>
+
 #include "info.hpp"
 
 #include "pclass.hpp"
 
-dsda_pclass_t pclass[NUMCLASSES] = {
-	[PCLASS_NULL] = {
+dsda_pclass_t pclass[std::to_underlying(PClass::Count)] = {
+	[std::to_underlying(PClass::Null)] = {
 		.armor_increment = {0},
 		.auto_armor_save = 0,
 		.armor_max = 0,
@@ -19,7 +21,7 @@ dsda_pclass_t pclass[NUMCLASSES] = {
 		.turbo_threshold = 0x32,
 	},
 
-	[PCLASS_FIGHTER] = {
+	[std::to_underlying(PClass::Fighter)] = {
 		.armor_increment = {25 * FRACUNIT, 20 * FRACUNIT, 15 * FRACUNIT, 5 * FRACUNIT},
 		.auto_armor_save = 15 * FRACUNIT,
 		.armor_max = 100 * FRACUNIT,
@@ -29,14 +31,14 @@ dsda_pclass_t pclass[NUMCLASSES] = {
 		.stroller_threshold = 0x1D,
 		.turbo_threshold = 0x3C,
 
-		.normal_state = HEXEN_S_FPLAY,
-		.run_state = HEXEN_S_FPLAY_RUN1,
-		.fire_weapon_state = HEXEN_S_FPLAY_ATK1,
-		.attack_state = HEXEN_S_FPLAY_ATK1,
-		.attack_end_state = HEXEN_S_FPLAY_ATK2,
+		.normal_state = StateId::HexenFplay,
+		.run_state = StateId::HexenFplayRun1,
+		.fire_weapon_state = StateId::HexenFplayAtk1,
+		.attack_state = StateId::HexenFplayAtk1,
+		.attack_end_state = StateId::HexenFplayAtk2,
 	},
 
-	[PCLASS_CLERIC] = {
+	[std::to_underlying(PClass::Cleric)] = {
 		.armor_increment = {10 * FRACUNIT, 25 * FRACUNIT, 5 * FRACUNIT, 20 * FRACUNIT},
 		.auto_armor_save = 10 * FRACUNIT,
 		.armor_max = 90 * FRACUNIT,
@@ -46,14 +48,14 @@ dsda_pclass_t pclass[NUMCLASSES] = {
 		.stroller_threshold = 0x19,
 		.turbo_threshold = 0x32,
 
-		.normal_state = HEXEN_S_CPLAY,
-		.run_state = HEXEN_S_CPLAY_RUN1,
-		.fire_weapon_state = HEXEN_S_CPLAY_ATK1,
-		.attack_state = HEXEN_S_CPLAY_ATK1,
-		.attack_end_state = HEXEN_S_CPLAY_ATK3,
+		.normal_state = StateId::HexenCplay,
+		.run_state = StateId::HexenCplayRun1,
+		.fire_weapon_state = StateId::HexenCplayAtk1,
+		.attack_state = StateId::HexenCplayAtk1,
+		.attack_end_state = StateId::HexenCplayAtk3,
 	},
 
-	[PCLASS_MAGE] = {
+	[std::to_underlying(PClass::Mage)] = {
 		.armor_increment = {5 * FRACUNIT, 15 * FRACUNIT, 10 * FRACUNIT, 25 * FRACUNIT},
 		.auto_armor_save = 5 * FRACUNIT,
 		.armor_max = 80 * FRACUNIT,
@@ -63,14 +65,14 @@ dsda_pclass_t pclass[NUMCLASSES] = {
 		.stroller_threshold = 0x16,
 		.turbo_threshold = 0x2D,
 
-		.normal_state = HEXEN_S_MPLAY,
-		.run_state = HEXEN_S_MPLAY_RUN1,
-		.fire_weapon_state = HEXEN_S_MPLAY_ATK1,
-		.attack_state = HEXEN_S_MPLAY_ATK1,
-		.attack_end_state = HEXEN_S_MPLAY_ATK2,
+		.normal_state = StateId::HexenMplay,
+		.run_state = StateId::HexenMplayRun1,
+		.fire_weapon_state = StateId::HexenMplayAtk1,
+		.attack_state = StateId::HexenMplayAtk1,
+		.attack_end_state = StateId::HexenMplayAtk2,
 	},
 
-	[PCLASS_PIG] = {
+	[std::to_underlying(PClass::Pig)] = {
 		.armor_increment = {0},
 		.auto_armor_save = 0,
 		.armor_max = 5 * FRACUNIT,
@@ -80,11 +82,11 @@ dsda_pclass_t pclass[NUMCLASSES] = {
 		.stroller_threshold = 0x18,
 		.turbo_threshold = 0x31,
 
-		.normal_state = HEXEN_S_PIGPLAY,
-		.run_state = HEXEN_S_PIGPLAY_RUN1,
-		.fire_weapon_state = HEXEN_S_PIGPLAY_ATK1,
-		.attack_state = HEXEN_S_PIGPLAY_ATK1,
-		.attack_end_state = HEXEN_S_PIGPLAY_ATK1,
+		.normal_state = StateId::HexenPigplay,
+		.run_state = StateId::HexenPigplayRun1,
+		.fire_weapon_state = StateId::HexenPigplayAtk1,
+		.attack_state = StateId::HexenPigplayAtk1,
+		.attack_end_state = StateId::HexenPigplayAtk1,
 	},
 };
 
@@ -92,18 +94,18 @@ extern "C" void dsda_ResetNullPClass()
 {
 	if(heretic)
 	{
-		pclass[PCLASS_NULL].normal_state = HERETIC_S_PLAY;
-		pclass[PCLASS_NULL].run_state = HERETIC_S_PLAY_RUN1;
-		pclass[PCLASS_NULL].fire_weapon_state = HERETIC_S_PLAY_ATK2;
-		pclass[PCLASS_NULL].attack_state = HERETIC_S_PLAY_ATK1;
-		pclass[PCLASS_NULL].attack_end_state = HERETIC_S_PLAY_ATK2;
+		pclass[std::to_underlying(PClass::Null)].normal_state = StateId::HereticPlay;
+		pclass[std::to_underlying(PClass::Null)].run_state = StateId::HereticPlayRun1;
+		pclass[std::to_underlying(PClass::Null)].fire_weapon_state = StateId::HereticPlayAtk2;
+		pclass[std::to_underlying(PClass::Null)].attack_state = StateId::HereticPlayAtk1;
+		pclass[std::to_underlying(PClass::Null)].attack_end_state = StateId::HereticPlayAtk2;
 	}
 	else
 	{
-		pclass[PCLASS_NULL].normal_state = S_PLAY;
-		pclass[PCLASS_NULL].run_state = S_PLAY_RUN1;
-		pclass[PCLASS_NULL].fire_weapon_state = S_PLAY_ATK1;
-		pclass[PCLASS_NULL].attack_state = S_PLAY_ATK1;
-		pclass[PCLASS_NULL].attack_end_state = S_PLAY_ATK2;
+		pclass[std::to_underlying(PClass::Null)].normal_state = StateId::Play;
+		pclass[std::to_underlying(PClass::Null)].run_state = StateId::PlayRun1;
+		pclass[std::to_underlying(PClass::Null)].fire_weapon_state = StateId::PlayAtk1;
+		pclass[std::to_underlying(PClass::Null)].attack_state = StateId::PlayAtk1;
+		pclass[std::to_underlying(PClass::Null)].attack_end_state = StateId::PlayAtk2;
 	}
 }

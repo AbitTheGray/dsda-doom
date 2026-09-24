@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Demo
 
+#include <utility>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -151,7 +153,7 @@ char* dsda_NewDemoName()
 
 static dboolean dsda_UseFailedDemoName()
 {
-	return dsda_IntConfig(dsda_config_organize_failed_demos) &&
+	return dsda_IntConfig(ConfigId::OrganizeFailedDemos) &&
 		!dsda_ILComplete() && !dsda_MovieComplete();
 }
 
@@ -214,7 +216,7 @@ static void dsda_EnsureDemoBufferSpace(size_t length)
 	dsda_demo_write_buffer_p = dsda_demo_write_buffer + offset;
 
 	lprintf(
-		LO_INFO,
+		OutputLevels::Info,
 		"dsda_EnsureDemoBufferSpace: expanding demo buffer %d\n",
 		dsda_demo_write_buffer_length
 	);
@@ -289,18 +291,18 @@ void dsda_InitDemoRecording()
 		I_Error("You must specify a compatibility level when recording a demo!\n"
 			"Example: dsda-doom -iwad DOOM -complevel 3 -skill 4 -record demo");
 
-	if(!dsda_Flag(dsda_arg_skill) && !dsda_Flag(dsda_arg_recordfromto))
+	if(!dsda_Flag(ArgId::Skill) && !dsda_Flag(ArgId::Recordfromto))
 		I_Error("You must specify a skill level when recording a demo!\n"
 			"Example: dsda-doom -iwad DOOM -complevel 3 -skill 4 -record demo");
 
-	if(dsda_Flag(dsda_arg_pistol_start))
+	if(dsda_Flag(ArgId::PistolStart))
 		I_Error("The -pistolstart option is not allowed when recording a demo!");
 
 	demorecording = true;
 
 	// Key settings revert when starting a new attempt
-	dsda_RevertIntConfig(dsda_config_vertmouse);
-	dsda_SetTas(dsda_Flag(dsda_arg_tas) || dsda_Flag(dsda_arg_build) || dsda_Flag(dsda_arg_dsdademo));
+	dsda_RevertIntConfig(ConfigId::Vertmouse);
+	dsda_SetTas(dsda_Flag(ArgId::Tas) || dsda_Flag(ArgId::Build) || dsda_Flag(ArgId::Dsdademo));
 
 	// prboom+ has already cached its settings (with demorecording == false)
 	// we need to reset things here to satisfy strict mode
@@ -427,7 +429,7 @@ dboolean dsda_StartDemoSegment(const char* demo_name)
 	if(demorecording)
 		return false;
 
-	dsda_UpdateFlag(dsda_arg_dsdademo, true);
+	dsda_UpdateFlag(ArgId::Dsdademo, true);
 	dsda_SetDemoBaseName(demo_name);
 	dsda_InitDemoRecording();
 	G_BeginRecording();
@@ -527,7 +529,7 @@ static int dsda_ExportDemoToFile(const char* demo_name)
 		Z_Free(fallback_file);
 	}
 
-	lprintf(LO_INFO, "Wrote demo: %s\n", demo_name);
+	lprintf(OutputLevels::Info, "Wrote demo: %s\n", demo_name);
 
 	return end_marker_location;
 }
@@ -637,7 +639,7 @@ void dsda_ExportDemo(const char* name)
 	Z_Free(base_name);
 	Z_Free(demo_name);
 
-	lprintf(LO_INFO, "Demo recording exported\n");
+	lprintf(OutputLevels::Info, "Demo recording exported\n");
 }
 
 int dsda_DemoDataSize(byte complete)
@@ -694,17 +696,17 @@ dboolean dsda_PendingJoin()
 
 void dsda_JoinDemoCmd(ticcmd_t* cmd)
 {
-	dsda_TrackFeature(uf_join);
+	dsda_TrackFeature(FeatureFlag::Join);
 
 	// Sometimes this bit is not available
 	if(
-		(!demo_compatibility || gamestate != GS_FINALE) &&
+		(!demo_compatibility || gamestate != GameState::Finale) &&
 		(
-			(demo_compatibility && !prboom_comp[PC_ALLOW_SSG_DIRECT].state) ||
-			(cmd->buttons & BT_CHANGE) == 0
+			(demo_compatibility && !prboom_comp[std::to_underlying(PrboomComp::AllowSsgDirect)].state) ||
+			(cmd->buttons & ButtonCode::Change) == ButtonCode{}
 		)
 	)
-		cmd->buttons |= BT_JOIN;
+		cmd->buttons |= ButtonCode::Join;
 	else
 		dsda_QueueJoin();
 }
@@ -857,7 +859,7 @@ void dsda_ApplyDSDADemoFormat(byte** demo_p)
 		use_dsda_format = true;
 	}
 
-	if(dsda_Flag(dsda_arg_dsdademo))
+	if(dsda_Flag(ArgId::Dsdademo))
 	{
 		use_dsda_format = true;
 		dsda_EnableCasualExCmdFeatures();

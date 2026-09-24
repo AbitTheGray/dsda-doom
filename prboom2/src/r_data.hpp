@@ -7,14 +7,14 @@
 
 #pragma once
 
+#include "r_defs.hpp"
+#include "r_state.hpp"
+#include "r_patch.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "r_defs.hpp"
-#include "r_state.hpp"
-#include "r_patch.hpp"
 
 // A single patch from a texture definition, basically
 // a rectangular area within the texture rectangle.
@@ -45,20 +45,16 @@ typedef struct
 extern int numtextures;
 extern texture_t** textures;
 
-
 const byte* R_GetTextureColumn(const rpatch_t* texpatch, int col);
-
 
 // I/O, setting up the stuff.
 void R_InitData();
 void R_PrecacheLevel();
 
-
 // Retrieval.
 // Floor/ceiling opaque texture tiles,
 // lookup by name. For animation?
 int R_FlatNumForName(const char* name); // killough -- const added
-
 
 // R_*TextureNumForName returns the texture number for the texture name, or NO_TEXTURE if
 //  there is no texture (i.e. "-") specified.
@@ -76,10 +72,10 @@ extern const byte *main_tranmap, *tranmap;
 void R_SetPatchNum(patchnum_t* patchnum, const char* name);
 // e6y: Added for "GRNROCK" mostly
 void R_SetFloorNum(patchnum_t* patchnum, const char* name);
-int R_SetSpriteByIndex(patchnum_t* patchnum, spritenum_t item);
+int R_SetSpriteByIndex(patchnum_t* patchnum, SpriteId item);
 int R_SetSpriteByName(patchnum_t* patchnum, const char* name);
 int R_SetPatchByName(patchnum_t* patchnum, const char* name);
-int R_NumPatchForSpriteIndex(spritenum_t item);
+int R_NumPatchForSpriteIndex(SpriteId item);
 
 #ifdef __cplusplus
 }

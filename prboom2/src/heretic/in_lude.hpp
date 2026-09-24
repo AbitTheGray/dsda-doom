@@ -10,12 +10,12 @@
 
 #pragma once
 
+#include "doomdef.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomdef.hpp"
 
 void IN_Ticker();
 void IN_Drawer();

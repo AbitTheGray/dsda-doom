@@ -8,15 +8,16 @@
 
 #pragma once
 
+#include "config.h"
+#include "doomtype.hpp"
+#include "m_fixed.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 // The most basic types we use, portability.
-#include "config.h"
-#include "doomtype.hpp"
-#include "m_fixed.hpp"
 
 //
 // Map level types.
@@ -26,20 +27,20 @@ extern "C"
 
 // Lump order in a map WAD: each map needs a couple of lumps
 // to provide a complete scene geometry description.
-enum
+enum struct MapLump : int32_t
 {
-	ML_LABEL,    // A separator, name, ExMx or MAPxx
-	ML_THINGS,   // Monsters, items..
-	ML_LINEDEFS, // LineDefs, from editing
-	ML_SIDEDEFS, // SideDefs, from editing
-	ML_VERTEXES, // Vertices, edited and BSP splits generated
-	ML_SEGS,     // LineSegs, from LineDefs split by BSP
-	ML_SSECTORS, // SubSectors, list of LineSegs
-	ML_NODES,    // BSP nodes
-	ML_SECTORS,  // Sectors, from editing
-	ML_REJECT,   // LUT, sector-sector visibility
-	ML_BLOCKMAP, // LUT, motion clipping, walls/grid element
-	ML_BEHAVIOR
+	Label,    // A separator, name, ExMx or MAPxx
+	Things,   // Monsters, items..
+	Linedefs, // LineDefs, from editing
+	Sidedefs, // SideDefs, from editing
+	Vertexes, // Vertices, edited and BSP splits generated
+	Segs,     // LineSegs, from LineDefs split by BSP
+	Ssectors, // SubSectors, list of LineSegs
+	Nodes,    // BSP nodes
+	Sectors,  // Sectors, from editing
+	Reject,   // LUT, sector-sector visibility
+	Blockmap, // LUT, motion clipping, walls/grid element
+	Behavior
 };
 
 #define ML_TEXTMAP 1

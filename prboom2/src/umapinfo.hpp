@@ -21,34 +21,41 @@
 
 #pragma once
 
+#include <stdint.h>
+
+#include "cpp/Util.hpp"
+
+enum struct MobjType : int32_t;
+
+enum struct UMapinfoFlags : uint32_t
+{
+	LabelClear = (1u << 0),
+
+	EndGameClear    = (1u << 1),
+	EndGameArt      = (1u << 2),
+	EndGameStandard = (1u << 3),
+	EndGameCast     = (1u << 4),
+	EndGameScroll   = (1u << 5),
+
+	NoIntermission       = (1u << 6),
+	InterTextClear       = (1u << 7),
+	InterTextSecretClear = (1u << 8),
+
+	BossActionClear = (1u << 9),
+
+	EndGameAny = (EndGameArt | EndGameStandard |
+		EndGameCast | EndGameScroll),
+};
+ENUM_FLAGS_FUNC(UMapinfoFlags)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-	typedef enum MapinfoFlags
-	{
-		MapInfo_LabelClear = (1u << 0),
-
-		MapInfo_EndGameClear    = (1u << 1),
-		MapInfo_EndGameArt      = (1u << 2),
-		MapInfo_EndGameStandard = (1u << 3),
-		MapInfo_EndGameCast     = (1u << 4),
-		MapInfo_EndGameScroll   = (1u << 5),
-
-		MapInfo_NoIntermission       = (1u << 6),
-		MapInfo_InterTextClear       = (1u << 7),
-		MapInfo_InterTextSecretClear = (1u << 8),
-
-		MapInfo_BossActionClear = (1u << 9),
-
-		MapInfo_EndGameAny = (MapInfo_EndGameArt | MapInfo_EndGameStandard |
-			MapInfo_EndGameCast | MapInfo_EndGameScroll),
-	} UMapinfoFlags;
-
 	struct BossAction
 	{
-		int type;
+		MobjType type;
 		int special;
 		int tag;
 	};
@@ -73,7 +80,7 @@ extern "C"
 		char interbackdrop[9];
 		char intermusic[9];
 		int partime;
-		int flags;
+		UMapinfoFlags flags;
 
 		int numbossactions;
 		struct BossAction* bossactions;

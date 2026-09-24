@@ -2,14 +2,15 @@
 
 #pragma once
 
+#include <utility>
+
+#include <stdarg.h>
+#include "hu_lib.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include <stdarg.h>
-
-#include "hu_lib.hpp"
 
 #define GL_COMBINE_ARB                    0x8570
 #define GL_RGB_SCALE_ARB                  0x8573
@@ -102,52 +103,52 @@ typedef struct prboom_comp_s
 	int arg_id;
 } prboom_comp_t;
 
-enum
+enum struct PrboomComp : int32_t
 {
-	PC_MONSTER_AVOID_HAZARDS,
-	PC_REMOVE_SLIME_TRAILS,
-	PC_NO_DROPOFF,
-	PC_TRUNCATED_SECTOR_SPECIALS,
-	PC_BOOM_BRAINAWAKE,
-	PC_PRBOOM_FRICTION,
-	PC_REJECT_PAD_WITH_FF,
-	PC_FORCE_LXDOOM_DEMO_COMPATIBILITY,
-	PC_ALLOW_SSG_DIRECT,
-	PC_TREAT_NO_CLIPPING_THINGS_AS_NOT_BLOCKING,
-	PC_FORCE_INCORRECT_PROCESSING_OF_RESPAWN_FRAME_ENTRY,
-	PC_FORCE_CORRECT_CODE_FOR_3_KEYS_DOORS_IN_MBF,
-	PC_UNINITIALIZE_CRUSH_FIELD_FOR_STAIRS,
-	PC_FORCE_BOOM_FINDNEXTHIGHESTFLOOR,
-	PC_ALLOW_SKY_TRANSFER_IN_BOOM,
-	PC_APPLY_GREEN_ARMOR_CLASS_TO_ARMOR_BONUSES,
-	PC_APPLY_BLUE_ARMOR_CLASS_TO_MEGASPHERE,
-	PC_FORCE_INCORRECT_BOBBING_IN_BOOM,
-	PC_BOOM_DEH_PARSER,
-	PC_MBF_REMOVE_THINKER_IN_KILLMOBJ,
-	PC_DO_NOT_INHERIT_FRIENDLYNESS_FLAG_ON_SPAWN,
-	PC_DO_NOT_USE_MISC12_FRAME_PARAMETERS_IN_A_MUSHROOM,
-	PC_APPLY_MBF_CODEPOINTERS_TO_ANY_COMPLEVEL,
-	PC_RESET_MONSTERSPAWNER_PARAMS_AFTER_LOADING,
-	PC_MAX
+	MonsterAvoidHazards,
+	RemoveSlimeTrails,
+	NoDropoff,
+	TruncatedSectorSpecials,
+	BoomBrainAwake,
+	PrboomFriction,
+	RejectPadWithFf,
+	ForceLxdoomDemoCompatibility,
+	AllowSsgDirect,
+	TreatNoClippingThingsAsNotBlocking,
+	ForceIncorrectProcessingOfRespawnFrameEntry,
+	ForceCorrectCodeFor3KeysDoorsInMbf,
+	UninitializeCrushFieldForStairs,
+	ForceBoomFindnexthighestfloor,
+	AllowSkyTransferInBoom,
+	ApplyGreenArmorClassToArmorBonuses,
+	ApplyBlueArmorClassToMegasphere,
+	ForceIncorrectBobbingInBoom,
+	BoomDehParser,
+	MbfRemoveThinkerInKillmobj,
+	DoNotInheritFriendlynessFlagOnSpawn,
+	DoNotUseMisc12FrameParametersInAMushroom,
+	ApplyMbfCodepointersToAnyComplevel,
+	ResetMonsterspawnerParamsAfterLoading,
+	Max
 };
 
 extern prboom_comp_t prboom_comp[];
 
 int StepwiseSum(int value, int direction, int minval, int maxval, int defval);
 
-enum
+enum struct TotalsDisplay : int32_t
 {
-	TT_ALLKILL,
-	TT_ALLITEM,
-	TT_ALLSECRET,
+	AllKill,
+	AllItem,
+	AllSecret,
 
-	TT_TIME,
-	TT_TOTALTIME,
-	TT_TOTALKILL,
-	TT_TOTALITEM,
-	TT_TOTALSECRET,
+	Time,
+	TotalTime,
+	TotalKill,
+	TotalItem,
+	TotalSecret,
 
-	TT_MAX
+	Max
 };
 
 typedef struct timetable_s
@@ -158,7 +159,7 @@ typedef struct timetable_s
 	int item[MAX_MAXPLAYERS];
 	int secret[MAX_MAXPLAYERS];
 
-	int stat[TT_MAX];
+	int stat[std::to_underlying(TotalsDisplay::Max)];
 } timetable_t;
 
 #ifdef _WIN32

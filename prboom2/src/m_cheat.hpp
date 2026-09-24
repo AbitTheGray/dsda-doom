@@ -6,37 +6,38 @@
 
 #pragma once
 
+#include "d_event.hpp"
+
+enum struct CheatWhen : uint32_t
+{
+	Always       = 0,
+	NotDemo         = 1,
+	NotMenu         = 2,
+	NotClassicDemo = 4, // allowed in dsda demo format
+};
+ENUM_FLAGS_FUNC(CheatWhen)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "d_event.hpp"
-
 /* The cheat handlers do not share a parameter list, so the table entry casts
  * each one to the common signature, the same way the state tables do.
  */
 #define CHEAT(cheat, deh_cheat, when, func, arg, repeatable) \
-  { cheat, deh_cheat, static_cast<cheat_when_t>(when), reinterpret_cast<void (*)()>(func), \
+  { cheat, deh_cheat, static_cast<CheatWhen>(when), reinterpret_cast<void (*)()>(func), \
     arg, repeatable, 0, 0, 0, 0, 0, "" }
 
 #define CHEAT_ARGS_MAX 8  /* Maximum number of args at end of cheats */
 
 /* killough 4/16/98: Cheat table structure */
 
-typedef enum
-{
-	cht_always       = 0,
-	not_demo         = 1,
-	not_menu         = 2,
-	not_classic_demo = 4, // allowed in dsda demo format
-} cheat_when_t;
-
 typedef struct cheatseq_s
 {
 	const char* cheat;
 	const char* const deh_cheat;
-	const cheat_when_t when;
+	const CheatWhen when;
 	void (*const func)();
 	const int arg;
 	const int repeatable;

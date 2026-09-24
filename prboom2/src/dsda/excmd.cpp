@@ -52,7 +52,7 @@ dboolean dsda_AllowCasualExCmdFeatures()
 
 dboolean dsda_AllowJumping()
 {
-	return (allow_incompatibility && dsda_IntConfig(dsda_config_allow_jumping))
+	return (allow_incompatibility && dsda_IntConfig(ConfigId::AllowJumping))
 		// TODO: possible "allow jumping" mapinfo flag
 		|| dsda_AllowCasualExCmdFeatures();
 }
@@ -61,7 +61,7 @@ dboolean dsda_FreeAim()
 {
 	return ((allow_incompatibility || dsda_AllowCasualExCmdFeatures())
 		// TODO: possible "allow freelook" mapinfo flag
-		&& dsda_IntConfig(dsda_config_freelook));
+		&& dsda_IntConfig(ConfigId::Freelook));
 }
 
 void dsda_ReadExCmd(ticcmd_t* cmd, const byte** p)

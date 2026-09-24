@@ -5,14 +5,13 @@
 
 #pragma once
 
+#include "info.hpp"
+#include "dsda/deh_hash.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "info.hpp"
-
-#include "dsda/deh_hash.hpp"
 
 typedef struct
 {

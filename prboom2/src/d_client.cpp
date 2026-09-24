@@ -45,8 +45,8 @@ void D_InitFakeNetGame()
 	int i;
 
 	consoleplayer = displayplayer = 0;
-	solo_net = dsda_Flag(dsda_arg_solo_net);
-	coop_spawns = dsda_Flag(dsda_arg_coop_spawns);
+	solo_net = dsda_Flag(ArgId::SoloNet);
+	coop_spawns = dsda_Flag(ArgId::CoopSpawns);
 	netgame = solo_net;
 
 	playeringame[0] = true;

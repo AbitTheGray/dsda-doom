@@ -7,6 +7,8 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 #include "SDL.h"
@@ -444,7 +446,7 @@ static void R_InitLightTables()
 	c_scalelight = static_cast<decltype(c_scalelight)>(Z_Malloc(sizeof(*c_scalelight) * numcolormaps));
 
 	// hexen_note: does hexen require render_doom_lightmaps?
-	render_doom_lightmaps = dsda_IntConfig(dsda_config_render_doom_lightmaps);
+	render_doom_lightmaps = dsda_IntConfig(ConfigId::RenderDoomLightmaps);
 
 	LIGHTLEVELS = (render_doom_lightmaps ? 16 : 32);
 	LIGHTSEGSHIFT = (render_doom_lightmaps ? 4 : 3);
@@ -493,7 +495,7 @@ void R_SetViewSize()
 {
 	BorderNeedRefresh = true;
 	setsizeneeded = true;
-	setblocks = dsda_IntConfig(dsda_config_screenblocks);
+	setblocks = dsda_IntConfig(ConfigId::Screenblocks);
 }
 
 void R_MultMatrixVecd(const float matrix[16], const float in[4], float out[4])
@@ -766,20 +768,20 @@ void R_Init()
 	// CPhipps - R_DrawColumn isn't constant anymore, so must
 	//  initialise in code
 	// current column draw function
-	lprintf(LO_DEBUG, "\nR_LoadTrigTables: ");
+	lprintf(OutputLevels::Debug, "\nR_LoadTrigTables: ");
 	R_LoadTrigTables();
-	lprintf(LO_DEBUG, "\nR_InitData: ");
+	lprintf(OutputLevels::Debug, "\nR_InitData: ");
 	R_InitData();
 	R_SetViewSize();
-	lprintf(LO_DEBUG, "\nR_Init: R_InitPlanes ");
+	lprintf(OutputLevels::Debug, "\nR_Init: R_InitPlanes ");
 	R_InitPlanes();
-	lprintf(LO_DEBUG, "R_InitLightTables ");
+	lprintf(OutputLevels::Debug, "R_InitLightTables ");
 	R_InitLightTables();
-	lprintf(LO_DEBUG, "R_InitSkyMap ");
+	lprintf(OutputLevels::Debug, "R_InitSkyMap ");
 	R_InitSkyMap();
-	lprintf(LO_DEBUG, "R_InitTranslationsTables ");
+	lprintf(OutputLevels::Debug, "R_InitTranslationsTables ");
 	R_InitTranslationTables();
-	lprintf(LO_DEBUG, "R_InitPatches ");
+	lprintf(OutputLevels::Debug, "R_InitPatches ");
 	R_InitPatches();
 }
 
@@ -913,7 +915,7 @@ static void R_SetupFrame(player_t* player)
 	int i, cm;
 
 	int FocalTangent = finetangent[FINEANGLES / 4 + FieldOfView / 2];
-	int extra_brightness = dsda_IntConfig(dsda_config_extra_level_brightness);
+	int extra_brightness = dsda_IntConfig(ConfigId::ExtraLevelBrightness);
 
 	viewplayer = player;
 
@@ -925,7 +927,7 @@ static void R_SetupFrame(player_t* player)
 	}
 	if(extra_brightness != 0)
 	{
-		dsda_TrackFeature(uf_levelbrightness);
+		dsda_TrackFeature(FeatureFlag::Levelbrightness);
 	}
 	extralight += extra_brightness;
 
@@ -1008,7 +1010,7 @@ static void R_InitDrawScene()
 	}
 	else
 	{
-		if(dsda_IntConfig(dsda_config_flashing_hom))
+		if(dsda_IntConfig(ConfigId::FlashingHom))
 		{
 			// killough 2/10/98: add flashing red HOM indicators
 			unsigned char color = (gametic % 20) < 9 ? 0xb0 : 0;
@@ -1032,7 +1034,7 @@ static void R_InitDrawScene()
 static void R_RenderBSPNodes()
 {
 	// Make displayed player invisible locally
-	if(localQuakeHappening[displayplayer] && gamestate == GS_LEVEL)
+	if(localQuakeHappening[displayplayer] && gamestate == GameState::Level)
 	{
 		players[displayplayer].mo->flags2 |= MF2_DONTDRAW;
 		R_RenderBSPNode(numnodes - 1); // head node is the last node output
@@ -1058,64 +1060,64 @@ void R_RenderPlayerView(player_t* player)
 {
 	r_frame_count++;
 
-	DSDA_ADD_CONTEXT(sf_setup_frame);
+	DSDA_ADD_CONTEXT(SignalContext::SetupFrame);
 	R_SetupFrame(player);
-	DSDA_REMOVE_CONTEXT(sf_setup_frame);
+	DSDA_REMOVE_CONTEXT(SignalContext::SetupFrame);
 
-	DSDA_ADD_CONTEXT(sf_clear);
+	DSDA_ADD_CONTEXT(SignalContext::Clear);
 	R_ClearClipSegs();
 	R_ClearDrawSegs();
 	R_ClearPlanes();
 	R_ClearSprites();
-	DSDA_REMOVE_CONTEXT(sf_clear);
+	DSDA_REMOVE_CONTEXT(SignalContext::Clear);
 
-	DSDA_ADD_CONTEXT(sf_init_scene);
+	DSDA_ADD_CONTEXT(SignalContext::InitScene);
 	R_InitDrawScene();
-	DSDA_REMOVE_CONTEXT(sf_init_scene);
+	DSDA_REMOVE_CONTEXT(SignalContext::InitScene);
 
 	FakeNetUpdate();
 
 	if(V_IsOpenGLMode())
 	{
-		DSDA_ADD_CONTEXT(sf_gl_frustum);
+		DSDA_ADD_CONTEXT(SignalContext::GlFrustum);
 		gld_FrustumSetup();
-		DSDA_REMOVE_CONTEXT(sf_gl_frustum);
+		DSDA_REMOVE_CONTEXT(SignalContext::GlFrustum);
 	}
 
-	DSDA_ADD_CONTEXT(sf_bsp_nodes);
+	DSDA_ADD_CONTEXT(SignalContext::BspNodes);
 	R_RenderBSPNodes();
-	DSDA_REMOVE_CONTEXT(sf_bsp_nodes);
+	DSDA_REMOVE_CONTEXT(SignalContext::BspNodes);
 
 	FakeNetUpdate();
 
 	if(V_IsSoftwareMode())
 	{
-		DSDA_ADD_CONTEXT(sf_draw_planes);
+		DSDA_ADD_CONTEXT(SignalContext::DrawPlanes);
 		R_DrawPlanes();
-		DSDA_REMOVE_CONTEXT(sf_draw_planes);
+		DSDA_REMOVE_CONTEXT(SignalContext::DrawPlanes);
 	}
 
-	DSDA_ADD_CONTEXT(sf_reset_column_buffer);
+	DSDA_ADD_CONTEXT(SignalContext::ResetColumnBuffer);
 	R_ResetColumnBuffer();
-	DSDA_REMOVE_CONTEXT(sf_reset_column_buffer);
+	DSDA_REMOVE_CONTEXT(SignalContext::ResetColumnBuffer);
 
 	FakeNetUpdate();
 
 	if(V_IsSoftwareMode())
 	{
-		DSDA_ADD_CONTEXT(sf_draw_masked);
+		DSDA_ADD_CONTEXT(SignalContext::DrawMasked);
 		R_DrawMasked();
 		R_ResetColumnBuffer();
-		DSDA_REMOVE_CONTEXT(sf_draw_masked);
+		DSDA_REMOVE_CONTEXT(SignalContext::DrawMasked);
 	}
 
 	FakeNetUpdate();
 
 	if(V_IsOpenGLMode() && !automap_solid)
 	{
-		DSDA_ADD_CONTEXT(sf_draw_scene);
+		DSDA_ADD_CONTEXT(SignalContext::DrawScene);
 		gld_DrawScene(player);
 		gld_EndDrawScene();
-		DSDA_REMOVE_CONTEXT(sf_draw_scene);
+		DSDA_REMOVE_CONTEXT(SignalContext::DrawScene);
 	}
 }

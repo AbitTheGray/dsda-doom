@@ -25,13 +25,13 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 		str,
 		max_size,
 		"%s%d/%d",
-		dsda_TextColor(dsda_tc_exhud_attempts),
+		dsda_TextColor(TextColorIndex::ExhudAttempts),
 		dsda_SessionAttempts(),
 		dsda_DemoAttempts()
 	);
 }
 
-void dsda_InitAttemptsHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitAttemptsHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

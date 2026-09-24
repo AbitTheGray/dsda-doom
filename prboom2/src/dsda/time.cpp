@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Time
 
+#include <utility>
+
 #include <time.h>
 #include <string.h>
 
@@ -44,39 +46,39 @@ static int clock_gettime(int clockid, struct timespec* tp)
 
 #endif //_MSC_VER
 
-static struct timespec dsda_time[DSDA_TIMER_COUNT];
+static struct timespec dsda_time[std::to_underlying(DsdaTimer::Count)];
 
-void dsda_StartTimer(int timer)
+void dsda_StartTimer(DsdaTimer timer)
 {
-	clock_gettime(CLOCK_MONOTONIC, &dsda_time[timer]);
+	clock_gettime(CLOCK_MONOTONIC, &dsda_time[std::to_underlying(timer)]);
 }
 
-unsigned long long dsda_ElapsedTime(int timer)
+unsigned long long dsda_ElapsedTime(DsdaTimer timer)
 {
 	struct timespec now;
 
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
 	return (unsigned long long)(
-		(signed long long)(now.tv_nsec - dsda_time[timer].tv_nsec) / 1000 +
-		(signed long long)(now.tv_sec - dsda_time[timer].tv_sec) * 1000000
+		(signed long long)(now.tv_nsec - dsda_time[std::to_underlying(timer)].tv_nsec) / 1000 +
+		(signed long long)(now.tv_sec - dsda_time[std::to_underlying(timer)].tv_sec) * 1000000
 	);
 }
 
-unsigned long long dsda_ElapsedTimeMS(int timer)
+unsigned long long dsda_ElapsedTimeMS(DsdaTimer timer)
 {
 	return dsda_ElapsedTime(timer) / 1000;
 }
 
-void dsda_PrintElapsedTime(int timer, const char* message)
+void dsda_PrintElapsedTime(DsdaTimer timer, const char* message)
 {
 	unsigned long long result;
 
 	result = dsda_ElapsedTime(timer);
-	lprintf(LO_INFO, "%s: %lf\n", message, (double)result / 1000);
+	lprintf(OutputLevels::Info, "%s: %lf\n", message, (double)result / 1000);
 }
 
-static void dsda_Throttle(int timer, unsigned long long target_time)
+static void dsda_Throttle(DsdaTimer timer, unsigned long long target_time)
 {
 	unsigned long long elapsed_time;
 	unsigned long long remaining_time;
@@ -106,10 +108,10 @@ void dsda_LimitFPS()
 	int allow_limit;
 	int fps_limit;
 
-	allow_limit = (movement_smooth || !window_focused) && !dsda_Flag(dsda_arg_timedemo) && !dsda_Flag(dsda_arg_fastdemo);
+	allow_limit = (movement_smooth || !window_focused) && !dsda_Flag(ArgId::Timedemo) && !dsda_Flag(ArgId::Fastdemo);
 	fps_limit = window_focused
-		? dsda_IntConfig(dsda_config_fps_limit)
-		: dsda_IntConfig(dsda_config_background_fps_limit);
+		? dsda_IntConfig(ConfigId::FpsLimit)
+		: dsda_IntConfig(ConfigId::BackgroundFpsLimit);
 
 	if(allow_limit && fps_limit)
 	{
@@ -117,7 +119,7 @@ void dsda_LimitFPS()
 
 		target_time = 1000000 / fps_limit;
 
-		dsda_Throttle(dsda_timer_fps, target_time);
+		dsda_Throttle(DsdaTimer::Fps, target_time);
 	}
 }
 
@@ -130,10 +132,10 @@ static unsigned long long dsda_RealTime()
 	if(!started)
 	{
 		started = true;
-		dsda_StartTimer(dsda_timer_realtime);
+		dsda_StartTimer(DsdaTimer::Realtime);
 	}
 
-	return dsda_ElapsedTime(dsda_timer_realtime);
+	return dsda_ElapsedTime(DsdaTimer::Realtime);
 }
 
 static unsigned long long dsda_ScaledTime()

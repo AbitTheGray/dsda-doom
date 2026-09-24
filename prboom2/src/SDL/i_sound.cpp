@@ -5,6 +5,8 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 #include <math.h>
@@ -60,7 +62,7 @@ typedef struct
 {
 	// SFX id of the playing sound effect.
 	// Used to catch duplicates (like chainsaw).
-	int id;
+	SfxId id;
 	// The channel step amount...
 	unsigned int step;
 	// ... and a 0.16 bit remainder of last step.
@@ -108,13 +110,13 @@ static const char* snd_midiplayer;
 
 extern "C" void I_InitSoundParams()
 {
-	pitched_sounds = dsda_IntConfig(dsda_config_pitched_sounds);
+	pitched_sounds = dsda_IntConfig(ConfigId::PitchedSounds);
 
 	// TODO: can we reinitialize sound with new sample rate / count?
 	if(!snd_samplerate)
-		snd_samplerate = dsda_IntConfig(dsda_config_snd_samplerate);
+		snd_samplerate = dsda_IntConfig(ConfigId::SndSamplerate);
 	if(!snd_samplecount)
-		snd_samplecount = dsda_IntConfig(dsda_config_snd_samplecount);
+		snd_samplecount = dsda_IntConfig(ConfigId::SndSamplecount);
 }
 
 /* cph
@@ -139,7 +141,7 @@ static Uint8* ConvertAudioFormat(void** data, SDL_AudioSpec* sample, Uint32* len
 		sample->format, sample->channels, sample->freq,
 		AUDIO_S16, 1, snd_samplerate) < 0)
 	{
-		lprintf(LO_WARN, "SDL_BuildAudioCVT: %s\n", SDL_GetError());
+		lprintf(OutputLevels::Warn, "SDL_BuildAudioCVT: %s\n", SDL_GetError());
 		return nullptr;
 	}
 
@@ -150,7 +152,7 @@ static Uint8* ConvertAudioFormat(void** data, SDL_AudioSpec* sample, Uint32* len
 	if(SDL_ConvertAudio(&cvt) < 0)
 	{
 		Z_Free(cvt.buf);
-		lprintf(LO_WARN, "SDL_ConvertAudio: %s\n", SDL_GetError());
+		lprintf(OutputLevels::Warn, "SDL_ConvertAudio: %s\n", SDL_GetError());
 		return nullptr;
 	}
 
@@ -167,7 +169,7 @@ static Uint8* ConvertAudioFormat(void** data, SDL_AudioSpec* sample, Uint32* len
 
 typedef struct snd_data_s
 {
-	int sfxid;
+	SfxId sfxid;
 	unsigned char* data;
 	int samplelen;
 	int samplerate;
@@ -177,12 +179,12 @@ typedef struct snd_data_s
 #define SND_DATA_HASH_SIZE 32
 static snd_data_t* snd_data_hash[SND_DATA_HASH_SIZE];
 
-static snd_data_t* GetSndData(int sfxid, const unsigned char* data, size_t len)
+static snd_data_t* GetSndData(SfxId sfxid, const unsigned char* data, size_t len)
 {
 	int key;
 	snd_data_t* target = nullptr;
 
-	key = (sfxid % SND_DATA_HASH_SIZE);
+	key = (std::to_underlying(sfxid) % SND_DATA_HASH_SIZE);
 
 	if(snd_data_hash[key])
 	{
@@ -208,7 +210,7 @@ static snd_data_t* GetSndData(int sfxid, const unsigned char* data, size_t len)
 
 		if(Load_SNDFile(data, &sample, &sampledata, &samplelen) == nullptr)
 		{
-			lprintf(LO_WARN, "Can't open sfx file: %s\n", S_sfx[sfxid].name);
+			lprintf(OutputLevels::Warn, "Can't open sfx file: %s\n", S_sfx[std::to_underlying(sfxid)].name);
 			return nullptr;
 		}
 
@@ -317,10 +319,10 @@ INLINE static dboolean IsDMXSound(const byte* data, int len)
 
 void I_CacheSounds()
 {
-	int id;
-	for(id = 1; id < num_sfx; id++)
+	for(int32_t i = 1; i < num_sfx; i++)
 	{
-		int lump = I_GetSfxLumpNum(&S_sfx[id]);
+		const SfxId id = static_cast<SfxId>(i);
+		int lump = I_GetSfxLumpNum(&S_sfx[i]);
 		if(lump >= 0)
 		{
 			const byte* data = static_cast<const byte*>(W_LumpByNum(lump));
@@ -361,7 +363,7 @@ void I_CacheSounds()
 // Returns a handle.
 //
 
-static int addsfx(int sfxid, int channel, const channel_info_t* cinfo)
+static int addsfx(SfxId sfxid, int channel, const channel_info_t* cinfo)
 {
 	channel_info_t* ci = channelinfo + channel;
 
@@ -449,13 +451,13 @@ static void updateSoundParams(int handle, sfx_params_t* params)
 	if(rightvol < 0 || rightvol > 127)
 	{
 		rightvol = rightvol < 0 ? 0 : 127;
-		lprintf(LO_WARN, "rightvol out of bounds\n");
+		lprintf(OutputLevels::Warn, "rightvol out of bounds\n");
 	}
 
 	if(leftvol < 0 || leftvol > 127)
 	{
 		leftvol = leftvol < 0 ? 0 : 127;
-		lprintf(LO_WARN, "leftvol out of bounds\n");
+		lprintf(OutputLevels::Warn, "leftvol out of bounds\n");
 	}
 
 	// Get the proper lookup table piece
@@ -543,13 +545,13 @@ int I_GetSfxLumpNum(sfxinfo_t* sfx)
 // Pitching (that is, increased speed of playback)
 //  is set, but currently not used by mixing.
 //
-int I_StartSound(int id, int channel, sfx_params_t* params)
+int I_StartSound(SfxId id, int channel, sfx_params_t* params)
 {
 	const unsigned char* data;
 	int lump;
 	size_t len;
 	snd_data_t* snd_data = nullptr;
-	channel_info_t cinfo = {0};
+	channel_info_t cinfo = {};
 
 	if((channel < 0) || (channel >= MAX_CHANNELS))
 #ifdef RANGECHECK
@@ -558,7 +560,7 @@ int I_StartSound(int id, int channel, sfx_params_t* params)
 		return -1;
 #endif
 
-	lump = S_sfx[id].lumpnum;
+	lump = S_sfx[std::to_underlying(id)].lumpnum;
 
 	// We will handle the new SFX.
 	// Set pointer to raw data.
@@ -851,14 +853,14 @@ void I_InitSound()
 
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO))
 	{
-		lprintf(LO_WARN, "Couldn't initialize SDL audio (%s))\n", SDL_GetError());
+		lprintf(OutputLevels::Warn, "Couldn't initialize SDL audio (%s))\n", SDL_GetError());
 		nosfxparm = true;
 		nomusicparm = true;
 		return;
 	}
 
 	// Secure and configure sound device first.
-	lprintf(LO_DEBUG, "I_InitSound: ");
+	lprintf(OutputLevels::Debug, "I_InitSound: ");
 
 	audio_rate = snd_samplerate;
 	audio_channels = 2;
@@ -867,7 +869,7 @@ void I_InitSound()
 	if(Mix_OpenAudioDevice(audio_rate, MIX_DEFAULT_FORMAT, audio_channels, audio_buffers,
 		nullptr, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE) < 0)
 	{
-		lprintf(LO_DEBUG, "couldn't open audio with desired format (%s)\n", SDL_GetError());
+		lprintf(OutputLevels::Debug, "couldn't open audio with desired format (%s)\n", SDL_GetError());
 		nosfxparm = true;
 		nomusicparm = true;
 		return;
@@ -880,16 +882,16 @@ void I_InitSound()
 
 	Mix_SetPostMix(I_UpdateSound, nullptr);
 
-	lprintf(LO_DEBUG, " configured audio device with %d samples/slice\n", audio_buffers);
+	lprintf(OutputLevels::Debug, " configured audio device with %d samples/slice\n", audio_buffers);
 
-	I_AtExit(I_ShutdownSound, true, "I_ShutdownSound", exit_priority_normal);
+	I_AtExit(I_ShutdownSound, true, "I_ShutdownSound", ExitPriority::Normal);
 
 	sfxmutex = SDL_CreateMutex();
 
 	if(!nomusicparm)
 		I_InitMusic();
 
-	lprintf(LO_DEBUG, "I_InitSound: sound module ready\n");
+	lprintf(OutputLevels::Debug, "I_InitSound: sound module ready\n");
 	SDL_PauseAudio(0);
 }
 
@@ -1039,7 +1041,7 @@ char music_player_order[NUM_MUS_PLAYERS][200] =
 	PLAYER_PORTMIDI,
 };
 
-const char* midiplayers[midi_player_last + 1] = {
+const char* midiplayers[std::to_underlying(MidiPlayerName::Last) + 1] = {
 	"fluidsynth", "opl", "portmidi", nullptr
 };
 
@@ -1075,7 +1077,7 @@ void I_InitMusic()
 	for(i = 0; music_players[i]; i++)
 		music_player_was_init[i] = music_players[i]->init(snd_samplerate);
 
-	I_AtExit(I_ShutdownMusic, true, "I_ShutdownMusic", exit_priority_normal);
+	I_AtExit(I_ShutdownMusic, true, "I_ShutdownMusic", ExitPriority::Normal);
 }
 
 // Derived value (not saved, accounts for muted music)
@@ -1083,7 +1085,7 @@ static int music_volume;
 
 extern "C" void I_ResetMusicVolume()
 {
-	snd_MusicVolume = dsda_IntConfig(dsda_config_music_volume);
+	snd_MusicVolume = dsda_IntConfig(ConfigId::MusicVolume);
 
 	if(nomusicparm)
 		return;
@@ -1129,7 +1131,7 @@ void I_PauseSong(int handle)
 		return;
 	}
 
-	switch(dsda_IntConfig(dsda_config_mus_pause_opt))
+	switch(dsda_IntConfig(ConfigId::MusPauseOpt))
 	{
 		case 0:
 			I_StopSong(handle);
@@ -1156,7 +1158,7 @@ void I_ResumeSong(int handle)
 		return;
 	}
 
-	switch(dsda_IntConfig(dsda_config_mus_pause_opt))
+	switch(dsda_IntConfig(ConfigId::MusPauseOpt))
 	{
 		case 0:
 			I_PlaySong(handle, 1);
@@ -1239,7 +1241,7 @@ int I_RegisterSong(const void* data, size_t len)
 			rwops_stream = nullptr;
 		}
 
-		lprintf(LO_ERROR, "Error loading song: %s\n", Mix_GetError());
+		lprintf(OutputLevels::Error, "Error loading song: %s\n", Mix_GetError());
 	}
 
 	return (0);
@@ -1262,7 +1264,7 @@ static void PauseSong(int handle)
 		return;
 
 	SDL_LockMutex(musmutex);
-	switch(dsda_IntConfig(dsda_config_mus_pause_opt))
+	switch(dsda_IntConfig(ConfigId::MusPauseOpt))
 	{
 		case 0:
 			music_players[current_player]->stop();
@@ -1282,7 +1284,7 @@ static void ResumeSong(int handle)
 		return;
 
 	SDL_LockMutex(musmutex);
-	switch(dsda_IntConfig(dsda_config_mus_pause_opt))
+	switch(dsda_IntConfig(ConfigId::MusPauseOpt))
 	{
 		case 0: // i'm not sure why we can guarantee looping=true here,
 			// but that's what the old code did
@@ -1367,16 +1369,16 @@ static int RegisterSongEx(const void* data, size_t len, int try_mus2mid)
 							current_player = i;
 							music_handle = temp_handle;
 							SDL_UnlockMutex(musmutex);
-							lprintf(LO_DEBUG, "RegisterSongEx: Using player %s\n", music_players[i]->name());
+							lprintf(OutputLevels::Debug, "RegisterSongEx: Using player %s\n", music_players[i]->name());
 							return 1;
 						}
 					}
 					else
-						lprintf(LO_DEBUG, "RegisterSongEx: Music player %s on preferred list but it failed to init\n", music_players[i]->name());
+						lprintf(OutputLevels::Debug, "RegisterSongEx: Music player %s on preferred list but it failed to init\n", music_players[i]->name());
 				}
 			}
 			if(!found)
-				lprintf(LO_DEBUG, "RegisterSongEx: Couldn't find preferred music player %s in list\n  (typo or support not included at compile time)\n", music_player_order[j]);
+				lprintf(OutputLevels::Debug, "RegisterSongEx: Couldn't find preferred music player %s in list\n  (typo or support not included at compile time)\n", music_player_order[j]);
 		}
 		// load failed
 	}
@@ -1434,7 +1436,7 @@ static int RegisterSongEx(const void* data, size_t len, int try_mus2mid)
 		}
 	}
 
-	lprintf(LO_ERROR, "RegisterSongEx: Failed\n");
+	lprintf(OutputLevels::Error, "RegisterSongEx: Failed\n");
 	return 0;
 }
 
@@ -1464,21 +1466,21 @@ static void UpdateMusic(void* buff, unsigned nsamp)
 
 void M_ChangeMIDIPlayer()
 {
-	snd_midiplayer = dsda_StringConfig(dsda_config_snd_midiplayer);
+	snd_midiplayer = dsda_StringConfig(ConfigId::SndMidiplayer);
 
-	if(!strcasecmp(snd_midiplayer, midiplayers[midi_player_fluidsynth]))
+	if(!strcasecmp(snd_midiplayer, midiplayers[std::to_underlying(MidiPlayerName::Fluidsynth)]))
 	{
 		strcpy(music_player_order[3], PLAYER_FLUIDSYNTH);
 		strcpy(music_player_order[4], PLAYER_OPL);
 		strcpy(music_player_order[5], PLAYER_PORTMIDI);
 	}
-	else if(!strcasecmp(snd_midiplayer, midiplayers[midi_player_opl]))
+	else if(!strcasecmp(snd_midiplayer, midiplayers[std::to_underlying(MidiPlayerName::Opl)]))
 	{
 		strcpy(music_player_order[3], PLAYER_OPL);
 		strcpy(music_player_order[4], PLAYER_FLUIDSYNTH);
 		strcpy(music_player_order[5], PLAYER_PORTMIDI);
 	}
-	else if(!strcasecmp(snd_midiplayer, midiplayers[midi_player_portmidi]))
+	else if(!strcasecmp(snd_midiplayer, midiplayers[std::to_underlying(MidiPlayerName::Portmidi)]))
 	{
 		strcpy(music_player_order[3], PLAYER_PORTMIDI);
 		strcpy(music_player_order[4], PLAYER_FLUIDSYNTH);

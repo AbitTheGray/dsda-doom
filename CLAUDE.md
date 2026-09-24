@@ -50,6 +50,10 @@ Do not use `#ifndef`+`#define` to prevent multiple isntances of a header, use `#
 Use `enum struct` (not `enum class`) for structs.
 Add helper functions to "flags" enum using `ENUM_FLAGS_FUNC(enum_name)` macro and use `Bit<uint8_t>(0u)` to get a specific bit (it is just `1 << 0u` but type-checked).
 It needs `prboom2/src/cpp/Util.hpp`.
+Always specify underlaying type.
+`ENUM_FLAGS_FUNC` requires an unsigned underlying type, and it has to sit outside any `extern "C"` block.
+If an enum mixes flag bits with a packed field (a mask plus a shift), give it named extractor functions instead of repeating the mask-and-shift at every use.
+A list terminated by a bare `-1` or `0` gets a named enumerator (`End`, `None`) so the list stays typed.
 
 ## Use ranges and views
 Use modern ranges and views where possible. They give us capabilities and readability of LINQ in C++.
@@ -99,3 +103,19 @@ If we do not have time to implement something, put `NOT_IMPLEMENTED` there. It c
 ## Do not pre-declare variables
 Do not start procedures with declaring all variables. That is an old thing from C, we do not want that.
 Not even declaring the object for `for` loop, unless it needs to survive the loop's scope.
+
+## Use C++ casts, not C casts
+Avoid using C-style casts like `(int)`, be explicit like `static_cast<int>`.
+
+## Type the holder, not the use site
+When a variable, field or parameter only ever holds one enum, change its type to that enum.
+Converting at every use is the wrong fix - it keeps the old type and adds noise.
+Only convert where the integer really is the storage or interface format.
+
+## Use `std::to_underlying` to get the number out of an enum
+Where a conversion is genuinely needed, use `std::to_underlying(value)` rather than `static_cast`.
+It needs `<utility>`.
+
+## Never include a header from inside `extern "C"`
+Every header here guards its own linkage, so the wrapper is redundant - and it gives the standard library C linkage, which fails to compile.
+Put the includes above the `extern "C"` block.

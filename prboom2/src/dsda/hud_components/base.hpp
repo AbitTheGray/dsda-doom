@@ -5,14 +5,13 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#include <stdint.h>
+
+// declared in v_video.hpp; the fixed underlying type makes this enough
+enum struct ColorRange : int32_t;
 
 #include <stdio.h>
 #include <math.h>
-
 #include "am_map.hpp"
 #include "doomdef.hpp"
 #include "doomstat.hpp"
@@ -28,7 +27,6 @@ extern "C"
 #include "r_state.hpp"
 #include "v_video.hpp"
 #include "w_wad.hpp"
-
 #include "dsda.hpp"
 #include "dsda/demo.hpp"
 #include "dsda/exhud.hpp"
@@ -37,6 +35,11 @@ extern "C"
 #include "dsda/settings.hpp"
 #include "dsda/text_color.hpp"
 #include "dsda/utility.hpp"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #define DSDA_TEXT_SIZE 200
 #define DSDA_CHAR_HEIGHT 8
@@ -52,15 +55,15 @@ typedef struct
 {
 	int x;
 	int y;
-	int vpt;
+	PatchTranslation vpt;
 } dsda_patch_component_t;
 
-int dsda_HudComponentY(int y_offset, int vpt, double ratio);
-void dsda_InitTextHC(dsda_text_t* component, int x_offset, int y_offset, int vpt);
-void dsda_InitBlockyHC(dsda_text_t* component, int x_offset, int y_offset, int vpt);
-void dsda_InitPatchHC(dsda_patch_component_t* component, int x_offset, int y_offset, int vpt);
+int dsda_HudComponentY(int y_offset, PatchTranslation vpt, double ratio);
+void dsda_InitTextHC(dsda_text_t* component, int x_offset, int y_offset, PatchTranslation vpt);
+void dsda_InitBlockyHC(dsda_text_t* component, int x_offset, int y_offset, PatchTranslation vpt);
+void dsda_InitPatchHC(dsda_patch_component_t* component, int x_offset, int y_offset, PatchTranslation vpt);
 fixed_t dsda_HexenArmor(player_t* player);
-void dsda_DrawBigNumber(int x, int y, int delta_x, int delta_y, int cm, int vpt, int count, int n);
+void dsda_DrawBigNumber(int x, int y, int delta_x, int delta_y, ColorRange cm, PatchTranslation vpt, int count, int n);
 void dsda_DrawBasicText(dsda_text_t* component);
 void dsda_RefreshHudText(dsda_text_t* component);
 

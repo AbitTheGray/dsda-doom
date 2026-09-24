@@ -4,6 +4,8 @@
 // split off or something
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -205,15 +207,15 @@ static int pm_init(int samplerate)
 	char devname[64];
 	const char* snd_mididev;
 
-	mus_portmidi_reset_type = dsda_StringConfig(dsda_config_mus_portmidi_reset_type);
-	mus_portmidi_reset_delay = dsda_IntConfig(dsda_config_mus_portmidi_reset_delay);
-	mus_portmidi_filter_sysex = dsda_IntConfig(dsda_config_mus_portmidi_filter_sysex);
-	mus_portmidi_reverb_level = dsda_IntConfig(dsda_config_mus_portmidi_reverb_level);
-	mus_portmidi_chorus_level = dsda_IntConfig(dsda_config_mus_portmidi_chorus_level);
+	mus_portmidi_reset_type = dsda_StringConfig(ConfigId::MusPortmidiResetType);
+	mus_portmidi_reset_delay = dsda_IntConfig(ConfigId::MusPortmidiResetDelay);
+	mus_portmidi_filter_sysex = dsda_IntConfig(ConfigId::MusPortmidiFilterSysex);
+	mus_portmidi_reverb_level = dsda_IntConfig(ConfigId::MusPortmidiReverbLevel);
+	mus_portmidi_chorus_level = dsda_IntConfig(ConfigId::MusPortmidiChorusLevel);
 
 	if(Pm_Initialize() != pmNoError)
 	{
-		lprintf(LO_WARN, "portmidiplayer: Pm_Initialize () failed\n");
+		lprintf(OutputLevels::Warn, "portmidiplayer: Pm_Initialize () failed\n");
 		return 0;
 	}
 
@@ -221,16 +223,16 @@ static int pm_init(int samplerate)
 
 	if(outputdevice == pmNoDevice)
 	{
-		lprintf(LO_WARN, "portmidiplayer: No output devices available\n");
+		lprintf(OutputLevels::Warn, "portmidiplayer: No output devices available\n");
 		Pm_Terminate();
 		return 0;
 	}
 
 	// look for a device that matches the user preference
 
-	snd_mididev = dsda_StringConfig(dsda_config_snd_mididev);
+	snd_mididev = dsda_StringConfig(ConfigId::SndMididev);
 
-	lprintf(LO_DEBUG, "portmidiplayer device list:\n");
+	lprintf(OutputLevels::Debug, "portmidiplayer device list:\n");
 	for(i = 0; i < Pm_CountDevices(); i++)
 	{
 		oinfo = Pm_GetDeviceInfo(i);
@@ -240,21 +242,21 @@ static int pm_init(int samplerate)
 		if(strlen(snd_mididev) && strstr(devname, snd_mididev))
 		{
 			outputdevice = i;
-			lprintf(LO_DEBUG, ">>%s\n", devname);
+			lprintf(OutputLevels::Debug, ">>%s\n", devname);
 		}
 		else
 		{
-			lprintf(LO_DEBUG, "  %s\n", devname);
+			lprintf(OutputLevels::Debug, "  %s\n", devname);
 		}
 	}
 
 	oinfo = Pm_GetDeviceInfo(outputdevice);
 
-	lprintf(LO_DEBUG, "portmidiplayer: Opening device %s:%s for output\n", oinfo->interf, oinfo->name);
+	lprintf(OutputLevels::Debug, "portmidiplayer: Opening device %s:%s for output\n", oinfo->interf, oinfo->name);
 
 	if(Pm_OpenOutput(&pm_stream, outputdevice, nullptr, DRIVER_BUFFER, nullptr, nullptr, DRIVER_LATENCY) != pmNoError)
 	{
-		lprintf(LO_WARN, "portmidiplayer: Pm_OpenOutput () failed\n");
+		lprintf(OutputLevels::Warn, "portmidiplayer: Pm_OpenOutput () failed\n");
 		Pm_Terminate();
 		return 0;
 	}
@@ -347,7 +349,7 @@ static void writeevent(unsigned long when, int eve, int channel, int v1, int v2)
 static void write_volume(unsigned long when, int channel, int volume)
 {
 	int vol = volume * volume_scale + 0.5f;
-	writeevent(when, MIDI_EVENT_CONTROLLER, channel, MIDI_CONTROLLER_MAIN_VOLUME, vol);
+	writeevent(when, std::to_underlying(MidiEventType::Controller), channel, std::to_underlying(MidiController::MainVolume), vol);
 	channel_volume[channel] = volume;
 }
 
@@ -527,16 +529,16 @@ static void writesysex(unsigned long when, int etype, byte* data, int len)
 		return;
 	}
 
-	if(etype == MIDI_EVENT_SYSEX_SPLIT && sysexbufflen == 0)
+	if(etype == std::to_underlying(MidiEventType::SysexSplit) && sysexbufflen == 0)
 	{
 		// ignore escape sequence
 		return;
 	}
 
-	if(etype == MIDI_EVENT_SYSEX)
+	if(etype == std::to_underlying(MidiEventType::Sysex))
 	{
 		// start a new message (discards any previous incomplete message)
-		sysexbuff[0] = MIDI_EVENT_SYSEX;
+		sysexbuff[0] = std::to_underlying(MidiEventType::Sysex);
 		sysexbufflen = 1;
 	}
 
@@ -544,7 +546,7 @@ static void writesysex(unsigned long when, int etype, byte* data, int len)
 	sysexbufflen += len;
 
 	// process message if it's complete, otherwise do nothing yet
-	if(sysexbuff[sysexbufflen - 1] == MIDI_EVENT_SYSEX_SPLIT)
+	if(sysexbuff[sysexbufflen - 1] == std::to_underlying(MidiEventType::SysexSplit))
 	{
 		Pm_WriteSysEx(pm_stream, when, sysexbuff);
 
@@ -609,18 +611,18 @@ static void pm_render(void* vdest, unsigned bufflen)
 
 		switch(currevent->event_type)
 		{
-			case MIDI_EVENT_SYSEX:
-			case MIDI_EVENT_SYSEX_SPLIT:
+			case MidiEventType::Sysex:
+			case MidiEventType::SysexSplit:
 				if(!mus_portmidi_filter_sysex)
-					writesysex(when, currevent->event_type, currevent->data.sysex.data, currevent->data.sysex.length);
+					writesysex(when, std::to_underlying(currevent->event_type), currevent->data.sysex.data, currevent->data.sysex.length);
 				break;
-			case MIDI_EVENT_META:
+			case MidiEventType::Meta:
 				switch(currevent->data.meta.type)
 				{
-					case MIDI_META_SET_TEMPO:
+					case std::to_underlying(MidiMetaEventType::SetTempo):
 						spmc = MIDI_spmc(midifile, currevent, 1000);
 						break;
-					case MIDI_META_END_OF_TRACK:
+					case std::to_underlying(MidiMetaEventType::EndOfTrack):
 						if(pm_looping)
 						{
 							eventpos = 0;
@@ -640,8 +642,8 @@ static void pm_render(void* vdest, unsigned bufflen)
 						return;
 				}
 				break; // not interested in most metas
-			case MIDI_EVENT_CONTROLLER:
-				if(currevent->data.channel.param1 == MIDI_CONTROLLER_MAIN_VOLUME)
+			case MidiEventType::Controller:
+				if(currevent->data.channel.param1 == std::to_underlying(MidiController::MainVolume))
 				{
 					write_volume(when, currevent->data.channel.channel, currevent->data.channel.param2);
 					channel_used[currevent->data.channel.channel] = true;
@@ -656,7 +658,7 @@ static void pm_render(void* vdest, unsigned bufflen)
 				}
 			// fall through
 			default:
-				writeevent(when, currevent->event_type, currevent->data.channel.channel, currevent->data.channel.param1, currevent->data.channel.param2);
+				writeevent(when, std::to_underlying(currevent->event_type), currevent->data.channel.channel, currevent->data.channel.param1, currevent->data.channel.param2);
 				channel_used[currevent->data.channel.channel] = true;
 				break;
 		}

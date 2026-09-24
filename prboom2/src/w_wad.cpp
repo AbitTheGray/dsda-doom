@@ -111,7 +111,7 @@ static void W_AddFile(wadfile_info_t* wadfile)
 	filelump_t singleinfo;
 	int flags = 0;
 
-	if(wadfile->src == source_skip)
+	if(wadfile->src == WadSource::Skip)
 	{
 		return;
 	}
@@ -135,11 +135,11 @@ static void W_AddFile(wadfile_info_t* wadfile)
 
 	//jff 8/3/98 use logical output routine
 	if(MainLumpCache)
-		lprintf(LO_INFO, " adding %s\n", wadfile->name);
+		lprintf(OutputLevels::Info, " adding %s\n", wadfile->name);
 	startlump = numlumps;
 
 	// mark lumps from internal resource
-	if(wadfile->src == source_port_wad)
+	if(wadfile->src == WadSource::PortWad)
 	{
 		int len = strlen(WAD_DATA);
 		int len_file = strlen(wadfile->name);
@@ -188,16 +188,16 @@ static void W_AddFile(wadfile_info_t* wadfile)
 		lump_p->wadfile = wadfile; //  killough 4/25/98
 		lump_p->position = LittleLong(fileinfo->filepos);
 		lump_p->size = LittleLong(fileinfo->size);
-		if(wadfile->src == source_lmp)
+		if(wadfile->src == WadSource::Lmp)
 		{
 			// Modifications to place command-line-added demo lumps
 			// into a separate "ns_demos" namespace so that they cannot
 			// conflict with other lump names
-			lump_p->li_namespace = ns_demos;
+			lump_p->li_namespace = LumpNamespace::Demos;
 		}
 		else
 		{
-			lump_p->li_namespace = ns_global; // killough 4/17/98
+			lump_p->li_namespace = LumpNamespace::Global; // killough 4/17/98
 		}
 		strncpy(lump_p->name, fileinfo->name, 8);
 		lump_p->source = wadfile->src; // Ty 08/29/98
@@ -224,7 +224,7 @@ static int IsMarker(const char* marker, const char* name)
 // killough 4/17/98: add namespace tags
 
 static int W_CoalesceMarkedResource(const char* start_marker,
-	const char* end_marker, li_namespace_e li_namespace)
+	const char* end_marker, LumpNamespace li_namespace)
 {
 	int result = 0;
 	lumpinfo_t* marked = static_cast<lumpinfo_t*>(Z_Malloc(sizeof(*marked) * numlumps));
@@ -240,7 +240,7 @@ static int W_CoalesceMarkedResource(const char* start_marker,
 			{
 				strncpy(marked->name, start_marker, 8);
 				marked->size = 0;                 // killough 3/20/98: force size to be 0
-				marked->li_namespace = ns_global; // killough 4/17/98
+				marked->li_namespace = LumpNamespace::Global; // killough 4/17/98
 				marked->wadfile = nullptr;
 				num_marked = 1;
 			}
@@ -261,7 +261,7 @@ static int W_CoalesceMarkedResource(const char* start_marker,
 			// ignore sprite lumps smaller than 8 bytes (the smallest possible)
 			// in size -- this was used by some dmadds wads
 			// as an 'empty' graphics resource
-			if(li_namespace != ns_sprites || lump->size > 8)
+			if(li_namespace != LumpNamespace::Sprites || lump->size > 8)
 			{
 				marked[num_marked] = *lump;
 				marked[num_marked++].li_namespace = li_namespace; // killough 4/17/98
@@ -282,7 +282,7 @@ static int W_CoalesceMarkedResource(const char* start_marker,
 	{
 		lumpinfo[numlumps].size = 0; // killough 3/20/98: force size to be 0
 		lumpinfo[numlumps].wadfile = nullptr;
-		lumpinfo[numlumps].li_namespace = ns_global; // killough 4/17/98
+		lumpinfo[numlumps].li_namespace = LumpNamespace::Global; // killough 4/17/98
 		strncpy(lumpinfo[numlumps++].name, end_marker, 8);
 	}
 
@@ -331,7 +331,7 @@ unsigned W_LumpNameHash(const char* s)
 // W_FindNumFromName, an iterative version of W_CheckNumForName
 // returns list of lump numbers for a given name (latest first)
 //
-int W_FindNumFromName2(const char* name, int li_namespace, int i)
+int W_FindNumFromName2(const char* name, LumpNamespace li_namespace, int i)
 {
 	// Hash function maps the name to one of possibly numlump chains.
 	// It has been tuned so that the average chain length never exceeds 2.
@@ -483,17 +483,17 @@ void W_Init()
 	// killough 1/24/98: change interface to use M_START/M_END explicitly
 	// killough 4/17/98: Add namespace tags to each entry
 	// killough 4/4/98: add colormap markers
-	W_CoalesceMarkedResource("S_START", "S_END", ns_sprites);
-	W_CoalesceMarkedResource("F_START", "F_END", ns_flats);
-	W_CoalesceMarkedResource("C_START", "C_END", ns_colormaps);
-	W_CoalesceMarkedResource("B_START", "B_END", ns_prboom);
-	W_CoalesceMarkedResource("HI_START", "HI_END", ns_hires);
+	W_CoalesceMarkedResource("S_START", "S_END", LumpNamespace::Sprites);
+	W_CoalesceMarkedResource("F_START", "F_END", LumpNamespace::Flats);
+	W_CoalesceMarkedResource("C_START", "C_END", LumpNamespace::Colormaps);
+	W_CoalesceMarkedResource("B_START", "B_END", LumpNamespace::Prboom);
+	W_CoalesceMarkedResource("HI_START", "HI_END", LumpNamespace::Hires);
 
 	// killough 1/31/98: initialize lump hash table
 	W_HashLumps();
 
 	/* cph 2001/07/07 - separated cache setup */
-	lprintf(LO_DEBUG, "W_InitCache\n");
+	lprintf(OutputLevels::Debug, "W_InitCache\n");
 	W_InitCache();
 
 	V_FreePlaypal();
@@ -591,8 +591,8 @@ int W_GetAnimatedOrSwitchesLump(const char* lumpname)
 		for(iwad_lump = 0; iwad_lump < numlumps; iwad_lump++)
 		{
 			if(!strncmp(lumpinfo[iwad_lump].name, lumpname, 8) &&
-				lumpinfo[iwad_lump].li_namespace == ns_global &&
-				lumpinfo[iwad_lump].source == source_iwad)
+				lumpinfo[iwad_lump].li_namespace == LumpNamespace::Global &&
+				lumpinfo[iwad_lump].source == WadSource::Iwad)
 				return iwad_lump;
 		}
 	}
@@ -608,12 +608,12 @@ int W_LumpNumExists(int lump)
 
 int W_PWADLumpNumExists(int lump)
 {
-	return W_LumpNumExists(lump) && (lumpinfo[lump].source == source_pwad || lumpinfo[lump].source == source_pwad_auto_load);
+	return W_LumpNumExists(lump) && (lumpinfo[lump].source == WadSource::Pwad || lumpinfo[lump].source == WadSource::PwadAutoLoad);
 }
 
 int W_AUTOLumpNumExists(int lump)
 {
-	return W_LumpNumExists(lump) && (lumpinfo[lump].source == source_auto_load);
+	return W_LumpNumExists(lump) && (lumpinfo[lump].source == WadSource::AutoLoad);
 }
 
 int W_PWADLumpNumExists2(int lump)
@@ -626,7 +626,7 @@ int W_LumpNameExists(const char* name)
 	return W_CheckNumForName(name) != LUMP_NOT_FOUND;
 }
 
-int W_LumpNameExists2(const char* name, int ns)
+int W_LumpNameExists2(const char* name, LumpNamespace ns)
 {
 	return W_CheckNumForName2(name, ns) != LUMP_NOT_FOUND;
 }

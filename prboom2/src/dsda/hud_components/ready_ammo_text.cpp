@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Ready Ammo Text HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "ready_ammo_text.hpp"
@@ -14,20 +16,20 @@ typedef struct
 
 static local_component_t* local;
 
-int dsda_AmmoColor(player_t* player)
+TextColorIndex dsda_AmmoColor(player_t* player)
 {
 	int ammo_percent;
 
 	ammo_percent = P_AmmoPercent(player, player->readyweapon);
 
 	if(ammo_percent < hud_ammo_red)
-		return dsda_tc_exhud_ammo_bad;
+		return TextColorIndex::ExhudAmmoBad;
 	else if(ammo_percent < hud_ammo_yellow)
-		return dsda_tc_exhud_ammo_warning;
+		return TextColorIndex::ExhudAmmoWarning;
 	else if(ammo_percent < 100)
-		return dsda_tc_exhud_ammo_ok;
+		return TextColorIndex::ExhudAmmoOk;
 	else
-		return dsda_tc_exhud_ammo_full;
+		return TextColorIndex::ExhudAmmoFull;
 }
 
 static void dsda_UpdateComponentText(char* str, size_t max_size)
@@ -39,34 +41,34 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 	if(hexen)
 	{
 		snprintf(str, max_size, "%sAMM %s%3d %s%3d",
-			dsda_TextColor(dsda_tc_exhud_ammo_label),
-			dsda_TextColor(dsda_tc_exhud_ammo_mana1), player->ammo[0],
-			dsda_TextColor(dsda_tc_exhud_ammo_mana2), player->ammo[1]
+			dsda_TextColor(TextColorIndex::ExhudAmmoLabel),
+			dsda_TextColor(TextColorIndex::ExhudAmmoMana1), player->ammo[0],
+			dsda_TextColor(TextColorIndex::ExhudAmmoMana2), player->ammo[1]
 		);
 	}
 	else
 	{
-		ammotype_t ammo_type = weaponinfo[player->readyweapon].ammo;
+		AmmoType ammo_type = weaponinfo[std::to_underlying(player->readyweapon)].ammo;
 
-		if(ammo_type == am_noammo || !player->maxammo[ammo_type])
+		if(ammo_type == AmmoType::NoAmmo || !player->maxammo[std::to_underlying(ammo_type)])
 		{
 			snprintf(str, max_size, "%sAMM %sN/A",
-				dsda_TextColor(dsda_tc_exhud_ammo_label),
-				dsda_TextColor(dsda_tc_exhud_ammo_value)
+				dsda_TextColor(TextColorIndex::ExhudAmmoLabel),
+				dsda_TextColor(TextColorIndex::ExhudAmmoValue)
 			);
 		}
 		else
 		{
 			snprintf(str, max_size, "%sAMM %s%3d",
-				dsda_TextColor(dsda_tc_exhud_ammo_label),
-				dsda_TextColor((dsda_text_color_index_t)dsda_AmmoColor(player)),
-				player->ammo[ammo_type]
+				dsda_TextColor(TextColorIndex::ExhudAmmoLabel),
+				dsda_TextColor(dsda_AmmoColor(player)),
+				player->ammo[std::to_underlying(ammo_type)]
 			);
 		}
 	}
 }
 
-void dsda_InitReadyAmmoTextHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitReadyAmmoTextHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

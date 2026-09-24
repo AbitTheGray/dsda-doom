@@ -6,13 +6,13 @@
 
 #pragma once
 
+#include "d_player.hpp"
+#include "r_data.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_player.hpp"
-#include "r_data.hpp"
 
 extern int r_frame_count;
 

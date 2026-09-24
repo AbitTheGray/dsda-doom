@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Weapon Text HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "weapon_text.hpp"
@@ -32,22 +34,22 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 			"%s%s%s%c %s%c %c\n"
 			"%s%s%s%c %c %c\n"
 			"%s%s%s%c %c %c",
-			dsda_TextColor(dsda_tc_exhud_weapon_label),
+			dsda_TextColor(TextColorIndex::ExhudWeaponLabel),
 			local->label_w,
-			player->powers[pw_strength] ? dsda_TextColor(dsda_tc_exhud_weapon_berserk) : dsda_TextColor(dsda_tc_exhud_weapon_owned),
+			player->powers[std::to_underlying(PowerType::Strength)] ? dsda_TextColor(TextColorIndex::ExhudWeaponBerserk) : dsda_TextColor(TextColorIndex::ExhudWeaponOwned),
 			player->weaponowned[0] ? '1' : ' ',
-			dsda_TextColor(dsda_tc_exhud_weapon_owned),
+			dsda_TextColor(TextColorIndex::ExhudWeaponOwned),
 			player->weaponowned[1] ? '2' : ' ',
 			player->weaponowned[2] ? '3' : ' ',
-			dsda_TextColor(dsda_tc_exhud_weapon_label),
+			dsda_TextColor(TextColorIndex::ExhudWeaponLabel),
 			local->label_p,
-			dsda_TextColor(dsda_tc_exhud_weapon_owned),
+			dsda_TextColor(TextColorIndex::ExhudWeaponOwned),
 			player->weaponowned[3] ? '4' : ' ',
 			player->weaponowned[4] ? '5' : ' ',
 			player->weaponowned[5] ? '6' : ' ',
-			dsda_TextColor(dsda_tc_exhud_weapon_label),
+			dsda_TextColor(TextColorIndex::ExhudWeaponLabel),
 			local->label_n,
-			dsda_TextColor(dsda_tc_exhud_weapon_owned),
+			dsda_TextColor(TextColorIndex::ExhudWeaponOwned),
 			player->weaponowned[6] ? '7' : ' ',
 			player->weaponowned[7] ? '8' : ' ',
 			player->weaponowned[8] ? '9' : ' '
@@ -57,11 +59,11 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 			str,
 			max_size,
 			"%s%s%s%c %s%c %c %c %c %c %c %c %c",
-			dsda_TextColor(dsda_tc_exhud_weapon_label),
+			dsda_TextColor(TextColorIndex::ExhudWeaponLabel),
 			local->label_wpn,
-			player->powers[pw_strength] ? dsda_TextColor(dsda_tc_exhud_weapon_berserk) : dsda_TextColor(dsda_tc_exhud_weapon_owned),
+			player->powers[std::to_underlying(PowerType::Strength)] ? dsda_TextColor(TextColorIndex::ExhudWeaponBerserk) : dsda_TextColor(TextColorIndex::ExhudWeaponOwned),
 			player->weaponowned[0] ? '1' : ' ',
-			dsda_TextColor(dsda_tc_exhud_weapon_owned),
+			dsda_TextColor(TextColorIndex::ExhudWeaponOwned),
 			player->weaponowned[1] ? '2' : ' ',
 			player->weaponowned[2] ? '3' : ' ',
 			player->weaponowned[3] ? '4' : ' ',
@@ -73,7 +75,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 		);
 }
 
-void dsda_InitWeaponTextHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitWeaponTextHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

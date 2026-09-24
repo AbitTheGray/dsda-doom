@@ -6,13 +6,13 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+#include "w_wad.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
-#include "w_wad.hpp"
 
 typedef struct
 {

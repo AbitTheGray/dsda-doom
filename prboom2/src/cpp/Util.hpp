@@ -113,9 +113,9 @@ static_assert(PositiveModulo(-4, 4) == 0);
 	{\
 		return static_cast<enum_name>(std::to_underlying(a) & ~std::to_underlying(b));\
 	}\
-	[[nodiscard]] inline constexpr bool operator &(const enum_name a, const enum_name b) noexcept\
+	[[nodiscard]] inline constexpr enum_name operator &(const enum_name a, const enum_name b) noexcept\
 	{\
-		return (std::to_underlying(a) & std::to_underlying(b)) != 0;\
+		return static_cast<enum_name>(std::to_underlying(a) & std::to_underlying(b));\
 	}\
 	inline constexpr enum_name& operator |=(enum_name& a, const enum_name b) noexcept\
 	{\
@@ -144,7 +144,7 @@ static_assert(PositiveModulo(-4, 4) == 0);
 	}\
 	[[nodiscard]] inline constexpr bool operator &(const enum_name a, const other_name b) noexcept\
 	{\
-		return (a & static_cast<enum_name>(::Bit(std::to_underlying(b)))) != 0;\
+		return (a & static_cast<enum_name>(::Bit(std::to_underlying(b)))) != enum_name{};\
 	}\
 	inline constexpr enum_name& operator |=(enum_name& a, const other_name b) noexcept\
 	{\

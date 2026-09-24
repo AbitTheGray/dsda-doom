@@ -8,6 +8,8 @@
 ========================
 */
 
+#include <utility>
+
 #include "am_map.hpp"
 #include "doomstat.hpp"
 #include "d_event.hpp"
@@ -34,12 +36,12 @@
 
 extern dboolean BorderNeedRefresh;
 
-typedef enum
+enum struct GameType : int32_t
 {
-	SINGLE,
-	COOPERATIVE,
-	DEATHMATCH
-} gametype_t;
+	Single,
+	Cooperative,
+	Deathmatch
+};
 
 static void IN_WaitStop();
 static void IN_Stop();
@@ -64,19 +66,21 @@ static int nextmap;
 static dboolean intermission;
 static dboolean skipintermission;
 dboolean finalintermission;
-static int interstate = 0;
 
-enum
+enum struct InterState : int32_t
 {
-	IN_STATS = 0,
-	IN_FINISHED,
-	IN_ENTERING,
-	IN_ENTERING_DELAY,
-} interstate_e;
+	BeforeStats = -1, // IN_Start waits one tick before showing the stats
+	Stats = 0,
+	Finished,
+	Entering,
+	EnteringDelay,
+};
+
+static InterState interstate = InterState::Stats;
 
 static int intertime = -1;
 static int oldintertime = 0;
-static gametype_t gametype;
+static GameType gametype;
 
 static int cnt;
 
@@ -202,18 +206,18 @@ static void IN_DrawInterpic()
 
 	if(enterpic)
 	{
-		V_DrawNamePatchFS(0, 0, 0, enterpic, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatchFS(0, 0, 0, enterpic, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	else if(exitpic)
 	{
-		V_DrawNamePatchFS(0, 0, 0, exitpic, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatchFS(0, 0, 0, exitpic, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	else if(IN_UseWorldMap())
 	{
 		char name[9];
 		snprintf(name, sizeof(name), "MAPE%d", gameepisode);
 
-		V_DrawNamePatchFS(0, 0, 0, name, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatchFS(0, 0, 0, name, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	else
 	{
@@ -225,7 +229,7 @@ static void IN_DrawBeenThere(int i)
 {
 	V_DrawNamePatch(
 		YAHspot[gameepisode - 1][i].x, YAHspot[gameepisode - 1][i].y, 0,
-		"IN_X", CR_DEFAULT, VPT_STRETCH
+		"IN_X", ColorRange::Default, PatchTranslation::Stretch
 	);
 }
 
@@ -233,7 +237,7 @@ static void IN_DrawGoingThere(int i)
 {
 	V_DrawNamePatch(
 		YAHspot[gameepisode - 1][i].x, YAHspot[gameepisode - 1][i].y, 0,
-		"IN_YAH", CR_DEFAULT, VPT_STRETCH
+		"IN_YAH", ColorRange::Default, PatchTranslation::Stretch
 	);
 }
 
@@ -277,12 +281,12 @@ void IN_Start(wbstartstruct_t* wbstartstruct)
 	IN_InitLumps();
 	IN_InitStats();
 	intermission = true;
-	interstate = -1;
+	interstate = InterState::BeforeStats;
 	skipintermission = false;
 	intertime = 0;
 	oldintertime = 0;
 	AM_Stop(false);
-	S_ChangeMusic(heretic_mus_intr, true);
+	S_ChangeMusic(MusicId::HereticIntr, true);
 }
 
 //========================================================================
@@ -332,7 +336,7 @@ void IN_InitStats()
 
 	if(!netgame)
 	{
-		gametype = SINGLE;
+		gametype = GameType::Single;
 		count = leveltime / TICRATE;
 		hours = count / 3600;
 		count -= hours * 3600;
@@ -360,7 +364,7 @@ void IN_InitStats()
 	}
 	else if(netgame && !deathmatch)
 	{
-		gametype = COOPERATIVE;
+		gametype = GameType::Cooperative;
 		memset(killPercent, 0, MAX_MAXPLAYERS * sizeof(int));
 		memset(bonusPercent, 0, MAX_MAXPLAYERS * sizeof(int));
 		memset(secretPercent, 0, MAX_MAXPLAYERS * sizeof(int));
@@ -386,7 +390,7 @@ void IN_InitStats()
 	}
 	else
 	{
-		gametype = DEATHMATCH;
+		gametype = GameType::Deathmatch;
 		slaughterboy = 0;
 		slaughterfrags = -9999;
 		posnum = 0;
@@ -441,7 +445,7 @@ void IN_Ticker()
 	{
 		return;
 	}
-	if(interstate == IN_ENTERING_DELAY)
+	if(interstate == InterState::EnteringDelay)
 	{
 		IN_WaitStop();
 		return;
@@ -450,37 +454,37 @@ void IN_Ticker()
 	intertime++;
 	if(oldintertime < intertime)
 	{
-		interstate++;
+		interstate = static_cast<InterState>(std::to_underlying(interstate) + 1);
 
 		// [crispy] skip "now entering" if it's the final intermission
-		if(interstate >= IN_FINISHED && finalintermission)
+		if(interstate >= InterState::Finished && finalintermission)
 		{
 			IN_Stop();
 			G_WorldDone();
 			return;
 		}
 
-		if(!IN_HasInterpic() && interstate >= IN_FINISHED)
+		if(!IN_HasInterpic() && interstate >= InterState::Finished)
 		{
 			// Extended Wad levels:  skip directly to the next level
-			interstate = IN_ENTERING_DELAY;
+			interstate = InterState::EnteringDelay;
 		}
 		switch(interstate)
 		{
-			case IN_STATS:
+			case InterState::Stats:
 				oldintertime = intertime + 300;
 				if(!IN_HasInterpic())
 				{
 					oldintertime = intertime + 1200;
 				}
 				break;
-			case IN_FINISHED:
+			case InterState::Finished:
 				oldintertime = intertime + 200;
 				break;
-			case IN_ENTERING:
+			case InterState::Entering:
 				oldintertime = INT_MAX;
 				break;
-			case IN_ENTERING_DELAY:
+			case InterState::EnteringDelay:
 				cnt = 10;
 				break;
 			default:
@@ -489,7 +493,7 @@ void IN_Ticker()
 	}
 	if(skipintermission)
 	{
-		if(interstate == IN_STATS && intertime < 150)
+		if(interstate == InterState::Stats && intertime < 150)
 		{
 			intertime = 150;
 			skipintermission = false;
@@ -502,17 +506,17 @@ void IN_Ticker()
 			G_WorldDone();
 			return;
 		}
-		else if(interstate < IN_ENTERING && IN_HasInterpic())
+		else if(interstate < InterState::Entering && IN_HasInterpic())
 		{
-			interstate = IN_ENTERING;
+			interstate = InterState::Entering;
 			skipintermission = false;
-			S_StartOptionalSound(g_sfx_inttot, heretic_sfx_dorcls, false);
+			S_StartOptionalSound(g_sfx_inttot, SfxId::HereticDorcls, false);
 			return;
 		}
-		interstate = IN_ENTERING_DELAY;
+		interstate = InterState::EnteringDelay;
 		cnt = 10;
 		skipintermission = false;
-		S_StartOptionalSound(g_sfx_inttot, heretic_sfx_dorcls, false);
+		S_StartOptionalSound(g_sfx_inttot, SfxId::HereticDorcls, false);
 	}
 }
 
@@ -532,7 +536,7 @@ void IN_CheckForSkip()
 	{
 		if(playeringame[i])
 		{
-			if(player->cmd.buttons & BT_ATTACK)
+			if((player->cmd.buttons & ButtonCode::Attack) != ButtonCode{})
 			{
 				if(!player->attackdown)
 				{
@@ -544,7 +548,7 @@ void IN_CheckForSkip()
 			{
 				player->attackdown = false;
 			}
-			if(player->cmd.buttons & BT_USE)
+			if((player->cmd.buttons & ButtonCode::Use) != ButtonCode{})
 			{
 				if(!player->usedown)
 				{
@@ -568,56 +572,56 @@ void IN_CheckForSkip()
 
 void IN_Drawer()
 {
-	static int oldinterstate;
+	static InterState oldinterstate;
 
 	if(!intermission)
 	{
 		return;
 	}
-	if(interstate == IN_ENTERING_DELAY)
+	if(interstate == InterState::EnteringDelay)
 	{
 		return;
 	}
 
-	if(oldinterstate != IN_ENTERING && interstate == IN_ENTERING)
+	if(oldinterstate != InterState::Entering && interstate == InterState::Entering)
 	{
-		S_StartOptionalSound(g_sfx_intnex, heretic_sfx_pstop, false);
+		S_StartOptionalSound(g_sfx_intnex, SfxId::HereticPstop, false);
 	}
 	oldinterstate = interstate;
 	switch(interstate)
 	{
-		case -1:
-		case IN_STATS: // draw stats
+		case InterState::BeforeStats:
+		case InterState::Stats: // draw stats
 			dsda_PrepareFinished();
 			IN_DrawStatBack();
 			switch(gametype)
 			{
-				case SINGLE:
+				case GameType::Single:
 					IN_DrawSingleStats();
 					break;
-				case COOPERATIVE:
+				case GameType::Cooperative:
 					IN_DrawCoopStats();
 					break;
-				case DEATHMATCH:
+				case GameType::Deathmatch:
 					IN_DrawDMStats();
 					break;
 			}
 			break;
-		case IN_FINISHED: // leaving old level
+		case InterState::Finished: // leaving old level
 			if(IN_HasInterpic())
 			{
 				IN_DrawInterpic();
 				IN_DrawOldLevel();
 			}
 			break;
-		case IN_ENTERING: // going to the next level
+		case InterState::Entering: // going to the next level
 			if(IN_HasInterpic() && !finalintermission)
 			{
 				IN_DrawInterpic();
 				IN_DrawYAH();
 			}
 			break;
-		case IN_ENTERING_DELAY: // waiting before going to the next level
+		case InterState::EnteringDelay: // waiting before going to the next level
 			if(IN_HasInterpic())
 			{
 				IN_DrawInterpic();
@@ -642,7 +646,7 @@ void IN_DrawStatBack()
 
 	if(exitpic)
 	{
-		V_DrawNamePatch(0, 0, 0, exitpic, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatch(0, 0, 0, exitpic, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	else
 	{
@@ -720,7 +724,7 @@ void IN_DrawYAH()
 	{
 		IN_DrawBeenThere(8);
 	}
-	if(!(intertime & 16) || interstate == IN_ENTERING_DELAY)
+	if(!(intertime & 16) || interstate == InterState::EnteringDelay)
 	{
 		// draw the destination 'X'
 		IN_DrawGoingThere(nextmap - 1);
@@ -755,7 +759,7 @@ void IN_DrawSingleStats()
 	x = 160 - MN_TextAWidth("FINISHED") / 2;
 	MN_DrTextA("FINISHED", x, yoffset);
 
-	if(gamemode == retail && !IN_HasInterpic())
+	if(gamemode == GameMode::Retail && !IN_HasInterpic())
 	{
 		yoffset -= 20;
 	}
@@ -773,7 +777,7 @@ void IN_DrawSingleStats()
 	}
 	if(sounds < 1 && intertime >= 30)
 	{
-		S_StartOptionalSound(g_sfx_inttot, heretic_sfx_dorcls, false);
+		S_StartOptionalSound(g_sfx_inttot, SfxId::HereticDorcls, false);
 		sounds++;
 	}
 	IN_DrawNumber(players[consoleplayer].killcount, 200, yoffset + 25, 3);
@@ -785,7 +789,7 @@ void IN_DrawSingleStats()
 	}
 	if(sounds < 2 && intertime >= 60)
 	{
-		S_StartOptionalSound(g_sfx_inttot, heretic_sfx_dorcls, false);
+		S_StartOptionalSound(g_sfx_inttot, SfxId::HereticDorcls, false);
 		sounds++;
 	}
 	IN_DrawNumber(players[consoleplayer].itemcount, 200, yoffset + 50, 3);
@@ -797,7 +801,7 @@ void IN_DrawSingleStats()
 	}
 	if(sounds < 3 && intertime >= 90)
 	{
-		S_StartOptionalSound(g_sfx_inttot, heretic_sfx_dorcls, false);
+		S_StartOptionalSound(g_sfx_inttot, SfxId::HereticDorcls, false);
 		sounds++;
 	}
 	IN_DrawNumber(players[consoleplayer].secretcount, 200, yoffset + 75, 3);
@@ -809,14 +813,14 @@ void IN_DrawSingleStats()
 	}
 	if(sounds < 4 && intertime >= 150)
 	{
-		S_StartOptionalSound(g_sfx_inttot, heretic_sfx_dorcls, false);
+		S_StartOptionalSound(g_sfx_inttot, SfxId::HereticDorcls, false);
 		sounds++;
 	}
 
 	dsda_PrepareEntering();
 
 	// [crispy] ignore "now entering" if it's the final intermission
-	if(gamemode != retail || IN_HasInterpic() || finalintermission)
+	if(gamemode != GameMode::Retail || IN_HasInterpic() || finalintermission)
 	{
 		yoffset = 30;
 	}
@@ -883,7 +887,7 @@ void IN_DrawCoopStats()
 			}
 			else if(intertime >= 40 && sounds < 1)
 			{
-				S_StartOptionalSound(g_sfx_inttot, heretic_sfx_dorcls, false);
+				S_StartOptionalSound(g_sfx_inttot, SfxId::HereticDorcls, false);
 				sounds++;
 			}
 			IN_DrawNumber(killPercent[i], 85, ypos + 10, 3);
@@ -945,12 +949,12 @@ void IN_DrawDMStats()
 	}
 	if(intertime >= 20 && sounds < 1)
 	{
-		S_StartOptionalSound(g_sfx_inttot, heretic_sfx_dorcls, false);
+		S_StartOptionalSound(g_sfx_inttot, SfxId::HereticDorcls, false);
 		sounds++;
 	}
 	if(intertime >= 100 && slaughterboy && sounds < 2)
 	{
-		S_StartOptionalSound(g_sfx_intdms, heretic_sfx_wpnup, false);
+		S_StartOptionalSound(g_sfx_intdms, SfxId::HereticWpnup, false);
 		sounds++;
 	}
 	for(i = 0; i < g_maxplayers; i++)
@@ -1152,7 +1156,7 @@ static void IN_DrawLevelname(const char* patch, const char* levelname, int y)
 	if(patch)
 	{
 		x = 160 - V_NamePatchWidth(patch) / 2;
-		V_DrawNamePatch(x, y, 0, patch, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatch(x, y, 0, patch, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	else
 	{

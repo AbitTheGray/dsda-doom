@@ -5,12 +5,17 @@
 
 #pragma once
 
+#include <stdint.h>
+
+// declared in dsda/args.hpp; the fixed underlying type makes this enough
+enum struct ArgId : int32_t;
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-char* dsda_DetectDirectory(const char* env_key, int arg_id);
+char* dsda_DetectDirectory(const char* env_key, ArgId arg_id);
 void dsda_InitDataDir();
 char* dsda_DataDir();
 const char* dsda_DataRoot();

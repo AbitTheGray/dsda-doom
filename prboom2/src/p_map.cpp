@@ -5,6 +5,8 @@
  *  Shooting and aiming.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "r_main.hpp"
 #include "p_mobj.hpp"
@@ -216,7 +218,7 @@ int P_GetMoveFactor(mobj_t* mo, int* frictionp)
 	int movefactor, friction;
 
 	//e6y
-	if(!mbf_features && !prboom_comp[PC_PRBOOM_FRICTION].state)
+	if(!mbf_features && !prboom_comp[std::to_underlying(PrboomComp::PrboomFriction)].state)
 	{
 		int momentum;
 
@@ -315,12 +317,12 @@ dboolean P_MoveThing(mobj_t* thing, fixed_t x, fixed_t y, fixed_t z, dboolean fo
 			telefog = P_SpawnMobj(oldx,
 				oldy,
 				oldfloorz + g_telefog_height,
-				static_cast<mobjtype_t>(g_mt_tfog));
+				static_cast<MobjType>(g_mt_tfog));
 			S_StartMobjSound(telefog, g_sfx_telept);
 			telefog = P_SpawnMobj(thing->x,
 				thing->y,
 				thing->floorz + g_telefog_height,
-				static_cast<mobjtype_t>(g_mt_tfog));
+				static_cast<MobjType>(g_mt_tfog));
 			S_StartMobjSound(telefog, g_sfx_telept);
 		}
 
@@ -373,7 +375,7 @@ dboolean P_TeleportMove(mobj_t* thing, fixed_t x, fixed_t y, dboolean boss)
 
 	/* killough 8/9/98: make telefragging more consistent, preserve compatibility */
 	telefrag = !raven &&
-		(thing->player || (!comp[comp_telefrag] ? boss : (gamemap == 30)));
+		(thing->player || (!comp[std::to_underlying(CompOption::Telefrag)] ? boss : (gamemap == 30)));
 
 	// kill anything occupying the position
 
@@ -383,10 +385,10 @@ dboolean P_TeleportMove(mobj_t* thing, fixed_t x, fixed_t y, dboolean boss)
 	tmx = x;
 	tmy = y;
 
-	tmbbox[BOXTOP] = y + tmthing->radius;
-	tmbbox[BOXBOTTOM] = y - tmthing->radius;
-	tmbbox[BOXRIGHT] = x + tmthing->radius;
-	tmbbox[BOXLEFT] = x - tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Top)] = y + tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Bottom)] = y - tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Right)] = x + tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Left)] = x - tmthing->radius;
 
 	newsec = R_PointInSector(x, y);
 	ceilingline = nullptr;
@@ -405,10 +407,10 @@ dboolean P_TeleportMove(mobj_t* thing, fixed_t x, fixed_t y, dboolean boss)
 
 	// stomp on any things contacted
 
-	xl = P_GetSafeBlockX(tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS);
-	xh = P_GetSafeBlockX(tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS);
-	yl = P_GetSafeBlockY(tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS);
-	yh = P_GetSafeBlockY(tmbbox[BOXTOP] - bmaporgy + MAXRADIUS);
+	xl = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Left)] - bmaporgx - MAXRADIUS);
+	xh = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Right)] - bmaporgx + MAXRADIUS);
+	yl = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Bottom)] - bmaporgy - MAXRADIUS);
+	yh = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Top)] - bmaporgy + MAXRADIUS);
 
 	for(bx = xl; bx <= xh; bx++)
 		for(by = yl; by <= yh; by++)
@@ -463,10 +465,10 @@ dboolean PIT_CrossLine(line_t* ld)
 {
 	if(!(ld->flags & ML_TWOSIDED) ||
 		(ld->flags & (ML_BLOCKING | ML_BLOCKMONSTERS)))
-		if(!(tmbbox[BOXLEFT] > ld->bbox[BOXRIGHT] ||
-			tmbbox[BOXRIGHT] < ld->bbox[BOXLEFT] ||
-			tmbbox[BOXTOP] < ld->bbox[BOXBOTTOM] ||
-			tmbbox[BOXBOTTOM] > ld->bbox[BOXTOP]))
+		if(!(tmbbox[std::to_underlying(BoxEdge::Left)] > ld->bbox[std::to_underlying(BoxEdge::Right)] ||
+			tmbbox[std::to_underlying(BoxEdge::Right)] < ld->bbox[std::to_underlying(BoxEdge::Left)] ||
+			tmbbox[std::to_underlying(BoxEdge::Top)] < ld->bbox[std::to_underlying(BoxEdge::Bottom)] ||
+			tmbbox[std::to_underlying(BoxEdge::Bottom)] > ld->bbox[std::to_underlying(BoxEdge::Top)]))
 			if(P_PointOnLineSide(pe_x, pe_y, ld) != P_PointOnLineSide(ls_x, ls_y, ld))
 				return (false); // line blocks trajectory                   //   ^
 	return (true);              // line doesn't block trajectory                    //   |
@@ -481,10 +483,10 @@ static int untouched(line_t* ld)
 {
 	fixed_t x, y, tmbbox[4];
 	return
-		(tmbbox[BOXRIGHT] = (x = tmthing->x) + tmthing->radius) <= ld->bbox[BOXLEFT] ||
-		(tmbbox[BOXLEFT] = x - tmthing->radius) >= ld->bbox[BOXRIGHT] ||
-		(tmbbox[BOXTOP] = (y = tmthing->y) + tmthing->radius) <= ld->bbox[BOXBOTTOM] ||
-		(tmbbox[BOXBOTTOM] = y - tmthing->radius) >= ld->bbox[BOXTOP] ||
+		(tmbbox[std::to_underlying(BoxEdge::Right)] = (x = tmthing->x) + tmthing->radius) <= ld->bbox[std::to_underlying(BoxEdge::Left)] ||
+		(tmbbox[std::to_underlying(BoxEdge::Left)] = x - tmthing->radius) >= ld->bbox[std::to_underlying(BoxEdge::Right)] ||
+		(tmbbox[std::to_underlying(BoxEdge::Top)] = (y = tmthing->y) + tmthing->radius) <= ld->bbox[std::to_underlying(BoxEdge::Bottom)] ||
+		(tmbbox[std::to_underlying(BoxEdge::Bottom)] = y - tmthing->radius) >= ld->bbox[std::to_underlying(BoxEdge::Top)] ||
 		P_BoxOnLineSide(tmbbox, ld) != -1;
 }
 
@@ -508,7 +510,7 @@ static void CheckForDamageSpecial(line_t* line, mobj_t* mo)
 		return;
 	}
 
-	damage = ((P_Random(pr_damage) % 8) + 1) * mo->info->damage;
+	damage = ((P_Random(RandomClass::Damage) % 8) + 1) * mo->info->damage;
 	dsda_DamageLinedef(line, mo->target, damage);
 }
 
@@ -519,10 +521,10 @@ dboolean PIT_CheckLine(line_t* ld)
 {
 	dboolean rail = false;
 
-	if(tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT]
-		|| tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT]
-		|| tmbbox[BOXTOP] <= ld->bbox[BOXBOTTOM]
-		|| tmbbox[BOXBOTTOM] >= ld->bbox[BOXTOP])
+	if(tmbbox[std::to_underlying(BoxEdge::Right)] <= ld->bbox[std::to_underlying(BoxEdge::Left)]
+		|| tmbbox[std::to_underlying(BoxEdge::Left)] >= ld->bbox[std::to_underlying(BoxEdge::Right)]
+		|| tmbbox[std::to_underlying(BoxEdge::Top)] <= ld->bbox[std::to_underlying(BoxEdge::Bottom)]
+		|| tmbbox[std::to_underlying(BoxEdge::Bottom)] >= ld->bbox[std::to_underlying(BoxEdge::Top)])
 		return true; // didn't hit it
 
 	if(P_BoxOnLineSide(tmbbox, ld) != -1)
@@ -605,7 +607,7 @@ dboolean PIT_CheckLine(line_t* ld)
 					(mbf21 && ld->flags & ML_BLOCKLANDMONSTERS && !(tmthing->flags & MF_FLOAT)) ||
 					(ld->flags & ML_BLOCKFLOATERS && tmthing->flags & MF_FLOAT)
 				) &&
-				(!heretic || tmthing->type != HERETIC_MT_POD)
+				(!heretic || tmthing->type != MobjType::HereticPod)
 			)
 			{
 				if(tmthing->flags2 & MF2_BLASTED)
@@ -660,17 +662,17 @@ static dboolean P_ProjectileImmune(mobj_t* target, mobj_t* source)
 {
 	return
 		( // PG_GROUPLESS means no immunity, even to own species
-			mobjinfo[target->type].projectile_group != PG_GROUPLESS ||
+			mobjinfo[std::to_underlying(target->type)].projectile_group != std::to_underlying(ProjectileGroup::Groupless) ||
 			target == source
 		) &&
 		(
 			( // target type has default behaviour, and things are the same type
-				mobjinfo[target->type].projectile_group == PG_DEFAULT &&
+				mobjinfo[std::to_underlying(target->type)].projectile_group == std::to_underlying(ProjectileGroup::Default) &&
 				source->type == target->type
 			) ||
 			( // target type has special behaviour, and things have the same group
-				mobjinfo[target->type].projectile_group != PG_DEFAULT &&
-				mobjinfo[target->type].projectile_group == mobjinfo[source->type].projectile_group
+				mobjinfo[std::to_underlying(target->type)].projectile_group != std::to_underlying(ProjectileGroup::Default) &&
+				mobjinfo[std::to_underlying(target->type)].projectile_group == mobjinfo[std::to_underlying(source->type)].projectile_group
 			)
 		);
 }
@@ -713,16 +715,16 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 	if(thing->flags & MF_TOUCHY &&                // touchy object
 		tmthing->flags & MF_SOLID &&              // solid object touches it
 		thing->health > 0 &&                      // touchy object is alive
-		(thing->intflags & MIF_ARMED ||           // Thing is an armed mine
+		((thing->intflags & MobjIntFlag::Armed) != MobjIntFlag{} || // Thing is an armed mine
 			sentient(thing)) &&                   // ... or a sentient thing
 		(thing->type != tmthing->type ||          // only different species
 			thing->type == g_mt_player) &&        // ... or different players
 		thing->z + thing->height >= tmthing->z && // touches vertically
 		tmthing->z + tmthing->height >= thing->z &&
-		(thing->type ^ MT_PAIN) |     // PEs and lost souls
-		(tmthing->type ^ MT_SKULL) && // are considered same
-		(thing->type ^ MT_SKULL) |    // (but Barons & Knights
-		(tmthing->type ^ MT_PAIN))    // are intentionally not)
+		(std::to_underlying(thing->type) ^ std::to_underlying(MobjType::Pain)) |     // PEs and lost souls
+		(std::to_underlying(tmthing->type) ^ std::to_underlying(MobjType::Skull)) && // are considered same
+		(std::to_underlying(thing->type) ^ std::to_underlying(MobjType::Skull)) |    // (but Barons & Knights
+		(std::to_underlying(tmthing->type) ^ std::to_underlying(MobjType::Pain)))    // are intentionally not)
 	{
 		P_DamageMobj(thing, nullptr, nullptr, thing->health); // kill object
 		return true;
@@ -733,14 +735,14 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		// check if a mobj passed over/under another object
 		if(raven)
 		{
-			if((tmthing->type == HERETIC_MT_IMP || tmthing->type == HERETIC_MT_WIZARD)
-				&& (thing->type == HERETIC_MT_IMP || thing->type == HERETIC_MT_WIZARD))
+			if((tmthing->type == MobjType::HereticImp || tmthing->type == MobjType::HereticWizard)
+				&& (thing->type == MobjType::HereticImp || thing->type == MobjType::HereticWizard))
 			{
 				// don't let imps/wizards fly over other imps/wizards
 				return false;
 			}
 
-			if(tmthing->type == HEXEN_MT_BISHOP && thing->type == HEXEN_MT_BISHOP)
+			if(tmthing->type == MobjType::HexenBishop && thing->type == MobjType::HexenBishop)
 			{
 				// don't let bishops fly over other bishops
 				return false;
@@ -774,12 +776,12 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		// A flying skull is smacking something.
 		// Determine damage amount, and the skull comes to a dead stop.
 
-		int new_state;
+		StateId new_state;
 		int damage;
 
 		if(hexen)
 		{
-			if(tmthing->type == HEXEN_MT_MINOTAUR)
+			if(tmthing->type == MobjType::HexenMinotaur)
 			{
 				// Slamming minotaurs shouldn't move non-creatures
 				if(!(thing->flags & MF_COUNTKILL))
@@ -787,7 +789,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 					return (false);
 				}
 			}
-			else if(tmthing->type == HEXEN_MT_HOLY_FX)
+			else if(tmthing->type == MobjType::HexenHolyFx)
 			{
 				if(thing->flags & MF_SHOOTABLE && thing != tmthing->target)
 				{
@@ -807,7 +809,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 					{
 						P_SetTarget(&tmthing->special1.m, thing);
 					}
-					if(P_Random(pr_hexen) < 96)
+					if(P_Random(RandomClass::Hexen) < 96)
 					{
 						damage = 12;
 						if(thing->player || thing->flags2 & MF2_BOSS)
@@ -817,19 +819,19 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 							tmthing->health -= 6;
 						}
 						P_DamageMobj(thing, tmthing, tmthing->target, damage);
-						if(P_Random(pr_hexen) < 128)
+						if(P_Random(RandomClass::Hexen) < 128)
 						{
 							P_SpawnMobj(tmthing->x, tmthing->y, tmthing->z,
-								HEXEN_MT_HOLY_PUFF);
-							S_StartMobjSound(tmthing, hexen_sfx_spirit_attack);
-							if(thing->flags & MF_COUNTKILL && P_Random(pr_hexen) < 128
-								&& !S_GetSoundPlayingInfo(thing, hexen_sfx_puppybeat))
+								MobjType::HexenHolyPuff);
+							S_StartMobjSound(tmthing, SfxId::HexenSpiritAttack);
+							if(thing->flags & MF_COUNTKILL && P_Random(RandomClass::Hexen) < 128
+								&& !S_GetSoundPlayingInfo(thing, SfxId::HexenPuppybeat))
 							{
-								if((thing->type == HEXEN_MT_CENTAUR) ||
-									(thing->type == HEXEN_MT_CENTAURLEADER) ||
-									(thing->type == HEXEN_MT_ETTIN))
+								if((thing->type == MobjType::HexenCentaur) ||
+									(thing->type == MobjType::HexenCentaurleader) ||
+									(thing->type == MobjType::HexenEttin))
 								{
-									S_StartMobjSound(thing, hexen_sfx_puppybeat);
+									S_StartMobjSound(thing, SfxId::HexenPuppybeat);
 								}
 							}
 						}
@@ -844,7 +846,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			}
 		}
 
-		damage = ((P_Random(pr_skullfly) % 8) + 1) * tmthing->info->damage;
+		damage = ((P_Random(RandomClass::Skullfly) % 8) + 1) * tmthing->info->damage;
 
 		P_DamageMobj(thing, tmthing, tmthing, damage);
 
@@ -856,7 +858,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		else
 			new_state = tmthing->info->spawnstate;
 
-		P_SetMobjState(tmthing, static_cast<statenum_t>(new_state));
+		P_SetMobjState(tmthing, static_cast<StateId>(new_state));
 
 		return false; // stop moving
 	}
@@ -919,8 +921,8 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 				}
 			}
 
-			if(tmthing->type == HEXEN_MT_LIGHTNING_FLOOR
-				|| tmthing->type == HEXEN_MT_LIGHTNING_CEILING)
+			if(tmthing->type == MobjType::HexenLightningFloor
+				|| tmthing->type == MobjType::HexenLightningCeiling)
 			{
 				if(thing->flags & MF_SHOOTABLE && thing != tmthing->target)
 				{
@@ -932,8 +934,8 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 					if((!thing->player && !(thing->flags2 & MF2_BOSS))
 						|| !(leveltime & 1))
 					{
-						if(thing->type == HEXEN_MT_CENTAUR
-							|| thing->type == HEXEN_MT_CENTAURLEADER)
+						if(thing->type == MobjType::HexenCentaur
+							|| thing->type == MobjType::HexenCentaurleader)
 						{
 							// Lightning does more damage to centaurs
 							P_DamageMobj(thing, tmthing, tmthing->target, 9);
@@ -943,18 +945,18 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 							P_DamageMobj(thing, tmthing, tmthing->target, 3);
 						}
 						if(!(S_GetSoundPlayingInfo(tmthing,
-							hexen_sfx_mage_lightning_zap)))
+							SfxId::HexenMageLightningZap)))
 						{
-							S_StartMobjSound(tmthing, hexen_sfx_mage_lightning_zap);
+							S_StartMobjSound(tmthing, SfxId::HexenMageLightningZap);
 						}
-						if(thing->flags & MF_COUNTKILL && P_Random(pr_hexen) < 64
-							&& !S_GetSoundPlayingInfo(thing, hexen_sfx_puppybeat))
+						if(thing->flags & MF_COUNTKILL && P_Random(RandomClass::Hexen) < 64
+							&& !S_GetSoundPlayingInfo(thing, SfxId::HexenPuppybeat))
 						{
-							if((thing->type == HEXEN_MT_CENTAUR) ||
-								(thing->type == HEXEN_MT_CENTAURLEADER) ||
-								(thing->type == HEXEN_MT_ETTIN))
+							if((thing->type == MobjType::HexenCentaur) ||
+								(thing->type == MobjType::HexenCentaurleader) ||
+								(thing->type == MobjType::HexenEttin))
 							{
-								S_StartMobjSound(thing, hexen_sfx_puppybeat);
+								S_StartMobjSound(thing, SfxId::HexenPuppybeat);
 							}
 						}
 					}
@@ -963,7 +965,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 					{
 						return false;
 					}
-					if(tmthing->type == HEXEN_MT_LIGHTNING_FLOOR)
+					if(tmthing->type == MobjType::HexenLightningFloor)
 					{
 						if(tmthing->special2.m
 							&& !tmthing->special2.m->special1.m)
@@ -978,7 +980,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 				}
 				return true; // lightning zaps through all sprites
 			}
-			else if(tmthing->type == HEXEN_MT_LIGHTNING_ZAP)
+			else if(tmthing->type == MobjType::HexenLightningZap)
 			{
 				mobj_t* lmo;
 
@@ -987,7 +989,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 					lmo = tmthing->special2.m;
 					if(lmo)
 					{
-						if(lmo->type == HEXEN_MT_LIGHTNING_FLOOR)
+						if(lmo->type == MobjType::HexenLightningFloor)
 						{
 							if(lmo->special2.m
 								&& !lmo->special2.m->special1.m)
@@ -1006,15 +1008,15 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 					}
 				}
 			}
-			else if(tmthing->type == HEXEN_MT_MSTAFF_FX2 && thing != tmthing->target)
+			else if(tmthing->type == MobjType::HexenMstaffFx2 && thing != tmthing->target)
 			{
 				if(!thing->player && !(thing->flags2 & MF2_BOSS))
 				{
 					switch(thing->type)
 					{
-						case HEXEN_MT_FIGHTER_BOSS: // these not flagged boss
-						case HEXEN_MT_CLERIC_BOSS:  // so they can be blasted
-						case HEXEN_MT_MAGE_BOSS:
+						case MobjType::HexenFighterBoss: // these not flagged boss
+						case MobjType::HexenClericBoss:  // so they can be blasted
+						case MobjType::HexenMageBoss:
 							break;
 						default:
 							P_DamageMobj(thing, tmthing, tmthing->target, 10);
@@ -1071,15 +1073,15 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 					// Ok to spawn some blood
 					P_RipperBlood(tmthing, thing);
 				}
-				if(heretic) S_StartMobjSound(tmthing, heretic_sfx_ripslop);
-				damage = ((P_Random(pr_heretic) & 3) + 2) * tmthing->damage;
+				if(heretic) S_StartMobjSound(tmthing, SfxId::HereticRipslop);
+				damage = ((P_Random(RandomClass::Heretic) & 3) + 2) * tmthing->damage;
 			}
 			else
 			{
-				damage = ((P_Random(pr_mbf21) & 3) + 2) * tmthing->info->damage;
+				damage = ((P_Random(RandomClass::Mbf21) & 3) + 2) * tmthing->info->damage;
 				if(!(thing->flags & MF_NOBLOOD))
 					P_SpawnBlood(tmthing->x, tmthing->y, tmthing->z, damage, thing);
-				if(tmthing->info->ripsound)
+				if(tmthing->info->ripsound != SfxId::None)
 					S_StartMobjSound(tmthing, tmthing->info->ripsound);
 			}
 
@@ -1097,19 +1099,19 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		// damage / explode
 
 		damage = raven ? tmthing->damage : tmthing->info->damage;
-		damage = ((P_Random(pr_damage) % 8) + 1) * damage;
+		damage = ((P_Random(RandomClass::Damage) % 8) + 1) * damage;
 		if(
 			raven &&
 			damage &&
 			!(thing->flags & MF_NOBLOOD) &&
 			!(thing->flags2 & MF2_REFLECTIVE) &&
 			!(thing->flags2 & MF2_INVULNERABLE) &&
-			!(tmthing->type == HEXEN_MT_TELOTHER_FX1) &&
-			!(tmthing->type == HEXEN_MT_TELOTHER_FX2) &&
-			!(tmthing->type == HEXEN_MT_TELOTHER_FX3) &&
-			!(tmthing->type == HEXEN_MT_TELOTHER_FX4) &&
-			!(tmthing->type == HEXEN_MT_TELOTHER_FX5) &&
-			P_Random(pr_heretic) < 192
+			!(tmthing->type == MobjType::HexenTelotherFx1) &&
+			!(tmthing->type == MobjType::HexenTelotherFx2) &&
+			!(tmthing->type == MobjType::HexenTelotherFx3) &&
+			!(tmthing->type == MobjType::HexenTelotherFx4) &&
+			!(tmthing->type == MobjType::HexenTelotherFx5) &&
+			P_Random(RandomClass::Heretic) < 192
 		)
 		{
 			P_BloodSplatter(tmthing->x, tmthing->y, tmthing->z, thing);
@@ -1141,7 +1143,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 	// RjY
 	// comperr_hangsolid, an attempt to handle blocking hanging bodies
 	// A solid hanging body will allow sufficiently small things underneath it.
-	if(comperr(comperr_hangsolid) &&
+	if(comperr(CompError::HangSolid) &&
 		!((~thing->flags) & (MF_SOLID | MF_SPAWNCEILING)) // solid and hanging
 		// invert everything, then both bits should be clear
 		&& tmthing->z + tmthing->height <= thing->z)      // head height <= base
@@ -1161,7 +1163,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 	// Correction of wrong return value with demo_compatibility.
 	// There is no more synch on http://www.doomworld.com/sda/dwdemo/w303-115.zip
 	// (with correction in setMobjInfoValue)
-	if(demo_compatibility && !prboom_comp[PC_TREAT_NO_CLIPPING_THINGS_AS_NOT_BLOCKING].state)
+	if(demo_compatibility && !prboom_comp[std::to_underlying(PrboomComp::TreatNoClippingThingsAsNotBlocking)].state)
 		return !(thing->flags & MF_SOLID);
 	else
 		return !((thing->flags & MF_SOLID && !(thing->flags & MF_NOCLIP))
@@ -1194,17 +1196,17 @@ dboolean Check_Sides(mobj_t* actor, int x, int y)
 
 	// Here is the bounding box of the trajectory
 
-	tmbbox[BOXLEFT] = pe_x < x ? pe_x : x;
-	tmbbox[BOXRIGHT] = pe_x > x ? pe_x : x;
-	tmbbox[BOXTOP] = pe_y > y ? pe_y : y;
-	tmbbox[BOXBOTTOM] = pe_y < y ? pe_y : y;
+	tmbbox[std::to_underlying(BoxEdge::Left)] = pe_x < x ? pe_x : x;
+	tmbbox[std::to_underlying(BoxEdge::Right)] = pe_x > x ? pe_x : x;
+	tmbbox[std::to_underlying(BoxEdge::Top)] = pe_y > y ? pe_y : y;
+	tmbbox[std::to_underlying(BoxEdge::Bottom)] = pe_y < y ? pe_y : y;
 
 	// Determine which blocks to look in for blocking lines
 
-	xl = P_GetSafeBlockX(tmbbox[BOXLEFT] - bmaporgx);
-	xh = P_GetSafeBlockX(tmbbox[BOXRIGHT] - bmaporgx);
-	yl = P_GetSafeBlockY(tmbbox[BOXBOTTOM] - bmaporgy);
-	yh = P_GetSafeBlockY(tmbbox[BOXTOP] - bmaporgy);
+	xl = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Left)] - bmaporgx);
+	xh = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Right)] - bmaporgx);
+	yl = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Bottom)] - bmaporgy);
+	yh = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Top)] - bmaporgy);
 
 	// xl->xh, yl->yh determine the mapblock set to search
 
@@ -1261,10 +1263,10 @@ dboolean P_CheckPosition(mobj_t* thing, fixed_t x, fixed_t y)
 	tmx = x;
 	tmy = y;
 
-	tmbbox[BOXTOP] = y + tmthing->radius;
-	tmbbox[BOXBOTTOM] = y - tmthing->radius;
-	tmbbox[BOXRIGHT] = x + tmthing->radius;
-	tmbbox[BOXLEFT] = x - tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Top)] = y + tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Bottom)] = y - tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Right)] = x + tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Left)] = x - tmthing->radius;
 
 	newsec = R_PointInSector(x, y);
 	floorline = blockline = ceilingline = nullptr; // killough 8/1/98
@@ -1294,10 +1296,10 @@ dboolean P_CheckPosition(mobj_t* thing, fixed_t x, fixed_t y)
 	// based on their origin point, and can overlap
 	// into adjacent blocks by up to MAXRADIUS units.
 
-	xl = P_GetSafeBlockX(tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS);
-	xh = P_GetSafeBlockX(tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS);
-	yl = P_GetSafeBlockY(tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS);
-	yh = P_GetSafeBlockY(tmbbox[BOXTOP] - bmaporgy + MAXRADIUS);
+	xl = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Left)] - bmaporgx - MAXRADIUS);
+	xh = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Right)] - bmaporgx + MAXRADIUS);
+	yl = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Bottom)] - bmaporgy - MAXRADIUS);
+	yh = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Top)] - bmaporgy + MAXRADIUS);
 
 	BlockingMobj = nullptr;
 
@@ -1315,10 +1317,10 @@ dboolean P_CheckPosition(mobj_t* thing, fixed_t x, fixed_t y)
 
 	// check lines
 
-	xl = P_GetSafeBlockX(tmbbox[BOXLEFT] - bmaporgx);
-	xh = P_GetSafeBlockX(tmbbox[BOXRIGHT] - bmaporgx);
-	yl = P_GetSafeBlockY(tmbbox[BOXBOTTOM] - bmaporgy);
-	yh = P_GetSafeBlockY(tmbbox[BOXTOP] - bmaporgy);
+	xl = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Left)] - bmaporgx);
+	xh = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Right)] - bmaporgx);
+	yl = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Bottom)] - bmaporgy);
+	yh = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Top)] - bmaporgy);
 
 	// Fixes a vanilla bug where this is incremented in the wrong place
 	// Prevents edge cases where lines aren't checked when they should be
@@ -1342,17 +1344,17 @@ void P_AdjustZLimits(mobj_t* thing)
 	int bx, by;
 	fixed_t bbox[4];
 
-	bbox[BOXTOP] = thing->y + thing->radius;
-	bbox[BOXBOTTOM] = thing->y - thing->radius;
-	bbox[BOXRIGHT] = thing->x + thing->radius;
-	bbox[BOXLEFT] = thing->x - thing->radius;
+	bbox[std::to_underlying(BoxEdge::Top)] = thing->y + thing->radius;
+	bbox[std::to_underlying(BoxEdge::Bottom)] = thing->y - thing->radius;
+	bbox[std::to_underlying(BoxEdge::Right)] = thing->x + thing->radius;
+	bbox[std::to_underlying(BoxEdge::Left)] = thing->x - thing->radius;
 
 	validcount++;
 
-	xl = P_GetSafeBlockX(bbox[BOXLEFT] - bmaporgx);
-	xh = P_GetSafeBlockX(bbox[BOXRIGHT] - bmaporgx);
-	yl = P_GetSafeBlockY(bbox[BOXBOTTOM] - bmaporgy);
-	yh = P_GetSafeBlockY(bbox[BOXTOP] - bmaporgy);
+	xl = P_GetSafeBlockX(bbox[std::to_underlying(BoxEdge::Left)] - bmaporgx);
+	xh = P_GetSafeBlockX(bbox[std::to_underlying(BoxEdge::Right)] - bmaporgx);
+	yl = P_GetSafeBlockY(bbox[std::to_underlying(BoxEdge::Bottom)] - bmaporgy);
+	yh = P_GetSafeBlockY(bbox[std::to_underlying(BoxEdge::Top)] - bmaporgy);
 
 	for(bx = xl; bx <= xh; ++bx)
 		for(by = yl; by <= yh; ++by)
@@ -1379,10 +1381,10 @@ void P_AdjustZLimits(mobj_t* thing)
 					continue; // line has already been checked
 				ld->validcount = validcount;
 
-				if(bbox[BOXRIGHT] <= ld->bbox[BOXLEFT]
-					|| bbox[BOXLEFT] >= ld->bbox[BOXRIGHT]
-					|| bbox[BOXTOP] <= ld->bbox[BOXBOTTOM]
-					|| bbox[BOXBOTTOM] >= ld->bbox[BOXTOP])
+				if(bbox[std::to_underlying(BoxEdge::Right)] <= ld->bbox[std::to_underlying(BoxEdge::Left)]
+					|| bbox[std::to_underlying(BoxEdge::Left)] >= ld->bbox[std::to_underlying(BoxEdge::Right)]
+					|| bbox[std::to_underlying(BoxEdge::Top)] <= ld->bbox[std::to_underlying(BoxEdge::Bottom)]
+					|| bbox[std::to_underlying(BoxEdge::Bottom)] >= ld->bbox[std::to_underlying(BoxEdge::Top)])
 					continue; // didn't hit it
 
 				if(P_BoxOnLineSide(bbox, ld) != -1)
@@ -1490,7 +1492,7 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 	fixed_t oldx;
 	fixed_t oldy;
 
-	if(map_trail_mode == map_trail_mode_include_collisions &&
+	if(map_trail_mode == MapTrailMode::IncludeCollisions &&
 		thing->player && thing->player->mo == thing)
 	{
 		AM_updatePlayerTrail(x, y);
@@ -1565,7 +1567,7 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 
 		if(
 			!(thing->flags & MF_TELEPORT) &&
-			(!heretic || thing->type != HERETIC_MT_MNTRFX2) &&
+			(!heretic || thing->type != MobjType::HereticMntrfx2) &&
 			tmfloorz - thing->z > 24 * FRACUNIT
 		)
 		{
@@ -1590,10 +1592,10 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 		*/
 		if(!(thing->flags & (MF_DROPOFF | MF_FLOAT)))
 		{
-			dboolean ledgeblock = comp[comp_ledgeblock] &&
-				!(mbf21 && thing->intflags & MIF_SCROLLING);
+			dboolean ledgeblock = comp[std::to_underlying(CompOption::LedgeBlock)] &&
+				!(mbf21 && (thing->intflags & MobjIntFlag::Scrolling) != MobjIntFlag{});
 
-			if(comp[comp_dropoff] || ledgeblock)
+			if(comp[std::to_underlying(CompOption::DropOff)] || ledgeblock)
 			{
 				// e6y
 				// Fix demosync bug in mbf compatibility mode
@@ -1608,9 +1610,9 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 						ledgeblock ||
 						!dropoff ||
 						(
-							!prboom_comp[PC_NO_DROPOFF].state &&
+							!prboom_comp[std::to_underlying(PrboomComp::NoDropoff)].state &&
 							mbf_features &&
-							compatibility_level <= prboom_2_compatibility
+							compatibility_level <= CompLevel::Prboom2
 						)
 					) &&
 					(tmfloorz - tmdropoffz > 24 * FRACUNIT)
@@ -1640,7 +1642,7 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 			return false; // too big a step up for bouncers under gravity
 
 		// killough 11/98: prevent falling objects from going up too many steps
-		if(thing->intflags & MIF_FALLING && tmfloorz - thing->z >
+		if((thing->intflags & MobjIntFlag::Falling) != MobjIntFlag{} && tmfloorz - thing->z >
 			FixedMul(thing->momx, thing->momx) + FixedMul(thing->momy, thing->momy))
 			return false;
 	}
@@ -1661,7 +1663,7 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 	P_SetThingPosition(thing);
 
 	if(thing->flags2 & MF2_FOOTCLIP
-		&& P_GetThingFloorType(thing) != FLOOR_SOLID)
+		&& P_GetThingFloorType(thing) != FloorType::Solid)
 	{
 		thing->flags2 |= MF2_FEETARECLIPPED;
 	}
@@ -1670,7 +1672,7 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 		thing->flags2 &= ~MF2_FEETARECLIPPED;
 	}
 
-	if(map_trail_mode == map_trail_mode_ignore_collisions &&
+	if(map_trail_mode == MapTrailMode::IgnoreCollisions &&
 		thing->player && thing->player->mo == thing)
 	{
 		AM_updatePlayerTrail(x, y);
@@ -1703,10 +1705,10 @@ static dboolean PIT_ApplyTorque(line_t* ld)
 {
 	if(ld->backsector &&      // If thing touches two-sided pivot linedef
 		(ld->dx || ld->dy) && // Torque is undefined if the line has no length
-		tmbbox[BOXRIGHT] > ld->bbox[BOXLEFT] &&
-		tmbbox[BOXLEFT] < ld->bbox[BOXRIGHT] &&
-		tmbbox[BOXTOP] > ld->bbox[BOXBOTTOM] &&
-		tmbbox[BOXBOTTOM] < ld->bbox[BOXTOP] &&
+		tmbbox[std::to_underlying(BoxEdge::Right)] > ld->bbox[std::to_underlying(BoxEdge::Left)] &&
+		tmbbox[std::to_underlying(BoxEdge::Left)] < ld->bbox[std::to_underlying(BoxEdge::Right)] &&
+		tmbbox[std::to_underlying(BoxEdge::Top)] > ld->bbox[std::to_underlying(BoxEdge::Bottom)] &&
+		tmbbox[std::to_underlying(BoxEdge::Bottom)] < ld->bbox[std::to_underlying(BoxEdge::Top)] &&
 		P_BoxOnLineSide(tmbbox, ld) == -1)
 	{
 		mobj_t* mo = tmthing;
@@ -1776,15 +1778,16 @@ static dboolean PIT_ApplyTorque(line_t* ld)
 
 void P_ApplyTorque(mobj_t* mo)
 {
-	int xl = P_GetSafeBlockX((tmbbox[BOXLEFT] =
+	int xl = P_GetSafeBlockX((tmbbox[std::to_underlying(BoxEdge::Left)] =
 		mo->x - mo->radius) - bmaporgx);
-	int xh = P_GetSafeBlockX((tmbbox[BOXRIGHT] =
+	int xh = P_GetSafeBlockX((tmbbox[std::to_underlying(BoxEdge::Right)] =
 		mo->x + mo->radius) - bmaporgx);
-	int yl = P_GetSafeBlockY((tmbbox[BOXBOTTOM] =
+	int yl = P_GetSafeBlockY((tmbbox[std::to_underlying(BoxEdge::Bottom)] =
 		mo->y - mo->radius) - bmaporgy);
-	int yh = P_GetSafeBlockY((tmbbox[BOXTOP] =
+	int yh = P_GetSafeBlockY((tmbbox[std::to_underlying(BoxEdge::Top)] =
 		mo->y + mo->radius) - bmaporgy);
-	int bx, by, flags = mo->intflags; //Remember the current state, for gear-change
+	int bx, by;
+	const MobjIntFlag flags = mo->intflags; //Remember the current state, for gear-change
 
 	tmthing = mo;
 	validcount++; /* prevents checking same line twice */
@@ -1795,9 +1798,9 @@ void P_ApplyTorque(mobj_t* mo)
 
 	/* If any momentum, mark object as 'falling' using engine-internal flags */
 	if(mo->momx | mo->momy)
-		mo->intflags |= MIF_FALLING;
+		mo->intflags |= MobjIntFlag::Falling;
 	else // Clear the engine-internal flag indicating falling object.
-		mo->intflags &= ~MIF_FALLING;
+		mo->intflags -= MobjIntFlag::Falling;
 
 	/* If the object has been moving, step up the gear.
 	* This helps reach equilibrium and avoid oscillations.
@@ -1807,7 +1810,7 @@ void P_ApplyTorque(mobj_t* mo)
 	* systems somehow :)
 	*/
 
-	if(!((mo->intflags | flags) & MIF_FALLING)) // If not falling for a while,
+	if(((mo->intflags | flags) & MobjIntFlag::Falling) == MobjIntFlag{}) // If not falling for a while,
 		mo->gear = 0;                           // Reset it to full strength
 	else if(mo->gear < MAXGEAR)                 // Else if not at max gear,
 		mo->gear++;                             // move up a gear
@@ -1854,7 +1857,7 @@ dboolean P_ThingHeightClip(mobj_t* thing)
 			thing->z = thing->floorz;
 
 		/* killough 11/98: Possibly upset balance of objects hanging off ledges */
-		if(thing->intflags & MIF_FALLING && thing->gear >= MAXGEAR)
+		if((thing->intflags & MobjIntFlag::Falling) != MobjIntFlag{} && thing->gear >= MAXGEAR)
 			thing->gear = 0;
 	}
 	else
@@ -1909,7 +1912,7 @@ void P_HitSlideLine(line_t* ld)
 	* cph - DEMOSYNC - should only affect players in Boom demos? */
 
 	//e6y
-	if(mbf_features || prboom_comp[PC_PRBOOM_FRICTION].state)
+	if(mbf_features || prboom_comp[std::to_underlying(PrboomComp::PrboomFriction)].state)
 	{
 		icyfloor =
 			P_AproxDistance(tmxmove, tmymove) > 4 * FRACUNIT &&
@@ -1927,26 +1930,26 @@ void P_HitSlideLine(line_t* ld)
 			slidemo->friction > ORIG_FRICTION;
 	}
 
-	if(ld->slopetype == ST_HORIZONTAL)
+	if(ld->slopetype == SlopeType::Horizontal)
 	{
 		if(icyfloor && (D_abs(tmymove) > D_abs(tmxmove)))
 		{
 			tmxmove /= 2; // absorb half the momentum
 			tmymove = -tmymove / 2;
-			S_StartMobjSound(slidemo, sfx_oof); // oooff!
+			S_StartMobjSound(slidemo, SfxId::Oof); // oooff!
 		}
 		else
 			tmymove = 0; // no more movement in the Y direction
 		return;
 	}
 
-	if(ld->slopetype == ST_VERTICAL)
+	if(ld->slopetype == SlopeType::Vertical)
 	{
 		if(icyfloor && (D_abs(tmxmove) > D_abs(tmymove)))
 		{
 			tmxmove = -tmxmove / 2; // absorb half the momentum
 			tmymove /= 2;
-			S_StartMobjSound(slidemo, sfx_oof); // oooff!                      //   ^
+			S_StartMobjSound(slidemo, SfxId::Oof); // oooff!                      //   ^
 		}                                       //   |
 		else                                    // phares
 			tmxmove = 0;                        // no more movement in the X direction
@@ -1976,7 +1979,7 @@ void P_HitSlideLine(line_t* ld)
 	{
 		moveangle = lineangle - deltaangle;
 		movelen /= 2;                       // absorb
-		S_StartMobjSound(slidemo, sfx_oof); // oooff!
+		S_StartMobjSound(slidemo, SfxId::Oof); // oooff!
 		moveangle >>= ANGLETOFINESHIFT;
 		tmxmove = FixedMul(movelen, finecosine[moveangle]);
 		tmymove = FixedMul(movelen, finesine[moveangle]);
@@ -2114,7 +2117,7 @@ void P_SlideMove(mobj_t* mo)
 
 			if(!P_TryMove(mo, mo->x, mo->y + mo->momy, true))
 				if(!P_TryMove(mo, mo->x + mo->momx, mo->y, true))
-					if(compatibility_level == boom_201_compatibility)
+					if(compatibility_level == CompLevel::Boom201)
 						mo->momx = mo->momy = 0;
 
 			break;
@@ -2253,7 +2256,7 @@ dboolean PTR_AimTraverse(intercept_t* in)
 	if(!(th->flags & MF_SHOOTABLE))
 		return true; // corpse or something
 
-	if(heretic && th->type == HERETIC_MT_POD)
+	if(heretic && th->type == MobjType::HereticPod)
 		return true; // Can't auto-aim at pods
 
 	if(hexen && th->player && netgame && !deathmatch)
@@ -2296,7 +2299,7 @@ dboolean PTR_AimTraverse(intercept_t* in)
 }
 
 // heretic
-extern mobjtype_t PuffType;
+extern MobjType PuffType;
 
 //
 // PTR_ShootTraverse
@@ -2322,7 +2325,7 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 		if(li->special)
 			map_format.shoot_special_line(shootthing, li);
 
-		if(map_format.zdoom && li->special == zl_line_horizon)
+		if(map_format.zdoom && li->special == std::to_underlying(ZDoomLineSpecial::LineHorizon))
 			return false;
 
 		if(li->flags & ML_TWOSIDED &&
@@ -2380,7 +2383,7 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 					return false;
 
 				// puff spawn height is +/- (255 << 10)
-				z = sec->ceilingheight - mobjinfo[MT_PUFF].height - (255 << 10);
+				z = sec->ceilingheight - mobjinfo[std::to_underlying(MobjType::Puff)].height - (255 << 10);
 				dist = FixedDiv(z - shootz, aimslope);
 				frac = FixedDiv(dist, attackrange);
 			}
@@ -2440,7 +2443,7 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 	if(!(th->flags & MF_SHOOTABLE))
 		return true; // corpse or something
 
-	if(heretic && th->flags & MF_SHADOW && shootthing->player->readyweapon == wp_staff)
+	if(heretic && th->flags & MF_SHADOW && shootthing->player->readyweapon == WeaponType::Staff)
 		return true;
 
 	// check angles to see if the thing can be aimed at
@@ -2467,12 +2470,12 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 
 	// Spawn bullet puffs or blod spots,
 	// depending on target type.
-	if(heretic && PuffType == HERETIC_MT_BLASTERPUFF1)
+	if(heretic && PuffType == MobjType::HereticBlasterpuff1)
 	{
 		// Make blaster big puff
 		mobj_t* mo;
-		mo = P_SpawnMobj(x, y, z, HERETIC_MT_BLASTERPUFF2);
-		S_StartMobjSound(mo, heretic_sfx_blshit);
+		mo = P_SpawnMobj(x, y, z, MobjType::HereticBlasterpuff2);
+		S_StartMobjSound(mo, SfxId::HereticBlshit);
 	}
 	else
 	{
@@ -2490,17 +2493,17 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 			!(in->d.thing->flags2 & MF2_INVULNERABLE)
 		)
 		{
-			if(PuffType == HEXEN_MT_AXEPUFF || PuffType == HEXEN_MT_AXEPUFF_GLOW)
+			if(PuffType == MobjType::HexenAxepuff || PuffType == MobjType::HexenAxepuffGlow)
 			{
 				P_BloodSplatter2(x, y, z, in->d.thing);
 			}
-			if(P_Random(pr_heretic) < 192)
+			if(P_Random(RandomClass::Heretic) < 192)
 			{
 				P_BloodSplatter(x, y, z, in->d.thing);
 			}
 		}
 
-		if(hexen && PuffType == HEXEN_MT_FLAMEPUFF2)
+		if(hexen && PuffType == MobjType::HexenFlamepuff2)
 		{
 			// Cleric FlameStrike does fire damage
 			extern mobj_t LavaInflictor;
@@ -2590,15 +2593,15 @@ void P_LineAttack(mobj_t* t1, angle_t angle, fixed_t distance, fixed_t slope,
 		{
 			switch(PuffType)
 			{
-				case HEXEN_MT_PUNCHPUFF:
-					S_StartMobjSound(t1, hexen_sfx_fighter_punch_miss);
+				case MobjType::HexenPunchpuff:
+					S_StartMobjSound(t1, SfxId::HexenFighterPunchMiss);
 					break;
-				case HEXEN_MT_HAMMERPUFF:
-				case HEXEN_MT_AXEPUFF:
-				case HEXEN_MT_AXEPUFF_GLOW:
-					S_StartMobjSound(t1, hexen_sfx_fighter_hammer_miss);
+				case MobjType::HexenHammerpuff:
+				case MobjType::HexenAxepuff:
+				case MobjType::HexenAxepuffGlow:
+					S_StartMobjSound(t1, SfxId::HexenFighterHammerMiss);
 					break;
-				case HEXEN_MT_FLAMEPUFF:
+				case MobjType::HexenFlamepuff:
 					P_SpawnPuff(x2, y2, shootz + FixedMul(slope, distance));
 					break;
 				default:
@@ -2621,7 +2624,7 @@ dboolean PTR_UseTraverse(intercept_t* in)
 
 	if(!in->d.line->special)
 	{
-		int sound;
+		SfxId sound;
 
 		if(in->d.line->flags & (ML_BLOCKEVERYTHING | ML_BLOCKUSE))
 		{
@@ -2638,27 +2641,27 @@ dboolean PTR_UseTraverse(intercept_t* in)
 			{
 				switch(usething->player->pclass)
 				{
-					case PCLASS_FIGHTER:
-						sound = hexen_sfx_player_fighter_failed_use;
+					case PClass::Fighter:
+						sound = SfxId::HexenPlayerFighterFailedUse;
 						break;
-					case PCLASS_CLERIC:
-						sound = hexen_sfx_player_cleric_failed_use;
+					case PClass::Cleric:
+						sound = SfxId::HexenPlayerClericFailedUse;
 						break;
-					case PCLASS_MAGE:
-						sound = hexen_sfx_player_mage_failed_use;
+					case PClass::Mage:
+						sound = SfxId::HexenPlayerMageFailedUse;
 						break;
-					case PCLASS_PIG:
-						sound = hexen_sfx_pig_active1;
+					case PClass::Pig:
+						sound = SfxId::HexenPigActive1;
 						break;
 					default:
-						sound = sfx_None;
+						sound = SfxId::None;
 						break;
 				}
 				S_StartMobjSound(usething, sound);
 			}
 			else if(!heretic)
 			{
-				S_StartSound(usething, sfx_noway);
+				S_StartSound(usething, SfxId::Noway);
 			}
 
 			// can't use through a wall
@@ -2672,20 +2675,20 @@ dboolean PTR_UseTraverse(intercept_t* in)
 			{
 				switch(usething->player->pclass)
 				{
-					case PCLASS_FIGHTER:
-						sound = hexen_sfx_player_fighter_failed_use;
+					case PClass::Fighter:
+						sound = SfxId::HexenPlayerFighterFailedUse;
 						break;
-					case PCLASS_CLERIC:
-						sound = hexen_sfx_player_cleric_failed_use;
+					case PClass::Cleric:
+						sound = SfxId::HexenPlayerClericFailedUse;
 						break;
-					case PCLASS_MAGE:
-						sound = hexen_sfx_player_mage_failed_use;
+					case PClass::Mage:
+						sound = SfxId::HexenPlayerMageFailedUse;
 						break;
-					case PCLASS_PIG:
-						sound = hexen_sfx_pig_active1;
+					case PClass::Pig:
+						sound = SfxId::HexenPigActive1;
 						break;
 					default:
-						sound = sfx_None;
+						sound = SfxId::None;
 						break;
 				}
 				S_StartMobjSound(usething, sound);
@@ -2708,7 +2711,7 @@ dboolean PTR_UseTraverse(intercept_t* in)
 	//WAS can't use for than one special line in a row
 	//jff 3/21/98 NOW multiple use allowed with enabling line flag
 
-	return (!demo_compatibility && ((in->d.line->flags & ML_PASSUSE) || comperr(comperr_passuse)))
+	return (!demo_compatibility && ((in->d.line->flags & ML_PASSUSE) || comperr(CompError::PassUse)))
 		? //e6y
 		true
 		: false;
@@ -2766,8 +2769,8 @@ void P_UseLines(player_t* player)
 	// This added test makes the "oof" sound work on 2s lines -- killough:
 
 	if(P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES, PTR_UseTraverse))
-		if(!comp[comp_sound] && !P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES, PTR_NoWayTraverse))
-			S_StartSound(usething, sfx_noway);
+		if(!comp[std::to_underlying(CompOption::Sound)] && !P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES, PTR_NoWayTraverse))
+			S_StartSound(usething, SfxId::Noway);
 }
 
 
@@ -2786,8 +2789,8 @@ bomb_t bomb;
 static dboolean P_SplashImmune(mobj_t* target, mobj_t* spot)
 {
 	return // not default behaviour and same group
-		mobjinfo[target->type].splash_group != SG_DEFAULT &&
-		mobjinfo[target->type].splash_group == mobjinfo[spot->type].splash_group;
+		mobjinfo[std::to_underlying(target->type)].splash_group != std::to_underlying(SplashGroup::Default) &&
+		mobjinfo[std::to_underlying(target->type)].splash_group == mobjinfo[std::to_underlying(spot->type)].splash_group;
 }
 
 int P_SplashDamage(fixed_t dist)
@@ -2843,7 +2846,7 @@ dboolean PIT_RadiusAttack(mobj_t* thing)
 		// fired by Cyberdemons, in which case it won't hurt Cybers.
 
 		if(bomb.spot->flags & MF_BOUNCES
-			? thing->type == MT_CYBORG && bomb.source->type == MT_CYBORG
+			? thing->type == MobjType::Cyborg && bomb.source->type == MobjType::Cyborg
 			: thing->flags2 & (MF2_NORADIUSDMG | MF2_BOSS) &&
 			!(bomb.spot->flags2 & MF2_FORCERADIUSDMG))
 			return true;
@@ -2948,7 +2951,7 @@ void P_RadiusAttack(mobj_t* spot, mobj_t* source, int damage, int distance, int 
 	xl = P_GetSafeBlockX(spot->x - dist - bmaporgx);
 
 	bomb.spot = spot;
-	if(heretic && spot->type == HERETIC_MT_POD && spot->target)
+	if(heretic && spot->type == MobjType::HereticPod && spot->target)
 	{
 		bomb.source = spot->target;
 	}
@@ -2996,12 +2999,12 @@ dboolean PIT_ChangeSector(mobj_t* thing)
 				}
 				else
 				{
-					if(thing->state != &states[HEXEN_S_GIBS1])
+					if(thing->state != &states[std::to_underlying(StateId::HexenGibs1)])
 					{
-						P_SetMobjState(thing, HEXEN_S_GIBS1);
+						P_SetMobjState(thing, StateId::HexenGibs1);
 						thing->height = 0;
 						thing->radius = 0;
-						S_StartMobjSound(thing, hexen_sfx_player_falling_splat);
+						S_StartMobjSound(thing, SfxId::HexenPlayerFallingSplat);
 					}
 				}
 				return true; // keep checking
@@ -3009,9 +3012,9 @@ dboolean PIT_ChangeSector(mobj_t* thing)
 		}
 		else
 		{
-			if(!heretic) P_SetMobjState(thing, S_GIBS);
+			if(!heretic) P_SetMobjState(thing, StateId::Gibs);
 
-			if(compatibility_level != doom_12_compatibility)
+			if(compatibility_level != CompLevel::Doom12)
 			{
 				thing->flags &= ~MF_SOLID;
 			}
@@ -3034,7 +3037,7 @@ dboolean PIT_ChangeSector(mobj_t* thing)
 
 	/* killough 11/98: kill touchy things immediately */
 	if(thing->flags & MF_TOUCHY &&
-		(thing->intflags & MIF_ARMED || sentient(thing)))
+		((thing->intflags & MobjIntFlag::Armed) != MobjIntFlag{} || sentient(thing)))
 	{
 		P_DamageMobj(thing, nullptr, nullptr, thing->health); // kill object
 		return true;                                    // keep checking
@@ -3066,14 +3069,14 @@ dboolean PIT_ChangeSector(mobj_t* thing)
 			// spray blood in a random direction
 			mo = P_SpawnMobj(thing->x,
 				thing->y,
-				thing->z + thing->height / 2, static_cast<mobjtype_t>(g_mt_blood));
+				thing->z + thing->height / 2, static_cast<MobjType>(g_mt_blood));
 			mo->color = thing->info->bloodcolor;
 
 			/* killough 8/10/98: remove dependence on order of evaluation */
-			t = P_Random(pr_crush);
-			mo->momx = (t - P_Random(pr_crush)) << 12;
-			t = P_Random(pr_crush);
-			mo->momy = (t - P_Random(pr_crush)) << 12;
+			t = P_Random(RandomClass::Crush);
+			mo->momx = (t - P_Random(RandomClass::Crush)) << 12;
+			t = P_Random(RandomClass::Crush);
+			mo->momy = (t - P_Random(RandomClass::Crush)) << 12;
 		}
 	}
 
@@ -3102,8 +3105,8 @@ dboolean P_ChangeSector(sector_t* sector, int crunch)
 
 	// re-check heights for all things near the moving sector
 
-	for(x = sector->blockbox[BOXLEFT]; x <= sector->blockbox[BOXRIGHT]; x++)
-		for(y = sector->blockbox[BOXBOTTOM]; y <= sector->blockbox[BOXTOP]; y++)
+	for(x = sector->blockbox[std::to_underlying(BoxEdge::Left)]; x <= sector->blockbox[std::to_underlying(BoxEdge::Right)]; x++)
+		for(y = sector->blockbox[std::to_underlying(BoxEdge::Bottom)]; y <= sector->blockbox[std::to_underlying(BoxEdge::Top)]; y++)
 			P_BlockThingsIterator(x, y, PIT_ChangeSector);
 
 	return nofit;
@@ -3145,7 +3148,7 @@ dboolean P_CheckSector(sector_t* sector, int crunch)
 {
 	msecnode_t* n;
 
-	if(comp[comp_floors]) /* use the old routine for old demos though */
+	if(comp[std::to_underlying(CompOption::Floors)]) /* use the old routine for old demos though */
 		return P_ChangeSector(sector, crunch);
 
 	nofit = false;
@@ -3364,10 +3367,10 @@ void P_DelSeclist(msecnode_t* node)
 
 dboolean PIT_GetSectors(line_t* ld)
 {
-	if(tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT] ||
-		tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT] ||
-		tmbbox[BOXTOP] <= ld->bbox[BOXBOTTOM] ||
-		tmbbox[BOXBOTTOM] >= ld->bbox[BOXTOP])
+	if(tmbbox[std::to_underlying(BoxEdge::Right)] <= ld->bbox[std::to_underlying(BoxEdge::Left)] ||
+		tmbbox[std::to_underlying(BoxEdge::Left)] >= ld->bbox[std::to_underlying(BoxEdge::Right)] ||
+		tmbbox[std::to_underlying(BoxEdge::Top)] <= ld->bbox[std::to_underlying(BoxEdge::Bottom)] ||
+		tmbbox[std::to_underlying(BoxEdge::Bottom)] >= ld->bbox[std::to_underlying(BoxEdge::Top)])
 		return true;
 
 	if(P_BoxOnLineSide(tmbbox, ld) != -1)
@@ -3432,17 +3435,17 @@ void P_CreateSecNodeList(mobj_t* thing, fixed_t x, fixed_t y)
 	tmx = x;
 	tmy = y;
 
-	tmbbox[BOXTOP] = y + tmthing->radius;
-	tmbbox[BOXBOTTOM] = y - tmthing->radius;
-	tmbbox[BOXRIGHT] = x + tmthing->radius;
-	tmbbox[BOXLEFT] = x - tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Top)] = y + tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Bottom)] = y - tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Right)] = x + tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Left)] = x - tmthing->radius;
 
 	validcount2++; // used to make sure we only process a line once
 
-	xl = P_GetSafeBlockX(tmbbox[BOXLEFT] - bmaporgx);
-	xh = P_GetSafeBlockX(tmbbox[BOXRIGHT] - bmaporgx);
-	yl = P_GetSafeBlockY(tmbbox[BOXBOTTOM] - bmaporgy);
-	yh = P_GetSafeBlockY(tmbbox[BOXTOP] - bmaporgy);
+	xl = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Left)] - bmaporgx);
+	xh = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Right)] - bmaporgx);
+	yl = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Bottom)] - bmaporgy);
+	yh = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Top)] - bmaporgy);
 
 	for(bx = xl; bx <= xh; bx++)
 		for(by = yl; by <= yh; by++)
@@ -3476,22 +3479,22 @@ void P_CreateSecNodeList(mobj_t* thing, fixed_t x, fixed_t y)
 	* OTOH for Boom/MBF demos we have to preserve the buggy behavior.
 	*  Fun. We restore its previous value unless we're in a Boom/MBF demo.
 	*/
-	if(!prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state)
-		if((compatibility_level < boom_compatibility_compatibility) ||
-			(compatibility_level >= prboom_3_compatibility))
+	if(!prboom_comp[std::to_underlying(PrboomComp::ForceLxdoomDemoCompatibility)].state)
+		if((compatibility_level < CompLevel::BoomCompatibility) ||
+			(compatibility_level >= CompLevel::Prboom3))
 			tmthing = saved_tmthing;
 	/* And, duh, the same for tmx/y - cph 2002/09/22
 	* And for tmbbox - cph 2003/08/10 */
-	if((compatibility_level < boom_compatibility_compatibility) /* ||
+	if((compatibility_level < CompLevel::BoomCompatibility) /* ||
       (compatibility_level >= prboom_4_compatibility) */)
 	{
 		tmx = saved_tmx, tmy = saved_tmy;
 		if(tmthing)
 		{
-			tmbbox[BOXTOP] = tmy + tmthing->radius;
-			tmbbox[BOXBOTTOM] = tmy - tmthing->radius;
-			tmbbox[BOXRIGHT] = tmx + tmthing->radius;
-			tmbbox[BOXLEFT] = tmx - tmthing->radius;
+			tmbbox[std::to_underlying(BoxEdge::Top)] = tmy + tmthing->radius;
+			tmbbox[std::to_underlying(BoxEdge::Bottom)] = tmy - tmthing->radius;
+			tmbbox[std::to_underlying(BoxEdge::Right)] = tmx + tmthing->radius;
+			tmbbox[std::to_underlying(BoxEdge::Left)] = tmx - tmthing->radius;
 		}
 	}
 }
@@ -3588,10 +3591,10 @@ mobj_t* P_CheckOnmobj(mobj_t* thing)
 	tmx = x;
 	tmy = y;
 
-	tmbbox[BOXTOP] = y + tmthing->radius;
-	tmbbox[BOXBOTTOM] = y - tmthing->radius;
-	tmbbox[BOXRIGHT] = x + tmthing->radius;
-	tmbbox[BOXLEFT] = x - tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Top)] = y + tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Bottom)] = y - tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Right)] = x + tmthing->radius;
+	tmbbox[std::to_underlying(BoxEdge::Left)] = x - tmthing->radius;
 
 	newsec = R_PointInSector(x, y);
 	ceilingline = nullptr;
@@ -3616,10 +3619,10 @@ mobj_t* P_CheckOnmobj(mobj_t* thing)
 	// into mapblocks based on their origin point, and can overlap into adjacent
 	// blocks by up to MAXRADIUS units
 	//
-	xl = (tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
-	xh = (tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
-	yl = (tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
-	yh = (tmbbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
+	xl = (tmbbox[std::to_underlying(BoxEdge::Left)] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
+	xh = (tmbbox[std::to_underlying(BoxEdge::Right)] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
+	yl = (tmbbox[std::to_underlying(BoxEdge::Bottom)] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
+	yh = (tmbbox[std::to_underlying(BoxEdge::Top)] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
 
 	for(bx = xl; bx <= xh; bx++)
 		for(by = yl; by <= yh; by++)
@@ -3676,7 +3679,7 @@ void P_FakeZMovement(mobj_t* mo)
 			// The skull slammed into something
 			mo->momz = -mo->momz;
 		}
-		if(mo->info->crashstate && (mo->flags & MF_CORPSE))
+		if(mo->info->crashstate != StateId::Null && (mo->flags & MF_CORPSE))
 		{
 			return;
 		}
@@ -3938,7 +3941,7 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 		floatok = true;
 		if(!(thing->flags & MF_TELEPORT)
 			&& tmceilingz - thing->z < thing->height
-			&& thing->type != HEXEN_MT_LIGHTNING_CEILING
+			&& thing->type != MobjType::HexenLightningCeiling
 			&& !(thing->flags2 & MF2_FLY))
 		{
 			// mobj must lower itself to fit
@@ -3960,7 +3963,7 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 		}
 		if(!(thing->flags & MF_TELEPORT)
 			// The Minotaur floor fire (HEXEN_MT_MNTRFX2) can step up any amount
-			&& thing->type != HEXEN_MT_MNTRFX2 && thing->type != HEXEN_MT_LIGHTNING_FLOOR
+			&& thing->type != MobjType::HexenMntrfx2 && thing->type != MobjType::HexenLightningFloor
 			&& tmfloorz - thing->z > 24 * FRACUNIT)
 		{
 			goto pushline;
@@ -3999,7 +4002,7 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 	if(thing->flags2 & MF2_FOOTCLIP)
 	{
 		if(thing->z == thing->subsector->sector->floorheight
-			&& P_GetThingFloorType(thing) >= FLOOR_LIQUID)
+			&& P_GetThingFloorType(thing) >= FloorType::Liquid)
 		{
 			thing->floorclip = 10 * FRACUNIT;
 		}
@@ -4066,7 +4069,7 @@ dboolean PTR_PuzzleItemTraverse(intercept_t* in)
 {
 	mobj_t* mobj;
 	byte args[3];
-	int sound;
+	SfxId sound;
 
 	if(in->isaline)
 	{
@@ -4076,22 +4079,22 @@ dboolean PTR_PuzzleItemTraverse(intercept_t* in)
 			P_LineOpening(in->d.line, nullptr);
 			if(line_opening.range <= 0)
 			{
-				sound = sfx_None;
+				sound = SfxId::None;
 				if(PuzzleItemUser->player)
 				{
 					switch(PuzzleItemUser->player->pclass)
 					{
-						case PCLASS_FIGHTER:
-							sound = hexen_sfx_puzzle_fail_fighter;
+						case PClass::Fighter:
+							sound = SfxId::HexenPuzzleFailFighter;
 							break;
-						case PCLASS_CLERIC:
-							sound = hexen_sfx_puzzle_fail_cleric;
+						case PClass::Cleric:
+							sound = SfxId::HexenPuzzleFailCleric;
 							break;
-						case PCLASS_MAGE:
-							sound = hexen_sfx_puzzle_fail_mage;
+						case PClass::Mage:
+							sound = SfxId::HexenPuzzleFailMage;
 							break;
 						default:
-							sound = sfx_None;
+							sound = SfxId::None;
 							break;
 					}
 				}

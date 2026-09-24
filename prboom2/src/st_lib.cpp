@@ -4,6 +4,8 @@
  *      The status bar widget code.
  */
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "doomstat.hpp"
 #include "v_video.hpp"
@@ -66,7 +68,7 @@ void STlib_initNum
  */
 static void STlib_drawNum
 (st_number_t* n,
-	int cm,
+	ColorRange cm,
 	dboolean refresh)
 {
 	int numdigits = n->width;
@@ -102,7 +104,7 @@ static void STlib_drawNum
 	clear_x = n->x - LittleShort(n->p[0].leftoffset) - numdigits * w;
 	clear_y = n->y - LittleShort(n->p[0].topoffset);
 
-	V_CopyRect(BG, FG, clear_x, clear_y, w * numdigits, h, static_cast<enum patch_translation_e>(VPT_STRETCH | VPT_ALIGN_BOTTOM));
+	V_CopyRect(BG, FG, clear_x, clear_y, w * numdigits, h, PatchTranslation::Stretch | PatchTranslation::AlignBottom);
 
 	// if non-number, do not draw it
 	if(num == 1994)
@@ -113,7 +115,7 @@ static void STlib_drawNum
 	if(!num)
 		// CPhipps - patch drawing updated, reformatted
 		V_DrawNumPatch(x - w, n->y, FG, n->p[0].lumpnum, cm,
-		static_cast<enum patch_translation_e>((((cm!=CR_DEFAULT) && sts_colored_numbers) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM));
+		static_cast<PatchTranslation>((((cm!=ColorRange::Default) && sts_colored_numbers) ? PatchTranslation::Trans : PatchTranslation::None) | PatchTranslation::AlignBottom));
 
 	// draw the new number
 	//jff 2/16/98 add color translation to digit output
@@ -122,7 +124,7 @@ static void STlib_drawNum
 		// CPhipps - patch drawing updated, reformatted
 		x -= w;
 		V_DrawNumPatch(x, n->y, FG, n->p[num % 10].lumpnum, cm,
-			static_cast<enum patch_translation_e>((((cm!=CR_DEFAULT) && sts_colored_numbers) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM));
+			static_cast<PatchTranslation>((((cm!=ColorRange::Default) && sts_colored_numbers) ? PatchTranslation::Trans : PatchTranslation::None) | PatchTranslation::AlignBottom));
 		num /= 10;
 	}
 
@@ -131,7 +133,7 @@ static void STlib_drawNum
 	// cph - patch drawing updated, load by name instead of acquiring pointer earlier
 	if(neg)
 		V_DrawNamePatch(x - w, n->y, FG, "STTMINUS", cm,
-		static_cast<enum patch_translation_e>((((cm!=CR_DEFAULT) && sts_colored_numbers) ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM));
+		static_cast<PatchTranslation>((((cm!=ColorRange::Default) && sts_colored_numbers) ? PatchTranslation::Trans : PatchTranslation::None) | PatchTranslation::AlignBottom));
 }
 
 /*
@@ -147,7 +149,7 @@ static void STlib_drawNum
  */
 void STlib_updateNum
 (st_number_t* n,
-	int cm,
+	ColorRange cm,
 	dboolean refresh)
 {
 	if(*n->on) STlib_drawNum(n, cm, refresh);
@@ -190,7 +192,7 @@ void STlib_initPercent
 
 void STlib_updatePercent
 (st_percent_t* per,
-	int cm,
+	ColorRange cm,
 	int refresh)
 {
 	if(*per->n.on && (refresh || (per->n.oldnum != *per->n.num)))
@@ -199,8 +201,8 @@ void STlib_updatePercent
 		/* CPhipps - make %'s only be updated if number changed */
 		// CPhipps - patch drawing updated
 		V_DrawNumPatch(per->n.x, per->n.y, FG, per->p->lumpnum,
-			sts_pct_always_gray ? CR_GRAY : cm,
-			static_cast<enum patch_translation_e>((sts_colored_numbers || sts_pct_always_gray ? VPT_TRANS : VPT_NONE) | VPT_ALIGN_BOTTOM));
+			sts_pct_always_gray ? ColorRange::Gray : cm,
+			static_cast<PatchTranslation>((sts_colored_numbers || sts_pct_always_gray ? PatchTranslation::Trans : PatchTranslation::None) | PatchTranslation::AlignBottom));
 	}
 
 	STlib_updateNum(&per->n, cm, refresh);
@@ -265,10 +267,10 @@ void STlib_updateMultIcon
 				I_Error("STlib_updateMultIcon: y - ST_Y < 0");
 #endif
 
-			V_CopyRect(BG, FG, x, y, w, h, static_cast<enum patch_translation_e>(VPT_STRETCH | VPT_ALIGN_BOTTOM));
+			V_CopyRect(BG, FG, x, y, w, h, PatchTranslation::Stretch | PatchTranslation::AlignBottom);
 		}
 		if(*mi->inum != -1) // killough 2/16/98: redraw only if != -1
-			V_DrawNumPatch(mi->x, mi->y, FG, mi->p[*mi->inum].lumpnum, CR_DEFAULT, VPT_ALIGN_BOTTOM);
+			V_DrawNumPatch(mi->x, mi->y, FG, mi->p[*mi->inum].lumpnum, ColorRange::Default, PatchTranslation::AlignBottom);
 		mi->oldinum = *mi->inum;
 	}
 }

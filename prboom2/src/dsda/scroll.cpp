@@ -104,7 +104,7 @@ static void dsda_UpdateFloorCarryScrollerPosition(scroll_t* s, fixed_t dx, fixed
 		{
 			thing->momx += dx;
 			thing->momy += dy;
-			thing->intflags |= MIF_SCROLLING;
+			thing->intflags |= MobjIntFlag::Scrolling;
 		}
 	}
 }
@@ -229,7 +229,7 @@ void dsda_UpdateZDoomFloorScroller(scroll_t* s)
 				dboolean scroll_it;
 
 				scroll_it = false;
-				if(thing->type == MT_SKULL || thing->flags & MF_COUNTKILL)
+				if(thing->type == MobjType::Skull || thing->flags & MF_COUNTKILL)
 				{
 					if(s->flags & SCROLL_MONSTER)
 						scroll_it = true;
@@ -249,7 +249,7 @@ void dsda_UpdateZDoomFloorScroller(scroll_t* s)
 				{
 					thing->momx += s->dx * 3 / 32;
 					thing->momy += s->dy * 3 / 32;
-					thing->intflags |= MIF_SCROLLING;
+					thing->intflags |= MobjIntFlag::Scrolling;
 				}
 			}
 		}
@@ -290,7 +290,7 @@ void dsda_UpdateZDoomCeilingScroller(scroll_t* s)
 				dboolean scroll_it;
 
 				scroll_it = false;
-				if(thing->type == MT_SKULL || thing->flags & MF_COUNTKILL)
+				if(thing->type == MobjType::Skull || thing->flags & MF_COUNTKILL)
 				{
 					if(s->flags & SCROLL_MONSTER)
 						scroll_it = true;
@@ -310,7 +310,7 @@ void dsda_UpdateZDoomCeilingScroller(scroll_t* s)
 				{
 					thing->momx = s->dx;
 					thing->momy = s->dy;
-					thing->intflags |= MIF_SCROLLING;
+					thing->intflags |= MobjIntFlag::Scrolling;
 				}
 			}
 		}
@@ -364,7 +364,7 @@ void dsda_UpdateThruster(scroll_t* s)
 
 			if(thing->flags2 & MF2_WINDTHRUST && s->flags & THRUST_WINDTHRUST)
 				thrust_it = true;
-			else if(thing->type == MT_SKULL || thing->flags & MF_COUNTKILL)
+			else if(thing->type == MobjType::Skull || thing->flags & MF_COUNTKILL)
 			{
 				if(s->flags & THRUST_MONSTER)
 					thrust_it = true;
@@ -389,7 +389,7 @@ void dsda_UpdateThruster(scroll_t* s)
 			{
 				thing->momx += s->dx;
 				thing->momy += s->dy;
-				thing->intflags |= MIF_SCROLLING;
+				thing->intflags |= MobjIntFlag::Scrolling;
 			}
 		}
 	}

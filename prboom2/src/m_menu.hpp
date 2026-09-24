@@ -6,14 +6,23 @@
 
 #pragma once
 
+#include <stdint.h>
+
+// declared in dsda/input.hpp; the fixed underlying type makes this enough
+enum struct InputId : int32_t;
+
+#include <stdint.h>
+
+// declared in v_video.hpp; the fixed underlying type makes this enough
+enum struct ColorRange : int32_t;
+
+#include "d_event.hpp"
+#include "dsda/configuration.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_event.hpp"
-
-#include "dsda/configuration.hpp"
 
 //
 // MENUS
@@ -64,20 +73,20 @@ void M_DrawTabs(const char** pages, int m, int y);
 // Big Thermo (for Raven)
 void M_DrawThermoBig(int x, int y, int thermWidth, int thermRange, int thermDot, int menu_item);
 
-// Save / Load Highlights
-dboolean M_FileBoxSelected(int menu, int item);
-int M_FileTextColor(int menu, int item);
-
-typedef enum
+enum struct SaveOrLoadMenu : int32_t
 {
-	MN_LOAD,
-	MN_SAVE,
-} save_or_load_menu;
+	Load,
+	Save,
+};
+
+// Save / Load Highlights
+dboolean M_FileBoxSelected(SaveOrLoadMenu menu, int item);
+ColorRange M_FileTextColor(SaveOrLoadMenu menu, int item);
 
 // Menu Highlights
 dboolean M_MouseHovered(int index);
-int M_HighlightColor(dboolean highlight, int color);
-int M_AddColorFlag(int color);
+ColorRange M_HighlightColor(dboolean highlight, ColorRange color);
+PatchTranslation M_AddColorFlag(ColorRange color);
 
 /****************************
  *
@@ -86,16 +95,16 @@ int M_AddColorFlag(int color);
  * It also applies behaviour to other types of settings.
  */
 
-typedef enum
+enum struct SetupGroup : int32_t
 {
-	m_null, // Has no meaning; not applicable
-	m_scrn, // A key can not be assigned to more than one action
-	m_map,  // in the same group. A key can be assigned to one
-	m_menu, // action in one group, and another action in another.
-	m_build,
+	Null, // Has no meaning; not applicable
+	Screen, // A key can not be assigned to more than one action
+	Map,  // in the same group. A key can be assigned to one
+	Menu, // action in one group, and another action in another.
+	Build,
 
-	m_conf, // migrate to new config process
-} setup_group;
+	Conf, // migrate to new config process
+};
 
 /****************************
  *
@@ -118,10 +127,10 @@ typedef struct setup_menu_s
 {
 	const char* m_text;  /* text to display */
 	int m_flags;         /* phares 4/17/98: flag bits S_* (defined above) */
-	setup_group m_group; /* Group */
+	SetupGroup m_group; /* Group */
 	short m_x;           /* screen x position (left is 0) */
-	dsda_config_identifier_t config_id;
-	int input;                  // composite input identifier
+	ConfigId config_id;
+	InputId input;              // composite input identifier
 	const char** selectstrings; /* list of strings for choice value */
 	struct setup_menu_s* menu;  /* next or prev menu */
 } setup_menu_t;
@@ -130,17 +139,17 @@ typedef struct setup_menu_s
 // MENU TYPEDEFS
 //
 
-typedef enum
+enum struct MenuItemType : int32_t
 {
-	M_ITEM_SKIP = -1,
-	M_ITEM_INACTIVE,
-	M_ITEM_ACTION,
-	M_ITEM_THERMO,
-} menuitem_type_t;
+	Skip = -1,
+	Inactive,
+	Action,
+	Thermo,
+};
 
 typedef struct
 {
-	menuitem_type_t status;
+	MenuItemType status;
 	char name[10];
 
 	// choice = menu item #.
@@ -149,7 +158,7 @@ typedef struct
 	void (*routine)(int choice);
 	char alphaKey; // hotkey in menu
 	const char* alttext;
-	int color;
+	ColorRange color;
 	byte flags;
 } menuitem_t;
 

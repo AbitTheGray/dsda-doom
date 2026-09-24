@@ -4,6 +4,8 @@
  *      LineOfSight/Visibility checks, uses REJECT Lookup Table.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "doomtype.hpp"
 #include "r_main.hpp"
@@ -423,7 +425,7 @@ INLINE static int P_DivlineSide(fixed_t x, fixed_t y, const divline_t* node)
 		? node->dy > 0
 		: node->dy < 0
 		: !node->dy
-		? (compatibility_level < prboom_4_compatibility ? x : y) == node->y
+		? (compatibility_level < CompLevel::Prboom4 ? x : y) == node->y
 		? 2
 		: y <= node->y
 		? node->dx < 0
@@ -470,10 +472,10 @@ dboolean P_CrossSubsector_Poly(int num)
 
 			// OPTIMIZE: killough 4/20/98: Added quick bounding-box rejection test
 
-			if(line->bbox[BOXLEFT] > los.bbox[BOXRIGHT] ||
-				line->bbox[BOXRIGHT] < los.bbox[BOXLEFT] ||
-				line->bbox[BOXBOTTOM] > los.bbox[BOXTOP] ||
-				line->bbox[BOXTOP] < los.bbox[BOXBOTTOM])
+			if(line->bbox[std::to_underlying(BoxEdge::Left)] > los.bbox[std::to_underlying(BoxEdge::Right)] ||
+				line->bbox[std::to_underlying(BoxEdge::Right)] < los.bbox[std::to_underlying(BoxEdge::Left)] ||
+				line->bbox[std::to_underlying(BoxEdge::Bottom)] > los.bbox[std::to_underlying(BoxEdge::Top)] ||
+				line->bbox[std::to_underlying(BoxEdge::Top)] < los.bbox[std::to_underlying(BoxEdge::Bottom)])
 			{
 				line->validcount = validcount;
 				continue;
@@ -531,10 +533,10 @@ dboolean P_CrossSubsector_PrBoom(int num)
 		* cph - this is causing demo desyncs on original Doom demos.
 		*  Who knows why. Exclude test for those.
 		*/
-		if(ssline->bbox[BOXLEFT] > los.bbox[BOXRIGHT] ||
-			ssline->bbox[BOXRIGHT] < los.bbox[BOXLEFT] ||
-			ssline->bbox[BOXBOTTOM] > los.bbox[BOXTOP] ||
-			ssline->bbox[BOXTOP] < los.bbox[BOXBOTTOM])
+		if(ssline->bbox[std::to_underlying(BoxEdge::Left)] > los.bbox[std::to_underlying(BoxEdge::Right)] ||
+			ssline->bbox[std::to_underlying(BoxEdge::Right)] < los.bbox[std::to_underlying(BoxEdge::Left)] ||
+			ssline->bbox[std::to_underlying(BoxEdge::Bottom)] > los.bbox[std::to_underlying(BoxEdge::Top)] ||
+			ssline->bbox[std::to_underlying(BoxEdge::Top)] < los.bbox[std::to_underlying(BoxEdge::Bottom)])
 		{
 			ssline->linedef->validcount = validcount;
 			continue;
@@ -590,14 +592,14 @@ dboolean P_CrossSubsector_PrBoom(int num)
 		// cph - if bottom >= top or top < minz or bottom > maxz then it must be
 		// solid wrt this LOS
 		if(!(ssline->linedef->flags & ML_TWOSIDED) || (openbottom >= opentop) ||
-			(prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state ? (opentop <= los.minz) || (openbottom >= los.maxz) : (opentop < los.minz) || (openbottom > los.maxz)))
+			(prboom_comp[std::to_underlying(PrboomComp::ForceLxdoomDemoCompatibility)].state ? (opentop <= los.minz) || (openbottom >= los.maxz) : (opentop < los.minz) || (openbottom > los.maxz)))
 			return false;
 
 		{
 			// crosses a two sided line
 			/* cph 2006/07/15 - oops, we missed this in 2.4.0 & .1;
 			*  use P_InterceptVector2 for those compat levels only. */
-			fixed_t frac = (compatibility_level == prboom_5_compatibility || compatibility_level == prboom_6_compatibility) ? P_InterceptVector2(&los.strace, &divl) : P_InterceptVector(&los.strace, &divl);
+			fixed_t frac = (compatibility_level == CompLevel::Prboom5 || compatibility_level == CompLevel::Prboom6) ? P_InterceptVector2(&los.strace, &divl) : P_InterceptVector(&los.strace, &divl);
 
 			if(front->floorheight != back->floorheight)
 			{
@@ -733,10 +735,10 @@ dboolean P_CrossSubsector_Boom(int num)
 
 		// OPTIMIZE: killough 4/20/98: Added quick bounding-box rejection test
 
-		if(ssline->bbox[BOXLEFT] > los.bbox[BOXRIGHT] ||
-			ssline->bbox[BOXRIGHT] < los.bbox[BOXLEFT] ||
-			ssline->bbox[BOXBOTTOM] > los.bbox[BOXTOP] ||
-			ssline->bbox[BOXTOP] < los.bbox[BOXBOTTOM])
+		if(ssline->bbox[std::to_underlying(BoxEdge::Left)] > los.bbox[std::to_underlying(BoxEdge::Right)] ||
+			ssline->bbox[std::to_underlying(BoxEdge::Right)] < los.bbox[std::to_underlying(BoxEdge::Left)] ||
+			ssline->bbox[std::to_underlying(BoxEdge::Bottom)] > los.bbox[std::to_underlying(BoxEdge::Top)] ||
+			ssline->bbox[std::to_underlying(BoxEdge::Top)] < los.bbox[std::to_underlying(BoxEdge::Bottom)])
 		{
 			ssline->linedef->validcount = validcount;
 			continue;
@@ -871,7 +873,7 @@ static dboolean P_CrossBSPNode_PrBoom(int bspnum)
 static dboolean P_CrossBSPNode(int bspnum)
 {
 	/* cph - LxDoom used some R_* funcs here */
-	if(compatibility_level == lxdoom_1_compatibility || prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state)
+	if(compatibility_level == CompLevel::Lxdoom1 || prboom_comp[std::to_underlying(PrboomComp::ForceLxdoomDemoCompatibility)].state)
 		return P_CrossBSPNode_LxDoom(bspnum);
 	else
 		return P_CrossBSPNode_PrBoom(bspnum);
@@ -890,7 +892,7 @@ dboolean P_CheckSight(mobj_t* t1, mobj_t* t2)
 	const sector_t *s1, *s2;
 	int pnum;
 
-	if(compatibility_level == doom_12_compatibility)
+	if(compatibility_level == CompLevel::Doom12)
 	{
 		return P_CheckSight_12(t1, t2);
 	}
@@ -926,7 +928,7 @@ dboolean P_CheckSight(mobj_t* t1, mobj_t* t2)
 	* same subsector? obviously visible
 	* cph - compatibility optioned for demo sync, cf HR06-UV.LMP */
 	if((t1->subsector == t2->subsector) &&
-		(compatibility_level >= mbf_compatibility))
+		(compatibility_level >= CompLevel::Mbf))
 		return true;
 
 	// An unobstructed LOS is possible.
@@ -941,19 +943,19 @@ dboolean P_CheckSight(mobj_t* t1, mobj_t* t2)
 	los.strace.dy = (los.t2y = t2->y) - (los.strace.y = t1->y);
 
 	if(t1->x > t2->x)
-		los.bbox[BOXRIGHT] = t1->x, los.bbox[BOXLEFT] = t2->x;
+		los.bbox[std::to_underlying(BoxEdge::Right)] = t1->x, los.bbox[std::to_underlying(BoxEdge::Left)] = t2->x;
 	else
-		los.bbox[BOXRIGHT] = t2->x, los.bbox[BOXLEFT] = t1->x;
+		los.bbox[std::to_underlying(BoxEdge::Right)] = t2->x, los.bbox[std::to_underlying(BoxEdge::Left)] = t1->x;
 
 	if(t1->y > t2->y)
-		los.bbox[BOXTOP] = t1->y, los.bbox[BOXBOTTOM] = t2->y;
+		los.bbox[std::to_underlying(BoxEdge::Top)] = t1->y, los.bbox[std::to_underlying(BoxEdge::Bottom)] = t2->y;
 	else
-		los.bbox[BOXTOP] = t2->y, los.bbox[BOXBOTTOM] = t1->y;
+		los.bbox[std::to_underlying(BoxEdge::Top)] = t2->y, los.bbox[std::to_underlying(BoxEdge::Bottom)] = t1->y;
 
 	/* cph - calculate min and max z of the potential line of sight
 	* For old demos, we disable this optimisation by setting them to
 	* the extremes */
-	if(compatibility_level == lxdoom_1_compatibility || prboom_comp[PC_FORCE_LXDOOM_DEMO_COMPATIBILITY].state)
+	if(compatibility_level == CompLevel::Lxdoom1 || prboom_comp[std::to_underlying(PrboomComp::ForceLxdoomDemoCompatibility)].state)
 	{
 		if(los.sightzstart < t2->z)
 		{

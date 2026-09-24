@@ -6,12 +6,12 @@
 
 #pragma once
 
+#include "r_defs.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "r_defs.hpp"
 
 /* mapblocks are used to check movement against lines and things */
 #define MAPBLOCKUNITS   128

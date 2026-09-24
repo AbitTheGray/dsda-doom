@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -41,14 +43,11 @@ extern "C"
 #define DEVMAPS "devmaps"
 #define DEVDATA "devdata"
 
-
 /* Not done in french?
  * QuitDOOM messages *
  * killough 1/18/98:
  * replace hardcoded limit with extern var (silly hack, I know)
  */
-
-#include <stddef.h>
 
 extern const size_t NUM_QUITMESSAGES; /* Calculated in dstrings.c */
 

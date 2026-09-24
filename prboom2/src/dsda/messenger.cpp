@@ -15,16 +15,16 @@
 
 #define MESSAGE_LIFETIME 140
 
-typedef enum
+enum struct MessagePriority : int32_t
 {
-	message_alert,
-	message_normal,
-} message_priority_t;
+	Alert,
+	Normal,
+};
 
 typedef struct message_s
 {
 	char* str;
-	message_priority_t priority;
+	MessagePriority priority;
 	int tics;
 	struct message_s* next_message;
 } message_t;
@@ -66,7 +66,7 @@ static void dsda_AppendMessage(message_t* message)
 	}
 }
 
-static void dsda_QueueMessage(const char* str, message_priority_t priority)
+static void dsda_QueueMessage(const char* str, MessagePriority priority)
 {
 	message_t* new_message;
 
@@ -76,7 +76,7 @@ static void dsda_QueueMessage(const char* str, message_priority_t priority)
 			return;
 		else if(current_message->priority > priority)
 			dsda_ClearMessages();
-		else if(priority == message_normal)
+		else if(priority == MessagePriority::Normal)
 		{
 			Z_Free(current_message->str);
 
@@ -98,29 +98,29 @@ static void dsda_QueueMessage(const char* str, message_priority_t priority)
 void dsda_AddPlayerAlert(const char* str, player_t* player)
 {
 	if(player == &players[displayplayer])
-		dsda_QueueMessage(str, message_alert);
+		dsda_QueueMessage(str, MessagePriority::Alert);
 }
 
 void dsda_AddAlert(const char* str)
 {
-	dsda_QueueMessage(str, message_alert);
+	dsda_QueueMessage(str, MessagePriority::Alert);
 }
 
 void dsda_AddPlayerMessage(const char* str, player_t* player)
 {
 	if(dsda_ShowMessages() && player == &players[displayplayer])
-		dsda_QueueMessage(str, message_normal);
+		dsda_QueueMessage(str, MessagePriority::Normal);
 }
 
 void dsda_AddMessage(const char* str)
 {
 	if(dsda_ShowMessages())
-		dsda_QueueMessage(str, message_normal);
+		dsda_QueueMessage(str, MessagePriority::Normal);
 }
 
 void dsda_AddUnblockableMessage(const char* str)
 {
-	dsda_QueueMessage(str, message_normal);
+	dsda_QueueMessage(str, MessagePriority::Normal);
 }
 
 void dsda_UpdateMessenger()

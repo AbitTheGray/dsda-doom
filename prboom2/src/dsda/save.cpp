@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Save
 
+#include <utility>
+
 #include <stdlib.h>
 
 #include "doomstat.hpp"
@@ -59,7 +61,7 @@ static void dsda_ArchiveContext()
 	int boom_logictic_value;
 	int true_logictic_value;
 
-	P_SAVE_BYTE(compatibility_level);
+	P_SAVE_BYTE(std::to_underlying(compatibility_level));
 	P_SAVE_BYTE(gameskill);
 	P_SAVE_BYTE(gameepisode);
 	P_SAVE_BYTE(gamemap);
@@ -99,7 +101,7 @@ static void dsda_UnArchiveContext()
 	int boom_logictic_value;
 	int true_logictic_value;
 
-	P_LOAD_BYTE(compatibility_level);
+	{ byte level; P_LOAD_BYTE(level); compatibility_level = static_cast<CompLevel>(level); }
 	P_LOAD_BYTE(gameskill);
 
 	P_LOAD_BYTE(epi);
@@ -157,13 +159,13 @@ static void dsda_SetGameModifiers()
 		return;
 
 	// If "Always Pistol Start" is enabled, skip resetting "Pistol Start"
-	if(!dsda_IntConfig(dsda_config_always_pistol_start))
-		dsda_UpdateIntConfig(dsda_config_pistol_start, saved_pistolstart,true);
+	if(!dsda_IntConfig(ConfigId::AlwaysPistolStart))
+		dsda_UpdateIntConfig(ConfigId::PistolStart, saved_pistolstart,true);
 
-	dsda_UpdateIntConfig(dsda_config_respawn_monsters, saved_respawnparm,true);
-	dsda_UpdateIntConfig(dsda_config_fast_monsters, saved_fastparm,true);
-	dsda_UpdateIntConfig(dsda_config_no_monsters, saved_nomonsters,true);
-	dsda_UpdateIntConfig(dsda_config_coop_spawns, saved_coop_spawns,true);
+	dsda_UpdateIntConfig(ConfigId::RespawnMonsters, saved_respawnparm,true);
+	dsda_UpdateIntConfig(ConfigId::FastMonsters, saved_fastparm,true);
+	dsda_UpdateIntConfig(ConfigId::NoMonsters, saved_nomonsters,true);
+	dsda_UpdateIntConfig(ConfigId::CoopSpawns, saved_coop_spawns,true);
 }
 
 static void dsda_ArchiveGameModifiers()
@@ -234,16 +236,16 @@ void dsda_UnArchiveAll()
 
 void dsda_InitSaveDir()
 {
-	dsda_base_save_dir = dsda_DetectDirectory("DOOMSAVEDIR", dsda_arg_save);
+	dsda_base_save_dir = dsda_DetectDirectory("DOOMSAVEDIR", ArgId::Save);
 }
 
 char* dsda_SaveDir()
 {
-	dsda_arg_t* arg = dsda_Arg(dsda_arg_save);
+	dsda_arg_t* arg = dsda_Arg(ArgId::Save);
 
 	if(!arg->found)
 	{
-		if(dsda_IntConfig(dsda_config_organized_saves))
+		if(dsda_IntConfig(ConfigId::OrganizedSaves))
 		{
 			if(!dsda_wad_save_dir)
 				dsda_wad_save_dir = dsda_DataDir();
@@ -363,9 +365,9 @@ void dsda_UpdateAutoSaves()
 	static int autoepisode = -1;
 
 
-	if(!dsda_IntConfig(dsda_config_auto_save) ||
-		gamestate != GS_LEVEL ||
-		gameaction != ga_nothing ||
+	if(!dsda_IntConfig(ConfigId::AutoSave) ||
+		gamestate != GameState::Level ||
+		gameaction != GameAction::Nothing ||
 		demoplayback ||
 		demorecording)
 		return;

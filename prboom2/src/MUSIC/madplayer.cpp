@@ -135,7 +135,7 @@ static const void* mp_registersong(const void* data, unsigned len)
 		return nullptr;
 	}
 
-	lprintf(LO_INFO, "mad_registersong succeed. bitrate %lu samplerate %d\n", Header.bitrate, Header.samplerate);
+	lprintf(OutputLevels::Info, "mad_registersong succeed. bitrate %lu samplerate %d\n", Header.bitrate, Header.samplerate);
 
 	mp_data = data;
 	mp_len = len;
@@ -240,7 +240,7 @@ static void mp_render_ex(void* dest, unsigned nsamp)
 				localerrors++;
 				if(localerrors == 10)
 				{
-					lprintf(LO_WARN, "mad_frame_decode: Lots of errors.  Most recent %s\n", mad_stream_errorstr(&Stream));
+					lprintf(OutputLevels::Warn, "mad_frame_decode: Lots of errors.  Most recent %s\n", mad_stream_errorstr(&Stream));
 					mp_playing = 0;
 					memset(sout, 0, nsamp * 4);
 					return;
@@ -269,7 +269,7 @@ static void mp_render_ex(void* dest, unsigned nsamp)
 			else
 			{
 				// oh well.
-				lprintf(LO_WARN, "mad_frame_decode: Unrecoverable error %s\n", mad_stream_errorstr(&Stream));
+				lprintf(OutputLevels::Warn, "mad_frame_decode: Unrecoverable error %s\n", mad_stream_errorstr(&Stream));
 				mp_playing = 0;
 				memset(sout, 0, nsamp * 4);
 				return;

@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Big Armor HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "big_armor.hpp"
@@ -24,7 +26,7 @@ static void dsda_DrawComponent()
 {
 	player_t* player;
 	int x, y;
-	int cm;
+	ColorRange cm;
 	int lump;
 	int armor;
 
@@ -35,30 +37,30 @@ static void dsda_DrawComponent()
 	if(hexen)
 	{
 		armor = dsda_HexenArmor(player);
-		cm = dsda_TextCR(dsda_tc_stbar_armor_zero);
+		cm = dsda_TextCR(TextColorIndex::StbarArmorZero);
 		lump = armor_lump_green;
 	}
 	else
 	{
-		armor = player->armorpoints[ARMOR_ARMOR];
+		armor = player->armorpoints[std::to_underlying(ArmorType::Armor)];
 		if(armor <= 0)
 		{
-			cm = dsda_TextCR(dsda_tc_stbar_armor_zero);
+			cm = dsda_TextCR(TextColorIndex::StbarArmorZero);
 			lump = armor_lump_green;
 		}
 		else if(player->armortype < 2)
 		{
-			cm = dsda_TextCR(dsda_tc_stbar_armor_one);
+			cm = dsda_TextCR(TextColorIndex::StbarArmorOne);
 			lump = armor_lump_green;
 		}
 		else
 		{
-			cm = dsda_TextCR(dsda_tc_stbar_armor_two);
+			cm = dsda_TextCR(TextColorIndex::StbarArmorTwo);
 			lump = armor_lump_blue;
 		}
 	}
 
-	V_DrawNumPatch(x, y, FG, lump, CR_DEFAULT, static_cast<enum patch_translation_e>((enum patch_translation_e)local->component.vpt));
+	V_DrawNumPatch(x, y, FG, lump, ColorRange::Default, static_cast<PatchTranslation>((PatchTranslation)local->component.vpt));
 
 	x += patch_spacing;
 	y += patch_vertical_spacing;
@@ -67,31 +69,31 @@ static void dsda_DrawComponent()
 		cm, local->component.vpt, 3, armor);
 }
 
-void dsda_InitBigArmorHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitBigArmorHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);
 
 	if(heretic)
 	{
-		armor_lump_green = R_NumPatchForSpriteIndex(HERETIC_SPR_SHLD);
-		armor_lump_blue = R_NumPatchForSpriteIndex(HERETIC_SPR_SHD2);
+		armor_lump_green = R_NumPatchForSpriteIndex(SpriteId::HereticShld);
+		armor_lump_blue = R_NumPatchForSpriteIndex(SpriteId::HereticShd2);
 		patch_delta_x = 10;
 		patch_vertical_spacing = 6;
 		patch_spacing = 2;
 	}
 	else if(hexen)
 	{
-		armor_lump_green = R_NumPatchForSpriteIndex(HEXEN_SPR_ARM3);
-		armor_lump_blue = R_NumPatchForSpriteIndex(HEXEN_SPR_ARM3);
+		armor_lump_green = R_NumPatchForSpriteIndex(SpriteId::HexenArm3);
+		armor_lump_blue = R_NumPatchForSpriteIndex(SpriteId::HexenArm3);
 		patch_delta_x = 10;
 		patch_vertical_spacing = 4;
 		patch_spacing = 2;
 	}
 	else
 	{
-		armor_lump_green = R_NumPatchForSpriteIndex(SPR_ARM1);
-		armor_lump_blue = R_NumPatchForSpriteIndex(SPR_ARM2);
+		armor_lump_green = R_NumPatchForSpriteIndex(SpriteId::Arm1);
+		armor_lump_blue = R_NumPatchForSpriteIndex(SpriteId::Arm2);
 		patch_delta_x = 14;
 		patch_vertical_spacing = 1;
 		patch_spacing = 2;

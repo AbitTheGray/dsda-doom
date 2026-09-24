@@ -5,13 +5,13 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+#include "m_menu.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
-#include "m_menu.hpp"
 
 #define CONSOLE_SCRIPT_COUNT 10
 

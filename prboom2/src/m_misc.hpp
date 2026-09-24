@@ -7,15 +7,14 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+#include "dsda/configuration.hpp"
+#include "dsda/input.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
-
-#include "dsda/configuration.hpp"
-#include "dsda/input.hpp"
 
 void M_ScreenShot();
 void M_DoScreenShot(const char*); // cph

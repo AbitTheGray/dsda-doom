@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -111,7 +113,7 @@ static int fl_sfread(void* buf, fl_sfread_count_t count, void* handle)
 
 static int fl_sfseek(void* handle, fl_sfseek_offset_t offset, int origin)
 {
-	if(mem_fseek((MEMFILE*)handle, offset, static_cast<mem_rel_t>(origin)) < 0)
+	if(mem_fseek((MEMFILE*)handle, offset, static_cast<MemSeek>(origin)) < 0)
 	{
 		return FLUID_FAILED;
 	}
@@ -147,18 +149,18 @@ static int fl_init(int samplerate)
 	int mus_fluidsynth_reverb_room_size;
 	const char* filename;
 
-	if(!dsda_Flag(dsda_arg_verbose) || dsda_Flag(dsda_arg_quiet))
+	if(!dsda_Flag(ArgId::Verbose) || dsda_Flag(ArgId::Quiet))
 		fluid_set_log_function(FLUID_WARN, fl_null_logger, nullptr);
 
-	mus_fluidsynth_chorus = dsda_IntConfig(dsda_config_mus_fluidsynth_chorus);
-	mus_fluidsynth_reverb = dsda_IntConfig(dsda_config_mus_fluidsynth_reverb);
-	mus_fluidsynth_gain = dsda_IntConfig(dsda_config_mus_fluidsynth_gain);
-	mus_fluidsynth_chorus_depth = dsda_IntConfig(dsda_config_mus_fluidsynth_chorus_depth);
-	mus_fluidsynth_chorus_level = dsda_IntConfig(dsda_config_mus_fluidsynth_chorus_level);
-	mus_fluidsynth_reverb_damp = dsda_IntConfig(dsda_config_mus_fluidsynth_reverb_damp);
-	mus_fluidsynth_reverb_level = dsda_IntConfig(dsda_config_mus_fluidsynth_reverb_level);
-	mus_fluidsynth_reverb_width = dsda_IntConfig(dsda_config_mus_fluidsynth_reverb_width);
-	mus_fluidsynth_reverb_room_size = dsda_IntConfig(dsda_config_mus_fluidsynth_reverb_room_size);
+	mus_fluidsynth_chorus = dsda_IntConfig(ConfigId::MusFluidsynthChorus);
+	mus_fluidsynth_reverb = dsda_IntConfig(ConfigId::MusFluidsynthReverb);
+	mus_fluidsynth_gain = dsda_IntConfig(ConfigId::MusFluidsynthGain);
+	mus_fluidsynth_chorus_depth = dsda_IntConfig(ConfigId::MusFluidsynthChorusDepth);
+	mus_fluidsynth_chorus_level = dsda_IntConfig(ConfigId::MusFluidsynthChorusLevel);
+	mus_fluidsynth_reverb_damp = dsda_IntConfig(ConfigId::MusFluidsynthReverbDamp);
+	mus_fluidsynth_reverb_level = dsda_IntConfig(ConfigId::MusFluidsynthReverbLevel);
+	mus_fluidsynth_reverb_width = dsda_IntConfig(ConfigId::MusFluidsynthReverbWidth);
+	mus_fluidsynth_reverb_room_size = dsda_IntConfig(ConfigId::MusFluidsynthReverbRoomSize);
 
 	f_soundrate = samplerate;
 	// fluidsynth 1.1.4 supports sample rates as low as 8000hz.  earlier versions only go down to 22050hz
@@ -169,14 +171,14 @@ static int fl_init(int samplerate)
 		int minor;
 		int micro;
 		fluid_version(&major, &minor, &micro);
-		lprintf(LO_DEBUG, "Fluidplayer: Fluidsynth version %i.%i.%i\n", major, minor, micro);
+		lprintf(OutputLevels::Debug, "Fluidplayer: Fluidsynth version %i.%i.%i\n", major, minor, micro);
 		if(major >= 2 || (minor >= 1 && micro >= 4))
 			sratemin = 8000;
 		else
 			sratemin = 22050;
 		if(f_soundrate < sratemin)
 		{
-			lprintf(LO_WARN, "Fluidplayer: samplerates under %i are not supported\n", sratemin);
+			lprintf(OutputLevels::Warn, "Fluidplayer: samplerates under %i are not supported\n", sratemin);
 			return 0;
 		}
 	}
@@ -186,10 +188,10 @@ static int fl_init(int samplerate)
 
 #if FLUIDSYNTH_VERSION_MAJOR == 1
 #define FSET(a,b,c) if (!fluid_settings_set##a(f_set,b,c))\
-    lprintf (LO_WARN, "fl_init: Couldn't set " b "\n")
+    lprintf (OutputLevels::Warn, "fl_init: Couldn't set " b "\n")
 #else
 #define FSET(a,b,c) if (fluid_settings_set##a(f_set,b,c) == FLUID_FAILED)\
-    lprintf (LO_WARN, "fl_init: Couldn't set " b "\n")
+    lprintf (OutputLevels::Warn, "fl_init: Couldn't set " b "\n")
 #endif
 
 	FSET(num, "synth.sample-rate", f_soundrate);
@@ -233,7 +235,7 @@ static int fl_init(int samplerate)
 	f_syn = new_fluid_synth(f_set);
 	if(!f_syn)
 	{
-		lprintf(LO_WARN, "fl_init: error creating fluidsynth object\n");
+		lprintf(OutputLevels::Warn, "fl_init: error creating fluidsynth object\n");
 		delete_fluid_settings(f_set);
 		return 0;
 	}
@@ -252,7 +254,7 @@ static int fl_init(int samplerate)
 			replaced_soundfont = !W_LumpNumInPortWad(lumpnum);
 		}
 
-		snd_soundfont = dsda_StringConfig(dsda_config_snd_soundfont);
+		snd_soundfont = dsda_StringConfig(ConfigId::SndSoundfont);
 
 		if(!replaced_soundfont && snd_soundfont && snd_soundfont[0])
 		{
@@ -276,7 +278,7 @@ static int fl_init(int samplerate)
 
 		if(!checked_f_font)
 		{
-			lprintf(LO_WARN, "fl_init: no soundfont detected!\n");
+			lprintf(OutputLevels::Warn, "fl_init: no soundfont detected!\n");
 			delete_fluid_synth(f_syn);
 			delete_fluid_settings(f_set);
 			return 0;
@@ -284,7 +286,7 @@ static int fl_init(int samplerate)
 
 		if(f_font == FLUID_FAILED)
 		{
-			lprintf(LO_WARN, "fl_init: error loading soundfont %s\n", checked_f_font);
+			lprintf(OutputLevels::Warn, "fl_init: error loading soundfont %s\n", checked_f_font);
 			delete_fluid_synth(f_syn);
 			delete_fluid_settings(f_set);
 			return 0;
@@ -478,31 +480,31 @@ static void fl_render(void* vdest, unsigned length)
 		// process event
 		switch(currevent->event_type)
 		{
-			case MIDI_EVENT_NOTE_OFF:
+			case MidiEventType::NoteOff:
 				fluid_synth_noteoff(f_syn, currevent->data.channel.channel, currevent->data.channel.param1);
 				break;
-			case MIDI_EVENT_NOTE_ON:
+			case MidiEventType::NoteOn:
 				fluid_synth_noteon(f_syn, currevent->data.channel.channel, currevent->data.channel.param1, currevent->data.channel.param2);
 				break;
-			case MIDI_EVENT_AFTERTOUCH:
+			case MidiEventType::Aftertouch:
 				// not suipported?
 				break;
-			case MIDI_EVENT_CONTROLLER:
+			case MidiEventType::Controller:
 				fluid_synth_cc(f_syn, currevent->data.channel.channel, currevent->data.channel.param1, currevent->data.channel.param2);
 				break;
-			case MIDI_EVENT_PROGRAM_CHANGE:
+			case MidiEventType::ProgramChange:
 				fluid_synth_program_change(f_syn, currevent->data.channel.channel, currevent->data.channel.param1);
 				break;
-			case MIDI_EVENT_CHAN_AFTERTOUCH:
+			case MidiEventType::ChanAftertouch:
 				fluid_synth_channel_pressure(f_syn, currevent->data.channel.channel, currevent->data.channel.param1);
 				break;
-			case MIDI_EVENT_PITCH_BEND:
+			case MidiEventType::End:
 				fluid_synth_pitch_bend(f_syn, currevent->data.channel.channel, currevent->data.channel.param1 | currevent->data.channel.param2 << 7);
 				break;
-			case MIDI_EVENT_META:
-				if(currevent->data.meta.type == MIDI_META_SET_TEMPO)
+			case MidiEventType::Meta:
+				if(currevent->data.meta.type == std::to_underlying(MidiMetaEventType::SetTempo))
 					spmc = MIDI_spmc(midifile, currevent, f_soundrate);
-				else if(currevent->data.meta.type == MIDI_META_END_OF_TRACK)
+				else if(currevent->data.meta.type == std::to_underlying(MidiMetaEventType::EndOfTrack))
 				{
 					if(f_looping)
 					{

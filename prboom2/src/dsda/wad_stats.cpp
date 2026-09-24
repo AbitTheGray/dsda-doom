@@ -87,11 +87,11 @@ static void dsda_CreateWadStats()
 
 	for(i = numlumps - 1; i > 0; --i)
 	{
-		if(any_pwad_map && lumpinfo[i].source == source_iwad)
+		if(any_pwad_map && lumpinfo[i].source == WadSource::Iwad)
 			break;
 
-		if(lumpinfo[i].source != source_iwad &&
-			lumpinfo[i].source != source_pwad)
+		if(lumpinfo[i].source != WadSource::Iwad &&
+			lumpinfo[i].source != WadSource::Pwad)
 			continue;
 
 		if(strncasecmp(lumpinfo[i].name, "THINGS", 8) &&
@@ -102,7 +102,7 @@ static void dsda_CreateWadStats()
 		if(dsda_MapStatsExist(map_name))
 			continue;
 
-		if(lumpinfo[i - 1].source == source_pwad)
+		if(lumpinfo[i - 1].source == WadSource::Pwad)
 			any_pwad_map = true;
 
 		{
@@ -168,7 +168,7 @@ static void dsda_LoadWadStats()
 				sscanf(lines[1], "%d", &wad_stats.total_kills) != 1
 			)
 			{
-				lprintf(LO_WARN, "Encountered invalid wad stats: %s", path);
+				lprintf(OutputLevels::Warn, "Encountered invalid wad stats: %s", path);
 				M_remove(path);
 			}
 			else
@@ -231,7 +231,7 @@ void dsda_SaveWadStats()
 	file = M_OpenFile(path, "wb");
 	if(!file)
 	{
-		lprintf(LO_WARN, "dsda_SaveWadStats: Failed to save wad stats file \"%s\".\n", path);
+		lprintf(OutputLevels::Warn, "dsda_SaveWadStats: Failed to save wad stats file \"%s\".\n", path);
 		return;
 	}
 

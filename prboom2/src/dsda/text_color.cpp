@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Text Color
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "hu_lib.hpp"
 #include "lprintf.hpp"
@@ -16,115 +18,115 @@
 typedef struct
 {
 	const char* key;
-	int color_range;
+	ColorRange color_range;
 	char color_str[3];
 } dsda_text_color_t;
 
 dsda_text_color_t dsda_text_colors[] = {
-	[dsda_tc_exhud_time_label] = {"exhud_time_label", CR_GRAY},
-	[dsda_tc_exhud_level_time] = {"exhud_level_time", CR_GREEN},
-	[dsda_tc_exhud_total_time] = {"exhud_total_time", CR_GOLD},
-	[dsda_tc_exhud_demo_length] = {"exhud_demo_length", CR_BROWN},
-	[dsda_tc_exhud_armor_zero] = {"exhud_armor_zero", CR_GRAY},
-	[dsda_tc_exhud_armor_one] = {"exhud_armor_one", CR_GREEN},
-	[dsda_tc_exhud_armor_two] = {"exhud_armor_two", CR_LIGHTBLUE},
-	[dsda_tc_exhud_command_entry] = {"exhud_command_entry", CR_GRAY},
-	[dsda_tc_exhud_command_queue] = {"exhud_command_queue", CR_GOLD},
-	[dsda_tc_exhud_coords_base] = {"exhud_coords_base", CR_GREEN},
-	[dsda_tc_exhud_coords_mf50] = {"exhud_coords_mf50", CR_GRAY},
-	[dsda_tc_exhud_coords_sr40] = {"exhud_coords_sr40", CR_GREEN},
-	[dsda_tc_exhud_coords_sr50] = {"exhud_coords_sr50", CR_LIGHTBLUE},
-	[dsda_tc_exhud_coords_fast] = {"exhud_coords_fast", CR_RED},
-	[dsda_tc_exhud_fps_bad] = {"exhud_fps_bad", CR_RED},
-	[dsda_tc_exhud_fps_fine] = {"exhud_fps_fine", CR_GRAY},
-	[dsda_tc_exhud_health_bad] = {"exhud_health_bad", CR_RED},
-	[dsda_tc_exhud_health_warning] = {"exhud_health_warning", CR_GOLD},
-	[dsda_tc_exhud_health_ok] = {"exhud_health_ok", CR_GREEN},
-	[dsda_tc_exhud_health_super] = {"exhud_health_super", CR_LIGHTBLUE},
-	[dsda_tc_exhud_line_close] = {"exhud_line_close", CR_GREEN},
-	[dsda_tc_exhud_line_far] = {"exhud_line_far", CR_GRAY},
-	[dsda_tc_exhud_line_special] = {"exhud_line_special", CR_GREEN},
-	[dsda_tc_exhud_line_normal] = {"exhud_line_normal", CR_GRAY},
-	[dsda_tc_exhud_mobj_alive] = {"exhud_mobj_alive", CR_GREEN},
-	[dsda_tc_exhud_mobj_dead] = {"exhud_mobj_dead", CR_GRAY},
-	[dsda_tc_exhud_player_damage] = {"exhud_player_damage", CR_GREEN},
-	[dsda_tc_exhud_player_neutral] = {"exhud_player_neutral", CR_GRAY},
-	[dsda_tc_exhud_ammo_label] = {"exhud_ammo_label", CR_GRAY},
-	[dsda_tc_exhud_ammo_mana1] = {"exhud_ammo_mana1", CR_LIGHTBLUE},
-	[dsda_tc_exhud_ammo_mana2] = {"exhud_ammo_mana2", CR_GREEN},
-	[dsda_tc_exhud_ammo_value] = {"exhud_ammo_value", CR_GRAY},
-	[dsda_tc_exhud_ammo_bad] = {"exhud_ammo_bad", CR_RED},
-	[dsda_tc_exhud_ammo_warning] = {"exhud_ammo_warning", CR_GOLD},
-	[dsda_tc_exhud_ammo_ok] = {"exhud_ammo_ok", CR_GREEN},
-	[dsda_tc_exhud_ammo_full] = {"exhud_ammo_full", CR_LIGHTBLUE},
-	[dsda_tc_exhud_render_label] = {"exhud_render_label", CR_GRAY},
-	[dsda_tc_exhud_render_good] = {"exhud_render_good", CR_GOLD},
-	[dsda_tc_exhud_render_bad] = {"exhud_render_bad", CR_RED},
-	[dsda_tc_exhud_sector_active] = {"exhud_sector_active", CR_RED},
-	[dsda_tc_exhud_sector_special] = {"exhud_sector_special", CR_GREEN},
-	[dsda_tc_exhud_sector_normal] = {"exhud_sector_normal", CR_GRAY},
-	[dsda_tc_exhud_speed_label] = {"exhud_speed_label", CR_GRAY},
-	[dsda_tc_exhud_speed_slow] = {"exhud_speed_slow", CR_GOLD},
-	[dsda_tc_exhud_speed_normal] = {"exhud_speed_normal", CR_GREEN},
-	[dsda_tc_exhud_speed_fast] = {"exhud_speed_fast", CR_LIGHTBLUE},
-	[dsda_tc_exhud_totals_label] = {"exhud_totals_label", CR_RED},
-	[dsda_tc_exhud_totals_value] = {"exhud_totals_value", CR_GOLD},
-	[dsda_tc_exhud_totals_max] = {"exhud_totals_max", CR_LIGHTBLUE},
-	[dsda_tc_exhud_weapon_label] = {"exhud_weapon_label", CR_GRAY},
-	[dsda_tc_exhud_weapon_owned] = {"exhud_weapon_owned", CR_GREEN},
-	[dsda_tc_exhud_weapon_berserk] = {"exhud_weapon_berserk", CR_LIGHTBLUE},
-	[dsda_tc_exhud_attempts] = {"exhud_attempts", CR_GRAY},
-	[dsda_tc_exhud_event_split] = {"exhud_event_split", CR_GRAY},
-	[dsda_tc_exhud_line_activation] = {"exhud_line_activation", CR_GRAY},
-	[dsda_tc_exhud_local_time] = {"exhud_local_time", CR_GRAY},
-	[dsda_tc_exhud_free_text] = {"exhud_free_text", CR_GRAY},
-	[dsda_tc_hud_message] = {"hud_message", CR_DEFAULT},
-	[dsda_tc_hud_secret_message] = {"hud_secret_message", CR_GOLD},
-	[dsda_tc_map_coords] = {"map_coords", CR_GREEN},
-	[dsda_tc_map_time_level] = {"map_time_level", CR_GRAY},
-	[dsda_tc_map_time_total] = {"map_time_total", CR_GRAY},
-	[dsda_tc_map_title] = {"map_title", CR_GOLD},
-	[dsda_tc_map_totals_label] = {"map_totals_label", CR_RED},
-	[dsda_tc_map_totals_value] = {"map_totals_value", CR_GRAY},
-	[dsda_tc_map_totals_max] = {"map_totals_max", CR_LIGHTBLUE},
-	[dsda_tc_inter_split_normal] = {"inter_split_normal", CR_GRAY},
-	[dsda_tc_inter_split_good] = {"inter_split_good", CR_GREEN},
-	[dsda_tc_inter_split_best] = {"inter_split_best", CR_GOLD},
-	[dsda_tc_menu_title] = {"menu_title", CR_GOLD},
-	[dsda_tc_menu_tab] = {"menu_tab", CR_TAN},
-	[dsda_tc_menu_tab_highlight] = {"menu_tab_highlight", CR_GOLD},
-	[dsda_tc_menu_label] = {"menu_label", CR_RED},
-	[dsda_tc_menu_label_highlight] = {"menu_label_highlight", CR_BRICK},
-	[dsda_tc_menu_label_edit] = {"menu_label_edit", CR_GRAY},
-	[dsda_tc_menu_value] = {"menu_value", CR_GREEN},
-	[dsda_tc_menu_value_highlight] = {"menu_value_highlight", CR_BRICK},
-	[dsda_tc_menu_value_edit] = {"menu_value_edit", CR_GRAY},
-	[dsda_tc_menu_info_highlight] = {"menu_info_highlight", CR_BRICK},
-	[dsda_tc_menu_info_edit] = {"menu_info_edit", CR_GRAY},
-	[dsda_tc_menu_warning] = {"menu_warning", CR_RED},
-	[dsda_tc_menu_scrollbar] = {"menu_scrollbar", CR_TAN},
-	[dsda_tc_stbar_health_bad] = {"stbar_health_bad", CR_RED},
-	[dsda_tc_stbar_health_warning] = {"stbar_health_warning", CR_GOLD},
-	[dsda_tc_stbar_health_ok] = {"stbar_health_ok", CR_GREEN},
-	[dsda_tc_stbar_health_super] = {"stbar_health_super", CR_BLUE},
-	[dsda_tc_stbar_armor_zero] = {"stbar_armor_zero", CR_GRAY},
-	[dsda_tc_stbar_armor_one] = {"stbar_armor_one", CR_GREEN},
-	[dsda_tc_stbar_armor_two] = {"stbar_armor_two", CR_BLUE},
-	[dsda_tc_stbar_ammo_bad] = {"stbar_ammo_bad", CR_RED},
-	[dsda_tc_stbar_ammo_warning] = {"stbar_ammo_warning", CR_GOLD},
-	[dsda_tc_stbar_ammo_ok] = {"stbar_ammo_ok", CR_GREEN},
-	[dsda_tc_stbar_ammo_full] = {"stbar_ammo_full", CR_BLUE},
+	[std::to_underlying(TextColorIndex::ExhudTimeLabel)] = {"exhud_time_label", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudLevelTime)] = {"exhud_level_time", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudTotalTime)] = {"exhud_total_time", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::ExhudDemoLength)] = {"exhud_demo_length", ColorRange::Brown},
+	[std::to_underlying(TextColorIndex::ExhudArmorZero)] = {"exhud_armor_zero", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudArmorOne)] = {"exhud_armor_one", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudArmorTwo)] = {"exhud_armor_two", ColorRange::Lightblue},
+	[std::to_underlying(TextColorIndex::ExhudCommandEntry)] = {"exhud_command_entry", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudCommandQueue)] = {"exhud_command_queue", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::ExhudCoordsBase)] = {"exhud_coords_base", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudCoordsMf50)] = {"exhud_coords_mf50", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudCoordsSr40)] = {"exhud_coords_sr40", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudCoordsSr50)] = {"exhud_coords_sr50", ColorRange::Lightblue},
+	[std::to_underlying(TextColorIndex::ExhudCoordsFast)] = {"exhud_coords_fast", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::ExhudFpsBad)] = {"exhud_fps_bad", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::ExhudFpsFine)] = {"exhud_fps_fine", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudHealthBad)] = {"exhud_health_bad", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::ExhudHealthWarning)] = {"exhud_health_warning", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::ExhudHealthOk)] = {"exhud_health_ok", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudHealthSuper)] = {"exhud_health_super", ColorRange::Lightblue},
+	[std::to_underlying(TextColorIndex::ExhudLineClose)] = {"exhud_line_close", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudLineFar)] = {"exhud_line_far", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudLineSpecial)] = {"exhud_line_special", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudLineNormal)] = {"exhud_line_normal", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudMobjAlive)] = {"exhud_mobj_alive", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudMobjDead)] = {"exhud_mobj_dead", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudPlayerDamage)] = {"exhud_player_damage", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudPlayerNeutral)] = {"exhud_player_neutral", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudAmmoLabel)] = {"exhud_ammo_label", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudAmmoMana1)] = {"exhud_ammo_mana1", ColorRange::Lightblue},
+	[std::to_underlying(TextColorIndex::ExhudAmmoMana2)] = {"exhud_ammo_mana2", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudAmmoValue)] = {"exhud_ammo_value", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudAmmoBad)] = {"exhud_ammo_bad", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::ExhudAmmoWarning)] = {"exhud_ammo_warning", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::ExhudAmmoOk)] = {"exhud_ammo_ok", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudAmmoFull)] = {"exhud_ammo_full", ColorRange::Lightblue},
+	[std::to_underlying(TextColorIndex::ExhudRenderLabel)] = {"exhud_render_label", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudRenderGood)] = {"exhud_render_good", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::ExhudRenderBad)] = {"exhud_render_bad", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::ExhudSectorActive)] = {"exhud_sector_active", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::ExhudSectorSpecial)] = {"exhud_sector_special", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudSectorNormal)] = {"exhud_sector_normal", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudSpeedLabel)] = {"exhud_speed_label", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudSpeedSlow)] = {"exhud_speed_slow", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::ExhudSpeedNormal)] = {"exhud_speed_normal", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudSpeedFast)] = {"exhud_speed_fast", ColorRange::Lightblue},
+	[std::to_underlying(TextColorIndex::ExhudTotalsLabel)] = {"exhud_totals_label", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::ExhudTotalsValue)] = {"exhud_totals_value", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::ExhudTotalsMax)] = {"exhud_totals_max", ColorRange::Lightblue},
+	[std::to_underlying(TextColorIndex::ExhudWeaponLabel)] = {"exhud_weapon_label", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudWeaponOwned)] = {"exhud_weapon_owned", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::ExhudWeaponBerserk)] = {"exhud_weapon_berserk", ColorRange::Lightblue},
+	[std::to_underlying(TextColorIndex::ExhudAttempts)] = {"exhud_attempts", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudEventSplit)] = {"exhud_event_split", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudLineActivation)] = {"exhud_line_activation", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudLocalTime)] = {"exhud_local_time", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::ExhudFreeText)] = {"exhud_free_text", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::HudMessage)] = {"hud_message", ColorRange::Default},
+	[std::to_underlying(TextColorIndex::HudSecretMessage)] = {"hud_secret_message", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::MapCoords)] = {"map_coords", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::MapTimeLevel)] = {"map_time_level", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::MapTimeTotal)] = {"map_time_total", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::MapTitle)] = {"map_title", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::MapTotalsLabel)] = {"map_totals_label", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::MapTotalsValue)] = {"map_totals_value", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::MapTotalsMax)] = {"map_totals_max", ColorRange::Lightblue},
+	[std::to_underlying(TextColorIndex::InterSplitNormal)] = {"inter_split_normal", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::InterSplitGood)] = {"inter_split_good", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::InterSplitBest)] = {"inter_split_best", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::MenuTitle)] = {"menu_title", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::MenuTab)] = {"menu_tab", ColorRange::Tan},
+	[std::to_underlying(TextColorIndex::MenuTabHighlight)] = {"menu_tab_highlight", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::MenuLabel)] = {"menu_label", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::MenuLabelHighlight)] = {"menu_label_highlight", ColorRange::Brick},
+	[std::to_underlying(TextColorIndex::MenuLabelEdit)] = {"menu_label_edit", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::MenuValue)] = {"menu_value", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::MenuValueHighlight)] = {"menu_value_highlight", ColorRange::Brick},
+	[std::to_underlying(TextColorIndex::MenuValueEdit)] = {"menu_value_edit", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::MenuInfoHighlight)] = {"menu_info_highlight", ColorRange::Brick},
+	[std::to_underlying(TextColorIndex::MenuInfoEdit)] = {"menu_info_edit", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::MenuWarning)] = {"menu_warning", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::MenuScrollbar)] = {"menu_scrollbar", ColorRange::Tan},
+	[std::to_underlying(TextColorIndex::StbarHealthBad)] = {"stbar_health_bad", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::StbarHealthWarning)] = {"stbar_health_warning", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::StbarHealthOk)] = {"stbar_health_ok", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::StbarHealthSuper)] = {"stbar_health_super", ColorRange::Blue},
+	[std::to_underlying(TextColorIndex::StbarArmorZero)] = {"stbar_armor_zero", ColorRange::Gray},
+	[std::to_underlying(TextColorIndex::StbarArmorOne)] = {"stbar_armor_one", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::StbarArmorTwo)] = {"stbar_armor_two", ColorRange::Blue},
+	[std::to_underlying(TextColorIndex::StbarAmmoBad)] = {"stbar_ammo_bad", ColorRange::Red},
+	[std::to_underlying(TextColorIndex::StbarAmmoWarning)] = {"stbar_ammo_warning", ColorRange::Gold},
+	[std::to_underlying(TextColorIndex::StbarAmmoOk)] = {"stbar_ammo_ok", ColorRange::Green},
+	[std::to_underlying(TextColorIndex::StbarAmmoFull)] = {"stbar_ammo_full", ColorRange::Blue},
 	{nullptr},
 };
 
-const char* dsda_TextColor(dsda_text_color_index_t i)
+const char* dsda_TextColor(TextColorIndex i)
 {
-	return dsda_text_colors[i].color_str;
+	return dsda_text_colors[std::to_underlying(i)].color_str;
 }
 
-int dsda_TextCR(dsda_text_color_index_t i)
+ColorRange dsda_TextCR(TextColorIndex i)
 {
-	return dsda_text_colors[i].color_range;
+	return dsda_text_colors[std::to_underlying(i)].color_range;
 }
 
 void dsda_LoadTextColor()
@@ -133,7 +135,6 @@ void dsda_LoadTextColor()
 	char** lines;
 	const char* line;
 	int line_i;
-	int color_range;
 	char key[33] = {0};
 	dsda_text_color_t* p;
 
@@ -148,13 +149,15 @@ void dsda_LoadTextColor()
 		if(!line[0] || line[0] == '/')
 			continue;
 
-		if(sscanf(line, "%32s %d", key, &color_range) != 2)
+		int color_range_value;
+
+		if(sscanf(line, "%32s %d", key, &color_range_value) != 2)
 			I_Error("DSDATC lump has unknown format! (%s)", line);
 
 		for(p = dsda_text_colors; p->key; p++)
 			if(!strcasecmp(key, p->key))
 			{
-				p->color_range = color_range;
+				p->color_range = static_cast<ColorRange>(color_range_value);
 				break;
 			}
 
@@ -172,7 +175,7 @@ void dsda_LoadTextColor()
 	Z_Free(lump);
 }
 
-static const char* color_name_to_index[CR_HUD_LIMIT] = {
+static const char* color_name_to_index[std::to_underlying(ColorRange::HudLimit)] = {
 	"",
 	"brick",
 	"tan",
@@ -195,11 +198,11 @@ int dsda_ColorNameToIndex(const char* name)
 	int i;
 
 	if(!name)
-		return CR_DEFAULT;
+		return std::to_underlying(ColorRange::Default);
 
-	for(i = CR_DEFAULT + 1; i < CR_HUD_LIMIT; ++i)
+	for(i = std::to_underlying(ColorRange::Default) + 1; i < std::to_underlying(ColorRange::HudLimit); ++i)
 		if(!stricmp(color_name_to_index[i], name))
 			return i;
 
-	return CR_DEFAULT;
+	return std::to_underlying(ColorRange::Default);
 }

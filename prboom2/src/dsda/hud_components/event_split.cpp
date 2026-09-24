@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Event Split HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "event_split.hpp"
@@ -14,12 +16,12 @@ typedef struct
 	int delay;
 } dsda_split_state_t;
 
-static dsda_split_state_t dsda_split_state[DSDA_SPLIT_CLASS_COUNT] = {
-	[DSDA_SPLIT_BLUE_KEY] = {"Blue Key", 0, 0},
-	[DSDA_SPLIT_YELLOW_KEY] = {"Yellow Key", 0, 0},
-	[DSDA_SPLIT_RED_KEY] = {"Red Key", 0, 0},
-	[DSDA_SPLIT_USE] = {"Use", 2, 0},
-	[DSDA_SPLIT_SECRET] = {"Secret", 0, 0},
+static dsda_split_state_t dsda_split_state[std::to_underlying(SplitClass::Count)] = {
+	[std::to_underlying(SplitClass::BlueKey)] = {"Blue Key", 0, 0},
+	[std::to_underlying(SplitClass::YellowKey)] = {"Yellow Key", 0, 0},
+	[std::to_underlying(SplitClass::RedKey)] = {"Red Key", 0, 0},
+	[std::to_underlying(SplitClass::Use)] = {"Use", 2, 0},
+	[std::to_underlying(SplitClass::Secret)] = {"Secret", 0, 0},
 };
 
 typedef struct
@@ -31,7 +33,7 @@ static local_component_t* local;
 
 static int ticks;
 
-void dsda_InitEventSplitHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitEventSplitHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);
@@ -39,7 +41,7 @@ void dsda_InitEventSplitHC(int x_offset, int y_offset, int vpt, int* args, int a
 	dsda_InitTextHC(&local->component, x_offset, y_offset, vpt);
 }
 
-void dsda_AddSplit(dsda_split_class_t split_class, int lifetime)
+void dsda_AddSplit(SplitClass split_class, int lifetime)
 {
 	int minutes;
 	float seconds;
@@ -48,7 +50,7 @@ void dsda_AddSplit(dsda_split_class_t split_class, int lifetime)
 	if(!local)
 		return;
 
-	split_state = &dsda_split_state[split_class];
+	split_state = &dsda_split_state[std::to_underlying(split_class)];
 
 	if(split_state->delay > 0)
 	{
@@ -65,7 +67,7 @@ void dsda_AddSplit(dsda_split_class_t split_class, int lifetime)
 	seconds = (float)((leveltime + 1) % (60 * TICRATE)) / TICRATE;
 	snprintf(
 		local->component.msg, sizeof(local->component.msg), "%s%d:%05.2f - %s",
-		dsda_TextColor(dsda_tc_exhud_event_split),
+		dsda_TextColor(TextColorIndex::ExhudEventSplit),
 		minutes, seconds, split_state->msg
 	);
 
@@ -81,7 +83,7 @@ void dsda_UpdateEventSplitHC(void* data)
 	if(ticks > 0)
 		--ticks;
 
-	for(i = 0; i < DSDA_SPLIT_CLASS_COUNT; ++i)
+	for(i = 0; i < std::to_underlying(SplitClass::Count); ++i)
 		if(dsda_split_state[i].delay > 0)
 			--dsda_split_state[i].delay;
 }

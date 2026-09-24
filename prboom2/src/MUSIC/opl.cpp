@@ -56,7 +56,7 @@ static opl_timer_t timer2 = {3125, 0, 0, 0};
 // successfully.
 int OPL_Init(unsigned int rate)
 {
-	opl_opl3mode = dsda_IntConfig(dsda_config_mus_opl_opl3mode);
+	opl_opl3mode = dsda_IntConfig(ConfigId::MusOplOpl3mode);
 
 	opl_sample_rate = rate;
 	opl_paused = 0;
@@ -237,27 +237,27 @@ void OPL_Render_Samples(void* dest, unsigned buffer_len)
 	}
 }
 
-void OPL_WritePort(opl_port_t port, unsigned int value)
+void OPL_WritePort(OplPort port, unsigned int value)
 {
-	if(port == OPL_REGISTER_PORT)
+	if(port == OplPort::RegisterPort)
 	{
 		register_num = value;
 	}
-	else if(port == OPL_REGISTER_PORT_OPL3)
+	else if(port == OplPort::RegisterPortOpl3)
 	{
 		register_num = value | 0x100;
 	}
-	else if(port == OPL_DATA_PORT)
+	else if(port == OplPort::DataPort)
 	{
 		WriteRegister(register_num, value);
 	}
 }
 
-unsigned int OPL_ReadPort(opl_port_t port)
+unsigned int OPL_ReadPort(OplPort port)
 {
 	unsigned int result = 0;
 
-	if(port == OPL_REGISTER_PORT_OPL3)
+	if(port == OplPort::RegisterPortOpl3)
 	{
 		return 0xff;
 	}
@@ -283,7 +283,7 @@ unsigned int OPL_ReadPort(opl_port_t port)
 //
 unsigned int OPL_ReadStatus()
 {
-	return OPL_ReadPort(OPL_REGISTER_PORT);
+	return OPL_ReadPort(OplPort::RegisterPort);
 }
 
 // Write an OPL register value
@@ -293,11 +293,11 @@ void OPL_WriteRegister(int reg, int value)
 
 	if(reg & 0x100)
 	{
-		OPL_WritePort(OPL_REGISTER_PORT_OPL3, reg);
+		OPL_WritePort(OplPort::RegisterPortOpl3, reg);
 	}
 	else
 	{
-		OPL_WritePort(OPL_REGISTER_PORT, reg);
+		OPL_WritePort(OplPort::RegisterPort, reg);
 	}
 
 	// For timing, read the register port six times after writing the
@@ -309,15 +309,15 @@ void OPL_WriteRegister(int reg, int value)
 		// port; after initialization, the data port is read, instead.
 		if(init_stage_reg_writes)
 		{
-			OPL_ReadPort(OPL_REGISTER_PORT);
+			OPL_ReadPort(OplPort::RegisterPort);
 		}
 		else
 		{
-			OPL_ReadPort(OPL_DATA_PORT);
+			OPL_ReadPort(OplPort::DataPort);
 		}
 	}
 
-	OPL_WritePort(OPL_DATA_PORT, value);
+	OPL_WritePort(OplPort::DataPort, value);
 
 	// Read the register port 24 times after writing the value to
 	// cause the appropriate delay

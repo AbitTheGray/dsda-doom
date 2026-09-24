@@ -6,26 +6,45 @@
 
 #pragma once
 
+#include <stdint.h>
+
+// declared in doomdef.hpp; the fixed underlying type makes this enough
+enum struct FloorType : int32_t;
+
+#include "tables.hpp"
+#include "m_fixed.hpp"
+#include "d_think.hpp"
+#include "doomdata.hpp"
+#include "info.hpp"
+
+enum struct MobjIntFlag : uint32_t
+{
+	Falling               = (1 << 0), // Object is falling
+	Armed                 = (1 << 1), // Object is armed (for MF_TOUCHY objects)
+	Scrolling             = (1 << 2), // Object is affected by scroller / pusher / puller
+	PlayerDamagedBarrel = (1 << 3),
+	SpawnedByIcon       = (1 << 4),
+	Fake                  = (1 << 5), // Not a real thing, transient (e.g., for cheats)
+	Linedone              = (1 << 6), // Object has activated W1 or S1 linedef via DEH frame
+	InterpCapture        = (1 << 7), // [AR] Capture interpolation once per tic
+};
+ENUM_FLAGS_FUNC(MobjIntFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 // Basics.
-#include "tables.hpp"
-#include "m_fixed.hpp"
 
 // We need the thinker_t stuff.
-#include "d_think.hpp"
 
 // We need the WAD data structure for Map things,
 // from the THINGS lump.
-#include "doomdata.hpp"
 
 // States are tied to finite states are
 //  tied to animation frames.
 // Needs precompiled tables/data structures.
-#include "info.hpp"
 
 //
 // NOTES: mobj_t
@@ -216,18 +235,6 @@ extern "C"
 // killough 9/15/98: Same, but internal flags, not intended for .deh
 // (some degree of opaqueness is good, to avoid compatibility woes)
 
-enum
-{
-	MIF_FALLING               = (1 << 0), // Object is falling
-	MIF_ARMED                 = (1 << 1), // Object is armed (for MF_TOUCHY objects)
-	MIF_SCROLLING             = (1 << 2), // Object is affected by scroller / pusher / puller
-	MIF_PLAYER_DAMAGED_BARREL = (1 << 3),
-	MIF_SPAWNED_BY_ICON       = (1 << 4),
-	MIF_FAKE                  = (1 << 5), // Not a real thing, transient (e.g., for cheats)
-	MIF_LINEDONE              = (1 << 6), // Object has activated W1 or S1 linedef via DEH frame
-	MIF_INTERP_CAPTURE        = (1 << 7), // [AR] Capture interpolation once per tic
-};
-
 // heretic
 typedef struct
 {
@@ -270,7 +277,7 @@ typedef struct mobj_s
 
 	//More drawing info: to determine current sprite.
 	angle_t angle;      // orientation
-	spritenum_t sprite; // used to find patch_t and flip value
+	SpriteId sprite; // used to find patch_t and flip value
 	int frame;          // might be ORed with FF_FULLBRIGHT
 
 	// Interaction info, by BLOCKMAP.
@@ -299,13 +306,13 @@ typedef struct mobj_s
 	// If == validcount, already checked.
 	int validcount;
 
-	mobjtype_t type;
+	MobjType type;
 	mobjinfo_t* info; // &mobjinfo[mobj->type]
 
 	int tics; // state tic counter
 	state_t* state;
 	uint64_t flags;
-	int intflags; // killough 9/15/98: internal flags
+	MobjIntFlag intflags; // killough 9/15/98: internal flags
 	int health;
 
 	// Movement direction, movement generation (zig-zagging).
@@ -414,7 +421,7 @@ typedef struct mobj_s
 
 // killough 11/98:
 // Whether an object is "sentient" or not. Used for environmental influences.
-#define sentient(mobj) ((mobj)->health > 0 && (mobj)->info->seestate)
+#define sentient(mobj) ((mobj)->health > 0 && (mobj)->info->seestate != StateId::Null)
 
 extern int iquehead;
 extern int iquetail;
@@ -422,16 +429,16 @@ extern int iquetail;
 int P_MobjSpawnHealth(const mobj_t* mobj);
 mobj_t* P_SubstNullMobj(mobj_t* th);
 void P_RespawnSpecials();
-mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type);
+mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, MobjType type);
 void P_RemoveMobj(mobj_t* th);
-dboolean P_SetMobjState(mobj_t* mobj, statenum_t state);
+dboolean P_SetMobjState(mobj_t* mobj, StateId state);
 void P_MobjThinker(mobj_t* mobj);
 void P_UpdateMobjInterpolations();
 void P_MobjInterpolation(mobj_t* mobj);
 void P_SpawnPuff(fixed_t x, fixed_t y, fixed_t z);
 void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, int damage, mobj_t* bleeder);
-mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, mobjtype_t type);
-mobj_t* P_SpawnPlayerMissile(mobj_t* source, mobjtype_t type);
+mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, MobjType type);
+mobj_t* P_SpawnPlayerMissile(mobj_t* source, MobjType type);
 dboolean P_IsDoomnumAllowed(int doomnum);
 mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index);
 void P_SpawnPlayer(int n, const mapthing_t* mthing);
@@ -518,30 +525,30 @@ void P_RemoveMonsters();
 extern mobj_t* MissileMobj;
 
 void P_BlasterMobjThinker(mobj_t* mobj);
-mobj_t* P_SpawnMissileAngle(mobj_t* source, mobjtype_t type, angle_t angle, fixed_t momz);
-dboolean P_SetMobjStateNF(mobj_t* mobj, statenum_t state);
+mobj_t* P_SpawnMissileAngle(mobj_t* source, MobjType type, angle_t angle, fixed_t momz);
+dboolean P_SetMobjStateNF(mobj_t* mobj, StateId state);
 void P_ThrustMobj(mobj_t* mo, angle_t angle, fixed_t move);
 dboolean P_SeekerMissile(mobj_t* actor, mobj_t** seekTarget, angle_t thresh, angle_t turnMax, dboolean seekcenter);
-mobj_t* P_SPMAngle(mobj_t* source, mobjtype_t type, angle_t angle);
-int P_HitFloor(mobj_t* thing);
-int P_GetThingFloorType(mobj_t* thing);
+mobj_t* P_SPMAngle(mobj_t* source, MobjType type, angle_t angle);
+FloorType P_HitFloor(mobj_t* thing);
+FloorType P_GetThingFloorType(mobj_t* thing);
 int P_FaceMobj(mobj_t* source, mobj_t* target, angle_t* delta);
 void P_BloodSplatter(fixed_t x, fixed_t y, fixed_t z, mobj_t* originator);
 void P_RipperBlood(mobj_t* mo, mobj_t* bleeder);
-dboolean Raven_P_SetMobjState(mobj_t* mobj, statenum_t state);
+dboolean Raven_P_SetMobjState(mobj_t* mobj, StateId state);
 void P_FloorBounceMissile(mobj_t* mo);
 void Raven_P_SpawnPuff(fixed_t x, fixed_t y, fixed_t z);
 
 // hexen
 
 mobj_t* P_SpawnMissileXYZ(fixed_t x, fixed_t y, fixed_t z,
-	mobj_t* source, mobj_t* dest, mobjtype_t type);
-mobj_t* P_SpawnMissileAngleSpeed(mobj_t* source, mobjtype_t type,
+	mobj_t* source, mobj_t* dest, MobjType type);
+mobj_t* P_SpawnMissileAngleSpeed(mobj_t* source, MobjType type,
 	angle_t angle, fixed_t momz, fixed_t speed);
 mobj_t* P_SPMAngleXYZ(mobj_t* source, fixed_t x, fixed_t y,
-	fixed_t z, mobjtype_t type, angle_t angle);
+	fixed_t z, MobjType type, angle_t angle);
 mobj_t* P_SpawnKoraxMissile(fixed_t x, fixed_t y, fixed_t z,
-	mobj_t* source, mobj_t* dest, mobjtype_t type);
+	mobj_t* source, mobj_t* dest, MobjType type);
 mobj_t* P_FindMobjFromTID(short tid, int* searchPosition);
 void P_BloodSplatter2(fixed_t x, fixed_t y, fixed_t z, mobj_t* originator);
 

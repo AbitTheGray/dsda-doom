@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Extended Demo
 
+#include <utility>
+
 #include <string.h>
 
 #include "d_main.hpp"
@@ -102,17 +104,17 @@ static void DemoEx_GetParams(const wadinfo_t* header)
 		struct
 		{
 			const char* param;
-			wad_source_t source;
+			WadSource source;
 		} files[] = {
-			{"-iwad", source_iwad},
-			{"-file", source_pwad},
-			{"-deh", source_deh},
+			{"-iwad", WadSource::Iwad},
+			{"-file", WadSource::Pwad},
+			{"-deh", WadSource::Deh},
 			{nullptr}
 		};
 
 		M_ParseCmdLine(str, params, ((char*)params) + sizeof(char*) * paramscount, &paramscount, &i);
 
-		if(!dsda_Flag(dsda_arg_iwad) && !dsda_Flag(dsda_arg_file))
+		if(!dsda_Flag(ArgId::Iwad) && !dsda_Flag(ArgId::File))
 		{
 			for(i = 0; files[i].param; ++i)
 			{
@@ -123,7 +125,7 @@ static void DemoEx_GetParams(const wadinfo_t* header)
 					{
 						char* filename;
 
-						if(files[i].source == source_deh)
+						if(files[i].source == WadSource::Deh)
 							filename = I_FindDeh(params[p]);
 						else
 							filename = I_FindWad(params[p]);
@@ -131,12 +133,12 @@ static void DemoEx_GetParams(const wadinfo_t* header)
 						if(!filename)
 							continue;
 
-						if(files[i].source == source_iwad)
+						if(files[i].source == WadSource::Iwad)
 							AddIWAD(filename);
-						else if(files[i].source == source_pwad)
-							dsda_AppendStringArg(dsda_arg_file, filename);
-						else if(files[i].source == source_deh)
-							dsda_AppendStringArg(dsda_arg_deh, filename);
+						else if(files[i].source == WadSource::Pwad)
+							dsda_AppendStringArg(ArgId::File, filename);
+						else if(files[i].source == WadSource::Deh)
+							dsda_AppendStringArg(ArgId::Deh, filename);
 
 						Z_Free(filename);
 					}
@@ -144,66 +146,66 @@ static void DemoEx_GetParams(const wadinfo_t* header)
 			}
 		}
 
-		if(!dsda_Arg(dsda_arg_complevel)->found)
+		if(!dsda_Arg(ArgId::Complevel)->found)
 		{
 			p = M_CheckParmEx("-complevel", params, paramscount);
 			if(p >= 0 && p < (int)paramscount - 1)
-				dsda_UpdateStringArg(dsda_arg_complevel, params[p + 1]);
+				dsda_UpdateStringArg(ArgId::Complevel, params[p + 1]);
 		}
 
 		//for recording or playback using "single-player coop" mode
-		if(!dsda_Flag(dsda_arg_solo_net))
+		if(!dsda_Flag(ArgId::SoloNet))
 		{
 			p = M_CheckParmEx("-solo-net", params, paramscount);
 			if(p >= 0)
-				dsda_UpdateFlag(dsda_arg_solo_net, true);
+				dsda_UpdateFlag(ArgId::SoloNet, true);
 		}
 
 		//for recording or playback using "coop in single-player" mode
-		if(!dsda_Flag(dsda_arg_coop_spawns))
+		if(!dsda_Flag(ArgId::CoopSpawns))
 		{
 			p = M_CheckParmEx("-coop_spawns", params, paramscount);
 			if(p >= 0)
-				dsda_UpdateFlag(dsda_arg_coop_spawns, true);
+				dsda_UpdateFlag(ArgId::CoopSpawns, true);
 		}
 
 		//for recording multiple episodes in one demo
-		if(!dsda_Flag(dsda_arg_chain_episodes))
+		if(!dsda_Flag(ArgId::ChainEpisodes))
 		{
 			p = M_CheckParmEx("-chain_episodes", params, paramscount);
 			if(p >= 0)
-				dsda_UpdateFlag(dsda_arg_chain_episodes, true);
+				dsda_UpdateFlag(ArgId::ChainEpisodes, true);
 		}
 
-		if(!dsda_Flag(dsda_arg_emulate))
+		if(!dsda_Flag(ArgId::Emulate))
 		{
 			p = M_CheckParmEx("-emulate", params, paramscount);
 			if(p >= 0 && p < (int)paramscount - 1)
-				dsda_UpdateStringArg(dsda_arg_emulate, params[p + 1]);
+				dsda_UpdateStringArg(ArgId::Emulate, params[p + 1]);
 		}
 
 		// for doom 1.2
-		if(!dsda_Flag(dsda_arg_respawn))
+		if(!dsda_Flag(ArgId::Respawn))
 		{
 			p = M_CheckParmEx("-respawn", params, paramscount);
 			if(p >= 0)
-				dsda_UpdateFlag(dsda_arg_respawn, true);
+				dsda_UpdateFlag(ArgId::Respawn, true);
 		}
 
 		// for doom 1.2
-		if(!dsda_Flag(dsda_arg_fast))
+		if(!dsda_Flag(ArgId::Fast))
 		{
 			p = M_CheckParmEx("-fast", params, paramscount);
 			if(p >= 0)
-				dsda_UpdateFlag(dsda_arg_fast, true);
+				dsda_UpdateFlag(ArgId::Fast, true);
 		}
 
 		// for doom 1.2
-		if(!dsda_Flag(dsda_arg_nomonsters))
+		if(!dsda_Flag(ArgId::Nomonsters))
 		{
 			p = M_CheckParmEx("-nomonsters", params, paramscount);
 			if(p >= 0)
-				dsda_UpdateFlag(dsda_arg_nomonsters, true);
+				dsda_UpdateFlag(ArgId::Nomonsters, true);
 		}
 
 		p = M_CheckParmEx("-spechit", params, paramscount);
@@ -215,16 +217,16 @@ static void DemoEx_GetParams(const wadinfo_t* header)
 		//overflows
 		{
 			int overflow_i;
-			for(overflow_i = 0; overflow_i < OVERFLOW_MAX; overflow_i++)
+			for(overflow_i = 0; overflow_i < std::to_underlying(OverrunList::Max); overflow_i++)
 			{
-				overrun_list_t overflow = (overrun_list_t)overflow_i;
+				OverrunList overflow = (OverrunList)overflow_i;
 
-				size_t mask_size = strlen(overflow_cfgname[overflow]) + 16;
+				size_t mask_size = strlen(overflow_cfgname[std::to_underlying(overflow)]) + 16;
 				char* mask = static_cast<char*>(Z_Malloc(mask_size));
 
 				if(mask)
 				{
-					snprintf(mask, mask_size, "-set %s", overflow_cfgname[overflow]);
+					snprintf(mask, mask_size, "-set %s", overflow_cfgname[std::to_underlying(overflow)]);
 					char* pstr = strstr(str, mask);
 
 					if(pstr)
@@ -233,8 +235,8 @@ static void DemoEx_GetParams(const wadinfo_t* header)
 						int value;
 						if(sscanf(pstr, mask, &value) == 1)
 						{
-							overflows[overflow].footer = true;
-							overflows[overflow].footer_emulate = value;
+							overflows[std::to_underlying(overflow)].footer = true;
+							overflows[std::to_underlying(overflow)].footer_emulate = value;
 						}
 					}
 					Z_Free(mask);
@@ -280,10 +282,10 @@ static void DemoEx_AddParams(wadtbl_t* wadtbl)
 		if(fileext_p == filename_p)
 			continue;
 
-		if(wadfiles[i].src == source_iwad && !iwad.string && !strcasecmp(fileext_p, "wad"))
+		if(wadfiles[i].src == WadSource::Iwad && !iwad.string && !strcasecmp(fileext_p, "wad"))
 			item = &iwad;
 
-		if(wadfiles[i].src == source_pwad && !strcasecmp(fileext_p, "wad"))
+		if(wadfiles[i].src == WadSource::Pwad && !strcasecmp(fileext_p, "wad"))
 			item = &pwads;
 
 		if(item)
@@ -294,7 +296,7 @@ static void DemoEx_AddParams(wadtbl_t* wadtbl)
 		}
 	}
 
-	arg = dsda_Arg(dsda_arg_deh);
+	arg = dsda_Arg(ArgId::Deh);
 	if(arg->found)
 	{
 		for(i = 0; i < arg->count; ++i)
@@ -339,27 +341,27 @@ static void DemoEx_AddParams(wadtbl_t* wadtbl)
 	}
 
 	// for recording or playback using "single-player coop" mode
-	if(dsda_Flag(dsda_arg_solo_net))
+	if(dsda_Flag(ArgId::SoloNet))
 	{
 		snprintf(buf, sizeof(buf), "-solo-net ");
 		dsda_StringCat(&files, buf);
 	}
 
 	// for recording or playback using "coop in single-player" mode
-	if(dsda_Flag(dsda_arg_coop_spawns))
+	if(dsda_Flag(ArgId::CoopSpawns))
 	{
 		snprintf(buf, sizeof(buf), "-coop_spawns ");
 		dsda_StringCat(&files, buf);
 	}
 
 	// for recording multiple episodes in one demo
-	if(dsda_Flag(dsda_arg_chain_episodes))
+	if(dsda_Flag(ArgId::ChainEpisodes))
 	{
 		snprintf(buf, sizeof(buf), "-chain_episodes ");
 		dsda_StringCat(&files, buf);
 	}
 
-	arg = dsda_Arg(dsda_arg_emulate);
+	arg = dsda_Arg(ArgId::Emulate);
 	if(arg->found)
 	{
 		snprintf(buf, sizeof(buf), "-emulate %s", arg->value.v_string);
@@ -367,21 +369,21 @@ static void DemoEx_AddParams(wadtbl_t* wadtbl)
 	}
 
 	// doom 1.2 does not store these params in header
-	if(compatibility_level == doom_12_compatibility)
+	if(compatibility_level == CompLevel::Doom12)
 	{
-		if(dsda_Flag(dsda_arg_respawn))
+		if(dsda_Flag(ArgId::Respawn))
 		{
 			snprintf(buf, sizeof(buf), "-respawn ");
 			dsda_StringCat(&files, buf);
 		}
 
-		if(dsda_Flag(dsda_arg_fast))
+		if(dsda_Flag(ArgId::Fast))
 		{
 			snprintf(buf, sizeof(buf), "-fast ");
 			dsda_StringCat(&files, buf);
 		}
 
-		if(dsda_Flag(dsda_arg_nomonsters))
+		if(dsda_Flag(ArgId::Nomonsters))
 		{
 			snprintf(buf, sizeof(buf), "-nomonsters ");
 			dsda_StringCat(&files, buf);
@@ -396,12 +398,12 @@ static void DemoEx_AddParams(wadtbl_t* wadtbl)
 
 	//overflows
 	{
-		for(int overflow_i = 0; overflow_i < OVERFLOW_MAX; overflow_i++)
+		for(int overflow_i = 0; overflow_i < std::to_underlying(OverrunList::Max); overflow_i++)
 		{
-			overrun_list_t overflow = (overrun_list_t)overflow_i;
-			if(overflows[overflow].happened)
+			OverrunList overflow = (OverrunList)overflow_i;
+			if(overflows[std::to_underlying(overflow)].happened)
 			{
-				snprintf(buf, sizeof(buf), "-set %s=%d ", overflow_cfgname[overflow], overflows[overflow].emulate);
+				snprintf(buf, sizeof(buf), "-set %s=%d ", overflow_cfgname[std::to_underlying(overflow)], overflows[std::to_underlying(overflow)].emulate);
 				dsda_StringCat(&files, buf);
 			}
 		}
@@ -425,13 +427,13 @@ int dsda_IsExDemoSigned()
 void dsda_MergeExDemoFeatures()
 {
 	if(!exdemo.is_signed)
-		dsda_TrackFeature(uf_unknown);
+		dsda_TrackFeature(FeatureFlag::Unknown);
 	else
 	{
 		dsda_MergeFeatures(exdemo.features);
 
 		if(exdemo.is_signed == -1)
-			dsda_TrackFeature(uf_invalid);
+			dsda_TrackFeature(FeatureFlag::Invalid);
 	}
 }
 
@@ -619,7 +621,7 @@ void dsda_LoadExDemo(const char* filename)
 		header = ReadPWADTable(exdemo.footer, exdemo.footer_size);
 
 		if(!header)
-			lprintf(LO_ERROR, "LoadExDemo: demo footer is corrupted\n");
+			lprintf(OutputLevels::Error, "LoadExDemo: demo footer is corrupted\n");
 		else
 		{
 			DemoEx_GetFeatures(header);

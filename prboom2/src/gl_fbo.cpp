@@ -86,7 +86,7 @@ static dboolean gld_CreateScreenSizeFBO()
 	}
 	else
 	{
-		lprintf(LO_ERROR, "gld_CreateScreenSizeFBO: Cannot create framebuffer object (error code: %d)\n", status);
+		lprintf(OutputLevels::Error, "gld_CreateScreenSizeFBO: Cannot create framebuffer object (error code: %d)\n", status);
 	}
 
 	return (status == GL_FRAMEBUFFER_COMPLETE_EXT);

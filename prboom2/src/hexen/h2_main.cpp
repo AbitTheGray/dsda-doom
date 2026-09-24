@@ -6,18 +6,18 @@
 
 static void Hexen_D_DrawTitle(const char* _x)
 {
-	D_SetPage("TITLE", 280, 0);
+	D_SetPage("TITLE", 280, MusicId::None);
 	S_StartSongName("hexen", true);
 }
 
 static void Hexen_D_DrawTitle2(const char* _x)
 {
-	D_SetPage("TITLE", 210, 0);
+	D_SetPage("TITLE", 210, MusicId::None);
 }
 
 static void Hexen_D_DrawCredits(const char* _x)
 {
-	D_SetPage("CREDIT", 200, 0);
+	D_SetPage("CREDIT", 200, MusicId::None);
 }
 
 extern const demostate_t hexen_demostates[][4] =

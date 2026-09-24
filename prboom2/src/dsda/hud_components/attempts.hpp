@@ -10,7 +10,7 @@ extern "C"
 {
 #endif
 
-void dsda_InitAttemptsHC(int x_offset, int y_offset, int vpt_flags, int* args, int arg_count, void** data);
+void dsda_InitAttemptsHC(int x_offset, int y_offset, PatchTranslation vpt_flags, int* args, int arg_count, void** data);
 void dsda_UpdateAttemptsHC(void* data);
 void dsda_DrawAttemptsHC(void* data);
 

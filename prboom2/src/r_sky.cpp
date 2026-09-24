@@ -34,7 +34,7 @@ void R_InitSkyMap()
 {
 	int r_stretchsky;
 
-	r_stretchsky = dsda_IntConfig(dsda_config_render_stretchsky);
+	r_stretchsky = dsda_IntConfig(ConfigId::RenderStretchsky);
 
 	if(raven || !dsda_FreeAim())
 	{

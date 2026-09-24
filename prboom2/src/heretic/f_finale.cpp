@@ -2,6 +2,8 @@
 
 // F_finale.c
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "../f_finale.hpp"
 #include "w_wad.hpp"
@@ -37,7 +39,7 @@ extern const char* finalepatch;
 extern const char* endpic;
 extern const char* endpalette;
 extern dboolean finalintermission;
-extern int endgameflags;
+extern UMapinfoFlags endgameflags;
 
 static int FontABaseLump;
 
@@ -53,8 +55,8 @@ void Heretic_F_StartFinale()
 {
 	int mnum, muslump;
 
-	gameaction = ga_nothing;
-	gamestate = GS_FINALE;
+	gameaction = GameAction::Nothing;
+	gamestate = GameState::Finale;
 	automap_full = false;
 
 	switch(gameepisode)
@@ -90,7 +92,7 @@ void Heretic_F_StartFinale()
 	}
 	else
 	{
-		S_ChangeMusic(heretic_mus_cptd, true);
+		S_ChangeMusic(MusicId::HereticCptd, true);
 	}
 
 	dsda_StartFinale();
@@ -103,12 +105,12 @@ void Heretic_F_StartFinale()
 static dboolean Heretic_F_BlockingInput() // Avoid bringing up menu when loading Heretic's custom E2 palette
 {
 	return (finalestage == 1) &&
-		((endgameflags & (MapInfo_EndGameClear | MapInfo_EndGameAny)) ? (endpalette && endpalette[0]) : gameepisode == 2);
+		(((endgameflags & (UMapinfoFlags::EndGameClear | UMapinfoFlags::EndGameAny)) != UMapinfoFlags{}) ? (endpalette && endpalette[0]) : gameepisode == 2);
 }
 
 dboolean Heretic_F_Responder(event_t* event)
 {
-	if(event->type != ev_keydown)
+	if(event->type != EventType::KeyDown)
 	{
 		return false;
 	}
@@ -118,7 +120,7 @@ dboolean Heretic_F_Responder(event_t* event)
 		// we're showing the water pic, make any key kick to demo mode
 		finalestage++;
 		S_StartVoidSound(g_sfx_swtchx);
-		V_SetPlayPal(playpal_default);
+		V_SetPlayPal(PlaypalIndex::Default);
 		V_DrawRawScreen("TITLE");
 		return true;
 	}
@@ -175,7 +177,7 @@ void Heretic_F_TextWrite()
 	//
 	if(finalepatch)
 	{
-		V_DrawNamePatch(0, 0, 0, finalepatch, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatch(0, 0, 0, finalepatch, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	else
 	{
@@ -215,7 +217,7 @@ void Heretic_F_TextWrite()
 		width = R_NumPatchWidth(lump);
 		if(cx + width > SCREENWIDTH)
 			break;
-		V_DrawNumPatch(cx, cy, 0, lump, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNumPatch(cx, cy, 0, lump, ColorRange::Default, PatchTranslation::Stretch);
 		cx += width;
 	}
 }
@@ -266,14 +268,14 @@ void F_DemonScroll()
 
 void F_DrawUnderwater()
 {
-	if(menuactive) // Force menu off to avoid bad palette on menu
+	if(menuactive != MenuActive::Inactive) // Force menu off to avoid bad palette on menu
 	{
 		M_LeaveSetupMenu();
 		M_ClearMenus();
 		S_StartVoidSound(g_sfx_swtchx);
 	}
 
-	V_SetPlayPal(playpal_heretic_e2end);
+	V_SetPlayPal(PlaypalIndex::HereticE2End);
 	V_DrawRawScreen("E2END");
 }
 
@@ -293,12 +295,12 @@ void Heretic_F_Drawer()
 			Heretic_F_TextWrite();
 			break;
 		case 1:
-			if(endpalette && endpalette[0] && playpal_index != playpal_custom)
+			if(endpalette && endpalette[0] && playpal_index != PlaypalIndex::Custom)
 			{
-				V_SetPlayPal(playpal_custom);
+				V_SetPlayPal(PlaypalIndex::Custom);
 			}
 
-			if(endgameflags & MapInfo_EndGameScroll)
+			if((endgameflags & UMapinfoFlags::EndGameScroll) != UMapinfoFlags{})
 			{
 				F_DemonScroll();
 				return;
@@ -311,17 +313,17 @@ void Heretic_F_Drawer()
 			}
 			if(!finalintermission)
 			{
-				gameaction = ga_worlddone;
+				gameaction = GameAction::WorldDone;
 				return;
 			}
 
-			if(endgameflags & MapInfo_EndGameClear)
+			if((endgameflags & UMapinfoFlags::EndGameClear) != UMapinfoFlags{})
 				return;
 
 			switch(gameepisode)
 			{
 				case 1:
-					if(gamemode == shareware)
+					if(gamemode == GameMode::Shareware)
 					{
 						V_DrawRawScreen("ORDER");
 					}

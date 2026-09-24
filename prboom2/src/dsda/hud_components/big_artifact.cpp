@@ -14,7 +14,7 @@ typedef struct
 
 static local_component_t* local;
 
-void dsda_InitBigArtifactHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitBigArtifactHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);
@@ -27,7 +27,7 @@ void dsda_UpdateBigArtifactHC(void* data)
 	local = (local_component_t*)data;
 }
 
-extern "C" void DrawArtifact(int x, int y, int vpt);
+extern "C" void DrawArtifact(int x, int y, PatchTranslation vpt);
 void dsda_DrawBigArtifactHC(void* data)
 {
 

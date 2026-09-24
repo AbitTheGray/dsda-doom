@@ -8,14 +8,19 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#include <stdint.h>
+
+// declared in v_video.hpp; the fixed underlying type makes this enough
+enum struct ColorRange : int32_t;
 
 #include "doomtype.hpp"
 #include "d_event.hpp"
 #include "r_defs.hpp"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 // Size of statusbar.
 // Now sensitive for scaling.
@@ -58,14 +63,14 @@ void ST_SetResolution();
 
 void ST_Refresh();
 
-int ST_HealthColor(int health);
+ColorRange ST_HealthColor(int health);
 
 // States for status bar code.
-typedef enum
+enum struct StatusBarState : int32_t
 {
 	AutomapState,
 	FirstPersonState
-} st_stateenum_t;
+};
 
 extern int st_palette; // cph 2006/04/06 - make palette visible
 

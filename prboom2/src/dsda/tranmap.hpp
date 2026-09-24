@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
 
 const byte* dsda_TranMap(unsigned int alpha);
 const byte* dsda_DefaultTranMap();

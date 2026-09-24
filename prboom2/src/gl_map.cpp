@@ -4,6 +4,8 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -22,7 +24,7 @@
 #include "lprintf.hpp"
 #include "dsda/gl/render_scale.hpp"
 
-am_icon_t am_icons[am_icon_count + 1] =
+am_icon_t am_icons[std::to_underlying(AutomapIcon::Count) + 1] =
 {
 	{static_cast<GLuint>(-1), "M_SHADOW"},
 
@@ -50,7 +52,7 @@ typedef struct map_nice_thing_s
 }
 	PACKEDATTR map_nice_thing_t;
 
-static array_t map_things[am_icon_count];
+static array_t map_things[std::to_underlying(AutomapIcon::Count)];
 
 void gld_InitMapPics()
 {
@@ -59,7 +61,7 @@ void gld_InitMapPics()
 	i = 0;
 	while(am_icons[i].name)
 	{
-		lump = W_CheckNumForName2(am_icons[i].name, ns_prboom);
+		lump = W_CheckNumForName2(am_icons[i].name, LumpNamespace::Prboom);
 		am_icons[i].lumpnum = lump;
 		if(lump != LUMP_NOT_FOUND)
 		{
@@ -93,10 +95,10 @@ void gld_InitMapPics()
 	}
 }
 
-void gld_AddNiceThing(int type, float x, float y, float radius, float angle,
+void gld_AddNiceThing(AutomapIcon type, float x, float y, float radius, float angle,
 	unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	map_nice_thing_t* thing = static_cast<map_nice_thing_t*>(M_ArrayGetNewItem(&map_things[type], sizeof(thing[0])));
+	map_nice_thing_t* thing = static_cast<map_nice_thing_t*>(M_ArrayGetNewItem(&map_things[std::to_underlying(type)], sizeof(thing[0])));
 
 	float sina_r = (float)sin(angle) * radius;
 	float cosa_r = (float)cos(angle) * radius;
@@ -136,7 +138,7 @@ void gld_DrawNiceThings(int fx, int fy, int fw, int fh)
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
-	for(i = 0; i < am_icon_count; i++)
+	for(i = 0; i < std::to_underlying(AutomapIcon::Count); i++)
 	{
 		array_t* things = &map_things[i];
 
@@ -170,7 +172,7 @@ void gld_ClearNiceThings()
 {
 	int type;
 
-	for(type = 0; type < am_icon_count; type++)
+	for(type = 0; type < std::to_underlying(AutomapIcon::Count); type++)
 	{
 		M_ArrayClear(&map_things[type]);
 	}

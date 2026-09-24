@@ -815,7 +815,7 @@ int dsda_ActorNameToType(const char* name)
 
 	for(i = 0; actor_names[i]; ++i)
 		if(!stricmp(name, actor_names[i]))
-			return heretic ? dsda_GetDehMobjIndex(HERETIC_MT_ZERO + i) : dsda_GetDehMobjIndex(i);
+			return heretic ? dsda_GetDehMobjIndex(std::to_underlying(MobjType::HereticZero) + i) : dsda_GetDehMobjIndex(i);
 
 	return NAME_NOT_FOUND;
 }

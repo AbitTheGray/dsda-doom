@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
 
 // Non-allocated, read-only view into a string, like C++ string_view
 typedef struct

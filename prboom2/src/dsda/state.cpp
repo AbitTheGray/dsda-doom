@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA State
 
+#include <utility>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,7 +13,7 @@
 state_t* states;
 int num_states;
 byte* defined_codeptr_args;
-statenum_t* seenstate_tab;
+StateId* seenstate_tab;
 
 static actionf_t* deh_codeptr;
 
@@ -21,9 +23,9 @@ static void dsda_ResetStates(int from, int to)
 
 	for(i = from; i < to; ++i)
 	{
-		states[i].sprite = SPR_TNT1;
+		states[i].sprite = SpriteId::Tnt1;
 		states[i].tics = -1;
-		states[i].nextstate = (statenum_t)i;
+		states[i].nextstate = (StateId)i;
 	}
 }
 

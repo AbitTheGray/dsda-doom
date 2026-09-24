@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "d_player.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_player.hpp"
 
 typedef struct
 {

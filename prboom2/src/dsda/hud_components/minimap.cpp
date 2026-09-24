@@ -14,7 +14,8 @@ typedef struct
 	// backups of original values
 	// (so we can access them later)
 	int xx, yy, ww, hh;
-	int yy_offset, flags;
+	int yy_offset;
+	PatchTranslation flags;
 } local_component_t;
 
 static local_component_t* local;
@@ -48,10 +49,10 @@ static void dsda_UpdateMinimapCoordinates()
 	if(local->y + local->height > 200)
 		local->y = 200 - local->height;
 
-	V_GetWideRect(&local->x, &local->y, &local->width, &local->height, (enum patch_translation_e)local->flags);
+	V_GetWideRect(&local->x, &local->y, &local->width, &local->height, (PatchTranslation)local->flags);
 }
 
-void dsda_InitMinimapHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitMinimapHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

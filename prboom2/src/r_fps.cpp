@@ -27,18 +27,18 @@
 int movement_smooth;
 dboolean isExtraDDisplay = false;
 
-typedef enum
+enum struct InterpolationType : int32_t
 {
-	INTERP_SectorFloor,
-	INTERP_SectorCeiling,
-	INTERP_WallPanning,
-	INTERP_FloorPanning,
-	INTERP_CeilingPanning
-} interpolation_type_e;
+	SectorFloor,
+	SectorCeiling,
+	WallPanning,
+	FloorPanning,
+	CeilingPanning
+};
 
 typedef struct
 {
-	interpolation_type_e type;
+	InterpolationType type;
 	void* address;
 } interpolation_t;
 
@@ -55,7 +55,7 @@ void M_ChangeUncappedFrameRate()
 	if(capturing_video)
 		movement_smooth = true;
 	else
-		movement_smooth = (singletics ? false : dsda_IntConfig(dsda_config_uncapped_framerate));
+		movement_smooth = (singletics ? false : dsda_IntConfig(ConfigId::UncappedFramerate));
 }
 
 typedef fixed_t fixed2_t[2];
@@ -79,7 +79,7 @@ void R_InterpolateView(player_t* player, fixed_t frac)
 
 	dboolean NoInterpolate = dsda_CameraPaused() || dsda_PausedViaMenu();
 
-	quake_intensity = dsda_IntConfig(dsda_config_quake_intensity);
+	quake_intensity = dsda_IntConfig(ConfigId::QuakeIntensity);
 
 	viewplayer = player;
 
@@ -203,21 +203,21 @@ static void R_CopyInterpToOld(int i)
 {
 	switch(curipos[i].type)
 	{
-		case INTERP_SectorFloor:
+		case InterpolationType::SectorFloor:
 			oldipos[i][0] = ((sector_t*)curipos[i].address)->floorheight;
 			break;
-		case INTERP_SectorCeiling:
+		case InterpolationType::SectorCeiling:
 			oldipos[i][0] = ((sector_t*)curipos[i].address)->ceilingheight;
 			break;
-		case INTERP_WallPanning:
+		case InterpolationType::WallPanning:
 			oldipos[i][0] = ((side_t*)curipos[i].address)->rowoffset;
 			oldipos[i][1] = ((side_t*)curipos[i].address)->textureoffset;
 			break;
-		case INTERP_FloorPanning:
+		case InterpolationType::FloorPanning:
 			oldipos[i][0] = ((sector_t*)curipos[i].address)->floor_xoffs;
 			oldipos[i][1] = ((sector_t*)curipos[i].address)->floor_yoffs;
 			break;
-		case INTERP_CeilingPanning:
+		case InterpolationType::CeilingPanning:
 			oldipos[i][0] = ((sector_t*)curipos[i].address)->ceiling_xoffs;
 			oldipos[i][1] = ((sector_t*)curipos[i].address)->ceiling_yoffs;
 			break;
@@ -228,21 +228,21 @@ static void R_CopyBakToInterp(int i)
 {
 	switch(curipos[i].type)
 	{
-		case INTERP_SectorFloor:
+		case InterpolationType::SectorFloor:
 			((sector_t*)curipos[i].address)->floorheight = bakipos[i][0];
 			break;
-		case INTERP_SectorCeiling:
+		case InterpolationType::SectorCeiling:
 			((sector_t*)curipos[i].address)->ceilingheight = bakipos[i][0];
 			break;
-		case INTERP_WallPanning:
+		case InterpolationType::WallPanning:
 			((side_t*)curipos[i].address)->rowoffset = bakipos[i][0];
 			((side_t*)curipos[i].address)->textureoffset = bakipos[i][1];
 			break;
-		case INTERP_FloorPanning:
+		case InterpolationType::FloorPanning:
 			((sector_t*)curipos[i].address)->floor_xoffs = bakipos[i][0];
 			((sector_t*)curipos[i].address)->floor_yoffs = bakipos[i][1];
 			break;
-		case INTERP_CeilingPanning:
+		case InterpolationType::CeilingPanning:
 			((sector_t*)curipos[i].address)->ceiling_xoffs = bakipos[i][0];
 			((sector_t*)curipos[i].address)->ceiling_yoffs = bakipos[i][1];
 			break;
@@ -257,21 +257,21 @@ static void R_DoAnInterpolation(int i, fixed_t smoothratio)
 
 	switch(curipos[i].type)
 	{
-		case INTERP_SectorFloor:
+		case InterpolationType::SectorFloor:
 			adr1 = &((sector_t*)curipos[i].address)->floorheight;
 			break;
-		case INTERP_SectorCeiling:
+		case InterpolationType::SectorCeiling:
 			adr1 = &((sector_t*)curipos[i].address)->ceilingheight;
 			break;
-		case INTERP_WallPanning:
+		case InterpolationType::WallPanning:
 			adr1 = &((side_t*)curipos[i].address)->rowoffset;
 			adr2 = &((side_t*)curipos[i].address)->textureoffset;
 			break;
-		case INTERP_FloorPanning:
+		case InterpolationType::FloorPanning:
 			adr1 = &((sector_t*)curipos[i].address)->floor_xoffs;
 			adr2 = &((sector_t*)curipos[i].address)->floor_yoffs;
 			break;
-		case INTERP_CeilingPanning:
+		case InterpolationType::CeilingPanning:
 			adr1 = &((sector_t*)curipos[i].address)->ceiling_xoffs;
 			adr2 = &((sector_t*)curipos[i].address)->ceiling_yoffs;
 			break;
@@ -294,8 +294,8 @@ static void R_DoAnInterpolation(int i, fixed_t smoothratio)
 
 	switch(curipos[i].type)
 	{
-		case INTERP_SectorFloor:
-		case INTERP_SectorCeiling:
+		case InterpolationType::SectorFloor:
+		case InterpolationType::SectorCeiling:
 			gld_UpdateSplitData(((sector_t*)curipos[i].address));
 			break;
 		default:
@@ -317,7 +317,7 @@ void R_UpdateInterpolations()
 
 int interpolations_max = 0;
 
-static void R_SetInterpolation(interpolation_type_e type, void* posptr)
+static void R_SetInterpolation(InterpolationType type, void* posptr)
 {
 	int* i;
 	if(!movement_smooth)
@@ -342,19 +342,19 @@ static void R_SetInterpolation(interpolation_type_e type, void* posptr)
 	i = nullptr;
 	switch(type)
 	{
-		case INTERP_SectorFloor:
+		case InterpolationType::SectorFloor:
 			i = &(((sector_t*)posptr)->INTERP_SectorFloor);
 			break;
-		case INTERP_SectorCeiling:
+		case InterpolationType::SectorCeiling:
 			i = &(((sector_t*)posptr)->INTERP_SectorCeiling);
 			break;
-		case INTERP_WallPanning:
+		case InterpolationType::WallPanning:
 			i = &(((side_t*)posptr)->INTERP_WallPanning);
 			break;
-		case INTERP_FloorPanning:
+		case InterpolationType::FloorPanning:
 			i = &(((sector_t*)posptr)->INTERP_FloorPanning);
 			break;
-		case INTERP_CeilingPanning:
+		case InterpolationType::CeilingPanning:
 			i = &(((sector_t*)posptr)->INTERP_CeilingPanning);
 			break;
 	}
@@ -369,7 +369,7 @@ static void R_SetInterpolation(interpolation_type_e type, void* posptr)
 	}
 }
 
-static void R_StopInterpolation(interpolation_type_e type, void* posptr)
+static void R_StopInterpolation(InterpolationType type, void* posptr)
 {
 	int *i, *j;
 	void* posptr_last;
@@ -380,19 +380,19 @@ static void R_StopInterpolation(interpolation_type_e type, void* posptr)
 	i = nullptr;
 	switch(type)
 	{
-		case INTERP_SectorFloor:
+		case InterpolationType::SectorFloor:
 			i = &(((sector_t*)posptr)->INTERP_SectorFloor);
 			break;
-		case INTERP_SectorCeiling:
+		case InterpolationType::SectorCeiling:
 			i = &(((sector_t*)posptr)->INTERP_SectorCeiling);
 			break;
-		case INTERP_WallPanning:
+		case InterpolationType::WallPanning:
 			i = &(((side_t*)posptr)->INTERP_WallPanning);
 			break;
-		case INTERP_FloorPanning:
+		case InterpolationType::FloorPanning:
 			i = &(((sector_t*)posptr)->INTERP_FloorPanning);
 			break;
-		case INTERP_CeilingPanning:
+		case InterpolationType::CeilingPanning:
 			i = &(((sector_t*)posptr)->INTERP_CeilingPanning);
 			break;
 	}
@@ -413,19 +413,19 @@ static void R_StopInterpolation(interpolation_type_e type, void* posptr)
 		j = nullptr;
 		switch(curipos[numinterpolations].type)
 		{
-			case INTERP_SectorFloor:
+			case InterpolationType::SectorFloor:
 				j = &(((sector_t*)posptr_last)->INTERP_SectorFloor);
 				break;
-			case INTERP_SectorCeiling:
+			case InterpolationType::SectorCeiling:
 				j = &(((sector_t*)posptr_last)->INTERP_SectorCeiling);
 				break;
-			case INTERP_WallPanning:
+			case InterpolationType::WallPanning:
 				j = &(((side_t*)posptr_last)->INTERP_WallPanning);
 				break;
-			case INTERP_FloorPanning:
+			case InterpolationType::FloorPanning:
 				j = &(((sector_t*)posptr_last)->INTERP_FloorPanning);
 				break;
-			case INTERP_CeilingPanning:
+			case InterpolationType::CeilingPanning:
 				j = &(((sector_t*)posptr_last)->INTERP_CeilingPanning);
 				break;
 		}
@@ -500,14 +500,14 @@ void R_ActivateSectorInterpolations()
 	for(i = 0, sec = sectors; i < numsectors; i++, sec++)
 	{
 		if(sec->floordata)
-			R_SetInterpolation(INTERP_SectorFloor, sec);
+			R_SetInterpolation(InterpolationType::SectorFloor, sec);
 		if(sec->ceilingdata)
-			R_SetInterpolation(INTERP_SectorCeiling, sec);
+			R_SetInterpolation(InterpolationType::SectorCeiling, sec);
 	}
 }
 
 static void R_InterpolationGetData(thinker_t* th,
-	interpolation_type_e* type1, interpolation_type_e* type2,
+	InterpolationType* type1, InterpolationType* type2,
 	void** posptr1, void** posptr2)
 {
 	*posptr1 = nullptr;
@@ -515,44 +515,44 @@ static void R_InterpolationGetData(thinker_t* th,
 
 	if(th->function == reinterpret_cast<think_t>(T_MoveFloor))
 	{
-		*type1 = INTERP_SectorFloor;
+		*type1 = InterpolationType::SectorFloor;
 		*posptr1 = ((floormove_t*)th)->sector;
 	}
 	else if(th->function == reinterpret_cast<think_t>(T_PlatRaise))
 	{
-		*type1 = INTERP_SectorFloor;
+		*type1 = InterpolationType::SectorFloor;
 		*posptr1 = ((plat_t*)th)->sector;
 	}
 	else if(th->function == reinterpret_cast<think_t>(T_MoveCeiling))
 	{
-		*type1 = INTERP_SectorCeiling;
+		*type1 = InterpolationType::SectorCeiling;
 		*posptr1 = ((ceiling_t*)th)->sector;
 	}
 	else if(th->function == reinterpret_cast<think_t>(T_VerticalDoor))
 	{
-		*type1 = INTERP_SectorCeiling;
+		*type1 = InterpolationType::SectorCeiling;
 		*posptr1 = ((vldoor_t*)th)->sector;
 	}
 	else if(th->function == reinterpret_cast<think_t>(T_MoveElevator))
 	{
-		*type1 = INTERP_SectorFloor;
+		*type1 = InterpolationType::SectorFloor;
 		*posptr1 = ((elevator_t*)th)->sector;
-		*type2 = INTERP_SectorCeiling;
+		*type2 = InterpolationType::SectorCeiling;
 		*posptr2 = ((elevator_t*)th)->sector;
 	}
 	else if(th->function == reinterpret_cast<think_t>(dsda_UpdateSideScroller) || th->function == reinterpret_cast<think_t>(dsda_UpdateControlSideScroller))
 	{
-		*type1 = INTERP_WallPanning;
+		*type1 = InterpolationType::WallPanning;
 		*posptr1 = sides + ((scroll_t*)th)->affectee;
 	}
 	else if(th->function == reinterpret_cast<think_t>(dsda_UpdateFloorScroller) || th->function == reinterpret_cast<think_t>(dsda_UpdateControlFloorScroller))
 	{
-		*type1 = INTERP_FloorPanning;
+		*type1 = InterpolationType::FloorPanning;
 		*posptr1 = sectors + ((scroll_t*)th)->affectee;
 	}
 	else if(th->function == reinterpret_cast<think_t>(dsda_UpdateCeilingScroller) || th->function == reinterpret_cast<think_t>(dsda_UpdateControlCeilingScroller))
 	{
-		*type1 = INTERP_CeilingPanning;
+		*type1 = InterpolationType::CeilingPanning;
 		*posptr1 = sectors + ((scroll_t*)th)->affectee;
 	}
 }
@@ -561,7 +561,7 @@ void R_ActivateThinkerInterpolations(thinker_t* th)
 {
 	void* posptr1;
 	void* posptr2;
-	interpolation_type_e type1, type2;
+	InterpolationType type1, type2;
 
 	if(!movement_smooth)
 		return;
@@ -581,7 +581,7 @@ void R_StopInterpolationIfNeeded(thinker_t* th)
 {
 	void* posptr1;
 	void* posptr2;
-	interpolation_type_e type1, type2;
+	InterpolationType type1, type2;
 
 	if(!movement_smooth)
 		return;

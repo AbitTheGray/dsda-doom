@@ -6,12 +6,12 @@
 
 #pragma once
 
+#include "SDL.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "SDL.h"
 
 extern int gl_statusbar_height;
 extern int gl_scene_width;

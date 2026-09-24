@@ -15,6 +15,8 @@
 
 // use config.h if autoconf made one -- josh
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -33,11 +35,11 @@
 
 #define ZONE_SIGNATURE 0x931d4a11
 
-enum
+enum struct ZoneTag : int32_t
 {
-	ZONE_STATIC,
-	ZONE_LEVEL,
-	ZONE_MAX
+	Static,
+	Level,
+	Max
 };
 
 typedef struct memblock
@@ -45,12 +47,12 @@ typedef struct memblock
 	unsigned signature;
 	struct memblock *next, *prev;
 	size_t size;
-	unsigned char tag;
+	ZoneTag tag;
 } memblock_t;
 
 static const size_t HEADER_SIZE = sizeof(memblock_t);
 
-static memblock_t* blockbytag[ZONE_MAX];
+static memblock_t* blockbytag[std::to_underlying(ZoneTag::Max)];
 
 /* Z_Malloc
  * cph - the algorithm here was a very simple first-fit round-robin
@@ -62,7 +64,7 @@ static memblock_t* blockbytag[ZONE_MAX];
  * free all the stuff we just pass on the way.
  */
 
-static void* Z_MallocTag(size_t size, int tag)
+static void* Z_MallocTag(size_t size, ZoneTag tag)
 {
 	memblock_t* block = nullptr;
 
@@ -74,17 +76,17 @@ static void* Z_MallocTag(size_t size, int tag)
 		I_Error("Z_Malloc: Failure trying to allocate %lu bytes", (unsigned long)size);
 	}
 
-	if(!blockbytag[tag])
+	if(!blockbytag[std::to_underlying(tag)])
 	{
-		blockbytag[tag] = block;
+		blockbytag[std::to_underlying(tag)] = block;
 		block->next = block->prev = block;
 	}
 	else
 	{
-		blockbytag[tag]->prev->next = block;
-		block->prev = blockbytag[tag]->prev;
-		block->next = blockbytag[tag];
-		blockbytag[tag]->prev = block;
+		blockbytag[std::to_underlying(tag)]->prev->next = block;
+		block->prev = blockbytag[std::to_underlying(tag)]->prev;
+		block->next = blockbytag[std::to_underlying(tag)];
+		blockbytag[std::to_underlying(tag)]->prev = block;
 	}
 
 	block->size = size;
@@ -107,23 +109,23 @@ void Z_Free(void* p)
 	block->signature = 0; // Nullify signature so another free fails
 
 	if(block == block->next)
-		blockbytag[block->tag] = nullptr;
-	else if(blockbytag[block->tag] == block)
-		blockbytag[block->tag] = block->next;
+		blockbytag[std::to_underlying(block->tag)] = nullptr;
+	else if(blockbytag[std::to_underlying(block->tag)] == block)
+		blockbytag[std::to_underlying(block->tag)] = block->next;
 	block->prev->next = block->next;
 	block->next->prev = block->prev;
 
 	free(block);
 }
 
-static void Z_FreeTag(int tag)
+static void Z_FreeTag(ZoneTag tag)
 {
 	memblock_t *block, *end_block;
 
-	if(tag < 0 || tag >= ZONE_MAX)
-		I_Error("Z_FreeTag: Tag %i does not exist", tag);
+	if(tag < ZoneTag::Static || tag >= ZoneTag::Max)
+		I_Error("Z_FreeTag: Tag %i does not exist", std::to_underlying(tag));
 
-	block = blockbytag[tag];
+	block = blockbytag[std::to_underlying(tag)];
 	if(!block)
 		return;
 	end_block = block->prev;
@@ -137,7 +139,7 @@ static void Z_FreeTag(int tag)
 	}
 }
 
-static void* Z_ReallocTag(void* ptr, size_t n, int tag)
+static void* Z_ReallocTag(void* ptr, size_t n, ZoneTag tag)
 {
 	void* p = Z_MallocTag(n, tag);
 	if(ptr)
@@ -149,58 +151,58 @@ static void* Z_ReallocTag(void* ptr, size_t n, int tag)
 	return p;
 }
 
-static void* Z_CallocTag(size_t n1, size_t n2, int tag)
+static void* Z_CallocTag(size_t n1, size_t n2, ZoneTag tag)
 {
 	return
 		(n1 *= n2) ? memset(Z_MallocTag(n1, tag), 0, n1) : nullptr;
 }
 
-static char* Z_StrdupTag(const char* s, int tag)
+static char* Z_StrdupTag(const char* s, ZoneTag tag)
 {
 	return strcpy(static_cast<char *>(Z_MallocTag(strlen(s) + 1, tag)), s);
 }
 
 void* Z_Malloc(size_t size)
 {
-	return Z_MallocTag(size, ZONE_STATIC);
+	return Z_MallocTag(size, ZoneTag::Static);
 }
 
 void* Z_Calloc(size_t n, size_t n2)
 {
-	return Z_CallocTag(n, n2, ZONE_STATIC);
+	return Z_CallocTag(n, n2, ZoneTag::Static);
 }
 
 void* Z_Realloc(void* p, size_t n)
 {
-	return Z_ReallocTag(p, n, ZONE_STATIC);
+	return Z_ReallocTag(p, n, ZoneTag::Static);
 }
 
 char* Z_Strdup(const char* s)
 {
-	return Z_StrdupTag(s, ZONE_STATIC);
+	return Z_StrdupTag(s, ZoneTag::Static);
 }
 
 void Z_FreeLevel()
 {
-	return Z_FreeTag(ZONE_LEVEL);
+	return Z_FreeTag(ZoneTag::Level);
 }
 
 void* Z_MallocLevel(size_t size)
 {
-	return Z_MallocTag(size, ZONE_LEVEL);
+	return Z_MallocTag(size, ZoneTag::Level);
 }
 
 void* Z_CallocLevel(size_t n, size_t n2)
 {
-	return Z_CallocTag(n, n2, ZONE_LEVEL);
+	return Z_CallocTag(n, n2, ZoneTag::Level);
 }
 
 void* Z_ReallocLevel(void* p, size_t n)
 {
-	return Z_ReallocTag(p, n, ZONE_LEVEL);
+	return Z_ReallocTag(p, n, ZoneTag::Level);
 }
 
 char* Z_StrdupLevel(const char* s)
 {
-	return Z_StrdupTag(s, ZONE_LEVEL);
+	return Z_StrdupTag(s, ZoneTag::Level);
 }

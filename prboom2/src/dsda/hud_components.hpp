@@ -5,11 +5,6 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "hud_components/ammo_text.hpp"
 #include "hud_components/armor_text.hpp"
 #include "hud_components/attempts.hpp"
@@ -44,6 +39,11 @@ extern "C"
 #include "hud_components/stat_totals.hpp"
 #include "hud_components/tracker.hpp"
 #include "hud_components/weapon_text.hpp"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #ifdef __cplusplus
 }

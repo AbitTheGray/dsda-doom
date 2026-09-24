@@ -4,6 +4,8 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -31,7 +33,7 @@ void gld_FreeDrawInfo()
 	Z_Free(gld_drawinfo.data);
 	gld_drawinfo.data = nullptr;
 
-	for(i = 0; i < GLDIT_TYPES; i++)
+	for(i = 0; i < std::to_underlying(GLDrawItemType::Types); i++)
 	{
 		if(gld_drawinfo.items[i])
 		{
@@ -58,7 +60,7 @@ void gld_ResetDrawInfo()
 	}
 	gld_drawinfo.size = 0;
 
-	for(i = 0; i < GLDIT_TYPES; i++)
+	for(i = 0; i < std::to_underlying(GLDrawItemType::Types); i++)
 	{
 		gld_drawinfo.num_items[i] = 0;
 	}
@@ -88,7 +90,7 @@ void gld_AddDrawItem(GLDrawItemType itemtype, void* itemdata)
 	int itemsize = 0;
 	byte* item_p = nullptr;
 
-	static int itemsizes[GLDIT_TYPES] = {
+	static int itemsizes[std::to_underlying(GLDrawItemType::Types)] = {
 		0,
 		SIZEOF8(GLWall), SIZEOF8(GLWall), SIZEOF8(GLWall), SIZEOF8(GLWall), SIZEOF8(GLWall),
 		SIZEOF8(GLWall), SIZEOF8(GLWall),
@@ -99,7 +101,7 @@ void gld_AddDrawItem(GLDrawItemType itemtype, void* itemdata)
 		SIZEOF8(GLHealthBar)
 	};
 
-	itemsize = itemsizes[itemtype];
+	itemsize = itemsizes[std::to_underlying(itemtype)];
 	if(itemsize == 0)
 	{
 		I_Error("gld_AddDrawItem: unknown GLDrawItemType %d", itemtype);
@@ -127,16 +129,16 @@ void gld_AddDrawItem(GLDrawItemType itemtype, void* itemdata)
 
 	gld_drawinfo.data[gld_drawinfo.size].size += itemsize;
 
-	if(gld_drawinfo.num_items[itemtype] >= gld_drawinfo.max_items[itemtype])
+	if(gld_drawinfo.num_items[std::to_underlying(itemtype)] >= gld_drawinfo.max_items[std::to_underlying(itemtype)])
 	{
-		gld_drawinfo.max_items[itemtype] += 64;
-		gld_drawinfo.items[itemtype] = static_cast<GLDrawItem*>(Z_Realloc(
-			gld_drawinfo.items[itemtype],
-			gld_drawinfo.max_items[itemtype] * sizeof(gld_drawinfo.items[0][0])));
+		gld_drawinfo.max_items[std::to_underlying(itemtype)] += 64;
+		gld_drawinfo.items[std::to_underlying(itemtype)] = static_cast<GLDrawItem*>(Z_Realloc(
+			gld_drawinfo.items[std::to_underlying(itemtype)],
+			gld_drawinfo.max_items[std::to_underlying(itemtype)] * sizeof(gld_drawinfo.items[0][0])));
 	}
 
-	gld_drawinfo.items[itemtype][gld_drawinfo.num_items[itemtype]].item.item = item_p;
-	gld_drawinfo.num_items[itemtype]++;
+	gld_drawinfo.items[std::to_underlying(itemtype)][gld_drawinfo.num_items[std::to_underlying(itemtype)]].item.item = item_p;
+	gld_drawinfo.num_items[std::to_underlying(itemtype)]++;
 }
 #undef SIZEOF8
 #undef NEWSIZE

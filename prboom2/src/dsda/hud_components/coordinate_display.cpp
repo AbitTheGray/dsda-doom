@@ -113,7 +113,7 @@ static void dsda_WriteVelocity(dsda_text_t* text)
 	v = dsda_CalculateVelocity();
 
 	dsda_velocity_color =
-		v >= THRESHOLD_3V ? dsda_TextColor(dsda_tc_exhud_coords_fast) : v >= THRESHOLD_2V ? dsda_TextColor(dsda_tc_exhud_coords_sr50) : v >= THRESHOLD_1V ? dsda_TextColor(dsda_tc_exhud_coords_sr40) : dsda_TextColor(dsda_tc_exhud_coords_mf50);
+		v >= THRESHOLD_3V ? dsda_TextColor(TextColorIndex::ExhudCoordsFast) : v >= THRESHOLD_2V ? dsda_TextColor(TextColorIndex::ExhudCoordsSr50) : v >= THRESHOLD_1V ? dsda_TextColor(TextColorIndex::ExhudCoordsSr40) : dsda_TextColor(TextColorIndex::ExhudCoordsMf50);
 
 	if(v)
 		snprintf(text->msg, sizeof(text->msg), "%sV: %.3f", dsda_velocity_color, v);
@@ -130,7 +130,7 @@ static void dsda_WriteDistance(dsda_text_t* text)
 	v = dsda_CalculateDistance();
 
 	dsda_distance_color =
-		v >= THRESHOLD_3D ? dsda_TextColor(dsda_tc_exhud_coords_fast) : v >= THRESHOLD_2D ? dsda_TextColor(dsda_tc_exhud_coords_sr50) : v >= THRESHOLD_1D ? dsda_TextColor(dsda_tc_exhud_coords_sr40) : dsda_TextColor(dsda_tc_exhud_coords_mf50);
+		v >= THRESHOLD_3D ? dsda_TextColor(TextColorIndex::ExhudCoordsFast) : v >= THRESHOLD_2D ? dsda_TextColor(TextColorIndex::ExhudCoordsSr50) : v >= THRESHOLD_1D ? dsda_TextColor(TextColorIndex::ExhudCoordsSr40) : dsda_TextColor(TextColorIndex::ExhudCoordsMf50);
 
 	if(v)
 		snprintf(text->msg, sizeof(text->msg), "%sD: %.3f", dsda_distance_color, v);
@@ -140,12 +140,12 @@ static void dsda_WriteDistance(dsda_text_t* text)
 	dsda_RefreshHudText(text);
 }
 
-void dsda_InitCoordinateDisplayHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitCoordinateDisplayHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);
 
-	dsda_coordinate_color = dsda_TextColor(dsda_tc_exhud_coords_base);
+	dsda_coordinate_color = dsda_TextColor(TextColorIndex::ExhudCoordsBase);
 
 	dsda_InitTextHC(&local->dsda_x_display, x_offset, y_offset, vpt);
 	dsda_InitTextHC(&local->dsda_y_display, x_offset, y_offset + 8, vpt);

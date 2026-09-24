@@ -5,15 +5,15 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "doomdef.hpp"
 #include "p_mobj.hpp"
 #include "d_player.hpp"
 #include "r_defs.hpp"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 typedef struct
 {
@@ -33,23 +33,23 @@ void dsda_InitCommandHistory();
 void dsda_AddCommandToCommandDisplay(ticcmd_t* cmd);
 
 // TODO: Might want a split object separate from display
-typedef enum
+enum struct SplitClass : int32_t
 {
-	DSDA_SPLIT_BLUE_KEY,
-	DSDA_SPLIT_YELLOW_KEY,
-	DSDA_SPLIT_RED_KEY,
-	DSDA_SPLIT_USE,
-	DSDA_SPLIT_SECRET,
-	DSDA_SPLIT_CLASS_COUNT
-} dsda_split_class_t;
+	BlueKey,
+	YellowKey,
+	RedKey,
+	Use,
+	Secret,
+	Count
+};
 
-void dsda_AddSplit(dsda_split_class_t split_class, int lifetime);
+void dsda_AddSplit(SplitClass split_class, int lifetime);
 
 void dsda_ReadCommandLine();
 int dsda_SessionAttempts();
 void dsda_DisplayNotifications();
 void dsda_WatchReborn(int playernum);
-void dsda_WatchCard(card_t card);
+void dsda_WatchCard(Card card);
 void dsda_WatchCrush(mobj_t* thing, int damage);
 void dsda_WatchDamage(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage);
 void dsda_WatchDeath(mobj_t* thing);
@@ -66,7 +66,7 @@ void dsda_WatchBeforeLevelSetup();
 void dsda_WatchAfterLevelSetup();
 void dsda_WatchNewLevel();
 void dsda_WatchLevelCompletion();
-void dsda_WatchWeaponFire(weapontype_t weapon);
+void dsda_WatchWeaponFire(WeaponType weapon);
 void dsda_WatchSecret();
 void dsda_WatchDeferredInitNew(int skill, int episode, int map);
 void dsda_WatchNewGame();

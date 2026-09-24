@@ -53,9 +53,9 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 		max_kill_requirement = totalkills;
 	}
 
-	killcolor = (fullkillcount >= max_kill_requirement ? dsda_TextColor(dsda_tc_map_totals_max) : dsda_TextColor(dsda_tc_map_totals_value));
-	itemcolor = (fullitemcount >= totalitems ? dsda_TextColor(dsda_tc_map_totals_max) : dsda_TextColor(dsda_tc_map_totals_value));
-	secretcolor = (fullsecretcount >= totalsecret ? dsda_TextColor(dsda_tc_map_totals_max) : dsda_TextColor(dsda_tc_map_totals_value));
+	killcolor = (fullkillcount >= max_kill_requirement ? dsda_TextColor(TextColorIndex::MapTotalsMax) : dsda_TextColor(TextColorIndex::MapTotalsValue));
+	itemcolor = (fullitemcount >= totalitems ? dsda_TextColor(TextColorIndex::MapTotalsMax) : dsda_TextColor(TextColorIndex::MapTotalsValue));
+	secretcolor = (fullsecretcount >= totalsecret ? dsda_TextColor(TextColorIndex::MapTotalsMax) : dsda_TextColor(TextColorIndex::MapTotalsValue));
 
 	if(local->include_kills)
 	{
@@ -64,7 +64,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str,
 				max_size,
 				"%sMonsters: %s%d/%d\n",
-				dsda_TextColor(dsda_tc_map_totals_label),
+				dsda_TextColor(TextColorIndex::MapTotalsLabel),
 				killcolor, fullkillcount, max_kill_requirement
 			);
 		else
@@ -72,7 +72,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str,
 				max_size,
 				"%sMonsters: %s%d\n",
-				dsda_TextColor(dsda_tc_map_totals_label),
+				dsda_TextColor(TextColorIndex::MapTotalsLabel),
 				killcolor, fullkillcount
 			);
 	}
@@ -84,7 +84,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str + length,
 				max_size - length,
 				"%sItems: %s%d/%d\n",
-				dsda_TextColor(dsda_tc_map_totals_label),
+				dsda_TextColor(TextColorIndex::MapTotalsLabel),
 				itemcolor, fullitemcount, totalitems
 			);
 		else
@@ -92,7 +92,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str + length,
 				max_size - length,
 				"%sItems: %s%d\n",
-				dsda_TextColor(dsda_tc_map_totals_label),
+				dsda_TextColor(TextColorIndex::MapTotalsLabel),
 				itemcolor, fullitemcount
 			);
 	}
@@ -104,7 +104,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str + length,
 				max_size - length,
 				"%sSecrets: %s%d/%d",
-				dsda_TextColor(dsda_tc_map_totals_label),
+				dsda_TextColor(TextColorIndex::MapTotalsLabel),
 				secretcolor, fullsecretcount, totalsecret
 			);
 		else
@@ -112,13 +112,13 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str + length,
 				max_size - length,
 				"%sSecrets: %s%d",
-				dsda_TextColor(dsda_tc_map_totals_label),
+				dsda_TextColor(TextColorIndex::MapTotalsLabel),
 				secretcolor, fullsecretcount
 			);
 	}
 }
 
-void dsda_InitMapTotalsHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitMapTotalsHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

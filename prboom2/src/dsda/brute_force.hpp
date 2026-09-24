@@ -5,101 +5,103 @@
 
 #pragma once
 
+#include <utility>
+
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "doomtype.hpp"
-
-typedef enum
+enum struct BruteForceAttribute : int32_t
 {
-	dsda_bf_x,
-	dsda_bf_y,
-	dsda_bf_z,
-	dsda_bf_momx,
-	dsda_bf_momy,
-	dsda_bf_speed,
-	dsda_bf_damage,
-	dsda_bf_rng,
-	dsda_bf_arm,
-	dsda_bf_hp,
-	dsda_bf_ammo_0,
-	dsda_bf_ammo_1,
-	dsda_bf_ammo_2,
-	dsda_bf_ammo_3,
-	dsda_bf_ammo_4,
-	dsda_bf_ammo_5,
-	dsda_bf_bmapwidth,
-	dsda_bf_attribute_max,
+	X,
+	Y,
+	Z,
+	Momx,
+	Momy,
+	Speed,
+	Damage,
+	Rng,
+	Arm,
+	Hp,
+	Ammo0,
+	Ammo1,
+	Ammo2,
+	Ammo3,
+	Ammo4,
+	Ammo5,
+	Bmapwidth,
+	AttributeMax,
 
-	dsda_bf_line_skip = 0,
-	dsda_bf_line_activation,
-	dsda_bf_have_item,
-	dsda_bf_lack_item,
-	dsda_bf_misc_max,
-} dsda_bf_attribute_t;
+	LineSkip = 0,
+	LineActivation,
+	HaveItem,
+	LackItem,
+	MiscMax,
+};
 
-typedef enum
+enum struct BruteForceOperator : int32_t
 {
-	dsda_bf_less_than,
-	dsda_bf_less_than_or_equal_to,
-	dsda_bf_greater_than,
-	dsda_bf_greater_than_or_equal_to,
-	dsda_bf_equal_to,
-	dsda_bf_not_equal_to,
-	dsda_bf_operator_max,
+	LessThan,
+	LessThanOrEqualTo,
+	GreaterThan,
+	GreaterThanOrEqualTo,
+	EqualTo,
+	NotEqualTo,
+	Max,
 
-	dsda_bf_operator_misc,
-} dsda_bf_operator_t;
+	Misc,
+};
 
-typedef enum
+enum struct BruteForceItem : int32_t
 {
-	dsda_bf_red_key_card,
-	dsda_bf_yellow_key_card,
-	dsda_bf_blue_key_card,
-	dsda_bf_red_skull_key,
-	dsda_bf_yellow_skull_key,
-	dsda_bf_blue_skull_key,
-	dsda_bf_fist,
-	dsda_bf_pistol,
-	dsda_bf_shotgun,
-	dsda_bf_chaingun,
-	dsda_bf_rocket_launcher,
-	dsda_bf_plasma_gun,
-	dsda_bf_bfg,
-	dsda_bf_chainsaw,
-	dsda_bf_super_shotgun,
-	dsda_bf_item_max,
-} dsda_bf_item_t;
+	RedKeyCard,
+	YellowKeyCard,
+	BlueKeyCard,
+	RedSkullKey,
+	YellowSkullKey,
+	BlueSkullKey,
+	Fist,
+	Pistol,
+	Shotgun,
+	Chaingun,
+	RocketLauncher,
+	PlasmaGun,
+	Bfg,
+	Chainsaw,
+	SuperShotgun,
+	Max,
+};
 
-typedef enum
+enum struct BruteForceLimit : int32_t
 {
-	dsda_bf_limit_trio_zero,
-	dsda_bf_acap = dsda_bf_limit_trio_zero,
-	dsda_bf_limit_trio_max,
+	TrioZero,
+	Acap = TrioZero,
+	TrioMax,
 
-	dsda_bf_limit_duo_zero = dsda_bf_limit_trio_max,
-	dsda_bf_max            = dsda_bf_limit_duo_zero,
-	dsda_bf_min,
-	dsda_bf_limit_duo_max,
+	DuoZero = TrioMax,
+	Max            = DuoZero,
+	Min,
+	DuoMax,
 
-	dsda_bf_limit_max = dsda_bf_limit_duo_max
-} dsda_bf_limit_t;
+	Count = DuoMax
+};
 
-extern const char* dsda_bf_attribute_names[dsda_bf_attribute_max];
-extern const char* dsda_bf_operator_names[dsda_bf_operator_max];
-extern const char* dsda_bf_item_names[dsda_bf_item_max];
-extern const char* dsda_bf_limit_names[dsda_bf_limit_max];
+extern const char* dsda_bf_attribute_names[std::to_underlying(BruteForceAttribute::AttributeMax)];
+extern const char* dsda_bf_operator_names[std::to_underlying(BruteForceOperator::Max)];
+extern const char* dsda_bf_item_names[std::to_underlying(BruteForceItem::Max)];
+extern const char* dsda_bf_limit_names[std::to_underlying(BruteForceLimit::Count)];
 
 dboolean dsda_BruteForce();
 dboolean dsda_BruteForceEnded();
 void dsda_ResetBruteForceConditions();
-void dsda_SetBruteForceTarget(dsda_bf_attribute_t attribute,
-	dsda_bf_limit_t limit, fixed_t value, dboolean has_value);
-void dsda_AddMiscBruteForceCondition(dsda_bf_attribute_t attribute, fixed_t value);
-void dsda_AddBruteForceCondition(dsda_bf_attribute_t attribute,
-	dsda_bf_operator_t operator_, fixed_t value);
+void dsda_SetBruteForceTarget(BruteForceAttribute attribute,
+	BruteForceLimit limit, fixed_t value, dboolean has_value);
+void dsda_AddMiscBruteForceCondition(BruteForceAttribute attribute, fixed_t value);
+void dsda_AddBruteForceCondition(BruteForceAttribute attribute,
+	BruteForceOperator operator_, fixed_t value);
 dboolean dsda_StartBruteForce(int depth);
 int dsda_KeepBruteForceFrame(int i);
 int dsda_AddBruteForceFrame(int i,

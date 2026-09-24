@@ -7,6 +7,8 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 #ifdef _MSC_VER
@@ -31,8 +33,8 @@
 
 static dboolean disable_message_box;
 
-int cons_stdout_mask = LO_INFO;
-int cons_stderr_mask = LO_WARN | LO_ERROR;
+int cons_stdout_mask = std::to_underlying(OutputLevels::Info);
+int cons_stderr_mask = std::to_underlying(OutputLevels::Warn) | std::to_underlying(OutputLevels::Error);
 
 /* cphipps - enlarged message buffer and made non-static
  * We still have to be careful here, this function can be called after exit
@@ -43,7 +45,7 @@ int lprintf(OutputLevels pri, const char* s, ...)
 {
 	int r = 0;
 	char msg[MAX_MESSAGE_SIZE];
-	int lvl = pri;
+	int lvl = std::to_underlying(pri);
 
 	va_list v;
 	va_start(v, s);
@@ -69,7 +71,7 @@ int lprintf(OutputLevels pri, const char* s, ...)
 
 void I_EnableVerboseLogging()
 {
-	cons_stdout_mask = LO_INFO | LO_DEBUG;
+	cons_stdout_mask = std::to_underlying(OutputLevels::Info) | std::to_underlying(OutputLevels::Debug);
 }
 
 void I_DisableAllLogging()
@@ -99,9 +101,9 @@ void I_Error(const char* error, ...)
 	va_start(argptr, error);
 	vsnprintf(errmsg, sizeof(errmsg), error, argptr);
 	va_end(argptr);
-	lprintf(LO_ERROR, "%s\n", errmsg);
+	lprintf(OutputLevels::Error, "%s\n", errmsg);
 #ifdef _WIN32
-	if(!disable_message_box && !dsda_Flag(dsda_arg_nodraw) && !capturing_video)
+	if(!disable_message_box && !dsda_Flag(ArgId::Nodraw) && !capturing_video)
 	{
 		I_MessageBox(errmsg, PRB_MB_OK);
 	}
@@ -116,9 +118,9 @@ void I_Warn(const char* error, ...)
 	va_start(argptr, error);
 	vsnprintf(errmsg, sizeof(errmsg), error, argptr);
 	va_end(argptr);
-	lprintf(LO_WARN, "%s\n", errmsg);
+	lprintf(OutputLevels::Warn, "%s\n", errmsg);
 #ifdef _WIN32
-	if(!dsda_Flag(dsda_arg_nodraw) && !capturing_video)
+	if(!dsda_Flag(ArgId::Nodraw) && !capturing_video)
 	{
 		I_MessageBox(errmsg, PRB_MB_OK);
 	}

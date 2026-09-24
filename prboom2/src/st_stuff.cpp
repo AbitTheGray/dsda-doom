@@ -6,6 +6,8 @@
  *      Does palette indicators as well (red pain/berserk, bright pickup)
  */
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "doomstat.hpp"
 #include "m_random.hpp"
@@ -266,7 +268,7 @@ static patchnum_t shortnum[10];
 
 // 3 key-cards, 3 skulls, 3 card/skull combos
 // jff 2/24/98 extend number of patches by three skull/card combos
-static patchnum_t keys[DOOM_NUMCARDS + 3];
+static patchnum_t keys[std::to_underlying(Card::DoomCount) + 3];
 
 // face status patches
 static patchnum_t faces[ST_NUMFACES];
@@ -319,7 +321,7 @@ static int st_fragscount;
 static int st_oldhealth = -1;
 
 // used for evil grin
-static dboolean oldweaponsowned[NUMWEAPONS];
+static dboolean oldweaponsowned[std::to_underlying(WeaponType::Count)];
 
 // count until face changes
 static int st_facecount = 0;
@@ -335,17 +337,17 @@ static int st_randomnumber;
 
 extern char* mapnames[];
 
-static int cr_health_bad;
-static int cr_health_warning;
-static int cr_health_ok;
-static int cr_health_super;
-static int cr_armor_zero;
-static int cr_armor_one;
-static int cr_armor_two;
-static int cr_ammo_bad;
-static int cr_ammo_warning;
-static int cr_ammo_ok;
-static int cr_ammo_full;
+static ColorRange cr_health_bad;
+static ColorRange cr_health_warning;
+static ColorRange cr_health_ok;
+static ColorRange cr_health_super;
+static ColorRange cr_armor_zero;
+static ColorRange cr_armor_one;
+static ColorRange cr_armor_two;
+static ColorRange cr_ammo_bad;
+static ColorRange cr_ammo_warning;
+static ColorRange cr_ammo_ok;
+static ColorRange cr_ammo_full;
 
 //
 // STATUS BAR CODE
@@ -355,17 +357,17 @@ static void ST_Stop();
 
 void ST_LoadTextColors()
 {
-	cr_health_bad = dsda_TextCR(dsda_tc_stbar_health_bad);
-	cr_health_warning = dsda_TextCR(dsda_tc_stbar_health_warning);
-	cr_health_ok = dsda_TextCR(dsda_tc_stbar_health_ok);
-	cr_health_super = dsda_TextCR(dsda_tc_stbar_health_super);
-	cr_armor_zero = dsda_TextCR(dsda_tc_stbar_armor_zero);
-	cr_armor_one = dsda_TextCR(dsda_tc_stbar_armor_one);
-	cr_armor_two = dsda_TextCR(dsda_tc_stbar_armor_two);
-	cr_ammo_bad = dsda_TextCR(dsda_tc_stbar_ammo_bad);
-	cr_ammo_warning = dsda_TextCR(dsda_tc_stbar_ammo_warning);
-	cr_ammo_ok = dsda_TextCR(dsda_tc_stbar_ammo_ok);
-	cr_ammo_full = dsda_TextCR(dsda_tc_stbar_ammo_full);
+	cr_health_bad = dsda_TextCR(TextColorIndex::StbarHealthBad);
+	cr_health_warning = dsda_TextCR(TextColorIndex::StbarHealthWarning);
+	cr_health_ok = dsda_TextCR(TextColorIndex::StbarHealthOk);
+	cr_health_super = dsda_TextCR(TextColorIndex::StbarHealthSuper);
+	cr_armor_zero = dsda_TextCR(TextColorIndex::StbarArmorZero);
+	cr_armor_one = dsda_TextCR(TextColorIndex::StbarArmorOne);
+	cr_armor_two = dsda_TextCR(TextColorIndex::StbarArmorTwo);
+	cr_ammo_bad = dsda_TextCR(TextColorIndex::StbarAmmoBad);
+	cr_ammo_warning = dsda_TextCR(TextColorIndex::StbarAmmoWarning);
+	cr_ammo_ok = dsda_TextCR(TextColorIndex::StbarAmmoOk);
+	cr_ammo_full = dsda_TextCR(TextColorIndex::StbarAmmoFull);
 }
 
 // [FG] support widescreen status bar backgrounds
@@ -377,15 +379,15 @@ void ST_SetScaledWidth()
 	if(width == 0)
 		width = ST_WIDTH;
 
-	switch(stretch_hud(render_stretch_hud))
+	switch(stretch_hud(static_cast<PatchStretch>(render_stretch_hud)))
 	{
-		case patch_stretch_not_adjusted:
+		case PatchStretch::NotAdjusted:
 			ST_SCALED_WIDTH = width * patches_scalex;
 			break;
-		case patch_stretch_doom_format:
+		case PatchStretch::DoomFormat:
 			ST_SCALED_WIDTH = width * WIDE_SCREENWIDTH / 320;
 			break;
-		case patch_stretch_fit_to_width:
+		case PatchStretch::FitToWidth:
 			ST_SCALED_WIDTH = width * SCREENWIDTH / 320;
 			break;
 	}
@@ -401,26 +403,26 @@ void ST_SetScaledWidth()
 static void ST_refreshBackground()
 {
 	int y = ST_Y;
-	enum patch_translation_e flags = VPT_ALIGN_LEFT_TOP;
+	PatchTranslation flags = PatchTranslation::AlignLeftTop;
 
 	if(st_statusbaron)
 	{
-		flags = VPT_ALIGN_BOTTOM;
+		flags = PatchTranslation::AlignBottom;
 
-		V_DrawNumPatchFS(ST_X, y, BG, stbarbg.lumpnum, CR_DEFAULT, flags);
+		V_DrawNumPatchFS(ST_X, y, BG, stbarbg.lumpnum, ColorRange::Default, flags);
 		if(!deathmatch)
 		{
-			V_DrawNumPatch(ST_ARMSBGX, y, BG, armsbg.lumpnum, CR_DEFAULT, static_cast<enum patch_translation_e>(flags));
+			V_DrawNumPatch(ST_ARMSBGX, y, BG, armsbg.lumpnum, ColorRange::Default, static_cast<PatchTranslation>(flags));
 		}
 
 		// killough 3/7/98: make face background change with displayplayer
 		if(netgame)
 		{
 			V_DrawNumPatch(ST_FX, y, BG, faceback.lumpnum,
-				displayplayer ? CR_LIMIT+displayplayer : CR_DEFAULT,
-				static_cast<enum patch_translation_e>(displayplayer ? (VPT_TRANS | VPT_ALIGN_BOTTOM) : flags));
+				displayplayer ? static_cast<ColorRange>(std::to_underlying(ColorRange::Limit) + displayplayer) : ColorRange::Default,
+				static_cast<PatchTranslation>(displayplayer ? (PatchTranslation::Trans | PatchTranslation::AlignBottom) : flags));
 		}
-		V_CopyRect(BG, FG, ST_X + ST_SCALED_OFFSETX, SCREENHEIGHT - ST_SCALED_HEIGHT, ST_SCALED_WIDTH, ST_SCALED_HEIGHT, VPT_NONE);
+		V_CopyRect(BG, FG, ST_X + ST_SCALED_OFFSETX, SCREENHEIGHT - ST_SCALED_HEIGHT, ST_SCALED_WIDTH, ST_SCALED_HEIGHT, PatchTranslation::None);
 	}
 }
 
@@ -489,7 +491,7 @@ static void ST_updateFaceWidget()
 			// picking up bonus
 			doevilgrin = false;
 
-			for(i = 0; i < NUMWEAPONS; i++)
+			for(i = 0; i < std::to_underlying(WeaponType::Count); i++)
 			{
 				if(oldweaponsowned[i] != plyr->weaponowned[i])
 				{
@@ -518,13 +520,13 @@ static void ST_updateFaceWidget()
 			// was due to inversion of this test:
 			// if(plyr->health - st_oldhealth > ST_MUCHPAIN)
 			// e6y: compatibility optioned
-			if((comp[comp_ouchface] ? (plyr->health - st_oldhealth) : (st_oldhealth - plyr->health)) > ST_MUCHPAIN)
+			if((comp[std::to_underlying(CompOption::OuchFace)] ? (plyr->health - st_oldhealth) : (st_oldhealth - plyr->health)) > ST_MUCHPAIN)
 			{
 				// e6y
 				// There are TWO bugs in the ouch face code.
 				// Not only was the condition reversed, but the priority system is
 				// broken in a way that makes the face not work with monster damage.
-				if(!comp[comp_ouchface])
+				if(!comp[std::to_underlying(CompOption::OuchFace)])
 					priority = 8;
 
 				st_facecount = ST_TURNCOUNT;
@@ -581,7 +583,7 @@ static void ST_updateFaceWidget()
 			// was due to inversion of this test:
 			// if(plyr->health - st_oldhealth > ST_MUCHPAIN)
 			// e6y: compatibility optioned
-			if((comp[comp_ouchface] ? (plyr->health - st_oldhealth) : (st_oldhealth - plyr->health)) > ST_MUCHPAIN)
+			if((comp[std::to_underlying(CompOption::OuchFace)] ? (plyr->health - st_oldhealth) : (st_oldhealth - plyr->health)) > ST_MUCHPAIN)
 			{
 				priority = 7;
 				st_facecount = ST_TURNCOUNT;
@@ -619,7 +621,7 @@ static void ST_updateFaceWidget()
 	{
 		// invulnerability
 		if((plyr->cheats & CF_GODMODE)
-			|| plyr->powers[pw_invulnerability])
+			|| plyr->powers[std::to_underlying(PowerType::Invulnerability)])
 		{
 			priority = 4;
 
@@ -653,10 +655,10 @@ static void ST_updateWidgets()
 	// must redirect the pointer if the ready weapon has changed.
 	//  if (w_ready.data != plyr->readyweapon)
 	//  {
-	if(weaponinfo[plyr->readyweapon].ammo == am_noammo)
+	if(weaponinfo[std::to_underlying(plyr->readyweapon)].ammo == AmmoType::NoAmmo)
 		w_ready.num = &largeammo;
 	else
-		w_ready.num = &plyr->ammo[weaponinfo[plyr->readyweapon].ammo];
+		w_ready.num = &plyr->ammo[std::to_underlying(weaponinfo[std::to_underlying(plyr->readyweapon)].ammo)];
 	//{
 	// static int tic=0;
 	// static int dir=-1;
@@ -666,7 +668,7 @@ static void ST_updateWidgets()
 	//   dir = 1;
 	// tic++;
 	// }
-	w_ready.data = plyr->readyweapon;
+	w_ready.data = std::to_underlying(plyr->readyweapon);
 
 	// if (*w_ready.on)
 	//  STlib_updateNum(&w_ready, true);
@@ -724,10 +726,10 @@ static void ST_doPaletteStuff()
 	int palette;
 	int cnt = dsda_PainPalette() ? plyr->damagecount : 0;
 
-	if(dsda_PowerPalette() && plyr->powers[pw_strength])
+	if(dsda_PowerPalette() && plyr->powers[std::to_underlying(PowerType::Strength)])
 	{
 		// slowly fade the berzerk out
-		int bzc = 12 - (plyr->powers[pw_strength] >> 6);
+		int bzc = 12 - (plyr->powers[std::to_underlying(PowerType::Strength)] >> 6);
 		if(bzc > cnt)
 			cnt = bzc;
 	}
@@ -738,7 +740,7 @@ static void ST_doPaletteStuff()
 		// radiation suit palette is used to tint the screen green,
 		// as though the player is being covered in goo by an
 		// attacking flemoid.
-		if(gamemission == tc_chex)
+		if(gamemission == GameMission::TcChex)
 		{
 			palette = RADIATIONPAL;
 		}
@@ -750,7 +752,7 @@ static void ST_doPaletteStuff()
 
 			/* cph 2006/08/06 - if in the menu, reduce the red tint - navigating to
 			* load a game can be tricky if the screen is all red */
-			if(menuactive) palette >>= 1;
+			if(menuactive != MenuActive::Inactive) palette >>= 1;
 
 			palette += STARTREDPALS;
 		}
@@ -762,7 +764,7 @@ static void ST_doPaletteStuff()
 			palette = NUMBONUSPALS - 1;
 		palette += STARTBONUSPALS;
 	}
-	else if(dsda_PowerPalette() && (plyr->powers[pw_ironfeet] > 4 * 32 || plyr->powers[pw_ironfeet] & 8))
+	else if(dsda_PowerPalette() && (plyr->powers[std::to_underlying(PowerType::IronFeet)] > 4 * 32 || plyr->powers[std::to_underlying(PowerType::IronFeet)] & 8))
 		palette = RADIATIONPAL;
 	else
 		palette = 0;
@@ -777,7 +779,7 @@ extern "C" void M_ChangeApplyPalette()
 {
 	st_palette = -1;
 
-	if(in_game && gamestate == GS_LEVEL)
+	if(in_game && gamestate == GameState::Level)
 	{
 		if(raven)
 			SB_PaletteFlash(true);
@@ -788,7 +790,7 @@ extern "C" void M_ChangeApplyPalette()
 		V_SetPalette(0);
 }
 
-int ST_HealthColor(int health)
+ColorRange ST_HealthColor(int health)
 {
 	if(health < hud_health_red)
 		return cr_health_bad;
@@ -811,11 +813,11 @@ static void ST_drawWidgets(dboolean refresh)
 	st_fragson = deathmatch && st_statusbaron;
 
 	//jff 2/16/98 make color of ammo depend on amount
-	if(*w_ready.num == plyr->maxammo[weaponinfo[w_ready.data].ammo])
+	if(*w_ready.num == plyr->maxammo[std::to_underlying(weaponinfo[w_ready.data].ammo)])
 		STlib_updateNum(&w_ready, cr_ammo_full, refresh);
 	else
 	{
-		int ammopct = P_AmmoPercent(plyr, w_ready.data);
+		int ammopct = P_AmmoPercent(plyr, static_cast<WeaponType>(w_ready.data));
 
 		if(ammopct < hud_ammo_red)
 			STlib_updateNum(&w_ready, cr_ammo_bad, refresh);
@@ -827,8 +829,8 @@ static void ST_drawWidgets(dboolean refresh)
 
 	for(i = 0; i < 4; i++)
 	{
-		STlib_updateNum(&w_ammo[i], CR_DEFAULT, refresh); //jff 2/16/98 no xlation
-		STlib_updateNum(&w_maxammo[i], CR_DEFAULT, refresh);
+		STlib_updateNum(&w_ammo[i], ColorRange::Default, refresh); //jff 2/16/98 no xlation
+		STlib_updateNum(&w_maxammo[i], ColorRange::Default, refresh);
 	}
 
 	//jff 2/16/98 make color of health depend on amount
@@ -850,7 +852,7 @@ static void ST_drawWidgets(dboolean refresh)
 	for(i = 0; i < 3; i++)
 		STlib_updateMultIcon(&w_keyboxes[i], refresh);
 
-	STlib_updateNum(&w_frags, CR_DEFAULT, refresh);
+	STlib_updateNum(&w_frags, ColorRange::Default, refresh);
 }
 
 void ST_SetResolution()
@@ -931,7 +933,7 @@ static void ST_loadGraphics()
 	R_SetPatchNum(&tallpercent, "STTPRCNT");
 
 	// key cards
-	for(i = 0; i < DOOM_NUMCARDS + 3; i++) //jff 2/23/98 show both keys too
+	for(i = 0; i < std::to_underlying(Card::DoomCount) + 3; i++) //jff 2/23/98 show both keys too
 	{
 		snprintf(namebuf, sizeof(namebuf), "STKEYS%d", i);
 		R_SetPatchNum(&keys[i], namebuf);
@@ -1008,7 +1010,7 @@ static void ST_initData()
 
 	st_oldhealth = -1;
 
-	for(i = 0; i < NUMWEAPONS; i++)
+	for(i = 0; i < std::to_underlying(WeaponType::Count); i++)
 		oldweaponsowned[i] = plyr->weaponowned[i];
 
 	for(i = 0; i < 3; i++)
@@ -1026,12 +1028,12 @@ static void ST_createWidgets()
 		ST_AMMOX,
 		ST_AMMOY,
 		tallnum,
-		&plyr->ammo[weaponinfo[plyr->readyweapon].ammo],
+		&plyr->ammo[std::to_underlying(weaponinfo[std::to_underlying(plyr->readyweapon)].ammo)],
 		&st_statusbaron,
 		ST_AMMOWIDTH);
 
 	// the last weapon type
-	w_ready.data = plyr->readyweapon;
+	w_ready.data = std::to_underlying(plyr->readyweapon);
 
 	// health percentage
 	STlib_initPercent(&w_health,
@@ -1074,7 +1076,7 @@ static void ST_createWidgets()
 		ST_ARMORX,
 		ST_ARMORY,
 		tallnum,
-		&plyr->armorpoints[ARMOR_ARMOR],
+		&plyr->armorpoints[std::to_underlying(ArmorType::Armor)],
 		&st_statusbaron, &tallpercent);
 
 	// keyboxes 0-2

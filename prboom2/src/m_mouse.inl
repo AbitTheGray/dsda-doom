@@ -39,7 +39,7 @@ dboolean M_MouseHovered(int index)
 		currentMenu &&
 		index >= 0 &&
 		index < currentMenu->numitems &&
-		currentMenu->menuitems[index].status != M_ITEM_SKIP;
+		currentMenu->menuitems[index].status != MenuItemType::Skip;
 }
 
 static dboolean M_MouseTabHovered(int page)
@@ -91,7 +91,7 @@ static void M_MouseSetLogicalPosition(int x, int y)
 	int viewport_h = viewport_rect.h > 0 ? viewport_rect.h : (SCREENHEIGHT > 0 ? SCREENHEIGHT : MENU_MOUSE_HEIGHT);
 	int screen_w = SCREENWIDTH > 0 ? SCREENWIDTH : BASE_WIDTH;
 	int screen_h = SCREENHEIGHT > 0 ? SCREENHEIGHT : MENU_MOUSE_HEIGHT;
-	stretch_param_t* stretch = dsda_StretchParams(VPT_STRETCH);
+	stretch_param_t* stretch = dsda_StretchParams(PatchTranslation::Stretch);
 
 	menu_mouse_in_viewport = x >= 0 && y >= 0 && x < viewport_w && y < viewport_h;
 
@@ -142,7 +142,7 @@ static void M_MouseReadPosition()
 
 static int M_MouseWheelAction(event_t* ev)
 {
-	if(ev->type != ev_keydown && ev->type != ev_keyup)
+	if(ev->type != EventType::KeyDown && ev->type != EventType::KeyUp)
 		return MENU_NULL;
 
 	switch(ev->data1.i)
@@ -278,7 +278,7 @@ static dboolean M_MouseMainItemAtPointer(int* index)
 	{
 		menu_mouse_rect_t rect;
 
-		if(currentMenu->menuitems[i].status == M_ITEM_SKIP)
+		if(currentMenu->menuitems[i].status == MenuItemType::Skip)
 			continue;
 
 		if(M_MouseMainItemRect(&currentMenu->menuitems[i], i, lumps_missing, &rect) &&
@@ -405,14 +405,14 @@ static int M_MouseThermoValue(int x, int slider_x, int width, int low, int high)
 
 static dboolean M_MouseSetSoundSlider(int index)
 {
-	dsda_config_identifier_t id;
+	ConfigId id;
 	int value;
 
 	if(currentMenu != &SoundDef || index < 0 || index >= currentMenu->numitems ||
-		currentMenu->menuitems[index].status != M_ITEM_THERMO)
+		currentMenu->menuitems[index].status != MenuItemType::Thermo)
 		return false;
 
-	id = index == sfx_vol ? dsda_config_sfx_volume : dsda_config_music_volume;
+	id = index == std::to_underlying(SoundItem::SfxVol) ? ConfigId::SfxVolume : ConfigId::MusicVolume;
 	value = M_MouseThermoValue(menu_mouse_x, raven ? SoundDef.x - 8 : SoundDef.x,
 		16, 0, 15);
 
@@ -420,10 +420,10 @@ static dboolean M_MouseSetSoundSlider(int index)
 	{
 		dsda_UpdateIntConfig(id, value, true);
 
-		if(index == sfx_vol && dsda_IntConfig(dsda_config_mute_sfx))
-			dsda_ToggleConfig(dsda_config_mute_sfx, true);
-		else if(index == music_vol && dsda_IntConfig(dsda_config_mute_music))
-			dsda_ToggleConfig(dsda_config_mute_music, true);
+		if(index == std::to_underlying(SoundItem::SfxVol) && dsda_IntConfig(ConfigId::MuteSfx))
+			dsda_ToggleConfig(ConfigId::MuteSfx, true);
+		else if(index == std::to_underlying(SoundItem::MusicVol) && dsda_IntConfig(ConfigId::MuteMusic))
+			dsda_ToggleConfig(ConfigId::MuteMusic, true);
 
 		S_StartOptionalSound(g_sfx_mnusli, g_sfx_stnmov, false);
 	}
@@ -450,7 +450,7 @@ static dboolean M_MouseSoundSliderAtPointer(int* index)
 	{
 		int y;
 
-		if(currentMenu->menuitems[i].status != M_ITEM_THERMO)
+		if(currentMenu->menuitems[i].status != MenuItemType::Thermo)
 			continue;
 
 		y = SoundDef.y + row_height * (i + 1);
@@ -1073,7 +1073,7 @@ static dboolean M_MouseMenuAction(int action, event_t* ev)
 	if(messageToPrint)
 		return M_MessageResponder(MENU_NULL, action, ev);
 
-	if(!menuactive)
+	if(menuactive == MenuActive::Inactive)
 		return false;
 
 	if(currentMenu == &LoadDef || currentMenu == &SaveDef)
@@ -1095,7 +1095,7 @@ static dboolean M_MouseWheelResponder(event_t* ev, int action)
 	if(action == MENU_NULL)
 		return false;
 
-	if(ev->type == ev_keyup)
+	if(ev->type == EventType::KeyUp)
 		return !M_MouseBindingCaptureActive();
 
 	if(M_MouseBindingCaptureActive())
@@ -1113,7 +1113,7 @@ static dboolean M_MouseWheelResponder(event_t* ev, int action)
 
 static dboolean M_MouseBindingCaptureResponder(event_t* ev)
 {
-	if(ev->type == ev_mouse)
+	if(ev->type == EventType::Mouse)
 	{
 		int buttons = ev->data1.i;
 
@@ -1127,7 +1127,7 @@ static dboolean M_MouseBindingCaptureResponder(event_t* ev)
 
 static dboolean M_MouseSoundSliderTitleAtPointer()
 {
-	return currentMenu->menuitems[itemOn].status == M_ITEM_THERMO;
+	return currentMenu->menuitems[itemOn].status == MenuItemType::Thermo;
 }
 
 static dboolean M_MouseMotionResponder()
@@ -1141,19 +1141,19 @@ static dboolean M_MouseMotionResponder()
 	if(M_MouseColorChipAtPointer())
 		return true;
 
-	if(menuactive && M_MouseUpdateTabHover())
+	if(menuactive != MenuActive::Inactive && M_MouseUpdateTabHover())
 	{
 		M_MouseClearMainHover();
 		return true;
 	}
 
-	if(menuactive && setup_active && !setup_select)
+	if(menuactive != MenuActive::Inactive && setup_active && !setup_select)
 	{
 		M_MouseUpdateSetupHover();
 		return true;
 	}
 
-	if(menuactive)
+	if(menuactive != MenuActive::Inactive)
 	{
 		M_MouseUpdateMainHover();
 		return true;
@@ -1169,7 +1169,7 @@ static dboolean M_MouseLeftPressResponder(event_t* ev)
 	if(messageToPrint)
 		return M_MouseMenuAction(MENU_ENTER, ev);
 
-	if(!menuactive)
+	if(menuactive == MenuActive::Inactive)
 		return false;
 
 	if(inhelpscreens)
@@ -1239,12 +1239,12 @@ static dboolean M_MouseResponder(event_t* ev)
 {
 	int action = M_MouseWheelAction(ev);
 
-	if(!menuactive && !messageToPrint)
+	if(menuactive == MenuActive::Inactive && !messageToPrint)
 	{
-		dboolean click_to_open_menu = (gamestate == GS_DEMOSCREEN ||
+		dboolean click_to_open_menu = (gamestate == GameState::Demoscreen ||
 			reelplayback);
 
-		if(click_to_open_menu && ev->type == ev_mouse &&
+		if(click_to_open_menu && ev->type == EventType::Mouse &&
 			(ev->data1.i & MENU_MOUSE_LEFT))
 		{
 			M_MouseReadPosition();
@@ -1268,7 +1268,7 @@ static dboolean M_MouseResponder(event_t* ev)
 	if(action != MENU_NULL)
 		return false;
 
-	if(ev->type != ev_mouse && ev->type != ev_mousemotion)
+	if(ev->type != EventType::Mouse && ev->type != EventType::MouseMotion)
 		return false;
 
 	M_MouseReadPosition();
@@ -1279,7 +1279,7 @@ static dboolean M_MouseResponder(event_t* ev)
 	if(M_MouseBindingCaptureActive())
 		return M_MouseBindingCaptureResponder(ev);
 
-	if(ev->type == ev_mousemotion)
+	if(ev->type == EventType::MouseMotion)
 		return M_MouseMotionResponder();
 
 	return M_MouseButtonResponder(ev);

@@ -8,15 +8,12 @@
 
 extern "C" void* Z_MallocLevel(size_t size);
 extern "C" char* Z_StrdupLevel(const char* s);
-extern "C"
-{
 #include "doomdef.hpp"
-}
 
 #include "scanner.hpp"
 #include "udmf.hpp"
 
-udmf_namespace_t udmf_namespace = UDMF_NONE;
+UdmfNamespace udmf_namespace = UdmfNamespace::None;
 
 std::vector<udmf_line_t> udmf_lines;
 std::vector<udmf_side_t> udmf_sides;
@@ -26,11 +23,11 @@ std::vector<udmf_thing_t> udmf_things;
 
 static void dsda_SkipValue(Scanner& scanner)
 {
-	if(scanner.CheckToken('='))
+	if(scanner.CheckToken(static_cast<TokenType>('=')))
 	{
 		while(scanner.TokensLeft())
 		{
-			if(scanner.CheckToken(';'))
+			if(scanner.CheckToken(static_cast<TokenType>(';')))
 				break;
 
 			scanner.GetNextToken();
@@ -39,17 +36,17 @@ static void dsda_SkipValue(Scanner& scanner)
 		return;
 	}
 
-	scanner.MustGetToken('{');
+	scanner.MustGetToken(static_cast<TokenType>('{'));
 	{
 		int brace_count = 1;
 
 		while(scanner.TokensLeft())
 		{
-			if(scanner.CheckToken('}'))
+			if(scanner.CheckToken(static_cast<TokenType>('}')))
 			{
 				--brace_count;
 			}
-			else if(scanner.CheckToken('{'))
+			else if(scanner.CheckToken(static_cast<TokenType>('{')))
 			{
 				++brace_count;
 			}
@@ -78,49 +75,49 @@ static char* dsda_FloatString(Scanner& scanner)
 	return buffer;
 }
 
-#define SCAN_INT(x)  { scanner.MustGetToken('='); \
+#define SCAN_INT(x)  { scanner.MustGetToken(static_cast<TokenType>('=')); \
                        scanner.MustGetInteger(); \
                        x = scanner.number; \
-                       scanner.MustGetToken(';'); }
+                       scanner.MustGetToken(static_cast<TokenType>(';')); }
 
-#define SCAN_FLOAT(x) { scanner.MustGetToken('='); \
+#define SCAN_FLOAT(x) { scanner.MustGetToken(static_cast<TokenType>('=')); \
                         scanner.MustGetFloat(); \
                         x = scanner.decimal; \
-                        scanner.MustGetToken(';'); }
+                        scanner.MustGetToken(static_cast<TokenType>(';')); }
 
-#define SCAN_FLAG(x, f) { scanner.MustGetToken('='); \
-                          scanner.MustGetToken(TK_BoolConst); \
+#define SCAN_FLAG(x, f) { scanner.MustGetToken(static_cast<TokenType>('=')); \
+                          scanner.MustGetToken(TokenType::BoolConst); \
                           if (scanner.boolean) \
                             x |= f; \
-                          scanner.MustGetToken(';'); }
+                          scanner.MustGetToken(static_cast<TokenType>(';')); }
 
-#define SCAN_STRING_N(x, n) { scanner.MustGetToken('='); \
-                              scanner.MustGetToken(TK_StringConst); \
+#define SCAN_STRING_N(x, n) { scanner.MustGetToken(static_cast<TokenType>('=')); \
+                              scanner.MustGetToken(TokenType::StringConst); \
                               strncpy(x, scanner.string, n); \
-                              scanner.MustGetToken(';'); }
+                              scanner.MustGetToken(static_cast<TokenType>(';')); }
 
-#define SCAN_STRING(x) { scanner.MustGetToken('='); \
-                         scanner.MustGetToken(TK_StringConst); \
+#define SCAN_STRING(x) { scanner.MustGetToken(static_cast<TokenType>('=')); \
+                         scanner.MustGetToken(TokenType::StringConst); \
                          x = Z_StrdupLevel(scanner.string); \
-                         scanner.MustGetToken(';'); }
+                         scanner.MustGetToken(static_cast<TokenType>(';')); }
 
-#define SCAN_FLOAT_STRING(x) { scanner.MustGetToken('='); \
+#define SCAN_FLOAT_STRING(x) { scanner.MustGetToken(static_cast<TokenType>('=')); \
                                scanner.MustGetFloat(); \
                                x = dsda_FloatString(scanner); \
-                               scanner.MustGetToken(';'); }
+                               scanner.MustGetToken(static_cast<TokenType>(';')); }
 
 static void dsda_ParseUDMFLineDef(Scanner& scanner)
 {
 	udmf_line_t line = {0};
 
-	line.id = (udmf_namespace == UDMF_DSDA || udmf_namespace == UDMF_HEXEN) ? -1 : 0;
+	line.id = (udmf_namespace == UdmfNamespace::Dsda || udmf_namespace == UdmfNamespace::Hexen) ? -1 : 0;
 	line.sideback = -1;
 	line.alpha = 1.0;
 
-	scanner.MustGetToken('{');
-	while(!scanner.CheckToken('}'))
+	scanner.MustGetToken(static_cast<TokenType>('{'));
+	while(!scanner.CheckToken(static_cast<TokenType>('}')))
 	{
-		scanner.MustGetToken(TK_Identifier);
+		scanner.MustGetToken(TokenType::Identifier);
 
 		if(scanner.StringMatch("id"))
 		{
@@ -397,10 +394,10 @@ static void dsda_ParseUDMFSideDef(Scanner& scanner)
 	side.scalex_bottom = 1.f;
 	side.scaley_bottom = 1.f;
 
-	scanner.MustGetToken('{');
-	while(!scanner.CheckToken('}'))
+	scanner.MustGetToken(static_cast<TokenType>('{'));
+	while(!scanner.CheckToken(static_cast<TokenType>('}')))
 	{
-		scanner.MustGetToken(TK_Identifier);
+		scanner.MustGetToken(TokenType::Identifier);
 
 		if(scanner.StringMatch("offsetx"))
 		{
@@ -575,10 +572,10 @@ static void dsda_ParseUDMFVertex(Scanner& scanner)
 {
 	udmf_vertex_t vertex = {nullptr};
 
-	scanner.MustGetToken('{');
-	while(!scanner.CheckToken('}'))
+	scanner.MustGetToken(static_cast<TokenType>('{'));
+	while(!scanner.CheckToken(static_cast<TokenType>('}')))
 	{
-		scanner.MustGetToken(TK_Identifier);
+		scanner.MustGetToken(TokenType::Identifier);
 
 		if(scanner.StringMatch("x"))
 		{
@@ -609,10 +606,10 @@ static void dsda_ParseUDMFSector(Scanner& scanner)
 	sector.gravity = "1.0";
 	sector.damageinterval = 32;
 
-	scanner.MustGetToken('{');
-	while(!scanner.CheckToken('}'))
+	scanner.MustGetToken(static_cast<TokenType>('{'));
+	while(!scanner.CheckToken(static_cast<TokenType>('}')))
 	{
-		scanner.MustGetToken(TK_Identifier);
+		scanner.MustGetToken(TokenType::Identifier);
 
 		if(scanner.StringMatch("heightfloor"))
 		{
@@ -832,10 +829,10 @@ static void dsda_ParseUDMFThing(Scanner& scanner)
 	thing.floatbobphase = -1;
 	thing.alpha = 1.0;
 
-	scanner.MustGetToken('{');
-	while(!scanner.CheckToken('}'))
+	scanner.MustGetToken(static_cast<TokenType>('{'));
+	while(!scanner.CheckToken(static_cast<TokenType>('}')))
 	{
-		scanner.MustGetToken(TK_Identifier);
+		scanner.MustGetToken(TokenType::Identifier);
 
 		if(scanner.StringMatch("id"))
 		{
@@ -1004,35 +1001,35 @@ static void dsda_ParseUDMFThing(Scanner& scanner)
 
 static void dsda_ParseUDMFIdentifier(Scanner& scanner)
 {
-	scanner.MustGetToken(TK_Identifier);
+	scanner.MustGetToken(TokenType::Identifier);
 
 	if(scanner.StringMatch("namespace"))
 	{
-		scanner.MustGetToken('=');
-		scanner.MustGetToken(TK_StringConst);
+		scanner.MustGetToken(static_cast<TokenType>('='));
+		scanner.MustGetToken(TokenType::StringConst);
 
 		if(!stricmp(scanner.string, "doom") && !raven)
 		{
-			udmf_namespace = UDMF_DOOM;
+			udmf_namespace = UdmfNamespace::Doom;
 		}
 		else if(!stricmp(scanner.string, "heretic") && heretic)
 		{
-			udmf_namespace = UDMF_HERETIC;
+			udmf_namespace = UdmfNamespace::Heretic;
 		}
 		else if(!stricmp(scanner.string, "hexen") && hexen)
 		{
-			udmf_namespace = UDMF_HEXEN;
+			udmf_namespace = UdmfNamespace::Hexen;
 		}
 		else if((!stricmp(scanner.string, "dsda") || !stricmp(scanner.string, "zdoom")) && !raven)
 		{
-			udmf_namespace = UDMF_DSDA;
+			udmf_namespace = UdmfNamespace::Dsda;
 		}
 		else
 		{
 			scanner.ErrorF("Unsupported UDMF namespace \"%s\"", scanner.string);
 		}
 
-		scanner.MustGetToken(';');
+		scanner.MustGetToken(static_cast<TokenType>(';'));
 	}
 	else if(scanner.StringMatch("linedef"))
 	{

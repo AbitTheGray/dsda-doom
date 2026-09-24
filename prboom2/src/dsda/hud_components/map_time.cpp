@@ -30,7 +30,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 		str,
 		max_size,
 		"%s%02d:%02d:%02d\n",
-		dsda_TextColor(dsda_tc_map_time_level),
+		dsda_TextColor(TextColorIndex::MapTimeLevel),
 		level_time / 3600,
 		(level_time % 3600) / 60,
 		level_time % 60
@@ -41,14 +41,14 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 			str + length,
 			max_size - length,
 			"%s%02d:%02d:%02d\n",
-			dsda_TextColor(dsda_tc_map_time_total),
+			dsda_TextColor(TextColorIndex::MapTimeTotal),
 			total_time / 3600,
 			(total_time % 3600) / 60,
 			total_time % 60
 		);
 }
 
-void dsda_InitMapTimeHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitMapTimeHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

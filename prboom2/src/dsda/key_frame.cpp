@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Key Frame
 
+#include <utility>
+
 #include <time.h>
 
 #include "doomstat.hpp"
@@ -176,9 +178,9 @@ void dsda_InitAutoKeyFrames()
 {
 	int i;
 
-	dsda_auto_key_frame_interval = dsda_IntConfig(dsda_config_auto_key_frame_interval);
-	dsda_auto_key_frame_depth = dsda_IntConfig(dsda_config_auto_key_frame_depth);
-	dsda_auto_key_frame_timeout = dsda_IntConfig(dsda_config_auto_key_frame_timeout);
+	dsda_auto_key_frame_interval = dsda_IntConfig(ConfigId::AutoKeyFrameInterval);
+	dsda_auto_key_frame_depth = dsda_IntConfig(ConfigId::AutoKeyFrameDepth);
+	dsda_auto_key_frame_timeout = dsda_IntConfig(ConfigId::AutoKeyFrameTimeout);
 
 	auto_kf_size = autoKeyFrameDepth();
 
@@ -285,7 +287,7 @@ void dsda_RestoreKeyFrame(dsda_key_frame_t* key_frame, dboolean skip_wipe)
 		return;
 	}
 
-	dsda_TrackFeature(uf_keyframe);
+	dsda_TrackFeature(FeatureFlag::Keyframe);
 
 	if(skip_wipe || dsda_BuildMode())
 		dsda_SkipNextWipe();
@@ -362,7 +364,7 @@ void dsda_ContinueKeyFrame()
 {
 	dsda_arg_t* arg;
 
-	arg = dsda_Arg(dsda_arg_from_key_frame);
+	arg = dsda_Arg(ArgId::FromKeyFrame);
 	if(arg->found)
 	{
 		dsda_RestoreKeyFrameFile(arg->value.v_string);
@@ -398,8 +400,8 @@ void dsda_UpdateAutoKeyFrames()
 	if(
 		auto_kf_timed_out ||
 		auto_kf_size == 0 ||
-		gamestate != GS_LEVEL ||
-		gameaction != ga_nothing
+		gamestate != GameState::Level ||
+		gameaction != GameAction::Nothing
 	)
 		return;
 
@@ -427,9 +429,9 @@ void dsda_UpdateAutoKeyFrames()
 		{
 			unsigned long long elapsed_time;
 
-			dsda_StartTimer(dsda_timer_key_frame);
+			dsda_StartTimer(DsdaTimer::KeyFrame);
 			dsda_StoreKeyFrame(current_key_frame, false, false);
-			elapsed_time = dsda_ElapsedTimeMS(dsda_timer_key_frame);
+			elapsed_time = dsda_ElapsedTimeMS(DsdaTimer::KeyFrame);
 
 			if(autoKeyFrameTimeout())
 			{
@@ -458,7 +460,7 @@ void dsda_UpdatePlaybackKeyFrames()
 	int current_time;
 	int interval_tics;
 
-	if(gameaction != ga_nothing || playback_kf_size == 0) return;
+	if(gameaction != GameAction::Nothing || playback_kf_size == 0) return;
 
 	current_time = totalleveltimes + leveltime;
 	interval_tics = (demo_tics_count * demo_playerscount) / playback_kf_size;

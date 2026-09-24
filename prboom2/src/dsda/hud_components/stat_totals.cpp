@@ -57,9 +57,9 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 		max_kill_requirement = totalkills;
 	}
 
-	killcolor = (fullkillcount >= max_kill_requirement ? dsda_TextColor(dsda_tc_exhud_totals_max) : dsda_TextColor(dsda_tc_exhud_totals_value));
-	secretcolor = (fullsecretcount >= totalsecret ? dsda_TextColor(dsda_tc_exhud_totals_max) : dsda_TextColor(dsda_tc_exhud_totals_value));
-	itemcolor = (fullitemcount >= totalitems ? dsda_TextColor(dsda_tc_exhud_totals_max) : dsda_TextColor(dsda_tc_exhud_totals_value));
+	killcolor = (fullkillcount >= max_kill_requirement ? dsda_TextColor(TextColorIndex::ExhudTotalsMax) : dsda_TextColor(TextColorIndex::ExhudTotalsValue));
+	secretcolor = (fullsecretcount >= totalsecret ? dsda_TextColor(TextColorIndex::ExhudTotalsMax) : dsda_TextColor(TextColorIndex::ExhudTotalsValue));
+	itemcolor = (fullitemcount >= totalitems ? dsda_TextColor(TextColorIndex::ExhudTotalsMax) : dsda_TextColor(TextColorIndex::ExhudTotalsValue));
 
 	if(local->include_kills)
 	{
@@ -68,7 +68,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str,
 				max_size,
 				"%s%s%s%d/%d%s",
-				dsda_TextColor(dsda_tc_exhud_totals_label),
+				dsda_TextColor(TextColorIndex::ExhudTotalsLabel),
 				local->label_k,
 				killcolor, fullkillcount, max_kill_requirement,
 				local->stat_separator
@@ -78,7 +78,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str,
 				max_size,
 				"%s%s%s%d%s",
-				dsda_TextColor(dsda_tc_exhud_totals_label),
+				dsda_TextColor(TextColorIndex::ExhudTotalsLabel),
 				local->label_k,
 				killcolor, fullkillcount,
 				local->stat_separator
@@ -92,7 +92,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str + length,
 				max_size - length,
 				"%s%s%s%d/%d%s",
-				dsda_TextColor(dsda_tc_exhud_totals_label),
+				dsda_TextColor(TextColorIndex::ExhudTotalsLabel),
 				local->label_i,
 				itemcolor, fullitemcount, totalitems,
 				local->stat_separator
@@ -102,7 +102,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str + length,
 				max_size - length,
 				"%s%s%s%d%s",
-				dsda_TextColor(dsda_tc_exhud_totals_label),
+				dsda_TextColor(TextColorIndex::ExhudTotalsLabel),
 				local->label_i,
 				itemcolor, fullitemcount,
 				local->stat_separator
@@ -116,7 +116,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str + length,
 				max_size - length,
 				"%s%s%s%d/%d",
-				dsda_TextColor(dsda_tc_exhud_totals_label),
+				dsda_TextColor(TextColorIndex::ExhudTotalsLabel),
 				local->label_s,
 				secretcolor, fullsecretcount, totalsecret
 			);
@@ -125,14 +125,14 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 				str + length,
 				max_size - length,
 				"%s%s%s%d",
-				dsda_TextColor(dsda_tc_exhud_totals_label),
+				dsda_TextColor(TextColorIndex::ExhudTotalsLabel),
 				local->label_s,
 				secretcolor, fullsecretcount
 			);
 	}
 }
 
-void dsda_InitStatTotalsHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitStatTotalsHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

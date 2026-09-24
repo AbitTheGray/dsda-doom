@@ -30,22 +30,22 @@ typedef struct stretch_param_s
 	int deltay2;
 } stretch_param_t;
 
-typedef enum
+enum struct PatchStretch : int32_t
 {
-	patch_stretch_not_adjusted,
-	patch_stretch_doom_format,
-	patch_stretch_fit_to_width,
+	NotAdjusted,
+	DoomFormat,
+	FitToWidth,
 
-	patch_stretch_max_config,
+	MaxConfig,
 
-	patch_stretch_ex_text = patch_stretch_max_config,
+	ExText = MaxConfig,
 
-	patch_stretch_max
-} patch_stretch_t;
+	Max
+};
 
 // Raven HUD breaks in "patch_stretch_not_adjusted",
 // so let's use "patch_stretch_doom_format" settings
-#define stretch_hud(a) ((raven && (a) == patch_stretch_not_adjusted) ? patch_stretch_doom_format : (a))
+#define stretch_hud(a) ((raven && (a) == PatchStretch::NotAdjusted) ? PatchStretch::DoomFormat : (a))
 
 extern int wide_offsetx;
 extern int wide_offset2x;
@@ -57,7 +57,7 @@ extern int render_stretch_hud;
 extern int patches_scalex;
 extern int patches_scaley;
 
-stretch_param_t* dsda_StretchParams(int flags);
+stretch_param_t* dsda_StretchParams(PatchTranslation flags);
 void dsda_SetupStretchParams();
 void dsda_EvaluatePatchScale();
 void dsda_UpdateStretchParams();

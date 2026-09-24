@@ -8,12 +8,12 @@
 
 #pragma once
 
+#include "d_player.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_player.hpp"
 
 void P_PlayerThink(player_t* player);
 void P_CalcHeight(player_t* player);
@@ -28,9 +28,9 @@ void P_SetPitch(player_t* player);
 
 int P_GetPlayerNum(player_t* player);
 void P_PlayerRemoveArtifact(player_t* player, int slot);
-void P_PlayerUseArtifact(player_t* player, artitype_t arti);
+void P_PlayerUseArtifact(player_t* player, ArtiType arti);
 void P_PlayerNextArtifact(player_t* player);
-dboolean P_UseArtifact(player_t* player, artitype_t arti);
+dboolean P_UseArtifact(player_t* player, ArtiType arti);
 void P_ChickenPlayerThink(player_t* player);
 dboolean P_UndoPlayerChicken(player_t* player);
 void Raven_P_MovePlayer(player_t* player);

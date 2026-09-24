@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Armor Text HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "armor_text.hpp"
@@ -30,7 +32,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 			str,
 			max_size,
 			"%sA.C. %2d",
-			armor_percent == 0 ? dsda_TextColor(dsda_tc_exhud_armor_zero) : armor_percent <= 50 ? dsda_TextColor(dsda_tc_exhud_armor_one) : dsda_TextColor(dsda_tc_exhud_armor_two),
+			armor_percent == 0 ? dsda_TextColor(TextColorIndex::ExhudArmorZero) : armor_percent <= 50 ? dsda_TextColor(TextColorIndex::ExhudArmorOne) : dsda_TextColor(TextColorIndex::ExhudArmorTwo),
 			armor_percent
 		);
 	}
@@ -40,13 +42,13 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 			str,
 			max_size,
 			"%sARM %3d%%",
-			player->armorpoints[ARMOR_ARMOR] <= 0 ? dsda_TextColor(dsda_tc_exhud_armor_zero) : player->armortype == 1 ? dsda_TextColor(dsda_tc_exhud_armor_one) : dsda_TextColor(dsda_tc_exhud_armor_two),
-			player->armorpoints[ARMOR_ARMOR]
+			player->armorpoints[std::to_underlying(ArmorType::Armor)] <= 0 ? dsda_TextColor(TextColorIndex::ExhudArmorZero) : player->armortype == 1 ? dsda_TextColor(TextColorIndex::ExhudArmorOne) : dsda_TextColor(TextColorIndex::ExhudArmorTwo),
+			player->armorpoints[std::to_underlying(ArmorType::Armor)]
 		);
 	}
 }
 
-void dsda_InitArmorTextHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitArmorTextHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

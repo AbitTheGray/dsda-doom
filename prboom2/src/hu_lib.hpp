@@ -5,14 +5,13 @@
 
 #pragma once
 
+#include "v_video.hpp"  //jff 2/16/52 include color range defs
+#include "dsda/font.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "v_video.hpp"  //jff 2/16/52 include color range defs
-
-#include "dsda/font.hpp"
 
 /* background and foreground screen numbers
  * different from other modules. */
@@ -32,7 +31,7 @@ typedef struct
 	int sc;              // start character
 	//const char *cr;                       //jff 2/16/52 output color range
 	// Proff - Made this an int again. Needed for OpenGL
-	int cm;              //jff 2/16/52 output color range
+	ColorRange cm;              //jff 2/16/52 output color range
 
 	// killough 1/23/98: Support multiple lines:
 #define MAXLINES 25
@@ -42,7 +41,7 @@ typedef struct
 	int len;                                 // current line length
 
 	// e6y: wide-res
-	enum patch_translation_e flags;
+	PatchTranslation flags;
 
 	int line_height;
 	int kerning; // Heretic/Hexen -1 kerning
@@ -62,8 +61,8 @@ void HUlib_initTextLine
 	int x,
 	int y,
 	const dsda_font_t* f,
-	int cm, //jff 2/16/98 add color range parameter
-	enum patch_translation_e flags
+	ColorRange cm, //jff 2/16/98 add color range parameter
+	PatchTranslation flags
 );
 
 // returns success
@@ -76,7 +75,7 @@ void HUlib_drawOffsetTextLine(hu_textline_t* l, int offset);
 //e6y
 void HUlib_setTextXCenter(hu_textline_t* t);
 
-char HUlib_Color(int cm);
+char HUlib_Color(ColorRange cm);
 
 #ifdef __cplusplus
 }

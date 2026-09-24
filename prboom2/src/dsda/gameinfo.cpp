@@ -5,13 +5,10 @@
 
 #include <string.h>
 
-extern "C"
-{
 #include "d_main.hpp"
 #include "w_wad.hpp"
 #include "lprintf.hpp"
 #include "z_zone.hpp"
-}
 
 #include "scanner.hpp"
 
@@ -28,7 +25,7 @@ void dsda_ParseGameInfoLine(Scanner& scanner)
 
 	if(!stricmp(scanner.string, "IWAD"))
 	{
-		scanner.MustGetToken('=');
+		scanner.MustGetToken(static_cast<TokenType>('='));
 		scanner.MustGetString();
 
 		if(iwadlump)

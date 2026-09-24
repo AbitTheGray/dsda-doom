@@ -22,12 +22,12 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 		str,
 		max_size,
 		"%s%4d",
-		dsda_render_stats_fps < TICRATE ? dsda_TextColor(dsda_tc_exhud_fps_bad) : dsda_TextColor(dsda_tc_exhud_fps_fine),
+		dsda_render_stats_fps < TICRATE ? dsda_TextColor(TextColorIndex::ExhudFpsBad) : dsda_TextColor(TextColorIndex::ExhudFpsFine),
 		dsda_render_stats_fps
 	);
 }
 
-void dsda_InitFPSHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitFPSHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

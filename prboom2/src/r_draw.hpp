@@ -6,34 +6,37 @@
 
 #pragma once
 
+#include "r_patch.hpp"
+
+#include "r_defs.hpp"
+
+enum struct DrawColumnFlag : uint32_t
+{
+	IsPatch = 0x00000001
+};
+ENUM_FLAGS_FUNC(DrawColumnFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "r_defs.hpp"
-
-enum column_pipeline_e
+enum struct ColumnPipeline : int32_t
 {
-	RDC_PIPELINE_STANDARD,
-	RDC_PIPELINE_TRANSLUCENT,
-	RDC_PIPELINE_TRANSLATED,
-	RDC_PIPELINE_FUZZ,
-	RDC_PIPELINE_MAXPIPELINES,
+	Standard,
+	Translucent,
+	Translated,
+	Fuzz,
+	Count,
 };
 
 // Used to specify what kind of filering you want
-enum draw_filter_type_e
+enum struct DrawFilterType : int32_t
 {
-	RDRAW_FILTER_NONE,
-	RDRAW_FILTER_POINT,
-	RDRAW_FILTER_MAXFILTERS
+	None,
+	Point,
+	Count
 };
-
-typedef enum
-{
-	DRAW_COLUMN_ISPATCH = 0x00000001
-} draw_column_flags_e;
 
 typedef struct draw_column_vars_s* pdraw_column_vars_s;
 typedef void (*R_DrawColumn_f)(pdraw_column_vars_s dcvars);
@@ -53,10 +56,10 @@ typedef struct draw_column_vars_s
 	const byte* nextsource; // first pixel in next column
 	const lighttable_t* colormap;
 	const byte* translation;
-	int edgeslope; // OR'ed RDRAW_EDGESLOPE_*
+	EdgeSlope edgeslope; // OR'ed EdgeSlope values
 	// 1 if R_DrawColumn* is currently drawing a masked column, otherwise 0
 	int drawingmasked;
-	unsigned int flags; //e6y: for detect patches ind colfunc()
+	DrawColumnFlag flags; //e6y: for detect patches ind colfunc()
 
 	// [AR] mark weapon sprite
 	dboolean isplayersprite;
@@ -102,7 +105,7 @@ extern draw_vars_t drawvars;
 extern byte playernumtotrans[MAX_MAXPLAYERS]; // CPhipps - what translation table for what player
 extern byte* translationtables;
 
-R_DrawColumn_f R_GetDrawColumnFunc(enum column_pipeline_e type, enum draw_filter_type_e filterz);
+R_DrawColumn_f R_GetDrawColumnFunc(ColumnPipeline type, DrawFilterType filterz);
 
 // Span blitting for rows, floor/ceiling. No Spectre effect needed.
 void R_DrawSpan(draw_span_vars_t* dsvars);

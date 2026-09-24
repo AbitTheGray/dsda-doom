@@ -5,15 +5,14 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+#include "dsda/mapinfo.hpp"
+#include "dsda/utility.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "p_mobj.hpp"
-
-#include "dsda/mapinfo.hpp"
-#include "dsda/utility.hpp"
 
 int dsda_UNameToMap(int* found, const char* name, int* episode, int* map);
 int dsda_UFirstMap(int* episode, int* map);

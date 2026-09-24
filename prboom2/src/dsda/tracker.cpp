@@ -19,7 +19,7 @@ dsda_tracker_t dsda_tracker[TRACKER_LIMIT];
 static int tracker_map;
 static int tracker_episode;
 
-static int dsda_FindTracker(int type, int id)
+static int dsda_FindTracker(TrackerType type, int id)
 {
 	int i;
 
@@ -51,7 +51,7 @@ mobj_t* dsda_FindMobj(int id)
 
 static void dsda_WipeTracker(int i)
 {
-	dsda_tracker[i].type = dsda_tracker_nothing;
+	dsda_tracker[i].type = TrackerType::Nothing;
 	dsda_tracker[i].id = 0;
 	dsda_tracker[i].mobj = nullptr;
 }
@@ -61,7 +61,7 @@ void dsda_WipeTrackers()
 	int i;
 
 	for(i = 0; i < TRACKER_LIMIT; ++i)
-		if(dsda_tracker[i].type != dsda_tracker_player)
+		if(dsda_tracker[i].type != TrackerType::Player)
 			dsda_WipeTracker(i);
 }
 
@@ -70,12 +70,12 @@ static void dsda_ConsolidateTrackers()
 	int i;
 
 	for(i = 0; i < TRACKER_LIMIT; ++i)
-		if(dsda_tracker[i].type == dsda_tracker_nothing)
+		if(dsda_tracker[i].type == TrackerType::Nothing)
 		{
 			int j;
 
 			for(j = i + 1; j < TRACKER_LIMIT; ++j)
-				if(dsda_tracker[j].type != dsda_tracker_nothing)
+				if(dsda_tracker[j].type != TrackerType::Nothing)
 				{
 					dsda_tracker[i] = dsda_tracker[j];
 					dsda_WipeTracker(j);
@@ -97,23 +97,23 @@ static void dsda_RefreshTrackers()
 		{
 			default:
 				break;
-			case dsda_tracker_mobj:
+			case TrackerType::Mobj:
 				dsda_tracker[i].mobj = dsda_FindMobj(dsda_tracker[i].id);
 				if(!dsda_tracker[i].mobj)
 					dsda_WipeTracker(i);
 				break;
 		}
 
-		if(dsda_tracker[i].type != dsda_tracker_nothing)
-			dsda_TrackFeature(uf_tracker);
+		if(dsda_tracker[i].type != TrackerType::Nothing)
+			dsda_TrackFeature(FeatureFlag::Tracker);
 	}
 }
 
-static void dsda_ParseCommandlineTrackers(int arg_id, dboolean (*track)(int))
+static void dsda_ParseCommandlineTrackers(ArgId arg_id, dboolean (*track)(int))
 {
 	dsda_arg_t* arg;
 
-	arg = dsda_Arg(static_cast<dsda_arg_identifier_t>(arg_id));
+	arg = dsda_Arg(static_cast<ArgId>(arg_id));
 	if(arg->found)
 	{
 		int i;
@@ -131,12 +131,12 @@ void dsda_ResetTrackers()
 	{
 		first_time = false;
 
-		dsda_ParseCommandlineTrackers(dsda_arg_track_line, dsda_TrackLine);
-		dsda_ParseCommandlineTrackers(dsda_arg_track_line_distance, dsda_TrackLineDistance);
-		dsda_ParseCommandlineTrackers(dsda_arg_track_sector, dsda_TrackSector);
-		dsda_ParseCommandlineTrackers(dsda_arg_track_mobj, dsda_TrackMobj);
+		dsda_ParseCommandlineTrackers(ArgId::TrackLine, dsda_TrackLine);
+		dsda_ParseCommandlineTrackers(ArgId::TrackLineDistance, dsda_TrackLineDistance);
+		dsda_ParseCommandlineTrackers(ArgId::TrackSector, dsda_TrackSector);
+		dsda_ParseCommandlineTrackers(ArgId::TrackMobj, dsda_TrackMobj);
 
-		if(dsda_Flag(dsda_arg_track_player))
+		if(dsda_Flag(ArgId::TrackPlayer))
 			dsda_TrackPlayer(0);
 
 		return;
@@ -150,7 +150,7 @@ void dsda_ResetTrackers()
 	dsda_ConsolidateTrackers();
 }
 
-static dboolean dsda_AddTracker(int type, int id, mobj_t* mobj)
+static dboolean dsda_AddTracker(TrackerType type, int id, mobj_t* mobj)
 {
 	int i;
 
@@ -160,11 +160,11 @@ static dboolean dsda_AddTracker(int type, int id, mobj_t* mobj)
 	if(dsda_FindTracker(type, id) >= 0)
 		return false;
 
-	if((i = dsda_FindTracker(dsda_tracker_nothing, 0)) >= 0)
+	if((i = dsda_FindTracker(TrackerType::Nothing, 0)) >= 0)
 	{
-		dsda_TrackFeature(uf_tracker);
+		dsda_TrackFeature(FeatureFlag::Tracker);
 
-		dsda_tracker[i].type = (dsda_tracker_type_t)type;
+		dsda_tracker[i].type = (TrackerType)type;
 		dsda_tracker[i].id = id;
 		dsda_tracker[i].mobj = mobj;
 
@@ -174,7 +174,7 @@ static dboolean dsda_AddTracker(int type, int id, mobj_t* mobj)
 	return false;
 }
 
-static dboolean dsda_RemoveTracker(int type, int id)
+static dboolean dsda_RemoveTracker(TrackerType type, int id)
 {
 	int i;
 
@@ -200,12 +200,12 @@ dboolean dsda_TrackLine(int id)
 	if(id >= numlines || id < 0)
 		return false;
 
-	return dsda_AddTracker(dsda_tracker_line, id, nullptr);
+	return dsda_AddTracker(TrackerType::Line, id, nullptr);
 }
 
 dboolean dsda_UntrackLine(int id)
 {
-	return dsda_RemoveTracker(dsda_tracker_line, id);
+	return dsda_RemoveTracker(TrackerType::Line, id);
 }
 
 dboolean dsda_TrackLineDistance(int id)
@@ -216,12 +216,12 @@ dboolean dsda_TrackLineDistance(int id)
 	if(id >= numlines || id < 0)
 		return false;
 
-	return dsda_AddTracker(dsda_tracker_line_distance, id, nullptr);
+	return dsda_AddTracker(TrackerType::LineDistance, id, nullptr);
 }
 
 dboolean dsda_UntrackLineDistance(int id)
 {
-	return dsda_RemoveTracker(dsda_tracker_line_distance, id);
+	return dsda_RemoveTracker(TrackerType::LineDistance, id);
 }
 
 dboolean dsda_TrackSector(int id)
@@ -232,12 +232,12 @@ dboolean dsda_TrackSector(int id)
 	if(id >= numsectors || id < 0)
 		return false;
 
-	return dsda_AddTracker(dsda_tracker_sector, id, nullptr);
+	return dsda_AddTracker(TrackerType::Sector, id, nullptr);
 }
 
 dboolean dsda_UntrackSector(int id)
 {
-	return dsda_RemoveTracker(dsda_tracker_sector, id);
+	return dsda_RemoveTracker(TrackerType::Sector, id);
 }
 
 dboolean dsda_TrackMobj(int id)
@@ -259,12 +259,12 @@ dboolean dsda_TrackMobj(int id)
 		P_SetTarget(&target, mobj);
 	}
 
-	return dsda_AddTracker(dsda_tracker_mobj, id, mobj);
+	return dsda_AddTracker(TrackerType::Mobj, id, mobj);
 }
 
 dboolean dsda_UntrackMobj(int id)
 {
-	return dsda_RemoveTracker(dsda_tracker_mobj, id);
+	return dsda_RemoveTracker(TrackerType::Mobj, id);
 }
 
 dboolean dsda_TrackPlayer(int id)
@@ -272,10 +272,10 @@ dboolean dsda_TrackPlayer(int id)
 	if(dsda_StrictMode())
 		return false;
 
-	return dsda_AddTracker(dsda_tracker_player, id, nullptr);
+	return dsda_AddTracker(TrackerType::Player, id, nullptr);
 }
 
 dboolean dsda_UntrackPlayer(int id)
 {
-	return dsda_RemoveTracker(dsda_tracker_player, id);
+	return dsda_RemoveTracker(TrackerType::Player, id);
 }

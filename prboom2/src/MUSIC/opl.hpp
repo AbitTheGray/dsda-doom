@@ -12,12 +12,12 @@ extern "C"
 
 typedef void (*opl_callback_t)(void* data);
 
-typedef enum
+enum struct OplPort : int32_t
 {
-	OPL_REGISTER_PORT      = 0,
-	OPL_DATA_PORT          = 1,
-	OPL_REGISTER_PORT_OPL3 = 2
-} opl_port_t;
+	RegisterPort      = 0,
+	DataPort          = 1,
+	RegisterPortOpl3 = 2
+};
 
 #define OPL_NUM_OPERATORS   21
 #define OPL_NUM_VOICES      9
@@ -62,11 +62,11 @@ void OPL_Shutdown();
 
 // Write to one of the OPL I/O ports:
 
-void OPL_WritePort(opl_port_t port, unsigned int value);
+void OPL_WritePort(OplPort port, unsigned int value);
 
 // Read from one of the OPL I/O ports:
 
-unsigned int OPL_ReadPort(opl_port_t port);
+unsigned int OPL_ReadPort(OplPort port);
 
 //
 // Higher-level functions.

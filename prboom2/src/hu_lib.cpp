@@ -3,6 +3,8 @@
 /* DESCRIPTION:  heads-up text and input code
  */
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "doomstat.hpp"
 #include "v_video.hpp"
@@ -15,9 +17,9 @@
 
 #define HU_COLOR 0x30
 
-char HUlib_Color(int cm)
+char HUlib_Color(ColorRange cm)
 {
-	return HU_COLOR + cm;
+	return HU_COLOR + std::to_underlying(cm);
 }
 
 ////////////////////////////////////////////////////////
@@ -50,7 +52,7 @@ void HUlib_clearTextLine(hu_textline_t* t)
 // Returns nothing
 //
 void HUlib_initTextLine(hu_textline_t* t, int x, int y,
-	const dsda_font_t* f, int cm, enum patch_translation_e flags)
+	const dsda_font_t* f, ColorRange cm, PatchTranslation flags)
 //jff 2/16/98 add color range parameter
 {
 	t->x = x;
@@ -108,7 +110,7 @@ void HUlib_drawTextLine
 	int w;
 	int x;
 	unsigned char c;
-	int oc = l->cm; //jff 2/17/98 remember default color
+	const ColorRange oc = l->cm; //jff 2/17/98 remember default color
 	int y;          // killough 1/18/98 -- support multiple lines
 
 	// draw the new stuff
@@ -131,8 +133,8 @@ void HUlib_drawTextLine
 			//jff 3/26/98 changed to actual escape char
 			if(++i < l->len)
 			{
-				if(l->l[i] >= HU_COLOR && l->l[i] < HU_COLOR + CR_HUD_LIMIT)
-					l->cm = l->l[i] - HU_COLOR;
+				if(l->l[i] >= HU_COLOR && l->l[i] < HU_COLOR + std::to_underlying(ColorRange::HudLimit))
+					l->cm = static_cast<ColorRange>(l->l[i] - HU_COLOR);
 				else if(l->l[i] < HU_COLOR)
 					x += l->l[i];
 			}
@@ -144,7 +146,7 @@ void HUlib_drawTextLine
 				break;
 			// killough 1/18/98 -- support multiple lines:
 			// CPhipps - patch drawing updated
-			V_DrawNumPatch(x, y, FG, l->f[c - l->sc].lumpnum, l->cm, static_cast<enum patch_translation_e>(VPT_TRANS | l->flags));
+			V_DrawNumPatch(x, y, FG, l->f[c - l->sc].lumpnum, l->cm, static_cast<PatchTranslation>(PatchTranslation::Trans | l->flags));
 			x += w;
 		}
 		else
@@ -161,7 +163,7 @@ void HUlib_drawTextLine
 	{
 		// killough 1/18/98 -- support multiple lines
 		// CPhipps - patch drawing updated
-		V_DrawNumPatch(x, y, FG, l->f['_' - l->sc].lumpnum, CR_DEFAULT, static_cast<enum patch_translation_e>(VPT_NONE | l->flags));
+		V_DrawNumPatch(x, y, FG, l->f['_' - l->sc].lumpnum, ColorRange::Default, static_cast<PatchTranslation>(PatchTranslation::None | l->flags));
 	}
 }
 

@@ -52,10 +52,10 @@ void dsda_UpdateQuake(quake_t* quake)
 		{
 			angle_t an;
 
-			if(P_Random(pr_hexen) < 50)
+			if(P_Random(RandomClass::Hexen) < 50)
 				P_DamageMobj(mo, nullptr, nullptr, HITDICE(1));
 
-			an = P_Random(pr_hexen) << 24;
+			an = P_Random(RandomClass::Hexen) << 24;
 			P_ThrustMobj(mo, an, quake->intensity << (FRACBITS - 1));
 		}
 	}

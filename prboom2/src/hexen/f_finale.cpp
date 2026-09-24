@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "w_wad.hpp"
 #include "v_video.hpp"
@@ -34,8 +36,8 @@ static char* FinaleText;
 
 void Hexen_F_StartFinale()
 {
-	gameaction = ga_nothing;
-	gamestate = GS_FINALE;
+	gameaction = GameAction::Nothing;
+	gamestate = GameState::Finale;
 	automap_full = false;
 
 	FinaleStage = 0;
@@ -114,13 +116,13 @@ static void TextWrite()
 		// Chess pic, draw the correct character graphic
 		if(netgame)
 		{
-			V_DrawNamePatch(20, 0, 0, "chessall", CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatch(20, 0, 0, "chessall", ColorRange::Default, PatchTranslation::Stretch);
 		}
-		else if(PlayerClass[consoleplayer] > 1)
+		else if(std::to_underlying(PlayerClass[consoleplayer]) > 1)
 		{
 			V_DrawNumPatch(60, 0, 0,
-				W_GetNumForName("chessc") + PlayerClass[consoleplayer] - 2,
-				CR_DEFAULT, VPT_STRETCH);
+				W_GetNumForName("chessc") + std::to_underlying(PlayerClass[consoleplayer]) - 2,
+				ColorRange::Default, PatchTranslation::Stretch);
 		}
 	}
 	// Draw the actual text
@@ -168,7 +170,7 @@ static void TextWrite()
 		{
 			break;
 		}
-		V_DrawNumPatch(cx, cy, 0, lump, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNumPatch(cx, cy, 0, lump, ColorRange::Default, PatchTranslation::Stretch);
 		cx += width;
 	}
 }
@@ -232,13 +234,13 @@ static void DrawPic()
 		// Chess pic, draw the correct character graphic
 		if(netgame)
 		{
-			V_DrawNamePatch(20, 0, 0, "chessall", CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatch(20, 0, 0, "chessall", ColorRange::Default, PatchTranslation::Stretch);
 		}
-		else if(PlayerClass[consoleplayer] > 1)
+		else if(std::to_underlying(PlayerClass[consoleplayer]) > 1)
 		{
 			V_DrawNumPatch(60, 0, 0,
-				W_GetNumForName("chessc") + PlayerClass[consoleplayer] - 2,
-				CR_DEFAULT, VPT_STRETCH);
+				W_GetNumForName("chessc") + std::to_underlying(PlayerClass[consoleplayer]) - 2,
+				ColorRange::Default, PatchTranslation::Stretch);
 		}
 	}
 }

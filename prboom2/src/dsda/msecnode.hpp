@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "r_defs.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "r_defs.hpp"
 
 void dsda_ArchiveMSecNodes();
 void dsda_UnArchiveMSecNodes(mobj_t** mobj_p, int mobj_count);

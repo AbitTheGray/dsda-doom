@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //    Reading of MIDI files.
 
+#include <utility>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +14,7 @@
 #include "doomdef.hpp"
 #include "doomtype.hpp"
 #else
-typedef enum { false, true } dboolean;
+using dboolean = bool;
 typedef unsigned char byte;
 #define PACKEDATTR __attribute__((packed))
 #endif
@@ -119,7 +121,7 @@ static dboolean CheckChunkHeader(chunk_header_t* chunk,
 
 	if(!result)
 	{
-		lprintf(LO_WARN, "CheckChunkHeader: Expected '%s' chunk header, "
+		lprintf(OutputLevels::Warn, "CheckChunkHeader: Expected '%s' chunk header, "
 			"got '%c%c%c%c'\n",
 			expected_id,
 			chunk->chunk_id[0], chunk->chunk_id[1],
@@ -135,7 +137,7 @@ static dboolean ReadByte(byte* result, midimem_t* mf)
 {
 	if(mf->pos >= mf->len)
 	{
-		lprintf(LO_WARN, "ReadByte: Unexpected end of file\n");
+		lprintf(OutputLevels::Warn, "ReadByte: Unexpected end of file\n");
 		return false;
 	}
 
@@ -151,7 +153,7 @@ static dboolean ReadMultipleBytes(void* dest, size_t len, midimem_t* mf)
 	{
 		if(!ReadByte(cdest + i, mf))
 		{
-			lprintf(LO_WARN, "ReadMultipleBytes: Unexpected end of file\n");
+			lprintf(OutputLevels::Warn, "ReadMultipleBytes: Unexpected end of file\n");
 			return false;
 		}
 	}
@@ -171,7 +173,7 @@ static dboolean ReadVariableLength(unsigned int* result, midimem_t* mf)
 	{
 		if(!ReadByte(&b, mf))
 		{
-			lprintf(LO_WARN, "ReadVariableLength: Error while reading "
+			lprintf(OutputLevels::Warn, "ReadVariableLength: Error while reading "
 				"variable-length value\n");
 			return false;
 		}
@@ -189,7 +191,7 @@ static dboolean ReadVariableLength(unsigned int* result, midimem_t* mf)
 		}
 	}
 
-	lprintf(LO_WARN, "ReadVariableLength: Variable-length value too "
+	lprintf(OutputLevels::Warn, "ReadVariableLength: Variable-length value too "
 		"long: maximum of four bytes\n");
 	return false;
 }
@@ -211,7 +213,7 @@ static void* ReadByteSequence(unsigned int num_bytes, midimem_t* mf)
 
 	if(result == nullptr)
 	{
-		lprintf(LO_WARN, "ReadByteSequence: Failed to allocate buffer %u bytes\n", num_bytes);
+		lprintf(OutputLevels::Warn, "ReadByteSequence: Failed to allocate buffer %u bytes\n", num_bytes);
 		return nullptr;
 	}
 
@@ -221,7 +223,7 @@ static void* ReadByteSequence(unsigned int num_bytes, midimem_t* mf)
 	{
 		if(!ReadByte(&result[i], mf))
 		{
-			lprintf(LO_WARN, "ReadByteSequence: Error while reading byte %u\n", i);
+			lprintf(OutputLevels::Warn, "ReadByteSequence: Error while reading byte %u\n", i);
 			Z_Free(result);
 			return nullptr;
 		}
@@ -242,14 +244,14 @@ static dboolean ReadChannelEvent(midi_event_t* event,
 
 	// Set basics:
 
-	event->event_type = (midi_event_type_t)(event_type & 0xf0);
+	event->event_type = (MidiEventType)(event_type & 0xf0);
 	event->data.channel.channel = event_type & 0x0f;
 
 	// Read parameters:
 
 	if(!ReadByte(&b, mf))
 	{
-		lprintf(LO_WARN, "ReadChannelEvent: Error while reading channel "
+		lprintf(OutputLevels::Warn, "ReadChannelEvent: Error while reading channel "
 			"event parameters\n");
 		return false;
 	}
@@ -262,7 +264,7 @@ static dboolean ReadChannelEvent(midi_event_t* event,
 	{
 		if(!ReadByte(&b, mf))
 		{
-			lprintf(LO_WARN, "ReadChannelEvent: Error while reading channel "
+			lprintf(OutputLevels::Warn, "ReadChannelEvent: Error while reading channel "
 				"event parameters\n");
 			return false;
 		}
@@ -278,11 +280,11 @@ static dboolean ReadChannelEvent(midi_event_t* event,
 static dboolean ReadSysExEvent(midi_event_t* event, int event_type,
 	midimem_t* mf)
 {
-	event->event_type = (midi_event_type_t)event_type;
+	event->event_type = (MidiEventType)event_type;
 
 	if(!ReadVariableLength(&event->data.sysex.length, mf))
 	{
-		lprintf(LO_WARN, "ReadSysExEvent: Failed to read length of "
+		lprintf(OutputLevels::Warn, "ReadSysExEvent: Failed to read length of "
 			"SysEx block\n");
 		return false;
 	}
@@ -293,7 +295,7 @@ static dboolean ReadSysExEvent(midi_event_t* event, int event_type,
 
 	if(event->data.sysex.data == nullptr)
 	{
-		lprintf(LO_WARN, "ReadSysExEvent: Failed while reading SysEx event\n");
+		lprintf(OutputLevels::Warn, "ReadSysExEvent: Failed while reading SysEx event\n");
 		return false;
 	}
 
@@ -306,13 +308,13 @@ static dboolean ReadMetaEvent(midi_event_t* event, midimem_t* mf)
 {
 	byte b;
 
-	event->event_type = MIDI_EVENT_META;
+	event->event_type = MidiEventType::Meta;
 
 	// Read meta event type:
 
 	if(!ReadByte(&b, mf))
 	{
-		lprintf(LO_WARN, "ReadMetaEvent: Failed to read meta event type\n");
+		lprintf(OutputLevels::Warn, "ReadMetaEvent: Failed to read meta event type\n");
 		return false;
 	}
 
@@ -322,7 +324,7 @@ static dboolean ReadMetaEvent(midi_event_t* event, midimem_t* mf)
 
 	if(!ReadVariableLength(&event->data.meta.length, mf))
 	{
-		lprintf(LO_WARN, "ReadMetaEvent: Failed to read length of "
+		lprintf(OutputLevels::Warn, "ReadMetaEvent: Failed to read length of "
 			"MetaEvent block\n");
 		return false;
 	}
@@ -333,7 +335,7 @@ static dboolean ReadMetaEvent(midi_event_t* event, midimem_t* mf)
 
 	if(event->data.meta.data == nullptr)
 	{
-		lprintf(LO_WARN, "ReadMetaEvent: Failed while reading MetaEvent\n");
+		lprintf(OutputLevels::Warn, "ReadMetaEvent: Failed while reading MetaEvent\n");
 		return false;
 	}
 
@@ -347,13 +349,13 @@ static dboolean ReadEvent(midi_event_t* event, unsigned int* last_event_type,
 
 	if(!ReadVariableLength(&event->delta_time, mf))
 	{
-		lprintf(LO_WARN, "ReadEvent: Failed to read event timestamp\n");
+		lprintf(OutputLevels::Warn, "ReadEvent: Failed to read event timestamp\n");
 		return false;
 	}
 
 	if(!ReadByte(&event_type, mf))
 	{
-		lprintf(LO_WARN, "ReadEvent: Failed to read event type\n");
+		lprintf(OutputLevels::Warn, "ReadEvent: Failed to read event type\n");
 		return false;
 	}
 
@@ -374,21 +376,21 @@ static dboolean ReadEvent(midi_event_t* event, unsigned int* last_event_type,
 
 	// Check event type:
 
-	switch(event_type & 0xf0)
+	switch(static_cast<MidiEventType>(event_type & 0xf0))
 	{
 		// Two parameter channel events:
 
-		case MIDI_EVENT_NOTE_OFF:
-		case MIDI_EVENT_NOTE_ON:
-		case MIDI_EVENT_AFTERTOUCH:
-		case MIDI_EVENT_CONTROLLER:
-		case MIDI_EVENT_PITCH_BEND:
+		case MidiEventType::NoteOff:
+		case MidiEventType::NoteOn:
+		case MidiEventType::Aftertouch:
+		case MidiEventType::Controller:
+		case MidiEventType::End:
 			return ReadChannelEvent(event, event_type, true, mf);
 
 		// Single parameter channel events:
 
-		case MIDI_EVENT_PROGRAM_CHANGE:
-		case MIDI_EVENT_CHAN_AFTERTOUCH:
+		case MidiEventType::ProgramChange:
+		case MidiEventType::ChanAftertouch:
 			return ReadChannelEvent(event, event_type, false, mf);
 
 		default:
@@ -397,20 +399,20 @@ static dboolean ReadEvent(midi_event_t* event, unsigned int* last_event_type,
 
 	// Specific value?
 
-	switch(event_type)
+	switch(static_cast<MidiEventType>(event_type))
 	{
-		case MIDI_EVENT_SYSEX:
-		case MIDI_EVENT_SYSEX_SPLIT:
+		case MidiEventType::Sysex:
+		case MidiEventType::SysexSplit:
 			return ReadSysExEvent(event, event_type, mf);
 
-		case MIDI_EVENT_META:
+		case MidiEventType::Meta:
 			return ReadMetaEvent(event, mf);
 
 		default:
 			break;
 	}
 
-	lprintf(LO_WARN, "ReadEvent: Unknown MIDI event type: 0x%x\n", event_type);
+	lprintf(OutputLevels::Warn, "ReadEvent: Unknown MIDI event type: 0x%x\n", event_type);
 	return false;
 }
 
@@ -423,12 +425,12 @@ static void FreeEvent(midi_event_t* event)
 
 	switch(event->event_type)
 	{
-		case MIDI_EVENT_SYSEX:
-		case MIDI_EVENT_SYSEX_SPLIT:
+		case MidiEventType::Sysex:
+		case MidiEventType::SysexSplit:
 			Z_Free(event->data.sysex.data);
 			break;
 
-		case MIDI_EVENT_META:
+		case MidiEventType::Meta:
 			Z_Free(event->data.meta.data);
 			break;
 
@@ -517,8 +519,8 @@ static dboolean ReadTrack(midi_track_t* track, midimem_t* mf)
 
 		// End of track?
 
-		if(event->event_type == MIDI_EVENT_META
-			&& event->data.meta.type == MIDI_META_END_OF_TRACK)
+		if(event->event_type == MidiEventType::Meta
+			&& event->data.meta.type == std::to_underlying(MidiMetaEventType::EndOfTrack))
 		{
 			break;
 		}
@@ -586,7 +588,7 @@ static dboolean ReadFileHeader(midi_file_t* file, midimem_t* mf)
 	if(!CheckChunkHeader(&file->header.chunk_header, HEADER_CHUNK_ID)
 		|| ntohl(file->header.chunk_header.chunk_size) != 6)
 	{
-		lprintf(LO_WARN, "ReadFileHeader: Invalid MIDI chunk header! "
+		lprintf(OutputLevels::Warn, "ReadFileHeader: Invalid MIDI chunk header! "
 			"chunk_size=%" PRIu32 "\n",
 			ntohl(file->header.chunk_header.chunk_size));
 		return false;
@@ -598,7 +600,7 @@ static dboolean ReadFileHeader(midi_file_t* file, midimem_t* mf)
 	if((format_type != 0 && format_type != 1)
 		|| file->num_tracks < 1)
 	{
-		lprintf(LO_WARN, "ReadFileHeader: Only type 0/1 "
+		lprintf(OutputLevels::Warn, "ReadFileHeader: Only type 0/1 "
 			"MIDI files supported!\n");
 		return false;
 	}
@@ -749,34 +751,34 @@ static void MIDI_PrintFlatListDBG(const midi_event_t** evs)
 
 		switch(event->event_type)
 		{
-			case MIDI_EVENT_NOTE_OFF:
+			case MidiEventType::NoteOff:
 				printf("MIDI_EVENT_NOTE_OFF\n");
 				break;
-			case MIDI_EVENT_NOTE_ON:
+			case MidiEventType::NoteOn:
 				printf("MIDI_EVENT_NOTE_ON\n");
 				break;
-			case MIDI_EVENT_AFTERTOUCH:
+			case MidiEventType::Aftertouch:
 				printf("MIDI_EVENT_AFTERTOUCH\n");
 				break;
-			case MIDI_EVENT_CONTROLLER:
+			case MidiEventType::Controller:
 				printf("MIDI_EVENT_CONTROLLER\n");
 				break;
-			case MIDI_EVENT_PROGRAM_CHANGE:
+			case MidiEventType::ProgramChange:
 				printf("MIDI_EVENT_PROGRAM_CHANGE\n");
 				break;
-			case MIDI_EVENT_CHAN_AFTERTOUCH:
+			case MidiEventType::ChanAftertouch:
 				printf("MIDI_EVENT_CHAN_AFTERTOUCH\n");
 				break;
-			case MIDI_EVENT_PITCH_BEND:
+			case MidiEventType::End:
 				printf("MIDI_EVENT_PITCH_BEND\n");
 				break;
-			case MIDI_EVENT_SYSEX:
+			case MidiEventType::Sysex:
 				printf("MIDI_EVENT_SYSEX\n");
 				break;
-			case MIDI_EVENT_SYSEX_SPLIT:
+			case MidiEventType::SysexSplit:
 				printf("MIDI_EVENT_SYSEX_SPLIT\n");
 				break;
-			case MIDI_EVENT_META:
+			case MidiEventType::Meta:
 				printf("MIDI_EVENT_META\n");
 				break;
 
@@ -786,30 +788,30 @@ static void MIDI_PrintFlatListDBG(const midi_event_t** evs)
 		}
 		switch(event->event_type)
 		{
-			case MIDI_EVENT_NOTE_OFF:
-			case MIDI_EVENT_NOTE_ON:
-			case MIDI_EVENT_AFTERTOUCH:
-			case MIDI_EVENT_CONTROLLER:
-			case MIDI_EVENT_PROGRAM_CHANGE:
-			case MIDI_EVENT_CHAN_AFTERTOUCH:
-			case MIDI_EVENT_PITCH_BEND:
+			case MidiEventType::NoteOff:
+			case MidiEventType::NoteOn:
+			case MidiEventType::Aftertouch:
+			case MidiEventType::Controller:
+			case MidiEventType::ProgramChange:
+			case MidiEventType::ChanAftertouch:
+			case MidiEventType::End:
 				printf("\tChannel: %i\n", event->data.channel.channel);
 				printf("\tParameter 1: %i\n", event->data.channel.param1);
 				printf("\tParameter 2: %i\n", event->data.channel.param2);
 				break;
 
-			case MIDI_EVENT_SYSEX:
-			case MIDI_EVENT_SYSEX_SPLIT:
+			case MidiEventType::Sysex:
+			case MidiEventType::SysexSplit:
 				printf("\tLength: %i\n", event->data.sysex.length);
 				break;
 
-			case MIDI_EVENT_META:
+			case MidiEventType::Meta:
 				printf("\tMeta type: %i\n", event->data.meta.type);
 				printf("\tLength: %i\n", event->data.meta.length);
 				break;
 		}
-		if(event->event_type == MIDI_EVENT_META &&
-			event->data.meta.type == MIDI_META_END_OF_TRACK)
+		if(event->event_type == MidiEventType::Meta &&
+			event->data.meta.type == std::to_underlying(MidiMetaEventType::EndOfTrack))
 		{
 			printf("gotta go!\n");
 			return;
@@ -874,17 +876,17 @@ midi_event_t** MIDI_GenerateFlatList(midi_file_t* file)
 		epos[0]->delta_time = delta;
 		totaldelta += delta;
 
-		if(epos[0]->event_type == MIDI_EVENT_META
-			&& epos[0]->data.meta.type == MIDI_META_END_OF_TRACK)
+		if(epos[0]->event_type == MidiEventType::Meta
+			&& epos[0]->data.meta.type == std::to_underlying(MidiMetaEventType::EndOfTrack))
 		{
 			// change end of track into no op
 			trackactive--;
 			trackpos[nextrk] = -1;
-			epos[0]->data.meta.type = MIDI_META_TEXT;
+			epos[0]->data.meta.type = std::to_underlying(MidiMetaEventType::Text);
 		}
 		else if((unsigned)trackpos[nextrk] == file->tracks[nextrk].num_events)
 		{
-			lprintf(LO_WARN, "MIDI_GenerateFlatList: Unexpected end of track\n");
+			lprintf(OutputLevels::Warn, "MIDI_GenerateFlatList: Unexpected end of track\n");
 			Z_Free(trackpos);
 			Z_Free(tracktime);
 			Z_Free(ret);
@@ -896,7 +898,7 @@ midi_event_t** MIDI_GenerateFlatList(midi_file_t* file)
 	if(trackactive)
 	{
 		// unexpected EOF
-		lprintf(LO_WARN, "MIDI_GenerateFlatList: Unexpected end of midi file\n");
+		lprintf(OutputLevels::Warn, "MIDI_GenerateFlatList: Unexpected end of midi file\n");
 		Z_Free(trackpos);
 		Z_Free(tracktime);
 		Z_Free(ret);
@@ -904,14 +906,14 @@ midi_event_t** MIDI_GenerateFlatList(midi_file_t* file)
 	}
 
 	// last end of track event is preserved though
-	epos[-1]->data.meta.type = MIDI_META_END_OF_TRACK;
+	epos[-1]->data.meta.type = std::to_underlying(MidiMetaEventType::EndOfTrack);
 
 	Z_Free(trackpos);
 	Z_Free(tracktime);
 
 	if(totaldelta < 100)
 	{
-		lprintf(LO_WARN, "MIDI_GeneratFlatList: very short file %i\n", totaldelta);
+		lprintf(OutputLevels::Warn, "MIDI_GeneratFlatList: very short file %i\n", totaldelta);
 		Z_Free(ret);
 		return nullptr;
 	}
@@ -984,7 +986,7 @@ static double compute_spmc_smpte(unsigned smpte_fps, unsigned mpf, unsigned sndr
 			fps = smpte_fps * 1000.0 / 1001.0;
 			break;
 		default:
-			lprintf(LO_WARN, "MIDI_spmc: Unexpected SMPTE timestamp %i\n", smpte_fps);
+			lprintf(OutputLevels::Warn, "MIDI_spmc: Unexpected SMPTE timestamp %i\n", smpte_fps);
 			// assume
 			fps = 30.0;
 			break;
@@ -1012,7 +1014,7 @@ double MIDI_spmc(const midi_file_t* file, const midi_event_t* ev, unsigned sndra
 	tempo = 500000; // default 120BPM
 	if(ev)
 	{
-		if(ev->event_type == MIDI_EVENT_META)
+		if(ev->event_type == MidiEventType::Meta)
 		{
 			if(ev->data.meta.length == 3)
 			{
@@ -1021,10 +1023,10 @@ double MIDI_spmc(const midi_file_t* file, const midi_event_t* ev, unsigned sndra
 					(unsigned)ev->data.meta.data[2];
 			}
 			else
-				lprintf(LO_WARN, "MIDI_spmc: wrong length tempo meta message in midi file\n");
+				lprintf(OutputLevels::Warn, "MIDI_spmc: wrong length tempo meta message in midi file\n");
 		}
 		else
-			lprintf(LO_WARN, "MIDI_spmc: passed non-meta event\n");
+			lprintf(OutputLevels::Warn, "MIDI_spmc: passed non-meta event\n");
 	}
 
 	return compute_spmc_normal(headerval, tempo, sndrate);
@@ -1032,29 +1034,29 @@ double MIDI_spmc(const midi_file_t* file, const midi_event_t* ev, unsigned sndra
 
 #ifdef TEST
 
-static char* MIDI_EventTypeToString(midi_event_type_t event_type)
+static char* MIDI_EventTypeToString(MidiEventType event_type)
 {
 	switch(event_type)
 	{
-		case MIDI_EVENT_NOTE_OFF:
+		case MidiEventType::NoteOff:
 			return "MIDI_EVENT_NOTE_OFF";
-		case MIDI_EVENT_NOTE_ON:
+		case MidiEventType::NoteOn:
 			return "MIDI_EVENT_NOTE_ON";
-		case MIDI_EVENT_AFTERTOUCH:
+		case MidiEventType::Aftertouch:
 			return "MIDI_EVENT_AFTERTOUCH";
-		case MIDI_EVENT_CONTROLLER:
+		case MidiEventType::Controller:
 			return "MIDI_EVENT_CONTROLLER";
-		case MIDI_EVENT_PROGRAM_CHANGE:
+		case MidiEventType::ProgramChange:
 			return "MIDI_EVENT_PROGRAM_CHANGE";
-		case MIDI_EVENT_CHAN_AFTERTOUCH:
+		case MidiEventType::ChanAftertouch:
 			return "MIDI_EVENT_CHAN_AFTERTOUCH";
-		case MIDI_EVENT_PITCH_BEND:
+		case MidiEventType::End:
 			return "MIDI_EVENT_PITCH_BEND";
-		case MIDI_EVENT_SYSEX:
+		case MidiEventType::Sysex:
 			return "MIDI_EVENT_SYSEX";
-		case MIDI_EVENT_SYSEX_SPLIT:
+		case MidiEventType::SysexSplit:
 			return "MIDI_EVENT_SYSEX_SPLIT";
-		case MIDI_EVENT_META:
+		case MidiEventType::Meta:
 			return "MIDI_EVENT_META";
 
 		default:
@@ -1082,24 +1084,24 @@ void PrintTrack(midi_track_t* track)
 
 		switch(event->event_type)
 		{
-			case MIDI_EVENT_NOTE_OFF:
-			case MIDI_EVENT_NOTE_ON:
-			case MIDI_EVENT_AFTERTOUCH:
-			case MIDI_EVENT_CONTROLLER:
-			case MIDI_EVENT_PROGRAM_CHANGE:
-			case MIDI_EVENT_CHAN_AFTERTOUCH:
-			case MIDI_EVENT_PITCH_BEND:
+			case MidiEventType::NoteOff:
+			case MidiEventType::NoteOn:
+			case MidiEventType::Aftertouch:
+			case MidiEventType::Controller:
+			case MidiEventType::ProgramChange:
+			case MidiEventType::ChanAftertouch:
+			case MidiEventType::End:
 				printf("\tChannel: %i\n", event->data.channel.channel);
 				printf("\tParameter 1: %i\n", event->data.channel.param1);
 				printf("\tParameter 2: %i\n", event->data.channel.param2);
 				break;
 
-			case MIDI_EVENT_SYSEX:
-			case MIDI_EVENT_SYSEX_SPLIT:
+			case MidiEventType::Sysex:
+			case MidiEventType::SysexSplit:
 				printf("\tLength: %i\n", event->data.sysex.length);
 				break;
 
-			case MIDI_EVENT_META:
+			case MidiEventType::Meta:
 				printf("\tMeta type: %i\n", event->data.meta.type);
 				printf("\tLength: %i\n", event->data.meta.length);
 				break;

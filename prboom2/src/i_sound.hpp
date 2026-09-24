@@ -6,15 +6,14 @@
 
 #pragma once
 
+#include <stddef.h>
+#include "sounds.hpp"
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include <stddef.h>
-
-#include "sounds.hpp"
-#include "doomtype.hpp"
 
 #define SNDSERV
 #undef SNDINTR
@@ -42,7 +41,7 @@ void I_SetChannels();
 int I_GetSfxLumpNum(sfxinfo_t* sfxinfo);
 
 // Starts a sound in a particular sound channel.
-int I_StartSound(int id, int channel, sfx_params_t* params);
+int I_StartSound(SfxId id, int channel, sfx_params_t* params);
 
 // Stops a sound channel.
 void I_StopSound(int handle);
@@ -100,14 +99,14 @@ void I_UnRegisterSong(int handle);
 extern int snd_samplerate;
 
 // prefered MIDI player
-typedef enum
+enum struct MidiPlayerName : int32_t
 {
-	midi_player_fluidsynth,
-	midi_player_opl,
-	midi_player_portmidi,
+	Fluidsynth,
+	Opl,
+	Portmidi,
 
-	midi_player_last
-} midi_player_name_t;
+	Last
+};
 
 extern const char* midiplayers[];
 

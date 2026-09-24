@@ -27,27 +27,29 @@
 
 #pragma once
 
+#include <utility>
+
 #include <cstdlib>
 
-enum
+enum struct TokenType : int32_t
 {
-	TK_Identifier,  // Ex: SomeIdentifier
-	TK_StringConst, // Ex: "Some String"
-	TK_IntConst,    // Ex: 27
-	TK_FloatConst,  // Ex: 1.5
-	TK_BoolConst,   // Ex: true
-	TK_AndAnd,      // &&
-	TK_OrOr,        // ||
-	TK_EqEq,        // ==
-	TK_NotEq,       // !=
-	TK_GtrEq,       // >=
-	TK_LessEq,      // <=
-	TK_ShiftLeft,   // <<
-	TK_ShiftRight,  // >>
+	Identifier,  // Ex: SomeIdentifier
+	StringConst, // Ex: "Some String"
+	IntConst,    // Ex: 27
+	FloatConst,  // Ex: 1.5
+	BoolConst,   // Ex: true
+	AndAnd,      // &&
+	OrOr,        // ||
+	EqEq,        // ==
+	NotEq,       // !=
+	GtrEq,       // >=
+	LessEq,      // <=
+	ShiftLeft,   // <<
+	ShiftRight,  // >>
 
-	TK_NumSpecialTokens,
+	NumSpecialTokens,
 
-	TK_NoToken = -1
+	NoToken = -1
 };
 
 struct ParserState
@@ -56,7 +58,7 @@ struct ParserState
 	int number;
 	double decimal;
 	bool boolean;
-	char token;
+	TokenType token;
 	unsigned int tokenLine;
 	unsigned int tokenLinePosition;
 
@@ -78,7 +80,7 @@ public:
 
 	void SetString(char** ptr, const char* src, unsigned int length);
 	void CheckForWhitespace();
-	bool CheckToken(char token);
+	bool CheckToken(TokenType token);
 	bool CheckInteger();
 	bool CheckFloat();
 	bool CheckString();
@@ -91,10 +93,10 @@ public:
 	int GetLine() const { return tokenLine; }
 	int GetLinePos() const { return tokenLinePosition; }
 	bool GetNextToken(bool expandState = true);
-	void MustGetToken(char token);
+	void MustGetToken(TokenType token);
 	void MustGetIdentifier(const char* ident);
 	bool TokensLeft() const;
-	void Error(int token);
+	void Error(TokenType token);
 	void Error(const char* mustget);
 	void ErrorF(const char* msg, ...);
 	void Unget() { needNext = true; }
@@ -102,13 +104,13 @@ public:
 
 	static void Unescape(char* str);
 
-	static const char* const TokenNames[TK_NumSpecialTokens];
+	static const char* const TokenNames[std::to_underlying(TokenType::NumSpecialTokens)];
 
 	char* string;
 	int number;
 	double decimal;
 	bool boolean;
-	char token;
+	TokenType token;
 
 protected:
 	Scanner()

@@ -2,19 +2,19 @@
 
 #pragma once
 
+#include "r_defs.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "r_defs.hpp"
-
-typedef enum
+enum struct PolyDoorType : int32_t
 {
-	PODOOR_NONE,
-	PODOOR_SLIDE,
-	PODOOR_SWING,
-} podoortype_t;
+	None,
+	Slide,
+	Swing,
+};
 
 typedef struct
 {
@@ -38,7 +38,7 @@ typedef struct
 	fixed_t xSpeed, ySpeed;
 	int tics;
 	int waitTics;
-	podoortype_t type;
+	PolyDoorType type;
 	dboolean close;
 } polydoor_t;
 
@@ -47,7 +47,7 @@ void T_RotatePoly(polyevent_t* pe);
 dboolean EV_RotatePoly(line_t* line, byte* args, int direction, dboolean overRide);
 void T_MovePoly(polyevent_t* pe);
 dboolean EV_MovePoly(line_t* line, byte* args, dboolean timesEight, dboolean overRide);
-dboolean EV_OpenPolyDoor(line_t* line, byte* args, podoortype_t type);
+dboolean EV_OpenPolyDoor(line_t* line, byte* args, PolyDoorType type);
 
 dboolean PO_MovePolyobj(int num, int x, int y);
 dboolean PO_RotatePolyobj(int num, angle_t angle);
@@ -64,7 +64,7 @@ dboolean EV_RotateZDoomPoly(line_t* line, int polyobj, int speed,
 dboolean EV_MoveZDoomPoly(line_t* line, int polyobj, int speed,
 	int angle, int distance, dboolean timesEight, dboolean overRide);
 dboolean EV_OpenZDoomPolyDoor(line_t* line, int polyobj, int speed,
-	int angle, int distance, int delay, podoortype_t type);
+	int angle, int distance, int delay, PolyDoorType type);
 dboolean EV_StopPoly(int polyNum);
 dboolean EV_MovePolyTo(line_t* line, int polyNum, fixed_t speed,
 	fixed_t x, fixed_t y, dboolean overRide);

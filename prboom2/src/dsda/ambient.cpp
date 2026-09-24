@@ -7,8 +7,6 @@
 #include <cstring>
 #include <unordered_map>
 
-extern "C"
-{
 #include "m_random.hpp"
 #include "lprintf.hpp"
 #include "p_tick.hpp"
@@ -16,9 +14,7 @@ extern "C"
 #include "sounds.hpp"
 #include "w_wad.hpp"
 #include "z_zone.hpp"
-
 #include "dsda/sfx.hpp"
-}
 
 #include "scanner.hpp"
 
@@ -27,13 +23,13 @@ extern "C"
 typedef struct
 {
 	char* lump_name;
-	int sfx_id;
+	SfxId sfx_id;
 } named_sfx_t;
 
 std::unordered_map<std::string, named_sfx_t> name_to_sfx;
 std::unordered_map<int, ambient_sfx_t> id_to_ambient_sfx;
 
-dboolean dsda_IsLoopingAmbientSFX(int sfx_id)
+dboolean dsda_IsLoopingAmbientSFX(SfxId sfx_id)
 {
 	for(auto& amb_sfx : id_to_ambient_sfx)
 	{
@@ -46,7 +42,7 @@ dboolean dsda_IsLoopingAmbientSFX(int sfx_id)
 
 static ambient_sfx_t* dsda_AmbientSFX(int id)
 {
-	return id_to_ambient_sfx[id].sfx_id ? &id_to_ambient_sfx[id] : nullptr;
+	return id_to_ambient_sfx[id].sfx_id != SfxId::None ? &id_to_ambient_sfx[id] : nullptr;
 }
 
 static int dsda_AmbientWaitTime(ambient_sfx_t* amb_sfx)
@@ -173,7 +169,7 @@ static void dsda_ParseAmbient(Scanner& scanner)
 
 	if(!amb_sfx.min_tics && !amb_sfx.max_tics)
 	{
-		lprintf(LO_WARN, "Ambient sound %d has invalid parameters\n", id);
+		lprintf(OutputLevels::Warn, "Ambient sound %d has invalid parameters\n", id);
 		Z_Free(amb_sfx.sound_name);
 		return;
 	}
@@ -204,11 +200,11 @@ static void dsda_ParseSndInfoLine(Scanner& scanner)
 	{
 		std::string name(scanner.string);
 
-		scanner.CheckToken('='); // Optional
+		scanner.CheckToken(static_cast<TokenType>('=')); // Optional
 
 		if(!scanner.CheckString())
 		{
-			lprintf(LO_WARN, "Invalid SNDINFO: name \"%s\" expects string sound lump\n", name.c_str());
+			lprintf(OutputLevels::Warn, "Invalid SNDINFO: name \"%s\" expects string sound lump\n", name.c_str());
 
 			scanner.GetNextToken();
 			scanner.SkipLine();
@@ -217,7 +213,7 @@ static void dsda_ParseSndInfoLine(Scanner& scanner)
 
 		if(!W_LumpNameExists(scanner.string))
 		{
-			lprintf(LO_WARN, "Sound lump \"%s\" does not exist\n", scanner.string);
+			lprintf(OutputLevels::Warn, "Sound lump \"%s\" does not exist\n", scanner.string);
 			return;
 		}
 
@@ -237,19 +233,19 @@ static void dsda_ResolveAmbientSounds()
 
 		new_sfx = dsda_NewSFX(&id);
 		new_sfx->name = named_sfx.second.lump_name;
-		named_sfx.second.sfx_id = id;
+		named_sfx.second.sfx_id = static_cast<SfxId>(id);
 
-		lprintf(LO_DEBUG, "Named sound: %s -> %s %d\n", named_sfx.first.c_str(), new_sfx->name, id);
+		lprintf(OutputLevels::Debug, "Named sound: %s -> %s %d\n", named_sfx.first.c_str(), new_sfx->name, id);
 	}
 
 	for(auto& amb_sfx : id_to_ambient_sfx)
 	{
 		amb_sfx.second.sfx_id = name_to_sfx[amb_sfx.second.sound_name].sfx_id;
 
-		if(!amb_sfx.second.sfx_id)
-			lprintf(LO_WARN, "Sound \"%s\" does not exist\n", amb_sfx.second.sound_name);
+		if(amb_sfx.second.sfx_id == SfxId::None)
+			lprintf(OutputLevels::Warn, "Sound \"%s\" does not exist\n", amb_sfx.second.sound_name);
 
-		lprintf(LO_DEBUG, "Ambient sound: %d att: %f, vol: %f, t: %d %d, sfx: %d\n",
+		lprintf(OutputLevels::Debug, "Ambient sound: %d att: %f, vol: %f, t: %d %d, sfx: %d\n",
 			amb_sfx.first,
 			amb_sfx.second.attenuation,
 			amb_sfx.second.volume,

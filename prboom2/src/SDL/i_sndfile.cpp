@@ -18,9 +18,9 @@ static sf_count_t sfvio_get_filelen(void* user_data)
 	sf_count_t len;
 
 	pos = mem_ftell(fs);
-	mem_fseek(fs, 0, MEM_SEEK_END);
+	mem_fseek(fs, 0, MemSeek::End);
 	len = mem_ftell(fs);
-	mem_fseek(fs, pos, MEM_SEEK_SET);
+	mem_fseek(fs, pos, MemSeek::Set);
 
 	return len;
 }
@@ -28,7 +28,7 @@ static sf_count_t sfvio_get_filelen(void* user_data)
 static sf_count_t sfvio_seek(sf_count_t offset, int whence, void* user_data)
 {
 	MEMFILE* fs = static_cast<MEMFILE *>(user_data);
-	mem_fseek(fs, offset, static_cast<mem_rel_t>(whence));
+	mem_fseek(fs, offset, static_cast<MemSeek>(whence));
 	return mem_ftell(fs);
 }
 
@@ -66,7 +66,7 @@ void* Load_SNDFile(const void* data, SDL_AudioSpec* sample, void** sampledata,
 
 	if(!sndfile)
 	{
-		lprintf(LO_WARN, "sf_open_virtual: %s\n", sf_strerror(sndfile));
+		lprintf(OutputLevels::Warn, "sf_open_virtual: %s\n", sf_strerror(sndfile));
 		mem_fclose(sfdata);
 		return nullptr;
 	}
@@ -115,7 +115,7 @@ void* Load_SNDFile(const void* data, SDL_AudioSpec* sample, void** sampledata,
 
 	if(num_frames < sfinfo.frames)
 	{
-		lprintf(LO_WARN, "sf_readf: %s\n", sf_strerror(sndfile));
+		lprintf(OutputLevels::Warn, "sf_readf: %s\n", sf_strerror(sndfile));
 		sf_close(sndfile);
 		mem_fclose(sfdata);
 		Z_Free(local_sampledata);

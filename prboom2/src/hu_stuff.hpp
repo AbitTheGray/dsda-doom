@@ -5,15 +5,15 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "d_event.hpp"
 #include "d_think.hpp"
 #include "p_mobj.hpp"
 #include "r_defs.hpp"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #define HU_MSGTIMEOUT   (4*TICRATE)
 
@@ -28,7 +28,7 @@ void HU_Drawer();
 
 mobj_t* HU_Target();
 
-int SetCustomMessage(int plr, const char* msg, int ticks, int sfx);
+int SetCustomMessage(int plr, const char* msg, int ticks, SfxId sfx);
 
 extern int hud_health_red;    // health amount less than which status is red
 extern int hud_health_yellow; // health amount less than which status is yellow

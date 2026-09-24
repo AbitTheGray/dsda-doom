@@ -4,6 +4,8 @@
  *      BSP traversal, handling of LineSegs for rendering.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "m_bbox.hpp"
 #include "p_spec.hpp"
@@ -548,8 +550,8 @@ static dboolean R_CheckBBox(const fixed_t* bspcoord)
 
 	// Find the corners of the box
 	// that define the edges from current viewpoint.
-	boxpos = (viewx <= bspcoord[BOXLEFT] ? 0 : viewx < bspcoord[BOXRIGHT] ? 1 : 2) +
-		(viewy >= bspcoord[BOXTOP] ? 0 : viewy > bspcoord[BOXBOTTOM] ? 4 : 8);
+	boxpos = (viewx <= bspcoord[std::to_underlying(BoxEdge::Left)] ? 0 : viewx < bspcoord[std::to_underlying(BoxEdge::Right)] ? 1 : 2) +
+		(viewy >= bspcoord[std::to_underlying(BoxEdge::Top)] ? 0 : viewy > bspcoord[std::to_underlying(BoxEdge::Bottom)] ? 4 : 8);
 
 	if(boxpos == 5)
 		return true;
@@ -677,12 +679,12 @@ static void R_HandleGLFakeFlats(sector_t* sector)
 			tmpsec = nullptr;
 
 			if(frontsector->floorheight >= viewz)
-				tmpsec = GetBestBleedSector(frontsector, BLEED_NONE);
+				tmpsec = GetBestBleedSector(frontsector, BleedType::None);
 
 #if EXPERIMENTAL_BLEED
 			if(tmpsec == NULL &&
 				viewz - frontsector->floorheight >= (FLOOR_BLEED_THRESHOLD << FRACBITS))
-				tmpsec = GetBestBleedSector(frontsector, BLEED_OCCLUDE);
+				tmpsec = GetBestBleedSector(frontsector, BleedType::Occlude);
 #endif
 
 			if(tmpsec)
@@ -706,12 +708,12 @@ static void R_HandleGLFakeFlats(sector_t* sector)
 			tmpsec = nullptr;
 
 			if(frontsector->ceilingheight <= viewz)
-				tmpsec = GetBestBleedSector(frontsector, BLEED_CEILING);
+				tmpsec = GetBestBleedSector(frontsector, BleedType::Ceiling);
 
 #if EXPERIMENTAL_BLEED
 			if(tmpsec == NULL &&
 				frontsector->ceilingheight - viewz >= (CEILING_BLEED_THRESHOLD << FRACBITS))
-				tmpsec = GetBestBleedSector(frontsector, BLEED_CEILING | BLEED_OCCLUDE);
+				tmpsec = GetBestBleedSector(frontsector, BleedType::Ceiling | BleedType::Occlude);
 #endif
 
 			if(tmpsec)

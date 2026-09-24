@@ -2,12 +2,12 @@
 
 #pragma once
 
+#include "info.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "info.hpp"
 
 dboolean EV_ThingProjectile(byte* args, dboolean gravity);
 dboolean EV_ThingSpawn(byte* args, dboolean fog);
@@ -16,7 +16,7 @@ dboolean EV_ThingDeactivate(int tid);
 dboolean EV_ThingRemove(int tid);
 dboolean EV_ThingDestroy(int tid);
 
-extern mobjtype_t TranslateThingType[];
+extern MobjType TranslateThingType[];
 
 #ifdef __cplusplus
 }

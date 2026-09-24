@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "sounds.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "sounds.hpp"
 
 int dsda_GetDehMusicIndex(const char* key, size_t length);
 int dsda_GetOriginalMusicIndex(const char* key);

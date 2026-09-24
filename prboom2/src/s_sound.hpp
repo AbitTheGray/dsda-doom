@@ -6,14 +6,16 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+#include "sounds.hpp"
+#include "p_mobj.hpp"
+#include "r_defs.hpp"
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
-#include "p_mobj.hpp"
-#include "r_defs.hpp"
 
 #define MAX_CHANNELS 32
 
@@ -38,28 +40,27 @@ void S_Start();
 // Start sound for thing at <origin>
 //  using <sound_id> from sounds.h
 //
-void S_StartSound(void* origin, int sound_id);
-void S_LoopSound(void* origin, int sfx_id, int timeout);
+void S_StartSound(void* origin, SfxId sound_id);
+void S_LoopSound(void* origin, SfxId sfx_id, int timeout);
 
-void S_StartSectorSound(sector_t* sector, int sfx_id);
-void S_LoopSectorSound(sector_t* sector, int sfx_id, int timeout);
+void S_StartSectorSound(sector_t* sector, SfxId sfx_id);
+void S_LoopSectorSound(sector_t* sector, SfxId sfx_id, int timeout);
 
-void S_StartMobjSound(mobj_t* mobj, int sfx_id);
-void S_LoopMobjSound(mobj_t* mobj, int sfx_id, int timeout);
+void S_StartMobjSound(mobj_t* mobj, SfxId sfx_id);
+void S_LoopMobjSound(mobj_t* mobj, SfxId sfx_id, int timeout);
 
-void S_StartVoidSound(int sfx_id);
-void S_StartImportantVoidSound(int sfx_id);
-void S_LoopVoidSound(int sfx_id, int timeout);
+void S_StartVoidSound(SfxId sfx_id);
+void S_StartImportantVoidSound(SfxId sfx_id);
+void S_LoopVoidSound(SfxId sfx_id, int timeout);
 
-void S_StartOptionalSound(int sfx_id, int fallback_sfx_id, dboolean important);
+void S_StartOptionalSound(SfxId sfx_id, SfxId fallback_sfx_id, dboolean important);
 
-void S_StartLineSound(line_t* line, degenmobj_t* soundorg, int sfx_id);
+void S_StartLineSound(line_t* line, degenmobj_t* soundorg, SfxId sfx_id);
 
 // Will start a sound at a given volume.
-void S_StartSoundAtVolume(void* origin, int sound_id, int volume, dboolean important, int loop_timeout);
+void S_StartSoundAtVolume(void* origin, SfxId sound_id, int volume, dboolean important, int loop_timeout);
 
 // killough 4/25/98: mask used to indicate sound origin is player item pickup
-#define PICKUP_SOUND (0x8000)
 
 // Stop sound for thing at <origin>
 void S_StopSound(void* origin);
@@ -70,10 +71,10 @@ extern int full_sounds;
 void S_UnlinkSound(void* origin);
 
 // Start music using <music_id> from sounds.h
-void S_StartMusic(int music_id);
+void S_StartMusic(MusicId music_id);
 
 // Start music using <music_id> from sounds.h, and set whether looping
-void S_ChangeMusic(int music_id, int looping);
+void S_ChangeMusic(MusicId music_id, int looping);
 void S_ChangeMusInfoMusic(int lumpnum, int looping);
 dboolean S_ChangeMusicByName(const char* name, dboolean looping);
 void S_RestartMusic();
@@ -103,16 +104,14 @@ extern int idmusnum;
 
 // heretic
 
-#include "doomtype.hpp"
-
 void S_SetSoundCurve(dboolean fullprocess);
-void S_StartAmbientSound(void* origin, int sound_id, int volume);
+void S_StartAmbientSound(void* origin, SfxId sound_id, int volume);
 
 // hexen
 
 void S_StartSongName(const char* songLump, dboolean loop);
-dboolean S_GetSoundPlayingInfo(void* mobj, int sound_id);
-int S_GetSoundID(const char* name);
+dboolean S_GetSoundPlayingInfo(void* mobj, SfxId sound_id);
+SfxId S_GetSoundID(const char* name);
 
 void S_ResetVolume();
 

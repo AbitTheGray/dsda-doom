@@ -6,14 +6,18 @@
 
 #pragma once
 
+// declared in v_video.hpp; the fixed underlying type makes this enough
+enum struct ColorRange : int32_t;
+
+#include "r_defs.hpp"
+#include "v_video.hpp"  // color ranges
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 // We are referring to patches.
-#include "r_defs.hpp"
-#include "v_video.hpp"  // color ranges
 
 //
 // Background and foreground screen numbers
@@ -111,9 +115,8 @@ void STlib_initNum
 
 void STlib_updateNum
 (st_number_t* n,
-	int cm,
+	ColorRange cm,
 	dboolean refresh);
-
 
 // Percent widget routines
 void STlib_initPercent
@@ -125,12 +128,10 @@ void STlib_initPercent
 	dboolean* on,
 	const patchnum_t* percent);
 
-
 void STlib_updatePercent
 (st_percent_t* per,
-	int cm,
+	ColorRange cm,
 	int refresh);
-
 
 // Multiple Icon widget routines
 void STlib_initMultIcon
@@ -140,7 +141,6 @@ void STlib_initMultIcon
 	const patchnum_t* il,
 	int* inum,
 	dboolean* on);
-
 
 void STlib_updateMultIcon
 (st_multicon_t* mi,

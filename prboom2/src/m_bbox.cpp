@@ -7,22 +7,24 @@
  *      PCX Screenshots.
  */
 
+#include <utility>
+
 #include "m_bbox.hpp"
 
 void M_ClearBox(fixed_t* box)
 {
-	box[BOXTOP] = box[BOXRIGHT] = INT_MIN;
-	box[BOXBOTTOM] = box[BOXLEFT] = INT_MAX;
+	box[std::to_underlying(BoxEdge::Top)] = box[std::to_underlying(BoxEdge::Right)] = INT_MIN;
+	box[std::to_underlying(BoxEdge::Bottom)] = box[std::to_underlying(BoxEdge::Left)] = INT_MAX;
 }
 
 void M_AddToBox(fixed_t* box, fixed_t x, fixed_t y)
 {
-	if(x < box[BOXLEFT])
-		box[BOXLEFT] = x;
-	else if(x > box[BOXRIGHT])
-		box[BOXRIGHT] = x;
-	if(y < box[BOXBOTTOM])
-		box[BOXBOTTOM] = y;
-	else if(y > box[BOXTOP])
-		box[BOXTOP] = y;
+	if(x < box[std::to_underlying(BoxEdge::Left)])
+		box[std::to_underlying(BoxEdge::Left)] = x;
+	else if(x > box[std::to_underlying(BoxEdge::Right)])
+		box[std::to_underlying(BoxEdge::Right)] = x;
+	if(y < box[std::to_underlying(BoxEdge::Bottom)])
+		box[std::to_underlying(BoxEdge::Bottom)] = y;
+	else if(y > box[std::to_underlying(BoxEdge::Top)])
+		box[std::to_underlying(BoxEdge::Top)] = y;
 }

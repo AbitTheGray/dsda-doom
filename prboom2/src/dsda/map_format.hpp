@@ -5,15 +5,15 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "doomtype.hpp"
 #include "r_defs.hpp"
 #include "p_maputl.hpp"
 #include "p_spec.hpp"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 // visibility flags - hide things that don't match
 #define VF_DOOM    0x01
@@ -64,8 +64,8 @@ typedef struct
 	void (*iterate_spechit)(mobj_t*, fixed_t, fixed_t);
 	size_t mapthing_size;
 	size_t maplinedef_size;
-	int mt_push;
-	int mt_pull;
+	MobjType mt_push;
+	MobjType mt_pull;
 	int dn_polyanchor;
 	int dn_polyspawn_start;
 	int dn_polyspawn_hurt;
@@ -75,7 +75,17 @@ typedef struct
 
 extern map_format_t map_format;
 
-int dsda_DoorType(int index);
+enum struct DoorType : int32_t
+{
+	None = -1,
+	Red,
+	Blue,
+	Yellow,
+	Unknown = Yellow,
+	Multiple
+};
+
+DoorType dsda_DoorType(int index);
 dboolean dsda_IsExitLine(int index);
 dboolean dsda_IsSecretExitLine(int index);
 dboolean dsda_IsDeathExitLine(int index);

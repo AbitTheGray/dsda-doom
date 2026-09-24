@@ -22,7 +22,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 	time_t now;
 	struct tm* local_tm;
 
-	length = snprintf(str, max_size, "%s", dsda_TextColor(dsda_tc_exhud_local_time));
+	length = snprintf(str, max_size, "%s", dsda_TextColor(TextColorIndex::ExhudLocalTime));
 
 	now = time(nullptr);
 	local_tm = localtime(&now);
@@ -30,7 +30,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 	strftime(str + length, max_size - length, "%H:%M:%S", local_tm);
 }
 
-void dsda_InitLocalTimeHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitLocalTimeHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

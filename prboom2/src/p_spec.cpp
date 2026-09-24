@@ -12,6 +12,8 @@
  *     Wind/Current
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "p_spec.hpp"
 #include "p_tick.hpp"
@@ -212,7 +214,7 @@ void P_InitPicAnims()
 		}
 		else
 		{
-			if(!W_LumpNameExists2(animdefs[i].startname, ns_flats)) // killough 4/17/98
+			if(!W_LumpNameExists2(animdefs[i].startname, LumpNamespace::Flats)) // killough 4/17/98
 				continue;
 
 			lastanim->picnum = R_FlatNumForName(animdefs[i].endname);
@@ -301,7 +303,7 @@ int twoSided
 	//jff 1/26/98 return what is actually needed, whether the line
 	//has two sidedefs, rather than whether the 2S flag is set
 
-	return (comp[comp_model])
+	return (comp[std::to_underlying(CompOption::Model)])
 		? (sectors[sector].lines[line])->flags & ML_TWOSIDED
 		: (sectors[sector].lines[line])->sidenum[1] != NO_INDEX;
 }
@@ -322,7 +324,7 @@ sector_t* getNextSector
 	//returns NULL if the line is not two sided, and does so from
 	//the actual two-sidedness of the line, rather than its 2S flag
 
-	if(comp[comp_model])
+	if(comp[std::to_underlying(CompOption::Model)])
 	{
 		if(!(line->flags & ML_TWOSIDED))
 			return nullptr;
@@ -330,7 +332,7 @@ sector_t* getNextSector
 
 	if(line->frontsector == sec)
 	{
-		if(comp[comp_model] || line->backsector != sec)
+		if(comp[std::to_underlying(CompOption::Model)] || line->backsector != sec)
 			return line->backsector; //jff 5/3/98 don't retn sec unless compatibility
 		else                         // fixes an intra-sector line breaking functions
 			return nullptr;             // like floor->highest floor
@@ -385,7 +387,7 @@ fixed_t P_FindHighestFloorSurrounding(sector_t* sec)
 
 	//jff 1/26/98 Fix initial value for floor to not act differently
 	//in sections of wad that are below -500 units
-	if(!comp[comp_model])          /* jff 3/12/98 avoid ovf */
+	if(!comp[std::to_underlying(CompOption::Model)])          /* jff 3/12/98 avoid ovf */
 		floor = -32000 * FRACUNIT; // in height calculations
 
 	for(i = 0; i < sec->linecount; i++)
@@ -421,7 +423,7 @@ fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
 	// e6y
 	// Original P_FindNextHighestFloor() is restored for demo_compatibility
 	// Adapted for prboom's complevels
-	if(demo_compatibility && !prboom_comp[PC_FORCE_BOOM_FINDNEXTHIGHESTFLOOR].state)
+	if(demo_compatibility && !prboom_comp[std::to_underlying(PrboomComp::ForceBoomFindnexthighestfloor)].state)
 	{
 		int h;
 		int min;
@@ -434,7 +436,7 @@ fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
 
 		// 20 adjoining sectors max!
 		if(!MAX_ADJOINING_SECTORS)
-			MAX_ADJOINING_SECTORS = dsda_Flag(dsda_arg_doom95) ? 500 : 20;
+			MAX_ADJOINING_SECTORS = dsda_Flag(ArgId::Doom95) ? 500 : 20;
 
 		if(sec->linecount > heightlist_size)
 		{
@@ -462,7 +464,7 @@ fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
 				// 21: can be emulated;
 				// 22..26: overflow affects saved registers - unpredictable behaviour, can crash;
 				// 27: overflow affects return address - crash with high probability;
-				if(compatibility_level < dosdoom_compatibility && h >= MAX_ADJOINING_SECTORS)
+				if(compatibility_level < CompLevel::Dosdoom && h >= MAX_ADJOINING_SECTORS)
 				{
 					if(h == MAX_ADJOINING_SECTORS + 1)
 						height = other->floorheight;
@@ -470,22 +472,22 @@ fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
 					// 20 & 21 are common and not "warning" worthy
 					if(h > MAX_ADJOINING_SECTORS + 1)
 					{
-						lprintf(LO_WARN, "P_FindNextHighestFloor: Overflow of heightlist[%d] array is detected.\n", MAX_ADJOINING_SECTORS);
-						lprintf(LO_WARN, " Sector %d, line %d, heightlist index %d: ", sec->iSectorID, sec->lines[i]->iLineID, h);
+						lprintf(OutputLevels::Warn, "P_FindNextHighestFloor: Overflow of heightlist[%d] array is detected.\n", MAX_ADJOINING_SECTORS);
+						lprintf(OutputLevels::Warn, " Sector %d, line %d, heightlist index %d: ", sec->iSectorID, sec->lines[i]->iLineID, h);
 
 						if(h <= MAX_ADJOINING_SECTORS + 6)
-							lprintf(LO_WARN, "cannot be emulated - unpredictable behaviour.\n");
+							lprintf(OutputLevels::Warn, "cannot be emulated - unpredictable behaviour.\n");
 						else
-							lprintf(LO_WARN, "cannot be emulated - crash with high probability.\n");
+							lprintf(OutputLevels::Warn, "cannot be emulated - crash with high probability.\n");
 					}
 				}
 				heightlist[h++] = other->floorheight;
 			}
 
 			// Check for overflow. Warning.
-			if(compatibility_level >= dosdoom_compatibility && h >= MAX_ADJOINING_SECTORS)
+			if(compatibility_level >= CompLevel::Dosdoom && h >= MAX_ADJOINING_SECTORS)
 			{
-				lprintf(LO_WARN, "Sector with more than 20 adjoining sectors\n");
+				lprintf(OutputLevels::Warn, "Sector with more than 20 adjoining sectors\n");
 				break;
 			}
 		}
@@ -502,7 +504,7 @@ fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
 			// It's not *quite* random stack noise. If this function is called
 			// as part of a loop, heightlist will be at the same location as in
 			// the previous call. Doing it this way fixes 1_ON_1.WAD.
-			return (compatibility_level < doom_1666_compatibility ? last_height_0 : currentheight);
+			return (compatibility_level < CompLevel::Doom1666 ? last_height_0 : currentheight);
 		}
 
 		last_height_0 = heightlist[0];
@@ -535,7 +537,7 @@ fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
 	* If there are no higher neighbouring sectors, Heretic just returned
 	* heightlist[0] (local variable), i.e. noise off the stack. 0 is right for
 	* RETURN01 E1M2, so let's take that. */
-	return (compatibility_level < doom_1666_compatibility ? 0 : currentheight);
+	return (compatibility_level < CompLevel::Doom1666 ? 0 : currentheight);
 }
 
 
@@ -649,7 +651,7 @@ fixed_t P_FindLowestCeilingSurrounding(sector_t* sec)
 	fixed_t height = INT_MAX;
 
 	/* jff 3/12/98 avoid ovf in height calculations */
-	if(!comp[comp_model]) height = 32000 * FRACUNIT;
+	if(!comp[std::to_underlying(CompOption::Model)]) height = 32000 * FRACUNIT;
 
 	for(i = 0; i < sec->linecount; i++)
 	{
@@ -685,7 +687,7 @@ fixed_t P_FindHighestCeilingSurrounding(sector_t* sec)
 	/* jff 1/26/98 Fix initial value for floor to not act differently
 	* in sections of wad that are below 0 units
 	* jff 3/12/98 avoid ovf in height calculations */
-	if(!comp[comp_model]) height = -32000 * FRACUNIT;
+	if(!comp[std::to_underlying(CompOption::Model)]) height = -32000 * FRACUNIT;
 
 	for(i = 0; i < sec->linecount; i++)
 	{
@@ -720,7 +722,7 @@ fixed_t P_FindShortestTextureAround(int secnum)
 	int i;
 	sector_t* sec = &sectors[secnum];
 
-	if(!comp[comp_model])
+	if(!comp[std::to_underlying(CompOption::Model)])
 		minsize = 32000 << FRACBITS; //jff 3/13/98 prevent overflow in height calcs
 
 	for(i = 0; i < sec->linecount; i++)
@@ -759,7 +761,7 @@ fixed_t P_FindShortestUpperAround(int secnum)
 	int i;
 	sector_t* sec = &sectors[secnum];
 
-	if(!comp[comp_model])
+	if(!comp[std::to_underlying(CompOption::Model)])
 		minsize = 32000 << FRACBITS; //jff 3/13/98 prevent overflow
 	// in height calcs
 	for(i = 0; i < sec->linecount; i++)
@@ -920,136 +922,136 @@ dboolean P_CanUnlockGenDoor
 	int skulliscard = (line->special & LockedNKeys) >> LockedNKeysShift;
 
 	// determine for each case of lock type if player's keys are adequate
-	switch((line->special & LockedKey) >> LockedKeyShift)
+	switch(static_cast<KeyKind>((line->special & LockedKey) >> LockedKeyShift))
 	{
-		case AnyKey:
+		case KeyKind::Any:
 			if
 			(
-				!player->cards[it_redcard] &&
-				!player->cards[it_redskull] &&
-				!player->cards[it_bluecard] &&
-				!player->cards[it_blueskull] &&
-				!player->cards[it_yellowcard] &&
-				!player->cards[it_yellowskull]
+				!player->cards[std::to_underlying(Card::RedCard)] &&
+				!player->cards[std::to_underlying(Card::RedSkull)] &&
+				!player->cards[std::to_underlying(Card::BlueCard)] &&
+				!player->cards[std::to_underlying(Card::BlueSkull)] &&
+				!player->cards[std::to_underlying(Card::YellowCard)] &&
+				!player->cards[std::to_underlying(Card::YellowSkull)]
 			)
 			{
 				dsda_AddPlayerMessage(s_PD_ANY, player);
-				S_StartMobjSound(player->mo, sfx_oof); // killough 3/20/98
+				S_StartMobjSound(player->mo, SfxId::Oof); // killough 3/20/98
 				return false;
 			}
 			break;
-		case RCard:
+		case KeyKind::RedCard:
 			if
 			(
-				!player->cards[it_redcard] &&
-				(!skulliscard || !player->cards[it_redskull])
+				!player->cards[std::to_underlying(Card::RedCard)] &&
+				(!skulliscard || !player->cards[std::to_underlying(Card::RedSkull)])
 			)
 			{
 				dsda_AddPlayerMessage(skulliscard ? s_PD_REDK : s_PD_REDC, player);
-				S_StartMobjSound(player->mo, sfx_oof); // killough 3/20/98
+				S_StartMobjSound(player->mo, SfxId::Oof); // killough 3/20/98
 				return false;
 			}
 			break;
-		case BCard:
+		case KeyKind::BlueCard:
 			if
 			(
-				!player->cards[it_bluecard] &&
-				(!skulliscard || !player->cards[it_blueskull])
+				!player->cards[std::to_underlying(Card::BlueCard)] &&
+				(!skulliscard || !player->cards[std::to_underlying(Card::BlueSkull)])
 			)
 			{
 				dsda_AddPlayerMessage(skulliscard ? s_PD_BLUEK : s_PD_BLUEC, player);
-				S_StartMobjSound(player->mo, sfx_oof); // killough 3/20/98
+				S_StartMobjSound(player->mo, SfxId::Oof); // killough 3/20/98
 				return false;
 			}
 			break;
-		case YCard:
+		case KeyKind::YellowCard:
 			if
 			(
-				!player->cards[it_yellowcard] &&
-				(!skulliscard || !player->cards[it_yellowskull])
+				!player->cards[std::to_underlying(Card::YellowCard)] &&
+				(!skulliscard || !player->cards[std::to_underlying(Card::YellowSkull)])
 			)
 			{
 				dsda_AddPlayerMessage(skulliscard ? s_PD_YELLOWK : s_PD_YELLOWC, player);
-				S_StartMobjSound(player->mo, sfx_oof); // killough 3/20/98
+				S_StartMobjSound(player->mo, SfxId::Oof); // killough 3/20/98
 				return false;
 			}
 			break;
-		case RSkull:
+		case KeyKind::RedSkull:
 			if
 			(
-				!player->cards[it_redskull] &&
-				(!skulliscard || !player->cards[it_redcard])
+				!player->cards[std::to_underlying(Card::RedSkull)] &&
+				(!skulliscard || !player->cards[std::to_underlying(Card::RedCard)])
 			)
 			{
 				dsda_AddPlayerMessage(skulliscard ? s_PD_REDK : s_PD_REDS, player);
-				S_StartMobjSound(player->mo, sfx_oof); // killough 3/20/98
+				S_StartMobjSound(player->mo, SfxId::Oof); // killough 3/20/98
 				return false;
 			}
 			break;
-		case BSkull:
+		case KeyKind::BlueSkull:
 			if
 			(
-				!player->cards[it_blueskull] &&
-				(!skulliscard || !player->cards[it_bluecard])
+				!player->cards[std::to_underlying(Card::BlueSkull)] &&
+				(!skulliscard || !player->cards[std::to_underlying(Card::BlueCard)])
 			)
 			{
 				dsda_AddPlayerMessage(skulliscard ? s_PD_BLUEK : s_PD_BLUES, player);
-				S_StartMobjSound(player->mo, sfx_oof); // killough 3/20/98
+				S_StartMobjSound(player->mo, SfxId::Oof); // killough 3/20/98
 				return false;
 			}
 			break;
-		case YSkull:
+		case KeyKind::YellowSkull:
 			if
 			(
-				!player->cards[it_yellowskull] &&
-				(!skulliscard || !player->cards[it_yellowcard])
+				!player->cards[std::to_underlying(Card::YellowSkull)] &&
+				(!skulliscard || !player->cards[std::to_underlying(Card::YellowCard)])
 			)
 			{
 				dsda_AddPlayerMessage(skulliscard ? s_PD_YELLOWK : s_PD_YELLOWS, player);
-				S_StartMobjSound(player->mo, sfx_oof); // killough 3/20/98
+				S_StartMobjSound(player->mo, SfxId::Oof); // killough 3/20/98
 				return false;
 			}
 			break;
-		case AllKeys:
+		case KeyKind::All:
 			if
 			(
 				!skulliscard &&
 				(
-					!player->cards[it_redcard] ||
-					!player->cards[it_redskull] ||
-					!player->cards[it_bluecard] ||
-					!player->cards[it_blueskull] ||
-					!player->cards[it_yellowcard] ||
-					!player->cards[it_yellowskull]
+					!player->cards[std::to_underlying(Card::RedCard)] ||
+					!player->cards[std::to_underlying(Card::RedSkull)] ||
+					!player->cards[std::to_underlying(Card::BlueCard)] ||
+					!player->cards[std::to_underlying(Card::BlueSkull)] ||
+					!player->cards[std::to_underlying(Card::YellowCard)] ||
+					!player->cards[std::to_underlying(Card::YellowSkull)]
 				)
 			)
 			{
 				dsda_AddPlayerMessage(s_PD_ALL6, player);
-				S_StartMobjSound(player->mo, sfx_oof); // killough 3/20/98
+				S_StartMobjSound(player->mo, SfxId::Oof); // killough 3/20/98
 				return false;
 			}
 			if
 			(
 				skulliscard &&
 				(
-					(!player->cards[it_redcard] &&
-						!player->cards[it_redskull]) ||
-					(!player->cards[it_bluecard] &&
-						!player->cards[it_blueskull]) ||
+					(!player->cards[std::to_underlying(Card::RedCard)] &&
+						!player->cards[std::to_underlying(Card::RedSkull)]) ||
+					(!player->cards[std::to_underlying(Card::BlueCard)] &&
+						!player->cards[std::to_underlying(Card::BlueSkull)]) ||
 					// e6y
 					// Compatibility with buggy MBF behavior when 3-key door works with only 2 keys
 					// There is no more desync on 10sector.wad\ts27-137.lmp
 					// http://www.doomworld.com/tas/ts27-137.zip
-					(!player->cards[it_yellowcard] &&
-						(compatibility_level == mbf_compatibility &&
-							!prboom_comp[PC_FORCE_CORRECT_CODE_FOR_3_KEYS_DOORS_IN_MBF].state
-							? player->cards[it_yellowskull]
-							: !player->cards[it_yellowskull]))
+					(!player->cards[std::to_underlying(Card::YellowCard)] &&
+						(compatibility_level == CompLevel::Mbf &&
+							!prboom_comp[std::to_underlying(PrboomComp::ForceCorrectCodeFor3KeysDoorsInMbf)].state
+							? player->cards[std::to_underlying(Card::YellowSkull)]
+							: !player->cards[std::to_underlying(Card::YellowSkull)]))
 				)
 			)
 			{
 				dsda_AddPlayerMessage(s_PD_ALL3, player);
-				S_StartMobjSound(player->mo, sfx_oof); // killough 3/20/98
+				S_StartMobjSound(player->mo, SfxId::Oof); // killough 3/20/98
 				return false;
 			}
 			break;
@@ -1057,11 +1059,11 @@ dboolean P_CanUnlockGenDoor
 	return true;
 }
 
-dboolean P_CheckKeys(mobj_t* mo, zdoom_lock_t lock, dboolean legacy)
+dboolean P_CheckKeys(mobj_t* mo, ZDoomLock lock, dboolean legacy)
 {
 	player_t* player;
 	const char* message = nullptr;
-	int sfx = sfx_None;
+	SfxId sfx = SfxId::None;
 	dboolean successful = true;
 
 	if(!mo || !mo->player)
@@ -1071,122 +1073,122 @@ dboolean P_CheckKeys(mobj_t* mo, zdoom_lock_t lock, dboolean legacy)
 
 	switch(lock)
 	{
-		case zk_none:
+		case ZDoomLock::None:
 			break;
-		case zk_red_card:
-			if(!player->cards[it_redcard])
+		case ZDoomLock::RedCard:
+			if(!player->cards[std::to_underlying(Card::RedCard)])
 			{
 				message = legacy ? s_PD_REDC : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_blue_card:
-			if(!player->cards[it_bluecard])
+		case ZDoomLock::BlueCard:
+			if(!player->cards[std::to_underlying(Card::BlueCard)])
 			{
 				message = legacy ? s_PD_BLUEC : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_yellow_card:
-			if(!player->cards[it_yellowcard])
+		case ZDoomLock::YellowCard:
+			if(!player->cards[std::to_underlying(Card::YellowCard)])
 			{
 				message = legacy ? s_PD_YELLOWC : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_red_skull:
-			if(!player->cards[it_redskull])
+		case ZDoomLock::RedSkull:
+			if(!player->cards[std::to_underlying(Card::RedSkull)])
 			{
 				message = legacy ? s_PD_REDS : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_blue_skull:
-			if(!player->cards[it_blueskull])
+		case ZDoomLock::BlueSkull:
+			if(!player->cards[std::to_underlying(Card::BlueSkull)])
 			{
 				message = legacy ? s_PD_BLUES : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_yellow_skull:
-			if(!player->cards[it_yellowskull])
+		case ZDoomLock::YellowSkull:
+			if(!player->cards[std::to_underlying(Card::YellowSkull)])
 			{
 				message = legacy ? s_PD_YELLOWS : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_any:
+		case ZDoomLock::Any:
 			if(
-				!player->cards[it_redcard] &&
-				!player->cards[it_redskull] &&
-				!player->cards[it_bluecard] &&
-				!player->cards[it_blueskull] &&
-				!player->cards[it_yellowcard] &&
-				!player->cards[it_yellowskull]
+				!player->cards[std::to_underlying(Card::RedCard)] &&
+				!player->cards[std::to_underlying(Card::RedSkull)] &&
+				!player->cards[std::to_underlying(Card::BlueCard)] &&
+				!player->cards[std::to_underlying(Card::BlueSkull)] &&
+				!player->cards[std::to_underlying(Card::YellowCard)] &&
+				!player->cards[std::to_underlying(Card::YellowSkull)]
 			)
 			{
 				message = legacy ? s_PD_ANY : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_all:
+		case ZDoomLock::All:
 			if(
-				!player->cards[it_redcard] ||
-				!player->cards[it_redskull] ||
-				!player->cards[it_bluecard] ||
-				!player->cards[it_blueskull] ||
-				!player->cards[it_yellowcard] ||
-				!player->cards[it_yellowskull]
+				!player->cards[std::to_underlying(Card::RedCard)] ||
+				!player->cards[std::to_underlying(Card::RedSkull)] ||
+				!player->cards[std::to_underlying(Card::BlueCard)] ||
+				!player->cards[std::to_underlying(Card::BlueSkull)] ||
+				!player->cards[std::to_underlying(Card::YellowCard)] ||
+				!player->cards[std::to_underlying(Card::YellowSkull)]
 			)
 			{
 				message = legacy ? s_PD_ALL6 : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_red:
-		case zk_redx:
-			if(!player->cards[it_redcard] && !player->cards[it_redskull])
+		case ZDoomLock::Red:
+		case ZDoomLock::Redx:
+			if(!player->cards[std::to_underlying(Card::RedCard)] && !player->cards[std::to_underlying(Card::RedSkull)])
 			{
 				message = legacy ? s_PD_REDK : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_blue:
-		case zk_bluex:
-			if(!player->cards[it_bluecard] && !player->cards[it_blueskull])
+		case ZDoomLock::Blue:
+		case ZDoomLock::Bluex:
+			if(!player->cards[std::to_underlying(Card::BlueCard)] && !player->cards[std::to_underlying(Card::BlueSkull)])
 			{
 				message = legacy ? s_PD_BLUEK : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_yellow:
-		case zk_yellowx:
-			if(!player->cards[it_yellowcard] && !player->cards[it_yellowskull])
+		case ZDoomLock::Yellow:
+		case ZDoomLock::Yellowx:
+			if(!player->cards[std::to_underlying(Card::YellowCard)] && !player->cards[std::to_underlying(Card::YellowSkull)])
 			{
 				message = legacy ? s_PD_YELLOWK : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 			break;
-		case zk_each_color:
+		case ZDoomLock::EachColor:
 			if(
-				(!player->cards[it_redcard] && !player->cards[it_redskull]) ||
-				(!player->cards[it_bluecard] && !player->cards[it_blueskull]) ||
-				(!player->cards[it_yellowcard] && !player->cards[it_yellowskull])
+				(!player->cards[std::to_underlying(Card::RedCard)] && !player->cards[std::to_underlying(Card::RedSkull)]) ||
+				(!player->cards[std::to_underlying(Card::BlueCard)] && !player->cards[std::to_underlying(Card::BlueSkull)]) ||
+				(!player->cards[std::to_underlying(Card::YellowCard)] && !player->cards[std::to_underlying(Card::YellowSkull)])
 			)
 			{
 				message = legacy ? s_PD_ALL3 : nullptr;
-				sfx = legacy ? sfx_oof : sfx_None;
+				sfx = legacy ? SfxId::Oof : SfxId::None;
 				successful = false;
 			}
 		default:
@@ -1198,7 +1200,7 @@ dboolean P_CheckKeys(mobj_t* mo, zdoom_lock_t lock, dboolean legacy)
 		dsda_AddPlayerMessage(message, player);
 	}
 
-	if(sfx != sfx_None)
+	if(sfx != SfxId::None)
 	{
 		S_StartMobjSound(mo, sfx);
 	}
@@ -1301,7 +1303,7 @@ int P_CheckTag(line_t* line)
 {
 	/* tag not zero, allowed, or
 	* killough 11/98: compatibility option */
-	if(comp[comp_zerotags] || line->special_args[0]) //e6y
+	if(comp[std::to_underlying(CompOption::ZeroTags)] || line->special_args[0]) //e6y
 		return 1;
 
 	switch(line->special)
@@ -1441,11 +1443,11 @@ void P_PlayerCollectSecret(player_t* player)
 {
 	player->secretcount++;
 
-	if(dsda_IntConfig(dsda_config_hudadd_secretarea))
+	if(dsda_IntConfig(ConfigId::HudaddSecretarea))
 	{
-		int sfx_id = heretic ? heretic_sfx_chat : hexen ? hexen_sfx_chat : sfx_itmbk;
+		SfxId sfx_id = heretic ? SfxId::HereticChat : hexen ? SfxId::HexenChat : SfxId::Itmbk;
 
-		if(I_GetSfxLumpNum(&S_sfx[g_sfx_secret]) != -1)
+		if(I_GetSfxLumpNum(&S_sfx[std::to_underlying(g_sfx_secret)]) != -1)
 			sfx_id = g_sfx_secret;
 
 		SetCustomMessage(player - players, s_HUSTR_SECRETFOUND, 2 * TICRATE, sfx_id);
@@ -1583,7 +1585,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 	//  Things that should never trigger lines
 	//
 	// e6y: Improved support for Doom v1.2
-	if(compatibility_level == doom_12_compatibility)
+	if(compatibility_level == CompLevel::Doom12)
 	{
 		if(line->special > 98 && line->special != 104)
 		{
@@ -1597,12 +1599,12 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 			// Things that should NOT trigger specials...
 			switch(thing->type)
 			{
-				case MT_ROCKET:
-				case MT_PLASMA:
-				case MT_BFG:
-				case MT_TROOPSHOT:
-				case MT_HEADSHOT:
-				case MT_BRUISERSHOT:
+				case MobjType::Rocket:
+				case MobjType::Plasma:
+				case MobjType::Bfg:
+				case MobjType::Troopshot:
+				case MobjType::Headshot:
+				case MobjType::Bruisershot:
 					return;
 					break;
 
@@ -1658,7 +1660,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 		{
 			if(!thing->player || bossaction) // boss actions can't handle locked doors
 				return;                      // monsters disallowed from unlocking doors
-			if(((line->special & TriggerType) == WalkOnce) || ((line->special & TriggerType) == WalkMany))
+			if(((line->special & TriggerType) == std::to_underlying(GenTriggerType::WalkOnce)) || ((line->special & TriggerType) == std::to_underlying(GenTriggerType::WalkMany)))
 			{
 				//jff 4/1/98 check for being a walk type before reporting door type
 				if(!P_CanUnlockGenDoor(line, thing->player))
@@ -1699,13 +1701,13 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 		}
 
 		if(linefunc) // if it was a valid generalized type
-			switch((line->special & TriggerType) >> TriggerTypeShift)
+			switch(static_cast<GenTriggerType>((line->special & TriggerType) >> TriggerTypeShift))
 			{
-				case WalkOnce:
+				case GenTriggerType::WalkOnce:
 					if(linefunc(line))
 						line->special = 0; // clear special if a walk once type
 					return;
-				case WalkMany:
+				case GenTriggerType::WalkMany:
 					linefunc(line);
 					return;
 				default: // if not a walk type, do nothing here
@@ -1760,43 +1762,43 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 2:
 			// Open Door
-			if(EV_DoDoor(line, static_cast<vldoor_e>(openDoor)) || demo_compatibility)
+			if(EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::OpenDoor)) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 3:
 			// Close Door
-			if(EV_DoDoor(line, static_cast<vldoor_e>(closeDoor)) || demo_compatibility)
+			if(EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::CloseDoor)) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 4:
 			// Raise Door
-			if(EV_DoDoor(line, static_cast<vldoor_e>(normal)) || demo_compatibility)
+			if(EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::Normal)) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 5:
 			// Raise Floor
-			if(EV_DoFloor(line, raiseFloor) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::RaiseFloor) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 6:
 			// Fast Ceiling Crush & Raise
-			if(EV_DoCeiling(line, fastCrushAndRaise) || demo_compatibility)
+			if(EV_DoCeiling(line, CeilingKind::FastCrushAndRaise) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 8:
 			// Build Stairs
-			if(EV_BuildStairs(line, build8) || demo_compatibility)
+			if(EV_BuildStairs(line, StairType::Build8) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 10:
 			// PlatDownWaitUp
-			if(EV_DoPlat(line, downWaitUpStay, 0) || demo_compatibility)
+			if(EV_DoPlat(line, PlatType::DownWaitUpStay, 0) || demo_compatibility)
 				line->special = 0;
 			break;
 
@@ -1814,7 +1816,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 16:
 			// Close Door 30
-			if(EV_DoDoor(line, static_cast<vldoor_e>(close30ThenOpen)) || demo_compatibility)
+			if(EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::Close30ThenOpen)) || demo_compatibility)
 				line->special = 0;
 			break;
 
@@ -1826,26 +1828,26 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 19:
 			// Lower Floor
-			if(EV_DoFloor(line, lowerFloor) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::LowerFloor) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 22:
 			// Raise floor to nearest height and change texture
-			if(EV_DoPlat(line, raiseToNearestAndChange, 0) || demo_compatibility)
+			if(EV_DoPlat(line, PlatType::RaiseToNearestAndChange, 0) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 25:
 			// Ceiling Crush and Raise
-			if(EV_DoCeiling(line, crushAndRaise) || demo_compatibility)
+			if(EV_DoCeiling(line, CeilingKind::CrushAndRaise) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 30:
 			// Raise floor to shortest texture height
 			//  on either side of lines.
-			if(EV_DoFloor(line, raiseToTexture) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::RaiseToTexture) || demo_compatibility)
 				line->special = 0;
 			break;
 
@@ -1857,19 +1859,19 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 36:
 			// Lower Floor (TURBO)
-			if(EV_DoFloor(line, turboLower) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::TurboLower) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 37:
 			// LowerAndChange
-			if(EV_DoFloor(line, lowerAndChange) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::LowerAndChange) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 38:
 			// Lower Floor To Lowest
-			if(EV_DoFloor(line, lowerFloorToLowest) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::LowerFloorToLowest) || demo_compatibility)
 				line->special = 0;
 			break;
 
@@ -1883,30 +1885,30 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 			// RaiseCeilingLowerFloor
 			if(demo_compatibility)
 			{
-				EV_DoCeiling(line, raiseToHighest);
-				EV_DoFloor(line, lowerFloorToLowest); //jff 02/12/98 doesn't work
+				EV_DoCeiling(line, CeilingKind::RaiseToHighest);
+				EV_DoFloor(line, FloorKind::LowerFloorToLowest); //jff 02/12/98 doesn't work
 				line->special = 0;
 			}
-			else if(EV_DoCeiling(line, raiseToHighest))
+			else if(EV_DoCeiling(line, CeilingKind::RaiseToHighest))
 				line->special = 0;
 			break;
 
 		case 44:
 			// Ceiling Crush
-			if(EV_DoCeiling(line, lowerAndCrush) || demo_compatibility)
+			if(EV_DoCeiling(line, CeilingKind::LowerAndCrush) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 52:
 			// EXIT!
 			// killough 10/98: prevent zombies from exiting levels
-			if(bossaction || (!(thing->player && thing->player->health <= 0 && !comp[comp_zombie])))
+			if(bossaction || (!(thing->player && thing->player->health <= 0 && !comp[std::to_underlying(CompOption::Zombie)])))
 				G_ExitLevel(0);
 			break;
 
 		case 53:
 			// Perpetual Platform Raise
-			if(EV_DoPlat(line, perpetualRaise, 0) || demo_compatibility)
+			if(EV_DoPlat(line, PlatType::PerpetualRaise, 0) || demo_compatibility)
 				line->special = 0;
 			break;
 
@@ -1918,7 +1920,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 56:
 			// Raise Floor Crush
-			if(EV_DoFloor(line, raiseFloorCrush) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::RaiseFloorCrush) || demo_compatibility)
 				line->special = 0;
 			break;
 
@@ -1930,19 +1932,19 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 58:
 			// Raise Floor 24
-			if(EV_DoFloor(line, raiseFloor24) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::RaiseFloor24) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 59:
 			// Raise Floor 24 And Change
-			if(EV_DoFloor(line, raiseFloor24AndChange) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::RaiseFloor24AndChange) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 100:
 			// Build Stairs Turbo 16
-			if(EV_BuildStairs(line, turbo16) || demo_compatibility)
+			if(EV_BuildStairs(line, StairType::Turbo16) || demo_compatibility)
 				line->special = 0;
 			break;
 
@@ -1954,31 +1956,31 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 108:
 			// Blazing Door Raise (faster than TURBO!)
-			if(EV_DoDoor(line, static_cast<vldoor_e>(blazeRaise)) || demo_compatibility)
+			if(EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::BlazeRaise)) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 109:
 			// Blazing Door Open (faster than TURBO!)
-			if(EV_DoDoor(line, static_cast<vldoor_e>(blazeOpen)) || demo_compatibility)
+			if(EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::BlazeOpen)) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 110:
 			// Blazing Door Close (faster than TURBO!)
-			if(EV_DoDoor(line, static_cast<vldoor_e>(blazeClose)) || demo_compatibility)
+			if(EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::BlazeClose)) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 119:
 			// Raise floor to nearest surr. floor
-			if(EV_DoFloor(line, raiseFloorToNearest) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::RaiseFloorToNearest) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 121:
 			// Blazing PlatDownWaitUpStay
-			if(EV_DoPlat(line, blazeDWUS, 0) || demo_compatibility)
+			if(EV_DoPlat(line, PlatType::BlazeDWUS, 0) || demo_compatibility)
 				line->special = 0;
 			break;
 
@@ -1986,7 +1988,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 			// Secret EXIT
 			// killough 10/98: prevent zombies from exiting levels
 			// CPhipps - change for lxdoom's compatibility handling
-			if(bossaction || (!(thing->player && thing->player->health <= 0 && !comp[comp_zombie])))
+			if(bossaction || (!(thing->player && thing->player->health <= 0 && !comp[std::to_underlying(CompOption::Zombie)])))
 				G_SecretExitLevel(0);
 			break;
 
@@ -1999,13 +2001,13 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 130:
 			// Raise Floor Turbo
-			if(EV_DoFloor(line, raiseFloorTurbo) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::RaiseFloorTurbo) || demo_compatibility)
 				line->special = 0;
 			break;
 
 		case 141:
 			// Silent Ceiling Crush & Raise
-			if(EV_DoCeiling(line, silentCrushAndRaise) || demo_compatibility)
+			if(EV_DoCeiling(line, CeilingKind::SilentCrushAndRaise) || demo_compatibility)
 				line->special = 0;
 			break;
 
@@ -2013,12 +2015,12 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 72:
 			// Ceiling Crush
-			EV_DoCeiling(line, lowerAndCrush);
+			EV_DoCeiling(line, CeilingKind::LowerAndCrush);
 			break;
 
 		case 73:
 			// Ceiling Crush and Raise
-			EV_DoCeiling(line, crushAndRaise);
+			EV_DoCeiling(line, CeilingKind::CrushAndRaise);
 			break;
 
 		case 74:
@@ -2028,17 +2030,17 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 75:
 			// Close Door
-			EV_DoDoor(line, static_cast<vldoor_e>(closeDoor));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::CloseDoor));
 			break;
 
 		case 76:
 			// Close Door 30
-			EV_DoDoor(line, static_cast<vldoor_e>(close30ThenOpen));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::Close30ThenOpen));
 			break;
 
 		case 77:
 			// Fast Ceiling Crush & Raise
-			EV_DoCeiling(line, fastCrushAndRaise);
+			EV_DoCeiling(line, CeilingKind::FastCrushAndRaise);
 			break;
 
 		case 79:
@@ -2058,32 +2060,32 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 82:
 			// Lower Floor To Lowest
-			EV_DoFloor(line, lowerFloorToLowest);
+			EV_DoFloor(line, FloorKind::LowerFloorToLowest);
 			break;
 
 		case 83:
 			// Lower Floor
-			EV_DoFloor(line, lowerFloor);
+			EV_DoFloor(line, FloorKind::LowerFloor);
 			break;
 
 		case 84:
 			// LowerAndChange
-			EV_DoFloor(line, lowerAndChange);
+			EV_DoFloor(line, FloorKind::LowerAndChange);
 			break;
 
 		case 86:
 			// Open Door
-			EV_DoDoor(line, static_cast<vldoor_e>(openDoor));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::OpenDoor));
 			break;
 
 		case 87:
 			// Perpetual Platform Raise
-			EV_DoPlat(line, perpetualRaise, 0);
+			EV_DoPlat(line, PlatType::PerpetualRaise, 0);
 			break;
 
 		case 88:
 			// PlatDownWaitUp
-			EV_DoPlat(line, downWaitUpStay, 0);
+			EV_DoPlat(line, PlatType::DownWaitUpStay, 0);
 			break;
 
 		case 89:
@@ -2093,39 +2095,39 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 90:
 			// Raise Door
-			EV_DoDoor(line, static_cast<vldoor_e>(normal));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::Normal));
 			break;
 
 		case 91:
 			// Raise Floor
-			EV_DoFloor(line, raiseFloor);
+			EV_DoFloor(line, FloorKind::RaiseFloor);
 			break;
 
 		case 92:
 			// Raise Floor 24
-			EV_DoFloor(line, raiseFloor24);
+			EV_DoFloor(line, FloorKind::RaiseFloor24);
 			break;
 
 		case 93:
 			// Raise Floor 24 And Change
-			EV_DoFloor(line, raiseFloor24AndChange);
+			EV_DoFloor(line, FloorKind::RaiseFloor24AndChange);
 			break;
 
 		case 94:
 			// Raise Floor Crush
-			EV_DoFloor(line, raiseFloorCrush);
+			EV_DoFloor(line, FloorKind::RaiseFloorCrush);
 			break;
 
 		case 95:
 			// Raise floor to nearest height
 			// and change texture.
-			EV_DoPlat(line, raiseToNearestAndChange, 0);
+			EV_DoPlat(line, PlatType::RaiseToNearestAndChange, 0);
 			break;
 
 		case 96:
 			// Raise floor to shortest texture height
 			// on either side of lines.
-			EV_DoFloor(line, raiseToTexture);
+			EV_DoFloor(line, FloorKind::RaiseToTexture);
 			break;
 
 		case 97:
@@ -2135,27 +2137,27 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 98:
 			// Lower Floor (TURBO)
-			EV_DoFloor(line, turboLower);
+			EV_DoFloor(line, FloorKind::TurboLower);
 			break;
 
 		case 105:
 			// Blazing Door Raise (faster than TURBO!)
-			EV_DoDoor(line, static_cast<vldoor_e>(blazeRaise));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::BlazeRaise));
 			break;
 
 		case 106:
 			// Blazing Door Open (faster than TURBO!)
-			EV_DoDoor(line, static_cast<vldoor_e>(blazeOpen));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::BlazeOpen));
 			break;
 
 		case 107:
 			// Blazing Door Close (faster than TURBO!)
-			EV_DoDoor(line, static_cast<vldoor_e>(blazeClose));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::BlazeClose));
 			break;
 
 		case 120:
 			// Blazing PlatDownWaitUpStay.
-			EV_DoPlat(line, blazeDWUS, 0);
+			EV_DoPlat(line, PlatType::BlazeDWUS, 0);
 			break;
 
 		case 126:
@@ -2166,12 +2168,12 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 128:
 			// Raise To Nearest Floor
-			EV_DoFloor(line, raiseFloorToNearest);
+			EV_DoFloor(line, FloorKind::RaiseFloorToNearest);
 			break;
 
 		case 129:
 			// Raise Floor Turbo
-			EV_DoFloor(line, raiseFloorTurbo);
+			EV_DoFloor(line, FloorKind::RaiseFloorTurbo);
 			break;
 
 		// Extended walk triggers
@@ -2194,28 +2196,28 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 					case 142:
 						// Raise Floor 512
 						// 142 W1  EV_DoFloor(raiseFloor512)
-						if(EV_DoFloor(line, raiseFloor512))
+						if(EV_DoFloor(line, FloorKind::RaiseFloor512))
 							line->special = 0;
 						break;
 
 					case 143:
 						// Raise Floor 24 and change
 						// 143 W1  EV_DoPlat(raiseAndChange,24)
-						if(EV_DoPlat(line, raiseAndChange, 24))
+						if(EV_DoPlat(line, PlatType::RaiseAndChange, 24))
 							line->special = 0;
 						break;
 
 					case 144:
 						// Raise Floor 32 and change
 						// 144 W1  EV_DoPlat(raiseAndChange,32)
-						if(EV_DoPlat(line, raiseAndChange, 32))
+						if(EV_DoPlat(line, PlatType::RaiseAndChange, 32))
 							line->special = 0;
 						break;
 
 					case 145:
 						// Lower Ceiling to Floor
 						// 145 W1  EV_DoCeiling(lowerToFloor)
-						if(EV_DoCeiling(line, lowerToFloor))
+						if(EV_DoCeiling(line, CeilingKind::LowerToFloor))
 							line->special = 0;
 						break;
 
@@ -2229,14 +2231,14 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 					case 199:
 						// Lower ceiling to lowest surrounding ceiling
 						// 199 W1 EV_DoCeiling(lowerToLowest)
-						if(EV_DoCeiling(line, lowerToLowest))
+						if(EV_DoCeiling(line, CeilingKind::LowerToLowest))
 							line->special = 0;
 						break;
 
 					case 200:
 						// Lower ceiling to highest surrounding floor
 						// 200 W1 EV_DoCeiling(lowerToMaxFloor)
-						if(EV_DoCeiling(line, lowerToMaxFloor))
+						if(EV_DoCeiling(line, CeilingKind::LowerToMaxFloor))
 							line->special = 0;
 						break;
 
@@ -2250,42 +2252,42 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 					case 153: //jff 3/15/98 create texture change no motion type
 						// Texture/Type Change Only (Trig)
 						// 153 W1 Change Texture/Type Only
-						if(EV_DoChange(line, trigChangeOnly, line->special_args[0]))
+						if(EV_DoChange(line, ChangeKind::TriggerOnly, line->special_args[0]))
 							line->special = 0;
 						break;
 
 					case 239: //jff 3/15/98 create texture change no motion type
 						// Texture/Type Change Only (Numeric)
 						// 239 W1 Change Texture/Type Only
-						if(EV_DoChange(line, numChangeOnly, line->special_args[0]))
+						if(EV_DoChange(line, ChangeKind::NumericOnly, line->special_args[0]))
 							line->special = 0;
 						break;
 
 					case 219:
 						// Lower floor to next lower neighbor
 						// 219 W1 Lower Floor Next Lower Neighbor
-						if(EV_DoFloor(line, lowerFloorToNearest))
+						if(EV_DoFloor(line, FloorKind::LowerFloorToNearest))
 							line->special = 0;
 						break;
 
 					case 227:
 						// Raise elevator next floor
 						// 227 W1 Raise Elevator next floor
-						if(EV_DoElevator(line, elevateUp))
+						if(EV_DoElevator(line, ElevatorType::Up))
 							line->special = 0;
 						break;
 
 					case 231:
 						// Lower elevator next floor
 						// 231 W1 Lower Elevator next floor
-						if(EV_DoElevator(line, elevateDown))
+						if(EV_DoElevator(line, ElevatorType::Down))
 							line->special = 0;
 						break;
 
 					case 235:
 						// Elevator to current floor
 						// 235 W1 Elevator to current floor
-						if(EV_DoElevator(line, elevateCurrent))
+						if(EV_DoElevator(line, ElevatorType::Current))
 							line->special = 0;
 						break;
 
@@ -2327,53 +2329,53 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 					case 147:
 						// Raise Floor 512
 						// 147 WR  EV_DoFloor(raiseFloor512)
-						EV_DoFloor(line, raiseFloor512);
+						EV_DoFloor(line, FloorKind::RaiseFloor512);
 						break;
 
 					case 148:
 						// Raise Floor 24 and Change
 						// 148 WR  EV_DoPlat(raiseAndChange,24)
-						EV_DoPlat(line, raiseAndChange, 24);
+						EV_DoPlat(line, PlatType::RaiseAndChange, 24);
 						break;
 
 					case 149:
 						// Raise Floor 32 and Change
 						// 149 WR  EV_DoPlat(raiseAndChange,32)
-						EV_DoPlat(line, raiseAndChange, 32);
+						EV_DoPlat(line, PlatType::RaiseAndChange, 32);
 						break;
 
 					case 150:
 						// Start slow silent crusher
 						// 150 WR  EV_DoCeiling(silentCrushAndRaise)
-						EV_DoCeiling(line, silentCrushAndRaise);
+						EV_DoCeiling(line, CeilingKind::SilentCrushAndRaise);
 						break;
 
 					case 151:
 						// RaiseCeilingLowerFloor
 						// 151 WR  EV_DoCeiling(raiseToHighest),
 						//         EV_DoFloor(lowerFloortoLowest)
-						EV_DoCeiling(line, raiseToHighest);
-						EV_DoFloor(line, lowerFloorToLowest);
+						EV_DoCeiling(line, CeilingKind::RaiseToHighest);
+						EV_DoFloor(line, FloorKind::LowerFloorToLowest);
 						break;
 
 					case 152:
 						// Lower Ceiling to Floor
 						// 152 WR  EV_DoCeiling(lowerToFloor)
-						EV_DoCeiling(line, lowerToFloor);
+						EV_DoCeiling(line, CeilingKind::LowerToFloor);
 						break;
 
 					//jff 3/16/98 renumber 153->256
 					case 256:
 						// Build stairs, step 8
 						// 256 WR EV_BuildStairs(build8)
-						EV_BuildStairs(line, build8);
+						EV_BuildStairs(line, StairType::Build8);
 						break;
 
 					//jff 3/16/98 renumber 154->257
 					case 257:
 						// Build stairs, step 16
 						// 257 WR EV_BuildStairs(turbo16)
-						EV_BuildStairs(line, turbo16);
+						EV_BuildStairs(line, StairType::Turbo16);
 						break;
 
 					case 155:
@@ -2397,13 +2399,13 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 					case 201:
 						// Lower ceiling to lowest surrounding ceiling
 						// 201 WR EV_DoCeiling(lowerToLowest)
-						EV_DoCeiling(line, lowerToLowest);
+						EV_DoCeiling(line, CeilingKind::LowerToLowest);
 						break;
 
 					case 202:
 						// Lower ceiling to highest surrounding floor
 						// 202 WR EV_DoCeiling(lowerToMaxFloor)
-						EV_DoCeiling(line, lowerToMaxFloor);
+						EV_DoCeiling(line, CeilingKind::LowerToMaxFloor);
 						break;
 
 					case 208:
@@ -2414,44 +2416,44 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 					case 212: //jff 3/14/98 create instant toggle floor type
 						// Toggle floor between C and F instantly
 						// 212 WR Instant Toggle Floor
-						EV_DoPlat(line, toggleUpDn, 0);
+						EV_DoPlat(line, PlatType::ToggleUpDn, 0);
 						break;
 
 					//jff 3/16/98 renumber 216->154
 					case 154: //jff 3/15/98 create texture change no motion type
 						// Texture/Type Change Only (Trigger)
 						// 154 WR Change Texture/Type Only
-						EV_DoChange(line, trigChangeOnly, line->special_args[0]);
+						EV_DoChange(line, ChangeKind::TriggerOnly, line->special_args[0]);
 						break;
 
 					case 240: //jff 3/15/98 create texture change no motion type
 						// Texture/Type Change Only (Numeric)
 						// 240 WR Change Texture/Type Only
-						EV_DoChange(line, numChangeOnly, line->special_args[0]);
+						EV_DoChange(line, ChangeKind::NumericOnly, line->special_args[0]);
 						break;
 
 					case 220:
 						// Lower floor to next lower neighbor
 						// 220 WR Lower Floor Next Lower Neighbor
-						EV_DoFloor(line, lowerFloorToNearest);
+						EV_DoFloor(line, FloorKind::LowerFloorToNearest);
 						break;
 
 					case 228:
 						// Raise elevator next floor
 						// 228 WR Raise Elevator next floor
-						EV_DoElevator(line, elevateUp);
+						EV_DoElevator(line, ElevatorType::Up);
 						break;
 
 					case 232:
 						// Lower elevator next floor
 						// 232 WR Lower Elevator next floor
-						EV_DoElevator(line, elevateDown);
+						EV_DoElevator(line, ElevatorType::Down);
 						break;
 
 					case 236:
 						// Elevator to current floor
 						// 236 WR Elevator to current floor
-						EV_DoElevator(line, elevateCurrent);
+						EV_DoElevator(line, ElevatorType::Current);
 						break;
 
 					case 244: //jff 3/6/98 make fit within DCK's 256 linedef types
@@ -2498,9 +2500,9 @@ extern "C" void P_CrossZDoomSpecialLine(line_t* line, int side, mobj_t* thing, d
 	{
 		P_ActivateLine(line, thing, side, SPAC_PCROSS);
 	}
-	else if(line->special == zl_teleport ||
-		line->special == zl_teleport_no_fog ||
-		line->special == zl_teleport_line)
+	else if(line->special == std::to_underlying(ZDoomLineSpecial::Teleport) ||
+		line->special == std::to_underlying(ZDoomLineSpecial::TeleportNoFog) ||
+		line->special == std::to_underlying(ZDoomLineSpecial::TeleportLine))
 	{
 		// [RH] Just a little hack for BOOM compatibility
 		P_ActivateLine(line, thing, side, SPAC_MCROSS);
@@ -2572,7 +2574,7 @@ extern "C" void P_ShootCompatibleSpecialLine(mobj_t* thing, line_t* line)
 		{
 			if(!thing->player)
 				return; // monsters disallowed from unlocking doors
-			if(((line->special & TriggerType) == GunOnce) || ((line->special & TriggerType) == GunMany))
+			if(((line->special & TriggerType) == std::to_underlying(GenTriggerType::GunOnce)) || ((line->special & TriggerType) == std::to_underlying(GenTriggerType::GunMany)))
 			{
 				//jff 4/1/98 check for being a gun type before reporting door type
 				if(!P_CanUnlockGenDoor(line, thing->player))
@@ -2612,13 +2614,13 @@ extern "C" void P_ShootCompatibleSpecialLine(mobj_t* thing, line_t* line)
 		}
 
 		if(linefunc)
-			switch((line->special & TriggerType) >> TriggerTypeShift)
+			switch(static_cast<GenTriggerType>((line->special & TriggerType) >> TriggerTypeShift))
 			{
-				case GunOnce:
+				case GenTriggerType::GunOnce:
 					if(linefunc(line))
 						P_ChangeSwitchTexture(line, 0);
 					return;
-				case GunMany:
+				case GenTriggerType::GunMany:
 					if(linefunc(line))
 						P_ChangeSwitchTexture(line, 1);
 					return;
@@ -2649,19 +2651,19 @@ extern "C" void P_ShootCompatibleSpecialLine(mobj_t* thing, line_t* line)
 	{
 		case 24:
 			// 24 G1 raise floor to highest adjacent
-			if(EV_DoFloor(line, raiseFloor) || demo_compatibility)
+			if(EV_DoFloor(line, FloorKind::RaiseFloor) || demo_compatibility)
 				P_ChangeSwitchTexture(line, 0);
 			break;
 
 		case 46:
 			// 46 GR open door, stay open
-			EV_DoDoor(line, static_cast<vldoor_e>(g_door_open));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(g_door_open));
 			P_ChangeSwitchTexture(line, 1);
 			break;
 
 		case 47:
 			// 47 G1 raise floor to nearest and change texture and type
-			if(EV_DoPlat(line, raiseToNearestAndChange, 0) || demo_compatibility)
+			if(EV_DoPlat(line, PlatType::RaiseToNearestAndChange, 0) || demo_compatibility)
 				P_ChangeSwitchTexture(line, 0);
 			break;
 
@@ -2675,7 +2677,7 @@ extern "C" void P_ShootCompatibleSpecialLine(mobj_t* thing, line_t* line)
 					case 197:
 						// Exit to next level
 						// killough 10/98: prevent zombies from exiting levels
-						if(thing->player && thing->player->health <= 0 && !comp[comp_zombie])
+						if(thing->player && thing->player->health <= 0 && !comp[std::to_underlying(CompOption::Zombie)])
 							break;
 						P_ChangeSwitchTexture(line, 0);
 						G_ExitLevel(0);
@@ -2684,7 +2686,7 @@ extern "C" void P_ShootCompatibleSpecialLine(mobj_t* thing, line_t* line)
 					case 198:
 						// Exit to secret level
 						// killough 10/98: prevent zombies from exiting levels
-						if(thing->player && thing->player->health <= 0 && !comp[comp_zombie])
+						if(thing->player && thing->player->health <= 0 && !comp[std::to_underlying(CompOption::Zombie)])
 							break;
 						P_ChangeSwitchTexture(line, 0);
 						G_SecretExitLevel(0);
@@ -2702,14 +2704,14 @@ extern "C" void P_ShootHexenSpecialLine(mobj_t* thing, line_t* line)
 
 static void P_ApplySectorDamage(player_t* player, int damage, int leak)
 {
-	if(!player->powers[pw_ironfeet] || (leak && P_Random(pr_slimehurt) < leak))
+	if(!player->powers[std::to_underlying(PowerType::IronFeet)] || (leak && P_Random(RandomClass::Slimehurt) < leak))
 		if(!(leveltime & 0x1f))
 			P_DamageMobj(player->mo, nullptr, nullptr, damage);
 }
 
 static void P_ApplySectorDamageEndLevel(player_t* player)
 {
-	if(comp[comp_god])
+	if(comp[std::to_underlying(CompOption::God)])
 		player->cheats &= ~CF_GODMODE;
 
 	if(!(leveltime & 0x1f))
@@ -2773,7 +2775,7 @@ extern "C" void P_PlayerInCompatibleSector(player_t* player, sector_t* sector)
 			switch((sector->special & DAMAGE_MASK) >> DAMAGE_SHIFT)
 			{
 				case 0:
-					if(!player->powers[pw_invulnerability] && !player->powers[pw_ironfeet])
+					if(!player->powers[std::to_underlying(PowerType::Invulnerability)] && !player->powers[std::to_underlying(PowerType::IronFeet)])
 						P_DamageMobj(player->mo, nullptr, nullptr, 10000);
 					break;
 				case 1:
@@ -2830,8 +2832,8 @@ extern "C" void P_PlayerInZDoomSector(player_t* player, sector_t* sector)
 
 		if(
 			sector->flags & SECF_DMGUNBLOCKABLE ||
-			!player->powers[pw_ironfeet] ||
-			(sector->damage.leakrate && P_Random(pr_slimehurt) < sector->damage.leakrate)
+			!player->powers[std::to_underlying(PowerType::IronFeet)] ||
+			(sector->damage.leakrate && P_Random(RandomClass::Slimehurt) < sector->damage.leakrate)
 		)
 		{
 			if(sector->flags & SECF_HAZARD)
@@ -2866,12 +2868,12 @@ extern "C" void P_PlayerInZDoomSector(player_t* player, sector_t* sector)
 		}
 	}
 
-	switch(sector->special)
+	switch(static_cast<ZDoomSectorSpecial>(sector->special))
 	{
-		case zs_d_scroll_east_lava_damage:
+		case ZDoomSectorSpecial::DScrollEastLavaDamage:
 			P_Thrust(player, 0, 2048 * 28);
 			break;
-		case zs_scroll_strife_current:
+		case ZDoomSectorSpecial::ScrollStrifeCurrent:
 		{
 			int anglespeed;
 			fixed_t carryspeed;
@@ -2883,73 +2885,73 @@ extern "C" void P_PlayerInZDoomSector(player_t* player, sector_t* sector)
 			P_Thrust(player, angle, carryspeed);
 		}
 		break;
-		case zs_carry_east5:
-		case zs_carry_east10:
-		case zs_carry_east25:
-		case zs_carry_east30:
-		case zs_carry_east35:
-			P_Thrust(player, 0, heretic_carry[sector->special - zs_carry_east5]);
+		case ZDoomSectorSpecial::CarryEast5:
+		case ZDoomSectorSpecial::CarryEast10:
+		case ZDoomSectorSpecial::CarryEast25:
+		case ZDoomSectorSpecial::CarryEast30:
+		case ZDoomSectorSpecial::CarryEast35:
+			P_Thrust(player, 0, heretic_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::CarryEast5)]);
 			break;
-		case zs_carry_north5:
-		case zs_carry_north10:
-		case zs_carry_north25:
-		case zs_carry_north30:
-		case zs_carry_north35:
-			P_Thrust(player, ANG90, heretic_carry[sector->special - zs_carry_north5]);
+		case ZDoomSectorSpecial::CarryNorth5:
+		case ZDoomSectorSpecial::CarryNorth10:
+		case ZDoomSectorSpecial::CarryNorth25:
+		case ZDoomSectorSpecial::CarryNorth30:
+		case ZDoomSectorSpecial::CarryNorth35:
+			P_Thrust(player, ANG90, heretic_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::CarryNorth5)]);
 			break;
-		case zs_carry_south5:
-		case zs_carry_south10:
-		case zs_carry_south25:
-		case zs_carry_south30:
-		case zs_carry_south35:
-			P_Thrust(player, ANG270, heretic_carry[sector->special - zs_carry_south5]);
+		case ZDoomSectorSpecial::CarrySouth5:
+		case ZDoomSectorSpecial::CarrySouth10:
+		case ZDoomSectorSpecial::CarrySouth25:
+		case ZDoomSectorSpecial::CarrySouth30:
+		case ZDoomSectorSpecial::CarrySouth35:
+			P_Thrust(player, ANG270, heretic_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::CarrySouth5)]);
 			break;
-		case zs_carry_west5:
-		case zs_carry_west10:
-		case zs_carry_west25:
-		case zs_carry_west30:
-		case zs_carry_west35:
-			P_Thrust(player, ANG180, heretic_carry[sector->special - zs_carry_west5]);
+		case ZDoomSectorSpecial::CarryWest5:
+		case ZDoomSectorSpecial::CarryWest10:
+		case ZDoomSectorSpecial::CarryWest25:
+		case ZDoomSectorSpecial::CarryWest30:
+		case ZDoomSectorSpecial::CarryWest35:
+			P_Thrust(player, ANG180, heretic_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::CarryWest5)]);
 			break;
-		case zs_scroll_north_slow:
-		case zs_scroll_north_medium:
-		case zs_scroll_north_fast:
-			P_Thrust(player, ANG90, hexen_carry[sector->special - zs_scroll_north_slow]);
+		case ZDoomSectorSpecial::ScrollNorthSlow:
+		case ZDoomSectorSpecial::ScrollNorthMedium:
+		case ZDoomSectorSpecial::ScrollNorthFast:
+			P_Thrust(player, ANG90, hexen_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::ScrollNorthSlow)]);
 			break;
-		case zs_scroll_east_slow:
-		case zs_scroll_east_medium:
-		case zs_scroll_east_fast:
-			P_Thrust(player, 0, hexen_carry[sector->special - zs_scroll_east_slow]);
+		case ZDoomSectorSpecial::ScrollEastSlow:
+		case ZDoomSectorSpecial::ScrollEastMedium:
+		case ZDoomSectorSpecial::ScrollEastFast:
+			P_Thrust(player, 0, hexen_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::ScrollEastSlow)]);
 			break;
-		case zs_scroll_south_slow:
-		case zs_scroll_south_medium:
-		case zs_scroll_south_fast:
-			P_Thrust(player, ANG270, hexen_carry[sector->special - zs_scroll_south_slow]);
+		case ZDoomSectorSpecial::ScrollSouthSlow:
+		case ZDoomSectorSpecial::ScrollSouthMedium:
+		case ZDoomSectorSpecial::ScrollSouthFast:
+			P_Thrust(player, ANG270, hexen_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::ScrollSouthSlow)]);
 			break;
-		case zs_scroll_west_slow:
-		case zs_scroll_west_medium:
-		case zs_scroll_west_fast:
-			P_Thrust(player, ANG180, hexen_carry[sector->special - zs_scroll_west_slow]);
+		case ZDoomSectorSpecial::ScrollWestSlow:
+		case ZDoomSectorSpecial::ScrollWestMedium:
+		case ZDoomSectorSpecial::ScrollWestFast:
+			P_Thrust(player, ANG180, hexen_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::ScrollWestSlow)]);
 			break;
-		case zs_scroll_northwest_slow:
-		case zs_scroll_northwest_medium:
-		case zs_scroll_northwest_fast:
-			P_Thrust(player, ANG135, hexen_carry[sector->special - zs_scroll_northwest_slow]);
+		case ZDoomSectorSpecial::ScrollNorthwestSlow:
+		case ZDoomSectorSpecial::ScrollNorthwestMedium:
+		case ZDoomSectorSpecial::ScrollNorthwestFast:
+			P_Thrust(player, ANG135, hexen_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::ScrollNorthwestSlow)]);
 			break;
-		case zs_scroll_northeast_slow:
-		case zs_scroll_northeast_medium:
-		case zs_scroll_northeast_fast:
-			P_Thrust(player, ANG45, hexen_carry[sector->special - zs_scroll_northeast_slow]);
+		case ZDoomSectorSpecial::ScrollNortheastSlow:
+		case ZDoomSectorSpecial::ScrollNortheastMedium:
+		case ZDoomSectorSpecial::ScrollNortheastFast:
+			P_Thrust(player, ANG45, hexen_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::ScrollNortheastSlow)]);
 			break;
-		case zs_scroll_southeast_slow:
-		case zs_scroll_southeast_medium:
-		case zs_scroll_southeast_fast:
-			P_Thrust(player, ANG315, hexen_carry[sector->special - zs_scroll_southeast_slow]);
+		case ZDoomSectorSpecial::ScrollSoutheastSlow:
+		case ZDoomSectorSpecial::ScrollSoutheastMedium:
+		case ZDoomSectorSpecial::ScrollSoutheastFast:
+			P_Thrust(player, ANG315, hexen_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::ScrollSoutheastSlow)]);
 			break;
-		case zs_scroll_southwest_slow:
-		case zs_scroll_southwest_medium:
-		case zs_scroll_southwest_fast:
-			P_Thrust(player, ANG225, hexen_carry[sector->special - zs_scroll_southwest_slow]);
+		case ZDoomSectorSpecial::ScrollSouthwestSlow:
+		case ZDoomSectorSpecial::ScrollSouthwestMedium:
+		case ZDoomSectorSpecial::ScrollSouthwestFast:
+			P_Thrust(player, ANG225, hexen_carry[sector->special - std::to_underlying(ZDoomSectorSpecial::ScrollSouthwestSlow)]);
 			break;
 		default:
 			break;
@@ -3107,17 +3109,17 @@ void P_UpdateSpecials()
 			{
 				switch(buttonlist[i].where)
 				{
-					case top:
+					case ButtonWhere::Top:
 						sides[buttonlist[i].line->sidenum[0]].toptexture =
 							buttonlist[i].btexture;
 						break;
 
-					case middle:
+					case ButtonWhere::Middle:
 						sides[buttonlist[i].line->sidenum[0]].midtexture =
 							buttonlist[i].btexture;
 						break;
 
-					case bottom:
+					case ButtonWhere::Bottom:
 						sides[buttonlist[i].line->sidenum[0]].bottomtexture =
 							buttonlist[i].btexture;
 						break;
@@ -3127,7 +3129,7 @@ void P_UpdateSpecials()
 					/* don't take the address of the switch's sound origin,
 					* unless in a compatibility mode. */
 					degenmobj_t* so = buttonlist[i].soundorg;
-					if(comp[comp_sound] || compatibility_level < prboom_6_compatibility)
+					if(comp[std::to_underlying(CompOption::Sound)] || compatibility_level < CompLevel::Prboom6)
 						/* since the buttonlist array is usually zeroed out,
 						* button popouts generally appear to come from (0,0) */
 						so = (degenmobj_t*)&buttonlist[i].soundorg;
@@ -3161,7 +3163,7 @@ extern "C" void P_SpawnCompatibleSectorSpecial(sector_t* sector, int i)
 	if(sector->special & PUSH_MASK)
 		sector->flags |= SECF_PUSH;
 
-	switch((demo_compatibility && !prboom_comp[PC_TRUNCATED_SECTOR_SPECIALS].state) ? sector->special : sector->special & 31)
+	switch((demo_compatibility && !prboom_comp[std::to_underlying(PrboomComp::TruncatedSectorSpecials)].state) ? sector->special : sector->special & 31)
 	{
 		case 1:
 			// random off
@@ -3226,46 +3228,46 @@ extern "C" void P_SpawnCompatibleSectorSpecial(sector_t* sector, int i)
 
 void P_SpawnZDoomLights(sector_t* sector)
 {
-	switch(sector->special)
+	switch(static_cast<ZDoomSectorSpecial>(sector->special))
 	{
-		case zs_light_phased:
+		case ZDoomSectorSpecial::LightPhased:
 			P_SpawnPhasedLight(sector, 80, -1);
 			break;
-		case zs_light_sequence_start:
+		case ZDoomSectorSpecial::LightSequenceStart:
 			P_SpawnLightSequence(sector, 1);
 			break;
-		case zs_d_light_flicker:
+		case ZDoomSectorSpecial::DLightFlicker:
 			P_SpawnLightFlash(sector);
 			break;
-		case zs_d_light_strobe_fast:
+		case ZDoomSectorSpecial::DLightStrobeFast:
 			P_SpawnStrobeFlash(sector, FASTDARK, 0);
 			break;
-		case zs_d_light_strobe_slow:
+		case ZDoomSectorSpecial::DLightStrobeSlow:
 			P_SpawnStrobeFlash(sector, SLOWDARK, 0);
 			break;
-		case zs_d_light_strobe_hurt:
+		case ZDoomSectorSpecial::DLightStrobeHurt:
 			P_SpawnStrobeFlash(sector, FASTDARK, 0);
-			sector->special |= zs_d_light_strobe_hurt;
+			sector->special |= std::to_underlying(ZDoomSectorSpecial::DLightStrobeHurt);
 			break;
-		case zs_d_light_glow:
+		case ZDoomSectorSpecial::DLightGlow:
 			P_SpawnGlowingLight(sector);
 			break;
-		case zs_d_light_strobe_slow_sync:
+		case ZDoomSectorSpecial::DLightStrobeSlowSync:
 			P_SpawnStrobeFlash(sector, SLOWDARK, 1);
 			break;
-		case zs_d_light_strobe_fast_sync:
+		case ZDoomSectorSpecial::DLightStrobeFastSync:
 			P_SpawnStrobeFlash(sector, FASTDARK, 1);
 			break;
-		case zs_d_light_fire_flicker:
+		case ZDoomSectorSpecial::DLightFireFlicker:
 			P_SpawnFireFlicker(sector);
 			break;
-		case zs_d_scroll_east_lava_damage:
+		case ZDoomSectorSpecial::DScrollEastLavaDamage:
 			P_SpawnStrobeFlash(sector, FASTDARK, 0);
-			sector->special |= zs_d_scroll_east_lava_damage;
+			sector->special |= std::to_underlying(ZDoomSectorSpecial::DScrollEastLavaDamage);
 			break;
-		case zs_s_light_strobe_hurt:
+		case ZDoomSectorSpecial::SLightStrobeHurt:
 			P_SpawnStrobeFlash(sector, FASTDARK, 0);
-			sector->special |= zs_s_light_strobe_hurt;
+			sector->special |= std::to_underlying(ZDoomSectorSpecial::SLightStrobeHurt);
 			break;
 		default:
 			break;
@@ -3322,78 +3324,78 @@ extern "C" void P_SpawnZDoomSectorSpecial(sector_t* sector, int i)
 
 	P_SpawnZDoomLights(sector);
 
-	switch(sector->special)
+	switch(static_cast<ZDoomSectorSpecial>(sector->special))
 	{
-		case zs_d_scroll_east_lava_damage:
+		case ZDoomSectorSpecial::DScrollEastLavaDamage:
 			dsda_AddFloorScroller(-4, 0, sector - sectors, 0);
 			P_SetupSectorDamage(sector, 5, 32, 0, SECF_DMGTERRAINFX | SECF_DMGUNBLOCKABLE);
 			break;
-		case zs_s_light_strobe_hurt:
-		case zs_d_damage_nukage:
+		case ZDoomSectorSpecial::SLightStrobeHurt:
+		case ZDoomSectorSpecial::DDamageNukage:
 			P_SetupSectorDamage(sector, 5, 32, 0, 0);
 			sector->special = 0;
 			break;
-		case zs_d_damage_hellslime:
+		case ZDoomSectorSpecial::DDamageHellslime:
 			P_SetupSectorDamage(sector, 10, 32, 0, 0);
 			sector->special = 0;
 			break;
-		case zs_d_light_strobe_hurt:
-		case zs_d_damage_super_hellslime:
+		case ZDoomSectorSpecial::DLightStrobeHurt:
+		case ZDoomSectorSpecial::DDamageSuperHellslime:
 			P_SetupSectorDamage(sector, 20, 32, 5, 0);
 			sector->special = 0;
 			break;
-		case zs_d_damage_end:
+		case ZDoomSectorSpecial::DDamageEnd:
 			P_SetupSectorDamage(sector, 20, 32, 0, SECF_ENDGODMODE | SECF_ENDLEVEL | SECF_DMGUNBLOCKABLE);
 			sector->special = 0;
 			break;
-		case zs_damage_instant_death:
+		case ZDoomSectorSpecial::DamageInstantDeath:
 			P_SetupSectorDamage(sector, 10000, 1, 0, SECF_DMGUNBLOCKABLE);
 			sector->special = 0;
 			break;
-		case zs_h_damage_sludge:
+		case ZDoomSectorSpecial::HDamageSludge:
 			P_SetupSectorDamage(sector, 4, 32, 0, 0);
 			sector->special = 0;
 			break;
-		case zs_d_damage_lava_wimpy:
+		case ZDoomSectorSpecial::DDamageLavaWimpy:
 			P_SetupSectorDamage(sector, 5, 32, 0, SECF_DMGTERRAINFX | SECF_DMGUNBLOCKABLE);
 			sector->special = 0;
 			break;
-		case zs_d_damage_lava_hefty:
+		case ZDoomSectorSpecial::DDamageLavaHefty:
 			P_SetupSectorDamage(sector, 8, 32, 0, SECF_DMGTERRAINFX | SECF_DMGUNBLOCKABLE);
 			sector->special = 0;
 			break;
-		case zs_s_damage_hellslime:
+		case ZDoomSectorSpecial::SDamageHellslime:
 			P_SetupSectorDamage(sector, 2, 32, 0, SECF_HAZARD);
 			sector->special = 0;
 			break;
-		case zs_s_damage_super_hellslime:
+		case ZDoomSectorSpecial::SDamageSuperHellslime:
 			P_SetupSectorDamage(sector, 4, 32, 0, SECF_HAZARD);
 			sector->special = 0;
 			break;
-		case zs_sector_heal:
+		case ZDoomSectorSpecial::SectorHeal:
 			P_SetupSectorDamage(sector, -1, 32, 0, 0);
 			sector->special = 0;
 			break;
-		case zs_d_sector_door_close_in_30:
+		case ZDoomSectorSpecial::DSectorDoorCloseIn30:
 			P_SpawnDoorCloseIn30(sector);
 			sector->special = 0;
 			break;
-		case zs_d_sector_door_raise_in_5_mins:
+		case ZDoomSectorSpecial::DSectorDoorRaiseIn5Mins:
 			P_SpawnDoorRaiseIn5Mins(sector, i);
 			sector->special = 0;
 			break;
-		case zs_d_friction_low:
+		case ZDoomSectorSpecial::DFrictionLow:
 			sector->friction = FRICTION_LOW;
 			sector->movefactor = 0x269;
 			sector->flags |= SECF_FRICTION;
 			break;
-		case zs_sector_hidden:
+		case ZDoomSectorSpecial::SectorHidden:
 			sector->flags |= SECF_HIDDEN;
 			sector->special = 0;
 			break;
 		default:
-			if(sector->special >= zs_scroll_north_slow &&
-				sector->special <= zs_scroll_southwest_fast)
+			if(sector->special >= std::to_underlying(ZDoomSectorSpecial::ScrollNorthSlow) &&
+				sector->special <= std::to_underlying(ZDoomSectorSpecial::ScrollSouthwestFast))
 			{
 				// Hexen scroll special
 				static const fixed_t hexenScrollies[24][2] =
@@ -3411,17 +3413,17 @@ extern "C" void P_SpawnZDoomSectorSpecial(sector_t* sector, int i)
 				int i;
 				fixed_t dx, dy;
 
-				i = sector->special - zs_scroll_north_slow;
+				i = sector->special - std::to_underlying(ZDoomSectorSpecial::ScrollNorthSlow);
 				dx = FixedDiv(hexenScrollies[i][0] << FRACBITS, 2);
 				dy = FixedDiv(hexenScrollies[i][1] << FRACBITS, 2);
 				dsda_AddFloorScroller(dx, dy, sector - sectors, 0);
 			}
-			else if(sector->special >= zs_carry_east5 &&
-				sector->special <= zs_carry_east35)
+			else if(sector->special >= std::to_underlying(ZDoomSectorSpecial::CarryEast5) &&
+				sector->special <= std::to_underlying(ZDoomSectorSpecial::CarryEast35))
 			{
 				// Heretic scroll special
 				// Only east scrollers also scroll the texture
-				fixed_t dx = FixedDiv((1 << (sector->special - zs_carry_east5)) << FRACBITS, 2);
+				fixed_t dx = FixedDiv((1 << (sector->special - std::to_underlying(ZDoomSectorSpecial::CarryEast5))) << FRACBITS, 2);
 				dsda_AddFloorScroller(dx, 0, sector - sectors, 0);
 			}
 			break;
@@ -3510,7 +3512,7 @@ extern "C" void P_SpawnZDoomExtra(line_t* l, int i)
 	{
 		// killough 3/7/98:
 		// support for drawn heights coming from different sector
-		case zl_transfer_heights:
+		case std::to_underlying(ZDoomLineSpecial::TransferHeights):
 			sec = sides[*l->sidenum].sector->iSectorID;
 			FIND_SECTORS(id_p, l->special_args[0])
 				sectors[*id_p].heightsec = sec;
@@ -3518,7 +3520,7 @@ extern "C" void P_SpawnZDoomExtra(line_t* l, int i)
 
 		// killough 3/16/98: Add support for setting
 		// floor lighting independently (e.g. lava)
-		case zl_transfer_floor_light:
+		case std::to_underlying(ZDoomLineSpecial::TransferFloorLight):
 			sec = sides[*l->sidenum].sector->iSectorID;
 			FIND_SECTORS(id_p, l->special_args[0])
 				sectors[*id_p].floorlightsec = sec;
@@ -3526,17 +3528,17 @@ extern "C" void P_SpawnZDoomExtra(line_t* l, int i)
 
 		// killough 4/11/98: Add support for setting
 		// ceiling lighting independently
-		case zl_transfer_ceiling_light:
+		case std::to_underlying(ZDoomLineSpecial::TransferCeilingLight):
 			sec = sides[*l->sidenum].sector->iSectorID;
 			FIND_SECTORS(id_p, l->special_args[0])
 				sectors[*id_p].ceilinglightsec = sec;
 			break;
 
 		// [RH] ZDoom Static_Init settings
-		case zl_static_init:
-			switch(l->special_args[1])
+		case std::to_underlying(ZDoomLineSpecial::StaticInit):
+			switch(static_cast<ZDoomStaticInit>(l->special_args[1]))
 			{
-				case zi_init_gravity:
+				case ZDoomStaticInit::Gravity:
 				{
 					fixed_t grav = FixedDiv(P_AproxDistance(l->dx, l->dy), 100 * FRACUNIT);
 					sec = sides[*l->sidenum].sector->iSectorID;
@@ -3545,7 +3547,7 @@ extern "C" void P_SpawnZDoomExtra(line_t* l, int i)
 				}
 				break;
 
-				case zi_init_damage:
+				case ZDoomStaticInit::Damage:
 				{
 					damage_t damage;
 					unsigned int flags = 0;
@@ -3585,7 +3587,7 @@ extern "C" void P_SpawnZDoomExtra(line_t* l, int i)
 				// sky sector, the sky-transfer linedef, and the scroll-effect
 				// linedef). Still requires user to use F_SKY1 for the floor
 				// or ceiling texture, to distinguish floor and ceiling sky.
-				case zi_init_transfer_sky:
+				case ZDoomStaticInit::TransferSky:
 					FIND_SECTORS(id_p, l->special_args[0])
 					{
 						sectors[*id_p].floorsky = i | PL_SKYFLAT_LINE;
@@ -3612,7 +3614,7 @@ static void P_EvaluateDeathmatchParams()
 
 	levelTimer = false;
 
-	arg = dsda_Arg(dsda_arg_timer);
+	arg = dsda_Arg(ArgId::Timer);
 	if(arg->found && deathmatch)
 	{
 		levelTimer = true;
@@ -3621,7 +3623,7 @@ static void P_EvaluateDeathmatchParams()
 
 	levelFragLimit = false;
 
-	arg = dsda_Arg(dsda_arg_frags);
+	arg = dsda_Arg(ArgId::Frags);
 	if(arg->found && deathmatch)
 	{
 		levelFragLimit = true;
@@ -3700,7 +3702,7 @@ static void Add_WallScroller(fixed_t dx, fixed_t dy, const line_t* l,
 	d = FixedDiv(x, finesine[(tantoangle[FixedDiv(y, x) >> DBITS] + ANG90) >> ANGLETOFINESHIFT]);
 
 	// CPhipps - Import scroller calc overflow fix, compatibility optioned
-	if(compatibility_level >= lxdoom_1_compatibility)
+	if(compatibility_level >= CompLevel::Lxdoom1)
 	{
 		x = (fixed_t)(((int64_t)dy * -l->dy - (int64_t)dx * l->dx) / d);
 		y = (fixed_t)(((int64_t)dy * l->dx - (int64_t)dx * l->dy) / d);
@@ -3842,7 +3844,7 @@ static void P_InitCopyScrollers()
 	if(!map_format.zdoom) return;
 
 	for(i = 0, l = lines; i < numlines; i++, l++)
-		if(l->special == zl_sector_copy_scroller)
+		if(l->special == std::to_underlying(ZDoomLineSpecial::SectorCopyScroller))
 		{
 			// don't allow copying the scroller if the sector has the same tag
 			//   as it would just duplicate it.
@@ -3870,9 +3872,9 @@ extern "C" void P_SpawnZDoomScroller(line_t* l, int i)
 	int control = -1, accel = 0; // no control sector or acceleration
 	int special = l->special;
 
-	if(special == zl_scroll_ceiling ||
-		special == zl_scroll_floor ||
-		special == zl_scroll_texture_model)
+	if(special == std::to_underlying(ZDoomLineSpecial::ScrollCeiling) ||
+		special == std::to_underlying(ZDoomLineSpecial::ScrollFloor) ||
+		special == std::to_underlying(ZDoomLineSpecial::ScrollTextureModel))
 	{
 		if(l->special_args[1] & 3)
 		{
@@ -3883,7 +3885,7 @@ extern "C" void P_SpawnZDoomScroller(line_t* l, int i)
 				accel = 1;
 		}
 
-		if(special == zl_scroll_texture_model || l->special_args[1] & 4)
+		if(special == std::to_underlying(ZDoomLineSpecial::ScrollTextureModel) || l->special_args[1] & 4)
 		{
 			// The line housing the special controls the
 			// direction and speed of scrolling.
@@ -3903,7 +3905,7 @@ extern "C" void P_SpawnZDoomScroller(line_t* l, int i)
 			int j;
 			const int* id_p;
 
-		case zl_scroll_ceiling:
+		case std::to_underlying(ZDoomLineSpecial::ScrollCeiling):
 			FIND_SECTORS(id_p, l->special_args[0])
 				dsda_AddControlCeilingScroller(-dx, dy, control, *id_p, accel, 0);
 
@@ -3917,7 +3919,7 @@ extern "C" void P_SpawnZDoomScroller(line_t* l, int i)
 
 			l->special = 0;
 			break;
-		case zl_scroll_floor:
+		case std::to_underlying(ZDoomLineSpecial::ScrollFloor):
 			if(l->special_args[2] != 1)
 			{
 				// scroll the floor texture
@@ -3952,7 +3954,7 @@ extern "C" void P_SpawnZDoomScroller(line_t* l, int i)
 
 			l->special = 0;
 			break;
-		case zl_scroll_texture_model:
+		case std::to_underlying(ZDoomLineSpecial::ScrollTextureModel):
 			// killough 3/1/98: scroll wall according to linedef
 			// (same direction and speed as scrolling floors)
 			FIND_LINES(id_p, l->special_args[0])
@@ -3961,29 +3963,29 @@ extern "C" void P_SpawnZDoomScroller(line_t* l, int i)
 
 			l->special = 0;
 			break;
-		case zl_scroll_texture_offsets:
+		case std::to_underlying(ZDoomLineSpecial::ScrollTextureOffsets):
 			// killough 3/2/98: scroll according to sidedef offsets
 			j = lines[i].sidenum[0];
 			dsda_AddSideScroller(-sides[j].textureoffset, sides[j].rowoffset, j, l->special_args[0]);
 			l->special = 0;
 			break;
-		case zl_scroll_texture_left:
+		case std::to_underlying(ZDoomLineSpecial::ScrollTextureLeft):
 			j = lines[i].sidenum[0];
 			dsda_AddSideScroller(FRACUNIT * l->special_args[0] / 64, 0, j, l->special_args[1]);
 			break;
-		case zl_scroll_texture_right:
+		case std::to_underlying(ZDoomLineSpecial::ScrollTextureRight):
 			j = lines[i].sidenum[0];
 			dsda_AddSideScroller(-FRACUNIT * l->special_args[0] / 64, 0, j, l->special_args[1]);
 			break;
-		case zl_scroll_texture_up:
+		case std::to_underlying(ZDoomLineSpecial::ScrollTextureUp):
 			j = lines[i].sidenum[0];
 			dsda_AddSideScroller(0, FRACUNIT * l->special_args[0] / 64, j, l->special_args[1]);
 			break;
-		case zl_scroll_texture_down:
+		case std::to_underlying(ZDoomLineSpecial::ScrollTextureDown):
 			j = lines[i].sidenum[0];
 			dsda_AddSideScroller(0, -FRACUNIT * l->special_args[0] / 64, j, l->special_args[1]);
 			break;
-		case zl_scroll_texture_both:
+		case std::to_underlying(ZDoomLineSpecial::ScrollTextureBoth):
 			j = lines[i].sidenum[0];
 
 			if(l->special_args[0] == 0)
@@ -4215,7 +4217,7 @@ extern "C" void P_SpawnCompatibleFriction(line_t* l)
 		int value, use_thinker;
 
 		value = P_AproxDistance(l->dx, l->dy) >> FRACBITS;
-		use_thinker = !demo_compatibility && !mbf_features && !prboom_comp[PC_PRBOOM_FRICTION].state;
+		use_thinker = !demo_compatibility && !mbf_features && !prboom_comp[std::to_underlying(PrboomComp::PrboomFriction)].state;
 
 		P_ApplySectorFriction(l->special_args[0], value, use_thinker);
 	}
@@ -4223,7 +4225,7 @@ extern "C" void P_SpawnCompatibleFriction(line_t* l)
 
 extern "C" void P_SpawnZDoomFriction(line_t* l)
 {
-	if(l->special == zl_sector_set_friction)
+	if(l->special == std::to_underlying(ZDoomLineSpecial::SectorSetFriction))
 	{
 		int value;
 
@@ -4303,13 +4305,13 @@ static void P_SpawnFriction()
 //
 // Add a push thinker to the thinker list
 
-static void Add_Pusher(int type, int x_mag, int y_mag, mobj_t* source, int affectee)
+static void Add_Pusher(PusherType type, int x_mag, int y_mag, mobj_t* source, int affectee)
 {
 	pusher_t* p = static_cast<pusher_t*>(Z_MallocLevel(sizeof *p));
 
 	p->thinker.function = reinterpret_cast<think_t>(T_Pusher);
 	p->source = source;
-	p->type = static_cast<pushertype_e>(type);
+	p->type = static_cast<PusherType>(type);
 	p->x_mag = x_mag >> FRACBITS;
 	p->y_mag = y_mag >> FRACBITS;
 	p->magnitude = P_AproxDistance(p->x_mag, p->y_mag);
@@ -4372,12 +4374,12 @@ static dboolean PIT_PushThing(mobj_t* thing)
 		if(speed > 0 && P_CheckSight(thing, tmpusher->source))
 		{
 			pushangle = R_PointToAngle2(thing->x, thing->y, sx, sy);
-			if(tmpusher->source->type == MT_PUSH)
+			if(tmpusher->source->type == MobjType::Push)
 				pushangle += ANG180; // away
 			pushangle >>= ANGLETOFINESHIFT;
 			thing->momx += FixedMul(speed, finecosine[pushangle]);
 			thing->momy += FixedMul(speed, finesine[pushangle]);
-			thing->intflags |= MIF_SCROLLING;
+			thing->intflags |= MobjIntFlag::Scrolling;
 		}
 	}
 	return true;
@@ -4424,22 +4426,22 @@ void T_Pusher(pusher_t* p)
 	//
 	//    Apply no force if wind, full force if current.
 
-	if(p->type == p_push)
+	if(p->type == PusherType::Push)
 	{
 		// Seek out all pushable things within the force radius of this
 		// point pusher. Crosses sectors, so use blockmap.
 
 		tmpusher = p;       // MT_PUSH/MT_PULL point source
 		radius = p->radius; // where force goes to zero
-		tmbbox[BOXTOP] = p->y + radius;
-		tmbbox[BOXBOTTOM] = p->y - radius;
-		tmbbox[BOXRIGHT] = p->x + radius;
-		tmbbox[BOXLEFT] = p->x - radius;
+		tmbbox[std::to_underlying(BoxEdge::Top)] = p->y + radius;
+		tmbbox[std::to_underlying(BoxEdge::Bottom)] = p->y - radius;
+		tmbbox[std::to_underlying(BoxEdge::Right)] = p->x + radius;
+		tmbbox[std::to_underlying(BoxEdge::Left)] = p->x - radius;
 
-		xl = P_GetSafeBlockX(tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS);
-		xh = P_GetSafeBlockX(tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS);
-		yl = P_GetSafeBlockY(tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS);
-		yh = P_GetSafeBlockY(tmbbox[BOXTOP] - bmaporgy + MAXRADIUS);
+		xl = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Left)] - bmaporgx - MAXRADIUS);
+		xh = P_GetSafeBlockX(tmbbox[std::to_underlying(BoxEdge::Right)] - bmaporgx + MAXRADIUS);
+		yl = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Bottom)] - bmaporgy - MAXRADIUS);
+		yh = P_GetSafeBlockY(tmbbox[std::to_underlying(BoxEdge::Top)] - bmaporgy + MAXRADIUS);
 		for(bx = xl; bx <= xh; bx++)
 			for(by = yl; by <= yh; by++)
 				P_BlockThingsIterator(bx, by, PIT_PushThing);
@@ -4456,7 +4458,7 @@ void T_Pusher(pusher_t* p)
 		thing = node->m_thing;
 		if(!thing->player || (thing->flags & (MF_NOGRAVITY | MF_NOCLIP)))
 			continue;
-		if(p->type == p_wind)
+		if(p->type == PusherType::Wind)
 		{
 			if(sec->heightsec == -1)         // NOT special water sector
 				if(thing->z > thing->floorz) // above ground
@@ -4506,7 +4508,7 @@ void T_Pusher(pusher_t* p)
 		}
 		thing->momx += xspeed << (FRACBITS - PUSH_FACTOR);
 		thing->momy += yspeed << (FRACBITS - PUSH_FACTOR);
-		thing->intflags |= MIF_SCROLLING;
+		thing->intflags |= MobjIntFlag::Scrolling;
 	}
 }
 
@@ -4526,8 +4528,8 @@ mobj_t* P_GetPushThing(int s)
 	{
 		switch(thing->type)
 		{
-			case MT_PUSH:
-			case MT_PULL:
+			case MobjType::Push:
+			case MobjType::Pull:
 				return thing;
 			default:
 				break;
@@ -4551,18 +4553,18 @@ extern "C" void P_SpawnCompatiblePusher(line_t* l)
 	{
 		case 224: // wind
 			FIND_SECTORS(id_p, l->special_args[0])
-				Add_Pusher(p_wind, l->dx, l->dy, nullptr, *id_p);
+				Add_Pusher(PusherType::Wind, l->dx, l->dy, nullptr, *id_p);
 			break;
 		case 225: // current
 			FIND_SECTORS(id_p, l->special_args[0])
-				Add_Pusher(p_current, l->dx, l->dy, nullptr, *id_p);
+				Add_Pusher(PusherType::Current, l->dx, l->dy, nullptr, *id_p);
 			break;
 		case 226: // push/pull
 			FIND_SECTORS(id_p, l->special_args[0])
 			{
 				thing = P_GetPushThing(*id_p);
 				if(thing) // No MT_P* means no effect
-					Add_Pusher(p_push, l->dx, l->dy, thing, *id_p);
+					Add_Pusher(PusherType::Push, l->dx, l->dy, thing, *id_p);
 			}
 			break;
 	}
@@ -4593,19 +4595,19 @@ extern "C" void P_SpawnZDoomPusher(line_t* l)
 
 	switch(l->special)
 	{
-		case zl_sector_set_wind: // wind
+		case std::to_underlying(ZDoomLineSpecial::SectorSetWind): // wind
 			CalculatePushVector(l, l->special_args[1], l->special_args[2], &dx, &dy);
 			FIND_SECTORS(id_p, l->special_args[0])
-				Add_Pusher(p_wind, dx, dy, nullptr, *id_p);
+				Add_Pusher(PusherType::Wind, dx, dy, nullptr, *id_p);
 			l->special = 0;
 			break;
-		case zl_sector_set_current: // current
+		case std::to_underlying(ZDoomLineSpecial::SectorSetCurrent): // current
 			CalculatePushVector(l, l->special_args[1], l->special_args[2], &dx, &dy);
 			FIND_SECTORS(id_p, l->special_args[0])
-				Add_Pusher(p_current, dx, dy, nullptr, *id_p);
+				Add_Pusher(PusherType::Current, dx, dy, nullptr, *id_p);
 			l->special = 0;
 			break;
-		case zl_point_push_set_force: // push/pull
+		case std::to_underlying(ZDoomLineSpecial::PointPushSetForce): // push/pull
 			CalculatePushVector(l, l->special_args[2], 0, &dx, &dy);
 			if(l->special_args[0])
 			{
@@ -4617,7 +4619,7 @@ extern "C" void P_SpawnZDoomPusher(line_t* l)
 					{
 						// [RH] Allow narrowing it down by tid
 						if(!l->special_args[1] || l->special_args[1] == thing->tid)
-							Add_Pusher(p_push, dx, dy, thing, *id_p);
+							Add_Pusher(PusherType::Push, dx, dy, thing, *id_p);
 					}
 				}
 			}
@@ -4629,7 +4631,7 @@ extern "C" void P_SpawnZDoomPusher(line_t* l)
 				dsda_ResetThingIDSearch(&search);
 				while((thing = dsda_FindMobjFromThingID(l->special_args[1], &search)) != nullptr)
 					if(thing->type == map_format.mt_push || thing->type == map_format.mt_pull)
-						Add_Pusher(p_push, dx, dy, thing, thing->subsector->sector->iSectorID);
+						Add_Pusher(PusherType::Push, dx, dy, thing, thing->subsector->sector->iSectorID);
 			}
 			l->special = 0;
 			break;
@@ -4654,15 +4656,15 @@ static void P_SpawnPushers()
 
 #include "heretic/def.hpp"
 
-typedef enum
+enum struct AmbientCmd : int32_t
 {
-	afxcmd_play,       // (sound)
-	afxcmd_playabsvol, // (sound, volume)
-	afxcmd_playrelvol, // (sound, volume)
-	afxcmd_delay,      // (ticks)
-	afxcmd_delayrand,  // (andbits)
-	afxcmd_end         // ()
-} afxcmd_t;
+	Play,       // (sound)
+	PlayAbsVol, // (sound, volume)
+	PlayRelVol, // (sound, volume)
+	Delay,      // (ticks)
+	DelayRand,  // (andbits)
+	End         // ()
+};
 
 int* LevelAmbientSfx[MAX_AMBIENT_SFX];
 int* AmbSfxPtr;
@@ -4673,124 +4675,124 @@ int AmbSfxVolume;
 
 int AmbSndSeqInit[] = {
 	// Startup
-	afxcmd_end
+	std::to_underlying(AmbientCmd::End)
 };
 int AmbSndSeq1[] = {
 	// Scream
-	afxcmd_play, heretic_sfx_amb1,
-	afxcmd_end
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb1),
+	std::to_underlying(AmbientCmd::End)
 };
 int AmbSndSeq2[] = {
 	// Squish
-	afxcmd_play, heretic_sfx_amb2,
-	afxcmd_end
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb2),
+	std::to_underlying(AmbientCmd::End)
 };
 int AmbSndSeq3[] = {
 	// Drops
-	afxcmd_play, heretic_sfx_amb3,
-	afxcmd_delay, 16,
-	afxcmd_delayrand, 31,
-	afxcmd_play, heretic_sfx_amb7,
-	afxcmd_delay, 16,
-	afxcmd_delayrand, 31,
-	afxcmd_play, heretic_sfx_amb3,
-	afxcmd_delay, 16,
-	afxcmd_delayrand, 31,
-	afxcmd_play, heretic_sfx_amb7,
-	afxcmd_delay, 16,
-	afxcmd_delayrand, 31,
-	afxcmd_play, heretic_sfx_amb3,
-	afxcmd_delay, 16,
-	afxcmd_delayrand, 31,
-	afxcmd_play, heretic_sfx_amb7,
-	afxcmd_delay, 16,
-	afxcmd_delayrand, 31,
-	afxcmd_end
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb3),
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::DelayRand), 31,
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb7),
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::DelayRand), 31,
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb3),
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::DelayRand), 31,
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb7),
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::DelayRand), 31,
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb3),
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::DelayRand), 31,
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb7),
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::DelayRand), 31,
+	std::to_underlying(AmbientCmd::End)
 };
 int AmbSndSeq4[] = {
 	// SlowFootSteps
-	afxcmd_play, heretic_sfx_amb4,
-	afxcmd_delay, 15,
-	afxcmd_playrelvol, heretic_sfx_amb11, -3,
-	afxcmd_delay, 15,
-	afxcmd_playrelvol, heretic_sfx_amb4, -3,
-	afxcmd_delay, 15,
-	afxcmd_playrelvol, heretic_sfx_amb11, -3,
-	afxcmd_delay, 15,
-	afxcmd_playrelvol, heretic_sfx_amb4, -3,
-	afxcmd_delay, 15,
-	afxcmd_playrelvol, heretic_sfx_amb11, -3,
-	afxcmd_delay, 15,
-	afxcmd_playrelvol, heretic_sfx_amb4, -3,
-	afxcmd_delay, 15,
-	afxcmd_playrelvol, heretic_sfx_amb11, -3,
-	afxcmd_end
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb4),
+	std::to_underlying(AmbientCmd::Delay), 15,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb11), -3,
+	std::to_underlying(AmbientCmd::Delay), 15,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb4), -3,
+	std::to_underlying(AmbientCmd::Delay), 15,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb11), -3,
+	std::to_underlying(AmbientCmd::Delay), 15,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb4), -3,
+	std::to_underlying(AmbientCmd::Delay), 15,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb11), -3,
+	std::to_underlying(AmbientCmd::Delay), 15,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb4), -3,
+	std::to_underlying(AmbientCmd::Delay), 15,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb11), -3,
+	std::to_underlying(AmbientCmd::End)
 };
 int AmbSndSeq5[] = {
 	// Heartbeat
-	afxcmd_play, heretic_sfx_amb5,
-	afxcmd_delay, TICRATE,
-	afxcmd_play, heretic_sfx_amb5,
-	afxcmd_delay, TICRATE,
-	afxcmd_play, heretic_sfx_amb5,
-	afxcmd_delay, TICRATE,
-	afxcmd_play, heretic_sfx_amb5,
-	afxcmd_end
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb5),
+	std::to_underlying(AmbientCmd::Delay), TICRATE,
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb5),
+	std::to_underlying(AmbientCmd::Delay), TICRATE,
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb5),
+	std::to_underlying(AmbientCmd::Delay), TICRATE,
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb5),
+	std::to_underlying(AmbientCmd::End)
 };
 int AmbSndSeq6[] = {
 	// Bells
-	afxcmd_play, heretic_sfx_amb6,
-	afxcmd_delay, 17,
-	afxcmd_playrelvol, heretic_sfx_amb6, -8,
-	afxcmd_delay, 17,
-	afxcmd_playrelvol, heretic_sfx_amb6, -8,
-	afxcmd_delay, 17,
-	afxcmd_playrelvol, heretic_sfx_amb6, -8,
-	afxcmd_end
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb6),
+	std::to_underlying(AmbientCmd::Delay), 17,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb6), -8,
+	std::to_underlying(AmbientCmd::Delay), 17,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb6), -8,
+	std::to_underlying(AmbientCmd::Delay), 17,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb6), -8,
+	std::to_underlying(AmbientCmd::End)
 };
 int AmbSndSeq7[] = {
 	// Growl
-	afxcmd_play, heretic_sfx_bstsit,
-	afxcmd_end
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticBstsit),
+	std::to_underlying(AmbientCmd::End)
 };
 int AmbSndSeq8[] = {
 	// Magic
-	afxcmd_play, heretic_sfx_amb8,
-	afxcmd_end
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb8),
+	std::to_underlying(AmbientCmd::End)
 };
 int AmbSndSeq9[] = {
 	// Laughter
-	afxcmd_play, heretic_sfx_amb9,
-	afxcmd_delay, 16,
-	afxcmd_playrelvol, heretic_sfx_amb9, -4,
-	afxcmd_delay, 16,
-	afxcmd_playrelvol, heretic_sfx_amb9, -4,
-	afxcmd_delay, 16,
-	afxcmd_playrelvol, heretic_sfx_amb10, -4,
-	afxcmd_delay, 16,
-	afxcmd_playrelvol, heretic_sfx_amb10, -4,
-	afxcmd_delay, 16,
-	afxcmd_playrelvol, heretic_sfx_amb10, -4,
-	afxcmd_end
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb9),
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb9), -4,
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb9), -4,
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb10), -4,
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb10), -4,
+	std::to_underlying(AmbientCmd::Delay), 16,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb10), -4,
+	std::to_underlying(AmbientCmd::End)
 };
 int AmbSndSeq10[] = {
 	// FastFootsteps
-	afxcmd_play, heretic_sfx_amb4,
-	afxcmd_delay, 8,
-	afxcmd_playrelvol, heretic_sfx_amb11, -3,
-	afxcmd_delay, 8,
-	afxcmd_playrelvol, heretic_sfx_amb4, -3,
-	afxcmd_delay, 8,
-	afxcmd_playrelvol, heretic_sfx_amb11, -3,
-	afxcmd_delay, 8,
-	afxcmd_playrelvol, heretic_sfx_amb4, -3,
-	afxcmd_delay, 8,
-	afxcmd_playrelvol, heretic_sfx_amb11, -3,
-	afxcmd_delay, 8,
-	afxcmd_playrelvol, heretic_sfx_amb4, -3,
-	afxcmd_delay, 8,
-	afxcmd_playrelvol, heretic_sfx_amb11, -3,
-	afxcmd_end
+	std::to_underlying(AmbientCmd::Play), std::to_underlying(SfxId::HereticAmb4),
+	std::to_underlying(AmbientCmd::Delay), 8,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb11), -3,
+	std::to_underlying(AmbientCmd::Delay), 8,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb4), -3,
+	std::to_underlying(AmbientCmd::Delay), 8,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb11), -3,
+	std::to_underlying(AmbientCmd::Delay), 8,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb4), -3,
+	std::to_underlying(AmbientCmd::Delay), 8,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb11), -3,
+	std::to_underlying(AmbientCmd::Delay), 8,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb4), -3,
+	std::to_underlying(AmbientCmd::Delay), 8,
+	std::to_underlying(AmbientCmd::PlayRelVol), std::to_underlying(SfxId::HereticAmb11), -3,
+	std::to_underlying(AmbientCmd::End)
 };
 
 int* AmbientSfx[] = {
@@ -4815,18 +4817,18 @@ struct
 } TerrainTypeDefs[2][6] =
 {
 	{
-		{"FLTWAWA1", FLOOR_WATER},
-		{"FLTFLWW1", FLOOR_WATER},
-		{"FLTLAVA1", FLOOR_LAVA},
-		{"FLATHUH1", FLOOR_LAVA},
-		{"FLTSLUD1", FLOOR_SLUDGE},
+		{"FLTWAWA1", std::to_underlying(FloorType::Water)},
+		{"FLTFLWW1", std::to_underlying(FloorType::Water)},
+		{"FLTLAVA1", std::to_underlying(FloorType::Lava)},
+		{"FLATHUH1", std::to_underlying(FloorType::Lava)},
+		{"FLTSLUD1", std::to_underlying(FloorType::Sludge)},
 		{"END", -1}
 	},
 	{
-		{"X_005", FLOOR_WATER},
-		{"X_001", FLOOR_LAVA},
-		{"X_009", FLOOR_SLUDGE},
-		{"F_033", FLOOR_ICE},
+		{"X_005", std::to_underlying(FloorType::Water)},
+		{"X_001", std::to_underlying(FloorType::Lava)},
+		{"X_009", std::to_underlying(FloorType::Sludge)},
+		{"F_033", std::to_underlying(FloorType::Ice)},
 		{"END", -1}
 	}
 };
@@ -4853,8 +4855,8 @@ void P_InitAmbientSound()
 
 void P_AmbientSound()
 {
-	afxcmd_t cmd;
-	int sound;
+	AmbientCmd cmd;
+	SfxId sound;
 	dboolean done;
 
 	if(!AmbSfxCount)
@@ -4869,20 +4871,20 @@ void P_AmbientSound()
 	done = false;
 	do
 	{
-		cmd = static_cast<afxcmd_t>(*AmbSfxPtr++);
+		cmd = static_cast<AmbientCmd>(*AmbSfxPtr++);
 		switch(cmd)
 		{
-			case afxcmd_play:
-				AmbSfxVolume = P_Random(pr_heretic) >> 2;
-				S_StartAmbientSound(nullptr, *AmbSfxPtr++, AmbSfxVolume);
+			case AmbientCmd::Play:
+				AmbSfxVolume = P_Random(RandomClass::Heretic) >> 2;
+				S_StartAmbientSound(nullptr, static_cast<SfxId>(*AmbSfxPtr++), AmbSfxVolume);
 				break;
-			case afxcmd_playabsvol:
-				sound = *AmbSfxPtr++;
+			case AmbientCmd::PlayAbsVol:
+				sound = static_cast<SfxId>(*AmbSfxPtr++);
 				AmbSfxVolume = *AmbSfxPtr++;
 				S_StartAmbientSound(nullptr, sound, AmbSfxVolume);
 				break;
-			case afxcmd_playrelvol:
-				sound = *AmbSfxPtr++;
+			case AmbientCmd::PlayRelVol:
+				sound = static_cast<SfxId>(*AmbSfxPtr++);
 				AmbSfxVolume += *AmbSfxPtr++;
 				if(AmbSfxVolume < 0)
 				{
@@ -4894,17 +4896,17 @@ void P_AmbientSound()
 				}
 				S_StartAmbientSound(nullptr, sound, AmbSfxVolume);
 				break;
-			case afxcmd_delay:
+			case AmbientCmd::Delay:
 				AmbSfxTics = *AmbSfxPtr++;
 				done = true;
 				break;
-			case afxcmd_delayrand:
-				AmbSfxTics = P_Random(pr_heretic) & (*AmbSfxPtr++);
+			case AmbientCmd::DelayRand:
+				AmbSfxTics = P_Random(RandomClass::Heretic) & (*AmbSfxPtr++);
 				done = true;
 				break;
-			case afxcmd_end:
-				AmbSfxTics = 6 * TICRATE + P_Random(pr_heretic);
-				AmbSfxPtrIndex = P_Random(pr_heretic) % AmbSfxCount;
+			case AmbientCmd::End:
+				AmbSfxTics = 6 * TICRATE + P_Random(RandomClass::Heretic);
+				AmbSfxPtrIndex = P_Random(RandomClass::Heretic) % AmbSfxCount;
 				AmbSfxPtr = LevelAmbientSfx[AmbSfxPtrIndex];
 				done = true;
 				break;
@@ -4921,7 +4923,7 @@ void P_InitLava()
 	if(!raven) return;
 
 	memset(&LavaInflictor, 0, sizeof(mobj_t));
-	LavaInflictor.type = static_cast<mobjtype_t>(g_lava_type);
+	LavaInflictor.type = static_cast<MobjType>(g_lava_type);
 	LavaInflictor.flags2 = MF2_FIREDAMAGE | MF2_NODMGTHRUST;
 }
 
@@ -4938,7 +4940,7 @@ void P_InitTerrainTypes()
 	memset(TerrainTypes, 0, size);
 	for(i = 0; TerrainTypeDefs[hexen][i].type != -1; i++)
 	{
-		lump = W_CheckNumForName2(TerrainTypeDefs[hexen][i].name, ns_flats);
+		lump = W_CheckNumForName2(TerrainTypeDefs[hexen][i].name, LumpNamespace::Flats);
 		if(lump != LUMP_NOT_FOUND)
 		{
 			TerrainTypes[lump - firstflat] = TerrainTypeDefs[hexen][i].type;
@@ -4970,35 +4972,35 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 		// TRIGGERS
 		//====================================================
 		case 2: // Open Door
-			EV_DoDoor(line, static_cast<vldoor_e>(vld_open));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::VldOpen));
 			line->special = 0;
 			break;
 		case 3: // Close Door
-			EV_DoDoor(line, static_cast<vldoor_e>(vld_close));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::VldClose));
 			line->special = 0;
 			break;
 		case 4: // Raise Door
-			EV_DoDoor(line, static_cast<vldoor_e>(vld_normal));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::VldNormal));
 			line->special = 0;
 			break;
 		case 5: // Raise Floor
-			EV_DoFloor(line, raiseFloor);
+			EV_DoFloor(line, FloorKind::RaiseFloor);
 			line->special = 0;
 			break;
 		case 6: // Fast Ceiling Crush & Raise
-			EV_DoCeiling(line, fastCrushAndRaise);
+			EV_DoCeiling(line, CeilingKind::FastCrushAndRaise);
 			line->special = 0;
 			break;
 		case 8: // Trigger_Build_Stairs (8 pixel steps)
-			EV_BuildStairs(line, heretic_build8);
+			EV_BuildStairs(line, StairType::HereticBuild8);
 			line->special = 0;
 			break;
 		case 106: // Trigger_Build_Stairs_16 (16 pixel steps)
-			EV_BuildStairs(line, heretic_turbo16);
+			EV_BuildStairs(line, StairType::HereticTurbo16);
 			line->special = 0;
 			break;
 		case 10: // PlatDownWaitUp
-			EV_DoPlat(line, downWaitUpStay, 0);
+			EV_DoPlat(line, PlatType::DownWaitUpStay, 0);
 			line->special = 0;
 			break;
 		case 12: // Light Turn On - brightest near
@@ -5010,7 +5012,7 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 			line->special = 0;
 			break;
 		case 16: // Close Door 30
-			EV_DoDoor(line, static_cast<vldoor_e>(vld_close30ThenOpen));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::VldClose30ThenOpen));
 			line->special = 0;
 			break;
 		case 17: // Start Light Strobing
@@ -5018,20 +5020,20 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 			line->special = 0;
 			break;
 		case 19: // Lower Floor
-			EV_DoFloor(line, lowerFloor);
+			EV_DoFloor(line, FloorKind::LowerFloor);
 			line->special = 0;
 			break;
 		case 22: // Raise floor to nearest height and change texture
-			EV_DoPlat(line, raiseToNearestAndChange, 0);
+			EV_DoPlat(line, PlatType::RaiseToNearestAndChange, 0);
 			line->special = 0;
 			break;
 		case 25: // Ceiling Crush and Raise
-			EV_DoCeiling(line, crushAndRaise);
+			EV_DoCeiling(line, CeilingKind::CrushAndRaise);
 			line->special = 0;
 			break;
 		case 30: // Raise floor to shortest texture height
 			// on either side of lines
-			EV_DoFloor(line, raiseToTexture);
+			EV_DoFloor(line, FloorKind::RaiseToTexture);
 			line->special = 0;
 			break;
 		case 35: // Lights Very Dark
@@ -5039,15 +5041,15 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 			line->special = 0;
 			break;
 		case 36: // Lower Floor (TURBO)
-			EV_DoFloor(line, turboLower);
+			EV_DoFloor(line, FloorKind::TurboLower);
 			line->special = 0;
 			break;
 		case 37: // LowerAndChange
-			EV_DoFloor(line, lowerAndChange);
+			EV_DoFloor(line, FloorKind::LowerAndChange);
 			line->special = 0;
 			break;
 		case 38: // Lower Floor To Lowest
-			EV_DoFloor(line, lowerFloorToLowest);
+			EV_DoFloor(line, FloorKind::LowerFloorToLowest);
 			line->special = 0;
 			break;
 		case 39: // TELEPORT!
@@ -5055,12 +5057,12 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 			line->special = 0;
 			break;
 		case 40: // RaiseCeilingLowerFloor
-			EV_DoCeiling(line, raiseToHighest);
-			EV_DoFloor(line, lowerFloorToLowest);
+			EV_DoCeiling(line, CeilingKind::RaiseToHighest);
+			EV_DoFloor(line, FloorKind::LowerFloorToLowest);
 			line->special = 0;
 			break;
 		case 44: // Ceiling Crush
-			EV_DoCeiling(line, lowerAndCrush);
+			EV_DoCeiling(line, CeilingKind::LowerAndCrush);
 			line->special = 0;
 			break;
 		case 52: // EXIT!
@@ -5068,7 +5070,7 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 			line->special = 0;
 			break;
 		case 53: // Perpetual Platform Raise
-			EV_DoPlat(line, perpetualRaise, 0);
+			EV_DoPlat(line, PlatType::PerpetualRaise, 0);
 			line->special = 0;
 			break;
 		case 54: // Platform Stop
@@ -5076,7 +5078,7 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 			line->special = 0;
 			break;
 		case 56: // Raise Floor Crush
-			EV_DoFloor(line, raiseFloorCrush);
+			EV_DoFloor(line, FloorKind::RaiseFloorCrush);
 			line->special = 0;
 			break;
 		case 57: // Ceiling Crush Stop
@@ -5084,11 +5086,11 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 			line->special = 0;
 			break;
 		case 58: // Raise Floor 24
-			EV_DoFloor(line, raiseFloor24);
+			EV_DoFloor(line, FloorKind::RaiseFloor24);
 			line->special = 0;
 			break;
 		case 59: // Raise Floor 24 And Change
-			EV_DoFloor(line, raiseFloor24AndChange);
+			EV_DoFloor(line, FloorKind::RaiseFloor24AndChange);
 			line->special = 0;
 			break;
 		case 104: // Turn lights off in sector(tag)
@@ -5105,22 +5107,22 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 		//====================================================
 
 		case 72: // Ceiling Crush
-			EV_DoCeiling(line, lowerAndCrush);
+			EV_DoCeiling(line, CeilingKind::LowerAndCrush);
 			break;
 		case 73: // Ceiling Crush and Raise
-			EV_DoCeiling(line, crushAndRaise);
+			EV_DoCeiling(line, CeilingKind::CrushAndRaise);
 			break;
 		case 74: // Ceiling Crush Stop
 			EV_CeilingCrushStop(line);
 			break;
 		case 75: // Close Door
-			EV_DoDoor(line, static_cast<vldoor_e>(vld_close));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::VldClose));
 			break;
 		case 76: // Close Door 30
-			EV_DoDoor(line, static_cast<vldoor_e>(vld_close30ThenOpen));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::VldClose30ThenOpen));
 			break;
 		case 77: // Fast Ceiling Crush & Raise
-			EV_DoCeiling(line, fastCrushAndRaise);
+			EV_DoCeiling(line, CeilingKind::FastCrushAndRaise);
 			break;
 		case 79: // Lights Very Dark
 			EV_LightTurnOn(line, 35);
@@ -5132,56 +5134,56 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 			EV_LightTurnOn(line, 255);
 			break;
 		case 82: // Lower Floor To Lowest
-			EV_DoFloor(line, lowerFloorToLowest);
+			EV_DoFloor(line, FloorKind::LowerFloorToLowest);
 			break;
 		case 83: // Lower Floor
-			EV_DoFloor(line, lowerFloor);
+			EV_DoFloor(line, FloorKind::LowerFloor);
 			break;
 		case 84: // LowerAndChange
-			EV_DoFloor(line, lowerAndChange);
+			EV_DoFloor(line, FloorKind::LowerAndChange);
 			break;
 		case 86: // Open Door
-			EV_DoDoor(line, static_cast<vldoor_e>(vld_open));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::VldOpen));
 			break;
 		case 87: // Perpetual Platform Raise
-			EV_DoPlat(line, perpetualRaise, 0);
+			EV_DoPlat(line, PlatType::PerpetualRaise, 0);
 			break;
 		case 88: // PlatDownWaitUp
-			EV_DoPlat(line, downWaitUpStay, 0);
+			EV_DoPlat(line, PlatType::DownWaitUpStay, 0);
 			break;
 		case 89: // Platform Stop
 			EV_StopPlat(line);
 			break;
 		case 90: // Raise Door
-			EV_DoDoor(line, static_cast<vldoor_e>(vld_normal));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::VldNormal));
 			break;
 		case 100: // Retrigger_Raise_Door_Turbo
-			EV_DoDoor(line, static_cast<vldoor_e>(vld_normal_turbo));
+			EV_DoDoor(line, static_cast<VerticalDoorType>(VerticalDoorType::VldNormalTurbo));
 			break;
 		case 91: // Raise Floor
-			EV_DoFloor(line, raiseFloor);
+			EV_DoFloor(line, FloorKind::RaiseFloor);
 			break;
 		case 92: // Raise Floor 24
-			EV_DoFloor(line, raiseFloor24);
+			EV_DoFloor(line, FloorKind::RaiseFloor24);
 			break;
 		case 93: // Raise Floor 24 And Change
-			EV_DoFloor(line, raiseFloor24AndChange);
+			EV_DoFloor(line, FloorKind::RaiseFloor24AndChange);
 			break;
 		case 94: // Raise Floor Crush
-			EV_DoFloor(line, raiseFloorCrush);
+			EV_DoFloor(line, FloorKind::RaiseFloorCrush);
 			break;
 		case 95: // Raise floor to nearest height and change texture
-			EV_DoPlat(line, raiseToNearestAndChange, 0);
+			EV_DoPlat(line, PlatType::RaiseToNearestAndChange, 0);
 			break;
 		case 96: // Raise floor to shortest texture height
 			// on either side of lines
-			EV_DoFloor(line, raiseToTexture);
+			EV_DoFloor(line, FloorKind::RaiseToTexture);
 			break;
 		case 97: // TELEPORT!
 			map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_VANILLA);
 			break;
 		case 98: // Lower Floor (TURBO)
-			EV_DoFloor(line, turboLower);
+			EV_DoFloor(line, FloorKind::TurboLower);
 			break;
 	}
 }
@@ -5321,20 +5323,20 @@ static struct
 
 static int TaggedLineCount;
 
-void P_PlayerOnSpecialFlat(player_t* player, int floorType)
+void P_PlayerOnSpecialFlat(player_t* player, FloorType floorType)
 {
 	if(player->mo->z != player->mo->floorz)
 	{
 		// Player is not touching the floor
 		return;
 	}
-	switch(floorType)
+	switch(static_cast<FloorType>(floorType))
 	{
-		case FLOOR_LAVA:
+		case FloorType::Lava:
 			if(!(leveltime & 31))
 			{
 				P_DamageMobj(player->mo, &LavaInflictor, nullptr, 10);
-				S_StartMobjSound(player->mo, hexen_sfx_lava_sizzle);
+				S_StartMobjSound(player->mo, SfxId::HexenLavaSizzle);
 			}
 			break;
 		default:
@@ -5370,7 +5372,7 @@ dboolean EV_SectorSoundChange(byte* args)
 	rtn = false;
 	FIND_SECTORS(id_p, args[0])
 	{
-		sectors[*id_p].seqType = static_cast<seqtype_t>(args[1]);
+		sectors[*id_p].seqType = static_cast<SeqType>(args[1]);
 		rtn = true;
 	}
 	return rtn;
@@ -5395,7 +5397,7 @@ static dboolean CheckedLockedDoor(mobj_t* mo, byte lock)
 		snprintf(LockedBuffer, sizeof(LockedBuffer),
 			"YOU NEED THE %s\n", TextKeyMessages[lock - 1]);
 		P_SetMessage(mo->player, LockedBuffer, true);
-		S_StartMobjSound(mo, hexen_sfx_door_locked);
+		S_StartMobjSound(mo, SfxId::HexenDoorLocked);
 		return false;
 	}
 	return true;
@@ -5406,7 +5408,7 @@ dboolean EV_LineSearchForPuzzleItem(line_t* line, byte* args, mobj_t* mo)
 	player_t* player;
 	int i;
 	int type;
-	artitype_t arti;
+	ArtiType arti;
 
 	if(!mo)
 		return false;
@@ -5417,8 +5419,8 @@ dboolean EV_LineSearchForPuzzleItem(line_t* line, byte* args, mobj_t* mo)
 	// Search player's inventory for puzzle items
 	for(i = 0; i < player->artifactCount; i++)
 	{
-		arti = static_cast<artitype_t>(player->inventory[i].type);
-		type = arti - hexen_arti_firstpuzzitem;
+		arti = static_cast<ArtiType>(player->inventory[i].type);
+		type = std::to_underlying(arti) - std::to_underlying(ArtiType::HexenFirstpuzzitem);
 		if(type < 0)
 			continue;
 		if(type == line->special_args[0])
@@ -5430,13 +5432,13 @@ dboolean EV_LineSearchForPuzzleItem(line_t* line, byte* args, mobj_t* mo)
 				P_PlayerRemoveArtifact(player, i);
 				if(player == &players[consoleplayer])
 				{
-					if(arti < hexen_arti_firstpuzzitem)
+					if(arti < ArtiType::HexenFirstpuzzitem)
 					{
-						S_StartVoidSound(hexen_sfx_artifact_use);
+						S_StartVoidSound(SfxId::HexenArtifactUse);
 					}
 					else
 					{
-						S_StartVoidSound(hexen_sfx_puzzle_success);
+						S_StartVoidSound(SfxId::HexenPuzzleSuccess);
 					}
 					ArtifactFlash = 4;
 				}
@@ -5459,7 +5461,7 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 	}
 
 	if(
-		line->special == zl_teleport &&
+		line->special == std::to_underlying(ZDoomLineSpecial::Teleport) &&
 		lineActivation & SPAC_CROSS &&
 		activationType == SPAC_PCROSS &&
 		mo && mo->flags & MF_MISSILE
@@ -5530,12 +5532,12 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 			case SPAC_PUSH:
 				switch(line->special)
 				{
-					case zl_door_raise:
+					case std::to_underlying(ZDoomLineSpecial::DoorRaise):
 						if(line->special_args[0] == 0 && line->special_args[1] < 64)
 							noway = false;
 						break;
-					case zl_teleport:
-					case zl_teleport_no_fog:
+					case std::to_underlying(ZDoomLineSpecial::Teleport):
+					case std::to_underlying(ZDoomLineSpecial::TeleportNoFog):
 						noway = false;
 				}
 				break;
@@ -5545,14 +5547,14 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 				{
 					switch(line->special)
 					{
-						case zl_door_raise:
+						case std::to_underlying(ZDoomLineSpecial::DoorRaise):
 							if(line->special_args[1] >= 64)
 								break;
-						case zl_teleport:
-						case zl_teleport_no_fog:
-						case zl_teleport_line:
-						case zl_plat_down_wait_up_stay_lip:
-						case zl_plat_down_wait_up_stay:
+						case std::to_underlying(ZDoomLineSpecial::Teleport):
+						case std::to_underlying(ZDoomLineSpecial::TeleportNoFog):
+						case std::to_underlying(ZDoomLineSpecial::TeleportLine):
+						case std::to_underlying(ZDoomLineSpecial::PlatDownWaitUpStayLip):
+						case std::to_underlying(ZDoomLineSpecial::PlatDownWaitUpStay):
 							noway = false;
 					}
 				}
@@ -5619,21 +5621,21 @@ dboolean P_ActivateLine(line_t* line, mobj_t* mo, int side, line_activation_t ac
 
 		switch(line->special)
 		{
-			case zl_door_close:
-			case zl_door_open:
-			case zl_door_raise:
-			case zl_door_locked_raise:
-			case zl_door_close_wait_open:
-			case zl_door_wait_raise:
-			case zl_door_wait_close:
-			case zl_generic_door:
+			case std::to_underlying(ZDoomLineSpecial::DoorClose):
+			case std::to_underlying(ZDoomLineSpecial::DoorOpen):
+			case std::to_underlying(ZDoomLineSpecial::DoorRaise):
+			case std::to_underlying(ZDoomLineSpecial::DoorLockedRaise):
+			case std::to_underlying(ZDoomLineSpecial::DoorCloseWaitOpen):
+			case std::to_underlying(ZDoomLineSpecial::DoorWaitRaise):
+			case std::to_underlying(ZDoomLineSpecial::DoorWaitClose):
+			case std::to_underlying(ZDoomLineSpecial::GenericDoor):
 				legacy = true;
 				break;
 			default:
 				legacy = false;
 		}
 
-		if(!P_CheckKeys(mo, static_cast<zdoom_lock_t>(line->locknumber), legacy))
+		if(!P_CheckKeys(mo, static_cast<ZDoomLock>(line->locknumber), legacy))
 		{
 			return false;
 		}
@@ -5755,13 +5757,13 @@ static dboolean P_ArgToCrushType(int arg)
 	return arg == 1 ? false : arg == 2 ? true : hexen;
 }
 
-static crushmode_e P_ArgToCrushMode(int arg, dboolean slowdown)
+static CrushMode P_ArgToCrushMode(int arg, dboolean slowdown)
 {
-	static const crushmode_e map[] = {crushDoom, crushHexen, crushSlowdown};
+	static const CrushMode map[] = {CrushMode::Doom, CrushMode::Hexen, CrushMode::Slowdown};
 
 	if(arg >= 1 && arg <= 3) return map[arg - 1];
 
-	return hexen ? crushHexen : slowdown ? crushSlowdown : crushDoom;
+	return hexen ? CrushMode::Hexen : slowdown ? CrushMode::Slowdown : CrushMode::Doom;
 }
 
 static int P_ArgToCrush(int arg)
@@ -5798,53 +5800,53 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 
 	switch(special)
 	{
-		case zl_door_close:
-			buttonSuccess = EV_DoZDoomDoor(closeDoor, line, mo, args[0],
-				args[1], 0, static_cast<zdoom_lock_t>(0), args[2], false, 0);
+		case std::to_underlying(ZDoomLineSpecial::DoorClose):
+			buttonSuccess = EV_DoZDoomDoor(VerticalDoorType::CloseDoor, line, mo, args[0],
+				args[1], 0, static_cast<ZDoomLock>(0), args[2], false, 0);
 			break;
-		case zl_door_open:
-			buttonSuccess = EV_DoZDoomDoor(openDoor, line, mo, args[0],
-				args[1], 0, static_cast<zdoom_lock_t>(0), args[2], false, 0);
+		case std::to_underlying(ZDoomLineSpecial::DoorOpen):
+			buttonSuccess = EV_DoZDoomDoor(VerticalDoorType::OpenDoor, line, mo, args[0],
+				args[1], 0, static_cast<ZDoomLock>(0), args[2], false, 0);
 			break;
-		case zl_door_raise:
-			buttonSuccess = EV_DoZDoomDoor(normal, line, mo, args[0],
-				args[1], args[2], static_cast<zdoom_lock_t>(0), args[3], false, 0);
+		case std::to_underlying(ZDoomLineSpecial::DoorRaise):
+			buttonSuccess = EV_DoZDoomDoor(VerticalDoorType::Normal, line, mo, args[0],
+				args[1], args[2], static_cast<ZDoomLock>(0), args[3], false, 0);
 			break;
-		case zl_door_locked_raise:
-			buttonSuccess = EV_DoZDoomDoor(args[2] ? normal : openDoor, line, mo, args[0],
-				args[1], args[2], static_cast<zdoom_lock_t>(args[3]), args[4], false, 0);
+		case std::to_underlying(ZDoomLineSpecial::DoorLockedRaise):
+			buttonSuccess = EV_DoZDoomDoor(args[2] ? VerticalDoorType::Normal : VerticalDoorType::OpenDoor, line, mo, args[0],
+				args[1], args[2], static_cast<ZDoomLock>(args[3]), args[4], false, 0);
 			break;
-		case zl_door_close_wait_open:
-			buttonSuccess = EV_DoZDoomDoor(genCdO, line, mo, args[0],
-				args[1], args[2] * TICRATE / 8, static_cast<zdoom_lock_t>(0), args[3], false, 0);
+		case std::to_underlying(ZDoomLineSpecial::DoorCloseWaitOpen):
+			buttonSuccess = EV_DoZDoomDoor(VerticalDoorType::GenCdO, line, mo, args[0],
+				args[1], args[2] * TICRATE / 8, static_cast<ZDoomLock>(0), args[3], false, 0);
 			break;
-		case zl_door_wait_raise:
-			buttonSuccess = EV_DoZDoomDoor(waitRaiseDoor, line, mo, args[0],
-				args[1], args[2], static_cast<zdoom_lock_t>(0), args[4], false, args[3]);
+		case std::to_underlying(ZDoomLineSpecial::DoorWaitRaise):
+			buttonSuccess = EV_DoZDoomDoor(VerticalDoorType::WaitRaiseDoor, line, mo, args[0],
+				args[1], args[2], static_cast<ZDoomLock>(0), args[4], false, args[3]);
 			break;
-		case zl_door_wait_close:
-			buttonSuccess = EV_DoZDoomDoor(waitCloseDoor, line, mo, args[0],
-				args[1], 0, static_cast<zdoom_lock_t>(0), args[3], false, args[2]);
+		case std::to_underlying(ZDoomLineSpecial::DoorWaitClose):
+			buttonSuccess = EV_DoZDoomDoor(VerticalDoorType::WaitCloseDoor, line, mo, args[0],
+				args[1], 0, static_cast<ZDoomLock>(0), args[3], false, args[2]);
 			break;
-		case zl_generic_door:
+		case std::to_underlying(ZDoomLineSpecial::GenericDoor):
 		{
 			int tag, lightTag;
-			vldoor_e type;
+			VerticalDoorType type;
 			dboolean boomgen = false;
 
 			switch(args[2] & 63)
 			{
 				case 0:
-					type = normal;
+					type = VerticalDoorType::Normal;
 					break;
 				case 1:
-					type = openDoor;
+					type = VerticalDoorType::OpenDoor;
 					break;
 				case 2:
-					type = genCdO;
+					type = VerticalDoorType::GenCdO;
 					break;
 				case 3:
-					type = closeDoor;
+					type = VerticalDoorType::CloseDoor;
 					break;
 				default:
 					return 0;
@@ -5866,172 +5868,172 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 
 			buttonSuccess = EV_DoZDoomDoor(type, line, mo, tag, args[1],
-				args[3] * TICRATE / 8, static_cast<zdoom_lock_t>(args[4]), lightTag, boomgen, 0);
+				args[3] * TICRATE / 8, static_cast<ZDoomLock>(args[4]), lightTag, boomgen, 0);
 		}
 		break;
-		case zl_pillar_build:
-			buttonSuccess = EV_DoZDoomPillar(pillarBuild, line, args[0], P_ArgToSpeed(args[1]),
+		case std::to_underlying(ZDoomLineSpecial::PillarBuild):
+			buttonSuccess = EV_DoZDoomPillar(PillarType::Build, line, args[0], P_ArgToSpeed(args[1]),
 				args[2], 0, NO_CRUSH, false);
 			break;
-		case zl_pillar_build_and_crush:
-			buttonSuccess = EV_DoZDoomPillar(pillarBuild, line, args[0], P_ArgToSpeed(args[1]),
+		case std::to_underlying(ZDoomLineSpecial::PillarBuildAndCrush):
+			buttonSuccess = EV_DoZDoomPillar(PillarType::Build, line, args[0], P_ArgToSpeed(args[1]),
 				args[2], 0, args[3], P_ArgToCrushType(args[4]));
 			break;
-		case zl_pillar_open:
-			buttonSuccess = EV_DoZDoomPillar(pillarOpen, line, args[0], P_ArgToSpeed(args[1]),
+		case std::to_underlying(ZDoomLineSpecial::PillarOpen):
+			buttonSuccess = EV_DoZDoomPillar(PillarType::Open, line, args[0], P_ArgToSpeed(args[1]),
 				args[2], args[3], NO_CRUSH, false);
 			break;
-		case zl_elevator_move_to_floor:
-			buttonSuccess = EV_DoZDoomElevator(line, elevateCurrent, P_ArgToSpeed(args[1]),
+		case std::to_underlying(ZDoomLineSpecial::ElevatorMoveToFloor):
+			buttonSuccess = EV_DoZDoomElevator(line, ElevatorType::Current, P_ArgToSpeed(args[1]),
 				0, args[0]);
 			break;
-		case zl_elevator_raise_to_nearest:
-			buttonSuccess = EV_DoZDoomElevator(line, elevateUp, P_ArgToSpeed(args[1]),
+		case std::to_underlying(ZDoomLineSpecial::ElevatorRaiseToNearest):
+			buttonSuccess = EV_DoZDoomElevator(line, ElevatorType::Up, P_ArgToSpeed(args[1]),
 				0, args[0]);
 			break;
-		case zl_elevator_lower_to_nearest:
-			buttonSuccess = EV_DoZDoomElevator(line, elevateDown, P_ArgToSpeed(args[1]),
+		case std::to_underlying(ZDoomLineSpecial::ElevatorLowerToNearest):
+			buttonSuccess = EV_DoZDoomElevator(line, ElevatorType::Down, P_ArgToSpeed(args[1]),
 				0, args[0]);
 			break;
-		case zl_floor_and_ceiling_lower_by_value:
-			buttonSuccess = EV_DoZDoomElevator(line, elevateLower, P_ArgToSpeed(args[1]),
+		case std::to_underlying(ZDoomLineSpecial::FloorAndCeilingLowerByValue):
+			buttonSuccess = EV_DoZDoomElevator(line, ElevatorType::Lower, P_ArgToSpeed(args[1]),
 				args[2], args[0]);
 			break;
-		case zl_floor_and_ceiling_raise_by_value:
-			buttonSuccess = EV_DoZDoomElevator(line, elevateRaise, P_ArgToSpeed(args[1]),
+		case std::to_underlying(ZDoomLineSpecial::FloorAndCeilingRaiseByValue):
+			buttonSuccess = EV_DoZDoomElevator(line, ElevatorType::Raise, P_ArgToSpeed(args[1]),
 				args[2], args[0]);
 			break;
-		case zl_floor_lower_by_value:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerByValue, line, args[0], args[1], args[2],
+		case std::to_underlying(ZDoomLineSpecial::FloorLowerByValue):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerByValue, line, args[0], args[1], args[2],
 				NO_CRUSH, P_ArgToChange(args[3]), false, false);
 			break;
-		case zl_floor_lower_to_lowest:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerToLowest, line, args[0], args[1], 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorLowerToLowest):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerToLowest, line, args[0], args[1], 0,
 				NO_CRUSH, P_ArgToChange(args[2]), false, false);
 			break;
-		case zl_floor_lower_to_highest:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerToHighest, line, args[0], args[1],
+		case std::to_underlying(ZDoomLineSpecial::FloorLowerToHighest):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerToHighest, line, args[0], args[1],
 				args[2] - 128, NO_CRUSH, 0, false, args[3] == 1);
 			break;
-		case zl_floor_lower_to_highest_ee:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerToHighest, line, args[0], args[1], 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorLowerToHighestEe):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerToHighest, line, args[0], args[1], 0,
 				NO_CRUSH, P_ArgToChange(args[2]), false, false);
 			break;
-		case zl_floor_lower_to_nearest:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerToNearest, line, args[0], args[1], 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorLowerToNearest):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerToNearest, line, args[0], args[1], 0,
 				NO_CRUSH, P_ArgToChange(args[2]), false, false);
 			break;
-		case zl_floor_raise_by_value:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseByValue, line, args[0], args[1], args[2],
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseByValue):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseByValue, line, args[0], args[1], args[2],
 				P_ArgToCrush(args[4]), P_ArgToChange(args[3]), true, false);
 			break;
-		case zl_floor_raise_to_highest:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseToHighest, line, args[0], args[1], 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseToHighest):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseToHighest, line, args[0], args[1], 0,
 				P_ArgToCrush(args[3]), P_ArgToChange(args[2]), true, false);
 			break;
-		case zl_floor_raise_to_nearest:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseToNearest, line, args[0], args[1], 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseToNearest):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseToNearest, line, args[0], args[1], 0,
 				P_ArgToCrush(args[3]), P_ArgToChange(args[2]), true, false);
 			break;
-		case zl_floor_raise_to_lowest:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseToLowest, line, args[0], 2, 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseToLowest):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseToLowest, line, args[0], 2, 0,
 				P_ArgToCrush(args[3]), P_ArgToChange(args[2]), true, false);
 			break;
-		case zl_floor_raise_and_crush:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseAndCrush, line, args[0], args[1], 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseAndCrush):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseAndCrush, line, args[0], args[1], 0,
 				args[2], 0, P_ArgToCrushType(args[3]), false);
 			break;
-		case zl_floor_raise_and_crushdoom:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseAndCrushDoom, line, args[0], args[1], 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseAndCrushdoom):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseAndCrushDoom, line, args[0], args[1], 0,
 				args[2], 0, P_ArgToCrushType(args[3]), false);
 			break;
-		case zl_floor_raise_by_value_times_8:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseByValue, line, args[0], args[1], args[2] * 8,
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseByValueTimes8):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseByValue, line, args[0], args[1], args[2] * 8,
 				P_ArgToCrush(args[4]), P_ArgToChange(args[3]), true, false);
 			break;
-		case zl_floor_lower_by_value_times_8:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerByValue, line, args[0], args[1], args[2] * 8,
+		case std::to_underlying(ZDoomLineSpecial::FloorLowerByValueTimes8):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerByValue, line, args[0], args[1], args[2] * 8,
 				NO_CRUSH, P_ArgToChange(args[3]), false, false);
 			break;
-		case zl_floor_lower_instant:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerInstant, line, args[0], 0, args[2] * 8,
+		case std::to_underlying(ZDoomLineSpecial::FloorLowerInstant):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerInstant, line, args[0], 0, args[2] * 8,
 				NO_CRUSH, P_ArgToChange(args[3]), false, false);
 			break;
-		case zl_floor_raise_instant:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseInstant, line, args[0], 0, args[2] * 8,
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseInstant):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseInstant, line, args[0], 0, args[2] * 8,
 				P_ArgToCrush(args[4]), P_ArgToChange(args[3]), true, false);
 			break;
-		case zl_floor_to_ceiling_instant:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerToCeiling, line, args[0], 0, args[3],
+		case std::to_underlying(ZDoomLineSpecial::FloorToCeilingInstant):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerToCeiling, line, args[0], 0, args[3],
 				P_ArgToCrush(args[2]), P_ArgToChange(args[1]), true, false);
 			break;
-		case zl_floor_move_to_value:
-			buttonSuccess = EV_DoZDoomFloor(floorMoveToValue, line, args[0], args[1],
+		case std::to_underlying(ZDoomLineSpecial::FloorMoveToValue):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorMoveToValue, line, args[0], args[1],
 				args[2] * (args[3] ? -1 : 1),
 				NO_CRUSH, P_ArgToChange(args[4]), false, false);
 			break;
-		case zl_floor_move_to_value_times_8:
-			buttonSuccess = EV_DoZDoomFloor(floorMoveToValue, line, args[0], args[1],
+		case std::to_underlying(ZDoomLineSpecial::FloorMoveToValueTimes8):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorMoveToValue, line, args[0], args[1],
 				args[2] * 8 * (args[3] ? -1 : 1),
 				NO_CRUSH, P_ArgToChange(args[4]), false, false);
 			break;
-		case zl_floor_move_to_value_and_crush:
-			buttonSuccess = EV_DoZDoomFloor(floorMoveToValue, line, args[0], args[1],
+		case std::to_underlying(ZDoomLineSpecial::FloorMoveToValueAndCrush):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorMoveToValue, line, args[0], args[1],
 				args[2], P_ArgToCrush(args[3]),
 				0, P_ArgToCrushType(args[4]), false);
 			break;
-		case zl_floor_raise_to_lowest_ceiling:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseToLowestCeiling, line, args[0], args[1], 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseToLowestCeiling):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseToLowestCeiling, line, args[0], args[1], 0,
 				P_ArgToCrush(args[3]), P_ArgToChange(args[2]), true, false);
 			break;
-		case zl_floor_lower_to_lowest_ceiling:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerToLowestCeiling, line, args[0], args[1], args[4],
+		case std::to_underlying(ZDoomLineSpecial::FloorLowerToLowestCeiling):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerToLowestCeiling, line, args[0], args[1], args[4],
 				NO_CRUSH, P_ArgToChange(args[2]), true, false);
 			break;
-		case zl_floor_raise_by_texture:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseByTexture, line, args[0], args[1], 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseByTexture):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseByTexture, line, args[0], args[1], 0,
 				P_ArgToCrush(args[3]), P_ArgToChange(args[2]), true, false);
 			break;
-		case zl_floor_lower_by_texture:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerByTexture, line, args[0], args[1], 0,
+		case std::to_underlying(ZDoomLineSpecial::FloorLowerByTexture):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerByTexture, line, args[0], args[1], 0,
 				NO_CRUSH, P_ArgToChange(args[2]), true, false);
 			break;
-		case zl_floor_raise_to_ceiling:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseToCeiling, line, args[0], args[1], args[4],
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseToCeiling):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseToCeiling, line, args[0], args[1], args[4],
 				P_ArgToCrush(args[3]), P_ArgToChange(args[2]), true, false);
 			break;
-		case zl_floor_raise_by_value_tx_ty:
-			buttonSuccess = EV_DoZDoomFloor(floorRaiseAndChange, line, args[0], args[1], args[2],
+		case std::to_underlying(ZDoomLineSpecial::FloorRaiseByValueTxTy):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorRaiseAndChange, line, args[0], args[1], args[2],
 				NO_CRUSH, 0, false, false);
 			break;
-		case zl_floor_lower_to_lowest_tx_ty:
-			buttonSuccess = EV_DoZDoomFloor(floorLowerAndChange, line, args[0], args[1], args[2],
+		case std::to_underlying(ZDoomLineSpecial::FloorLowerToLowestTxTy):
+			buttonSuccess = EV_DoZDoomFloor(FloorKind::FloorLowerAndChange, line, args[0], args[1], args[2],
 				NO_CRUSH, 0, false, false);
 			break;
-		case zl_generic_floor:
+		case std::to_underlying(ZDoomLineSpecial::GenericFloor):
 		{
-			floor_e type;
+			FloorKind type;
 			dboolean raise_or_lower;
 			byte index;
 
-			static floor_e floor_type[2][7] = {
+			static FloorKind floor_type[2][7] = {
 				{
-					floorLowerByValue,
-					floorLowerToHighest,
-					floorLowerToLowest,
-					floorLowerToNearest,
-					floorLowerToLowestCeiling,
-					floorLowerToCeiling,
-					floorLowerByTexture,
+					FloorKind::FloorLowerByValue,
+					FloorKind::FloorLowerToHighest,
+					FloorKind::FloorLowerToLowest,
+					FloorKind::FloorLowerToNearest,
+					FloorKind::FloorLowerToLowestCeiling,
+					FloorKind::FloorLowerToCeiling,
+					FloorKind::FloorLowerByTexture,
 				},
 				{
-					floorRaiseByValue,
-					floorRaiseToHighest,
-					floorRaiseToLowest,
-					floorRaiseToNearest,
-					floorRaiseToLowestCeiling,
-					floorRaiseToCeiling,
-					floorRaiseByTexture,
+					FloorKind::FloorRaiseByValue,
+					FloorKind::FloorRaiseToHighest,
+					FloorKind::FloorRaiseToLowest,
+					FloorKind::FloorRaiseToNearest,
+					FloorKind::FloorRaiseToLowestCeiling,
+					FloorKind::FloorRaiseToCeiling,
+					FloorKind::FloorRaiseByTexture,
 				}
 			};
 
@@ -6043,225 +6045,225 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				(args[4] & 16) ? 20 : NO_CRUSH, args[4] & 7, false, false);
 		}
 		break;
-		case zl_floor_crush_stop:
+		case std::to_underlying(ZDoomLineSpecial::FloorCrushStop):
 			buttonSuccess = EV_ZDoomFloorCrushStop(args[0]);
 			break;
-		case zl_floor_stop:
+		case std::to_underlying(ZDoomLineSpecial::FloorStop):
 			buttonSuccess = EV_ZDoomFloorStop(args[0], line);
 			break;
-		case zl_floor_donut:
+		case std::to_underlying(ZDoomLineSpecial::FloorDonut):
 			buttonSuccess = EV_DoZDoomDonut(args[0], line, P_ArgToSpeed(args[1]), P_ArgToSpeed(args[2]));
 			break;
-		case zl_ceiling_lower_by_value:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerByValue, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingLowerByValue):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerByValue, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				args[2], P_ArgToCrush(args[4]), 0,
-				P_ArgToChange(args[3]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[3]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_raise_by_value:
-			buttonSuccess = EV_DoZDoomCeiling(ceilRaiseByValue, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingRaiseByValue):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilRaiseByValue, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				args[2], P_ArgToCrush(args[4]), 0,
-				P_ArgToChange(args[3]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[3]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_lower_by_value_times_8:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerByValue, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingLowerByValueTimes8):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerByValue, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				args[2] * 8, NO_CRUSH, 0,
-				P_ArgToChange(args[3]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[3]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_raise_by_value_times_8:
-			buttonSuccess = EV_DoZDoomCeiling(ceilRaiseByValue, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingRaiseByValueTimes8):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilRaiseByValue, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				args[2] * 8, NO_CRUSH, 0,
-				P_ArgToChange(args[3]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[3]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_crush_and_raise:
-			buttonSuccess = EV_DoZDoomCeiling(ceilCrushAndRaise, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingCrushAndRaise):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilCrushAndRaise, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[1]) / 2,
 				8, args[2], 0,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[3], false)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[3], false)));
 			break;
-		case zl_ceiling_lower_and_crush:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerAndCrush, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingLowerAndCrush):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerAndCrush, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[1]),
 				8, args[2], 0,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[3], args[1] == 8)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[3], args[1] == 8)));
 			break;
-		case zl_ceiling_lower_and_crush_dist:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerAndCrush, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingLowerAndCrushDist):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerAndCrush, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[1]),
 				args[3], args[2], 0,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[4], args[1] == 8)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[4], args[1] == 8)));
 			break;
-		case zl_ceiling_crush_raise_and_stay:
-			buttonSuccess = EV_DoZDoomCeiling(ceilCrushRaiseAndStay, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingCrushRaiseAndStay):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilCrushRaiseAndStay, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[1]) / 2,
 				8, args[2], 0,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[3], false)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[3], false)));
 			break;
-		case zl_ceiling_move_to_value_times_8:
-			buttonSuccess = EV_DoZDoomCeiling(ceilMoveToValue, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingMoveToValueTimes8):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilMoveToValue, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				args[2] * 8 * (args[3] ? -1 : 1), NO_CRUSH, 0,
-				P_ArgToChange(args[4]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[4]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_move_to_value:
-			buttonSuccess = EV_DoZDoomCeiling(ceilMoveToValue, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingMoveToValue):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilMoveToValue, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				args[2] * (args[3] ? -1 : 1), NO_CRUSH, 0,
-				P_ArgToChange(args[4]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[4]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_move_to_value_and_crush:
-			buttonSuccess = EV_DoZDoomCeiling(ceilMoveToValue, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingMoveToValueAndCrush):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilMoveToValue, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				args[2], P_ArgToCrush(args[3]), 0,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[4], args[1] == 8)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[4], args[1] == 8)));
 			break;
-		case zl_ceiling_lower_to_highest_floor:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerToHighestFloor, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingLowerToHighestFloor):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerToHighestFloor, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				args[4], P_ArgToCrush(args[3]), 0,
-				P_ArgToChange(args[2]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[2]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_lower_instant:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerInstant, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingLowerInstant):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerInstant, line, args[0],
 				0, 0,
 				args[2] * 8, P_ArgToCrush(args[4]), 0,
-				P_ArgToChange(args[3]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[3]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_raise_instant:
-			buttonSuccess = EV_DoZDoomCeiling(ceilRaiseInstant, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingRaiseInstant):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilRaiseInstant, line, args[0],
 				0, 0,
 				args[2] * 8, NO_CRUSH, 0,
-				P_ArgToChange(args[3]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[3]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_crush_raise_and_stay_a:
-			buttonSuccess = EV_DoZDoomCeiling(ceilCrushRaiseAndStay, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingCrushRaiseAndStayA):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilCrushRaiseAndStay, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[2]),
 				0, args[3], 0,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[4], false)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[4], false)));
 			break;
-		case zl_ceiling_crush_raise_and_stay_sil_a:
-			buttonSuccess = EV_DoZDoomCeiling(ceilCrushRaiseAndStay, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingCrushRaiseAndStaySilA):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilCrushRaiseAndStay, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[2]),
 				0, args[3], 1,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[4], false)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[4], false)));
 			break;
-		case zl_ceiling_crush_and_raise_a:
-			buttonSuccess = EV_DoZDoomCeiling(ceilCrushAndRaise, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingCrushAndRaiseA):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilCrushAndRaise, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[2]),
 				0, args[3], 0,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[4], args[1] == 8 && args[2] == 8)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[4], args[1] == 8 && args[2] == 8)));
 			break;
-		case zl_ceiling_crush_and_raise_dist:
-			buttonSuccess = EV_DoZDoomCeiling(ceilCrushAndRaise, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingCrushAndRaiseDist):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilCrushAndRaise, line, args[0],
 				P_ArgToSpeed(args[2]), P_ArgToSpeed(args[2]),
 				args[1], args[3], 0,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[4], args[2] == 8)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[4], args[2] == 8)));
 			break;
-		case zl_ceiling_crush_and_raise_silent_a:
-			buttonSuccess = EV_DoZDoomCeiling(ceilCrushAndRaise, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingCrushAndRaiseSilentA):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilCrushAndRaise, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[2]),
 				0, args[3], 1,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[4], args[1] == 8 && args[2] == 8)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[4], args[1] == 8 && args[2] == 8)));
 			break;
-		case zl_ceiling_crush_and_raise_silent_dist:
-			buttonSuccess = EV_DoZDoomCeiling(ceilCrushAndRaise, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingCrushAndRaiseSilentDist):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilCrushAndRaise, line, args[0],
 				P_ArgToSpeed(args[2]), P_ArgToSpeed(args[2]),
 				args[1], args[3], 1,
-				0, static_cast<crushmode_e>(P_ArgToCrushMode(args[4], args[2] == 8)));
+				0, static_cast<CrushMode>(P_ArgToCrushMode(args[4], args[2] == 8)));
 			break;
-		case zl_ceiling_raise_to_nearest:
-			buttonSuccess = EV_DoZDoomCeiling(ceilRaiseToNearest, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingRaiseToNearest):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilRaiseToNearest, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				0, NO_CRUSH, P_ArgToChange(args[2]),
-				0, static_cast<crushmode_e>(false));
+				0, static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_raise_to_highest:
-			buttonSuccess = EV_DoZDoomCeiling(ceilRaiseToHighest, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingRaiseToHighest):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilRaiseToHighest, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				0, NO_CRUSH, P_ArgToChange(args[2]),
-				0, static_cast<crushmode_e>(false));
+				0, static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_raise_to_lowest:
-			buttonSuccess = EV_DoZDoomCeiling(ceilRaiseToLowest, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingRaiseToLowest):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilRaiseToLowest, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				0, NO_CRUSH, P_ArgToChange(args[2]),
-				0, static_cast<crushmode_e>(false));
+				0, static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_raise_to_highest_floor:
-			buttonSuccess = EV_DoZDoomCeiling(ceilRaiseToHighestFloor, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingRaiseToHighestFloor):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilRaiseToHighestFloor, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				0, NO_CRUSH, P_ArgToChange(args[2]),
-				0, static_cast<crushmode_e>(false));
+				0, static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_raise_by_texture:
-			buttonSuccess = EV_DoZDoomCeiling(ceilRaiseByTexture, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingRaiseByTexture):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilRaiseByTexture, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				0, NO_CRUSH, P_ArgToChange(args[2]),
-				0, static_cast<crushmode_e>(false));
+				0, static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_lower_to_lowest:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerToLowest, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingLowerToLowest):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerToLowest, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				0, P_ArgToCrush(args[3]), 0,
-				P_ArgToChange(args[2]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[2]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_lower_to_nearest:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerToNearest, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingLowerToNearest):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerToNearest, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				0, P_ArgToCrush(args[3]), 0,
-				P_ArgToChange(args[2]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[2]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_to_highest_instant:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerToHighest, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingToHighestInstant):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerToHighest, line, args[0],
 				2 * FRACUNIT, 0,
 				0, P_ArgToCrush(args[2]), 0,
-				P_ArgToChange(args[1]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[1]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_to_floor_instant:
-			buttonSuccess = EV_DoZDoomCeiling(ceilRaiseToFloor, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingToFloorInstant):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilRaiseToFloor, line, args[0],
 				2 * FRACUNIT, 0,
 				args[3], P_ArgToCrush(args[2]), 0,
-				P_ArgToChange(args[1]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[1]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_lower_to_floor:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerToFloor, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingLowerToFloor):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerToFloor, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				args[4], P_ArgToCrush(args[3]), 0,
-				P_ArgToChange(args[4]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[4]), static_cast<CrushMode>(false));
 			break;
-		case zl_ceiling_lower_by_texture:
-			buttonSuccess = EV_DoZDoomCeiling(ceilLowerByTexture, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::CeilingLowerByTexture):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilLowerByTexture, line, args[0],
 				P_ArgToSpeed(args[1]), 0,
 				0, P_ArgToCrush(args[3]), 0,
-				P_ArgToChange(args[4]), static_cast<crushmode_e>(false));
+				P_ArgToChange(args[4]), static_cast<CrushMode>(false));
 			break;
-		case zl_generic_ceiling:
+		case std::to_underlying(ZDoomLineSpecial::GenericCeiling):
 		{
-			ceiling_e type;
+			CeilingKind type;
 			dboolean raise_or_lower;
 			byte index;
 
-			static ceiling_e ceiling_type[2][7] = {
+			static CeilingKind ceiling_type[2][7] = {
 				{
-					ceilLowerByValue,
-					ceilLowerToHighest,
-					ceilLowerToLowest,
-					ceilLowerToNearest,
-					ceilLowerToHighestFloor,
-					ceilLowerToFloor,
-					ceilLowerByTexture,
+					CeilingKind::CeilLowerByValue,
+					CeilingKind::CeilLowerToHighest,
+					CeilingKind::CeilLowerToLowest,
+					CeilingKind::CeilLowerToNearest,
+					CeilingKind::CeilLowerToHighestFloor,
+					CeilingKind::CeilLowerToFloor,
+					CeilingKind::CeilLowerByTexture,
 				},
 				{
-					ceilRaiseByValue,
-					ceilRaiseToHighest,
-					ceilRaiseToLowest,
-					ceilRaiseToNearest,
-					ceilRaiseToHighestFloor,
-					ceilRaiseToFloor,
-					ceilRaiseByTexture,
+					CeilingKind::CeilRaiseByValue,
+					CeilingKind::CeilRaiseToHighest,
+					CeilingKind::CeilRaiseToLowest,
+					CeilingKind::CeilRaiseToNearest,
+					CeilingKind::CeilRaiseToHighestFloor,
+					CeilingKind::CeilRaiseToFloor,
+					CeilingKind::CeilRaiseByTexture,
 				}
 			};
 
@@ -6272,10 +6274,10 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			buttonSuccess = EV_DoZDoomCeiling(type, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[1]),
 				args[2], (args[4] & 16) ? 20 : NO_CRUSH, 0,
-				args[4] & 7, static_cast<crushmode_e>(false));
+				args[4] & 7, static_cast<CrushMode>(false));
 		}
 		break;
-		case zl_ceiling_crush_stop:
+		case std::to_underlying(ZDoomLineSpecial::CeilingCrushStop):
 		{
 			dboolean remove;
 
@@ -6295,83 +6297,83 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			buttonSuccess = EV_ZDoomCeilingCrushStop(args[0], remove);
 		}
 		break;
-		case zl_ceiling_stop:
+		case std::to_underlying(ZDoomLineSpecial::CeilingStop):
 			buttonSuccess = EV_ZDoomCeilingStop(args[0], line);
 			break;
-		case zl_generic_crusher:
-			buttonSuccess = EV_DoZDoomCeiling(ceilCrushAndRaise, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::GenericCrusher):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilCrushAndRaise, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[2]),
 				0, args[4], args[3] ? 2 : 0,
-				0, static_cast<crushmode_e>((args[1] <= 24 && args[2] <= 24) ? crushSlowdown : crushDoom));
+				0, static_cast<CrushMode>((args[1] <= 24 && args[2] <= 24) ? CrushMode::Slowdown : CrushMode::Doom));
 			break;
-		case zl_generic_crusher2:
-			buttonSuccess = EV_DoZDoomCeiling(ceilCrushAndRaise, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::GenericCrusher2):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilCrushAndRaise, line, args[0],
 				P_ArgToSpeed(args[1]), P_ArgToSpeed(args[2]),
 				0, args[4], args[3] ? 2 : 0,
-				0, static_cast<crushmode_e>(crushHexen));
+				0, static_cast<CrushMode>(CrushMode::Hexen));
 			break;
-		case zl_floor_waggle:
+		case std::to_underlying(ZDoomLineSpecial::FloorWaggle):
 			buttonSuccess = EV_StartPlaneWaggle(args[0], line, args[1], args[2], args[3], args[4], false);
 			break;
-		case zl_ceiling_waggle:
+		case std::to_underlying(ZDoomLineSpecial::CeilingWaggle):
 			buttonSuccess = EV_StartPlaneWaggle(args[0], line, args[1], args[2], args[3], args[4], true);
 			break;
-		case zl_floor_and_ceiling_lower_raise:
-			buttonSuccess = EV_DoZDoomCeiling(ceilRaiseToHighest, line, args[0],
-				P_ArgToSpeed(args[2]), 0, 0, 0, 0, 0, static_cast<crushmode_e>(false));
-			buttonSuccess |= EV_DoZDoomFloor(floorLowerToLowest, line, args[0],
+		case std::to_underlying(ZDoomLineSpecial::FloorAndCeilingLowerRaise):
+			buttonSuccess = EV_DoZDoomCeiling(CeilingKind::CeilRaiseToHighest, line, args[0],
+				P_ArgToSpeed(args[2]), 0, 0, 0, 0, 0, static_cast<CrushMode>(false));
+			buttonSuccess |= EV_DoZDoomFloor(FloorKind::FloorLowerToLowest, line, args[0],
 				args[1], 0, NO_CRUSH, 0, false, false);
 			break;
-		case zl_stairs_build_down:
-			buttonSuccess = EV_BuildZDoomStairs(args[0], stairBuildDown, line,
+		case std::to_underlying(ZDoomLineSpecial::StairsBuildDown):
+			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildDown, line,
 				args[2], P_ArgToSpeed(args[1]), args[3],
 				args[4], 0, STAIR_USE_SPECIALS);
 			break;
-		case zl_stairs_build_up:
-			buttonSuccess = EV_BuildZDoomStairs(args[0], stairBuildUp, line,
+		case std::to_underlying(ZDoomLineSpecial::StairsBuildUp):
+			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildUp, line,
 				args[2], P_ArgToSpeed(args[1]), args[3],
 				args[4], 0, STAIR_USE_SPECIALS);
 			break;
-		case zl_stairs_build_down_sync:
-			buttonSuccess = EV_BuildZDoomStairs(args[0], stairBuildDown, line,
+		case std::to_underlying(ZDoomLineSpecial::StairsBuildDownSync):
+			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildDown, line,
 				args[2], P_ArgToSpeed(args[1]), 0,
 				args[3], 0, STAIR_USE_SPECIALS | STAIR_SYNC);
 			break;
-		case zl_stairs_build_up_sync:
-			buttonSuccess = EV_BuildZDoomStairs(args[0], stairBuildUp, line,
+		case std::to_underlying(ZDoomLineSpecial::StairsBuildUpSync):
+			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildUp, line,
 				args[2], P_ArgToSpeed(args[1]), 0,
 				args[3], 0, STAIR_USE_SPECIALS | STAIR_SYNC);
 			break;
-		case zl_stairs_build_down_doom:
-			buttonSuccess = EV_BuildZDoomStairs(args[0], stairBuildDown, line,
+		case std::to_underlying(ZDoomLineSpecial::StairsBuildDownDoom):
+			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildDown, line,
 				args[2], P_ArgToSpeed(args[1]), args[3],
 				args[4], 0, 0);
 			break;
-		case zl_stairs_build_up_doom:
-			buttonSuccess = EV_BuildZDoomStairs(args[0], stairBuildUp, line,
+		case std::to_underlying(ZDoomLineSpecial::StairsBuildUpDoom):
+			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildUp, line,
 				args[2], P_ArgToSpeed(args[1]), args[3],
 				args[4], 0, 0);
 			break;
-		case zl_stairs_build_down_doom_sync:
-			buttonSuccess = EV_BuildZDoomStairs(args[0], stairBuildDown, line,
+		case std::to_underlying(ZDoomLineSpecial::StairsBuildDownDoomSync):
+			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildDown, line,
 				args[2], P_ArgToSpeed(args[1]), 0,
 				args[3], 0, STAIR_SYNC);
 			break;
-		case zl_stairs_build_up_doom_sync:
-			buttonSuccess = EV_BuildZDoomStairs(args[0], stairBuildUp, line,
+		case std::to_underlying(ZDoomLineSpecial::StairsBuildUpDoomSync):
+			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildUp, line,
 				args[2], P_ArgToSpeed(args[1]), 0,
 				args[3], 0, STAIR_SYNC);
 			break;
-		case zl_stairs_build_up_doom_crush:
-			buttonSuccess = EV_BuildZDoomStairs(args[0], stairBuildUp, line,
+		case std::to_underlying(ZDoomLineSpecial::StairsBuildUpDoomCrush):
+			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildUp, line,
 				args[2], P_ArgToSpeed(args[1]), args[3],
 				args[4], 0, STAIR_CRUSH);
 			break;
-		case zl_generic_stairs:
+		case std::to_underlying(ZDoomLineSpecial::GenericStairs):
 		{
-			stair_e type;
+			StairType type;
 
-			type = (args[3] & 1) ? stairBuildUp : stairBuildDown;
+			type = (args[3] & 1) ? StairType::BuildUp : StairType::BuildDown;
 			buttonSuccess = EV_BuildZDoomStairs(args[0], type, line,
 				args[2], P_ArgToSpeed(args[1]), 0,
 				args[4], args[3] & 2, 0);
@@ -6379,13 +6381,13 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			// Toggle direction of next activation of repeatable stairs
 			if(buttonSuccess && line &&
 				line->flags & ML_REPEATSPECIAL &&
-				line->special == zl_generic_stairs)
+				line->special == std::to_underlying(ZDoomLineSpecial::GenericStairs))
 			{
 				line->special_args[3] ^= 1;
 			}
 		}
 		break;
-		case zl_plat_stop:
+		case std::to_underlying(ZDoomLineSpecial::PlatStop):
 		{
 			dboolean remove;
 
@@ -6406,86 +6408,86 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			buttonSuccess = 1;
 		}
 		break;
-		case zl_plat_perpetual_raise:
-			buttonSuccess = EV_DoZDoomPlat(args[0], line, platPerpetualRaise, 0,
+		case std::to_underlying(ZDoomLineSpecial::PlatPerpetualRaise):
+			buttonSuccess = EV_DoZDoomPlat(args[0], line, PlatType::PlatPerpetualRaise, 0,
 				P_ArgToSpeed(args[1]), args[2], 8, 0);
 			break;
-		case zl_plat_perpetual_raise_lip:
-			buttonSuccess = EV_DoZDoomPlat(args[0], line, platPerpetualRaise, 0,
+		case std::to_underlying(ZDoomLineSpecial::PlatPerpetualRaiseLip):
+			buttonSuccess = EV_DoZDoomPlat(args[0], line, PlatType::PlatPerpetualRaise, 0,
 				P_ArgToSpeed(args[1]), args[2], args[3], 0);
 			break;
-		case zl_plat_down_wait_up_stay:
-			buttonSuccess = EV_DoZDoomPlat(args[0], line, platDownWaitUpStay, 0,
+		case std::to_underlying(ZDoomLineSpecial::PlatDownWaitUpStay):
+			buttonSuccess = EV_DoZDoomPlat(args[0], line, PlatType::PlatDownWaitUpStay, 0,
 				P_ArgToSpeed(args[1]), args[2], 8, 0);
 			break;
-		case zl_plat_down_wait_up_stay_lip:
+		case std::to_underlying(ZDoomLineSpecial::PlatDownWaitUpStayLip):
 			buttonSuccess = EV_DoZDoomPlat(args[0], line,
-				args[4] ? platDownWaitUpStayStone : platDownWaitUpStay, 0,
+				args[4] ? PlatType::PlatDownWaitUpStayStone : PlatType::PlatDownWaitUpStay, 0,
 				P_ArgToSpeed(args[1]), args[2], args[3], 0);
 			break;
-		case zl_plat_down_by_value:
-			buttonSuccess = EV_DoZDoomPlat(args[0], line, platDownByValue, args[3] * 8,
+		case std::to_underlying(ZDoomLineSpecial::PlatDownByValue):
+			buttonSuccess = EV_DoZDoomPlat(args[0], line, PlatType::PlatDownByValue, args[3] * 8,
 				P_ArgToSpeed(args[1]), args[2], 0, 0);
 			break;
-		case zl_plat_up_by_value:
-			buttonSuccess = EV_DoZDoomPlat(args[0], line, platUpByValue, args[3] * 8,
+		case std::to_underlying(ZDoomLineSpecial::PlatUpByValue):
+			buttonSuccess = EV_DoZDoomPlat(args[0], line, PlatType::PlatUpByValue, args[3] * 8,
 				P_ArgToSpeed(args[1]), args[2], 0, 0);
 			break;
-		case zl_plat_up_wait_down_stay:
-			buttonSuccess = EV_DoZDoomPlat(args[0], line, platUpWaitDownStay, 0,
+		case std::to_underlying(ZDoomLineSpecial::PlatUpWaitDownStay):
+			buttonSuccess = EV_DoZDoomPlat(args[0], line, PlatType::PlatUpWaitDownStay, 0,
 				P_ArgToSpeed(args[1]), args[2], 0, 0);
 			break;
-		case zl_plat_up_nearest_wait_down_stay:
-			buttonSuccess = EV_DoZDoomPlat(args[0], line, platUpNearestWaitDownStay, 0,
+		case std::to_underlying(ZDoomLineSpecial::PlatUpNearestWaitDownStay):
+			buttonSuccess = EV_DoZDoomPlat(args[0], line, PlatType::PlatUpNearestWaitDownStay, 0,
 				P_ArgToSpeed(args[1]), args[2], 0, 0);
 			break;
-		case zl_plat_raise_and_stay_tx0:
+		case std::to_underlying(ZDoomLineSpecial::PlatRaiseAndStayTx0):
 		{
-			plattype_e type;
+			PlatType type;
 
 			switch(args[3])
 			{
 				case 1:
-					type = platRaiseAndStay;
+					type = PlatType::PlatRaiseAndStay;
 					break;
 				case 2:
-					type = platRaiseAndStayLockout;
+					type = PlatType::PlatRaiseAndStayLockout;
 					break;
 				default:
-					type = (heretic ? platRaiseAndStayLockout : platRaiseAndStay);
+					type = (heretic ? PlatType::PlatRaiseAndStayLockout : PlatType::PlatRaiseAndStay);
 					break;
 			}
 
 			buttonSuccess = EV_DoZDoomPlat(args[0], line, type, 0, P_ArgToSpeed(args[1]), 0, 0, 1);
 		}
 		break;
-		case zl_plat_up_by_value_stay_tx:
-			buttonSuccess = EV_DoZDoomPlat(args[0], line, platUpByValueStay, args[2] * 8,
+		case std::to_underlying(ZDoomLineSpecial::PlatUpByValueStayTx):
+			buttonSuccess = EV_DoZDoomPlat(args[0], line, PlatType::PlatUpByValueStay, args[2] * 8,
 				P_ArgToSpeed(args[1]), 0, 0, 2);
 			break;
-		case zl_plat_toggle_ceiling:
-			buttonSuccess = EV_DoZDoomPlat(args[0], line, platToggle, 0, 0, 0, 0, 0);
+		case std::to_underlying(ZDoomLineSpecial::PlatToggleCeiling):
+			buttonSuccess = EV_DoZDoomPlat(args[0], line, PlatType::PlatToggle, 0, 0, 0, 0, 0);
 			break;
-		case zl_generic_lift:
+		case std::to_underlying(ZDoomLineSpecial::GenericLift):
 		{
-			plattype_e type;
+			PlatType type;
 
 			switch(args[3])
 			{
 				case 1:
-					type = platDownWaitUpStay;
+					type = PlatType::PlatDownWaitUpStay;
 					break;
 				case 2:
-					type = platDownToNearestFloor;
+					type = PlatType::PlatDownToNearestFloor;
 					break;
 				case 3:
-					type = platDownToLowestCeiling;
+					type = PlatType::PlatDownToLowestCeiling;
 					break;
 				case 4:
-					type = platPerpetualRaise;
+					type = PlatType::PlatPerpetualRaise;
 					break;
 				default:
-					type = platUpByValue;
+					type = PlatType::PlatUpByValue;
 					break;
 			}
 
@@ -6493,7 +6495,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				P_ArgToSpeed(args[1]), args[2] * TICRATE / 8, 0, 0);
 		}
 		break;
-		case zl_line_set_blocking:
+		case std::to_underlying(ZDoomLineSpecial::LineSetBlocking):
 			if(args[0])
 			{
 				int i;
@@ -6532,7 +6534,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_sector_change_flags:
+		case std::to_underlying(ZDoomLineSpecial::SectorChangeFlags):
 			if(args[0])
 			{
 				int i;
@@ -6569,7 +6571,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_line_set_automap_flags:
+		case std::to_underlying(ZDoomLineSpecial::LineSetAutomapFlags):
 			if(args[0])
 			{
 				int i;
@@ -6600,20 +6602,20 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_line_set_automap_style:
-			if(args[1] >= 0 && args[1] <= ams_portal)
+		case std::to_underlying(ZDoomLineSpecial::LineSetAutomapStyle):
+			if(args[1] >= 0 && args[1] <= std::to_underlying(AutomapStyle::Portal))
 			{
 				const int* id_p;
 
 				FIND_LINES(id_p, args[0])
 				{
-					lines[*id_p].automap_style = static_cast<automap_style_t>(args[1]);
+					lines[*id_p].automap_style = static_cast<AutomapStyle>(args[1]);
 				}
 
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_scroll_wall:
+		case std::to_underlying(ZDoomLineSpecial::ScrollWall):
 			if(args[0])
 			{
 				const int* id_p;
@@ -6627,7 +6629,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_line_set_texture_offset:
+		case std::to_underlying(ZDoomLineSpecial::LineSetTextureOffset):
 			if(args[0])
 			{
 				const int* id_p;
@@ -6695,7 +6697,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_line_set_texturescale:
+		case std::to_underlying(ZDoomLineSpecial::LineSetTexturescale):
 			if(args[0])
 			{
 				const int* id_p;
@@ -6769,7 +6771,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_noise_alert:
+		case std::to_underlying(ZDoomLineSpecial::NoiseAlert):
 		{
 
 			mobj_t *target, *emitter;
@@ -6802,7 +6804,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			buttonSuccess = 1;
 		}
 		break;
-		case zl_sector_set_gravity:
+		case std::to_underlying(ZDoomLineSpecial::SectorSetGravity):
 		{
 			fixed_t gravity;
 			const int* id_p;
@@ -6817,7 +6819,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_sector_set_damage:
+		case std::to_underlying(ZDoomLineSpecial::SectorSetDamage):
 		{
 			const int* id_p;
 			dboolean unblockable = false;
@@ -6855,13 +6857,13 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_floor_transfer_numeric:
-			buttonSuccess = EV_DoChange(line, numChangeOnly, args[0]);
+		case std::to_underlying(ZDoomLineSpecial::FloorTransferNumeric):
+			buttonSuccess = EV_DoChange(line, ChangeKind::NumericOnly, args[0]);
 			break;
-		case zl_floor_transfer_trigger:
-			buttonSuccess = EV_DoChange(line, trigChangeOnly, args[0]);
+		case std::to_underlying(ZDoomLineSpecial::FloorTransferTrigger):
+			buttonSuccess = EV_DoChange(line, ChangeKind::TriggerOnly, args[0]);
 			break;
-		case zl_sector_set_floor_panning:
+		case std::to_underlying(ZDoomLineSpecial::SectorSetFloorPanning):
 		{
 			const int* id_p;
 			fixed_t xoffs, yoffs;
@@ -6877,7 +6879,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_sector_set_ceiling_panning:
+		case std::to_underlying(ZDoomLineSpecial::SectorSetCeilingPanning):
 		{
 			const int* id_p;
 			fixed_t xoffs, yoffs;
@@ -6893,7 +6895,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_sector_set_rotation:
+		case std::to_underlying(ZDoomLineSpecial::SectorSetRotation):
 		{
 			const int* id_p;
 			angle_t floor, ceiling;
@@ -6909,7 +6911,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_sector_set_floor_scale:
+		case std::to_underlying(ZDoomLineSpecial::SectorSetFloorScale):
 		{
 			const int* id_p;
 			fixed_t xscale, yscale;
@@ -6931,7 +6933,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_sector_set_floor_scale2:
+		case std::to_underlying(ZDoomLineSpecial::SectorSetFloorScale2):
 		{
 			const int* id_p;
 			fixed_t xscale, yscale;
@@ -6953,7 +6955,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_sector_set_ceiling_scale:
+		case std::to_underlying(ZDoomLineSpecial::SectorSetCeilingScale):
 		{
 			const int* id_p;
 			fixed_t xscale, yscale;
@@ -6975,7 +6977,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_sector_set_ceiling_scale2:
+		case std::to_underlying(ZDoomLineSpecial::SectorSetCeilingScale2):
 		{
 			const int* id_p;
 			fixed_t xscale, yscale;
@@ -6997,7 +6999,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_heal_thing:
+		case std::to_underlying(ZDoomLineSpecial::HealThing):
 			if(mo)
 			{
 				int max = args[1];
@@ -7025,7 +7027,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				}
 			}
 			break;
-		case zl_force_field:
+		case std::to_underlying(ZDoomLineSpecial::ForceField):
 			if(mo)
 			{
 				P_DamageMobj(mo, nullptr, nullptr, 16);
@@ -7033,7 +7035,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 			buttonSuccess = 1;
 			break;
-		case zl_clear_force_field:
+		case std::to_underlying(ZDoomLineSpecial::ClearForceField):
 		{
 			const int* id_p;
 
@@ -7047,7 +7049,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				{
 					line_t* line = sectors[*id_p].lines[i];
 
-					if(line->backsector && line->special == zl_force_field)
+					if(line->backsector && line->special == std::to_underlying(ZDoomLineSpecial::ForceField))
 					{
 						line->flags &= ~(ML_BLOCKING | ML_BLOCKEVERYTHING);
 						line->special = 0;
@@ -7058,15 +7060,15 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 		}
 		break;
-		case zl_exit_normal:
+		case std::to_underlying(ZDoomLineSpecial::ExitNormal):
 			G_ExitLevel(args[0]);
 			buttonSuccess = 1;
 			break;
-		case zl_exit_secret:
+		case std::to_underlying(ZDoomLineSpecial::ExitSecret):
 			G_SecretExitLevel(args[0]);
 			buttonSuccess = 1;
 			break;
-		case zl_teleport_new_map:
+		case std::to_underlying(ZDoomLineSpecial::TeleportNewMap):
 			if(!side)
 			{
 				int flags;
@@ -7078,58 +7080,58 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_teleport_end_game:
+		case std::to_underlying(ZDoomLineSpecial::TeleportEndGame):
 			if(!side)
 			{
 				G_Completed(LEAVE_VICTORY, LEAVE_VICTORY, 0, 0);
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_polyobj_rotate_left:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjRotateLeft):
 			buttonSuccess = EV_RotateZDoomPoly(line, args[0], args[1], args[2], 1, false);
 			break;
-		case zl_polyobj_or_rotate_left:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjOrRotateLeft):
 			buttonSuccess = EV_RotateZDoomPoly(line, args[0], args[1], args[2], 1, true);
 			break;
-		case zl_polyobj_rotate_right:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjRotateRight):
 			buttonSuccess = EV_RotateZDoomPoly(line, args[0], args[1], args[2], -1, false);
 			break;
-		case zl_polyobj_or_rotate_right:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjOrRotateRight):
 			buttonSuccess = EV_RotateZDoomPoly(line, args[0], args[1], args[2], -1, true);
 			break;
-		case zl_polyobj_move:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjMove):
 			buttonSuccess = EV_MoveZDoomPoly(line, args[0], args[1],
 				args[2], args[3], false, false);
 			break;
-		case zl_polyobj_or_move:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjOrMove):
 			buttonSuccess = EV_MoveZDoomPoly(line, args[0], args[1],
 				args[2], args[3], false, true);
 			break;
-		case zl_polyobj_move_times_8:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjMoveTimes8):
 			buttonSuccess = EV_MoveZDoomPoly(line, args[0], args[1],
 				args[2], args[3], true, false);
 			break;
-		case zl_polyobj_or_move_times_8:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjOrMoveTimes8):
 			buttonSuccess = EV_MoveZDoomPoly(line, args[0], args[1],
 				args[2], args[3], true, true);
 			break;
-		case zl_polyobj_door_swing:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjDoorSwing):
 			buttonSuccess = EV_OpenZDoomPolyDoor(line, args[0], args[1],
-				args[2], args[3], args[4], PODOOR_SWING);
+				args[2], args[3], args[4], PolyDoorType::Swing);
 			break;
-		case zl_polyobj_door_slide:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjDoorSlide):
 			buttonSuccess = EV_OpenZDoomPolyDoor(line, args[0], args[1],
-				args[2], args[3], args[4], PODOOR_SLIDE);
+				args[2], args[3], args[4], PolyDoorType::Slide);
 			break;
-		case zl_polyobj_move_to:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjMoveTo):
 			buttonSuccess = EV_MovePolyTo(line, args[0], P_ArgToSpeed(args[1]),
 				args[2] << FRACBITS, args[3] << FRACBITS, false);
 			break;
-		case zl_polyobj_or_move_to:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjOrMoveTo):
 			buttonSuccess = EV_MovePolyTo(line, args[0], P_ArgToSpeed(args[1]),
 				args[2] << FRACBITS, args[3] << FRACBITS, true);
 			break;
-		case zl_polyobj_move_to_spot:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjMoveToSpot):
 		{
 			mobj_t* dest;
 			thing_id_search_t search;
@@ -7146,7 +7148,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				dest->x, dest->y, false);
 		}
 		break;
-		case zl_polyobj_or_move_to_spot:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjOrMoveToSpot):
 		{
 			mobj_t* dest;
 			thing_id_search_t search;
@@ -7163,10 +7165,10 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				dest->x, dest->y, true);
 		}
 		break;
-		case zl_polyobj_stop:
+		case std::to_underlying(ZDoomLineSpecial::PolyobjStop):
 			buttonSuccess = EV_StopPoly(args[0]);
 			break;
-		case zl_radius_quake:
+		case std::to_underlying(ZDoomLineSpecial::RadiusQuake):
 		{
 			mobj_t* spawn_location;
 			thing_id_search_t search;
@@ -7181,7 +7183,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 		}
 		break;
-		case zl_thing_move:
+		case std::to_underlying(ZDoomLineSpecial::ThingMove):
 		{
 			mobj_t* target;
 			mobj_t* dest;
@@ -7198,7 +7200,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 		}
 		break;
-		case zl_teleport_other:
+		case std::to_underlying(ZDoomLineSpecial::TeleportOther):
 			if(args[0] && args[1])
 			{
 				mobj_t* target;
@@ -7212,13 +7214,13 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				}
 			}
 			break;
-		case zl_teleport_group:
+		case std::to_underlying(ZDoomLineSpecial::TeleportGroup):
 			buttonSuccess = EV_TeleportGroup(args[0], mo, args[1], args[2], args[3], args[4]);
 			break;
-		case zl_teleport_in_sector:
+		case std::to_underlying(ZDoomLineSpecial::TeleportInSector):
 			buttonSuccess = EV_TeleportInSector(args[0], args[1], args[2], args[3], args[4]);
 			break;
-		case zl_teleport:
+		case std::to_underlying(ZDoomLineSpecial::Teleport):
 		{
 			int flags = TELF_DESTFOG;
 
@@ -7228,7 +7230,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			buttonSuccess = map_format.ev_teleport(args[0], args[1], line, side, mo, flags);
 		}
 		break;
-		case zl_teleport_no_fog:
+		case std::to_underlying(ZDoomLineSpecial::TeleportNoFog):
 		{
 			int flags = 0;
 
@@ -7258,7 +7260,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			buttonSuccess = map_format.ev_teleport(args[0], args[2], line, side, mo, flags);
 		}
 		break;
-		case zl_teleport_no_stop:
+		case std::to_underlying(ZDoomLineSpecial::TeleportNoStop):
 		{
 			int flags = TELF_DESTFOG | TELF_KEEPVELOCITY;
 
@@ -7268,65 +7270,65 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			buttonSuccess = map_format.ev_teleport(args[0], args[1], line, side, mo, flags);
 		}
 		break;
-		case zl_teleport_zombie_changer:
+		case std::to_underlying(ZDoomLineSpecial::TeleportZombieChanger):
 			if(mo)
 			{
 				map_format.ev_teleport(args[0], args[1], line, side, mo, 0);
-				if(mo->health >= 0 && mo->info->painstate)
+				if(mo->health >= 0 && mo->info->painstate != StateId::Null)
 				{
-					P_SetMobjState(mo, static_cast<statenum_t>(mo->info->painstate));
+					P_SetMobjState(mo, mo->info->painstate);
 				}
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_teleport_line:
+		case std::to_underlying(ZDoomLineSpecial::TeleportLine):
 			buttonSuccess = EV_SilentLineTeleport(line, side, mo, args[1], args[2]);
 			break;
-		case zl_light_raise_by_value:
+		case std::to_underlying(ZDoomLineSpecial::LightRaiseByValue):
 			EV_LightChange(args[0], args[1]);
 			buttonSuccess = 1;
 			break;
-		case zl_light_lower_by_value:
+		case std::to_underlying(ZDoomLineSpecial::LightLowerByValue):
 			EV_LightChange(args[0], -(short)args[1]);
 			buttonSuccess = 1;
 			break;
-		case zl_light_change_to_value:
+		case std::to_underlying(ZDoomLineSpecial::LightChangeToValue):
 			EV_LightSet(args[0], args[1]);
 			buttonSuccess = 1;
 			break;
-		case zl_light_min_neighbor:
+		case std::to_underlying(ZDoomLineSpecial::LightMinNeighbor):
 			EV_LightSetMinNeighbor(args[0]);
 			buttonSuccess = 1;
 			break;
-		case zl_light_max_neighbor:
+		case std::to_underlying(ZDoomLineSpecial::LightMaxNeighbor):
 			EV_LightSetMaxNeighbor(args[0]);
 			buttonSuccess = 1;
 			break;
-		case zl_light_fade:
+		case std::to_underlying(ZDoomLineSpecial::LightFade):
 			EV_StartLightFading(args[0], args[1], args[2]);
 			buttonSuccess = 1;
 			break;
-		case zl_light_glow:
+		case std::to_underlying(ZDoomLineSpecial::LightGlow):
 			EV_StartLightGlowing(args[0], args[1], args[2], args[3]);
 			buttonSuccess = 1;
 			break;
-		case zl_light_flicker:
+		case std::to_underlying(ZDoomLineSpecial::LightFlicker):
 			EV_StartLightFlickering(args[0], args[1], args[2]);
 			buttonSuccess = 1;
 			break;
-		case zl_light_strobe:
+		case std::to_underlying(ZDoomLineSpecial::LightStrobe):
 			EV_StartZDoomLightStrobing(args[0], args[1], args[2], args[3], args[4]);
 			buttonSuccess = 1;
 			break;
-		case zl_light_strobe_doom:
+		case std::to_underlying(ZDoomLineSpecial::LightStrobeDoom):
 			EV_StartZDoomLightStrobingDoom(args[0], args[1], args[2]);
 			buttonSuccess = 1;
 			break;
-		case zl_light_stop:
+		case std::to_underlying(ZDoomLineSpecial::LightStop):
 			EV_StopLightEffect(args[0]);
 			buttonSuccess = 1;
 			break;
-		case zl_thing_set_special:
+		case std::to_underlying(ZDoomLineSpecial::ThingSetSpecial):
 		{
 			mobj_t* target;
 			thing_id_search_t search;
@@ -7342,34 +7344,34 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_thing_spawn:
+		case std::to_underlying(ZDoomLineSpecial::ThingSpawn):
 			buttonSuccess =
 				P_SpawnThing(args[0], mo, args[1], P_ArgToAngle(args[2]), true, args[3]);
 			break;
-		case zl_thing_spawn_no_fog:
+		case std::to_underlying(ZDoomLineSpecial::ThingSpawnNoFog):
 			buttonSuccess =
 				P_SpawnThing(args[0], mo, args[1], P_ArgToAngle(args[2]), false, args[3]);
 			break;
-		case zl_thing_spawn_facing:
+		case std::to_underlying(ZDoomLineSpecial::ThingSpawnFacing):
 			buttonSuccess =
 				P_SpawnThing(args[0], mo, args[1], ANGLE_MAX, args[2] ? false : true, args[3]);
 			break;
-		case zl_thing_projectile:
+		case std::to_underlying(ZDoomLineSpecial::ThingProjectile):
 			buttonSuccess = P_SpawnProjectile(args[0], mo, args[1], P_ArgToAngle(args[2]),
 				P_ArgToSpeed(args[3]), P_ArgToSpeed(args[4]),
 				0, nullptr, 0, 0);
 			break;
-		case zl_thing_projectile_gravity:
+		case std::to_underlying(ZDoomLineSpecial::ThingProjectileGravity):
 			buttonSuccess = P_SpawnProjectile(args[0], mo, args[1], P_ArgToAngle(args[2]),
 				P_ArgToSpeed(args[3]), P_ArgToSpeed(args[4]),
 				0, nullptr, 1, 0);
 			break;
-		case zl_thing_projectile_aimed:
+		case std::to_underlying(ZDoomLineSpecial::ThingProjectileAimed):
 			buttonSuccess = P_SpawnProjectile(args[0], mo, args[1], 0,
 				P_ArgToSpeed(args[2]), 0,
 				args[3], mo, 0, args[4]);
 			break;
-		case zl_thing_projectile_intercept:
+		case std::to_underlying(ZDoomLineSpecial::ThingProjectileIntercept):
 			// ZDoom's implementation relies on a bunch of trigonometry
 			// I tried converting this to fixed points,
 			//   but the calculations easily go out of bounds (dot products).
@@ -7379,7 +7381,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				P_ArgToSpeed(args[2]), 0,
 				args[3], mo, 0, args[4]);
 			break;
-		case zl_thing_stop:
+		case std::to_underlying(ZDoomLineSpecial::ThingStop):
 		{
 			mobj_t* target;
 			thing_id_search_t search;
@@ -7401,7 +7403,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 		}
 		break;
-		case zl_thing_change_tid:
+		case std::to_underlying(ZDoomLineSpecial::ThingChangeTid):
 		{
 			mobj_t* target;
 			thing_id_search_t search;
@@ -7417,7 +7419,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_thing_hate:
+		case std::to_underlying(ZDoomLineSpecial::ThingHate):
 		{
 			mobj_t* hater;
 			mobj_t* target;
@@ -7461,7 +7463,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				if(
 					hater->health > 0 &&
 					hater->flags & MF_SHOOTABLE &&
-					hater->info->seestate
+					hater->info->seestate != StateId::Null
 				)
 				{
 					while((target = dsda_FindMobjFromThingIDOrMobj(args[1], mo, &target_search)))
@@ -7503,14 +7505,14 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 
 						if(!(hater->flags2 & MF2_DORMANT))
 						{
-							P_SetMobjState(hater, static_cast<statenum_t>(hater->info->seestate));
+							P_SetMobjState(hater, hater->info->seestate);
 						}
 					}
 				}
 			}
 		}
 		break;
-		case zl_thing_remove:
+		case std::to_underlying(ZDoomLineSpecial::ThingRemove):
 		{
 			mobj_t* target;
 			thing_id_search_t search;
@@ -7529,7 +7531,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_thing_activate:
+		case std::to_underlying(ZDoomLineSpecial::ThingActivate):
 		{
 			mobj_t* target;
 			thing_id_search_t search;
@@ -7547,7 +7549,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 		}
 		break;
-		case zl_thing_deactivate:
+		case std::to_underlying(ZDoomLineSpecial::ThingDeactivate):
 		{
 			mobj_t* target;
 			thing_id_search_t search;
@@ -7565,7 +7567,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 		}
 		break;
-		case zl_thrust_thing:
+		case std::to_underlying(ZDoomLineSpecial::ThrustThing):
 		{
 			fixed_t thrust;
 			mobj_t* target;
@@ -7582,7 +7584,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			buttonSuccess = (args[3] != 0 || mo);
 		}
 		break;
-		case zl_thrust_thing_z:
+		case std::to_underlying(ZDoomLineSpecial::ThrustThingZ):
 		{
 			fixed_t thrust;
 			mobj_t* target;
@@ -7605,7 +7607,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 		}
 		break;
-		case zl_thing_raise:
+		case std::to_underlying(ZDoomLineSpecial::ThingRaise):
 		{
 			mobj_t* target;
 			thing_id_search_t search;
@@ -7617,7 +7619,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 		}
 		break;
-		case zl_damage_thing:
+		case std::to_underlying(ZDoomLineSpecial::DamageThing):
 			if(mo)
 			{
 				if(args[0] < 0)
@@ -7631,7 +7633,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				buttonSuccess = 1;
 			}
 			break;
-		case zl_thing_damage:
+		case std::to_underlying(ZDoomLineSpecial::ThingDamage):
 		{
 			mobj_t* target;
 			thing_id_search_t search;
@@ -7654,7 +7656,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		}
 			buttonSuccess = 1;
 			break;
-		case zl_thing_destroy:
+		case std::to_underlying(ZDoomLineSpecial::ThingDestroy):
 			if(!args[0] && !args[2])
 			{
 				P_Massacre();
@@ -7699,14 +7701,14 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 			buttonSuccess = 1;
 			break;
-		case zl_map_set_colormap:
+		case std::to_underlying(ZDoomLineSpecial::MapSetColormap):
 			if(args[0] >= 0)
 			{
 				map_colormap = args[0];
 			}
 			buttonSuccess = 1;
 			break;
-		case zl_sector_set_colormap:
+		case std::to_underlying(ZDoomLineSpecial::SectorSetColormap):
 			if(args[0] >= 0 && args[1])
 			{
 				const int* id_p;
@@ -7716,7 +7718,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 			buttonSuccess = 1;
 			break;
-		case zl_music_change_song:
+		case std::to_underlying(ZDoomLineSpecial::MusicChangeSong):
 			if(args[0] != LUMP_NOT_FOUND)
 			{
 				if(!args[1] || (mo->player && mo->player->mo == mo))
@@ -7726,7 +7728,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				}
 			}
 			break;
-		case zl_music_stop:
+		case std::to_underlying(ZDoomLineSpecial::MusicStop):
 			if(!args[0] || (mo->player && mo->player->mo == mo))
 			{
 				S_StopMusic();
@@ -7764,13 +7766,13 @@ extern "C" dboolean P_ExecuteHexenLineSpecial(int special, int* special_args, li
 			buttonSuccess = EV_MovePoly(line, args, true, false);
 			break;
 		case 7: // Poly Door Swing
-			buttonSuccess = EV_OpenPolyDoor(line, args, PODOOR_SWING);
+			buttonSuccess = EV_OpenPolyDoor(line, args, PolyDoorType::Swing);
 			break;
 		case 8: // Poly Door Slide
-			buttonSuccess = EV_OpenPolyDoor(line, args, PODOOR_SLIDE);
+			buttonSuccess = EV_OpenPolyDoor(line, args, PolyDoorType::Slide);
 			break;
 		case 10: // Door Close
-			buttonSuccess = Hexen_EV_DoDoor(line, args, DREV_CLOSE);
+			buttonSuccess = Hexen_EV_DoDoor(line, args, VerticalDoorType::DrevClose);
 			break;
 		case 11: // Door Open
 			if(!args[0])
@@ -7779,7 +7781,7 @@ extern "C" dboolean P_ExecuteHexenLineSpecial(int special, int* special_args, li
 			}
 			else
 			{
-				buttonSuccess = Hexen_EV_DoDoor(line, args, DREV_OPEN);
+				buttonSuccess = Hexen_EV_DoDoor(line, args, VerticalDoorType::DrevOpen);
 			}
 			break;
 		case 12: // Door Raise
@@ -7789,7 +7791,7 @@ extern "C" dboolean P_ExecuteHexenLineSpecial(int special, int* special_args, li
 			}
 			else
 			{
-				buttonSuccess = Hexen_EV_DoDoor(line, args, DREV_NORMAL);
+				buttonSuccess = Hexen_EV_DoDoor(line, args, VerticalDoorType::DrevNormal);
 			}
 			break;
 		case 13: // Door Locked_Raise
@@ -7801,36 +7803,36 @@ extern "C" dboolean P_ExecuteHexenLineSpecial(int special, int* special_args, li
 				}
 				else
 				{
-					buttonSuccess = Hexen_EV_DoDoor(line, args, DREV_NORMAL);
+					buttonSuccess = Hexen_EV_DoDoor(line, args, VerticalDoorType::DrevNormal);
 				}
 			}
 			break;
 		case 20: // Floor Lower by Value
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_LOWERFLOORBYVALUE);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevLowerfloorbyvalue);
 			break;
 		case 21: // Floor Lower to Lowest
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_LOWERFLOORTOLOWEST);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevLowerfloortolowest);
 			break;
 		case 22: // Floor Lower to Nearest
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_LOWERFLOOR);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevLowerfloor);
 			break;
 		case 23: // Floor Raise by Value
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_RAISEFLOORBYVALUE);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevRaisefloorbyvalue);
 			break;
 		case 24: // Floor Raise to Highest
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_RAISEFLOOR);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevRaisefloor);
 			break;
 		case 25: // Floor Raise to Nearest
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_RAISEFLOORTONEAREST);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevRaisefloortonearest);
 			break;
 		case 26: // Stairs Build Down Normal
-			buttonSuccess = Hexen_EV_BuildStairs(line, args, -1, STAIRS_NORMAL);
+			buttonSuccess = Hexen_EV_BuildStairs(line, args, -1, StairsMode::Normal);
 			break;
 		case 27: // Build Stairs Up Normal
-			buttonSuccess = Hexen_EV_BuildStairs(line, args, 1, STAIRS_NORMAL);
+			buttonSuccess = Hexen_EV_BuildStairs(line, args, 1, StairsMode::Normal);
 			break;
 		case 28: // Floor Raise and Crush
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_RAISEFLOORCRUSH);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevRaisefloorcrush);
 			break;
 		case 29: // Build Pillar (no crushing)
 			buttonSuccess = EV_BuildPillar(line, args, false);
@@ -7839,69 +7841,69 @@ extern "C" dboolean P_ExecuteHexenLineSpecial(int special, int* special_args, li
 			buttonSuccess = EV_OpenPillar(line, args);
 			break;
 		case 31: // Stairs Build Down Sync
-			buttonSuccess = Hexen_EV_BuildStairs(line, args, -1, STAIRS_SYNC);
+			buttonSuccess = Hexen_EV_BuildStairs(line, args, -1, StairsMode::Sync);
 			break;
 		case 32: // Build Stairs Up Sync
-			buttonSuccess = Hexen_EV_BuildStairs(line, args, 1, STAIRS_SYNC);
+			buttonSuccess = Hexen_EV_BuildStairs(line, args, 1, StairsMode::Sync);
 			break;
 		case 35: // Raise Floor by Value Times 8
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_RAISEBYVALUETIMES8);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevRaisebyvaluetimes8);
 			break;
 		case 36: // Lower Floor by Value Times 8
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_LOWERBYVALUETIMES8);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevLowerbyvaluetimes8);
 			break;
 		case 40: // Ceiling Lower by Value
-			buttonSuccess = Hexen_EV_DoCeiling(line, args, CLEV_LOWERBYVALUE);
+			buttonSuccess = Hexen_EV_DoCeiling(line, args, CeilingKind::ClevLowerbyvalue);
 			break;
 		case 41: // Ceiling Raise by Value
-			buttonSuccess = Hexen_EV_DoCeiling(line, args, CLEV_RAISEBYVALUE);
+			buttonSuccess = Hexen_EV_DoCeiling(line, args, CeilingKind::ClevRaisebyvalue);
 			break;
 		case 42: // Ceiling Crush and Raise
-			buttonSuccess = Hexen_EV_DoCeiling(line, args, CLEV_CRUSHANDRAISE);
+			buttonSuccess = Hexen_EV_DoCeiling(line, args, CeilingKind::ClevCrushandraise);
 			break;
 		case 43: // Ceiling Lower and Crush
-			buttonSuccess = Hexen_EV_DoCeiling(line, args, CLEV_LOWERANDCRUSH);
+			buttonSuccess = Hexen_EV_DoCeiling(line, args, CeilingKind::ClevLowerandcrush);
 			break;
 		case 44: // Ceiling Crush Stop
 			buttonSuccess = Hexen_EV_CeilingCrushStop(line, args);
 			break;
 		case 45: // Ceiling Crush Raise and Stay
-			buttonSuccess = Hexen_EV_DoCeiling(line, args, CLEV_CRUSHRAISEANDSTAY);
+			buttonSuccess = Hexen_EV_DoCeiling(line, args, CeilingKind::ClevCrushraiseandstay);
 			break;
 		case 46: // Floor Crush Stop
 			buttonSuccess = EV_FloorCrushStop(line, args);
 			break;
 		case 60: // Plat Perpetual Raise
-			buttonSuccess = EV_DoHexenPlat(line, args, PLAT_PERPETUALRAISE, 0);
+			buttonSuccess = EV_DoHexenPlat(line, args, PlatType::PlatPerpetualraise, 0);
 			break;
 		case 61: // Plat Stop
 			Hexen_EV_StopPlat(line, args);
 			break;
 		case 62: // Plat Down-Wait-Up-Stay
-			buttonSuccess = EV_DoHexenPlat(line, args, PLAT_DOWNWAITUPSTAY, 0);
+			buttonSuccess = EV_DoHexenPlat(line, args, PlatType::PlatDownwaitupstay, 0);
 			break;
 		case 63: // Plat Down-by-Value*8-Wait-Up-Stay
-			buttonSuccess = EV_DoHexenPlat(line, args, PLAT_DOWNBYVALUEWAITUPSTAY,
+			buttonSuccess = EV_DoHexenPlat(line, args, PlatType::PlatDownbyvaluewaitupstay,
 				0);
 			break;
 		case 64: // Plat Up-Wait-Down-Stay
-			buttonSuccess = EV_DoHexenPlat(line, args, PLAT_UPWAITDOWNSTAY, 0);
+			buttonSuccess = EV_DoHexenPlat(line, args, PlatType::PlatUpwaitdownstay, 0);
 			break;
 		case 65: // Plat Up-by-Value*8-Wait-Down-Stay
-			buttonSuccess = EV_DoHexenPlat(line, args, PLAT_UPBYVALUEWAITDOWNSTAY,
+			buttonSuccess = EV_DoHexenPlat(line, args, PlatType::PlatUpbyvaluewaitdownstay,
 				0);
 			break;
 		case 66: // Floor Lower Instant * 8
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_LOWERTIMES8INSTANT);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevLowertimes8instant);
 			break;
 		case 67: // Floor Raise Instant * 8
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_RAISETIMES8INSTANT);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevRaisetimes8instant);
 			break;
 		case 68: // Floor Move to Value * 8
-			buttonSuccess = Hexen_EV_DoFloor(line, args, FLEV_MOVETOVALUETIMES8);
+			buttonSuccess = Hexen_EV_DoFloor(line, args, FloorKind::FlevMovetovaluetimes8);
 			break;
 		case 69: // Ceiling Move to Value * 8
-			buttonSuccess = Hexen_EV_DoCeiling(line, args, CLEV_MOVETOVALUETIMES8);
+			buttonSuccess = Hexen_EV_DoCeiling(line, args, CeilingKind::ClevMovetovaluetimes8);
 			break;
 		case 70: // Teleport
 			if(side == 0)
@@ -7941,7 +7943,7 @@ extern "C" dboolean P_ExecuteHexenLineSpecial(int special, int* special_args, li
 			if(side == 0)
 			{
 				// Only teleport when crossing the front side of a line
-				if(!(mo && mo->player && mo->player->playerstate == PST_DEAD)) // Players must be alive to teleport
+				if(!(mo && mo->player && mo->player->playerstate == PlayerState::Dead)) // Players must be alive to teleport
 				{
 					G_Completed(args[0], args[1], 0, 0);
 					buttonSuccess = true;
@@ -7952,7 +7954,7 @@ extern "C" dboolean P_ExecuteHexenLineSpecial(int special, int* special_args, li
 			if(side == 0)
 			{
 				// Only teleport when crossing the front side of a line
-				if(!(mo && mo->player && mo->player->playerstate == PST_DEAD)) // Players must be alive to teleport
+				if(!(mo && mo->player && mo->player->playerstate == PlayerState::Dead)) // Players must be alive to teleport
 				{
 					buttonSuccess = true;
 					if(deathmatch)
@@ -8007,25 +8009,25 @@ extern "C" dboolean P_ExecuteHexenLineSpecial(int special, int* special_args, li
 			P_ForceLightning();
 			break;
 		case 110: // Light Raise by Value
-			buttonSuccess = EV_SpawnLight(line, args, LITE_RAISEBYVALUE);
+			buttonSuccess = EV_SpawnLight(line, args, LightType::RaiseByValue);
 			break;
 		case 111: // Light Lower by Value
-			buttonSuccess = EV_SpawnLight(line, args, LITE_LOWERBYVALUE);
+			buttonSuccess = EV_SpawnLight(line, args, LightType::LowerByValue);
 			break;
 		case 112: // Light Change to Value
-			buttonSuccess = EV_SpawnLight(line, args, LITE_CHANGETOVALUE);
+			buttonSuccess = EV_SpawnLight(line, args, LightType::ChangeToValue);
 			break;
 		case 113: // Light Fade
-			buttonSuccess = EV_SpawnLight(line, args, LITE_FADE);
+			buttonSuccess = EV_SpawnLight(line, args, LightType::Fade);
 			break;
 		case 114: // Light Glow
-			buttonSuccess = EV_SpawnLight(line, args, LITE_GLOW);
+			buttonSuccess = EV_SpawnLight(line, args, LightType::Glow);
 			break;
 		case 115: // Light Flicker
-			buttonSuccess = EV_SpawnLight(line, args, LITE_FLICKER);
+			buttonSuccess = EV_SpawnLight(line, args, LightType::Flicker);
 			break;
 		case 116: // Light Strobe
-			buttonSuccess = EV_SpawnLight(line, args, LITE_STROBE);
+			buttonSuccess = EV_SpawnLight(line, args, LightType::Strobe);
 			break;
 		case 120: // Quake Tremor
 			buttonSuccess = A_LocalQuake(args, mo);

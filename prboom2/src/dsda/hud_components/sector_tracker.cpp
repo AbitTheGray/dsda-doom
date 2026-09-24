@@ -20,10 +20,10 @@ void dsda_SectorTrackerHC(char* str, size_t max_size, int id)
 		max_size,
 		"%ss %d: %d %d %d",
 		active
-		? dsda_TextColor(dsda_tc_exhud_sector_active)
+		? dsda_TextColor(TextColorIndex::ExhudSectorActive)
 		: special
-		? dsda_TextColor(dsda_tc_exhud_sector_special)
-		: dsda_TextColor(dsda_tc_exhud_sector_normal),
+		? dsda_TextColor(TextColorIndex::ExhudSectorSpecial)
+		: dsda_TextColor(TextColorIndex::ExhudSectorNormal),
 		id, special, active,
 		sectors[id].floorheight >> FRACBITS
 	);

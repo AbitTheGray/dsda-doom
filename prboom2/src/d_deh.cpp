@@ -8,6 +8,8 @@
  */
 
 // killough 5/2/98: fixed headers, removed rendunant external declarations:
+#include <utility>
+
 #include "doomdef.hpp"
 #include "doomtype.hpp"
 #include "doomstat.hpp"
@@ -63,9 +65,9 @@ static int deh_log(const char* s, ...)
 // e6y: for compatibility with BOOM deh parser
 int deh_strcasecmp(const char* str1, const char* str2)
 {
-	if(prboom_comp[PC_BOOM_DEH_PARSER].state &&
-		compatibility_level >= boom_compatibility_compatibility &&
-		compatibility_level <= boom_202_compatibility)
+	if(prboom_comp[std::to_underlying(PrboomComp::BoomDehParser)].state &&
+		compatibility_level >= CompLevel::BoomCompatibility &&
+		compatibility_level <= CompLevel::Boom202)
 	{
 		return strcmp(str1, str2);
 	}
@@ -77,9 +79,9 @@ int deh_strcasecmp(const char* str1, const char* str2)
 
 const char* deh_getBitsDelims()
 {
-	if(prboom_comp[PC_BOOM_DEH_PARSER].state &&
-		compatibility_level >= boom_compatibility_compatibility &&
-		compatibility_level <= boom_202_compatibility)
+	if(prboom_comp[std::to_underlying(PrboomComp::BoomDehParser)].state &&
+		compatibility_level >= CompLevel::BoomCompatibility &&
+		compatibility_level <= CompLevel::Boom202)
 	{
 		return "+";
 	}
@@ -1284,10 +1286,10 @@ static const struct deh_flag_s deh_weaponflags_mbf21[] = {
 
 static const char* deh_state_fields[] = // CPhipps - static const*
 {
-	"Sprite number",    // .sprite (spritenum_t) // an enum
+	"Sprite number",    // .sprite (SpriteId) // an enum
 	"Sprite subnumber", // .frame (long)
 	"Duration",         // .tics (long)
-	"Next frame",       // .nextstate (statenum_t)
+	"Next frame",       // .nextstate (StateId)
 	// This is set in a separate "Pointer" block from Dehacked
 	"Codep Frame",      // pointer to first use of action (actionf_t)
 	"Unknown 1",        // .misc1 (long)
@@ -1573,29 +1575,29 @@ void deh_changeCompTranslucency()
 	extern byte* edited_mobjinfo_bits;
 	int i;
 	int boom_translucent_sprites, vanilla_translucent_sprites, translucency_active;
-	int predefined_translucency[] = {
-		MT_FIRE, MT_SMOKE, MT_FATSHOT, MT_BRUISERSHOT, MT_SPAWNFIRE,
-		MT_TROOPSHOT, MT_HEADSHOT, MT_PLASMA, MT_BFG, MT_ARACHPLAZ, MT_PUFF,
-		MT_TFOG, MT_IFOG, MT_MISC12, MT_INV, MT_INS, MT_MEGA
+	MobjType predefined_translucency[] = {
+		MobjType::Fire, MobjType::Smoke, MobjType::Fatshot, MobjType::Bruisershot, MobjType::Spawnfire,
+		MobjType::Troopshot, MobjType::Headshot, MobjType::Plasma, MobjType::Bfg, MobjType::Arachplaz, MobjType::Puff,
+		MobjType::Tfog, MobjType::Ifog, MobjType::Misc12, MobjType::Inv, MobjType::Ins, MobjType::Mega
 	};
 
 	if(raven) return;
 
-	boom_translucent_sprites = dsda_IntConfig(dsda_config_translucent_sprites);
+	boom_translucent_sprites = dsda_IntConfig(ConfigId::TranslucentSprites);
 	vanilla_translucent_sprites = boom_translucent_sprites > 1;
-	translucency_active = (compatibility_level >= boom_compatibility_compatibility) ? !comp[comp_translucency] : vanilla_translucent_sprites;
+	translucency_active = (compatibility_level >= CompLevel::BoomCompatibility) ? !comp[std::to_underlying(CompOption::Translucency)] : vanilla_translucent_sprites;
 
 	// Reset translucency
 	for(i = 0; (size_t)i < sizeof(predefined_translucency) / sizeof(predefined_translucency[0]); i++)
-		if(!edited_mobjinfo_bits[predefined_translucency[i]])
-			mobjinfo[predefined_translucency[i]].flags &= ~MF_TRANSLUCENT;
+		if(!edited_mobjinfo_bits[std::to_underlying(predefined_translucency[i])])
+			mobjinfo[std::to_underlying(predefined_translucency[i])].flags &= ~MF_TRANSLUCENT;
 
 	// Set translucency
 	if(translucency_active)
 		for(i = 0; (size_t)i < sizeof(predefined_translucency) / sizeof(predefined_translucency[0]); i++)
-			if(!edited_mobjinfo_bits[predefined_translucency[i]])
+			if(!edited_mobjinfo_bits[std::to_underlying(predefined_translucency[i])])
 				if(boom_translucent_sprites)
-					mobjinfo[predefined_translucency[i]].flags |= MF_TRANSLUCENT;
+					mobjinfo[std::to_underlying(predefined_translucency[i])].flags |= MF_TRANSLUCENT;
 
 	// This updates the existing things in the map.
 	if(in_game)
@@ -1615,7 +1617,7 @@ void deh_changeCompTranslucency()
 
 				for(i = 0; (size_t)i < sizeof(predefined_translucency) / sizeof(predefined_translucency[0]); i++)
 					if(mobj->type == predefined_translucency[i])
-						mobj->flags = mobjinfo[predefined_translucency[i]].flags;
+						mobj->flags = mobjinfo[std::to_underlying(predefined_translucency[i])].flags;
 			}
 		}
 		while(th != start_th);
@@ -1625,12 +1627,12 @@ void deh_changeCompTranslucency()
 void deh_applyCompatibility()
 {
 	extern byte* edited_mobjinfo_bits;
-	int comp_max = (compatibility_level == doom_12_compatibility ? 199 : 200);
+	int comp_max = (compatibility_level == CompLevel::Doom12 ? 199 : 200);
 
 	max_soul = (IsDehMaxSoul ? deh_max_soul : comp_max);
 	mega_health = (IsDehMegaHealth ? deh_mega_health : comp_max);
 
-	if(comp[comp_maxhealth])
+	if(comp[std::to_underlying(CompOption::MaxHealth)])
 	{
 		maxhealth = 100;
 		maxhealthbonus = (IsDehMaxHealth ? deh_maxhealth : comp_max);
@@ -1643,12 +1645,12 @@ void deh_applyCompatibility()
 
 	if(raven) return;
 
-	if(!edited_mobjinfo_bits[MT_SKULL])
+	if(!edited_mobjinfo_bits[std::to_underlying(MobjType::Skull)])
 	{
-		if(compatibility_level == doom_12_compatibility)
-			mobjinfo[MT_SKULL].flags |= (MF_COUNTKILL);
+		if(compatibility_level == CompLevel::Doom12)
+			mobjinfo[std::to_underlying(MobjType::Skull)].flags |= (MF_COUNTKILL);
 		else
-			mobjinfo[MT_SKULL].flags &= ~(MF_COUNTKILL);
+			mobjinfo[std::to_underlying(MobjType::Skull)].flags &= ~(MF_COUNTKILL);
 	}
 
 	deh_changeCompTranslucency();
@@ -1684,7 +1686,7 @@ void ProcessDehFile(const char* filename, const char* outfilename, int lumpnum)
 			deh_log_file = stdout;
 		else if(!(deh_log_file = M_OpenFile(outfilename, firstfile ? "wt" : "at")))
 		{
-			lprintf(LO_WARN, "Could not open -dehout file %s\n... using stdout.\n", outfilename);
+			lprintf(OutputLevels::Warn, "Could not open -dehout file %s\n... using stdout.\n", outfilename);
 			deh_log_file = stdout;
 		}
 		firstfile = false;
@@ -1696,7 +1698,7 @@ void ProcessDehFile(const char* filename, const char* outfilename, int lumpnum)
 	{
 		if(!(infile.f = M_OpenFile(filename, "rt")))
 		{
-			lprintf(LO_WARN, "-deh file %s not found\n", filename);
+			lprintf(OutputLevels::Warn, "-deh file %s not found\n", filename);
 			return; // should be checked up front anyway
 		}
 		infile.lump = nullptr;
@@ -1709,14 +1711,14 @@ void ProcessDehFile(const char* filename, const char* outfilename, int lumpnum)
 		// [FG] skip empty DEHACKED lumps
 		if(!infile.inp)
 		{
-			lprintf(LO_WARN, "skipping empty DEHACKED (%d) lump\n", lumpnum);
+			lprintf(OutputLevels::Warn, "skipping empty DEHACKED (%d) lump\n", lumpnum);
 			return;
 		}
 		filename = lumpinfo[lumpnum].wadfile->name;
 		file_or_lump = "lump from";
 	}
 
-	lprintf(LO_INFO, "Loading DEH %s %s\n", file_or_lump, filename);
+	lprintf(OutputLevels::Info, "Loading DEH %s %s\n", file_or_lump, filename);
 	deh_log("\nLoading DEH %s %s\n\n", file_or_lump, filename);
 
 	// loop until end of file
@@ -1943,33 +1945,33 @@ static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint64_t value)
 	{
 		case 0: mi->doomednum = (int)value;
 			return;
-		case 1: mi->spawnstate = (int)value;
+		case 1: mi->spawnstate = static_cast<StateId>(value);
 			return;
 		case 2: mi->spawnhealth = (int)value;
 			return;
-		case 3: mi->seestate = (int)value;
+		case 3: mi->seestate = static_cast<StateId>(value);
 			return;
-		case 4: mi->seesound = (int)value;
+		case 4: mi->seesound = static_cast<SfxId>(value);
 			return;
 		case 5: mi->reactiontime = (int)value;
 			return;
-		case 6: mi->attacksound = (int)value;
+		case 6: mi->attacksound = static_cast<SfxId>(value);
 			return;
-		case 7: mi->painstate = (int)value;
+		case 7: mi->painstate = static_cast<StateId>(value);
 			return;
 		case 8: mi->painchance = (int)value;
 			return;
-		case 9: mi->painsound = (int)value;
+		case 9: mi->painsound = static_cast<SfxId>(value);
 			return;
-		case 10: mi->meleestate = (int)value;
+		case 10: mi->meleestate = static_cast<StateId>(value);
 			return;
-		case 11: mi->missilestate = (int)value;
+		case 11: mi->missilestate = static_cast<StateId>(value);
 			return;
-		case 12: mi->deathstate = (int)value;
+		case 12: mi->deathstate = static_cast<StateId>(value);
 			return;
-		case 13: mi->xdeathstate = (int)value;
+		case 13: mi->xdeathstate = static_cast<StateId>(value);
 			return;
-		case 14: mi->deathsound = (int)value;
+		case 14: mi->deathsound = static_cast<SfxId>(value);
 			return;
 		case 15: mi->speed = (int)value;
 			return;
@@ -1981,7 +1983,7 @@ static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint64_t value)
 			return;
 		case 19: mi->damage = (int)value;
 			return;
-		case 20: mi->activesound = (int)value;
+		case 20: mi->activesound = static_cast<SfxId>(value);
 			return;
 		case 21: mi->flags = value;
 			return;
@@ -1990,21 +1992,21 @@ static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint64_t value)
 		// There is no more synch on http://www.doomworld.com/sda/dwdemo/w303-115.zip
 		// (with correction in PIT_CheckThing)
 		case 22:
-			if(prboom_comp[PC_FORCE_INCORRECT_PROCESSING_OF_RESPAWN_FRAME_ENTRY].state)
+			if(prboom_comp[std::to_underlying(PrboomComp::ForceIncorrectProcessingOfRespawnFrameEntry)].state)
 			{
-				mi->raisestate = (int)value;
+				mi->raisestate = static_cast<StateId>(value);
 				return;
 			}
 			break;
 		case 23:
-			if(!prboom_comp[PC_FORCE_INCORRECT_PROCESSING_OF_RESPAWN_FRAME_ENTRY].state)
+			if(!prboom_comp[std::to_underlying(PrboomComp::ForceIncorrectProcessingOfRespawnFrameEntry)].state)
 			{
-				mi->raisestate = (int)value;
+				mi->raisestate = static_cast<StateId>(value);
 				return;
 			}
 			break;
 		case 24: // make it base zero (deh is 1-based)
-			mi->droppeditem = static_cast<mobjtype_t>(dsda_TranslateDehMobjIndex((int)value) - 1);
+			mi->droppeditem = static_cast<MobjType>(dsda_TranslateDehMobjIndex((int)value) - 1);
 			return;
 
 		// mbf21
@@ -2017,14 +2019,14 @@ static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint64_t value)
 				I_Error("Infighting groups must be >= 0 (check your dehacked)");
 				return;
 			}
-			mi->infighting_group = mi->infighting_group + IG_END;
+			mi->infighting_group = mi->infighting_group + std::to_underlying(InfightingGroup::End);
 			return;
 		case 26:
 			mi->projectile_group = (int)(value);
 			if(mi->projectile_group < 0)
-				mi->projectile_group = PG_GROUPLESS;
+				mi->projectile_group = std::to_underlying(ProjectileGroup::Groupless);
 			else
-				mi->projectile_group = mi->projectile_group + PG_END;
+				mi->projectile_group = mi->projectile_group + std::to_underlying(ProjectileGroup::End);
 			return;
 		case 27:
 			mi->splash_group = (int)(value);
@@ -2033,9 +2035,9 @@ static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint64_t value)
 				I_Error("Splash groups must be >= 0 (check your dehacked)");
 				return;
 			}
-			mi->splash_group = mi->splash_group + SG_END;
+			mi->splash_group = mi->splash_group + std::to_underlying(SplashGroup::End);
 			return;
-		case 29: mi->ripsound = (int)value;
+		case 29: mi->ripsound = static_cast<SfxId>(value);
 			return;
 		case 30: mi->altspeed = (int)value;
 			return;
@@ -2043,7 +2045,7 @@ static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint64_t value)
 			return;
 
 		// misc
-		case 32: mi->bloodcolor = V_BloodColor((int)value);
+		case 32: mi->bloodcolor = std::to_underlying(V_BloodColor((int)value));
 			return;
 
 		default: return;
@@ -2218,7 +2220,7 @@ static void deh_procFrame(DEHFILE* fpin, char* line)
 		if(!deh_strcasecmp(key, deh_state_fields[0])) // Sprite number
 		{
 			deh_log(" - sprite = %ld\n", (long)value);
-			deh_state.state->sprite = (spritenum_t)value;
+			deh_state.state->sprite = (SpriteId)value;
 		}
 		else if(!deh_strcasecmp(key, deh_state_fields[1])) // Sprite subnumber
 		{
@@ -2233,7 +2235,7 @@ static void deh_procFrame(DEHFILE* fpin, char* line)
 		else if(!deh_strcasecmp(key, deh_state_fields[3])) // Next frame
 		{
 			deh_log(" - nextstate = %ld\n", (long)value);
-			deh_state.state->nextstate = (statenum_t)value;
+			deh_state.state->nextstate = (StateId)value;
 		}
 		else if(!deh_strcasecmp(key, deh_state_fields[4])) // Codep frame (not set in Frame deh block)
 		{
@@ -2473,8 +2475,8 @@ static void deh_procAmmo(DEHFILE* fpin, char* line)
 	// killough 8/98: allow hex numbers in input:
 	sscanf(inbuffer, "%s %i", key, &indexnum);
 	deh_log("Processing Ammo at index %d: %s\n", indexnum, key);
-	if(indexnum < 0 || indexnum >= NUMAMMO)
-		deh_log("Bad ammo number %d of %d\n", indexnum, NUMAMMO);
+	if(indexnum < 0 || indexnum >= std::to_underlying(AmmoType::Count))
+		deh_log("Bad ammo number %d of %d\n", indexnum, AmmoType::Count);
 
 	while(!dehfeof(fpin) && *inbuffer && (*inbuffer != ' '))
 	{
@@ -2516,8 +2518,8 @@ static void deh_procWeapon(DEHFILE* fpin, char* line)
 	// killough 8/98: allow hex numbers in input:
 	sscanf(inbuffer, "%s %i", key, &indexnum);
 	deh_log("Processing Weapon at index %d: %s\n", indexnum, key);
-	if(indexnum < 0 || indexnum >= NUMWEAPONS)
-		deh_log("Bad weapon number %d of %d\n", indexnum, NUMAMMO);
+	if(indexnum < 0 || indexnum >= std::to_underlying(WeaponType::Count))
+		deh_log("Bad weapon number %d of %d\n", indexnum, AmmoType::Count);
 
 	while(!dehfeof(fpin) && *inbuffer && (*inbuffer != ' '))
 	{
@@ -2532,19 +2534,19 @@ static void deh_procWeapon(DEHFILE* fpin, char* line)
 		}
 		if(!deh_strcasecmp(key, deh_weapon[0])) // Ammo type
 		{
-			if(!raven && value == 5) value = am_noammo;
-			weaponinfo[indexnum].ammo = (ammotype_t)value;
+			if(!raven && value == 5) value = std::to_underlying(AmmoType::NoAmmo);
+			weaponinfo[indexnum].ammo = (AmmoType)value;
 		}
 		else if(!deh_strcasecmp(key, deh_weapon[1])) // Deselect frame
-			weaponinfo[indexnum].upstate = (int)value;
+			weaponinfo[indexnum].upstate = static_cast<StateId>(value);
 		else if(!deh_strcasecmp(key, deh_weapon[2])) // Select frame
-			weaponinfo[indexnum].downstate = (int)value;
+			weaponinfo[indexnum].downstate = static_cast<StateId>(value);
 		else if(!deh_strcasecmp(key, deh_weapon[3])) // Bobbing frame
-			weaponinfo[indexnum].readystate = (int)value;
+			weaponinfo[indexnum].readystate = static_cast<StateId>(value);
 		else if(!deh_strcasecmp(key, deh_weapon[4])) // Shooting frame
-			weaponinfo[indexnum].atkstate = (int)value;
+			weaponinfo[indexnum].atkstate = static_cast<StateId>(value);
 		else if(!deh_strcasecmp(key, deh_weapon[5])) // Firing frame
-			weaponinfo[indexnum].flashstate = (int)value;
+			weaponinfo[indexnum].flashstate = static_cast<StateId>(value);
 		else if(!deh_strcasecmp(key, deh_weapon[6])) // Ammo per shot
 		{
 			weaponinfo[indexnum].ammopershot = (int)value;
@@ -2752,7 +2754,7 @@ static void deh_procCheat(DEHFILE* fpin, char* line) // done
 					while(*p == ' ') ++p;
 
 					//e6y: ability to ignore cheats in dehacked files.
-					if(dsda_IntConfig(dsda_config_deh_apply_cheats) && !dsda_Flag(dsda_arg_nocheats))
+					if(dsda_IntConfig(ConfigId::DehApplyCheats) && !dsda_Flag(ArgId::Nocheats))
 					{
 						cheat[iy].cheat = Z_Strdup(p);
 						deh_log("Assigned new cheat '%s' to cheat '%s'at index %d\n",
@@ -2830,7 +2832,7 @@ static void deh_procMisc(DEHFILE* fpin, char* line) // done
 			idkfa_armor_class = (int)value;
 		else if(!deh_strcasecmp(key, deh_misc[14])) // BFG Cells/Shot
 		{
-			weaponinfo[wp_bfg].ammopershot = bfgcells = (int)value;
+			weaponinfo[std::to_underlying(WeaponType::Bfg)].ammopershot = bfgcells = (int)value;
 			bfgcells_modified = true;
 		}
 		else if(!deh_strcasecmp(key, deh_misc[15])) // Monsters Infight
@@ -3436,8 +3438,8 @@ void PostProcessDeh()
 	// sanity-check bfgcells and bfg ammopershot
 	if(
 		bfgcells_modified &&
-		weaponinfo[wp_bfg].intflags & WIF_ENABLEAPS &&
-		bfgcells != weaponinfo[wp_bfg].ammopershot
+		weaponinfo[std::to_underlying(WeaponType::Bfg)].intflags & WIF_ENABLEAPS &&
+		bfgcells != weaponinfo[std::to_underlying(WeaponType::Bfg)].ammopershot
 	)
 		I_Error("Mismatch between bfgcells and bfg ammo per shot modifications! Check your dehacked.");
 

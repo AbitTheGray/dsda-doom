@@ -6,12 +6,14 @@
 
 #pragma once
 
+#include <stdint.h>
+
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include <stddef.h>
 
 //
 // TYPES
@@ -39,22 +41,22 @@ typedef struct
 
 // CPhipps - defined enum in wider scope
 // Ty 08/29/98 - add source field to identify where this lump came from
-typedef enum
+enum struct WadSource : int32_t
 {
-	source_skip = -1,
-	source_iwad = 0,       // iwad file load
-	source_port_wad,       // predefined lump
-	source_auto_load,      // lump auto-loaded by config file
-	source_pwad_auto_load, // pwad dir auto-load
-	source_pwad,           // pwad file load
-	source_lmp,            // lmp file load
-	source_net,            // CPhipps
+	Skip = -1,
+	Iwad = 0,       // iwad file load
+	PortWad,       // predefined lump
+	AutoLoad,      // lump auto-loaded by config file
+	PwadAutoLoad, // pwad dir auto-load
+	Pwad,           // pwad file load
+	Lmp,            // lmp file load
+	Net,            // CPhipps
 
 	//e6y
 	//  source_deh_auto_load,
-	source_deh,
-	source_err
-} wad_source_t;
+	Deh,
+	Err
+};
 
 // CPhipps - changed wad init
 // We _must_ have the wadfiles[] the same as those actually loaded, so there
@@ -62,7 +64,7 @@ typedef enum
 typedef struct
 {
 	char* name;
-	wad_source_t src;
+	WadSource src;
 	int handle;
 } wadfile_info_t;
 
@@ -78,16 +80,16 @@ void W_DoneCache();
 void W_Shutdown();
 void dsda_ResetInitLumpCache();
 
-typedef enum
+enum struct LumpNamespace : int32_t
 {
-	ns_global = 0,
-	ns_sprites,
-	ns_flats,
-	ns_colormaps,
-	ns_prboom,
-	ns_demos,
-	ns_hires,
-} li_namespace_e; // haleyjd 05/21/02: renamed from "namespace"
+	Global = 0,
+	Sprites,
+	Flats,
+	Colormaps,
+	Prboom,
+	Demos,
+	Hires,
+}; // haleyjd 05/21/02: renamed from "namespace"
 
 typedef struct
 {
@@ -100,11 +102,11 @@ typedef struct
 	int index, next;
 
 	// killough 4/17/98: namespace tags, to prevent conflicts between resources
-	li_namespace_e li_namespace; // haleyjd 05/21/02: renamed from "namespace"
+	LumpNamespace li_namespace; // haleyjd 05/21/02: renamed from "namespace"
 
 	wadfile_info_t* wadfile;
 	int position;
-	wad_source_t source;
+	WadSource source;
 	int flags; //e6y
 } lumpinfo_t;
 
@@ -115,16 +117,16 @@ typedef struct
 extern lumpinfo_t* lumpinfo;
 extern int numlumps;
 
-int W_FindNumFromName2(const char* name, int ns, int lump);
+int W_FindNumFromName2(const char* name, LumpNamespace ns, int lump);
 
 static inline
 int W_FindNumFromName(const char* name, int lump)
 {
-	return W_FindNumFromName2(name, ns_global, lump);
+	return W_FindNumFromName2(name, LumpNamespace::Global, lump);
 }
 
 static inline
-int W_CheckNumForName2(const char* name, int ns)
+int W_CheckNumForName2(const char* name, LumpNamespace ns)
 {
 	return W_FindNumFromName2(name, ns, LUMP_NOT_FOUND);
 }
@@ -132,7 +134,7 @@ int W_CheckNumForName2(const char* name, int ns)
 static inline
 int W_CheckNumForName(const char* name)
 {
-	return W_CheckNumForName2(name, ns_global);
+	return W_CheckNumForName2(name, LumpNamespace::Global);
 }
 
 int W_CheckNumForNameInternal(const char* name);
@@ -152,7 +154,7 @@ void* W_GetModifiableLumpData(int lump);
 
 int W_LumpNumExists(int lump);
 int W_LumpNameExists(const char* name);
-int W_LumpNameExists2(const char* name, int ns);
+int W_LumpNameExists2(const char* name, LumpNamespace ns);
 int W_PWADLumpNumExists(int lump);
 int W_PWADLumpNameExists(const char* name);
 int W_AUTOLumpNumExists(int lump);

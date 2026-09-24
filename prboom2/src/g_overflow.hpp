@@ -6,14 +6,16 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#include <utility>
 
 #include "doomtype.hpp"
 #include "doomdata.hpp"
 #include "p_maputl.hpp"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 typedef struct overrun_param_s
 {
@@ -25,24 +27,24 @@ typedef struct overrun_param_s
 	int happened;
 } overrun_param_t;
 
-typedef enum overrun_list_s
+enum struct OverrunList : int32_t
 {
-	OVERFLOW_SPECHIT,
-	OVERFLOW_REJECT,
-	OVERFLOW_INTERCEPT,
-	OVERFLOW_PLAYERINGAME,
-	OVERFLOW_DONUT,
-	OVERFLOW_MISSEDBACKSIDE,
+	Spechit,
+	Reject,
+	Intercept,
+	Playeringame,
+	Donut,
+	Missedbackside,
 
-	OVERFLOW_MAX //last
-} overrun_list_t;
+	Max //last
+};
 
 extern int overflows_enabled;
 extern overrun_param_t overflows[];
-extern const char* overflow_cfgname[OVERFLOW_MAX];
+extern const char* overflow_cfgname[std::to_underlying(OverrunList::Max)];
 
-#define EMULATE(overflow) (overflows_enabled && (overflows[overflow].footer ? overflows[overflow].footer_emulate : overflows[overflow].emulate))
-#define PROCESS(overflow) (overflows_enabled && (overflows[overflow].warn || EMULATE(overflow)))
+#define EMULATE(overflow) (overflows_enabled && (overflows[std::to_underlying(overflow)].footer ? overflows[std::to_underlying(overflow)].footer_emulate : overflows[std::to_underlying(overflow)].emulate))
+#define PROCESS(overflow) (overflows_enabled && (overflows[std::to_underlying(overflow)].warn || EMULATE(overflow)))
 
 // e6y
 //

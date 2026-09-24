@@ -5,6 +5,8 @@
 
 // killough 5/3/98: remove unnecessary headers
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "hu_stuff.hpp"
 #include "hu_lib.hpp"
@@ -42,7 +44,7 @@ static player_t* plr;
 typedef struct custom_message_s
 {
 	int ticks;
-	int sfx;
+	SfxId sfx;
 	const char* msg;
 } custom_message_t;
 
@@ -58,11 +60,11 @@ int hud_health_green;  // health amount above is blue, below is green
 
 extern "C" void HU_InitThresholds()
 {
-	hud_health_red = dsda_IntConfig(dsda_config_hud_health_red);
-	hud_health_yellow = dsda_IntConfig(dsda_config_hud_health_yellow);
-	hud_health_green = dsda_IntConfig(dsda_config_hud_health_green);
-	hud_ammo_red = dsda_IntConfig(dsda_config_hud_ammo_red);
-	hud_ammo_yellow = dsda_IntConfig(dsda_config_hud_ammo_yellow);
+	hud_health_red = dsda_IntConfig(ConfigId::HudHealthRed);
+	hud_health_yellow = dsda_IntConfig(ConfigId::HudHealthYellow);
+	hud_health_green = dsda_IntConfig(ConfigId::HudHealthGreen);
+	hud_ammo_red = dsda_IntConfig(ConfigId::HudAmmoRed);
+	hud_ammo_yellow = dsda_IntConfig(ConfigId::HudAmmoYellow);
 }
 
 dsda_string_t hud_title;
@@ -90,7 +92,8 @@ static void HU_InitPlayer()
 typedef struct crosshair_s
 {
 	int lump;
-	int w, h, flags;
+	int w, h;
+	PatchTranslation flags;
 	int target_x, target_y, target_z, target_sprite;
 	float target_screen_x, target_screen_y;
 } crosshair_t;
@@ -108,11 +111,11 @@ static int hudadd_crosshair_lock_target;
 
 extern "C" void HU_InitCrosshair()
 {
-	hudadd_crosshair_scale = dsda_IntConfig(dsda_config_hudadd_crosshair_scale);
-	hudadd_crosshair_health = dsda_IntConfig(dsda_config_hudadd_crosshair_health);
-	hudadd_crosshair_target = dsda_IntConfig(dsda_config_hudadd_crosshair_target);
-	hudadd_crosshair_lock_target = dsda_IntConfig(dsda_config_hudadd_crosshair_lock_target);
-	hudadd_crosshair = dsda_IntConfig(dsda_config_hudadd_crosshair);
+	hudadd_crosshair_scale = dsda_IntConfig(ConfigId::HudaddCrosshairScale);
+	hudadd_crosshair_health = dsda_IntConfig(ConfigId::HudaddCrosshairHealth);
+	hudadd_crosshair_target = dsda_IntConfig(ConfigId::HudaddCrosshairTarget);
+	hudadd_crosshair_lock_target = dsda_IntConfig(ConfigId::HudaddCrosshairLockTarget);
+	hudadd_crosshair = dsda_IntConfig(ConfigId::HudaddCrosshair);
 
 	if(!hudadd_crosshair || !crosshair_nam[hudadd_crosshair])
 		return;
@@ -124,9 +127,9 @@ extern "C" void HU_InitCrosshair()
 	crosshair.w = R_NumPatchWidth(crosshair.lump);
 	crosshair.h = R_NumPatchHeight(crosshair.lump);
 
-	crosshair.flags = VPT_TRANS;
+	crosshair.flags = PatchTranslation::Trans;
 	if(hudadd_crosshair_scale)
-		crosshair.flags |= VPT_STRETCH;
+		crosshair.flags |= PatchTranslation::Stretch;
 }
 
 extern "C" dboolean HU_CrosshairEnabled()
@@ -188,7 +191,7 @@ mobj_t* HU_Target()
 	// intercepts overflow guard
 	overflows_enabled = false;
 	P_AimLineAttack(plr->mo, an, 16 * 64 * FRACUNIT, 0);
-	if(plr->readyweapon == wp_missile || plr->readyweapon == wp_plasma || plr->readyweapon == wp_bfg)
+	if(plr->readyweapon == WeaponType::Missile || plr->readyweapon == WeaponType::Plasma || plr->readyweapon == WeaponType::Bfg)
 	{
 		if(!linetarget)
 			P_AimLineAttack(plr->mo, an += 1 << 26, 16 * 64 * FRACUNIT, 0);
@@ -202,7 +205,7 @@ mobj_t* HU_Target()
 
 void HU_DrawCrosshair()
 {
-	int cm;
+	ColorRange cm;
 
 	if(!hudadd_crosshair)
 		return;
@@ -213,7 +216,7 @@ void HU_DrawCrosshair()
 		!crosshair_nam[hudadd_crosshair] ||
 		crosshair.lump == -1 ||
 		automap_full ||
-		menuactive ||
+		menuactive != MenuActive::Inactive ||
 		dsda_Paused()
 	)
 	{
@@ -223,7 +226,7 @@ void HU_DrawCrosshair()
 	if(hudadd_crosshair_health)
 		cm = ST_HealthColor(plr->health);
 	else
-		cm = dsda_IntConfig(dsda_config_hudadd_crosshair_color);
+		cm = static_cast<ColorRange>(dsda_IntConfig(ConfigId::HudaddCrosshairColor));
 
 	if(hudadd_crosshair_target || hudadd_crosshair_lock_target)
 	{
@@ -237,10 +240,10 @@ void HU_DrawCrosshair()
 			crosshair.target_y = target->y;
 			crosshair.target_z = target->z;
 			crosshair.target_z += target->height / 2 + target->height / 8;
-			crosshair.target_sprite = target->sprite;
+			crosshair.target_sprite = std::to_underlying(target->sprite);
 
 			if(hudadd_crosshair_target)
-				cm = dsda_IntConfig(dsda_config_hudadd_crosshair_target_color);
+				cm = static_cast<ColorRange>(dsda_IntConfig(ConfigId::HudaddCrosshairTargetColor));
 		}
 	}
 
@@ -250,7 +253,7 @@ void HU_DrawCrosshair()
 	{
 		float x = crosshair.target_screen_x;
 		float y = crosshair.target_screen_y;
-		V_DrawNumPatchPrecise(x, y, 0, crosshair.lump, cm, static_cast<enum patch_translation_e>(crosshair.flags));
+		V_DrawNumPatchPrecise(x, y, 0, crosshair.lump, cm, static_cast<PatchTranslation>(crosshair.flags));
 	}
 	else
 	{
@@ -269,13 +272,13 @@ void HU_DrawCrosshair()
 			y = (200 - st_height - crosshair.h) / 2;
 		}
 
-		V_DrawNumPatch(x, y, 0, crosshair.lump, cm, static_cast<enum patch_translation_e>(crosshair.flags));
+		V_DrawNumPatch(x, y, 0, crosshair.lump, cm, static_cast<PatchTranslation>(crosshair.flags));
 	}
 }
 
 void HU_AnnounceMap()
 {
-	if(dsda_IntConfig(dsda_config_announce_map))
+	if(dsda_IntConfig(ConfigId::AnnounceMap))
 	{
 		static int last_gamemap;
 		static int last_gameepisode;
@@ -386,7 +389,7 @@ void HU_Ticker()
 
 		custom_message_p->msg = nullptr;
 
-		if(custom_message_p->sfx > 0 && custom_message_p->sfx < num_sfx)
+		if(std::to_underlying(custom_message_p->sfx) > 0 && std::to_underlying(custom_message_p->sfx) < num_sfx)
 		{
 			S_StartVoidSound(custom_message_p->sfx);
 		}
@@ -404,7 +407,7 @@ void HU_Ticker()
 //
 dboolean HU_Responder(event_t* ev)
 {
-	if(dsda_InputActivated(dsda_input_repeat_message)) // phares
+	if(dsda_InputActivated(InputId::RepeatMessage)) // phares
 	{
 		dsda_ReplayMessage();
 
@@ -414,11 +417,11 @@ dboolean HU_Responder(event_t* ev)
 	return false;
 }
 
-int SetCustomMessage(int plr, const char* msg, int ticks, int sfx)
+int SetCustomMessage(int plr, const char* msg, int ticks, SfxId sfx)
 {
 	custom_message_t item;
 
-	if(plr < 0 || plr >= g_maxplayers || !msg || ticks < 0 || sfx < 0 || sfx >= num_sfx)
+	if(plr < 0 || plr >= g_maxplayers || !msg || ticks < 0 || std::to_underlying(sfx) < 0 || std::to_underlying(sfx) >= num_sfx)
 	{
 		return false;
 	}

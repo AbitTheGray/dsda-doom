@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <utility>
+
 #include <stdint.h>
 
 #include "doomstat.hpp"
@@ -33,41 +35,41 @@
 #define MOBJ_XX_PLAYER -2
 #define MAX_MAPS 99
 
-typedef enum
+enum struct GameArchiveSegment : int32_t
 {
-	ASEG_GAME_HEADER = 101,
-	ASEG_MAP_HEADER,
-	ASEG_WORLD,
-	ASEG_POLYOBJS,
-	ASEG_MOBJS,
-	ASEG_THINKERS,
-	ASEG_SCRIPTS,
-	ASEG_PLAYERS,
-	ASEG_SOUNDS,
-	ASEG_MISC,
-	ASEG_END
-} gameArchiveSegment_t;
+	GameHeader = 101,
+	MapHeader,
+	World,
+	Polyobjs,
+	Mobjs,
+	Thinkers,
+	Scripts,
+	Players,
+	Sounds,
+	Misc,
+	End
+};
 
-typedef enum
+enum struct ThinkClass : int32_t
 {
-	TC_NULL,
-	TC_MOVE_CEILING,
-	TC_VERTICAL_DOOR,
-	TC_MOVE_FLOOR,
-	TC_PLAT_RAISE,
-	TC_INTERPRET_ACS,
-	TC_FLOOR_WAGGLE,
-	TC_LIGHT,
-	TC_PHASE,
-	TC_BUILD_PILLAR,
-	TC_ROTATE_POLY,
-	TC_MOVE_POLY,
-	TC_POLY_DOOR
-} thinkClass_t;
+	Null,
+	MoveCeiling,
+	VerticalDoor,
+	MoveFloor,
+	PlatRaise,
+	InterpretAcs,
+	FloorWaggle,
+	Light,
+	Phase,
+	BuildPillar,
+	RotatePoly,
+	MovePoly,
+	PolyDoor
+};
 
 typedef struct
 {
-	thinkClass_t tClass;
+	ThinkClass tClass;
 	think_t thinkerFunc;
 	void (*writeFunc)();
 	void (*readFunc)();
@@ -308,8 +310,8 @@ static void StreamIn_mobj_t(mobj_t* str)
 	// angle_t angle;
 	str->angle = SV_ReadLong();
 
-	// spritenum_t sprite;
-	str->sprite = static_cast<spritenum_t>(SV_ReadLong());
+	// SpriteId sprite;
+	str->sprite = static_cast<SpriteId>(SV_ReadLong());
 
 	// int frame;
 	str->frame = SV_ReadLong();
@@ -343,8 +345,8 @@ static void StreamIn_mobj_t(mobj_t* str)
 	// int validcount;
 	str->validcount = SV_ReadLong();
 
-	// mobjtype_t type;
-	str->type = static_cast<mobjtype_t>(SV_ReadLong());
+	// MobjType type;
+	str->type = static_cast<MobjType>(SV_ReadLong());
 
 	// mobjinfo_t *info;
 	// Pointer value is read but discarded.
@@ -437,7 +439,7 @@ static void StreamOutMobjSpecials(mobj_t* mobj)
 
 	corpse = (mobj->flags & MF_CORPSE) != 0;
 
-	SV_WriteLong(mobj->type == HEXEN_MT_KORAX ? 0 : mobj->special1.i);
+	SV_WriteLong(mobj->type == MobjType::HexenKorax ? 0 : mobj->special1.i);
 	SV_WriteLong(corpse ? MOBJ_NULL : GetMobjNum(mobj->special1.m));
 	SV_WriteLong(mobj->special2.i);
 	SV_WriteLong(corpse ? MOBJ_NULL : GetMobjNum(mobj->special2.m));
@@ -458,8 +460,8 @@ static void StreamOut_mobj_t(mobj_t* str)
 	// angle_t angle;
 	SV_WriteLong(str->angle);
 
-	// spritenum_t sprite;
-	SV_WriteLong(str->sprite);
+	// SpriteId sprite;
+	SV_WriteLong(std::to_underlying(str->sprite));
 
 	// int frame;
 	SV_WriteLong(str->frame);
@@ -483,8 +485,8 @@ static void StreamOut_mobj_t(mobj_t* str)
 	// int validcount;
 	SV_WriteLong(str->validcount);
 
-	// mobjtype_t type;
-	SV_WriteLong(str->type);
+	// MobjType type;
+	SV_WriteLong(std::to_underlying(str->type));
 
 	// int tics;
 	SV_WriteLong(str->tics);
@@ -574,7 +576,7 @@ static void StreamIn_floormove_t(floormove_t* str)
 	str->sector = sectors + i;
 
 	// floor_e type;
-	str->type = static_cast<floor_e>(SV_ReadLong());
+	str->type = static_cast<FloorKind>(SV_ReadLong());
 
 	// int crush;
 	str->crush = SV_ReadLong();
@@ -629,7 +631,7 @@ static void StreamOut_floormove_t(floormove_t* str)
 	SV_WriteLong(str->sector - sectors);
 
 	// floor_e type;
-	SV_WriteLong(str->type);
+	SV_WriteLong(std::to_underlying(str->type));
 
 	// int crush;
 	SV_WriteLong(str->crush);
@@ -702,10 +704,10 @@ static void StreamIn_plat_t(plat_t* str)
 	str->count = SV_ReadLong();
 
 	// plat_e status;
-	str->status = static_cast<plat_e>(SV_ReadLong());
+	str->status = static_cast<PlatState>(SV_ReadLong());
 
 	// plat_e oldstatus;
-	str->oldstatus = static_cast<plat_e>(SV_ReadLong());
+	str->oldstatus = static_cast<PlatState>(SV_ReadLong());
 
 	// int crush;
 	str->crush = SV_ReadLong();
@@ -714,7 +716,7 @@ static void StreamIn_plat_t(plat_t* str)
 	str->tag = SV_ReadLong();
 
 	// plattype_e type;
-	str->type = static_cast<plattype_e>(SV_ReadLong());
+	str->type = static_cast<PlatType>(SV_ReadLong());
 }
 
 static void StreamOut_plat_t(plat_t* str)
@@ -737,11 +739,11 @@ static void StreamOut_plat_t(plat_t* str)
 	// int count;
 	SV_WriteLong(str->count);
 
-	// plat_e status;
-	SV_WriteLong(str->status);
+	// PlatState status;
+	SV_WriteLong(std::to_underlying(str->status));
 
-	// plat_e oldstatus;
-	SV_WriteLong(str->oldstatus);
+	// PlatState oldstatus;
+	SV_WriteLong(std::to_underlying(str->oldstatus));
 
 	// int crush;
 	SV_WriteLong(str->crush);
@@ -750,7 +752,7 @@ static void StreamOut_plat_t(plat_t* str)
 	SV_WriteLong(str->tag);
 
 	// plattype_e type;
-	SV_WriteLong(str->type);
+	SV_WriteLong(std::to_underlying(str->type));
 }
 
 static void StreamIn_ceiling_t(ceiling_t* str)
@@ -762,7 +764,7 @@ static void StreamIn_ceiling_t(ceiling_t* str)
 	str->sector = sectors + i;
 
 	// ceiling_e type;
-	str->type = static_cast<ceiling_e>(SV_ReadLong());
+	str->type = static_cast<CeilingKind>(SV_ReadLong());
 
 	// fixed_t bottomheight, topheight;
 	str->bottomheight = SV_ReadLong();
@@ -790,7 +792,7 @@ static void StreamOut_ceiling_t(ceiling_t* str)
 	SV_WriteLong(str->sector - sectors);
 
 	// ceiling_e type;
-	SV_WriteLong(str->type);
+	SV_WriteLong(std::to_underlying(str->type));
 
 	// fixed_t bottomheight, topheight;
 	SV_WriteLong(str->bottomheight);
@@ -821,7 +823,7 @@ static void StreamIn_light_t(light_t* str)
 	str->sector = sectors + i;
 
 	// lighttype_t type;
-	str->type = static_cast<lighttype_t>(SV_ReadLong());
+	str->type = static_cast<LightType>(SV_ReadLong());
 
 	// int value1;
 	str->value1 = SV_ReadLong();
@@ -845,7 +847,7 @@ static void StreamOut_light_t(light_t* str)
 	SV_WriteLong(str->sector - sectors);
 
 	// lighttype_t type;
-	SV_WriteLong(str->type);
+	SV_WriteLong(std::to_underlying(str->type));
 
 	// int value1;
 	SV_WriteLong(str->value1);
@@ -872,7 +874,7 @@ static void StreamIn_vldoor_t(vldoor_t* str)
 	str->sector = &sectors[i];
 
 	// vldoor_e type;
-	str->type = static_cast<vldoor_e>(SV_ReadLong());
+	str->type = static_cast<VerticalDoorType>(SV_ReadLong());
 
 	// fixed_t topheight;
 	str->topheight = SV_ReadLong();
@@ -896,7 +898,7 @@ static void StreamOut_vldoor_t(vldoor_t* str)
 	SV_WriteLong(str->sector - sectors);
 
 	// vldoor_e type;
-	SV_WriteLong(str->type);
+	SV_WriteLong(std::to_underlying(str->type));
 
 	// fixed_t topheight;
 	SV_WriteLong(str->topheight);
@@ -1160,7 +1162,7 @@ static void StreamIn_polydoor_t(polydoor_t* str)
 	str->waitTics = SV_ReadLong();
 
 	// podoortype_t type;
-	str->type = static_cast<podoortype_t>(SV_ReadLong());
+	str->type = static_cast<PolyDoorType>(SV_ReadLong());
 
 	// dboolean close;
 	str->close = SV_ReadLong();
@@ -1194,7 +1196,7 @@ static void StreamOut_polydoor_t(polydoor_t* str)
 	SV_WriteLong(str->waitTics);
 
 	// podoortype_t type;
-	SV_WriteLong(str->type);
+	SV_WriteLong(std::to_underlying(str->type));
 
 	// dboolean close;
 	SV_WriteLong(str->close);
@@ -1268,12 +1270,12 @@ void SV_Init()
 	FreeMapArchive();
 }
 
-static void AssertSegment(gameArchiveSegment_t segType)
+static void AssertSegment(GameArchiveSegment segType)
 {
-	if(SV_ReadLong() != segType)
+	if(SV_ReadLong() != std::to_underlying(segType))
 	{
 		I_Error("Corrupt save game: Segment [%d] failed alignment check",
-			segType);
+			std::to_underlying(segType));
 	}
 }
 
@@ -1285,7 +1287,7 @@ static void ArchiveWorld()
 	line_t* li;
 	side_t* si;
 
-	SV_WriteLong(ASEG_WORLD);
+	SV_WriteLong(std::to_underlying(GameArchiveSegment::World));
 	for(i = 0, sec = sectors; i < numsectors; i++, sec++)
 	{
 		SV_WriteWord(sec->floorheight >> FRACBITS);
@@ -1295,7 +1297,7 @@ static void ArchiveWorld()
 		SV_WriteWord(sec->lightlevel);
 		SV_WriteWord(sec->special);
 		SV_WriteWord(sec->tag);
-		SV_WriteWord(sec->seqType);
+		SV_WriteWord(std::to_underlying(sec->seqType));
 	}
 	for(i = 0, li = lines; i < numlines; i++, li++)
 	{
@@ -1331,7 +1333,7 @@ static void UnarchiveWorld()
 	line_t* li;
 	side_t* si;
 
-	AssertSegment(ASEG_WORLD);
+	AssertSegment(GameArchiveSegment::World);
 	for(i = 0, sec = sectors; i < numsectors; i++, sec++)
 	{
 		sec->floorheight = SV_ReadWord() << FRACBITS;
@@ -1341,7 +1343,7 @@ static void UnarchiveWorld()
 		sec->lightlevel = SV_ReadWord();
 		sec->special = SV_ReadWord();
 		sec->tag = SV_ReadWord();
-		sec->seqType = static_cast<seqtype_t>(SV_ReadWord());
+		sec->seqType = static_cast<SeqType>(SV_ReadWord());
 		sec->ceilingdata = nullptr;
 		sec->floordata = nullptr;
 		sec->lightingdata = nullptr;
@@ -1399,7 +1401,7 @@ static void ArchiveMobjs()
 	int count;
 	thinker_t* thinker;
 
-	SV_WriteLong(ASEG_MOBJS);
+	SV_WriteLong(std::to_underlying(GameArchiveSegment::Mobjs));
 	SV_WriteLong(MobjCount);
 	count = 0;
 	for(thinker = thinkercap.next; thinker != &thinkercap;
@@ -1429,7 +1431,7 @@ static void UnarchiveMobjs()
 	int i;
 	mobj_t* mobj;
 
-	AssertSegment(ASEG_MOBJS);
+	AssertSegment(GameArchiveSegment::Mobjs);
 	TargetPlayerAddrs = static_cast<mobj_t***>(Z_Malloc(MAX_TARGET_PLAYERS * sizeof(mobj_t**)));
 	TargetPlayerCount = 0;
 	MobjCount = SV_ReadLong();
@@ -1447,7 +1449,7 @@ static void UnarchiveMobjs()
 		StreamIn_mobj_t(mobj);
 
 		// Restore broken pointers.
-		mobj->info = &mobjinfo[mobj->type];
+		mobj->info = &mobjinfo[std::to_underlying(mobj->type)];
 
 		// "marked for deletion"
 		if(mobj->index)
@@ -1514,7 +1516,7 @@ static void RestoreMoveCeiling(ceiling_t* ceiling)
 
 static thinkInfo_t ThinkerInfo[] = {
 	{
-		TC_MOVE_FLOOR,
+		ThinkClass::MoveFloor,
 		THINKER_FUNC(T_MoveFloor),
 		THINKER_FUNC(StreamOut_floormove_t),
 		THINKER_FUNC(StreamIn_floormove_t),
@@ -1522,7 +1524,7 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(floormove_t)
 	},
 	{
-		TC_PLAT_RAISE,
+		ThinkClass::PlatRaise,
 		THINKER_FUNC(T_PlatRaise),
 		THINKER_FUNC(StreamOut_plat_t),
 		THINKER_FUNC(StreamIn_plat_t),
@@ -1530,7 +1532,7 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(plat_t)
 	},
 	{
-		TC_MOVE_CEILING,
+		ThinkClass::MoveCeiling,
 		THINKER_FUNC(T_MoveCeiling),
 		THINKER_FUNC(StreamOut_ceiling_t),
 		THINKER_FUNC(StreamIn_ceiling_t),
@@ -1538,7 +1540,7 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(ceiling_t)
 	},
 	{
-		TC_LIGHT,
+		ThinkClass::Light,
 		THINKER_FUNC(T_Light),
 		THINKER_FUNC(StreamOut_light_t),
 		THINKER_FUNC(StreamIn_light_t),
@@ -1546,7 +1548,7 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(light_t)
 	},
 	{
-		TC_VERTICAL_DOOR,
+		ThinkClass::VerticalDoor,
 		THINKER_FUNC(T_VerticalDoor),
 		THINKER_FUNC(StreamOut_vldoor_t),
 		THINKER_FUNC(StreamIn_vldoor_t),
@@ -1554,7 +1556,7 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(vldoor_t)
 	},
 	{
-		TC_PHASE,
+		ThinkClass::Phase,
 		THINKER_FUNC(T_Phase),
 		THINKER_FUNC(StreamOut_phase_t),
 		THINKER_FUNC(StreamIn_phase_t),
@@ -1562,7 +1564,7 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(phase_t)
 	},
 	{
-		TC_INTERPRET_ACS,
+		ThinkClass::InterpretAcs,
 		THINKER_FUNC(T_InterpretACS),
 		THINKER_FUNC(StreamOut_acs_t),
 		THINKER_FUNC(StreamIn_acs_t),
@@ -1570,7 +1572,7 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(acs_t)
 	},
 	{
-		TC_ROTATE_POLY,
+		ThinkClass::RotatePoly,
 		THINKER_FUNC(T_RotatePoly),
 		THINKER_FUNC(StreamOut_polyevent_t),
 		THINKER_FUNC(StreamIn_polyevent_t),
@@ -1578,7 +1580,7 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(polyevent_t)
 	},
 	{
-		TC_BUILD_PILLAR,
+		ThinkClass::BuildPillar,
 		THINKER_FUNC(T_BuildPillar),
 		THINKER_FUNC(StreamOut_pillar_t),
 		THINKER_FUNC(StreamIn_pillar_t),
@@ -1586,7 +1588,7 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(pillar_t)
 	},
 	{
-		TC_MOVE_POLY,
+		ThinkClass::MovePoly,
 		THINKER_FUNC(T_MovePoly),
 		THINKER_FUNC(StreamOut_polyevent_t),
 		THINKER_FUNC(StreamIn_polyevent_t),
@@ -1594,7 +1596,7 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(polyevent_t)
 	},
 	{
-		TC_POLY_DOOR,
+		ThinkClass::PolyDoor,
 		THINKER_FUNC(T_PolyDoor),
 		THINKER_FUNC(StreamOut_polydoor_t),
 		THINKER_FUNC(StreamIn_polydoor_t),
@@ -1602,14 +1604,14 @@ static thinkInfo_t ThinkerInfo[] = {
 		sizeof(polydoor_t)
 	},
 	{
-		TC_FLOOR_WAGGLE,
+		ThinkClass::FloorWaggle,
 		THINKER_FUNC(T_FloorWaggle),
 		THINKER_FUNC(StreamOut_planeWaggle_t),
 		THINKER_FUNC(StreamIn_planeWaggle_t),
 		THINKER_FUNC(RestoreFloorWaggle),
 		sizeof(planeWaggle_t)
 	},
-	{TC_NULL, nullptr, nullptr, nullptr, nullptr, 0},
+	{ThinkClass::Null, nullptr, nullptr, nullptr, nullptr, 0},
 };
 
 #undef THINKER_FUNC
@@ -1619,34 +1621,34 @@ static void ArchiveThinkers()
 	thinker_t* thinker;
 	thinkInfo_t* info;
 
-	SV_WriteLong(ASEG_THINKERS);
+	SV_WriteLong(std::to_underlying(GameArchiveSegment::Thinkers));
 	for(thinker = thinkercap.next; thinker != &thinkercap;
 		thinker = thinker->next)
 	{
-		for(info = ThinkerInfo; info->tClass != TC_NULL; info++)
+		for(info = ThinkerInfo; info->tClass != ThinkClass::Null; info++)
 		{
 			if(thinker->function == info->thinkerFunc)
 			{
-				SV_WriteByte(info->tClass);
+				SV_WriteByte(std::to_underlying(info->tClass));
 				reinterpret_cast<void (*)(thinker_t*)>(info->writeFunc)(thinker);
 				break;
 			}
 		}
 	}
 	// Add a termination marker
-	SV_WriteByte(TC_NULL);
+	SV_WriteByte(std::to_underlying(ThinkClass::Null));
 }
 
 static void UnarchiveThinkers()
 {
-	int tClass;
+	ThinkClass tClass;
 	thinker_t* thinker;
 	thinkInfo_t* info;
 
-	AssertSegment(ASEG_THINKERS);
-	while((tClass = SV_ReadByte()) != TC_NULL)
+	AssertSegment(GameArchiveSegment::Thinkers);
+	while((tClass = static_cast<ThinkClass>(SV_ReadByte())) != ThinkClass::Null)
 	{
-		for(info = ThinkerInfo; info->tClass != TC_NULL; info++)
+		for(info = ThinkerInfo; info->tClass != ThinkClass::Null; info++)
 		{
 			if(tClass == info->tClass)
 			{
@@ -1662,7 +1664,7 @@ static void UnarchiveThinkers()
 				break;
 			}
 		}
-		if(info->tClass == TC_NULL)
+		if(info->tClass == ThinkClass::Null)
 		{
 			I_Error("UnarchiveThinkers: Unknown tClass %d in "
 				"savegame", tClass);
@@ -1674,10 +1676,10 @@ static void ArchiveScripts()
 {
 	int i;
 
-	SV_WriteLong(ASEG_SCRIPTS);
+	SV_WriteLong(std::to_underlying(GameArchiveSegment::Scripts));
 	for(i = 0; i < ACScriptCount; i++)
 	{
-		SV_WriteWord(ACSInfo[i].state);
+		SV_WriteWord(std::to_underlying(ACSInfo[i].state));
 		SV_WriteWord(ACSInfo[i].waitValue);
 	}
 
@@ -1691,10 +1693,10 @@ static void UnarchiveScripts()
 {
 	int i;
 
-	AssertSegment(ASEG_SCRIPTS);
+	AssertSegment(GameArchiveSegment::Scripts);
 	for(i = 0; i < ACScriptCount; i++)
 	{
-		ACSInfo[i].state = static_cast<aste_t>(SV_ReadWord());
+		ACSInfo[i].state = static_cast<AcsState>(SV_ReadWord());
 		ACSInfo[i].waitValue = SV_ReadWord();
 	}
 
@@ -1708,7 +1710,7 @@ static void ArchiveMisc()
 {
 	int ix;
 
-	SV_WriteLong(ASEG_MISC);
+	SV_WriteLong(std::to_underlying(GameArchiveSegment::Misc));
 	for(ix = 0; ix < g_maxplayers; ix++)
 	{
 		SV_WriteLong(localQuakeHappening[ix]);
@@ -1719,7 +1721,7 @@ static void UnarchiveMisc()
 {
 	int ix;
 
-	AssertSegment(ASEG_MISC);
+	AssertSegment(GameArchiveSegment::Misc);
 	for(ix = 0; ix < g_maxplayers; ix++)
 	{
 		localQuakeHappening[ix] = SV_ReadLong();
@@ -1756,7 +1758,7 @@ static void ArchiveSounds()
 	int difference;
 	int i;
 
-	SV_WriteLong(ASEG_SOUNDS);
+	SV_WriteLong(std::to_underlying(GameArchiveSegment::Sounds));
 
 	// Save the sound sequences
 	SV_WriteLong(ActiveSequences);
@@ -1767,7 +1769,7 @@ static void ArchiveSounds()
 		SV_WriteLong(node->volume);
 		SV_WriteLong(SN_GetSequenceOffset(node->sequence,
 			node->sequencePtr));
-		SV_WriteLong(node->currentSoundID);
+		SV_WriteLong(std::to_underlying(node->currentSoundID));
 		for(i = 0; i < po_NumPolyobjs; i++)
 		{
 			if(node->mobj == (mobj_t*)&polyobjs[i].startSpot)
@@ -1805,7 +1807,7 @@ static void UnarchiveSounds()
 	int secNum;
 	mobj_t* sndMobj;
 
-	AssertSegment(ASEG_SOUNDS);
+	AssertSegment(GameArchiveSegment::Sounds);
 
 	// Reload and restart all sound sequences
 	numSequences = SV_ReadLong();
@@ -1829,7 +1831,7 @@ static void UnarchiveSounds()
 			sndMobj = (mobj_t*)&polyobjs[secNum].startSpot;
 		}
 		SN_StartSequence(sndMobj, sequence);
-		SN_ChangeNodeData(i, seqOffset, delayTics, volume, soundID);
+		SN_ChangeNodeData(i, seqOffset, delayTics, volume, static_cast<SfxId>(soundID));
 		i++;
 	}
 }
@@ -1838,7 +1840,7 @@ static void ArchivePolyobjs()
 {
 	int i;
 
-	SV_WriteLong(ASEG_POLYOBJS);
+	SV_WriteLong(std::to_underlying(GameArchiveSegment::Polyobjs));
 	SV_WriteLong(po_NumPolyobjs);
 	for(i = 0; i < po_NumPolyobjs; i++)
 	{
@@ -1855,7 +1857,7 @@ static void UnarchivePolyobjs()
 	fixed_t deltaX;
 	fixed_t deltaY;
 
-	AssertSegment(ASEG_POLYOBJS);
+	AssertSegment(GameArchiveSegment::Polyobjs);
 	if(SV_ReadLong() != po_NumPolyobjs)
 	{
 		I_Error("UnarchivePolyobjs: Bad polyobj count");
@@ -1879,7 +1881,7 @@ void SV_SaveMap()
 	SV_OpenWrite(gamemap);
 
 	// Place a header marker
-	SV_WriteLong(ASEG_MAP_HEADER);
+	SV_WriteLong(std::to_underlying(GameArchiveSegment::MapHeader));
 
 	// Write the level timer
 	SV_WriteLong(leveltime);
@@ -1896,7 +1898,7 @@ void SV_SaveMap()
 	ArchiveMisc();
 
 	// Place a termination marker
-	SV_WriteLong(ASEG_END);
+	SV_WriteLong(std::to_underlying(GameArchiveSegment::End));
 }
 
 void SV_LoadMap()
@@ -1910,7 +1912,7 @@ void SV_LoadMap()
 	// Initialize the input buffer
 	SV_OpenRead(gamemap);
 
-	AssertSegment(ASEG_MAP_HEADER);
+	AssertSegment(GameArchiveSegment::MapHeader);
 
 	// Read the level timer
 	leveltime = SV_ReadLong();
@@ -1923,7 +1925,7 @@ void SV_LoadMap()
 	UnarchiveSounds();
 	UnarchiveMisc();
 
-	AssertSegment(ASEG_END);
+	AssertSegment(GameArchiveSegment::End);
 
 	// Free mobj list and save buffer
 	Z_Free(MobjList);
@@ -1941,8 +1943,8 @@ void SV_MapTeleport(int map, int position)
 	int currentInvPos;
 	dboolean rClass;
 	dboolean playerWasReborn;
-	dboolean oldWeaponowned[HEXEN_NUMWEAPONS];
-	int oldKeys[NUMCARDS];
+	dboolean oldWeaponowned[std::to_underlying(WeaponType::HexenCount)];
+	int oldKeys[std::to_underlying(Card::Count)];
 	int oldPieces = 0;
 	int bestWeapon;
 
@@ -2018,30 +2020,30 @@ void SV_MapTeleport(int map, int position)
 
 		if(netgame)
 		{
-			if(players[i].playerstate == PST_DEAD)
+			if(players[i].playerstate == PlayerState::Dead)
 			{
 				// In a network game, force all players to be alive
-				players[i].playerstate = PST_REBORN;
+				players[i].playerstate = PlayerState::Reborn;
 			}
 			if(!deathmatch)
 			{
 				// Cooperative net-play, retain keys and weapons
-				for(key_i = 0; key_i < NUMCARDS; ++key_i)
+				for(key_i = 0; key_i < std::to_underlying(Card::Count); ++key_i)
 					oldKeys[key_i] = players[i].cards[key_i];
 				oldPieces = players[i].pieces;
-				for(j = 0; j < HEXEN_NUMWEAPONS; j++)
+				for(j = 0; j < std::to_underlying(WeaponType::HexenCount); j++)
 				{
 					oldWeaponowned[j] = players[i].weaponowned[j];
 				}
 			}
 		}
-		playerWasReborn = (players[i].playerstate == PST_REBORN);
+		playerWasReborn = (players[i].playerstate == PlayerState::Reborn);
 		if(deathmatch)
 		{
 			memset(players[i].frags, 0, sizeof(players[i].frags));
 			mobj = P_SpawnMobj(playerstarts[0][i].x,
 				playerstarts[0][i].y, 0,
-				HEXEN_MT_PLAYER_FIGHTER);
+				MobjType::HexenPlayerFighter);
 			players[i].mo = mobj;
 			G_DeathMatchSpawnPlayer(i);
 			P_RemoveMobj(mobj);
@@ -2054,10 +2056,10 @@ void SV_MapTeleport(int map, int position)
 		if(playerWasReborn && netgame && !deathmatch)
 		{
 			// Restore keys and weapons when reborn in co-op
-			for(key_i = 0; key_i < NUMCARDS; ++key_i)
+			for(key_i = 0; key_i < std::to_underlying(Card::Count); ++key_i)
 				players[i].cards[key_i] = oldKeys[key_i];
 			players[i].pieces = oldPieces;
-			for(bestWeapon = 0, j = 0; j < HEXEN_NUMWEAPONS; j++)
+			for(bestWeapon = 0, j = 0; j < std::to_underlying(WeaponType::HexenCount); j++)
 			{
 				if(oldWeaponowned[j])
 				{
@@ -2065,12 +2067,12 @@ void SV_MapTeleport(int map, int position)
 					players[i].weaponowned[j] = true;
 				}
 			}
-			players[i].ammo[MANA_1] = 25;
-			players[i].ammo[MANA_2] = 25;
+			players[i].ammo[std::to_underlying(AmmoType::Mana1)] = 25;
+			players[i].ammo[std::to_underlying(AmmoType::Mana2)] = 25;
 			if(bestWeapon)
 			{
 				// Bring up the best weapon
-				players[i].pendingweapon = static_cast<weapontype_t>(bestWeapon);
+				players[i].pendingweapon = static_cast<WeaponType>(bestWeapon);
 			}
 		}
 

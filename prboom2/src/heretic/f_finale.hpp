@@ -4,12 +4,12 @@
 
 #pragma once
 
+#include "d_event.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_event.hpp"
 
 dboolean Heretic_F_Responder(event_t* event);
 void Heretic_F_Drawer();

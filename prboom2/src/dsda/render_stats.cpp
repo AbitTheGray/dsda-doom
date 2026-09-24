@@ -36,7 +36,7 @@ void dsda_BeginRenderStats()
 	ZERO_DATA(dsda_render_stats);
 	ZERO_DATA(dsda_render_stats_max);
 
-	dsda_StartTimer(dsda_timer_render_stats);
+	dsda_StartTimer(DsdaTimer::RenderStats);
 }
 
 void dsda_RecordVisSprite()
@@ -76,13 +76,13 @@ void dsda_UpdateRenderStats()
 	++frame_count;
 	ZERO_DATA(frame_stats);
 
-	if(dsda_ElapsedTimeMS(dsda_timer_render_stats) >= 1000)
+	if(dsda_ElapsedTimeMS(DsdaTimer::RenderStats) >= 1000)
 	{
 		dsda_render_stats = interval_stats;
 		ZERO_DATA(interval_stats);
 		dsda_UpdateMaxValues(&dsda_render_stats_max, &dsda_render_stats);
-		dsda_render_stats_fps = frame_count * 1000 / dsda_ElapsedTimeMS(dsda_timer_render_stats);
+		dsda_render_stats_fps = frame_count * 1000 / dsda_ElapsedTimeMS(DsdaTimer::RenderStats);
 		frame_count = 0;
-		dsda_StartTimer(dsda_timer_render_stats);
+		dsda_StartTimer(DsdaTimer::RenderStats);
 	}
 }

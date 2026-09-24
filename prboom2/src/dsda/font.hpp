@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "r_defs.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "r_defs.hpp"
 
 #define HU_FONTSTART '!'  /* the first font characters */
 #define HU_FONTEND (0x7f) /*jff 2/16/98 '_' the last font characters */

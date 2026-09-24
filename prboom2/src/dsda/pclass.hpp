@@ -5,17 +5,22 @@
 
 #pragma once
 
+#include <stdint.h>
+#include <utility>
+
+enum struct StateId : int32_t;
+
+#include "m_fixed.hpp"
+#include "doomdef.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "m_fixed.hpp"
-#include "doomdef.hpp"
-
 typedef struct dsda_pclass_s
 {
-	int armor_increment[NUMARMOR];
+	int armor_increment[std::to_underlying(ArmorType::Count)];
 	int auto_armor_save;
 	int armor_max;
 
@@ -24,14 +29,14 @@ typedef struct dsda_pclass_s
 	fixed_t stroller_threshold;
 	fixed_t turbo_threshold;
 
-	int normal_state;
-	int run_state;
-	int fire_weapon_state;
-	int attack_state;
-	int attack_end_state;
+	StateId normal_state;
+	StateId run_state;
+	StateId fire_weapon_state;
+	StateId attack_state;
+	StateId attack_end_state;
 } dsda_pclass_t;
 
-extern dsda_pclass_t pclass[NUMCLASSES];
+extern dsda_pclass_t pclass[std::to_underlying(PClass::Count)];
 
 #ifdef __cplusplus
 }

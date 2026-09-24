@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "opl.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "opl.hpp"
 
 typedef struct opl_callback_queue_s opl_callback_queue_t;
 

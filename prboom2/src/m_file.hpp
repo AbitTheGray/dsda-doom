@@ -6,14 +6,13 @@
 
 #pragma once
 
+#include <stdio.h>
+#include "doomtype.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include <stdio.h>
-
-#include "doomtype.hpp"
 
 dboolean M_ReadWriteAccess(const char* name);
 dboolean M_ReadAccess(const char* name);

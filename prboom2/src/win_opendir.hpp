@@ -15,12 +15,12 @@
 
 #pragma once
 
+#include <io.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include <io.h>
 
 #ifndef FILENAME_MAX
 #define FILENAME_MAX 260
@@ -70,7 +70,6 @@ int closedir(DIR*);
 void rewinddir(DIR*);
 long telldir(DIR*);
 void seekdir(DIR*, long);
-
 
 // EOF
 

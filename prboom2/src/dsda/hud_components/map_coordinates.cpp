@@ -22,14 +22,14 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 		"%sX: %-5d\n"
 		"Y: %-5d\n"
 		"Z: %-5d",
-		dsda_TextColor(dsda_tc_map_coords),
+		dsda_TextColor(TextColorIndex::MapCoords),
 		(players[displayplayer].mo->x >> FRACBITS),
 		(players[displayplayer].mo->y >> FRACBITS),
 		(players[displayplayer].mo->z >> FRACBITS)
 	);
 }
 
-void dsda_InitMapCoordinatesHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitMapCoordinatesHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

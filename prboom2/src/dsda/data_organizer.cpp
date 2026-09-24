@@ -27,7 +27,7 @@ static char* dsda_data_dir_strings[DATA_DIR_LIMIT];
 static char* dsda_base_data_dir;
 static char* dsda_wad_data_dir;
 
-char* dsda_DetectDirectory(const char* env_key, int arg_id)
+char* dsda_DetectDirectory(const char* env_key, ArgId arg_id)
 {
 	dsda_arg_t* arg;
 	char* result = nullptr;
@@ -38,7 +38,7 @@ char* dsda_DetectDirectory(const char* env_key, int arg_id)
 	if(!default_directory)
 		default_directory = I_ConfigDir();
 
-	arg = dsda_Arg(static_cast<dsda_arg_identifier_t>(arg_id));
+	arg = dsda_Arg(static_cast<ArgId>(arg_id));
 	if(arg->found)
 	{
 		if(M_IsDir(arg->value.v_string))
@@ -47,7 +47,7 @@ char* dsda_DetectDirectory(const char* env_key, int arg_id)
 			result = Z_Strdup(arg->value.v_string);
 		}
 		else
-			lprintf(LO_ERROR, "Error: path %s does not exist. Using %s\n",
+			lprintf(OutputLevels::Error, "Error: path %s does not exist. Using %s\n",
 				arg->value.v_string, default_directory);
 	}
 
@@ -62,7 +62,7 @@ void dsda_InitDataDir()
 	char* parent_directory;
 	dsda_string_t str;
 
-	parent_directory = dsda_DetectDirectory("DOOMDATADIR", dsda_arg_data);
+	parent_directory = dsda_DetectDirectory("DOOMDATADIR", ArgId::Data);
 
 	dsda_StringPrintF(&str, "%s/%s", parent_directory, dsda_data_root);
 
@@ -93,9 +93,9 @@ static void dsda_InitWadDataDir()
 		{
 			int dir_index;
 
-			if(wadfiles[i].src == source_iwad)
+			if(wadfiles[i].src == WadSource::Iwad)
 				dir_index = iwad_index;
-			else if(wadfiles[i].src == source_pwad)
+			else if(wadfiles[i].src == WadSource::Pwad)
 				dir_index = pwad_index;
 			else
 				dir_index = -1;
@@ -126,7 +126,7 @@ static void dsda_InitWadDataDir()
 
 	dsda_wad_data_dir = str.string;
 
-	lprintf(LO_INFO, "Using data file directory: %s\n", dsda_wad_data_dir);
+	lprintf(OutputLevels::Info, "Using data file directory: %s\n", dsda_wad_data_dir);
 }
 
 char* dsda_DataDir()

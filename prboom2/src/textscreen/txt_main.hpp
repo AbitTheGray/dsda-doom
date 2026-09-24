@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "txt_sdl.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -11,8 +13,6 @@ extern "C"
 
 // For the moment, txt_sdl.c is the only implementation of the base
 // text mode screen API:
-
-#include "txt_sdl.hpp"
 
 // textscreen key values:
 // Key values are difficult because we have to support multiple conflicting
@@ -64,55 +64,54 @@ extern "C"
 
 #define TXT_COLOR_BLINKING (1 << 3)
 
-typedef enum
+enum struct TxtColor : int32_t
 {
-	TXT_COLOR_BLACK,
-	TXT_COLOR_BLUE,
-	TXT_COLOR_GREEN,
-	TXT_COLOR_CYAN,
-	TXT_COLOR_RED,
-	TXT_COLOR_MAGENTA,
-	TXT_COLOR_BROWN,
-	TXT_COLOR_GREY,
-	TXT_COLOR_DARK_GREY,
-	TXT_COLOR_BRIGHT_BLUE,
-	TXT_COLOR_BRIGHT_GREEN,
-	TXT_COLOR_BRIGHT_CYAN,
-	TXT_COLOR_BRIGHT_RED,
-	TXT_COLOR_BRIGHT_MAGENTA,
-	TXT_COLOR_YELLOW,
-	TXT_COLOR_BRIGHT_WHITE,
-} txt_color_t;
+	Black,
+	Blue,
+	Green,
+	Cyan,
+	Red,
+	Magenta,
+	Brown,
+	Grey,
+	DarkGrey,
+	BrightBlue,
+	BrightGreen,
+	BrightCyan,
+	BrightRed,
+	BrightMagenta,
+	Yellow,
+	BrightWhite,
+};
 
 // Modifier keys.
 
-typedef enum
+enum struct TxtModifier : int32_t
 {
-	TXT_MOD_SHIFT,
-	TXT_MOD_CTRL,
-	TXT_MOD_ALT,
-	TXT_NUM_MODIFIERS
-} txt_modifier_t;
+	Shift,
+	Ctrl,
+	Alt,
+	Count
+};
 
 // Due to the way the SDL API works, we provide different ways of configuring
 // how we read input events, each of which is useful in different scenarios.
-typedef enum
+enum struct TxtInputMode : int32_t
 {
 	// "Localized" output that takes software keyboard layout into account,
 	// but key shifting has no effect.
-	TXT_INPUT_NORMAL,
+	Normal,
 
 	// "Raw" input; the keys correspond to physical keyboard layout and
 	// software keyboard layout has no effect.
-	TXT_INPUT_RAW,
+	Raw,
 
 	// Used for full text input. Events are fully shifted and localized.
 	// However, not all keyboard keys will generate input.
 	// Setting this mode may activate the on-screen keyboard, depending on
 	// device and OS.
-	TXT_INPUT_TEXT,
-} txt_input_mode_t;
-
+	Text,
+};
 
 #if defined(__GNUC__) || defined(__clang__)
 

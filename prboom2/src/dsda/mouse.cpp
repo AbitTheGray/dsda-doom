@@ -18,7 +18,7 @@ static unsigned int angleturn_cache_index;
 
 extern "C" void dsda_InitQuickstartCache()
 {
-	quickstart_cache_tics = dsda_IntConfig(dsda_config_quickstart_cache_tics);
+	quickstart_cache_tics = dsda_IntConfig(ConfigId::QuickstartCacheTics);
 }
 
 void dsda_ApplyQuickstartMouseCache(int* mousex)
@@ -33,7 +33,7 @@ void dsda_ApplyQuickstartMouseCache(int* mousex)
 
 		quickstart_queued = false;
 
-		dsda_TrackFeature(uf_quickstartcache);
+		dsda_TrackFeature(FeatureFlag::Quickstartcache);
 
 		for(i = 0; i < quickstart_cache_tics; ++i)
 			result += angleturn_cache[i];

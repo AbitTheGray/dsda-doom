@@ -5,14 +5,14 @@
 
 #pragma once
 
+#include "d_event.hpp"
+#include "d_ticcmd.hpp"
+#include "tables.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_event.hpp"
-#include "d_ticcmd.hpp"
-#include "tables.hpp"
 
 dboolean dsda_AllowBuilding();
 dboolean dsda_BuildMode();

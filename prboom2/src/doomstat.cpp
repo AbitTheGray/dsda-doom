@@ -4,18 +4,20 @@
  *      Put all global state variables here.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 
 #include "dsda/map_format.hpp"
 
 // Game Mode - identify IWAD as shareware, retail etc.
-GameMode_t gamemode = indetermined;
-GameMission_t gamemission = doom;
+GameMode gamemode = GameMode::Indetermined;
+GameMission gamemission = GameMission::Doom;
 
 dboolean tc_game;
 
 // Language.
-Language_t language = english;
+Language language = Language::English;
 
 // Set if homebrew PWAD stuff has been added.
 dboolean modifiedgame;
@@ -29,8 +31,8 @@ complevel_t compatibility_level;
 // it's required for demos recorded in "demo compatibility" mode by boom201 for example
 int demover;
 
-int comp[MBF_COMP_TOTAL]; // killough 10/98
-int default_comperr[COMPERR_NUM];
+int comp[std::to_underlying(CompOption::MbfCompTotal)]; // killough 10/98
+int default_comperr[std::to_underlying(CompError::Count)];
 
 int demo_insurance; // killough 1/16/98
 
@@ -69,7 +71,7 @@ char* VANILLA_MAP_LUMP_NAME(int e, int m)
 {
 	static char name[9];
 
-	if(gamemode == commercial || map_format.map99)
+	if(gamemode == GameMode::Commercial || map_format.map99)
 		snprintf(name, sizeof(name), "MAP%02d", m);
 	else
 		snprintf(name, sizeof(name), "E%dM%d", e, m);

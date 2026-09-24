@@ -5,15 +5,15 @@
 
 #pragma once
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include "doomdef.hpp"
 #include "d_event.hpp"
 #include "d_ticcmd.hpp"
 #include "tables.hpp"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 //
 // GAME
@@ -54,7 +54,7 @@ void G_DoVictory();
 void G_BuildTiccmd(ticcmd_t* cmd); // CPhipps - move decl to header
 void G_ReadOneTick(ticcmd_t* cmd, const byte** data_p);
 void G_ChangedPlayerColour(int pn, int cl);    // CPhipps - On-the-fly player colour changing
-void G_MakeSpecialEvent(buttoncode_t bc, ...); /* cph - new event stuff */
+void G_MakeSpecialEvent(ButtonCode bc, ...); /* cph - new event stuff */
 int G_ValidateMapName(const char* mapname, int* pEpi, int* pMap);
 
 //e6y

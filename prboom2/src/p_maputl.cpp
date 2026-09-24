@@ -7,6 +7,8 @@
  *      and some PIT_* functions to use for iteration.
  */
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "doomtype.hpp"
 #include "m_bbox.hpp"
@@ -78,22 +80,22 @@ int PUREFUNC P_BoxOnLineSide(const fixed_t* tmbox, const line_t* ld)
 	{
 			int p;
 		default: // shut up compiler warnings -- killough
-		case ST_HORIZONTAL:
+		case SlopeType::Horizontal:
 			return
-				(tmbox[BOXBOTTOM] > ld->v1->y) == (p = tmbox[BOXTOP] > ld->v1->y) ? p ^ (ld->dx < 0) : -1;
-		case ST_VERTICAL:
+				(tmbox[std::to_underlying(BoxEdge::Bottom)] > ld->v1->y) == (p = tmbox[std::to_underlying(BoxEdge::Top)] > ld->v1->y) ? p ^ (ld->dx < 0) : -1;
+		case SlopeType::Vertical:
 			return
-				(tmbox[BOXLEFT] < ld->v1->x) == (p = tmbox[BOXRIGHT] < ld->v1->x) ? p ^ (ld->dy < 0) : -1;
-		case ST_POSITIVE:
+				(tmbox[std::to_underlying(BoxEdge::Left)] < ld->v1->x) == (p = tmbox[std::to_underlying(BoxEdge::Right)] < ld->v1->x) ? p ^ (ld->dy < 0) : -1;
+		case SlopeType::Positive:
 			return
-				P_PointOnLineSide(tmbox[BOXRIGHT], tmbox[BOXBOTTOM], ld) ==
-				(p = P_PointOnLineSide(tmbox[BOXLEFT], tmbox[BOXTOP], ld))
+				P_PointOnLineSide(tmbox[std::to_underlying(BoxEdge::Right)], tmbox[std::to_underlying(BoxEdge::Bottom)], ld) ==
+				(p = P_PointOnLineSide(tmbox[std::to_underlying(BoxEdge::Left)], tmbox[std::to_underlying(BoxEdge::Top)], ld))
 				? p
 				: -1;
-		case ST_NEGATIVE:
+		case SlopeType::Negative:
 			return
-				(P_PointOnLineSide(tmbox[BOXLEFT], tmbox[BOXBOTTOM], ld)) ==
-				(p = P_PointOnLineSide(tmbox[BOXRIGHT], tmbox[BOXTOP], ld))
+				(P_PointOnLineSide(tmbox[std::to_underlying(BoxEdge::Left)], tmbox[std::to_underlying(BoxEdge::Bottom)], ld)) ==
+				(p = P_PointOnLineSide(tmbox[std::to_underlying(BoxEdge::Right)], tmbox[std::to_underlying(BoxEdge::Top)], ld))
 				? p
 				: -1;
 	}
@@ -153,7 +155,7 @@ fixed_t PUREFUNC P_InterceptVector2(const divline_t* v2, const divline_t* v1)
 
 fixed_t PUREFUNC P_InterceptVector(const divline_t* v2, const divline_t* v1)
 {
-	if(compatibility_level < prboom_4_compatibility)
+	if(compatibility_level < CompLevel::Prboom4)
 		return P_InterceptVector2(v2, v1);
 	else
 	{
@@ -344,7 +346,7 @@ void P_UnsetThingPosition(mobj_t* thing)
 			bnext->bprev = bprev;
 	}
 
-	if(thing->type == MT_TELEPORTMAN)
+	if(thing->type == MobjType::Teleportman)
 	{
 		P_ResetTeleptFromSector(thing->subsector->sector->iSectorID);
 	}
@@ -416,7 +418,7 @@ void P_SetThingPosition(mobj_t* thing)
 			thing->bnext = nullptr, thing->bprev = nullptr;
 	}
 
-	if(thing->type == MT_TELEPORTMAN)
+	if(thing->type == MobjType::Teleportman)
 	{
 		P_ResetTeleptFromSector(ss->sector->iSectorID);
 	}
@@ -785,7 +787,7 @@ dboolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
 	int mapxstep, mapystep;
 	int count;
 
-	if(dsda_IntConfig(dsda_config_map_traces))
+	if(dsda_IntConfig(ConfigId::MapTraces))
 	{
 		amlinetraces[cur_amlinetrace].x1 = x1;
 		amlinetraces[cur_amlinetrace].x2 = x2;
@@ -809,7 +811,7 @@ dboolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
 	trace.dx = x2 - x1;
 	trace.dy = y2 - y1;
 
-	if(comperr(comperr_blockmap))
+	if(comperr(CompError::BlockMap))
 	{
 		int64_t _x1, _x2, _y1, _y2;
 
@@ -1113,7 +1115,7 @@ int P_GetSafeBlockX(int coord)
 
 	// If x is LE than those special values, interpret as positive.
 	// Otherwise, leave it as it is.
-	if(comperr(comperr_blockmap) && coord <= blockmapxneg)
+	if(comperr(CompError::BlockMap) && coord <= blockmapxneg)
 		return coord & 0x1FF; // Broke width boundary
 
 	return coord;
@@ -1126,7 +1128,7 @@ int P_GetSafeBlockY(int coord)
 
 	// If y is LE than those special values, interpret as positive.
 	// Otherwise, leave it as it is.
-	if(comperr(comperr_blockmap) && coord <= blockmapyneg)
+	if(comperr(CompError::BlockMap) && coord <= blockmapyneg)
 		return coord & 0x1FF; // Broke width boundary
 
 	return coord;
@@ -1206,7 +1208,7 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 					link = link->bnext;
 					continue;
 				}
-				if((link->type == HEXEN_MT_MINOTAUR) &&
+				if((link->type == MobjType::HexenMinotaur) &&
 					(link->special1.m == mo))
 				{
 					link = link->bnext;
@@ -1224,7 +1226,7 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 			}
 			link = link->bnext;
 		}
-		else if(mo->type == HEXEN_MT_MINOTAUR) // looking around minotaur
+		else if(mo->type == MobjType::HexenMinotaur) // looking around minotaur
 		{
 			master = mo->special1.m;
 			if((link->flags & MF_COUNTKILL) ||
@@ -1240,7 +1242,7 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 					link = link->bnext;
 					continue;
 				}
-				if((link->type == HEXEN_MT_MINOTAUR) &&
+				if((link->type == MobjType::HexenMinotaur) &&
 					(link->special1.m == mo->special1.m))
 				{
 					link = link->bnext;
@@ -1258,7 +1260,7 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 			}
 			link = link->bnext;
 		}
-		else if(mo->type == HEXEN_MT_MSTAFF_FX2) // bloodscourge
+		else if(mo->type == MobjType::HexenMstaffFx2) // bloodscourge
 		{
 			if((link->flags & MF_COUNTKILL ||
 					(link->player && link != mo->target))

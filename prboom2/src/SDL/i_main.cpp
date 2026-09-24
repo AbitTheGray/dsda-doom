@@ -7,6 +7,9 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <array>
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -77,7 +80,7 @@ void I_Init2()
 	force_singletics_to = gametic + BACKUPTICS;
 }
 
-int signal_context;
+SignalContext signal_context;
 
 static volatile sig_atomic_t interrupted = 0;
 
@@ -111,7 +114,7 @@ static void I_IntHandler(int s)
 static void PrintVer()
 {
 	char vbuf[200];
-	lprintf(LO_INFO, "%s\n", I_GetVersionString(vbuf, 200));
+	lprintf(OutputLevels::Info, "%s\n", I_GetVersionString(vbuf, 200));
 }
 
 // Schedule a function to be called when the program exits.
@@ -129,11 +132,11 @@ struct atexit_listentry_s
 	const char* name;
 };
 
-static atexit_listentry_t* exit_funcs[exit_priority_max];
+static std::array<atexit_listentry_t*, std::to_underlying(ExitPriority::Max)> exit_funcs;
 static int exit_priority;
 
 void I_AtExit(atexit_func_t func, dboolean run_on_error,
-	const char* name, exit_priority_t priority)
+	const char* name, ExitPriority priority)
 {
 	atexit_listentry_t* entry;
 
@@ -141,19 +144,19 @@ void I_AtExit(atexit_func_t func, dboolean run_on_error,
 
 	entry->func = func;
 	entry->run_on_error = run_on_error;
-	entry->next = exit_funcs[priority];
+	entry->next = exit_funcs[std::to_underlying(priority)];
 	entry->name = name;
-	exit_funcs[priority] = entry;
+	exit_funcs[std::to_underlying(priority)] = entry;
 }
 
 void I_SafeExit(int rc)
 {
 	atexit_listentry_t* entry;
 
-	lprintf(LO_DEBUG, "\n"); // Separator after game loop
+	lprintf(OutputLevels::Debug, "\n"); // Separator after game loop
 
 	// Run through all exit functions
-	for(; exit_priority < exit_priority_max; ++exit_priority)
+	for(; exit_priority < std::to_underlying(ExitPriority::Max); ++exit_priority)
 	{
 		while((entry = exit_funcs[exit_priority]))
 		{
@@ -161,7 +164,7 @@ void I_SafeExit(int rc)
 
 			if(rc == 0 || entry->run_on_error)
 			{
-				lprintf(LO_DEBUG, "Exit Sequence[%d]: %s (%d)\n", exit_priority, entry->name, rc);
+				lprintf(OutputLevels::Debug, "Exit Sequence[%d]: %s (%d)\n", exit_priority, entry->name, rc);
 				entry->func();
 			}
 		}
@@ -201,7 +204,7 @@ static void I_Quit()
 
 void I_SetProcessPriority()
 {
-	int process_priority = dsda_IntConfig(dsda_config_process_priority);
+	int process_priority = dsda_IntConfig(ConfigId::ProcessPriority);
 
 	if(process_priority)
 	{
@@ -227,11 +230,11 @@ void I_SetProcessPriority()
 
 		if(errbuf == nullptr)
 		{
-			lprintf(LO_INFO, "I_SetProcessPriority: priority for the process is %d\n", process_priority);
+			lprintf(OutputLevels::Info, "I_SetProcessPriority: priority for the process is %d\n", process_priority);
 		}
 		else
 		{
-			lprintf(LO_ERROR, "I_SetProcessPriority: failed to set priority for the process (%s)\n", errbuf);
+			lprintf(OutputLevels::Error, "I_SetProcessPriority: failed to set priority for the process (%s)\n", errbuf);
 		}
 	}
 }
@@ -241,14 +244,14 @@ int main(int argc, char** argv)
 {
 	dsda_ParseCommandLineArgs(argc, argv);
 
-	if(dsda_Flag(dsda_arg_verbose))
+	if(dsda_Flag(ArgId::Verbose))
 		I_EnableVerboseLogging();
 
-	if(dsda_Flag(dsda_arg_quiet))
+	if(dsda_Flag(ArgId::Quiet))
 		I_DisableAllLogging();
 
 	// Print the version and exit
-	if(dsda_Flag(dsda_arg_v))
+	if(dsda_Flag(ArgId::V))
 	{
 		PrintVer();
 		return 0;
@@ -263,9 +266,9 @@ int main(int argc, char** argv)
 	// e6y: was moved from D_DoomMainSetup
 	// init subsystems
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "M_LoadDefaults: Load system defaults.\n");
+	lprintf(OutputLevels::Debug, "M_LoadDefaults: Load system defaults.\n");
 	M_LoadDefaults(); // load before initing other systems
-	lprintf(LO_DEBUG, "\n");
+	lprintf(OutputLevels::Debug, "\n");
 
 	// Print date and time in the Load/Save Game menus in the current locale
 	setlocale(LC_TIME, "");
@@ -289,10 +292,10 @@ int main(int argc, char** argv)
 		left in an unstable state.
 	*/
 
-	I_AtExit(I_EssentialQuit, true, "I_EssentialQuit", exit_priority_first);
-	I_AtExit(I_Quit, false, "I_Quit", exit_priority_last);
+	I_AtExit(I_EssentialQuit, true, "I_EssentialQuit", ExitPriority::First);
+	I_AtExit(I_Quit, false, "I_Quit", ExitPriority::Last);
 #ifndef PRBOOM_DEBUG
-	if(!dsda_Flag(dsda_arg_sigsegv))
+	if(!dsda_Flag(ArgId::Sigsegv))
 	{
 		signal(SIGSEGV, I_SignalHandler);
 	}

@@ -25,6 +25,8 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <utility>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,7 +44,7 @@
 #endif
 
 
-const char* const Scanner::TokenNames[TK_NumSpecialTokens] =
+const char* const Scanner::TokenNames[std::to_underlying(TokenType::NumSpecialTokens)] =
 {
 	"Identifier",
 	"String Constant",
@@ -168,7 +170,7 @@ void Scanner::CheckForWhitespace()
 	}
 }
 
-bool Scanner::CheckToken(char token)
+bool Scanner::CheckToken(TokenType token)
 {
 	if(needNext)
 	{
@@ -177,7 +179,7 @@ bool Scanner::CheckToken(char token)
 	}
 
 	// An int can also be a float.
-	if(nextState.token == token || (nextState.token == TK_IntConst && token == TK_FloatConst))
+	if(nextState.token == token || (nextState.token == TokenType::IntConst && token == TokenType::FloatConst))
 	{
 		needNext = true;
 		ExpandState();
@@ -234,7 +236,7 @@ bool Scanner::GetNextToken(bool expandState)
 
 	nextState.tokenLine = line;
 	nextState.tokenLinePosition = scanPos - lineStart;
-	nextState.token = TK_NoToken;
+	nextState.token = TokenType::NoToken;
 	if(scanPos >= length)
 	{
 		if(expandState)
@@ -252,40 +254,40 @@ bool Scanner::GetNextToken(bool expandState)
 	char cur = data[scanPos++];
 	// Determine by first character
 	if(cur == '_' || cur == '$' || (cur >= 'A' && cur <= 'Z') || (cur >= 'a' && cur <= 'z'))
-		nextState.token = TK_Identifier;
+		nextState.token = TokenType::Identifier;
 	else if(cur >= '0' && cur <= '9')
 	{
 		if(cur == '0')
 			integerBase = 8;
-		nextState.token = TK_IntConst;
+		nextState.token = TokenType::IntConst;
 	}
 	else if(cur == '.')
 	{
 		floatHasDecimal = true;
-		nextState.token = TK_FloatConst;
+		nextState.token = TokenType::FloatConst;
 	}
 	else if(cur == '"')
 	{
 		end = ++start; // Move the start up one character so we don't have to trim it later.
-		nextState.token = TK_StringConst;
+		nextState.token = TokenType::StringConst;
 	}
 	else
 	{
 		end = scanPos;
-		nextState.token = cur;
+		nextState.token = static_cast<TokenType>(cur);
 
 		// Now check for operator tokens
 		if(scanPos < length)
 		{
 			char next = data[scanPos];
 			if(cur == '&' && next == '&')
-				nextState.token = TK_AndAnd;
+				nextState.token = TokenType::AndAnd;
 			else if(cur == '|' && next == '|')
-				nextState.token = TK_OrOr;
+				nextState.token = TokenType::OrOr;
 			else if(cur == '<' && next == '<')
-				nextState.token = TK_ShiftLeft;
+				nextState.token = TokenType::ShiftLeft;
 			else if(cur == '>' && next == '>')
-				nextState.token = TK_ShiftRight;
+				nextState.token = TokenType::ShiftRight;
 				//else if(cur == '#' && next == '#')
 				//	nextState.token = TK_MacroConcat;
 			else if(next == '=')
@@ -293,23 +295,23 @@ bool Scanner::GetNextToken(bool expandState)
 				switch(cur)
 				{
 					case '=':
-						nextState.token = TK_EqEq;
+						nextState.token = TokenType::EqEq;
 						break;
 					case '!':
-						nextState.token = TK_NotEq;
+						nextState.token = TokenType::NotEq;
 						break;
 					case '>':
-						nextState.token = TK_GtrEq;
+						nextState.token = TokenType::GtrEq;
 						break;
 					case '<':
-						nextState.token = TK_LessEq;
+						nextState.token = TokenType::LessEq;
 						break;
 					default:
 						break;
 				}
 			}
 
-			if(nextState.token != cur)
+			if(nextState.token != static_cast<TokenType>(cur))
 			{
 				scanPos++;
 				end = scanPos;
@@ -326,13 +328,13 @@ bool Scanner::GetNextToken(bool expandState)
 			{
 				default:
 					break;
-				case TK_Identifier:
+				case TokenType::Identifier:
 					if(cur != '_' && (cur < 'A' || cur > 'Z') && (cur < 'a' || cur > 'z') && (cur < '0' || cur > '9') && cur != '/' && cur != '\\')
 						end = scanPos;
 					break;
-				case TK_IntConst:
+				case TokenType::IntConst:
 					if(cur == '.' || (scanPos - 1 != start && cur == 'e'))
-						nextState.token = TK_FloatConst;
+						nextState.token = TokenType::FloatConst;
 					else if((cur == 'x' || cur == 'X') && scanPos - 1 == start)
 					{
 						integerBase = 16;
@@ -357,7 +359,7 @@ bool Scanner::GetNextToken(bool expandState)
 						}
 						break;
 					}
-				case TK_FloatConst:
+				case TokenType::FloatConst:
 					if(cur < '0' || cur > '9')
 					{
 						if(!floatHasDecimal && cur == '.')
@@ -382,7 +384,7 @@ bool Scanner::GetNextToken(bool expandState)
 						end = scanPos;
 					}
 					break;
-				case TK_StringConst:
+				case TokenType::StringConst:
 					if(cur == '"')
 					{
 						stringFinished = true;
@@ -406,19 +408,19 @@ bool Scanner::GetNextToken(bool expandState)
 	if(end - start > 0 || stringFinished)
 	{
 		SetString(&nextState.string, data + start, end - start);
-		if(nextState.token == TK_FloatConst)
+		if(nextState.token == TokenType::FloatConst)
 		{
 			nextState.decimal = atof(nextState.string);
 			nextState.number = static_cast<int>(nextState.decimal);
 			nextState.boolean = (nextState.number != 0);
 		}
-		else if(nextState.token == TK_IntConst)
+		else if(nextState.token == TokenType::IntConst)
 		{
 			nextState.number = strtol(nextState.string, nullptr, integerBase);
 			nextState.decimal = nextState.number;
 			nextState.boolean = (nextState.number != 0);
 		}
-		else if(nextState.token == TK_Identifier)
+		else if(nextState.token == TokenType::Identifier)
 		{
 			// Identifiers should be case insensitive.
 			char* p = nextState.string;
@@ -430,16 +432,16 @@ bool Scanner::GetNextToken(bool expandState)
 			// Check for a boolean constant.
 			if(strcmp(nextState.string, "true") == 0)
 			{
-				nextState.token = TK_BoolConst;
+				nextState.token = TokenType::BoolConst;
 				nextState.boolean = true;
 			}
 			else if(strcmp(nextState.string, "false") == 0)
 			{
-				nextState.token = TK_BoolConst;
+				nextState.token = TokenType::BoolConst;
 				nextState.boolean = false;
 			}
 		}
-		else if(nextState.token == TK_StringConst)
+		else if(nextState.token == TokenType::StringConst)
 		{
 			Unescape(nextState.string);
 		}
@@ -447,7 +449,7 @@ bool Scanner::GetNextToken(bool expandState)
 			ExpandState();
 		return true;
 	}
-	nextState.token = TK_NoToken;
+	nextState.token = TokenType::NoToken;
 	if(expandState)
 		ExpandState();
 	return false;
@@ -464,26 +466,26 @@ void Scanner::SkipLine()
 	while(tokenLine == line && GetNextToken());
 }
 
-void Scanner::Error(int token)
+void Scanner::Error(TokenType token)
 {
-	if(token < TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), TokenNames[token], TokenNames[(unsigned char)this->token]);
-	else if(token < TK_NumSpecialTokens && this->token >= TK_NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), TokenNames[token], this->token);
-	else if(token < TK_NumSpecialTokens && this->token == TK_NoToken)
-		error("%d:%d:Expected '%s'", GetLine(), GetLinePos(), TokenNames[token]);
-	else if(token >= TK_NumSpecialTokens && this->token >= TK_Identifier && this->token < TK_NumSpecialTokens)
-		error("%d:%d:Expected '%c' but got '%s' instead.", GetLine(), GetLinePos(), token, TokenNames[(unsigned char)this->token]);
+	if(token < TokenType::NumSpecialTokens && this->token >= TokenType::Identifier && this->token < TokenType::NumSpecialTokens)
+		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), TokenNames[std::to_underlying(token)], TokenNames[std::to_underlying(this->token)]);
+	else if(token < TokenType::NumSpecialTokens && this->token >= TokenType::NumSpecialTokens)
+		error("%d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), TokenNames[std::to_underlying(token)], std::to_underlying(this->token));
+	else if(token < TokenType::NumSpecialTokens && this->token == TokenType::NoToken)
+		error("%d:%d:Expected '%s'", GetLine(), GetLinePos(), TokenNames[std::to_underlying(token)]);
+	else if(token >= TokenType::NumSpecialTokens && this->token >= TokenType::Identifier && this->token < TokenType::NumSpecialTokens)
+		error("%d:%d:Expected '%c' but got '%s' instead.", GetLine(), GetLinePos(), std::to_underlying(token), TokenNames[std::to_underlying(this->token)]);
 	else
-		error("%d:%d:Expected '%c' but got '%c' instead.", GetLine(), GetLinePos(), token, this->token);
+		error("%d:%d:Expected '%c' but got '%c' instead.", GetLine(), GetLinePos(), std::to_underlying(token), std::to_underlying(this->token));
 }
 
 void Scanner::Error(const char* mustget)
 {
-	if(token < TK_NumSpecialTokens && this->token < TK_NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), mustget, TokenNames[(unsigned char)this->token]);
+	if(token < TokenType::NumSpecialTokens && this->token < TokenType::NumSpecialTokens)
+		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), mustget, TokenNames[std::to_underlying(this->token)]);
 	else
-		error("%d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), mustget, this->token);
+		error("%d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), mustget, std::to_underlying(this->token));
 }
 
 void Scanner::ErrorF(const char* msg, ...)
@@ -496,7 +498,7 @@ void Scanner::ErrorF(const char* msg, ...)
 	error("%d:%d:%s.", GetLine(), GetLinePos(), buffer);
 }
 
-void Scanner::MustGetToken(char token)
+void Scanner::MustGetToken(TokenType token)
 {
 	if(!CheckToken(token))
 	{
@@ -507,7 +509,7 @@ void Scanner::MustGetToken(char token)
 
 void Scanner::MustGetIdentifier(const char* ident)
 {
-	if(!CheckToken(TK_Identifier) || strcmpnocase(string, ident))
+	if(!CheckToken(TokenType::Identifier) || strcmpnocase(string, ident))
 	{
 		Error(ident);
 		return;
@@ -522,7 +524,7 @@ bool Scanner::ScanInteger()
 	{
 		return false;
 	}
-	if(token == '-')
+	if(token == static_cast<TokenType>('-'))
 	{
 		if(!GetNextToken())
 		{
@@ -530,14 +532,14 @@ bool Scanner::ScanInteger()
 		}
 		neg = true;
 	}
-	else if(token == '+')
+	else if(token == static_cast<TokenType>('+'))
 	{
 		if(!GetNextToken())
 		{
 			return false;
 		}
 	}
-	if(token != TK_IntConst)
+	if(token != TokenType::IntConst)
 	{
 		return false;
 	}
@@ -556,7 +558,7 @@ bool Scanner::ScanFloat()
 	{
 		return false;
 	}
-	if(token == '-')
+	if(token == static_cast<TokenType>('-'))
 	{
 		if(!GetNextToken())
 		{
@@ -564,14 +566,14 @@ bool Scanner::ScanFloat()
 		}
 		neg = true;
 	}
-	else if(token == '+')
+	else if(token == static_cast<TokenType>('+'))
 	{
 		if(!GetNextToken())
 		{
 			return false;
 		}
 	}
-	if(token != TK_IntConst && token != TK_FloatConst)
+	if(token != TokenType::IntConst && token != TokenType::FloatConst)
 	{
 		return false;
 	}
@@ -603,7 +605,7 @@ bool Scanner::CheckFloat()
 
 bool Scanner::CheckString()
 {
-	return CheckToken(TK_StringConst) || CheckToken(TK_Identifier);
+	return CheckToken(TokenType::StringConst) || CheckToken(TokenType::Identifier);
 }
 
 bool Scanner::StringMatch(const char* target)
@@ -613,12 +615,12 @@ bool Scanner::StringMatch(const char* target)
 
 void Scanner::MustGetInteger()
 {
-	if(!ScanInteger()) Error(TK_IntConst);
+	if(!ScanInteger()) Error(TokenType::IntConst);
 }
 
 void Scanner::MustGetFloat()
 {
-	if(!ScanFloat()) Error(TK_FloatConst);
+	if(!ScanFloat()) Error(TokenType::FloatConst);
 }
 
 void Scanner::MustGetString()

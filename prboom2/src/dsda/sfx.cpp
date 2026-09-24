@@ -177,8 +177,8 @@ static int dsda_parallel_sfx_window;
 
 extern "C" void dsda_InitParallelSFXFilter()
 {
-	dsda_parallel_sfx_limit = dsda_IntConfig(dsda_config_parallel_sfx_limit);
-	dsda_parallel_sfx_window = dsda_IntConfig(dsda_config_parallel_sfx_window);
+	dsda_parallel_sfx_limit = dsda_IntConfig(ConfigId::ParallelSfxLimit);
+	dsda_parallel_sfx_window = dsda_IntConfig(ConfigId::ParallelSfxWindow);
 }
 
 dboolean dsda_BlockSFX(sfxinfo_t* sfx)

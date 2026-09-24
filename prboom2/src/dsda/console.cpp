@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Console
 
+#include <utility>
+
 #include "d_deh.hpp"
 #include "doomstat.hpp"
 #include "g_game.hpp"
@@ -50,7 +52,7 @@
 
 #define target_player players[consoleplayer]
 
-#define CONSOLE_TEXT_FLAGS (VPT_ALIGN_TOP | VPT_EX_TEXT)
+#define CONSOLE_TEXT_FLAGS (PatchTranslation::AlignTop | PatchTranslation::ExText)
 #define CONSOLE_ENTRY_SIZE 64
 
 #define CF_NEVER  0x00
@@ -84,7 +86,7 @@ int dsda_ConsoleHeight()
 
 static void dsda_DrawConsole()
 {
-	console_height = V_FillHeightVPT(0, 0, 16, 0, static_cast<enum patch_translation_e>(CONSOLE_TEXT_FLAGS));
+	console_height = V_FillHeightVPT(0, 0, 16, 0, static_cast<PatchTranslation>(CONSOLE_TEXT_FLAGS));
 	HUlib_drawTextLine(&hu_console_prompt, false);
 	HUlib_drawTextLine(&hu_console_message, false);
 }
@@ -129,7 +131,7 @@ dboolean dsda_OpenConsole()
 {
 	static dboolean firsttime = true;
 
-	if(gamestate != GS_LEVEL)
+	if(gamestate != GameState::Level)
 		return false;
 
 	if(firsttime)
@@ -141,8 +143,8 @@ dboolean dsda_OpenConsole()
 			0,
 			8,
 			&exhud_font,
-			CR_GRAY,
-			static_cast<enum patch_translation_e>(CONSOLE_TEXT_FLAGS
+			ColorRange::Gray,
+			static_cast<PatchTranslation>(CONSOLE_TEXT_FLAGS
 		));
 
 		HUlib_initTextLine(
@@ -150,15 +152,15 @@ dboolean dsda_OpenConsole()
 			0,
 			0,
 			&exhud_font,
-			CR_GRAY,
-			static_cast<enum patch_translation_e>(CONSOLE_TEXT_FLAGS
+			ColorRange::Gray,
+			static_cast<PatchTranslation>(CONSOLE_TEXT_FLAGS
 		));
 
 		console_history_head = static_cast<console_entry_t *>(Z_Calloc(sizeof(console_entry_t), 1));
 		console_entry = console_history_head;
 	}
 
-	dsda_TrackFeature(uf_console);
+	dsda_TrackFeature(FeatureFlag::Console);
 
 	M_StartControlPanel();
 	M_SetupNextMenu(&dsda_ConsoleDef);
@@ -257,7 +259,7 @@ static dboolean console_PlayerSetArmor(const char* command, const char* args)
 
 	if(arg_count)
 	{
-		target_player.armorpoints[ARMOR_ARMOR] = armorpoints;
+		target_player.armorpoints[std::to_underlying(ArmorType::Armor)] = armorpoints;
 
 		if(armortype == 0) armortype = 1;
 		target_player.armortype = armortype;
@@ -268,11 +270,11 @@ static dboolean console_PlayerSetArmor(const char* command, const char* args)
 	return false;
 }
 
-extern "C" dboolean P_GiveWeapon(player_t* player, weapontype_t weapon, dboolean dropped);
+extern "C" dboolean P_GiveWeapon(player_t* player, WeaponType weapon, dboolean dropped);
 static dboolean console_PlayerGiveWeapon(const char* command, const char* args)
 {
-	void TryPickupWeapon(player_t* player, pclass_t weaponClass,
-		weapontype_t weaponType, mobj_t* weapon,
+	void TryPickupWeapon(player_t* player, PClass weaponClass,
+		WeaponType weaponType, mobj_t* weapon,
 		const char* message);
 
 	int weapon;
@@ -283,21 +285,21 @@ static dboolean console_PlayerGiveWeapon(const char* command, const char* args)
 		{
 			mobj_t mo;
 
-			if(weapon < 0 || weapon >= HEXEN_NUMWEAPONS)
+			if(weapon < 0 || weapon >= std::to_underlying(WeaponType::HexenCount))
 				return false;
 
 			memset(&mo, 0, sizeof(mo));
 
-			mo.intflags |= MIF_FAKE;
+			mo.intflags |= MobjIntFlag::Fake;
 
-			TryPickupWeapon(&target_player, target_player.pclass, static_cast<weapontype_t>(weapon), &mo, "WEAPON");
+			TryPickupWeapon(&target_player, target_player.pclass, static_cast<WeaponType>(weapon), &mo, "WEAPON");
 		}
 		else
 		{
-			if(weapon < 0 || weapon >= NUMWEAPONS)
+			if(weapon < 0 || weapon >= std::to_underlying(WeaponType::Count))
 				return false;
 
-			P_GiveWeapon(&target_player, static_cast<weapontype_t>(weapon), false);
+			P_GiveWeapon(&target_player, static_cast<WeaponType>(weapon), false);
 		}
 
 		return true;
@@ -385,7 +387,7 @@ static dboolean console_PlayerGiveKey(const char* command, const char* args)
 
 	if(sscanf(args, "%i", &key))
 	{
-		if(key < 0 || key >= NUMCARDS)
+		if(key < 0 || key >= std::to_underlying(Card::Count))
 			return false;
 
 		target_player.cards[key] = true;
@@ -403,7 +405,7 @@ static dboolean console_PlayerRemoveKey(const char* command, const char* args)
 
 	if(sscanf(args, "%i", &key))
 	{
-		if(key < 0 || key >= NUMCARDS)
+		if(key < 0 || key >= std::to_underlying(Card::Count))
 			return false;
 
 		target_player.cards[key] = false;
@@ -416,7 +418,7 @@ static dboolean console_PlayerRemoveKey(const char* command, const char* args)
 }
 
 extern "C" void SB_Start();
-extern "C" dboolean P_GivePower(player_t* player, int power);
+extern "C" dboolean P_GivePower(player_t* player, PowerType power);
 static dboolean console_PlayerGivePower(const char* command, const char* args)
 {
 
@@ -425,13 +427,13 @@ static dboolean console_PlayerGivePower(const char* command, const char* args)
 
 	if(sscanf(args, "%i %i", &power, &duration))
 	{
-		if(power < 0 || power >= NUMPOWERS ||
-			power == pw_shield || power == pw_health2 || power == pw_minotaur)
+		if(power < 0 || power >= std::to_underlying(PowerType::Count) ||
+			power == std::to_underlying(PowerType::Shield) || power == std::to_underlying(PowerType::Health2) || power == std::to_underlying(PowerType::Minotaur))
 			return false;
 
 		target_player.powers[power] = 0;
-		P_GivePower(&target_player, power);
-		if(power != pw_strength)
+		P_GivePower(&target_player, static_cast<PowerType>(power));
+		if(power != std::to_underlying(PowerType::Strength))
 			target_player.powers[power] = duration;
 
 		if(raven) SB_Start();
@@ -450,41 +452,41 @@ static dboolean console_PlayerRemovePower(const char* command, const char* args)
 
 	if(sscanf(args, "%i", &power))
 	{
-		if(power < 0 || power >= NUMPOWERS ||
-			power == pw_shield || power == pw_health2 || power == pw_minotaur)
+		if(power < 0 || power >= std::to_underlying(PowerType::Count) ||
+			power == std::to_underlying(PowerType::Shield) || power == std::to_underlying(PowerType::Health2) || power == std::to_underlying(PowerType::Minotaur))
 			return false;
 
 		target_player.powers[power] = 0;
 
-		if(power == pw_invulnerability)
+		if(power == std::to_underlying(PowerType::Invulnerability))
 		{
 			target_player.mo->flags2 &= ~(MF2_INVULNERABLE | MF2_REFLECTIVE);
-			if(target_player.pclass == PCLASS_CLERIC)
+			if(target_player.pclass == PClass::Cleric)
 			{
 				target_player.mo->flags2 &= ~(MF2_DONTDRAW | MF2_NONSHOOTABLE);
 				target_player.mo->flags &= ~(MF_SHADOW | MF_ALTSHADOW);
 			}
 		}
-		else if(power == pw_invisibility)
+		else if(power == std::to_underlying(PowerType::Invisibility))
 			target_player.mo->flags &= ~MF_SHADOW;
-		else if(power == pw_flight)
+		else if(power == std::to_underlying(PowerType::Flight))
 		{
 			P_PlayerEndFlight(&target_player);
 		}
-		else if(power == pw_weaponlevel2 && heretic)
+		else if(power == std::to_underlying(PowerType::WeaponLevel2) && heretic)
 		{
-			if((target_player.readyweapon == wp_phoenixrod)
-				&& (target_player.psprites[ps_weapon].state
-					!= &states[HERETIC_S_PHOENIXREADY])
-				&& (target_player.psprites[ps_weapon].state
-					!= &states[HERETIC_S_PHOENIXUP]))
+			if((target_player.readyweapon == WeaponType::PhoenixRod)
+				&& (target_player.psprites[std::to_underlying(PspNum::Weapon)].state
+					!= &states[std::to_underlying(StateId::HereticPhoenixready)])
+				&& (target_player.psprites[std::to_underlying(PspNum::Weapon)].state
+					!= &states[std::to_underlying(StateId::HereticPhoenixup)]))
 			{
-				P_SetPsprite(&target_player, ps_weapon, HERETIC_S_PHOENIXREADY);
-				target_player.ammo[am_phoenixrod] -= USE_PHRD_AMMO_2;
+				P_SetPsprite(&target_player, PspNum::Weapon, StateId::HereticPhoenixready);
+				target_player.ammo[std::to_underlying(AmmoType::PhoenixRod)] -= USE_PHRD_AMMO_2;
 				target_player.refire = 0;
 			}
-			else if((target_player.readyweapon == wp_gauntlets)
-				|| (target_player.readyweapon == wp_staff))
+			else if((target_player.readyweapon == WeaponType::Gauntlets)
+				|| (target_player.readyweapon == WeaponType::Staff))
 			{
 				target_player.pendingweapon = target_player.readyweapon;
 			}
@@ -959,16 +961,16 @@ static dboolean console_BruteForceFrame(const char* command, const char* args)
 			switch(button_str[i])
 			{
 				case 'a':
-					buttons |= BT_ATTACK;
+					buttons |= std::to_underlying(ButtonCode::Attack);
 					break;
 				case 'u':
-					buttons |= BT_USE;
+					buttons |= std::to_underlying(ButtonCode::Use);
 					break;
 				case 'c':
 					if(weapon > 0 && weapon < 16)
 					{
-						buttons |= BT_CHANGE;
-						buttons |= (weapon << BT_WEAPONSHIFT);
+						buttons |= std::to_underlying(ButtonCode::Change);
+						buttons |= (weapon << std::to_underlying(ButtonCode::WeaponShift));
 					}
 					else
 						return false;
@@ -1044,40 +1046,40 @@ static dboolean console_BruteForceStart(const char* command, const char* args)
 				if(value >= numlines || value < 0)
 					return false;
 
-				dsda_AddMiscBruteForceCondition(dsda_bf_line_skip, value);
+				dsda_AddMiscBruteForceCondition(BruteForceAttribute::LineSkip, value);
 			}
 			else if(sscanf(conditions[i], " act %i", &value) == 1)
 			{
 				if(value >= numlines || value < 0)
 					return false;
 
-				dsda_AddMiscBruteForceCondition(dsda_bf_line_activation, value);
+				dsda_AddMiscBruteForceCondition(BruteForceAttribute::LineActivation, value);
 			}
 			else if(sscanf(conditions[i], " have %3[a-zA-Z]", attr_s) == 1)
 			{
 				int attr_i;
 
-				for(attr_i = 0; attr_i < dsda_bf_item_max; ++attr_i)
+				for(attr_i = 0; attr_i < std::to_underlying(BruteForceItem::Max); ++attr_i)
 					if(!strcmp(attr_s, dsda_bf_item_names[attr_i]))
 						break;
 
-				if(attr_i == dsda_bf_item_max)
+				if(attr_i == std::to_underlying(BruteForceItem::Max))
 					return false;
 
-				dsda_AddMiscBruteForceCondition(dsda_bf_have_item, attr_i);
+				dsda_AddMiscBruteForceCondition(BruteForceAttribute::HaveItem, attr_i);
 			}
 			else if(sscanf(conditions[i], " lack %3[a-zA-Z]", attr_s) == 1)
 			{
 				int attr_i;
 
-				for(attr_i = 0; attr_i < dsda_bf_item_max; ++attr_i)
+				for(attr_i = 0; attr_i < std::to_underlying(BruteForceItem::Max); ++attr_i)
 					if(!strcmp(attr_s, dsda_bf_item_names[attr_i]))
 						break;
 
-				if(attr_i == dsda_bf_item_max)
+				if(attr_i == std::to_underlying(BruteForceItem::Max))
 					return false;
 
-				dsda_AddMiscBruteForceCondition(dsda_bf_lack_item, attr_i);
+				dsda_AddMiscBruteForceCondition(BruteForceAttribute::LackItem, attr_i);
 			}
 			else if(sscanf(conditions[i], " %3[a-zA-Z] %4[a-zA-Z><!=] %i", attr_s, oper_s, &value) == 3)
 			{
@@ -1086,51 +1088,51 @@ static dboolean console_BruteForceStart(const char* command, const char* args)
 				if(oper_s[0] == '=' && !oper_s[1])
 					oper_s[1] = '=';
 
-				for(attr_i = 0; attr_i < dsda_bf_attribute_max; ++attr_i)
+				for(attr_i = 0; attr_i < std::to_underlying(BruteForceAttribute::AttributeMax); ++attr_i)
 					if(!strcmp(attr_s, dsda_bf_attribute_names[attr_i]))
 						break;
 
-				if(attr_i == dsda_bf_attribute_max)
+				if(attr_i == std::to_underlying(BruteForceAttribute::AttributeMax))
 					return false;
 
-				for(oper_i = dsda_bf_limit_trio_zero; oper_i < dsda_bf_limit_trio_max; ++oper_i)
+				for(oper_i = std::to_underlying(BruteForceLimit::TrioZero); oper_i < std::to_underlying(BruteForceLimit::TrioMax); ++oper_i)
 					if(!strcmp(oper_s, dsda_bf_limit_names[oper_i]))
 						break;
 
-				if(oper_i != dsda_bf_limit_trio_max)
+				if(oper_i != std::to_underlying(BruteForceLimit::TrioMax))
 				{
-					dsda_SetBruteForceTarget(static_cast<dsda_bf_attribute_t>(attr_i), static_cast<dsda_bf_limit_t>(oper_i), value, true);
+					dsda_SetBruteForceTarget(static_cast<BruteForceAttribute>(attr_i), static_cast<BruteForceLimit>(oper_i), value, true);
 					continue;
 				}
 
-				for(oper_i = 0; oper_i < dsda_bf_operator_max; ++oper_i)
+				for(oper_i = 0; oper_i < std::to_underlying(BruteForceOperator::Max); ++oper_i)
 					if(!strcmp(oper_s, dsda_bf_operator_names[oper_i]))
 						break;
 
-				if(oper_i == dsda_bf_operator_max)
+				if(oper_i == std::to_underlying(BruteForceOperator::Max))
 					return false;
 
-				dsda_AddBruteForceCondition(static_cast<dsda_bf_attribute_t>(attr_i), static_cast<dsda_bf_operator_t>(oper_i), value);
+				dsda_AddBruteForceCondition(static_cast<BruteForceAttribute>(attr_i), static_cast<BruteForceOperator>(oper_i), value);
 			}
 			else if(sscanf(conditions[i], " %3s %4s", attr_s, oper_s) == 2)
 			{
 				int attr_i, oper_i;
 
-				for(attr_i = 0; attr_i < dsda_bf_attribute_max; ++attr_i)
+				for(attr_i = 0; attr_i < std::to_underlying(BruteForceAttribute::AttributeMax); ++attr_i)
 					if(!strcmp(attr_s, dsda_bf_attribute_names[attr_i]))
 						break;
 
-				if(attr_i == dsda_bf_attribute_max)
+				if(attr_i == std::to_underlying(BruteForceAttribute::AttributeMax))
 					return false;
 
-				for(oper_i = dsda_bf_limit_duo_zero; oper_i < dsda_bf_limit_duo_max; ++oper_i)
+				for(oper_i = std::to_underlying(BruteForceLimit::DuoZero); oper_i < std::to_underlying(BruteForceLimit::DuoMax); ++oper_i)
 					if(!strcmp(oper_s, dsda_bf_limit_names[oper_i]))
 						break;
 
-				if(oper_i == dsda_bf_limit_duo_max)
+				if(oper_i == std::to_underlying(BruteForceLimit::DuoMax))
 					return false;
 
-				dsda_SetBruteForceTarget(static_cast<dsda_bf_attribute_t>(attr_i), static_cast<dsda_bf_limit_t>(oper_i), 0, false);
+				dsda_SetBruteForceTarget(static_cast<BruteForceAttribute>(attr_i), static_cast<BruteForceLimit>(oper_i), 0, false);
 			}
 			else
 			{
@@ -1200,13 +1202,13 @@ static dboolean console_ScriptRunLine(const char* line)
 	{
 		if(strlen(line) >= CONSOLE_ENTRY_SIZE)
 		{
-			lprintf(LO_ERROR, "Script line too long: \"%s\" (limit %d)\n", line, CONSOLE_ENTRY_SIZE);
+			lprintf(OutputLevels::Error, "Script line too long: \"%s\" (limit %d)\n", line, CONSOLE_ENTRY_SIZE);
 			return false;
 		}
 
 		if(!dsda_ExecuteConsole(line, false))
 		{
-			lprintf(LO_ERROR, "Script line failed: \"%s\"\n", line);
+			lprintf(OutputLevels::Error, "Script line failed: \"%s\"\n", line);
 			return false;
 		}
 	}
@@ -1243,7 +1245,7 @@ static dboolean console_ScriptRun(const char* command, const char* args)
 			}
 			else
 			{
-				lprintf(LO_ERROR, "Unable to read script file (%s)\n", filename);
+				lprintf(OutputLevels::Error, "Unable to read script file (%s)\n", filename);
 				ret = false;
 			}
 
@@ -1251,7 +1253,7 @@ static dboolean console_ScriptRun(const char* command, const char* args)
 		}
 		else
 		{
-			lprintf(LO_ERROR, "Cannot find script file (%s)\n", name);
+			lprintf(OutputLevels::Error, "Cannot find script file (%s)\n", name);
 			ret = false;
 		}
 
@@ -1273,7 +1275,7 @@ static dboolean console_Check(const char* command, const char* args)
 
 		if(summary)
 		{
-			lprintf(LO_INFO, "%s\n", summary);
+			lprintf(OutputLevels::Info, "%s\n", summary);
 			Z_Free(summary);
 			return true;
 		}
@@ -1294,22 +1296,22 @@ static dboolean console_ChangeConfig(const char* command, const char* args, dboo
 		id = dsda_ConfigIDByName(name);
 		if(id)
 		{
-			dsda_config_type_t config_type;
+			ConfigType config_type;
 
-			config_type = dsda_ConfigType(static_cast<dsda_config_identifier_t>(id));
-			if(config_type == dsda_config_int)
+			config_type = dsda_ConfigType(static_cast<ConfigId>(id));
+			if(config_type == ConfigType::Int)
 			{
 				int value_int;
 
 				if(sscanf(value_string, "%d", &value_int))
 				{
-					dsda_UpdateIntConfig(static_cast<dsda_config_identifier_t>(id), value_int, persist);
+					dsda_UpdateIntConfig(static_cast<ConfigId>(id), value_int, persist);
 					return true;
 				}
 			}
 			else
 			{
-				dsda_UpdateStringConfig(static_cast<dsda_config_identifier_t>(id), value_string, persist);
+				dsda_UpdateStringConfig(static_cast<ConfigId>(id), value_string, persist);
 				return true;
 			}
 		}
@@ -1339,12 +1341,12 @@ static dboolean console_ToggleConfig(const char* command, const char* args, dboo
 		id = dsda_ConfigIDByName(name);
 		if(id)
 		{
-			dsda_config_type_t config_type;
+			ConfigType config_type;
 
-			config_type = dsda_ConfigType(static_cast<dsda_config_identifier_t>(id));
-			if(config_type == dsda_config_int)
+			config_type = dsda_ConfigType(static_cast<ConfigId>(id));
+			if(config_type == ConfigType::Int)
 			{
-				dsda_ToggleConfig(static_cast<dsda_config_identifier_t>(id), persist);
+				dsda_ToggleConfig(static_cast<ConfigId>(id), persist);
 				return true;
 			}
 		}
@@ -1401,25 +1403,25 @@ static dboolean console_WadStatsRemember(const char* command, const char* args)
 
 static dboolean console_FreeTextUpdate(const char* command, const char* args)
 {
-	dsda_UpdateStringConfig(dsda_config_free_text, args, true);
+	dsda_UpdateStringConfig(ConfigId::FreeText, args, true);
 
 	return true;
 }
 
 static dboolean console_FreeTextClear(const char* command, const char* args)
 {
-	dsda_UpdateStringConfig(dsda_config_free_text, "", true);
+	dsda_UpdateStringConfig(ConfigId::FreeText, "", true);
 
 	return true;
 }
 
-static dboolean console_SetMobjState(mobj_t* mobj, statenum_t state)
+static dboolean console_SetMobjState(mobj_t* mobj, StateId state)
 {
-	if(!state)
+	if(state == StateId::Null)
 		return false;
 
 	P_MapStart();
-	P_SetMobjState(mobj, static_cast<statenum_t>(state));
+	P_SetMobjState(mobj, static_cast<StateId>(state));
 	P_MapEnd();
 
 	return true;
@@ -1464,7 +1466,7 @@ static dboolean console_TargetSpawn(const char* command, const char* args)
 
 	target = HU_Target();
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->spawnstate));
+	return target && console_SetMobjState(target, target->info->spawnstate);
 }
 
 static dboolean console_TargetSee(const char* command, const char* args)
@@ -1473,7 +1475,7 @@ static dboolean console_TargetSee(const char* command, const char* args)
 
 	target = HU_Target();
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->seestate));
+	return target && console_SetMobjState(target, target->info->seestate);
 }
 
 static dboolean console_TargetPain(const char* command, const char* args)
@@ -1482,7 +1484,7 @@ static dboolean console_TargetPain(const char* command, const char* args)
 
 	target = HU_Target();
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->painstate));
+	return target && console_SetMobjState(target, target->info->painstate);
 }
 
 static dboolean console_TargetMelee(const char* command, const char* args)
@@ -1491,7 +1493,7 @@ static dboolean console_TargetMelee(const char* command, const char* args)
 
 	target = HU_Target();
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->meleestate));
+	return target && console_SetMobjState(target, target->info->meleestate);
 }
 
 static dboolean console_TargetMissile(const char* command, const char* args)
@@ -1500,7 +1502,7 @@ static dboolean console_TargetMissile(const char* command, const char* args)
 
 	target = HU_Target();
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->missilestate));
+	return target && console_SetMobjState(target, target->info->missilestate);
 }
 
 static dboolean console_TargetDeath(const char* command, const char* args)
@@ -1509,7 +1511,7 @@ static dboolean console_TargetDeath(const char* command, const char* args)
 
 	target = HU_Target();
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->deathstate));
+	return target && console_SetMobjState(target, target->info->deathstate);
 }
 
 static dboolean console_TargetXDeath(const char* command, const char* args)
@@ -1518,7 +1520,7 @@ static dboolean console_TargetXDeath(const char* command, const char* args)
 
 	target = HU_Target();
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->xdeathstate));
+	return target && console_SetMobjState(target, target->info->xdeathstate);
 }
 
 static dboolean console_TargetRaise(const char* command, const char* args)
@@ -1527,7 +1529,7 @@ static dboolean console_TargetRaise(const char* command, const char* args)
 
 	target = HU_Target();
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->raisestate));
+	return target && console_SetMobjState(target, target->info->raisestate);
 }
 
 static dboolean console_TargetSetState(const char* command, const char* args)
@@ -1540,7 +1542,7 @@ static dboolean console_TargetSetState(const char* command, const char* args)
 
 	target = HU_Target();
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(state));
+	return target && console_SetMobjState(target, static_cast<StateId>(state));
 }
 
 static dboolean console_TargetSetHealth(const char* command, const char* args)
@@ -1706,7 +1708,7 @@ static dboolean console_MobjSpawn(const char* command, const char* args)
 
 	target = dsda_FindMobj(index);
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->spawnstate));
+	return target && console_SetMobjState(target, target->info->spawnstate);
 }
 
 static dboolean console_MobjSee(const char* command, const char* args)
@@ -1719,7 +1721,7 @@ static dboolean console_MobjSee(const char* command, const char* args)
 
 	target = dsda_FindMobj(index);
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->seestate));
+	return target && console_SetMobjState(target, target->info->seestate);
 }
 
 static dboolean console_MobjPain(const char* command, const char* args)
@@ -1732,7 +1734,7 @@ static dboolean console_MobjPain(const char* command, const char* args)
 
 	target = dsda_FindMobj(index);
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->painstate));
+	return target && console_SetMobjState(target, target->info->painstate);
 }
 
 static dboolean console_MobjMelee(const char* command, const char* args)
@@ -1745,7 +1747,7 @@ static dboolean console_MobjMelee(const char* command, const char* args)
 
 	target = dsda_FindMobj(index);
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->meleestate));
+	return target && console_SetMobjState(target, target->info->meleestate);
 }
 
 static dboolean console_MobjMissile(const char* command, const char* args)
@@ -1758,7 +1760,7 @@ static dboolean console_MobjMissile(const char* command, const char* args)
 
 	target = dsda_FindMobj(index);
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->missilestate));
+	return target && console_SetMobjState(target, target->info->missilestate);
 }
 
 static dboolean console_MobjDeath(const char* command, const char* args)
@@ -1771,7 +1773,7 @@ static dboolean console_MobjDeath(const char* command, const char* args)
 
 	target = dsda_FindMobj(index);
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->deathstate));
+	return target && console_SetMobjState(target, target->info->deathstate);
 }
 
 static dboolean console_MobjXDeath(const char* command, const char* args)
@@ -1784,7 +1786,7 @@ static dboolean console_MobjXDeath(const char* command, const char* args)
 
 	target = dsda_FindMobj(index);
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->xdeathstate));
+	return target && console_SetMobjState(target, target->info->xdeathstate);
 }
 
 static dboolean console_MobjRaise(const char* command, const char* args)
@@ -1797,7 +1799,7 @@ static dboolean console_MobjRaise(const char* command, const char* args)
 
 	target = dsda_FindMobj(index);
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(target->info->raisestate));
+	return target && console_SetMobjState(target, target->info->raisestate);
 }
 
 static dboolean console_MobjSetState(const char* command, const char* args)
@@ -1811,7 +1813,7 @@ static dboolean console_MobjSetState(const char* command, const char* args)
 
 	target = dsda_FindMobj(index);
 
-	return target && console_SetMobjState(target, static_cast<statenum_t>(state));
+	return target && console_SetMobjState(target, static_cast<StateId>(state));
 }
 
 static dboolean console_MobjSetHealth(const char* command, const char* args)
@@ -1995,7 +1997,7 @@ static dboolean console_Spawn(const char* command, const char* args)
 	if(type == DEH_INDEX_NOT_FOUND)
 		return false;
 
-	return P_SpawnMobj(x, y, z, static_cast<mobjtype_t>(type)) != nullptr;
+	return P_SpawnMobj(x, y, z, static_cast<MobjType>(type)) != nullptr;
 }
 
 static dboolean console_SpawnRelative(const char* command, const char* args)
@@ -2017,7 +2019,7 @@ static dboolean console_SpawnRelative(const char* command, const char* args)
 
 	return P_SpawnMobj(target_player.mo->x + x,
 		target_player.mo->y + y,
-		target_player.mo->z + z, static_cast<mobjtype_t>(type)) != nullptr;
+		target_player.mo->z + z, static_cast<MobjType>(type)) != nullptr;
 }
 
 static dboolean console_StateSetTics(const char* command, const char* args)
@@ -2363,9 +2365,9 @@ static dboolean console_MobjInfoSetInfightingGroup(const char* command, const ch
 		return false;
 
 	if(value < 0)
-		value = IG_DEFAULT;
+		value = std::to_underlying(InfightingGroup::Default);
 	else
-		value += IG_END;
+		value += std::to_underlying(InfightingGroup::End);
 
 	mobjinfo[type].infighting_group = value;
 
@@ -2386,9 +2388,9 @@ static dboolean console_MobjInfoSetProjectileGroup(const char* command, const ch
 		return false;
 
 	if(value < 0)
-		value = PG_GROUPLESS;
+		value = std::to_underlying(ProjectileGroup::Groupless);
 	else
-		value += PG_END;
+		value += std::to_underlying(ProjectileGroup::End);
 
 	mobjinfo[type].projectile_group = value;
 
@@ -2409,9 +2411,9 @@ static dboolean console_MobjInfoSetSplashGroup(const char* command, const char* 
 		return false;
 
 	if(value < 0)
-		value = SG_DEFAULT;
+		value = std::to_underlying(SplashGroup::Default);
 	else
-		value += SG_END;
+		value += std::to_underlying(SplashGroup::End);
 
 	mobjinfo[type].splash_group = value;
 
@@ -2776,7 +2778,7 @@ static dboolean dsda_AuthorizeCommand(console_command_entry_t* entry)
 		return false;
 	}
 
-	if(gamestate != GS_LEVEL)
+	if(gamestate != GameState::Level)
 	{
 		dsda_AddConsoleMessage("command only allowed during levels");
 		return false;
@@ -2963,14 +2965,14 @@ void dsda_ExecuteConsoleScript(int i)
 {
 	int line;
 
-	if(gamestate != GS_LEVEL || i < 0 || i >= CONSOLE_SCRIPT_COUNT)
+	if(gamestate != GameState::Level || i < 0 || i >= CONSOLE_SCRIPT_COUNT)
 		return;
 
 	if(!dsda_console_script_lines[i])
 	{
 		char* dup;
 
-		dup = Z_Strdup(dsda_StringConfig((dsda_config_identifier_t)(dsda_config_script_0 + i)));
+		dup = Z_Strdup(dsda_StringConfig(static_cast<ConfigId>(std::to_underlying(ConfigId::Script0) + i)));
 		dsda_console_script_lines[i] = dsda_SplitString(dup, ";");
 	}
 

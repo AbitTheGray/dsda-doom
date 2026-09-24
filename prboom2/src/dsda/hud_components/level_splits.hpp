@@ -10,7 +10,7 @@ extern "C"
 {
 #endif
 
-void dsda_InitLevelSplitsHC(int x_offset, int y_offset, int vpt_flags, int* args, int arg_count, void** data);
+void dsda_InitLevelSplitsHC(int x_offset, int y_offset, PatchTranslation vpt_flags, int* args, int arg_count, void** data);
 void dsda_UpdateLevelSplitsHC(void* data);
 void dsda_DrawLevelSplitsHC(void* data);
 

@@ -8,6 +8,8 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -205,27 +207,27 @@ void D_PostEvent(event_t* ev)
 	// Allow only sensible keys during skipping
 	if(dsda_SkipMode())
 	{
-		if(dsda_InputActivated(dsda_input_quit))
+		if(dsda_InputActivated(InputId::Quit))
 		{
 			// Immediate exit if quit key is pressed in skip mode
 			I_SafeExit(0);
 		}
-		else if(dsda_InputActivated(dsda_input_menu_escape))
+		else if(dsda_InputActivated(InputId::MenuEscape))
 		{
 			dsda_ExitSkipMode();
 		}
 		// use key is used for seeing the current frame
-		else if(!dsda_InputActivated(dsda_input_use) && !dsda_InputActivated(dsda_input_demo_skip))
+		else if(!dsda_InputActivated(InputId::Use) && !dsda_InputActivated(InputId::DemoSkip))
 		{
 			return;
 		}
 	}
 
-	if(gamestate == GS_FINALE && !F_ShowCast() && F_Responder(ev))
+	if(gamestate == GameState::Finale && !F_ShowCast() && F_Responder(ev))
 		dsda_InputFlushTick(); // custom palette screen ate the event
 	else if(M_Responder(ev))
 		dsda_InputFlushTick(); // If the menu used the event, make it invisible
-	else if(gamestate == GS_FINALE && F_Responder(ev))
+	else if(gamestate == GameState::Finale && F_Responder(ev))
 		dsda_InputFlushTick(); // finale ate the event
 	else
 		G_Responder(ev);
@@ -248,7 +250,7 @@ static void D_Wipe()
 	if(!dsda_RenderWipeScreen() || dsda_SkipWipe())
 	{
 		if(!raven)
-			dsda_TrackFeature(uf_wipescreen);
+			dsda_TrackFeature(FeatureFlag::Wipescreen);
 
 		// If there's no screen wipe, we still need to refresh the status bar
 		SB_Start();
@@ -315,7 +317,7 @@ static void D_Wipe()
 //
 
 // wipegamestate can be set to -1 to force a wipe on the next draw
-gamestate_t wipegamestate = GS_DEMOSCREEN;
+GameState wipegamestate = GameState::Demoscreen;
 extern dboolean setsizeneeded;
 
 static void D_DrawPause()
@@ -329,17 +331,17 @@ static void D_DrawPause()
 	{
 		if(!netgame)
 		{
-			V_DrawNamePatch(160, 5, 0, "PAUSED", CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatch(160, 5, 0, "PAUSED", ColorRange::Default, PatchTranslation::Stretch);
 		}
 		else
 		{
-			V_DrawNamePatch(160, 70, 0, "PAUSED", CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatch(160, 70, 0, "PAUSED", ColorRange::Default, PatchTranslation::Stretch);
 		}
 	}
 	else if(heretic)
 		MN_DrawPause();
 	else
-		V_DrawNamePatch((320 - V_NamePatchWidth("M_PAUSE")) / 2, 4, 0, "M_PAUSE", CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatch((320 - V_NamePatchWidth("M_PAUSE")) / 2, 4, 0, "M_PAUSE", ColorRange::Default, PatchTranslation::Stretch);
 
 	V_EndUIDraw();
 }
@@ -355,7 +357,7 @@ void D_Display(fixed_t frac)
 {
 	static dboolean isborderstate = false;
 	static dboolean borderwillneedredraw = false;
-	static gamestate_t oldgamestate = GS_DEFAULT;
+	static GameState oldgamestate = GameState::Default;
 	dboolean wipe;
 	dboolean viewactive = false, isborder = false;
 
@@ -364,7 +366,7 @@ void D_Display(fixed_t frac)
 	{
 		if(HU_DrawDemoProgress(false))
 			I_FinishUpdate();
-		if(!dsda_InputActive(dsda_input_use))
+		if(!dsda_InputActive(InputId::Use))
 			return;
 
 		if(V_IsOpenGLMode())
@@ -373,7 +375,7 @@ void D_Display(fixed_t frac)
 		}
 	}
 
-	if(!dsda_SkipMode() || !dsda_InputActive(dsda_input_use))
+	if(!dsda_SkipMode() || !dsda_InputActive(InputId::Use))
 		if(nodrawers) // for comparative timing / profiling
 			return;
 
@@ -384,7 +386,7 @@ void D_Display(fixed_t frac)
 	{
 		// change the view size if needed
 		R_ExecuteSetViewSize();
-		oldgamestate = GS_DEFAULT; // force background redraw
+		oldgamestate = GameState::Default; // force background redraw
 	}
 
 	if(V_IsOpenGLMode() && !exclusive_fullscreen && !nodrawers)
@@ -397,13 +399,13 @@ void D_Display(fixed_t frac)
 		R_ResetViewInterpolation();
 	}
 
-	if(gamestate != GS_LEVEL)
+	if(gamestate != GameState::Level)
 	{
 		// Not a level
 		switch(oldgamestate)
 		{
-			case GS_DEFAULT:
-			case GS_LEVEL:
+			case GameState::Default:
+			case GameState::Level:
 				V_SetPalette(0); // cph - use default (basic) palette
 			default:
 				break;
@@ -412,13 +414,13 @@ void D_Display(fixed_t frac)
 		V_BeginUIDraw();
 		switch(gamestate)
 		{
-			case GS_INTERMISSION:
+			case GameState::Intermission:
 				WI_Drawer();
 				break;
-			case GS_FINALE:
+			case GameState::Finale:
 				F_Drawer();
 				break;
-			case GS_DEMOSCREEN:
+			case GameState::Demoscreen:
 				D_PageDrawer();
 				break;
 			default:
@@ -435,7 +437,7 @@ void D_Display(fixed_t frac)
 		viewactive = !inhelpscreens && !automap_solid;
 		isborder = viewactive ? R_PartialView() : (!inhelpscreens && automap_full);
 
-		if(oldgamestate != GS_LEVEL || must_fill_back_screen)
+		if(oldgamestate != GameState::Level || must_fill_back_screen)
 		{
 			must_fill_back_screen = false;
 			R_FillBackScreen(); // draw the pattern into the back screen
@@ -449,7 +451,7 @@ void D_Display(fixed_t frac)
 			redrawborderstuff = isborder && (!isborderstate || borderwillneedredraw);
 			// The border may need redrawing next time if the border surrounds the screen,
 			// and there is a menu being displayed
-			borderwillneedredraw = menuactive && isborder && viewactive;
+			borderwillneedredraw = menuactive != MenuActive::Inactive && isborder && viewactive;
 			// e6y
 			// I should do it because I call R_RenderPlayerView in all cases,
 			// not only if viewactive is true
@@ -482,9 +484,9 @@ void D_Display(fixed_t frac)
 
 		R_InterpolateView(&players[displayplayer], frac);
 
-		DSDA_ADD_CONTEXT(sf_player_view);
+		DSDA_ADD_CONTEXT(SignalContext::PlayerView);
 		R_RenderPlayerView(&players[displayplayer]);
-		DSDA_REMOVE_CONTEXT(sf_player_view);
+		DSDA_REMOVE_CONTEXT(SignalContext::PlayerView);
 
 		dsda_UpdateRenderStats();
 
@@ -500,24 +502,24 @@ void D_Display(fixed_t frac)
 
 		R_RestoreInterpolations();
 
-		DSDA_ADD_CONTEXT(sf_status_bar);
+		DSDA_ADD_CONTEXT(SignalContext::StatusBar);
 		ST_Drawer(redrawborderstuff || BorderNeedRefresh);
-		DSDA_REMOVE_CONTEXT(sf_status_bar);
+		DSDA_REMOVE_CONTEXT(SignalContext::StatusBar);
 
 		BorderNeedRefresh = false;
 		if(V_IsSoftwareMode())
 			R_DrawViewBorder();
 
-		DSDA_ADD_CONTEXT(sf_hud);
+		DSDA_ADD_CONTEXT(SignalContext::Hud);
 		HU_Drawer();
-		DSDA_REMOVE_CONTEXT(sf_hud);
+		DSDA_REMOVE_CONTEXT(SignalContext::Hud);
 	}
 
 	isborderstate = isborder;
 	oldgamestate = wipegamestate = gamestate;
 
 	// draw pause pic
-	if(dsda_Paused() && (menuactive != mnact_full))
+	if(dsda_Paused() && (menuactive != MenuActive::Full))
 	{
 		D_DrawPause();
 	}
@@ -569,8 +571,8 @@ void D_Display(fixed_t frac)
 
 static void D_DoomLoop()
 {
-	if(dsda_IntConfig(dsda_config_startup_delay_ms) > 0)
-		I_uSleep(dsda_IntConfig(dsda_config_startup_delay_ms) * 1000);
+	if(dsda_IntConfig(ConfigId::StartupDelayMs) > 0)
+		I_uSleep(dsda_IntConfig(ConfigId::StartupDelayMs) * 1000);
 
 	for(;;)
 	{
@@ -702,7 +704,7 @@ static void D_PageDrawer()
 		V_DrawRawScreen(pagename);
 		if(demosequence == 1)
 		{
-			V_DrawNamePatch(4, 160, 0, "ADVISOR", CR_DEFAULT, VPT_STRETCH);
+			V_DrawNamePatch(4, 160, 0, "ADVISOR", ColorRange::Default, PatchTranslation::Stretch);
 		}
 		return;
 	}
@@ -718,7 +720,7 @@ static void D_PageDrawer()
 	{
 		// e6y: wide-res
 		V_ClearBorder();
-		V_DrawNamePatchFS(0, 0, 0, pagename, CR_DEFAULT, VPT_STRETCH);
+		V_DrawNamePatchFS(0, 0, 0, pagename, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	else if(dsda_ForcePWADCredit())
 		M_DrawCredits();
@@ -747,9 +749,9 @@ static void D_SetPageName(const char* name)
 		pagename = name;
 }
 
-void D_SetPage(const char* name, int tics, int music)
+void D_SetPage(const char* name, int tics, MusicId music)
 {
-	if(music)
+	if(music != MusicId::None)
 		S_StartMusic(music);
 
 	if(tics)
@@ -760,12 +762,12 @@ void D_SetPage(const char* name, int tics, int music)
 
 static void D_DrawTitle1(const char* name)
 {
-	D_SetPage(name, TICRATE * 170 / 35, mus_intro);
+	D_SetPage(name, TICRATE * 170 / 35, MusicId::Intro);
 }
 
 static void D_DrawTitle2(const char* name)
 {
-	D_SetPage(name, 0, mus_dm2ttl);
+	D_SetPage(name, 0, MusicId::Dm2ttl);
 }
 
 /* killough 11/98: tabulate demo sequences
@@ -849,27 +851,27 @@ extern const demostate_t doom_demostates[][4] =
 
 void D_DoAdvanceDemo()
 {
-	players[consoleplayer].playerstate = PST_LIVE; /* not reborn */
+	players[consoleplayer].playerstate = PlayerState::Live; /* not reborn */
 	advancedemo = false;
 	dsda_ResetPauseMode();
-	gameaction = ga_nothing;
+	gameaction = GameAction::Nothing;
 
 	pagetic = TICRATE * 11; /* killough 11/98: default behavior */
-	gamestate = GS_DEMOSCREEN;
+	gamestate = GameState::Demoscreen;
 
 	if(netgame && !demoplayback)
 		demosequence = 0;
-	else if(!demostates[++demosequence][gamemode].func)
+	else if(!demostates[++demosequence][std::to_underlying(gamemode)].func)
 		demosequence = 0;
 
 	// do not even attempt to play DEMO4 if it is not available
-	if(demosequence == 6 && gamemode == commercial && !W_LumpNameExists("demo4"))
+	if(demosequence == 6 && gamemode == GameMode::Commercial && !W_LumpNameExists("demo4"))
 		demosequence = 0;
 
 	if(dsda_SimpleDemoLoop())
 	{
 		// Skip blank / IWAD demos in PWADs
-		if(demostates[demosequence][gamemode].func == G_DeferedPlayDemo)
+		if(demostates[demosequence][std::to_underlying(gamemode)].func == G_DeferedPlayDemo)
 			demosequence++;
 
 		// Limit to just TITLEPIC / CREDIT
@@ -877,7 +879,7 @@ void D_DoAdvanceDemo()
 			demosequence = 0;
 	}
 
-	demostates[demosequence][gamemode].func(demostates[demosequence][gamemode].name);
+	demostates[demosequence][std::to_underlying(gamemode)].func(demostates[demosequence][std::to_underlying(gamemode)].name);
 }
 
 //
@@ -885,7 +887,7 @@ void D_DoAdvanceDemo()
 //
 void D_StartTitle()
 {
-	gameaction = ga_nothing;
+	gameaction = GameAction::Nothing;
 	in_game = false;
 	demosequence = -1;
 	D_AdvanceDemo();
@@ -900,18 +902,18 @@ void D_StartTitle()
 // CPhipps - static, const char* parameter
 //         - source is an enum
 //         - modified to allocate & use new wadfiles array
-void D_AddFile(const char* file, wad_source_t source)
+void D_AddFile(const char* file, WadSource source)
 {
 	int len;
 
 	// There can only be one iwad source!
-	if(source == source_iwad)
+	if(source == WadSource::Iwad)
 	{
 		int i;
 
 		for(i = 0; i < numwadfiles; ++i)
-			if(wadfiles[i].src == source_iwad)
-				wadfiles[i].src = source_skip;
+			if(wadfiles[i].src == WadSource::Iwad)
+				wadfiles[i].src = WadSource::Skip;
 	}
 
 	wadfiles = static_cast<wadfile_info_t*>(Z_Realloc(wadfiles, sizeof(*wadfiles) * (numwadfiles + 1)));
@@ -923,7 +925,7 @@ void D_AddFile(const char* file, wad_source_t source)
 	// No Rest For The Living
 	len = strlen(wadfiles[numwadfiles].name);
 	if(len >= 9 && !strnicmp(wadfiles[numwadfiles].name + len - 9, "nerve.wad", 9))
-		gamemission = pack_nerve;
+		gamemission = GameMission::PackNerve;
 
 	numwadfiles++;
 }
@@ -935,7 +937,7 @@ const char* D_dehout()
 {
 	dsda_arg_t* arg;
 
-	arg = dsda_Arg(dsda_arg_dehout);
+	arg = dsda_Arg(ArgId::Dehout);
 
 	return arg->found ? arg->value.v_string : nullptr;
 }
@@ -954,7 +956,7 @@ const char* D_dehout()
 // the gamemode from it. Also note if DOOM II, whether secret levels exist
 // CPhipps - const char* for iwadname, made static
 //e6y static
-void CheckIWAD(const char* iwadname, GameMode_t* gmode, dboolean* hassec)
+void CheckIWAD(const char* iwadname, GameMode* gmode, dboolean* hassec)
 {
 	if(M_ReadAccess(iwadname))
 	{
@@ -977,7 +979,7 @@ void CheckIWAD(const char* iwadname, GameMode_t* gmode, dboolean* hassec)
 
 				if(strncmp(header.identification, "IWAD", 4)) // missing IWAD tag in header
 				{
-					lprintf(LO_WARN, "CheckIWAD: IWAD tag %s not present\n", iwadname);
+					lprintf(OutputLevels::Warn, "CheckIWAD: IWAD tag %s not present\n", iwadname);
 				}
 
 				// read IWAD directory
@@ -1047,19 +1049,19 @@ void CheckIWAD(const char* iwadname, GameMode_t* gmode, dboolean* hassec)
 		// Must be a full set for whichever mode is present
 		// Lack of wolf-3d levels also detected here
 
-		*gmode = indetermined;
+		*gmode = GameMode::Indetermined;
 		*hassec = false;
 		if(cm >= 30 || (cm >= 20 && hx))
 		{
-			*gmode = commercial;
+			*gmode = GameMode::Commercial;
 			*hassec = sc >= 2;
 		}
 		else if(ud >= 9)
-			*gmode = retail;
+			*gmode = GameMode::Retail;
 		else if(rg >= 18)
-			*gmode = registered;
+			*gmode = GameMode::Registered;
 		else if(sw >= 9)
-			*gmode = shareware;
+			*gmode = GameMode::Shareware;
 	}
 	else // error from access call
 		I_Error("CheckIWAD: IWAD %s not readable", iwadname);
@@ -1076,7 +1078,7 @@ void AddIWAD(const char* iwad)
 		return;
 
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "IWAD found: %s\n", iwad); //jff 4/20/98 print only if found
+	lprintf(OutputLevels::Debug, "IWAD found: %s\n", iwad); //jff 4/20/98 print only if found
 	CheckIWAD(iwad, &gamemode, &haswolflevels);
 
 	/* jff 8/23/98 set gamemission global appropriately in all cases
@@ -1086,70 +1088,70 @@ void AddIWAD(const char* iwad)
 
 	if(i >= 11 && !strnicmp(iwad + i - 11, "heretic.wad", 11))
 	{
-		if(!dsda_Flag(dsda_arg_heretic))
-			dsda_UpdateFlag(dsda_arg_heretic, true);
+		if(!dsda_Flag(ArgId::Heretic))
+			dsda_UpdateFlag(ArgId::Heretic, true);
 	}
 
 	if(i >= 9 && !strnicmp(iwad + i - 9, "hexen.wad", 9))
 	{
-		if(!dsda_Flag(dsda_arg_hexen))
-			dsda_UpdateFlag(dsda_arg_hexen, true);
+		if(!dsda_Flag(ArgId::Hexen))
+			dsda_UpdateFlag(ArgId::Hexen, true);
 
-		gamemode = commercial;
+		gamemode = GameMode::Commercial;
 		haswolflevels = false;
 	}
 
 	if(i >= 12 && !strnicmp(iwad + i - 12, "heretic1.wad", 12))
 	{
-		if(!dsda_Flag(dsda_arg_heretic))
-			dsda_UpdateFlag(dsda_arg_heretic, true);
+		if(!dsda_Flag(ArgId::Heretic))
+			dsda_UpdateFlag(ArgId::Heretic, true);
 
-		gamemode = shareware;
+		gamemode = GameMode::Shareware;
 	}
 
 	switch(gamemode)
 	{
-		case retail:
-		case registered:
-		case shareware:
-			gamemission = doom;
+		case GameMode::Retail:
+		case GameMode::Registered:
+		case GameMode::Shareware:
+			gamemission = GameMission::Doom;
 			if(i >= 8 && !strnicmp(iwad + i - 8, "chex.wad", 8))
-				gamemission = tc_chex;
+				gamemission = GameMission::TcChex;
 			else if(i >= 10 && !strnicmp(iwad + i - 10, "chex3v.wad", 10))
-				gamemission = tc_chex3v;
+				gamemission = GameMission::TcChex3v;
 			else if(i >= 11 && !strnicmp(iwad + i - 11, "rekkrsa.wad", 11))
-				gamemission = tc_rekkr;
+				gamemission = GameMission::TcRekkr;
 			else if(i >= 13 && !strnicmp(iwad + i - 13, "freedoom1.wad", 13))
-				gamemission = tc_freedoom;
+				gamemission = GameMission::TcFreedoom;
 			break;
-		case commercial:
-			gamemission = doom2;
+		case GameMode::Commercial:
+			gamemission = GameMission::Doom2;
 			if(i >= 10 && !strnicmp(iwad + i - 10, "doom2f.wad", 10))
-				language = french;
+				language = Language::French;
 			else if(i >= 7 && !strnicmp(iwad + i - 7, "tnt.wad", 7))
-				gamemission = pack_tnt;
+				gamemission = GameMission::PackTnt;
 			else if(i >= 12 && !strnicmp(iwad + i - 12, "plutonia.wad", 12))
-				gamemission = pack_plut;
+				gamemission = GameMission::PackPlut;
 			else if(i >= 11 && !strnicmp(iwad + i - 11, "chex3d2.wad", 11))
-				gamemission = tc_chex3v;
+				gamemission = GameMission::TcChex3v;
 			else if(i >= 8 && !strnicmp(iwad + i - 8, "hacx.wad", 8))
-				gamemission = tc_hacx;
+				gamemission = GameMission::TcHacx;
 			else if((i >= 13 && !strnicmp(iwad + i - 13, "freedoom2.wad", 13))
 				|| (i >= 10 && !strnicmp(iwad + i - 10, "freedm.wad", 10)))
-				gamemission = tc_freedoom;
+				gamemission = GameMission::TcFreedoom;
 			break;
 		default:
-			gamemission = none;
+			gamemission = GameMission::None;
 			break;
 	}
-	if(gamemode == indetermined)
+	if(gamemode == GameMode::Indetermined)
 		//jff 9/3/98 use logical output routine
-		lprintf(LO_WARN, "Unknown Game Version, may not work\n");
+		lprintf(OutputLevels::Warn, "Unknown Game Version, may not work\n");
 
 	// Set up TC game logic
-	tc_game = (gamemission > pack_nerve);
+	tc_game = (gamemission > GameMission::PackNerve);
 
-	D_AddFile(iwad, source_iwad);
+	D_AddFile(iwad, WadSource::Iwad);
 }
 
 /*
@@ -1181,25 +1183,25 @@ static char* FindIWADFile()
 
 	if(CheckExeSuffix("-heretic"))
 	{
-		if(!dsda_Flag(dsda_arg_heretic))
-			dsda_UpdateFlag(dsda_arg_heretic, true);
+		if(!dsda_Flag(ArgId::Heretic))
+			dsda_UpdateFlag(ArgId::Heretic, true);
 	}
 	else if(CheckExeSuffix("-hexen"))
 	{
-		if(!dsda_Flag(dsda_arg_hexen))
-			dsda_UpdateFlag(dsda_arg_hexen, true);
+		if(!dsda_Flag(ArgId::Hexen))
+			dsda_UpdateFlag(ArgId::Hexen, true);
 	}
 
-	arg = dsda_Arg(dsda_arg_iwad);
+	arg = dsda_Arg(ArgId::Iwad);
 	if(arg->found)
 	{
 		iwad = I_FindWad(arg->value.v_string);
 	}
 	else
 	{
-		if(dsda_Flag(dsda_arg_heretic))
+		if(dsda_Flag(ArgId::Heretic))
 			return I_FindWad("heretic.wad");
-		else if(dsda_Flag(dsda_arg_hexen))
+		else if(dsda_Flag(ArgId::Hexen))
 			return I_FindWad("hexen.wad");
 
 		if(iwadlump != nullptr)
@@ -1250,16 +1252,16 @@ static void DoLooseFiles()
 	struct
 	{
 		const char* ext;
-		dsda_arg_identifier_t arg_id;
+		ArgId arg_id;
 	} looses[] = {
-		{".wad", dsda_arg_file},
-		{".zip", dsda_arg_file},
-		{".lmp", dsda_arg_playdemo},
-		{".deh", dsda_arg_deh},
-		{".bex", dsda_arg_deh},
+		{".wad", ArgId::File},
+		{".zip", ArgId::File},
+		{".lmp", ArgId::Playdemo},
+		{".deh", ArgId::Deh},
+		{".bex", ArgId::Deh},
 		// assume wad if no extension or length of the extention is not equal to 3
 		// must be last entry
-		{"", dsda_arg_file},
+		{"", ArgId::File},
 		{nullptr}
 	};
 
@@ -1280,7 +1282,7 @@ static void DoLooseFiles()
 				// If a wad is an iwad, we don't want to send it to -file
 				if(k == loose_wad_index && FileMatchesIWAD(dsda_argv[i]))
 				{
-					dsda_UpdateStringArg(dsda_arg_iwad, dsda_argv[i]);
+					dsda_UpdateStringArg(ArgId::Iwad, dsda_argv[i]);
 					break;
 				}
 
@@ -1334,7 +1336,7 @@ const char* IWADBaseName()
 
 	for(i = 0; i < numwadfiles; i++)
 	{
-		if(wadfiles[i].src == source_iwad)
+		if(wadfiles[i].src == WadSource::Iwad)
 			break;
 	}
 
@@ -1394,7 +1396,7 @@ static void D_ProcessDehAutoloadQueue(deh_queue_t* queue)
 
 // Load all WAD files from the given directory.
 
-static void LoadWADsAtPath(const char* path, wad_source_t source)
+static void LoadWADsAtPath(const char* path, WadSource source)
 {
 	glob_t* glob;
 	const char* filename;
@@ -1435,7 +1437,7 @@ static void LoadDehackedFilesAtPath(const char* path, dboolean defer_loading, de
 		}
 		else if(defer_loading)
 		{
-			dsda_AppendStringArg(dsda_arg_deh, filename);
+			dsda_AppendStringArg(ArgId::Deh, filename);
 		}
 		else
 		{
@@ -1446,7 +1448,7 @@ static void LoadDehackedFilesAtPath(const char* path, dboolean defer_loading, de
 	I_EndGlob(glob);
 }
 
-static void D_AddZip(const char* zipped_file_name, wad_source_t source, deh_queue_t* deh_queue)
+static void D_AddZip(const char* zipped_file_name, WadSource source, deh_queue_t* deh_queue)
 {
 	char* full_zip_path;
 	const char* temporary_directory;
@@ -1461,7 +1463,7 @@ static void D_AddZip(const char* zipped_file_name, wad_source_t source, deh_queu
 	Z_Free(full_zip_path);
 }
 
-static void D_AddUnzippedFile(const char* zipped_file_name, wad_source_t source, deh_queue_t* deh_queue)
+static void D_AddUnzippedFile(const char* zipped_file_name, WadSource source, deh_queue_t* deh_queue)
 {
 	char* full_zip_path;
 	const char* temporary_directory;
@@ -1475,7 +1477,7 @@ static void D_AddUnzippedFile(const char* zipped_file_name, wad_source_t source,
 	Z_Free(full_zip_path);
 }
 
-static void LoadZIPsAtPath(const char* path, wad_source_t source, deh_queue_t* deh_queue)
+static void LoadZIPsAtPath(const char* path, WadSource source, deh_queue_t* deh_queue)
 {
 	glob_t* glob;
 	const char* filename;
@@ -1501,10 +1503,10 @@ static const char* D_AutoLoadGameBase()
 		? "hexen-all"
 		: heretic
 		? "heretic-all"
-		: (gamemission == tc_chex ||
-			gamemission == tc_chex3v)
+		: (gamemission == GameMission::TcChex ||
+			gamemission == GameMission::TcChex3v)
 		? "chex-all"
-		: (gamemission == tc_freedoom)
+		: (gamemission == GameMission::TcFreedoom)
 		? "freedoom-all"
 		: !tc_game
 		? "doom-all"
@@ -1521,23 +1523,23 @@ void D_AutoloadIWadDir()
 
 	// common auto-loaded files for all games
 	autoload_dir = GetAutoloadDir(ALL_AUTOLOAD, true);
-	LoadWADsAtPath(autoload_dir, source_auto_load);
-	LoadZIPsAtPath(autoload_dir, source_auto_load, &autoload_deh_all_queue);
+	LoadWADsAtPath(autoload_dir, WadSource::AutoLoad);
+	LoadZIPsAtPath(autoload_dir, WadSource::AutoLoad, &autoload_deh_all_queue);
 	Z_Free(autoload_dir);
 
 	if(D_AutoLoadGameBase())
 	{
 		// common auto-loaded files for the game
 		autoload_dir = GetAutoloadDir(D_AutoLoadGameBase(), true);
-		LoadWADsAtPath(autoload_dir, source_auto_load);
-		LoadZIPsAtPath(autoload_dir, source_auto_load, &autoload_deh_game_queue);
+		LoadWADsAtPath(autoload_dir, WadSource::AutoLoad);
+		LoadZIPsAtPath(autoload_dir, WadSource::AutoLoad, &autoload_deh_game_queue);
 		Z_Free(autoload_dir);
 	}
 
 	// auto-loaded files per IWAD
 	autoload_dir = GetAutoloadDir(IWADBaseName(), true);
-	LoadWADsAtPath(autoload_dir, source_auto_load);
-	LoadZIPsAtPath(autoload_dir, source_auto_load, &autoload_deh_iwad_queue);
+	LoadWADsAtPath(autoload_dir, WadSource::AutoLoad);
+	LoadZIPsAtPath(autoload_dir, WadSource::AutoLoad, &autoload_deh_iwad_queue);
 	Z_Free(autoload_dir);
 }
 
@@ -1549,12 +1551,12 @@ static void D_AutoloadPWadDir()
 	autoload_deh_pwad_queue = static_cast<deh_queue_t*>(Z_Calloc(autoload_deh_pwad_count, sizeof(*autoload_deh_pwad_queue)));
 
 	for(i = 0; i < numwadfiles; ++i)
-		if(wadfiles[i].src == source_pwad)
+		if(wadfiles[i].src == WadSource::Pwad)
 		{
 			char* autoload_dir;
 			autoload_dir = GetAutoloadDir(dsda_BaseName(wadfiles[i].name), false);
-			LoadWADsAtPath(autoload_dir, source_pwad_auto_load);
-			LoadZIPsAtPath(autoload_dir, source_pwad_auto_load, &autoload_deh_pwad_queue[i]);
+			LoadWADsAtPath(autoload_dir, WadSource::PwadAutoLoad);
+			LoadZIPsAtPath(autoload_dir, WadSource::PwadAutoLoad, &autoload_deh_pwad_queue[i]);
 			Z_Free(autoload_dir);
 		}
 }
@@ -1591,7 +1593,7 @@ static void D_AutoloadDehPWadDir()
 {
 	int i;
 	for(i = 0; i < numwadfiles; ++i)
-		if(wadfiles[i].src == source_pwad)
+		if(wadfiles[i].src == WadSource::Pwad)
 		{
 			char* autoload_dir;
 			autoload_dir = GetAutoloadDir(dsda_BaseName(wadfiles[i].name), false);
@@ -1611,7 +1613,7 @@ static void HandleWarp()
 {
 	dsda_arg_t* arg;
 
-	arg = dsda_Arg(dsda_arg_warp);
+	arg = dsda_Arg(ArgId::Warp);
 
 	if(arg->found)
 	{
@@ -1631,26 +1633,26 @@ static void HandleClass()
 {
 	int p;
 	dsda_arg_t* arg;
-	int player_class = PCLASS_FIGHTER;
+	int player_class = std::to_underlying(PClass::Fighter);
 
 	if(!hexen) return;
 
-	arg = dsda_Arg(dsda_arg_class);
+	arg = dsda_Arg(ArgId::Class);
 	if(arg->found)
-		player_class = arg->value.v_int + PCLASS_FIGHTER;
+		player_class = arg->value.v_int + std::to_underlying(PClass::Fighter);
 
 	if(
-		player_class != PCLASS_FIGHTER &&
-		player_class != PCLASS_CLERIC &&
-		player_class != PCLASS_MAGE
+		player_class != std::to_underlying(PClass::Fighter) &&
+		player_class != std::to_underlying(PClass::Cleric) &&
+		player_class != std::to_underlying(PClass::Mage)
 	)
-		player_class = PCLASS_FIGHTER;
+		player_class = std::to_underlying(PClass::Fighter);
 
-	PlayerClass[0] = static_cast<pclass_t>(player_class);
+	PlayerClass[0] = static_cast<PClass>(player_class);
 	for(p = 1; p < MAX_MAXPLAYERS; p++)
-		PlayerClass[p] = PCLASS_FIGHTER;
+		PlayerClass[p] = PClass::Fighter;
 
-	randomclass = dsda_Flag(dsda_arg_randclass);
+	randomclass = dsda_Flag(ArgId::Randclass);
 }
 
 static void HandlePlayback()
@@ -1671,9 +1673,9 @@ static void EvaluateDoomVerStr()
 {
 	if(heretic)
 	{
-		if(gamemode == retail)
+		if(gamemode == GameMode::Retail)
 			doomverstr = "Heretic: Shadow of the Serpent Riders";
-		else if(gamemode == shareware)
+		else if(gamemode == GameMode::Shareware)
 			doomverstr = "Heretic Shareware";
 		else
 			doomverstr = "Heretic";
@@ -1686,19 +1688,19 @@ static void EvaluateDoomVerStr()
 	{
 		switch(gamemode)
 		{
-			case retail:
+			case GameMode::Retail:
 				switch(gamemission)
 				{
-					case tc_chex:
+					case GameMission::TcChex:
 						doomverstr = "Chex(R) Quest";
 						break;
-					case tc_chex3v:
+					case GameMission::TcChex3v:
 						doomverstr = "Chex(R) Quest 3: Vanilla Edition";
 						break;
-					case tc_rekkr:
+					case GameMission::TcRekkr:
 						doomverstr = "REKKR";
 						break;
-					case tc_freedoom:
+					case GameMission::TcFreedoom:
 						doomverstr = "Freedoom Phase 1";
 						break;
 					default:
@@ -1706,28 +1708,28 @@ static void EvaluateDoomVerStr()
 						break;
 				}
 				break;
-			case shareware:
+			case GameMode::Shareware:
 				doomverstr = "DOOM Shareware";
 				break;
-			case registered:
+			case GameMode::Registered:
 				doomverstr = "DOOM Registered";
 				break;
-			case commercial: // Ty 08/27/98 - fixed gamemode vs gamemission
+			case GameMode::Commercial: // Ty 08/27/98 - fixed gamemode vs gamemission
 				switch(gamemission)
 				{
-					case pack_plut:
+					case GameMission::PackPlut:
 						doomverstr = "Final DOOM - The Plutonia Experiment";
 						break;
-					case pack_tnt:
+					case GameMission::PackTnt:
 						doomverstr = "Final DOOM - TNT: Evilution";
 						break;
-					case tc_chex3v:
+					case GameMission::TcChex3v:
 						doomverstr = "Chex(R) Quest 3: Modding Edition";
 						break;
-					case tc_hacx:
+					case GameMission::TcHacx:
 						doomverstr = "HACX - Twitch 'n Kill";
 						break;
-					case tc_freedoom:
+					case GameMission::TcFreedoom:
 						doomverstr = freedm ? "FreeDM" : "Freedoom Phase 2";
 						break;
 					default:
@@ -1753,20 +1755,20 @@ static void EvaluateDoomVerStr()
 	}
 
 	/* cphipps - the main display. This shows the copyright and game type */
-	lprintf(LO_INFO,
+	lprintf(OutputLevels::Info,
 		"%s is released under the GNU General Public license v2.0.\n"
 		"You are welcome to redistribute it under certain conditions.\n"
 		"It comes with ABSOLUTELY NO WARRANTY. See the file COPYING for details.\n\n",
 		PROJECT_NAME);
 
-	lprintf(LO_INFO, "Playing: %s\n", doomverstr);
+	lprintf(OutputLevels::Info, "Playing: %s\n", doomverstr);
 }
 
 static void dsda_Loadfiles()
 {
 	dsda_arg_t* arg;
 
-	if((arg = dsda_Arg(dsda_arg_file))->found)
+	if((arg = dsda_Arg(ArgId::File))->found)
 	{
 		int file_i;
 		// the parms after p are wadfile/lump names,
@@ -1791,21 +1793,21 @@ static void dsda_Loadfiles()
 			if(dsda_HasFileExt(file_name, ".deh") || dsda_HasFileExt(file_name, ".bex"))
 			{
 				if(MainLumpCache)
-					dsda_AppendStringArg(dsda_arg_deh, file_name);
+					dsda_AppendStringArg(ArgId::Deh, file_name);
 			}
 			else if(dsda_HasFileExt(file_name, ".zip"))
 			{
-				if(dsda_Arg(dsda_arg_iwad)->found)
-					D_AddZip(file_name, source_pwad, nullptr);
+				if(dsda_Arg(ArgId::Iwad)->found)
+					D_AddZip(file_name, WadSource::Pwad, nullptr);
 				else
-					MainLumpCache ? D_AddUnzippedFile(file_name, source_pwad, nullptr) : D_AddZip(file_name, source_pwad, nullptr);
+					MainLumpCache ? D_AddUnzippedFile(file_name, WadSource::Pwad, nullptr) : D_AddZip(file_name, WadSource::Pwad, nullptr);
 			}
 			else if(dsda_HasFileExt(file_name, ".wad") || dsda_HasFileExt(file_name, ".lmp"))
 			{
 				if(!file)
 					file = I_RequireWad(file_name);
 
-				D_AddFile(file, source_pwad);
+				D_AddFile(file, WadSource::Pwad);
 			}
 			else
 			{
@@ -1878,10 +1880,10 @@ static void IdentifyVersion()
 	dsda_InitDataDir();
 	dsda_InitSaveDir();
 
-	if(!dsda_Arg(dsda_arg_iwad)->found)
+	if(!dsda_Arg(ArgId::Iwad)->found)
 	{
 		dsda_Loadfiles();                                        // Load files for GAMEINFO lump
-		if(!dsda_Flag(dsda_arg_noautoload)) D_AutoloadPWadDir(); // Load autoload PWAD files for GAMEINFO lump
+		if(!dsda_Flag(ArgId::Noautoload)) D_AutoloadPWadDir(); // Load autoload PWAD files for GAMEINFO lump
 		W_Init();                                                // Quick cache to search for GAMEINFO lump
 
 		// Parse GAMEINFO lump
@@ -1948,14 +1950,14 @@ static void D_DoomMainSetup()
 
 	setbuf(stdout,nullptr);
 
-	if(dsda_Flag(dsda_arg_help))
+	if(dsda_Flag(ArgId::Help))
 	{
 		dsda_PrintArgHelp();
 		I_SafeExit(0);
 	}
 
 	// CPhipps - autoloading of wads
-	autoload = !dsda_Flag(dsda_arg_noautoload);
+	autoload = !dsda_Flag(ArgId::Noautoload);
 
 	DoLooseFiles(); // Ty 08/29/98 - handle "loose" files on command line
 
@@ -1968,33 +1970,33 @@ static void D_DoomMainSetup()
 	// The dachaked stuff has been moved below an autoload
 
 	// jff 1/24/98 set both working and command line value of play parms
-	nomonsters = clnomonsters = dsda_Flag(dsda_arg_nomonsters);
-	respawnparm = clrespawnparm = dsda_Flag(dsda_arg_respawn);
-	fastparm = clfastparm = dsda_Flag(dsda_arg_fast);
+	nomonsters = clnomonsters = dsda_Flag(ArgId::Nomonsters);
+	respawnparm = clrespawnparm = dsda_Flag(ArgId::Respawn);
+	fastparm = clfastparm = dsda_Flag(ArgId::Fast);
 	// jff 1/24/98 end of set to both working and command line value
 
-	if(dsda_Flag(dsda_arg_altdeath))
+	if(dsda_Flag(ArgId::Altdeath))
 		deathmatch = 2;
-	else if(dsda_Flag(dsda_arg_deathmatch))
+	else if(dsda_Flag(ArgId::Deathmatch))
 		deathmatch = 1;
 
 	modifiedgame = false;
 
 	// get skill / episode / map from parms
 
-	startskill = dsda_IntConfig(dsda_config_default_skill) - 1;
+	startskill = dsda_IntConfig(ConfigId::DefaultSkill) - 1;
 	startepisode = 1;
 	startmap = 1;
 	autostart = false;
 
-	arg = dsda_Arg(dsda_arg_skill);
+	arg = dsda_Arg(ArgId::Skill);
 	if(arg->found)
 	{
 		startskill = arg->value.v_int - 1;
 		autostart = true;
 	}
 
-	arg = dsda_Arg(dsda_arg_episode);
+	arg = dsda_Arg(ArgId::Episode);
 	if(arg->found)
 	{
 		startepisode = arg->value.v_int;
@@ -2004,24 +2006,24 @@ static void D_DoomMainSetup()
 
 	HandleClass();
 
-	arg = dsda_Arg(dsda_arg_timer);
+	arg = dsda_Arg(ArgId::Timer);
 	if(arg->found && deathmatch)
 	{
 		int time = arg->value.v_int;
 		//jff 9/3/98 use logical output routine
-		lprintf(LO_INFO, "Levels will end after %d minute%s.\n", time, time > 1 ? "s" : "");
+		lprintf(OutputLevels::Info, "Levels will end after %d minute%s.\n", time, time > 1 ? "s" : "");
 	}
 
 	//jff 1/22/98 add command line parms to disable sound and music
 	{
-		int nosound = dsda_Flag(dsda_arg_nosound);
-		nomusicparm = nosound || dsda_Flag(dsda_arg_nomusic);
-		nosfxparm = nosound || dsda_Flag(dsda_arg_nosfx);
+		int nosound = dsda_Flag(ArgId::Nosound);
+		nomusicparm = nosound || dsda_Flag(ArgId::Nomusic);
+		nosfxparm = nosound || dsda_Flag(ArgId::Nosfx);
 	}
 	//jff end of sound/music command line parms
 
 	// killough 3/2/98: allow -nodraw generally
-	nodrawers = dsda_Flag(dsda_arg_nodraw);
+	nodrawers = dsda_Flag(ArgId::Nodraw);
 
 	// init subsystems
 
@@ -2032,7 +2034,7 @@ static void D_DoomMainSetup()
 	gld_InitCommandLine();
 
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "V_Init: allocate screens.\n");
+	lprintf(OutputLevels::Debug, "V_Init: allocate screens.\n");
 	V_Init();
 
 	//e6y: Calculate the screen resolution and init all buffers
@@ -2042,10 +2044,10 @@ static void D_DoomMainSetup()
 	e6y_InitCommandLine();
 
 	// Check arguments for demoplayback / demorecording
-	started_demo = dsda_Flag(dsda_arg_record) || dsda_Flag(dsda_arg_recordfromto) ||
-		dsda_Flag(dsda_arg_playdemo) || dsda_Flag(dsda_arg_timedemo) || dsda_Flag(dsda_arg_fastdemo);
+	started_demo = dsda_Flag(ArgId::Record) || dsda_Flag(ArgId::Recordfromto) ||
+		dsda_Flag(ArgId::Playdemo) || dsda_Flag(ArgId::Timedemo) || dsda_Flag(ArgId::Fastdemo);
 
-	D_AddFile(port_wad_file, source_port_wad);
+	D_AddFile(port_wad_file, WadSource::PortWad);
 
 	HandlePlayback(); // must come before autoload: may detect iwad in footer
 
@@ -2067,7 +2069,7 @@ static void D_DoomMainSetup()
 	D_InitFakeNetGame();
 
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "W_Init: Init WADfiles.\n");
+	lprintf(OutputLevels::Debug, "W_Init: Init WADfiles.\n");
 	W_Init(); // CPhipps - handling of wadfiles init changed
 
 	if(hexen)
@@ -2075,7 +2077,7 @@ static void D_DoomMainSetup()
 		if(!W_LumpNameExists("MAP05"))
 		{
 			I_Error("The Hexen IWAD shareware is not supported.");
-			gamemode = shareware;
+			gamemode = GameMode::Shareware;
 			g_maxplayers = 4;
 		}
 		else if(!W_LumpNameExists("CLUS1MSG"))
@@ -2084,12 +2086,12 @@ static void D_DoomMainSetup()
 		}
 	}
 
-	lprintf(LO_DEBUG, "G_ReloadDefaults: Checking OPTIONS.\n");
+	lprintf(OutputLevels::Debug, "G_ReloadDefaults: Checking OPTIONS.\n");
 	dsda_ParseOptionsLump();
 
 	if(iwadlump != nullptr)
 	{
-		lprintf(LO_INFO, "Detected %s lump: %s\n", iwadver ? iwadver : "GAMEINFO", iwadlump);
+		lprintf(OutputLevels::Info, "Detected %s lump: %s\n", iwadver ? iwadver : "GAMEINFO", iwadlump);
 		Z_Free(iwadlump);
 
 		if(iwadver)
@@ -2100,36 +2102,36 @@ static void D_DoomMainSetup()
 
 	// e6y
 	// option to disable automatic loading of dehacked-in-wad lump
-	if(!dsda_Flag(dsda_arg_nodeh))
+	if(!dsda_Flag(ArgId::Nodeh))
 	{
 		// MBF-style DeHackEd in wad support: load all lumps, not just the last one
 		for(p = -1; (p = W_ListNumFromName("DEHACKED", p)) >= 0;)
 			// Split loading DEHACKED lumps into IWAD/autoload and PWADs/others
-			if(lumpinfo[p].source == source_iwad
-				|| lumpinfo[p].source == source_port_wad
-				|| lumpinfo[p].source == source_auto_load
-				|| lumpinfo[p].source == source_pwad_auto_load)
+			if(lumpinfo[p].source == WadSource::Iwad
+				|| lumpinfo[p].source == WadSource::PortWad
+				|| lumpinfo[p].source == WadSource::AutoLoad
+				|| lumpinfo[p].source == WadSource::PwadAutoLoad)
 				ProcessDehFile(nullptr, D_dehout(), p); // cph - add dehacked-in-a-wad support
 
 		if(bfgedition)
 		{
-			int lump = W_CheckNumForName2("BFGBEX", ns_prboom);
+			int lump = W_CheckNumForName2("BFGBEX", LumpNamespace::Prboom);
 			if(lump != LUMP_NOT_FOUND)
 			{
 				ProcessDehFile(nullptr, D_dehout(), lump);
 			}
 		}
-		if(gamemission == pack_nerve)
+		if(gamemission == GameMission::PackNerve)
 		{
-			int lump = W_CheckNumForName2("NERVEBEX", ns_prboom);
+			int lump = W_CheckNumForName2("NERVEBEX", LumpNamespace::Prboom);
 			if(lump != LUMP_NOT_FOUND)
 			{
 				ProcessDehFile(nullptr, D_dehout(), lump);
 			}
 		}
-		if(gamemission == tc_chex)
+		if(gamemission == GameMission::TcChex)
 		{
-			int lump = W_CheckNumForName2("CHEXDEH", ns_prboom);
+			int lump = W_CheckNumForName2("CHEXDEH", LumpNamespace::Prboom);
 			if(lump != LUMP_NOT_FOUND)
 			{
 				ProcessDehFile(nullptr, D_dehout(), lump);
@@ -2141,12 +2143,12 @@ static void D_DoomMainSetup()
 	if(autoload)
 		D_AutoloadDehIWadDir();
 
-	if(!dsda_Flag(dsda_arg_nodeh))
+	if(!dsda_Flag(ArgId::Nodeh))
 		for(p = -1; (p = W_ListNumFromName("DEHACKED", p)) >= 0;)
-			if(!(lumpinfo[p].source == source_iwad
-				|| lumpinfo[p].source == source_port_wad
-				|| lumpinfo[p].source == source_auto_load
-				|| lumpinfo[p].source == source_pwad_auto_load))
+			if(!(lumpinfo[p].source == WadSource::Iwad
+				|| lumpinfo[p].source == WadSource::PortWad
+				|| lumpinfo[p].source == WadSource::AutoLoad
+				|| lumpinfo[p].source == WadSource::PwadAutoLoad))
 				ProcessDehFile(nullptr, D_dehout(), p);
 
 	// process .deh files from PWADs autoload directories
@@ -2162,7 +2164,7 @@ static void D_DoomMainSetup()
 	// Using -deh in BOOM, others use -dehacked.
 	// Ty 03/18/98 also allow .bex extension.  .bex overrides if both exist.
 
-	arg = dsda_Arg(dsda_arg_deh);
+	arg = dsda_Arg(ArgId::Deh);
 	if(arg->found)
 	{
 		int i;
@@ -2186,15 +2188,15 @@ static void D_DoomMainSetup()
 	dsda_AppendZDoomMobjInfo();
 	dsda_ApplyBinaryMapFormat();
 
-	lprintf(LO_DEBUG, "dsda_InitWadStats: Setting up wad stats.\n");
+	lprintf(OutputLevels::Debug, "dsda_InitWadStats: Setting up wad stats.\n");
 	dsda_InitWadStats();
 
-	lprintf(LO_INFO, "\n"); // Separator after file loading
+	lprintf(OutputLevels::Info, "\n"); // Separator after file loading
 
 	V_InitColorTranslation(); //jff 4/24/98 load color translation lumps
 
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "M_Init: Init miscellaneous info.\n");
+	lprintf(OutputLevels::Debug, "M_Init: Init miscellaneous info.\n");
 	M_Init();
 
 	dsda_LoadSndInfo();
@@ -2205,7 +2207,7 @@ static void D_DoomMainSetup()
 	}
 
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "R_Init: Init DOOM refresh daemon - ");
+	lprintf(OutputLevels::Debug, "R_Init: Init DOOM refresh daemon - ");
 	R_Init();
 
 	dsda_LoadWadPreferences();
@@ -2214,7 +2216,7 @@ static void D_DoomMainSetup()
 	dsda_InitGameModifiers(); // Set game modifiers based off args / persistent cfgs
 
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "\nP_Init: Init Playloop state.\n");
+	lprintf(OutputLevels::Debug, "\nP_Init: Init Playloop state.\n");
 	P_Init();
 
 	// Must be after P_Init
@@ -2224,34 +2226,34 @@ static void D_DoomMainSetup()
 	dsda_HandleSkip();
 
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "I_Init: Setting up machine state.\n");
+	lprintf(OutputLevels::Debug, "I_Init: Setting up machine state.\n");
 	I_Init();
 
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "S_Init: Setting up sound.\n");
+	lprintf(OutputLevels::Debug, "S_Init: Setting up sound.\n");
 	S_Init();
 
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "dsda_InitFont: Loading the hud fonts.\n");
+	lprintf(OutputLevels::Debug, "dsda_InitFont: Loading the hud fonts.\n");
 	dsda_InitFont();
 
-	if(!(dsda_Flag(dsda_arg_nodraw) && dsda_Flag(dsda_arg_nosound)))
+	if(!(dsda_Flag(ArgId::Nodraw) && dsda_Flag(ArgId::Nosound)))
 		I_InitGraphics();
 
 	// NSM
-	arg = dsda_Arg(dsda_arg_viddump);
+	arg = dsda_Arg(ArgId::Viddump);
 	if(arg->found)
 	{
 		I_CapturePrep(arg->value.v_string);
 	}
 
 	//jff 9/3/98 use logical output routine
-	lprintf(LO_DEBUG, "ST_Init: Init status bar.\n");
+	lprintf(OutputLevels::Debug, "ST_Init: Init status bar.\n");
 	ST_Init();
 
 	// start the appropriate game based on parms
 
-	arg = dsda_Arg(dsda_arg_record);
+	arg = dsda_Arg(ArgId::Record);
 	if(arg->found)
 	{
 		autostart = true;
@@ -2260,7 +2262,7 @@ static void D_DoomMainSetup()
 	}
 	else
 	{
-		arg = dsda_Arg(dsda_arg_loadgame);
+		arg = dsda_Arg(ArgId::Loadgame);
 		if(arg->found)
 		{
 			slot = arg->value.v_int;
@@ -2285,7 +2287,7 @@ static void D_DoomMainSetup()
 	// do not try to interpolate during timedemo
 	M_ChangeUncappedFrameRate();
 
-	lprintf(LO_DEBUG, "\n"); // Separator after setup
+	lprintf(OutputLevels::Debug, "\n"); // Separator after setup
 }
 
 //

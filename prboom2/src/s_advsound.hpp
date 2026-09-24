@@ -6,13 +6,13 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+#include "sounds.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "p_mobj.hpp"
-#include "sounds.hpp"
 
 //
 //MUSINFO lump

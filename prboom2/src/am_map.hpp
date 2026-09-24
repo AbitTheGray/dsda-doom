@@ -6,6 +6,10 @@
 
 #pragma once
 
+#include "d_event.hpp"
+#include "m_fixed.hpp"
+#include "m_misc.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -14,10 +18,6 @@ extern "C"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#include "d_event.hpp"
-#include "m_fixed.hpp"
-#include "m_misc.hpp"
 
 typedef struct
 {
@@ -88,13 +88,13 @@ void AM_Stop(dboolean minimap);
 
 // killough 2/22/98: for saving automap information in savegame:
 
-typedef enum
+enum struct AutomapStart : int32_t
 {
-	AM_OPEN_MINIMAP,
-	AM_OPEN_FULLAUTOMAP
-} am_start_t;
+	Minimap,
+	FullAutomap
+};
 
-void AM_Start(dboolean open_full_automap);
+void AM_Start(AutomapStart open_full_automap);
 
 //jff 4/16/98 make externally available
 
@@ -146,27 +146,27 @@ typedef struct am_frame_s
 
 extern am_frame_t am_frame;
 
-typedef enum
+enum struct MapThingsAppearance : int32_t
 {
-	map_things_appearance_classic,
-	map_things_appearance_scaled,
+	Classic,
+	Scaled,
 #if defined(HAVE_LIBSDL2_IMAGE)
-	map_things_appearance_icon,
+	Icon,
 #endif
-	map_things_appearance_box,
+	Box,
 
-	map_things_appearance_max
-} map_things_appearance_t;
+	Count
+};
 
-typedef enum
+enum struct MapTrailMode : int32_t
 {
-	map_trail_mode_off,
-	map_trail_mode_ignore_collisions,
-	map_trail_mode_include_collisions,
-	map_trail_mode_max
-} map_trail_mode_t;
+	Off,
+	IgnoreCollisions,
+	IncludeCollisions,
+	Count
+};
 
-extern map_trail_mode_t map_trail_mode;
+extern MapTrailMode map_trail_mode;
 
 void AM_updatePlayerTrail(fixed_t x, fixed_t y);
 void AM_RefreshMinimap();

@@ -101,7 +101,7 @@ void dsda_ArchiveMSecNodes()
 
 			if(!dsda_IsMSecNodeMobj(th))
 			{
-				lprintf(LO_WARN, "Orphan mobj in msecnode list - undefined behaviour may occur!\n");
+				lprintf(OutputLevels::Warn, "Orphan mobj in msecnode list - undefined behaviour may occur!\n");
 				msecnode = msecnode->m_snext;
 				continue;
 			}

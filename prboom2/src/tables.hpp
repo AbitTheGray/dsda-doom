@@ -19,12 +19,12 @@
 
 #pragma once
 
+#include "m_fixed.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "m_fixed.hpp"
 
 #define FINEANGLES              8192
 #define FINEMASK                (FINEANGLES-1)

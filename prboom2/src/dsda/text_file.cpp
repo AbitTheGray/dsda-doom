@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Text File
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "lprintf.hpp"
 #include "m_file.hpp"
@@ -61,7 +63,7 @@ static int dsda_IL()
 
 static const char* dsda_Movie()
 {
-	if(gamemode == commercial)
+	if(gamemode == GameMode::Commercial)
 	{
 		if(dsda_startmap == 1 && dsda_last_gamemap == 10)
 			return "Episode 1";
@@ -125,7 +127,7 @@ void dsda_ExportTextFile()
 	const char* dsda_player_name;
 	FILE* file;
 
-	if(!dsda_Flag(dsda_arg_export_text_file))
+	if(!dsda_Flag(ArgId::ExportTextFile))
 		return;
 
 	name = dsda_TextFileName();
@@ -139,11 +141,11 @@ void dsda_ExportTextFile()
 	if(!file)
 		I_Error("Unable to export text file!");
 
-	arg = dsda_Arg(dsda_arg_iwad);
+	arg = dsda_Arg(ArgId::Iwad);
 	if(arg->found)
 		iwad = PathFindFileName(arg->value.v_string);
 
-	arg = dsda_Arg(dsda_arg_file);
+	arg = dsda_Arg(ArgId::File);
 	if(arg->found)
 		pwad = PathFindFileName(arg->value.v_string_array[0]);
 
@@ -181,7 +183,7 @@ void dsda_ExportTextFile()
 	fprintf(file, "Time:      %s\n", name);
 	Z_Free(name);
 
-	dsda_player_name = dsda_StringConfig(dsda_config_player_name);
+	dsda_player_name = dsda_StringConfig(ConfigId::PlayerName);
 
 	fprintf(file, "\n");
 	fprintf(file, "Author:    %s\n", dsda_player_name);

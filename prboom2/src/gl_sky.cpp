@@ -38,6 +38,8 @@
 */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -78,7 +80,7 @@ typedef struct
 	vbo_vertex_t* data;
 } GLSkyVBO;
 
-int gl_drawskys;
+SkyType gl_drawskys;
 // Sky stretching is rather pointless with the GL renderer
 // now that it can handle all sky heights.
 int gl_stretchsky = false;
@@ -118,9 +120,9 @@ void gld_DrawFakeSkyStrips()
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE); // no graphics
 	gld_EnableTexture2D(GL_TEXTURE0_ARB, false);
 
-	for(i = gld_drawinfo.num_items[GLDIT_SWALL] - 1; i >= 0; i--)
+	for(i = gld_drawinfo.num_items[std::to_underlying(GLDrawItemType::Swall)] - 1; i >= 0; i--)
 	{
-		GLWall* wall = gld_drawinfo.items[GLDIT_SWALL][i].item.wall;
+		GLWall* wall = gld_drawinfo.items[std::to_underlying(GLDrawItemType::Swall)][i].item.wall;
 
 		glBegin(GL_TRIANGLE_STRIP);
 		glVertex3f(wall->glseg->x1, wall->ytop, wall->glseg->z1);
@@ -196,9 +198,9 @@ void gld_AddSkyTexture(GLWall* wall, int sky1, int sky2, int skytype)
 	{
 		SkyBox.type |= skytype;
 
-		wall->gltexture->flags |= GLTEXTURE_SKY;
+		wall->gltexture->flags |= GLTextureFlag::Sky;
 
-		gld_AddDrawItem(GLDIT_SWALL, wall);
+		gld_AddDrawItem(GLDrawItemType::Swall, wall);
 
 		if(!SkyBox.wall.gltexture)
 		{
@@ -206,7 +208,7 @@ void gld_AddSkyTexture(GLWall* wall, int sky1, int sky2, int skytype)
 
 			switch(gl_drawskys)
 			{
-				case skytype_skydome:
+				case SkyType::Skydome:
 					if(s)
 					{
 						SkyBox.x_offset = (float)s->textureoffset * 180.0f / (float)ANG180;
@@ -274,7 +276,7 @@ void gld_DrawStripsSky()
 	int i;
 	GLTexture* gltexture = nullptr;
 
-	if(gl_drawskys == skytype_standard)
+	if(gl_drawskys == SkyType::Standard)
 	{
 		glEnable(GL_TEXTURE_GEN_S);
 		glEnable(GL_TEXTURE_GEN_T);
@@ -282,16 +284,16 @@ void gld_DrawStripsSky()
 
 		glColor4fv(gl_whitecolor);
 
-		SetTextureMode(TM_OPAQUE);
+		SetTextureMode(TexMode::Opaque);
 	}
 
 	glMatrixMode(GL_TEXTURE);
 
-	for(i = gld_drawinfo.num_items[GLDIT_SWALL] - 1; i >= 0; i--)
+	for(i = gld_drawinfo.num_items[std::to_underlying(GLDrawItemType::Swall)] - 1; i >= 0; i--)
 	{
-		GLWall* wall = gld_drawinfo.items[GLDIT_SWALL][i].item.wall;
+		GLWall* wall = gld_drawinfo.items[std::to_underlying(GLDrawItemType::Swall)][i].item.wall;
 
-		gltexture = (gl_drawskys == skytype_none ? nullptr : wall->gltexture);
+		gltexture = (gl_drawskys == SkyType::None ? nullptr : wall->gltexture);
 		gld_BindSkyTexture(gltexture);
 
 		if(!gltexture)
@@ -323,7 +325,7 @@ void gld_DrawStripsSky()
 
 	gld_DrawSkyCaps();
 
-	if(gl_drawskys == skytype_standard)
+	if(gl_drawskys == SkyType::Standard)
 	{
 		glDisable(GL_TEXTURE_GEN_Q);
 		glDisable(GL_TEXTURE_GEN_T);
@@ -558,12 +560,12 @@ static void SkyVertex(vbo_vertex_t* vbo, int r, int c)
 
 GLSkyVBO sky_vbo[2];
 
-static void gld_BuildSky(int row_count, int col_count, SkyBoxParams_t* sky, int cm)
+static void gld_BuildSky(int row_count, int col_count, SkyBoxParams_t* sky, ColorRange cm)
 {
 	int texh, c, r;
 	vbo_vertex_t* vertex_p;
 	int vertex_count = 2 * row_count * (col_count * 2 + 2) + col_count * 2;
-	int vbo_idx = (cm == INVERSECOLORMAP ? 1 : 0);
+	int vbo_idx = (cm == static_cast<ColorRange>(INVERSECOLORMAP) ? 1 : 0);
 	GLSkyVBO* vbo = &sky_vbo[vbo_idx];
 
 	if((vbo->columns != col_count) || (vbo->rows != row_count))
@@ -682,8 +684,8 @@ static void RenderDome(SkyBoxParams_t* sky)
 			gld_GetSkyCapColors();
 		}
 
-		gld_BuildSky(rows, columns, sky, 0);
-		gld_BuildSky(rows, columns, sky, INVERSECOLORMAP);
+		gld_BuildSky(rows, columns, sky, ColorRange::Default);
+		gld_BuildSky(rows, columns, sky, static_cast<ColorRange>(INVERSECOLORMAP));
 	}
 
 	if(gl_ext_arb_vertex_buffer_object)
@@ -783,7 +785,7 @@ void gld_DrawDomeSkyBox()
 
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_ALPHA_TEST);
-		SetTextureMode(TM_OPAQUE);
+		SetTextureMode(TexMode::Opaque);
 
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

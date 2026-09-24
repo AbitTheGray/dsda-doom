@@ -5,6 +5,8 @@
  *  Floors, Ceilings, Doors, Locked Doors, Lifts, Stairs, Crushers
  */
 
+#include <utility>
+
 #include "doomstat.hpp" //jff 6/19/98 for demo_compatibility
 #include "r_main.hpp"
 #include "p_spec.hpp"
@@ -17,7 +19,7 @@
 #include "dsda/id_list.hpp"
 
 // check if a manual trigger, if so do just the sector on the backside
-#define FIND_GENLIN_SECTORS if (Trig == PushOnce || Trig == PushMany) \
+#define FIND_GENLIN_SECTORS if (Trig == GenTriggerType::PushOnce || Trig == GenTriggerType::PushMany) \
                             { \
                               if (!(sec = line->backsector)) \
                                 return rtn; \
@@ -59,12 +61,12 @@ int EV_DoGenFloor
 	// parse the bit fields in the line's special type
 
 	int Crsh = (value & FloorCrush) >> FloorCrushShift;
-	int ChgT = (value & FloorChange) >> FloorChangeShift;
-	int Targ = (value & FloorTarget) >> FloorTargetShift;
+	GenFloorChange ChgT = static_cast<GenFloorChange>((value & FloorChange) >> FloorChangeShift);
+	GenFloorTarget Targ = static_cast<GenFloorTarget>((value & FloorTarget) >> FloorTargetShift);
 	int Dirn = (value & FloorDirection) >> FloorDirectionShift;
-	int ChgM = (value & FloorModel) >> FloorModelShift;
-	int Sped = (value & FloorSpeed) >> FloorSpeedShift;
-	int Trig = (value & TriggerType) >> TriggerTypeShift;
+	GenFloorModel ChgM = static_cast<GenFloorModel>((value & FloorModel) >> FloorModelShift);
+	MotionSpeed Sped = static_cast<MotionSpeed>((value & FloorSpeed) >> FloorSpeedShift);
+	GenTriggerType Trig = static_cast<GenTriggerType>((value & TriggerType) >> TriggerTypeShift);
 
 	rtn = 0;
 
@@ -90,21 +92,21 @@ int EV_DoGenFloor
 		floor->sector = sec;
 		floor->texture = sec->floorpic;
 		P_CopyTransferSpecial(&floor->newspecial, sec);
-		floor->type = genFloor;
+		floor->type = FloorKind::GenFloor;
 
 		// set the speed of motion
 		switch(Sped)
 		{
-			case SpeedSlow:
+			case MotionSpeed::Slow:
 				floor->speed = FLOORSPEED;
 				break;
-			case SpeedNormal:
+			case MotionSpeed::Normal:
 				floor->speed = FLOORSPEED * 2;
 				break;
-			case SpeedFast:
+			case MotionSpeed::Fast:
 				floor->speed = FLOORSPEED * 4;
 				break;
-			case SpeedTurbo:
+			case MotionSpeed::Turbo:
 				floor->speed = FLOORSPEED * 8;
 				break;
 			default:
@@ -114,22 +116,22 @@ int EV_DoGenFloor
 		// set the destination height
 		switch(Targ)
 		{
-			case FtoHnF:
+			case GenFloorTarget::ToHnF:
 				floor->floordestheight = P_FindHighestFloorSurrounding(sec);
 				break;
-			case FtoLnF:
+			case GenFloorTarget::ToLnF:
 				floor->floordestheight = P_FindLowestFloorSurrounding(sec);
 				break;
-			case FtoNnF:
+			case GenFloorTarget::ToNnF:
 				floor->floordestheight = Dirn ? P_FindNextHighestFloor(sec, sec->floorheight) : P_FindNextLowestFloor(sec, sec->floorheight);
 				break;
-			case FtoLnC:
+			case GenFloorTarget::ToLnC:
 				floor->floordestheight = P_FindLowestCeilingSurrounding(sec);
 				break;
-			case FtoC:
+			case GenFloorTarget::ToC:
 				floor->floordestheight = sec->ceilingheight;
 				break;
-			case FbyST:
+			case GenFloorTarget::ByST:
 				floor->floordestheight = (floor->sector->floorheight >> FRACBITS) +
 					floor->direction * (P_FindShortestTextureAround(*id_p) >> FRACBITS);
 				if(floor->floordestheight > 32000)  //jff 3/13/98 prevent overflow
@@ -138,11 +140,11 @@ int EV_DoGenFloor
 					floor->floordestheight = -32000;
 				floor->floordestheight <<= FRACBITS;
 				break;
-			case Fby24:
+			case GenFloorTarget::By24:
 				floor->floordestheight = floor->sector->floorheight +
 					floor->direction * 24 * FRACUNIT;
 				break;
-			case Fby32:
+			case GenFloorTarget::By32:
 				floor->floordestheight = floor->sector->floorheight +
 					floor->direction * 32 * FRACUNIT;
 				break;
@@ -151,30 +153,30 @@ int EV_DoGenFloor
 		}
 
 		// set texture/type change properties
-		if(ChgT) // if a texture change is indicated
+		if(ChgT != GenFloorChange::NoChg) // if a texture change is indicated
 		{
-			if(ChgM) // if a numeric model change
+			if(ChgM == GenFloorModel::NumericModel) // if a numeric model change
 			{
 				sector_t* sec;
 
 				//jff 5/23/98 find model with ceiling at target height if target
 				//is a ceiling type
-				sec = (Targ == FtoLnC || Targ == FtoC) ? P_FindModelCeilingSector(floor->floordestheight, *id_p) : P_FindModelFloorSector(floor->floordestheight, *id_p);
+				sec = (Targ == GenFloorTarget::ToLnC || Targ == GenFloorTarget::ToC) ? P_FindModelCeilingSector(floor->floordestheight, *id_p) : P_FindModelFloorSector(floor->floordestheight, *id_p);
 				if(sec)
 				{
 					floor->texture = sec->floorpic;
 					switch(ChgT)
 					{
-						case FChgZero: // zero type
+						case GenFloorChange::ChgZero: // zero type
 							P_ResetTransferSpecial(&floor->newspecial);
-							floor->type = genFloorChg0;
+							floor->type = FloorKind::GenFloorChg0;
 							break;
-						case FChgTyp: // copy type
+						case GenFloorChange::ChgTyp: // copy type
 							P_CopyTransferSpecial(&floor->newspecial, sec);
-							floor->type = genFloorChgT;
+							floor->type = FloorKind::GenFloorChgT;
 							break;
-						case FChgTxt: // leave type be
-							floor->type = genFloorChg;
+						case GenFloorChange::ChgTxt: // leave type be
+							floor->type = FloorKind::GenFloorChg;
 							break;
 						default:
 							break;
@@ -186,16 +188,16 @@ int EV_DoGenFloor
 				floor->texture = line->frontsector->floorpic;
 				switch(ChgT)
 				{
-					case FChgZero: // zero type
+					case GenFloorChange::ChgZero: // zero type
 						P_ResetTransferSpecial(&floor->newspecial);
-						floor->type = genFloorChg0;
+						floor->type = FloorKind::GenFloorChg0;
 						break;
-					case FChgTyp: // copy type
+					case GenFloorChange::ChgTyp: // copy type
 						P_CopyTransferSpecial(&floor->newspecial, line->frontsector);
-						floor->type = genFloorChgT;
+						floor->type = FloorKind::GenFloorChgT;
 						break;
-					case FChgTxt: // leave type be
-						floor->type = genFloorChg;
+					case GenFloorChange::ChgTxt: // leave type be
+						floor->type = FloorKind::GenFloorChg;
 					default:
 						break;
 				}
@@ -231,12 +233,12 @@ int EV_DoGenCeiling
 	// parse the bit fields in the line's special type
 
 	int Crsh = (value & CeilingCrush) >> CeilingCrushShift;
-	int ChgT = (value & CeilingChange) >> CeilingChangeShift;
-	int Targ = (value & CeilingTarget) >> CeilingTargetShift;
+	GenCeilingChange ChgT = static_cast<GenCeilingChange>((value & CeilingChange) >> CeilingChangeShift);
+	GenCeilingTarget Targ = static_cast<GenCeilingTarget>((value & CeilingTarget) >> CeilingTargetShift);
 	int Dirn = (value & CeilingDirection) >> CeilingDirectionShift;
-	int ChgM = (value & CeilingModel) >> CeilingModelShift;
-	int Sped = (value & CeilingSpeed) >> CeilingSpeedShift;
-	int Trig = (value & TriggerType) >> TriggerTypeShift;
+	GenCeilingModel ChgM = static_cast<GenCeilingModel>((value & CeilingModel) >> CeilingModelShift);
+	MotionSpeed Sped = static_cast<MotionSpeed>((value & CeilingSpeed) >> CeilingSpeedShift);
+	GenTriggerType Trig = static_cast<GenTriggerType>((value & TriggerType) >> TriggerTypeShift);
 
 	rtn = 0;
 
@@ -263,21 +265,21 @@ int EV_DoGenCeiling
 		ceiling->texture = sec->ceilingpic;
 		P_CopyTransferSpecial(&ceiling->newspecial, sec);
 		ceiling->tag = sec->tag;
-		ceiling->type = genCeiling;
+		ceiling->type = CeilingKind::GenCeiling;
 
 		// set speed of motion
 		switch(Sped)
 		{
-			case SpeedSlow:
+			case MotionSpeed::Slow:
 				ceiling->speed = CEILSPEED;
 				break;
-			case SpeedNormal:
+			case MotionSpeed::Normal:
 				ceiling->speed = CEILSPEED * 2;
 				break;
-			case SpeedFast:
+			case MotionSpeed::Fast:
 				ceiling->speed = CEILSPEED * 4;
 				break;
-			case SpeedTurbo:
+			case MotionSpeed::Turbo:
 				ceiling->speed = CEILSPEED * 8;
 				break;
 			default:
@@ -288,22 +290,22 @@ int EV_DoGenCeiling
 		targheight = sec->ceilingheight;
 		switch(Targ)
 		{
-			case CtoHnC:
+			case GenCeilingTarget::ToHnC:
 				targheight = P_FindHighestCeilingSurrounding(sec);
 				break;
-			case CtoLnC:
+			case GenCeilingTarget::ToLnC:
 				targheight = P_FindLowestCeilingSurrounding(sec);
 				break;
-			case CtoNnC:
+			case GenCeilingTarget::ToNnC:
 				targheight = Dirn ? P_FindNextHighestCeiling(sec, sec->ceilingheight) : P_FindNextLowestCeiling(sec, sec->ceilingheight);
 				break;
-			case CtoHnF:
+			case GenCeilingTarget::ToHnF:
 				targheight = P_FindHighestFloorSurrounding(sec);
 				break;
-			case CtoF:
+			case GenCeilingTarget::ToF:
 				targheight = sec->floorheight;
 				break;
-			case CbyST:
+			case GenCeilingTarget::ByST:
 				targheight = (ceiling->sector->ceilingheight >> FRACBITS) +
 					ceiling->direction * (P_FindShortestUpperAround(*id_p) >> FRACBITS);
 				if(targheight > 32000)  //jff 3/13/98 prevent overflow
@@ -312,11 +314,11 @@ int EV_DoGenCeiling
 					targheight = -32000;
 				targheight <<= FRACBITS;
 				break;
-			case Cby24:
+			case GenCeilingTarget::By24:
 				targheight = ceiling->sector->ceilingheight +
 					ceiling->direction * 24 * FRACUNIT;
 				break;
-			case Cby32:
+			case GenCeilingTarget::By32:
 				targheight = ceiling->sector->ceilingheight +
 					ceiling->direction * 32 * FRACUNIT;
 				break;
@@ -327,30 +329,30 @@ int EV_DoGenCeiling
 		else ceiling->bottomheight = targheight;
 
 		// set texture/type change properties
-		if(ChgT) // if a texture change is indicated
+		if(ChgT != GenCeilingChange::NoChg) // if a texture change is indicated
 		{
-			if(ChgM) // if a numeric model change
+			if(ChgM == GenCeilingModel::NumericModel) // if a numeric model change
 			{
 				sector_t* sec;
 
 				//jff 5/23/98 find model with floor at target height if target
 				//is a floor type
-				sec = (Targ == CtoHnF || Targ == CtoF) ? P_FindModelFloorSector(targheight, *id_p) : P_FindModelCeilingSector(targheight, *id_p);
+				sec = (Targ == GenCeilingTarget::ToHnF || Targ == GenCeilingTarget::ToF) ? P_FindModelFloorSector(targheight, *id_p) : P_FindModelCeilingSector(targheight, *id_p);
 				if(sec)
 				{
 					ceiling->texture = sec->ceilingpic;
 					switch(ChgT)
 					{
-						case CChgZero: // type is zeroed
+						case GenCeilingChange::ChgZero: // type is zeroed
 							P_ResetTransferSpecial(&ceiling->newspecial);
-							ceiling->type = genCeilingChg0;
+							ceiling->type = CeilingKind::GenCeilingChg0;
 							break;
-						case CChgTyp: // type is copied
+						case GenCeilingChange::ChgTyp: // type is copied
 							P_CopyTransferSpecial(&ceiling->newspecial, sec);
-							ceiling->type = genCeilingChgT;
+							ceiling->type = CeilingKind::GenCeilingChgT;
 							break;
-						case CChgTxt: // type is left alone
-							ceiling->type = genCeilingChg;
+						case GenCeilingChange::ChgTxt: // type is left alone
+							ceiling->type = CeilingKind::GenCeilingChg;
 							break;
 						default:
 							break;
@@ -362,16 +364,16 @@ int EV_DoGenCeiling
 				ceiling->texture = line->frontsector->ceilingpic;
 				switch(ChgT)
 				{
-					case CChgZero: // type is zeroed
+					case GenCeilingChange::ChgZero: // type is zeroed
 						P_ResetTransferSpecial(&ceiling->newspecial);
-						ceiling->type = genCeilingChg0;
+						ceiling->type = CeilingKind::GenCeilingChg0;
 						break;
-					case CChgTyp: // type is copied
+					case GenCeilingChange::ChgTyp: // type is copied
 						P_CopyTransferSpecial(&ceiling->newspecial, line->frontsector);
-						ceiling->type = genCeilingChgT;
+						ceiling->type = CeilingKind::GenCeilingChgT;
 						break;
-					case CChgTxt: // type is left alone
-						ceiling->type = genCeilingChg;
+					case GenCeilingChange::ChgTxt: // type is left alone
+						ceiling->type = CeilingKind::GenCeilingChg;
 						break;
 					default:
 						break;
@@ -403,16 +405,16 @@ int EV_DoGenLift
 
 	// parse the bit fields in the line's special type
 
-	int Targ = (value & LiftTarget) >> LiftTargetShift;
+	GenLiftTarget Targ = static_cast<GenLiftTarget>((value & LiftTarget) >> LiftTargetShift);
 	int Dely = (value & LiftDelay) >> LiftDelayShift;
-	int Sped = (value & LiftSpeed) >> LiftSpeedShift;
-	int Trig = (value & TriggerType) >> TriggerTypeShift;
+	MotionSpeed Sped = static_cast<MotionSpeed>((value & LiftSpeed) >> LiftSpeedShift);
+	GenTriggerType Trig = static_cast<GenTriggerType>((value & TriggerType) >> TriggerTypeShift);
 
 	rtn = 0;
 
 	// Activate all <type> plats that are in_stasis
 
-	if(Targ == LnF2HnF)
+	if(Targ == GenLiftTarget::LnF2HnF)
 		P_ActivateInStasis(line->special_args[0]);
 
 	FIND_GENLIN_SECTORS;
@@ -437,35 +439,35 @@ int EV_DoGenLift
 		plat->crush = NO_CRUSH;
 		plat->tag = line->special_args[0];
 
-		plat->type = genLift;
+		plat->type = PlatType::GenLift;
 		plat->high = sec->floorheight;
-		plat->status = down;
+		plat->status = PlatState::Down;
 
 		// setup the target destination height
 		switch(Targ)
 		{
-			case F2LnF:
+			case GenLiftTarget::F2LnF:
 				plat->low = P_FindLowestFloorSurrounding(sec);
 				if(plat->low > sec->floorheight)
 					plat->low = sec->floorheight;
 				break;
-			case F2NnF:
+			case GenLiftTarget::F2NnF:
 				plat->low = P_FindNextLowestFloor(sec, sec->floorheight);
 				break;
-			case F2LnC:
+			case GenLiftTarget::F2LnC:
 				plat->low = P_FindLowestCeilingSurrounding(sec);
 				if(plat->low > sec->floorheight)
 					plat->low = sec->floorheight;
 				break;
-			case LnF2HnF:
-				plat->type = genPerpetual;
+			case GenLiftTarget::LnF2HnF:
+				plat->type = PlatType::GenPerpetual;
 				plat->low = P_FindLowestFloorSurrounding(sec);
 				if(plat->low > sec->floorheight)
 					plat->low = sec->floorheight;
 				plat->high = P_FindHighestFloorSurrounding(sec);
 				if(plat->high < sec->floorheight)
 					plat->high = sec->floorheight;
-				plat->status = static_cast<plat_e>(P_Random(pr_genlift) & 1);
+				plat->status = static_cast<PlatState>(P_Random(RandomClass::Genlift) & 1);
 				break;
 			default:
 				break;
@@ -474,16 +476,16 @@ int EV_DoGenLift
 		// setup the speed of motion
 		switch(Sped)
 		{
-			case SpeedSlow:
+			case MotionSpeed::Slow:
 				plat->speed = PLATSPEED * 2;
 				break;
-			case SpeedNormal:
+			case MotionSpeed::Normal:
 				plat->speed = PLATSPEED * 4;
 				break;
-			case SpeedFast:
+			case MotionSpeed::Fast:
 				plat->speed = PLATSPEED * 8;
 				break;
-			case SpeedTurbo:
+			case MotionSpeed::Turbo:
 				plat->speed = PLATSPEED * 16;
 				break;
 			default:
@@ -507,7 +509,7 @@ int EV_DoGenLift
 				break;
 		}
 
-		S_StartSectorSound(sec, sfx_pstart);
+		S_StartSectorSound(sec, SfxId::Pstart);
 		P_AddActivePlat(plat); // add this plat to the list of active plats
 	}
 	return rtn;
@@ -549,8 +551,8 @@ int EV_DoGenStairs
 	int Igno = (value & StairIgnore) >> StairIgnoreShift;
 	int Dirn = (value & StairDirection) >> StairDirectionShift;
 	int Step = (value & StairStep) >> StairStepShift;
-	int Sped = (value & StairSpeed) >> StairSpeedShift;
-	int Trig = (value & TriggerType) >> TriggerTypeShift;
+	MotionSpeed Sped = static_cast<MotionSpeed>((value & StairSpeed) >> StairSpeedShift);
+	GenTriggerType Trig = static_cast<GenTriggerType>((value & TriggerType) >> TriggerTypeShift);
 
 	rtn = 0;
 
@@ -580,16 +582,16 @@ int EV_DoGenStairs
 		switch(Sped)
 		{
 			default:
-			case SpeedSlow:
+			case MotionSpeed::Slow:
 				floor->speed = FLOORSPEED / 4;
 				break;
-			case SpeedNormal:
+			case MotionSpeed::Normal:
 				floor->speed = FLOORSPEED / 2;
 				break;
-			case SpeedFast:
+			case MotionSpeed::Fast:
 				floor->speed = FLOORSPEED * 2;
 				break;
-			case SpeedTurbo:
+			case MotionSpeed::Turbo:
 				floor->speed = FLOORSPEED * 4;
 				break;
 		}
@@ -617,7 +619,7 @@ int EV_DoGenStairs
 		floor->floordestheight = height;
 		texture = sec->floorpic;
 		floor->crush = NO_CRUSH;
-		floor->type = genBuildStair; // jff 3/31/98 do not leave uninited
+		floor->type = FloorKind::GenBuildStair; // jff 3/31/98 do not leave uninited
 
 		sec->stairlock = -2; // jff 2/26/98 set up lock on current sector
 		sec->nextsec = -1;
@@ -648,7 +650,7 @@ int EV_DoGenStairs
 					continue;
 
 				/* jff 6/19/98 prevent double stepsize */
-				if(compatibility_level < boom_202_compatibility)
+				if(compatibility_level < CompLevel::Boom202)
 					height += floor->direction * stairsize;
 
 				//jff 2/26/98 special lockout condition for retriggering
@@ -656,7 +658,7 @@ int EV_DoGenStairs
 					continue;
 
 				/* jff 6/19/98 increase height AFTER continue */
-				if(compatibility_level >= boom_202_compatibility)
+				if(compatibility_level >= CompLevel::Boom202)
 					height += floor->direction * stairsize;
 
 				// jff 2/26/98
@@ -681,7 +683,7 @@ int EV_DoGenStairs
 				floor->speed = speed;
 				floor->floordestheight = height;
 				floor->crush = NO_CRUSH;
-				floor->type = genBuildStair; // jff 3/31/98 do not leave uninited
+				floor->type = FloorKind::GenBuildStair; // jff 3/31/98 do not leave uninited
 
 				ok = 1;
 				break;
@@ -716,8 +718,8 @@ int EV_DoGenCrusher
 	// parse the bit fields in the line's special type
 
 	int Slnt = (value & CrusherSilent) >> CrusherSilentShift;
-	int Sped = (value & CrusherSpeed) >> CrusherSpeedShift;
-	int Trig = (value & TriggerType) >> TriggerTypeShift;
+	MotionSpeed Sped = static_cast<MotionSpeed>((value & CrusherSpeed) >> CrusherSpeedShift);
+	GenTriggerType Trig = static_cast<GenTriggerType>((value & TriggerType) >> TriggerTypeShift);
 
 	//jff 2/22/98  Reactivate in-stasis ceilings...for certain types.
 	//jff 4/5/98 return if activated
@@ -746,24 +748,24 @@ int EV_DoGenCrusher
 		ceiling->texture = sec->ceilingpic;
 		P_CopyTransferSpecial(&ceiling->newspecial, sec);
 		ceiling->tag = sec->tag;
-		ceiling->type = Slnt ? genSilentCrusher : genCrusher;
-		ceiling->silent = (ceiling->type == genSilentCrusher);
+		ceiling->type = Slnt ? CeilingKind::GenSilentCrusher : CeilingKind::GenCrusher;
+		ceiling->silent = (ceiling->type == CeilingKind::GenSilentCrusher);
 		ceiling->topheight = sec->ceilingheight;
 		ceiling->bottomheight = sec->floorheight + (8 * FRACUNIT);
 
 		// setup ceiling motion speed
 		switch(Sped)
 		{
-			case SpeedSlow:
+			case MotionSpeed::Slow:
 				ceiling->speed = CEILSPEED;
 				break;
-			case SpeedNormal:
+			case MotionSpeed::Normal:
 				ceiling->speed = CEILSPEED * 2;
 				break;
-			case SpeedFast:
+			case MotionSpeed::Fast:
 				ceiling->speed = CEILSPEED * 4;
 				break;
-			case SpeedTurbo:
+			case MotionSpeed::Turbo:
 				ceiling->speed = CEILSPEED * 8;
 				break;
 			default:
@@ -796,9 +798,9 @@ int EV_DoGenLockedDoor
 
 	// parse the bit fields in the line's special type
 
-	int Kind = (value & LockedKind) >> LockedKindShift;
-	int Sped = (value & LockedSpeed) >> LockedSpeedShift;
-	int Trig = (value & TriggerType) >> TriggerTypeShift;
+	GenDoorKind Kind = static_cast<GenDoorKind>((value & LockedKind) >> LockedKindShift);
+	MotionSpeed Sped = static_cast<MotionSpeed>((value & LockedSpeed) >> LockedSpeedShift);
+	GenTriggerType Trig = static_cast<GenTriggerType>((value & TriggerType) >> TriggerTypeShift);
 
 	rtn = 0;
 
@@ -830,7 +832,7 @@ int EV_DoGenLockedDoor
 		door->direction = 1;
 
 		/* killough 10/98: implement gradual lighting */
-		door->lighttag = !comp[comp_doorlight] &&
+		door->lighttag = !comp[std::to_underlying(CompOption::DoorLight)] &&
 			(line->special & 6) == 6 &&
 			line->special > GenLockedBase
 			? line->special_args[0]
@@ -840,20 +842,20 @@ int EV_DoGenLockedDoor
 		switch(Sped)
 		{
 			default:
-			case SpeedSlow:
-				door->type = Kind ? genOpen : genRaise;
+			case MotionSpeed::Slow:
+				door->type = Kind != GenDoorKind::OpenDelayClose ? VerticalDoorType::GenOpen : VerticalDoorType::GenRaise;
 				door->speed = VDOORSPEED;
 				break;
-			case SpeedNormal:
-				door->type = Kind ? genOpen : genRaise;
+			case MotionSpeed::Normal:
+				door->type = Kind != GenDoorKind::OpenDelayClose ? VerticalDoorType::GenOpen : VerticalDoorType::GenRaise;
 				door->speed = VDOORSPEED * 2;
 				break;
-			case SpeedFast:
-				door->type = Kind ? genBlazeOpen : genBlazeRaise;
+			case MotionSpeed::Fast:
+				door->type = Kind != GenDoorKind::OpenDelayClose ? VerticalDoorType::GenBlazeOpen : VerticalDoorType::GenBlazeRaise;
 				door->speed = VDOORSPEED * 4;
 				break;
-			case SpeedTurbo:
-				door->type = Kind ? genBlazeOpen : genBlazeRaise;
+			case MotionSpeed::Turbo:
+				door->type = Kind != GenDoorKind::OpenDelayClose ? VerticalDoorType::GenBlazeOpen : VerticalDoorType::GenBlazeRaise;
 				door->speed = VDOORSPEED * 8;
 
 				break;
@@ -861,7 +863,7 @@ int EV_DoGenLockedDoor
 
 		// killough 4/15/98: fix generalized door opening sounds
 		// (previously they always had the blazing door close sound)
-		S_StartSectorSound(door->sector, door->speed >= VDOORSPEED * 4 ? sfx_bdopn : sfx_doropn);
+		S_StartSectorSound(door->sector, door->speed >= VDOORSPEED * 4 ? SfxId::Bdopn : SfxId::Doropn);
 	}
 	return rtn;
 }
@@ -887,9 +889,9 @@ int EV_DoGenDoor
 	// parse the bit fields in the line's special type
 
 	int Dely = (value & DoorDelay) >> DoorDelayShift;
-	int Kind = (value & DoorKind) >> DoorKindShift;
-	int Sped = (value & DoorSpeed) >> DoorSpeedShift;
-	int Trig = (value & TriggerType) >> TriggerTypeShift;
+	GenDoorKind Kind = static_cast<GenDoorKind>((value & DoorKind) >> DoorKindShift);
+	MotionSpeed Sped = static_cast<MotionSpeed>((value & DoorSpeed) >> DoorSpeedShift);
+	GenTriggerType Trig = static_cast<GenTriggerType>((value & TriggerType) >> TriggerTypeShift);
 
 	rtn = 0;
 
@@ -936,23 +938,23 @@ int EV_DoGenDoor
 		switch(Sped)
 		{
 			default:
-			case SpeedSlow:
+			case MotionSpeed::Slow:
 				door->speed = VDOORSPEED;
 				break;
-			case SpeedNormal:
+			case MotionSpeed::Normal:
 				door->speed = VDOORSPEED * 2;
 				break;
-			case SpeedFast:
+			case MotionSpeed::Fast:
 				door->speed = VDOORSPEED * 4;
 				break;
-			case SpeedTurbo:
+			case MotionSpeed::Turbo:
 				door->speed = VDOORSPEED * 8;
 				break;
 		}
 		door->line = line; // jff 1/31/98 remember line that triggered us
 
 		/* killough 10/98: implement gradual lighting */
-		door->lighttag = !comp[comp_doorlight] &&
+		door->lighttag = !comp[std::to_underlying(CompOption::DoorLight)] &&
 			(line->special & 6) == 6 &&
 			line->special > GenLockedBase
 			? line->special_args[0]
@@ -962,38 +964,38 @@ int EV_DoGenDoor
 		// assign target heights accordingly
 		switch(Kind)
 		{
-			case OdCDoor:
+			case GenDoorKind::OpenDelayClose:
 				door->direction = 1;
 				door->topheight = P_FindLowestCeilingSurrounding(sec);
 				door->topheight -= 4 * FRACUNIT;
 				if(door->topheight != sec->ceilingheight)
 					S_StartSectorSound(door->sector,
-						Sped >= SpeedFast || comp[comp_sound] ? sfx_bdopn : sfx_doropn);
-				door->type = Sped >= SpeedFast ? genBlazeRaise : genRaise;
+						Sped >= MotionSpeed::Fast || comp[std::to_underlying(CompOption::Sound)] ? SfxId::Bdopn : SfxId::Doropn);
+				door->type = Sped >= MotionSpeed::Fast ? VerticalDoorType::GenBlazeRaise : VerticalDoorType::GenRaise;
 				break;
-			case ODoor:
+			case GenDoorKind::Open:
 				door->direction = 1;
 				door->topheight = P_FindLowestCeilingSurrounding(sec);
 				door->topheight -= 4 * FRACUNIT;
 				if(door->topheight != sec->ceilingheight)
 					S_StartSectorSound(door->sector,
-						Sped >= SpeedFast || comp[comp_sound] ? sfx_bdopn : sfx_doropn);
-				door->type = Sped >= SpeedFast ? genBlazeOpen : genOpen;
+						Sped >= MotionSpeed::Fast || comp[std::to_underlying(CompOption::Sound)] ? SfxId::Bdopn : SfxId::Doropn);
+				door->type = Sped >= MotionSpeed::Fast ? VerticalDoorType::GenBlazeOpen : VerticalDoorType::GenOpen;
 				break;
-			case CdODoor:
+			case GenDoorKind::CloseDelayOpen:
 				door->topheight = sec->ceilingheight;
 				door->direction = -1;
 				S_StartSectorSound(door->sector,
-					Sped >= SpeedFast && !comp[comp_sound] ? sfx_bdcls : sfx_dorcls);
-				door->type = Sped >= SpeedFast ? genBlazeCdO : genCdO;
+					Sped >= MotionSpeed::Fast && !comp[std::to_underlying(CompOption::Sound)] ? SfxId::Bdcls : SfxId::Dorcls);
+				door->type = Sped >= MotionSpeed::Fast ? VerticalDoorType::GenBlazeCdO : VerticalDoorType::GenCdO;
 				break;
-			case CDoor:
+			case GenDoorKind::Close:
 				door->topheight = P_FindLowestCeilingSurrounding(sec);
 				door->topheight -= 4 * FRACUNIT;
 				door->direction = -1;
 				S_StartSectorSound(door->sector,
-					Sped >= SpeedFast && !comp[comp_sound] ? sfx_bdcls : sfx_dorcls);
-				door->type = Sped >= SpeedFast ? genBlazeClose : genClose;
+					Sped >= MotionSpeed::Fast && !comp[std::to_underlying(CompOption::Sound)] ? SfxId::Bdcls : SfxId::Dorcls);
+				door->type = Sped >= MotionSpeed::Fast ? VerticalDoorType::GenBlazeClose : VerticalDoorType::GenClose;
 				break;
 			default:
 				break;

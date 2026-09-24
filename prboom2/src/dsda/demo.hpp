@@ -5,14 +5,13 @@
 
 #pragma once
 
+#include "d_ticcmd.hpp"
+#include "dsda/utility.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_ticcmd.hpp"
-
-#include "dsda/utility.hpp"
 
 const char* dsda_DemoNameBase();
 void dsda_SetDemoBaseName(const char* name);

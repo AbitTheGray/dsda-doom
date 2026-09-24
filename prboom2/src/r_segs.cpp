@@ -8,6 +8,8 @@
 // 4/25/98, 5/2/98 killough: reformatted, beautified
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -85,7 +87,7 @@ static int HEIGHTUNIT = (1 << 12);
 static int invhgtbits = 4;
 
 /* cph - allow crappy fake contrast to be disabled */
-fake_contrast_mode_t fake_contrast_mode;
+FakeContrastMode fake_contrast_mode;
 
 //
 // R_FixWiggle()
@@ -209,14 +211,14 @@ const int fake_contrast_value = 16;
 
 static dboolean R_FakeContrast(seg_t* seg)
 {
-	return fake_contrast_mode != FAKE_CONTRAST_MODE_OFF &&
+	return fake_contrast_mode != FakeContrastMode::Off &&
 		// TODO: possible "even fake contrast" mapinfo flag
 		seg && !(seg->sidedef->flags & SF_NOFAKECONTRAST) && !hexen;
 }
 
 static dboolean R_SmoothLighting(seg_t* seg)
 {
-	return fake_contrast_mode == FAKE_CONTRAST_MODE_SMOOTH ||
+	return fake_contrast_mode == FakeContrastMode::Smooth ||
 		// TODO: possible "smooth fake contrast" mapinfo flag
 		seg->sidedef->flags & SF_SMOOTHLIGHTING;
 }
@@ -353,10 +355,10 @@ void R_RenderMaskedSegRange(drawseg_t* ds, int x1, int x2)
 
 	// killough 4/11/98: draw translucent 2s normal textures
 
-	colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_STANDARD, RDRAW_FILTER_POINT);
+	colfunc = R_GetDrawColumnFunc(ColumnPipeline::Standard, DrawFilterType::Point);
 	if(curline->linedef->tranmap)
 	{
-		colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_TRANSLUCENT, RDRAW_FILTER_POINT);
+		colfunc = R_GetDrawColumnFunc(ColumnPipeline::Translucent, DrawFilterType::Point);
 		tranmap = curline->linedef->tranmap;
 	}
 	// killough 4/11/98: end translucent 2s normal code
@@ -366,7 +368,7 @@ void R_RenderMaskedSegRange(drawseg_t* ds, int x1, int x2)
 
 	// cph 2001/11/25 - middle textures did not animate in v1.2
 	texnum = curline->sidedef->midtexture;
-	if(raven || !comp[comp_maskedanim])
+	if(raven || !comp[std::to_underlying(CompOption::MaskedAnim)])
 		texnum = texturetranslation[texnum];
 
 	// killough 4/13/98: get correct lightlevel for 2s normal textures
@@ -468,7 +470,7 @@ static int didsolidcol; /* True if at least one column was marked solid */
 static void R_RenderSegLoop()
 {
 	const rpatch_t* tex_patch;
-	R_DrawColumn_f colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_STANDARD, RDRAW_FILTER_POINT);
+	R_DrawColumn_f colfunc = R_GetDrawColumnFunc(ColumnPipeline::Standard, DrawFilterType::Point);
 	draw_column_vars_t dcvars;
 	fixed_t texturecolumn = 0;
 	fixed_t specific_texturecolumn = 0;
@@ -907,7 +909,7 @@ void R_StoreWallRange(const int start, const int stop)
 		}
 	}
 
-	if(map_format.zdoom && curline->linedef->special == zl_line_horizon)
+	if(map_format.zdoom && curline->linedef->special == std::to_underlying(ZDoomLineSpecial::LineHorizon))
 	{
 		rw_scale = ds_p->scale1 = ds_p->scale2 = rw_scalestep = 0;
 		midtexture = toptexture = bottomtexture = maskedtexture = 0;

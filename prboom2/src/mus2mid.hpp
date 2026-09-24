@@ -9,13 +9,13 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+#include "memio.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomtype.hpp"
-#include "memio.hpp"
 
 // Structure to hold MUS file header
 typedef struct

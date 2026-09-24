@@ -2,35 +2,42 @@
 
 #pragma once
 
+// declared in v_video.hpp; the fixed underlying type makes this enough
+enum struct ColorRange : int32_t;
+
+#include <SDL_opengl.h>
+
+#include "cpp/Util.hpp"
+
+enum struct BleedType : uint8_t
+{
+	None    = 0x0,
+	Ceiling = 0x1,
+	Occlude = 0x2
+};
+ENUM_FLAGS_FUNC(BleedType)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <SDL_opengl.h>
-
 extern dboolean use_gl_nodes;
 
-typedef enum
+enum struct SkyType : int32_t
 {
-	skytype_auto,
-	skytype_none,
-	skytype_standard,
-	skytype_skydome,
+	Auto,
+	None,
+	Standard,
+	Skydome,
 
-	skytype_count
-} skytype_t;
+	Count
+};
 
 #define MAX_GLGAMMA 32
 
-enum bleedtype
-{
-	BLEED_NONE    = 0x0,
-	BLEED_CEILING = 0x1,
-	BLEED_OCCLUDE = 0x2
-};
 
-extern int gl_drawskys;
+extern SkyType gl_drawskys;
 extern dboolean gl_ui_lightmode_indexed;
 extern dboolean gl_automap_lightmode_indexed;
 extern dboolean gl_menu_lightmode_indexed;
@@ -50,10 +57,10 @@ void gld_EndAutomapDraw();
 void gld_BeginMenuDraw();
 void gld_EndMenuDraw();
 
-void gld_DrawNumPatch(int x, int y, int lump, dboolean center, int cm, enum patch_translation_e flags);
-void gld_DrawNumPatch_f(float x, float y, int lump, dboolean center, int cm, enum patch_translation_e flags);
+void gld_DrawNumPatch(int x, int y, int lump, dboolean center, ColorRange cm, PatchTranslation flags);
+void gld_DrawNumPatch_f(float x, float y, int lump, dboolean center, ColorRange cm, PatchTranslation flags);
 
-void gld_FillRaw(int lump, int x, int y, int src_width, int src_height, int dst_width, int dst_height, enum patch_translation_e flags);
+void gld_FillRaw(int lump, int x, int y, int src_width, int src_height, int dst_width, int dst_height, PatchTranslation flags);
 #define gld_FillRawName(name, x, y, src_width, src_height, dst_width, dst_height, flags) \
   gld_FillRaw(W_GetNumForName(name), (x), (y), (src_width), (src_height), (dst_width), (dst_height), (flags))
 
@@ -62,7 +69,7 @@ void gld_FillRaw(int lump, int x, int y, int src_width, int src_height, int dst_
 #define gld_FillFlatName(flatname, x, y, width, height, flags) \
   gld_FillFlat(R_FlatNumForName(flatname), (x), (y), (width), (height), (flags))
 
-void gld_FillPatch(int lump, int x, int y, int width, int height, enum patch_translation_e flags);
+void gld_FillPatch(int lump, int x, int y, int width, int height, PatchTranslation flags);
 #define gld_FillPatchName(name, x, y, width, height, flags) \
   gld_FillPatch(W_GetNumForName(name), (x), (y), (width), (height), (flags))
 
@@ -103,7 +110,7 @@ dboolean gld_SphereInFrustum(float x, float y, float z, float radius);
 //missing flats (fake floors and ceilings)
 extern dboolean gl_use_stencil;
 sector_t* GetBestFake(sector_t* sector, int ceiling, int validcount);
-sector_t* GetBestBleedSector(sector_t* source, enum bleedtype type);
+sector_t* GetBestBleedSector(sector_t* source, BleedType type);
 
 void gld_DrawMapLines();
 
@@ -119,26 +126,26 @@ void gld_Init8InGLMode();
 void gld_Draw8InGL();
 
 // Nice map
-enum
+enum struct AutomapIcon : int32_t
 {
-	am_icon_shadow,
+	Shadow,
 
-	am_icon_corpse,
-	am_icon_normal,
-	am_icon_health,
-	am_icon_armor,
-	am_icon_ammo,
-	am_icon_key,
-	am_icon_power,
-	am_icon_weap,
+	Corpse,
+	Normal,
+	Health,
+	Armor,
+	Ammo,
+	Key,
+	Power,
+	Weap,
 
-	am_icon_arrow,
-	am_icon_monster,
-	am_icon_player,
-	am_icon_mark,
-	am_icon_bullet,
+	Arrow,
+	Monster,
+	Player,
+	Mark,
+	Bullet,
 
-	am_icon_count
+	Count
 };
 
 typedef struct am_icon_s
@@ -151,7 +158,7 @@ typedef struct am_icon_s
 extern am_icon_t am_icons[];
 
 void gld_InitMapPics();
-void gld_AddNiceThing(int type, float x, float y, float radius, float angle,
+void gld_AddNiceThing(AutomapIcon type, float x, float y, float radius, float angle,
 	unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void gld_DrawNiceThings(int fx, int fy, int fw, int fh);
 void gld_ClearNiceThings();

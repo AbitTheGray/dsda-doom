@@ -9,17 +9,21 @@
 
 #pragma once
 
+// declared in dsda/palette.hpp; the fixed underlying type makes this enough
+enum struct PlaypalIndex : int32_t;
+
+#include "SDL.h"
+#include "doomtype.hpp"
+#include "doomdef.hpp"
+#include "r_data.hpp"
+#include "gl_struct.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "SDL.h"
-
-#include "doomtype.hpp"
-#include "doomdef.hpp"
 // Needed because we are refering to patches.
-#include "r_data.hpp"
 
 //
 // VIDEO
@@ -44,52 +48,52 @@ extern int psprite_offset; // Needed for "tallscreen" modes
 extern const byte* colrngs[];
 
 // symbolic indices into color translation table pointer array
-typedef enum
+enum struct ColorRange : int32_t
 {
-	CR_DEFAULT,
-	CR_BRICK,
-	CR_TAN,
-	CR_GRAY,
-	CR_GREEN,
-	CR_BROWN,
-	CR_GOLD,
-	CR_RED,
-	CR_BLUE,
-	CR_ORANGE,
-	CR_YELLOW,
-	CR_LIGHTBLUE,
-	CR_BLACK,
-	CR_PURPLE,
-	CR_WHITE,
-	CR_HUD_LIMIT,
-	CR_DARKEN = CR_HUD_LIMIT,
-	CR_DARKEN_BRICK,
-	CR_DARKEN_TAN,
-	CR_DARKEN_GRAY,
-	CR_DARKEN_GREEN,
-	CR_DARKEN_BROWN,
-	CR_DARKEN_GOLD,
-	CR_DARKEN_RED,
-	CR_DARKEN_BLUE,
-	CR_DARKEN_ORANGE,
-	CR_DARKEN_YELLOW,
-	CR_DARKEN_LIGHTBLUE,
-	CR_DARKEN_BLACK,
-	CR_DARKEN_PURPLE,
-	CR_DARKEN_WHITE,
-	CR_BRIGHT,
-	CR_BRIGHT_LIMIT = CR_BRIGHT + CR_HUD_LIMIT,
-	CR_BLOOD        = CR_BRIGHT_LIMIT,
-	CR_BLOOD_GRAY   = CR_BLOOD,
-	CR_BLOOD_GREEN,
-	CR_BLOOD_BLUE,
-	CR_BLOOD_YELLOW,
-	CR_BLOOD_BLACK,
-	CR_BLOOD_PURPLE,
-	CR_BLOOD_WHITE,
-	CR_BLOOD_ORANGE,
-	CR_LIMIT,
-} crange_idx_e;
+	Default,
+	Brick,
+	Tan,
+	Gray,
+	Green,
+	Brown,
+	Gold,
+	Red,
+	Blue,
+	Orange,
+	Yellow,
+	Lightblue,
+	Black,
+	Purple,
+	White,
+	HudLimit,
+	Darken = HudLimit,
+	DarkenBrick,
+	DarkenTan,
+	DarkenGray,
+	DarkenGreen,
+	DarkenBrown,
+	DarkenGold,
+	DarkenRed,
+	DarkenBlue,
+	DarkenOrange,
+	DarkenYellow,
+	DarkenLightblue,
+	DarkenBlack,
+	DarkenPurple,
+	DarkenWhite,
+	Bright,
+	BrightLimit = Bright + HudLimit,
+	Blood        = BrightLimit,
+	BloodGray   = Blood,
+	BloodGreen,
+	BloodBlue,
+	BloodYellow,
+	BloodBlack,
+	BloodPurple,
+	BloodWhite,
+	BloodOrange,
+	Limit,
+};
 
 //jff 1/16/98 end palette color range additions
 
@@ -125,13 +129,13 @@ extern int usegamma;
 #define NUM_GAMMA_LEVELS 5
 
 // The available bit-depth modes
-typedef enum
+enum struct VideoMode : int32_t
 {
-	VID_MODESW,
-	VID_MODEGL
-} video_mode_t;
+	Software,
+	OpenGl
+};
 
-void V_InitMode(video_mode_t mode);
+void V_InitMode(VideoMode mode);
 
 // video mode query interface
 dboolean V_IsSoftwareMode();
@@ -178,7 +182,7 @@ extern V_EndMenuDraw_f V_EndMenuDraw;
 typedef void (*V_CopyRect_f)(int srcscrn, int destscrn,
 	int x, int y,
 	int width, int height,
-	enum patch_translation_e flags);
+	PatchTranslation flags);
 extern V_CopyRect_f V_CopyRect;
 
 void V_CopyScreen(int srcscrn, int destscrn);
@@ -193,13 +197,13 @@ extern V_FillRect_f V_FillRect;
 
 // V_DrawNumPatchGen - Draws the patch from lump num
 typedef void (*V_DrawNumPatchGen_f)(int x, int y, int scrn,
-	int lump, dboolean center, int cm,
-	enum patch_translation_e flags);
+	int lump, dboolean center, ColorRange cm,
+	PatchTranslation flags);
 extern V_DrawNumPatchGen_f V_DrawNumPatchGen;
 
 typedef void (*V_DrawNumPatchGenPrecise_f)(float x, float y, int scrn,
-	int lump, dboolean center, int cm,
-	enum patch_translation_e flags);
+	int lump, dboolean center, ColorRange cm,
+	PatchTranslation flags);
 extern V_DrawNumPatchGenPrecise_f V_DrawNumPatchGenPrecise;
 
 // V_DrawNumPatch - Draws the patch from lump "num"
@@ -225,16 +229,15 @@ extern V_DrawNumPatchGenPrecise_f V_DrawNumPatchGenPrecise;
 #define V_NamePatchHeight(name) R_NumPatchHeight(W_GetNumForName(name))
 
 // e6y
-typedef void (*V_FillFlat_f)(int lump, int scrn, int x, int y, int width, int height, enum patch_translation_e flags);
+typedef void (*V_FillFlat_f)(int lump, int scrn, int x, int y, int width, int height, PatchTranslation flags);
 extern V_FillFlat_f V_FillFlat;
 #define V_FillFlatName(flatname, scrn, x, y, width, height, flags) \
   V_FillFlat(R_FlatNumForName(flatname), (scrn), (x), (y), (width), (height), (flags))
 
-typedef void (*V_FillPatch_f)(int lump, int scrn, int x, int y, int width, int height, enum patch_translation_e flags);
+typedef void (*V_FillPatch_f)(int lump, int scrn, int x, int y, int width, int height, PatchTranslation flags);
 extern V_FillPatch_f V_FillPatch;
 #define V_FillPatchName(name, scrn, x, y, width, height, flags) \
   V_FillPatch(W_GetNumForName(name), (scrn), (x), (y), (width), (height), (flags))
-
 
 /* cphipps 10/99: function to tile a flat over the screen */
 typedef void (*V_DrawBackground_f)(const char* flatname, int scrn);
@@ -246,7 +249,7 @@ extern V_DrawShaded_f V_DrawShaded;
 // CPhipps - function to set the palette to palette number pal.
 void V_TouchPalette();
 void V_SetPalette(int pal);
-void V_SetPlayPal(int playpal_i);
+void V_SetPlayPal(PlaypalIndex playpal_i);
 
 // Alt-Enter: fullscreen <-> windowed
 void V_ToggleFullscreen();
@@ -297,17 +300,15 @@ SDL_Color V_GetPatchColor(int lumpnum);
 // e6y: wide-res
 void V_ClearBorder();
 
-void V_GetWideRect(int* x, int* y, int* w, int* h, enum patch_translation_e flags);
+void V_GetWideRect(int* x, int* y, int* w, int* h, PatchTranslation flags);
 
 int V_BestColor(const unsigned char* palette, int r, int g, int b);
 
 // [FG] colored blood and gibs
-int V_BloodColor(int blood);
+ColorRange V_BloodColor(int blood);
 
-#include "gl_struct.hpp"
-
-void V_FillRectVPT(int scrn, int x, int y, int width, int height, byte color, enum patch_translation_e flags);
-int V_FillHeightVPT(int scrn, int y, int height, byte color, enum patch_translation_e flags);
+void V_FillRectVPT(int scrn, int x, int y, int width, int height, byte color, PatchTranslation flags);
+int V_FillHeightVPT(int scrn, int y, int height, byte color, PatchTranslation flags);
 
 // heretic
 

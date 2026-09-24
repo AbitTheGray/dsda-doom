@@ -116,7 +116,7 @@ extern "C" void P_AnimateHexenSurfaces()
 			{
 				// Random tics
 				ad->tics = (ad->tics >> 16)
-					+ P_Random(pr_hexen) % ((ad->tics & 0xff00) >> 8);
+					+ P_Random(RandomClass::Hexen) % ((ad->tics & 0xff00) >> 8);
 			}
 			if(ad->type == ANIM_FLAT)
 			{
@@ -223,8 +223,8 @@ static void P_LightningFlash()
 		}
 		return;
 	}
-	LightningFlash = (P_Random(pr_hexen) & 7) + 8;
-	flashLight = 200 + (P_Random(pr_hexen) & 31);
+	LightningFlash = (P_Random(RandomClass::Hexen) & 7) + 8;
+	flashLight = 200 + (P_Random(RandomClass::Hexen) & 31);
 	tempSec = sectors;
 	tempLight = LightningLightLevels;
 	foundSec = false;
@@ -266,25 +266,25 @@ static void P_LightningFlash()
 	if(foundSec)
 	{
 		Sky1Texture = dsda_Sky2Texture(); // set alternate sky
-		S_StartVoidSound(hexen_sfx_thunder_crash);
+		S_StartVoidSound(SfxId::HexenThunderCrash);
 	}
 	// Calculate the next lighting flash
 	if(!NextLightningFlash)
 	{
-		if(P_Random(pr_hexen) < 50)
+		if(P_Random(RandomClass::Hexen) < 50)
 		{
 			// Immediate Quick flash
-			NextLightningFlash = (P_Random(pr_hexen) & 15) + 16;
+			NextLightningFlash = (P_Random(RandomClass::Hexen) & 15) + 16;
 		}
 		else
 		{
-			if(P_Random(pr_hexen) < 128 && !(leveltime & 32))
+			if(P_Random(RandomClass::Hexen) < 128 && !(leveltime & 32))
 			{
-				NextLightningFlash = ((P_Random(pr_hexen) & 7) + 2) * TICRATE;
+				NextLightningFlash = ((P_Random(RandomClass::Hexen) & 7) + 2) * TICRATE;
 			}
 			else
 			{
-				NextLightningFlash = ((P_Random(pr_hexen) & 15) + 5) * TICRATE;
+				NextLightningFlash = ((P_Random(RandomClass::Hexen) & 15) + 5) * TICRATE;
 			}
 		}
 	}
@@ -327,7 +327,7 @@ void P_InitLightning()
 		return;
 	}
 	LightningLightLevels = (int*)Z_MallocLevel(secCount * sizeof(int));
-	NextLightningFlash = ((P_Random(pr_hexen) & 15) + 5) * TICRATE; // don't flash at level start
+	NextLightningFlash = ((P_Random(RandomClass::Hexen) & 15) + 5) * TICRATE; // don't flash at level start
 }
 
 void P_InitFTAnims()
@@ -367,7 +367,7 @@ void P_InitFTAnims()
 		ignore = false;
 		if(ad->type == ANIM_FLAT)
 		{
-			if(!W_LumpNameExists2(sc_String, ns_flats))
+			if(!W_LumpNameExists2(sc_String, LumpNamespace::Flats))
 			{
 				ignore = true;
 			}

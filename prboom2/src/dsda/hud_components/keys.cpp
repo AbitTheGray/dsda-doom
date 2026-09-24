@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Keys HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "keys.hpp"
@@ -17,13 +19,13 @@ typedef struct
 
 static local_component_t* local;
 
-static int key_patch_num[NUMCARDS];
+static int key_patch_num[std::to_underlying(Card::Count)];
 
 static const char* dsda_Key1Name(player_t* player)
 {
 	if(heretic)
 	{
-		if(player->cards[key_yellow])
+		if(player->cards[std::to_underlying(Card::KeyYellow)])
 			return "ykeyicon";
 	}
 	else
@@ -43,7 +45,7 @@ static const char* dsda_Key2Name(player_t* player)
 {
 	if(heretic)
 	{
-		if(player->cards[key_green])
+		if(player->cards[std::to_underlying(Card::KeyGreen)])
 			return "gkeyicon";
 	}
 	else
@@ -63,7 +65,7 @@ static const char* dsda_Key3Name(player_t* player)
 {
 	if(heretic)
 	{
-		if(player->cards[key_blue])
+		if(player->cards[std::to_underlying(Card::KeyBlue)])
 			return "bkeyicon";
 	}
 	else
@@ -86,7 +88,7 @@ void drawKey(player_t* player, int* x, int* y, const char* (*key)(player_t*))
 	name = key(player);
 
 	if(name)
-		V_DrawNamePatch(*x, *y, FG, name, CR_DEFAULT, static_cast<enum patch_translation_e>((enum patch_translation_e)local->component.vpt));
+		V_DrawNamePatch(*x, *y, FG, name, ColorRange::Default, static_cast<PatchTranslation>((PatchTranslation)local->component.vpt));
 
 	if(local->horizontal)
 		*x += PATCH_DELTA;
@@ -108,10 +110,10 @@ static void dsda_DrawComponent()
 	{
 		int i;
 
-		for(i = 0; i < NUMCARDS; ++i)
+		for(i = 0; i < std::to_underlying(Card::Count); ++i)
 			if(player->cards[i])
 			{
-				V_DrawNumPatch(x, y, 0, key_patch_num[i], CR_DEFAULT, static_cast<enum patch_translation_e>((enum patch_translation_e)local->component.vpt));
+				V_DrawNumPatch(x, y, 0, key_patch_num[i], ColorRange::Default, static_cast<PatchTranslation>((PatchTranslation)local->component.vpt));
 				x += R_NumPatchWidth(key_patch_num[i]) + 4;
 			}
 
@@ -123,7 +125,7 @@ static void dsda_DrawComponent()
 	drawKey(player, &x, &y, dsda_Key3Name);
 }
 
-void dsda_InitKeysHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitKeysHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);
@@ -134,8 +136,8 @@ void dsda_InitKeysHC(int x_offset, int y_offset, int vpt, int* args, int arg_cou
 	{
 		int i;
 
-		for(i = 0; i < NUMCARDS; ++i)
-			key_patch_num[i] = R_NumPatchForSpriteIndex((spritenum_t)(HEXEN_SPR_KEY1 + i));
+		for(i = 0; i < std::to_underlying(Card::Count); ++i)
+			key_patch_num[i] = R_NumPatchForSpriteIndex(static_cast<SpriteId>(std::to_underlying(SpriteId::HexenKey1) + i));
 	}
 
 	dsda_InitPatchHC(&local->component, x_offset, y_offset, vpt);

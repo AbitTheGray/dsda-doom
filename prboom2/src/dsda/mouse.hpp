@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "d_ticcmd.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_ticcmd.hpp"
 
 void dsda_ApplyQuickstartMouseCache(int* mousex);
 void dsda_QueueQuickstart();

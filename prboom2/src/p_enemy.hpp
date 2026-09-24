@@ -8,12 +8,12 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "p_mobj.hpp"
 
 void P_NoiseAlert(mobj_t* target, mobj_t* emmiter);
 void P_SpawnBrainTargets(); /* killough 3/26/98: spawn icon landings */

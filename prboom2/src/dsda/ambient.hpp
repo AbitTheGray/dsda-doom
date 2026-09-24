@@ -5,17 +5,17 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "p_mobj.hpp"
-
 	typedef struct
 	{
 		char* sound_name;
-		int sfx_id;
+		SfxId sfx_id;
 		float attenuation;
 		float volume;
 		int min_tics;
@@ -30,7 +30,7 @@ extern "C"
 		int wait_tics;
 	} ambient_source_t;
 
-	dboolean dsda_IsLoopingAmbientSFX(int sfx_id);
+	dboolean dsda_IsLoopingAmbientSFX(SfxId sfx_id);
 	void dsda_UpdateAmbientSource(ambient_source_t* source);
 	void dsda_SpawnAmbientSource(mobj_t* mobj);
 	void dsda_LoadAmbientSndInfo();

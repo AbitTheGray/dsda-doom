@@ -6,12 +6,12 @@
 
 #pragma once
 
+#include "m_fixed.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "m_fixed.hpp"
 
 /* The sky map is 256*128*4 maps. */
 #define ANGLETOSKYSHIFT         22

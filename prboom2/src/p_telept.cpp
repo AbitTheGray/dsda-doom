@@ -4,6 +4,8 @@
  *      Teleportation.
  */
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "doomstat.hpp"
 #include "p_spec.hpp"
@@ -23,7 +25,7 @@
 // More will be added
 static dboolean P_IsTeleportDestination(mobj_t* mo)
 {
-	return mo->type == MT_TELEPORTMAN ||
+	return mo->type == MobjType::Teleportman ||
 		mo->type == ZMT_TELEPORTDEST2 || mo->type == ZMT_TELEPORTDEST3;
 }
 
@@ -85,7 +87,7 @@ static mobj_t* P_TeleptFromSector(int i)
 	{
 		mobj_t* m;
 		if(thinker->function == reinterpret_cast<think_t>(P_MobjThinker)
-			&& (m = (mobj_t*)thinker)->type == MT_TELEPORTMAN
+			&& (m = (mobj_t*)thinker)->type == MobjType::Teleportman
 			&& m->subsector->sector->iSectorID == i)
 		{
 			sectors_telept[i].telept = m;
@@ -154,7 +156,7 @@ static mobj_t* P_TeleportDestination(short thing_id, int tag)
 		{
 			if(count > 1)
 			{
-				count = 1 + (P_Random(pr_hexen) % count);
+				count = 1 + (P_Random(RandomClass::Hexen) % count);
 			}
 
 			dsda_ResetThingIDSearch(&search);
@@ -247,14 +249,14 @@ static int P_TeleportToDestination(mobj_t* destination, line_t* line, mobj_t* th
 		thing->z = destination->z;
 	else if(flags & TELF_KEEPHEIGHT)
 		thing->z = thing->floorz + z;
-	else if(compatibility_level != finaldoom_compatibility)
+	else if(compatibility_level != CompLevel::Finaldoom)
 		thing->z = thing->floorz;
 	thing->PrevZ = thing->z;
 
 	if(flags & TELF_SOURCEFOG)
 	{
 		// spawn teleport fog and emit sound at source
-		S_StartMobjSound(P_SpawnMobj(oldx, oldy, oldz, MT_TFOG), sfx_telept);
+		S_StartMobjSound(P_SpawnMobj(oldx, oldy, oldz, MobjType::Tfog), SfxId::Telept);
 	}
 
 	if(flags & TELF_DESTFOG)
@@ -264,9 +266,9 @@ static int P_TeleportToDestination(mobj_t* destination, line_t* line, mobj_t* th
 			P_SpawnMobj(
 				destination->x + 20 * finecosine[destination->angle >> ANGLETOFINESHIFT],
 				destination->y + 20 * finesine[destination->angle >> ANGLETOFINESHIFT],
-				thing->z, MT_TFOG
+				thing->z, MobjType::Tfog
 			),
-			sfx_telept
+			SfxId::Telept
 		);
 	}
 
@@ -612,7 +614,7 @@ dboolean P_Teleport(mobj_t* thing, fixed_t x, fixed_t y, angle_t angle, dboolean
 	if(thing->player)
 	{
 		player = thing->player;
-		if(player->powers[pw_flight] && aboveFloor)
+		if(player->powers[std::to_underlying(PowerType::Flight)] && aboveFloor)
 		{
 			thing->z = thing->floorz + aboveFloor;
 			if(thing->z + thing->height > thing->ceilingz)
@@ -647,15 +649,15 @@ dboolean P_Teleport(mobj_t* thing, fixed_t x, fixed_t y, angle_t angle, dboolean
 	if(useFog)
 	{
 		fogDelta = thing->flags & MF_MISSILE ? 0 : TELEFOGHEIGHT;
-		fog = P_SpawnMobj(oldx, oldy, oldz + fogDelta, static_cast<mobjtype_t>(g_mt_tfog));
+		fog = P_SpawnMobj(oldx, oldy, oldz + fogDelta, static_cast<MobjType>(g_mt_tfog));
 		S_StartMobjSound(fog, g_sfx_telept);
 		an = angle >> ANGLETOFINESHIFT;
 		fog = P_SpawnMobj(x + 20 * finecosine[an],
-			y + 20 * finesine[an], thing->z + fogDelta, static_cast<mobjtype_t>(g_mt_tfog));
+			y + 20 * finesine[an], thing->z + fogDelta, static_cast<MobjType>(g_mt_tfog));
 		S_StartMobjSound(fog, g_sfx_telept);
 		if(thing->player &&
-			!thing->player->powers[pw_weaponlevel2] &&
-			!thing->player->powers[pw_speed])
+			!thing->player->powers[std::to_underlying(PowerType::WeaponLevel2)] &&
+			!thing->player->powers[std::to_underlying(PowerType::Speed)])
 		{
 			// Freeze player for about .5 sec
 			thing->reactiontime = 18;
@@ -668,7 +670,7 @@ dboolean P_Teleport(mobj_t* thing, fixed_t x, fixed_t y, angle_t angle, dboolean
 		if(thing->flags2 & MF2_FOOTCLIP)
 		{
 			if(thing->z == thing->subsector->sector->floorheight
-				&& P_GetThingFloorType(thing) > FLOOR_SOLID)
+				&& P_GetThingFloorType(thing) > FloorType::Solid)
 			{
 				thing->floorclip = 10 * FRACUNIT;
 			}
@@ -681,7 +683,7 @@ dboolean P_Teleport(mobj_t* thing, fixed_t x, fixed_t y, angle_t angle, dboolean
 	else
 	{
 		if(thing->flags2 & MF2_FOOTCLIP
-			&& P_GetThingFloorType(thing) != FLOOR_SOLID)
+			&& P_GetThingFloorType(thing) != FloorType::Solid)
 		{
 			thing->flags2 |= MF2_FEETARECLIPPED;
 		}
@@ -739,7 +741,7 @@ extern "C" int EV_HereticTeleport(short thing_id, int tag, line_t* line, int sid
 					continue;
 				}
 				m = (mobj_t*)thinker;
-				if(m->type != HERETIC_MT_TELEPORTMAN)
+				if(m->type != MobjType::HereticTeleportman)
 				{
 					// Not a teleportman
 					continue;
@@ -788,7 +790,7 @@ dboolean EV_HexenTeleport(int tid, mobj_t* thing, dboolean fog)
 	{
 		return false;
 	}
-	count = 1 + (P_Random(pr_hexen) % count);
+	count = 1 + (P_Random(RandomClass::Hexen) % count);
 	searcher = -1;
 	mo = nullptr;
 

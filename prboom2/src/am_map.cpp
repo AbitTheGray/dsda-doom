@@ -5,6 +5,8 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -137,7 +139,7 @@ static int map_wheel_zoom;
 int map_textured;
 int map_use_multisampling;
 
-static map_things_appearance_t map_things_appearance;
+static MapThingsAppearance map_things_appearance;
 
 // drawing stuff
 #define FB    0
@@ -146,7 +148,7 @@ static map_things_appearance_t map_things_appearance;
 #define INITSCALEMTOF (.2*FRACUNIT)
 // how much the automap moves window per tic in frame-buffer coordinates
 // moves 140 pixels in 1 second
-#define F_SPEED  (dsda_InputActive(dsda_input_speed) ? !dsda_AutoRun() : dsda_AutoRun())
+#define F_SPEED  (dsda_InputActive(InputId::Speed) ? !dsda_AutoRun() : dsda_AutoRun())
 #define F_PANINC  (F_SPEED ? map_pan_speed * 2 : map_pan_speed)
 #define F_ZOOMINC  (F_SPEED ? map_scroll_speed * 2 : map_scroll_speed)
 // how much zoom-in per tic
@@ -334,10 +336,10 @@ typedef struct
 static trailpoint_t player_trail[TRAIL_SIZE];
 static int trail_index;
 static int trail_size;
-static int trail_collisions;
+static MapTrailMode trail_collisions;
 static int trail_size_max;
 
-map_trail_mode_t map_trail_mode;
+MapTrailMode map_trail_mode;
 
 am_frame_t am_frame;
 
@@ -532,7 +534,7 @@ static void AM_changeWindowLoc()
 
 	if(m_paninc.x || m_paninc.y)
 	{
-		dsda_UpdateIntConfig(dsda_config_automap_follow, false, true);
+		dsda_UpdateIntConfig(ConfigId::AutomapFollow, false, true);
 	}
 
 	if(movement_smooth)
@@ -574,13 +576,13 @@ static void AM_changeWindowLoc()
 //
 // AM_SetScale
 //
-typedef enum
+enum struct AutomapScale : int32_t
 {
-	AM_SCALE_RESET,
-	AM_SCALE_KEEP
-} am_scale_t;
+	Reset,
+	Keep
+};
 
-static void AM_SetScale(dboolean keep_scale)
+static void AM_SetScale(AutomapScale scale)
 {
 	fixed_t a, b;
 	fixed_t scale_w, scale_h;
@@ -594,7 +596,7 @@ static void AM_SetScale(dboolean keep_scale)
 	min_scale_mtof = a < b ? a : b;
 	max_scale_mtof = FixedDiv(scale_h, 2 * PLAYERRADIUS);
 
-	if(keep_scale)
+	if(scale == AutomapScale::Keep)
 	{
 		// Keep current zoom when changing resolution / renderer
 		if(automap_full && old_m_w > 0)
@@ -638,9 +640,9 @@ extern "C" void AM_initPlayerTrail()
 {
 	trail_index = -1;
 	trail_size = 0;
-	trail_size_max = dsda_IntConfig(dsda_config_map_trail_size);
-	trail_collisions = dsda_IntConfig(dsda_config_map_trail_collisions) ? map_trail_mode_include_collisions : map_trail_mode_ignore_collisions;
-	map_trail_mode = static_cast<map_trail_mode_t>(dsda_IntConfig(dsda_config_map_trail) ? trail_collisions : map_trail_mode_off);
+	trail_size_max = dsda_IntConfig(ConfigId::MapTrailSize);
+	trail_collisions = dsda_IntConfig(ConfigId::MapTrailCollisions) ? MapTrailMode::IncludeCollisions : MapTrailMode::IgnoreCollisions;
+	map_trail_mode = dsda_IntConfig(ConfigId::MapTrail) ? trail_collisions : MapTrailMode::Off;
 }
 
 //
@@ -703,7 +705,7 @@ static void AM_initVariables()
 void AM_SetResolution()
 {
 	AM_SetPosition();
-	AM_SetScale(AM_SCALE_KEEP);
+	AM_SetScale(AutomapScale::Keep);
 	AM_activateNewScale();
 }
 
@@ -774,13 +776,13 @@ static void AM_clearLastMark()
 
 extern "C" void AM_InitParams()
 {
-	map_blinking_locks = dsda_IntConfig(dsda_config_map_blinking_locks);
-	map_secret_after = dsda_IntConfig(dsda_config_map_secret_after);
-	map_pan_speed = dsda_IntConfig(dsda_config_map_pan_speed);
-	map_scroll_speed = dsda_IntConfig(dsda_config_map_scroll_speed);
-	map_grid_size = dsda_IntConfig(dsda_config_map_grid_size);
-	map_wheel_zoom = dsda_IntConfig(dsda_config_map_wheel_zoom);
-	map_things_appearance = static_cast<map_things_appearance_t>(dsda_IntConfig(dsda_config_map_things_appearance));
+	map_blinking_locks = dsda_IntConfig(ConfigId::MapBlinkingLocks);
+	map_secret_after = dsda_IntConfig(ConfigId::MapSecretAfter);
+	map_pan_speed = dsda_IntConfig(ConfigId::MapPanSpeed);
+	map_scroll_speed = dsda_IntConfig(ConfigId::MapScrollSpeed);
+	map_grid_size = dsda_IntConfig(ConfigId::MapGridSize);
+	map_wheel_zoom = dsda_IntConfig(ConfigId::MapWheelZoom);
+	map_things_appearance = static_cast<MapThingsAppearance>(dsda_IntConfig(ConfigId::MapThingsAppearance));
 }
 
 void AM_ExchangeScales(int full_automap, int* last_full_automap)
@@ -820,7 +822,7 @@ void AM_Stop(dboolean minimap)
 	automap_full = false;
 
 	if(minimap && dsda_ShowMinimap())
-		AM_Start(AM_OPEN_MINIMAP);
+		AM_Start(AutomapStart::Minimap);
 }
 
 //
@@ -833,29 +835,29 @@ void AM_Stop(dboolean minimap)
 //
 // Passed nothing, returns nothing
 //
-void AM_Start(dboolean open_full_automap)
+void AM_Start(AutomapStart open_full_automap)
 {
 	static int lastlevel = -1, lastepisode = -1;
 	static int last_full_automap;
 
 	AM_InitParams();
 
-	automap_full = open_full_automap;
+	automap_full = (open_full_automap == AutomapStart::FullAutomap);
 
 	AM_SetPosition();
 
 	if(lastlevel != gamemap || lastepisode != gameepisode)
 	{
 		AM_findMinMaxBoundaries();
-		AM_SetScale(AM_SCALE_RESET);
+		AM_SetScale(AutomapScale::Reset);
 		lastlevel = gamemap;
 		lastepisode = gameepisode;
 		last_full_automap = true;
 	}
 
-	AM_ExchangeScales(open_full_automap, &last_full_automap);
+	AM_ExchangeScales(open_full_automap == AutomapStart::FullAutomap, &last_full_automap);
 
-	if(dsda_ShowMinimap() && !open_full_automap)
+	if(dsda_ShowMinimap() && open_full_automap != AutomapStart::FullAutomap)
 		AM_RefreshMinimap();
 
 	AM_initVariables();
@@ -1045,9 +1047,9 @@ dboolean AM_Responder
 {
 	static int bigstate = 0;
 
-	if(dsda_InputActivated(dsda_input_map_overlay) && (automap_input || dsda_ShowMinimap()))
+	if(dsda_InputActivated(InputId::MapOverlay) && (automap_input || dsda_ShowMinimap()))
 	{
-		dsda_CycleConfig(dsda_config_automap_overlay, true);
+		dsda_CycleConfig(ConfigId::AutomapOverlay, true);
 		dsda_AddMessage(automap_overlay == 0 ? s_AMSTR_OVERLAYOFF : automap_overlay == 1 ? s_AMSTR_OVERLAYON : "Overlay Mode Dark");
 		AM_SetPosition();
 		AM_activateNewScale();
@@ -1057,20 +1059,20 @@ dboolean AM_Responder
 
 	if(!automap_input)
 	{
-		if(dsda_InputActivated(dsda_input_map))
+		if(dsda_InputActivated(InputId::Map))
 		{
-			AM_Start(AM_OPEN_FULLAUTOMAP);
+			AM_Start(AutomapStart::FullAutomap);
 			return true;
 		}
 	}
-	else if(dsda_InputActivated(dsda_input_map))
+	else if(dsda_InputActivated(InputId::Map))
 	{
 		bigstate = 0;
 		AM_Stop(true);
 
 		return true;
 	}
-	else if(dsda_InputActivated(dsda_input_map_right))
+	else if(dsda_InputActivated(InputId::MapRight))
 	{
 		if(!automap_follow)
 		{
@@ -1078,7 +1080,7 @@ dboolean AM_Responder
 			return true;
 		}
 	}
-	else if(dsda_InputActivated(dsda_input_map_left))
+	else if(dsda_InputActivated(InputId::MapLeft))
 	{
 		if(!automap_follow)
 		{
@@ -1086,17 +1088,17 @@ dboolean AM_Responder
 			return true;
 		}
 	}
-	else if(dsda_InputDeactivated(dsda_input_map_right))
+	else if(dsda_InputDeactivated(InputId::MapRight))
 	{
 		if(!automap_follow)
 			m_paninc.x = 0;
 	}
-	else if(dsda_InputDeactivated(dsda_input_map_left))
+	else if(dsda_InputDeactivated(InputId::MapLeft))
 	{
 		if(!automap_follow)
 			m_paninc.x = 0;
 	}
-	else if(dsda_InputActivated(dsda_input_map_up))
+	else if(dsda_InputActivated(InputId::MapUp))
 	{
 		if(!automap_follow)
 		{
@@ -1104,7 +1106,7 @@ dboolean AM_Responder
 			return true;
 		}
 	}
-	else if(dsda_InputActivated(dsda_input_map_down))
+	else if(dsda_InputActivated(InputId::MapDown))
 	{
 		if(!automap_follow)
 		{
@@ -1112,19 +1114,19 @@ dboolean AM_Responder
 			return true;
 		}
 	}
-	else if(dsda_InputDeactivated(dsda_input_map_up))
+	else if(dsda_InputDeactivated(InputId::MapUp))
 	{
 		if(!automap_follow)
 			m_paninc.y = 0;
 	}
-	else if(dsda_InputDeactivated(dsda_input_map_down))
+	else if(dsda_InputDeactivated(InputId::MapDown))
 	{
 		if(!automap_follow)
 			m_paninc.y = 0;
 	}
 	else if(
-		dsda_InputActivated(dsda_input_map_zoomout) ||
-		(map_wheel_zoom && ev->type == ev_keydown && ev->data1.i == KEYD_MWHEELDOWN)
+		dsda_InputActivated(InputId::MapZoomout) ||
+		(map_wheel_zoom && ev->type == EventType::KeyDown && ev->data1.i == KEYD_MWHEELDOWN)
 	)
 	{
 		mtof_zoommul = M_ZOOMOUT;
@@ -1135,8 +1137,8 @@ dboolean AM_Responder
 		return true;
 	}
 	else if(
-		dsda_InputActivated(dsda_input_map_zoomin) ||
-		(map_wheel_zoom && ev->type == ev_keydown && ev->data1.i == KEYD_MWHEELUP)
+		dsda_InputActivated(InputId::MapZoomin) ||
+		(map_wheel_zoom && ev->type == EventType::KeyDown && ev->data1.i == KEYD_MWHEELUP)
 	)
 	{
 		mtof_zoommul = M_ZOOMIN;
@@ -1146,7 +1148,7 @@ dboolean AM_Responder
 
 		return true;
 	}
-	else if(dsda_InputActivated(dsda_input_map_gobig))
+	else if(dsda_InputActivated(InputId::MapGobig))
 	{
 		bigstate = !bigstate;
 		if(bigstate)
@@ -1159,21 +1161,21 @@ dboolean AM_Responder
 
 		return true;
 	}
-	else if(dsda_InputActivated(dsda_input_map_follow))
+	else if(dsda_InputActivated(InputId::MapFollow))
 	{
-		dsda_ToggleConfig(dsda_config_automap_follow, true);
+		dsda_ToggleConfig(ConfigId::AutomapFollow, true);
 		dsda_AddMessage(automap_follow ? s_AMSTR_FOLLOWON : s_AMSTR_FOLLOWOFF);
 
 		return true;
 	}
-	else if(dsda_InputActivated(dsda_input_map_grid))
+	else if(dsda_InputActivated(InputId::MapGrid))
 	{
-		dsda_ToggleConfig(dsda_config_automap_grid, true);
+		dsda_ToggleConfig(ConfigId::AutomapGrid, true);
 		dsda_AddMessage(automap_grid ? s_AMSTR_GRIDON : s_AMSTR_GRIDOFF);
 
 		return true;
 	}
-	else if(dsda_InputActivated(dsda_input_map_mark))
+	else if(dsda_InputActivated(InputId::MapMark))
 	{
 		/* Ty 03/27/98 - *not* externalized
 		* cph 2001/11/20 - use doom_printf so we don't have our own buffer */
@@ -1182,7 +1184,7 @@ dboolean AM_Responder
 
 		return true;
 	}
-	else if(dsda_InputActivated(dsda_input_map_clear))
+	else if(dsda_InputActivated(InputId::MapClear))
 	{
 		// [Alaux] Clear just the last mark
 		if(markpointnum)
@@ -1195,25 +1197,25 @@ dboolean AM_Responder
 
 		return true;
 	}
-	else if(dsda_InputActivated(dsda_input_map_rotate))
+	else if(dsda_InputActivated(InputId::MapRotate))
 	{
-		dsda_ToggleConfig(dsda_config_automap_rotate, true);
+		dsda_ToggleConfig(ConfigId::AutomapRotate, true);
 		dsda_AddMessage(automap_rotate ? s_AMSTR_ROTATEON : s_AMSTR_ROTATEOFF);
 
 		return true;
 	}
-	else if(dsda_InputActivated(dsda_input_map_textured))
+	else if(dsda_InputActivated(InputId::MapTextured))
 	{
-		dsda_ToggleConfig(dsda_config_map_textured, true);
+		dsda_ToggleConfig(ConfigId::MapTextured, true);
 		dsda_AddMessage(map_textured ? s_AMSTR_TEXTUREDON : s_AMSTR_TEXTUREDOFF);
 
 		return true;
 	}
 	else if(
-		dsda_InputDeactivated(dsda_input_map_zoomout) ||
-		dsda_InputDeactivated(dsda_input_map_zoomin) ||
+		dsda_InputDeactivated(InputId::MapZoomout) ||
+		dsda_InputDeactivated(InputId::MapZoomin) ||
 		(
-			map_wheel_zoom && ev->type == ev_keyup &&
+			map_wheel_zoom && ev->type == EventType::KeyUp &&
 			(ev->data1.i == KEYD_MWHEELDOWN || ev->data1.i == KEYD_MWHEELUP)
 		)
 	)
@@ -1223,7 +1225,7 @@ dboolean AM_Responder
 		if(leveltime != zoom_leveltime)
 			AM_StopZooming();
 	}
-	else if(dsda_InputActivated(dsda_input_map_highlight_by_tag))
+	else if(dsda_InputActivated(InputId::MapHighlightByTag))
 	{
 		if(!dsda_RevealAutomap())
 			doom_printf("Highlight requires iddt");
@@ -1353,6 +1355,16 @@ void AM_Ticker()
 		AM_StopZooming();
 }
 
+// which side of the frame a clipped endpoint fell outside of
+enum struct ClipOutcode : uint32_t
+{
+	Left   = 1,
+	Right  = 2,
+	Bottom = 4,
+	Top    = 8
+};
+ENUM_FLAGS_FUNC(ClipOutcode)
+
 //
 // AM_clipMline()
 //
@@ -1370,17 +1382,9 @@ static dboolean AM_clipMline
 (mline_t* ml,
 	fline_t* fl)
 {
-	enum
-	{
-		LEFT   = 1,
-		RIGHT  = 2,
-		BOTTOM = 4,
-		TOP    = 8
-	};
-
-	int outcode1 = 0;
-	int outcode2 = 0;
-	int outside;
+	ClipOutcode outcode1 = static_cast<ClipOutcode>(0);
+	ClipOutcode outcode2 = static_cast<ClipOutcode>(0);
+	ClipOutcode outside;
 
 	fpoint_t tmp;
 	int dx;
@@ -1389,38 +1393,38 @@ static dboolean AM_clipMline
 
 
 #define DOOUTCODE(oc, mx, my) \
-  (oc) = 0; \
-  if ((my) < f_y) (oc) |= TOP; \
-  else if ((my) >= f_y + f_h) (oc) |= BOTTOM; \
-  if ((mx) < f_x) (oc) |= LEFT; \
-  else if ((mx) >= f_x + f_w) (oc) |= RIGHT;
+  (oc) = static_cast<ClipOutcode>(0); \
+  if ((my) < f_y) (oc) |= ClipOutcode::Top; \
+  else if ((my) >= f_y + f_h) (oc) |= ClipOutcode::Bottom; \
+  if ((mx) < f_x) (oc) |= ClipOutcode::Left; \
+  else if ((mx) >= f_x + f_w) (oc) |= ClipOutcode::Right;
 
 
 	// do trivial rejects and outcodes
 	if(ml->a.y > m_y2)
-		outcode1 = TOP;
+		outcode1 = ClipOutcode::Top;
 	else if(ml->a.y < m_y)
-		outcode1 = BOTTOM;
+		outcode1 = ClipOutcode::Bottom;
 
 	if(ml->b.y > m_y2)
-		outcode2 = TOP;
+		outcode2 = ClipOutcode::Top;
 	else if(ml->b.y < m_y)
-		outcode2 = BOTTOM;
+		outcode2 = ClipOutcode::Bottom;
 
-	if(outcode1 & outcode2)
+	if((outcode1 & outcode2) != ClipOutcode{})
 		return false; // trivially outside
 
 	if(ml->a.x < m_x)
-		outcode1 |= LEFT;
+		outcode1 |= ClipOutcode::Left;
 	else if(ml->a.x > m_x2)
-		outcode1 |= RIGHT;
+		outcode1 |= ClipOutcode::Right;
 
 	if(ml->b.x < m_x)
-		outcode2 |= LEFT;
+		outcode2 |= ClipOutcode::Left;
 	else if(ml->b.x > m_x2)
-		outcode2 |= RIGHT;
+		outcode2 |= ClipOutcode::Right;
 
-	if(outcode1 & outcode2)
+	if((outcode1 & outcode2) != ClipOutcode{})
 		return false; // trivially outside
 
 	// transform to frame-buffer coordinates.
@@ -1432,7 +1436,7 @@ static dboolean AM_clipMline
 	DOOUTCODE(outcode1, fl->a.x, fl->a.y);
 	DOOUTCODE(outcode2, fl->b.x, fl->b.y);
 
-	if(outcode1 & outcode2)
+	if((outcode1 & outcode2) != ClipOutcode{})
 		return false;
 
 	if(am_frame.precise)
@@ -1443,17 +1447,17 @@ static dboolean AM_clipMline
 		fl->b.fy = CYMTOF_F(ml->b.fy);
 	}
 
-	while(outcode1 | outcode2)
+	while(outcode1 != static_cast<ClipOutcode>(0) || outcode2 != static_cast<ClipOutcode>(0))
 	{
 		// may be partially inside box
 		// find an outside point
-		if(outcode1)
+		if(outcode1 != static_cast<ClipOutcode>(0))
 			outside = outcode1;
 		else
 			outside = outcode2;
 
 		// clip to each side
-		if(outside & TOP)
+		if((outside & ClipOutcode::Top) != ClipOutcode{})
 		{
 			dy = fl->a.y - fl->b.y;
 			dx = fl->b.x - fl->a.x;
@@ -1468,7 +1472,7 @@ static dboolean AM_clipMline
 				tmp.fy = (float)f_y;
 			}
 		}
-		else if(outside & BOTTOM)
+		else if((outside & ClipOutcode::Bottom) != ClipOutcode{})
 		{
 			dy = fl->a.y - fl->b.y;
 			dx = fl->b.x - fl->a.x;
@@ -1482,7 +1486,7 @@ static dboolean AM_clipMline
 				tmp.fy = (float)(f_y + f_h - 1);
 			}
 		}
-		else if(outside & RIGHT)
+		else if((outside & ClipOutcode::Right) != ClipOutcode{})
 		{
 			dy = fl->b.y - fl->a.y;
 			dx = fl->b.x - fl->a.x;
@@ -1496,7 +1500,7 @@ static dboolean AM_clipMline
 				tmp.fx = (float)(f_x + f_w - 1);
 			}
 		}
-		else if(outside & LEFT)
+		else if((outside & ClipOutcode::Left) != ClipOutcode{})
 		{
 			dy = fl->b.y - fl->a.y;
 			dx = fl->b.x - fl->a.x;
@@ -1522,7 +1526,7 @@ static dboolean AM_clipMline
 			DOOUTCODE(outcode2, fl->b.x, fl->b.y);
 		}
 
-		if(outcode1 & outcode2)
+		if((outcode1 & outcode2) != ClipOutcode{})
 			return false; // trivially outside
 	}
 
@@ -1673,20 +1677,20 @@ static dboolean AM_DrawRevealedSecrets()
 // jff 4/3/98 changed mapcolor_xxxx=-1 to disable drawing line completely
 //
 
-static automap_style_t AM_wallStyle(int i)
+static AutomapStyle AM_wallStyle(int i)
 {
 	switch(lines[i].automap_style)
 	{
-		case ams_default:
+		case AutomapStyle::Default:
 			break;
 
 		// These styles have no corresponding colors in dsda-doom
-		case ams_extra_floor:
-		case ams_portal:
-		case ams_special:
+		case AutomapStyle::ExtraFloor:
+		case AutomapStyle::Portal:
+		case AutomapStyle::Special:
 			if(!lines[i].backsector)
-				return ams_one_sided;
-			return ams_two_sided;
+				return AutomapStyle::OneSided;
+			return AutomapStyle::TwoSided;
 
 		default:
 			return lines[i].automap_style;
@@ -1696,44 +1700,44 @@ static automap_style_t AM_wallStyle(int i)
 	if(dsda_RevealAutomap() || (lines[i].flags & ML_MAPPED))
 	{
 		if((lines[i].flags & ML_DONTDRAW) && !dsda_RevealAutomap())
-			return ams_invisible;
+			return AutomapStyle::Invisible;
 
 		if(
 			(mapcolor_p->bdor || mapcolor_p->ydor || mapcolor_p->rdor) &&
-			!(lines[i].flags & ML_SECRET) && dsda_DoorType(i) != -1
+			!(lines[i].flags & ML_SECRET) && dsda_DoorType(i) != DoorType::None
 		)
-			return ams_locked;
+			return AutomapStyle::Locked;
 
 		if(mapcolor_p->exitsecr && (dsda_IsSecretExitLine(i) && !dsda_IsExitLine(i)))
-			return ams_exit_secret;
+			return AutomapStyle::ExitSecret;
 
 		if(mapcolor_p->exit && (dsda_IsExitLine(i) || dsda_IsSecretExitLine(i)))
-			return ams_exit;
+			return AutomapStyle::Exit;
 
 		if(mapcolor_p->exitsecr && (dsda_IsDeathSecretExitLine(i) && !dsda_IsDeathExitLine(i)))
-			return ams_exit_secret;
+			return AutomapStyle::ExitSecret;
 
 		if(mapcolor_p->exit && (dsda_IsDeathExitLine(i) || dsda_IsDeathSecretExitLine(i)))
-			return ams_exit;
+			return AutomapStyle::Exit;
 
 		if(!lines[i].backsector) // 1-sided
 		{
 			if(AM_DrawHiddenSecrets() && P_IsSecret(lines[i].frontsector))
-				return ams_secret;
+				return AutomapStyle::Secret;
 			else if(AM_DrawRevealedSecrets() && P_RevealedSecret(lines[i].frontsector))
-				return ams_revealed_secret;
+				return AutomapStyle::RevealedSecret;
 			else
-				return ams_one_sided;
+				return AutomapStyle::OneSided;
 		}
 		else // 2-sided
 		{
 			if(mapcolor_p->tele && !(lines[i].flags & ML_SECRET) && dsda_IsTeleportLine(i))
 			{
-				return ams_teleport;
+				return AutomapStyle::Teleport;
 			}
 			else if(lines[i].flags & ML_SECRET)
 			{
-				return ams_one_sided;
+				return AutomapStyle::OneSided;
 			}
 			else if(
 				mapcolor_p->clsd &&
@@ -1742,53 +1746,53 @@ static automap_style_t AM_wallStyle(int i)
 					(lines[i].frontsector->floorheight == lines[i].frontsector->ceilingheight))
 			)
 			{
-				return ams_closed_door;
+				return AutomapStyle::ClosedDoor;
 			}
 			else if(
 				AM_DrawHiddenSecrets() &&
 				(P_IsSecret(lines[i].frontsector) || P_IsSecret(lines[i].backsector))
 			)
 			{
-				return ams_secret;
+				return AutomapStyle::Secret;
 			}
 			else if(
 				AM_DrawRevealedSecrets() &&
 				(P_RevealedSecret(lines[i].frontsector) || P_RevealedSecret(lines[i].backsector))
 			)
 			{
-				return ams_revealed_secret;
+				return AutomapStyle::RevealedSecret;
 			}
 			else if(
 				(mapcolor_p->exitsecr && !mapcolor_p->exit) &&
 				(P_IsDeathExit(lines[i].frontsector) || P_IsDeathExit(lines[i].backsector))
 			)
 			{
-				return ams_exit_secret;
+				return AutomapStyle::ExitSecret;
 			}
 			else if(
 				(mapcolor_p->exit || mapcolor_p->exitsecr) &&
 				(P_IsDeathExit(lines[i].frontsector) || P_IsDeathExit(lines[i].backsector))
 			)
 			{
-				return ams_exit;
+				return AutomapStyle::Exit;
 			}
 			else if(lines[i].backsector->floorheight !=
 				lines[i].frontsector->floorheight)
 			{
-				return ams_floor_diff;
+				return AutomapStyle::FloorDiff;
 			}
 			else if(lines[i].backsector->ceilingheight !=
 				lines[i].frontsector->ceilingheight)
 			{
-				return ams_ceiling_diff;
+				return AutomapStyle::CeilingDiff;
 			}
 			else if(mapcolor_p->flat && dsda_RevealAutomap())
 			{
-				return ams_two_sided;
+				return AutomapStyle::TwoSided;
 			}
 		}
 	}
-	else if(plr->powers[pw_allmap] || (lines[i].flags & ML_REVEALED))
+	else if(plr->powers[std::to_underlying(PowerType::AllMap)] || (lines[i].flags & ML_REVEALED))
 	{
 		if(!(lines[i].flags & ML_DONTDRAW))
 		{
@@ -1799,17 +1803,17 @@ static automap_style_t AM_wallStyle(int i)
 				lines[i].backsector->floorheight != lines[i].frontsector->floorheight ||
 				lines[i].backsector->ceilingheight != lines[i].frontsector->ceilingheight
 			)
-				return ams_unseen;
+				return AutomapStyle::Unseen;
 		}
 	}
 
-	return ams_invisible;
+	return AutomapStyle::Invisible;
 }
 
 static void AM_drawWalls()
 {
 	int i;
-	automap_style_t automap_style;
+	AutomapStyle automap_style;
 	static mline_t l;
 	int hide_locks;
 
@@ -1818,10 +1822,10 @@ static void AM_drawWalls()
 	// draw the unclipped visible portions of all lines
 	for(i = 0; i < numlines; i++)
 	{
-		if(lines[i].bbox[BOXLEFT] >> FRACTOMAPBITS > am_frame.bbox[BOXRIGHT] ||
-			lines[i].bbox[BOXRIGHT] >> FRACTOMAPBITS < am_frame.bbox[BOXLEFT] ||
-			lines[i].bbox[BOXBOTTOM] >> FRACTOMAPBITS > am_frame.bbox[BOXTOP] ||
-			lines[i].bbox[BOXTOP] >> FRACTOMAPBITS < am_frame.bbox[BOXBOTTOM])
+		if(lines[i].bbox[std::to_underlying(BoxEdge::Left)] >> FRACTOMAPBITS > am_frame.bbox[std::to_underlying(BoxEdge::Right)] ||
+			lines[i].bbox[std::to_underlying(BoxEdge::Right)] >> FRACTOMAPBITS < am_frame.bbox[std::to_underlying(BoxEdge::Left)] ||
+			lines[i].bbox[std::to_underlying(BoxEdge::Bottom)] >> FRACTOMAPBITS > am_frame.bbox[std::to_underlying(BoxEdge::Top)] ||
+			lines[i].bbox[std::to_underlying(BoxEdge::Top)] >> FRACTOMAPBITS < am_frame.bbox[std::to_underlying(BoxEdge::Bottom)])
 		{
 			continue;
 		}
@@ -1846,10 +1850,10 @@ static void AM_drawWalls()
 
 		switch(automap_style)
 		{
-			case ams_invisible:
+			case AutomapStyle::Invisible:
 				continue;
 
-			case ams_locked:
+			case AutomapStyle::Locked:
 				if(hide_locks)
 				{
 					AM_drawMline(&l, mapcolor_p->grid);
@@ -1858,13 +1862,13 @@ static void AM_drawWalls()
 
 				switch(dsda_DoorType(i))
 				{
-					case 0: // red
+					case DoorType::Red:
 						AM_drawMline(&l, mapcolor_p->rdor ? mapcolor_p->rdor : mapcolor_p->cchg);
 						continue;
-					case 1: // blue
+					case DoorType::Blue:
 						AM_drawMline(&l, mapcolor_p->bdor ? mapcolor_p->bdor : mapcolor_p->cchg);
 						continue;
-					case 2: // yellow
+					case DoorType::Yellow:
 						AM_drawMline(&l, mapcolor_p->ydor ? mapcolor_p->ydor : mapcolor_p->cchg);
 						continue;
 					default:
@@ -1872,48 +1876,48 @@ static void AM_drawWalls()
 						continue;
 				}
 
-			case ams_exit:
+			case AutomapStyle::Exit:
 				AM_drawMline(&l, mapcolor_p->exit);
 				continue;
 
-			case ams_exit_secret:
+			case AutomapStyle::ExitSecret:
 				AM_drawMline(&l, mapcolor_p->exitsecr);
 				continue;
 
-			case ams_one_sided:
+			case AutomapStyle::OneSided:
 				AM_drawMline(&l, mapcolor_p->wall);
 				continue;
 
-			case ams_secret:
-			case ams_unseen_secret:
+			case AutomapStyle::Secret:
+			case AutomapStyle::UnseenSecret:
 				AM_drawMline(&l, mapcolor_p->secr);
 				continue;
 
-			case ams_revealed_secret:
+			case AutomapStyle::RevealedSecret:
 				AM_drawMline(&l, mapcolor_p->revsecr);
 				continue;
 
-			case ams_teleport:
+			case AutomapStyle::Teleport:
 				AM_drawMline(&l, mapcolor_p->tele);
 				continue;
 
-			case ams_closed_door:
+			case AutomapStyle::ClosedDoor:
 				AM_drawMline(&l, mapcolor_p->clsd);
 				continue;
 
-			case ams_floor_diff:
+			case AutomapStyle::FloorDiff:
 				AM_drawMline(&l, mapcolor_p->fchg);
 				continue;
 
-			case ams_ceiling_diff:
+			case AutomapStyle::CeilingDiff:
 				AM_drawMline(&l, mapcolor_p->cchg);
 				continue;
 
-			case ams_two_sided:
+			case AutomapStyle::TwoSided:
 				AM_drawMline(&l, mapcolor_p->flat);
 				continue;
 
-			case ams_unseen:
+			case AutomapStyle::Unseen:
 				AM_drawMline(&l, mapcolor_p->unsn);
 				continue;
 
@@ -2055,12 +2059,12 @@ static void AM_drawPlayers()
 #if defined(HAVE_LIBSDL2_IMAGE)
 	if(V_IsOpenGLMode())
 	{
-		if(map_things_appearance == map_things_appearance_icon)
+		if(map_things_appearance == MapThingsAppearance::Icon)
 			return;
 	}
 #endif
 
-	if(map_things_appearance == map_things_appearance_scaled)
+	if(map_things_appearance == MapThingsAppearance::Scaled)
 		scale = (BETWEEN(4<<FRACBITS, 256<<FRACBITS, plr->mo->radius) >> FRACTOMAPBITS);
 	else
 		scale = 16 << MAPBITS;
@@ -2098,7 +2102,7 @@ static void AM_drawPlayers()
 				AM_SetMPointFloatValue(&pt);
 
 			AM_drawLineCharacter(player_arrow, numplyrlines, scale, angle,
-				p->powers[pw_invisibility]
+				p->powers[std::to_underlying(PowerType::Invisibility)]
 				? 246                  /* *close* to black */
 				: mapcolor_p->plyr[i], //jff 1/6/98 use default color
 				pt.x, pt.y);
@@ -2110,14 +2114,15 @@ static void AM_ProcessNiceThing(mobj_t* mobj, angle_t angle, fixed_t x, fixed_t 
 {
 	const float shadow_scale_factor = 1.3f;
 	angle_t ang;
-	int i, type, radius, rotate, need_shadow;
+	int i, radius, rotate, need_shadow;
+	AutomapIcon type;
 	float fx, fy, fradius, rot, shadow_radius;
 	unsigned char r, g, b, a;
 
 	typedef struct map_nice_icon_param_s
 	{
-		spritenum_t sprite;
-		int icon;
+		SpriteId sprite;
+		AutomapIcon icon;
 		int radius;
 		int rotate;
 		unsigned char r, g, b;
@@ -2125,63 +2130,63 @@ static void AM_ProcessNiceThing(mobj_t* mobj, angle_t angle, fixed_t x, fixed_t 
 
 	static const map_nice_icon_param_t icons[] =
 	{
-		{SPR_STIM, am_icon_health, 12, 0, 100, 100, 200},
-		{SPR_MEDI, am_icon_health, 16, 0, 100, 100, 200},
-		{SPR_BON1, am_icon_health, 10, 0, 0, 0, 200},
+		{SpriteId::Stim, AutomapIcon::Health, 12, 0, 100, 100, 200},
+		{SpriteId::Medi, AutomapIcon::Health, 16, 0, 100, 100, 200},
+		{SpriteId::Bon1, AutomapIcon::Health, 10, 0, 0, 0, 200},
 
-		{SPR_BON2, am_icon_armor, 10, 0, 0, 200, 0},
-		{SPR_ARM1, am_icon_armor, 16, 0, 100, 200, 100},
-		{SPR_ARM2, am_icon_armor, 16, 0, 100, 100, 200},
+		{SpriteId::Bon2, AutomapIcon::Armor, 10, 0, 0, 200, 0},
+		{SpriteId::Arm1, AutomapIcon::Armor, 16, 0, 100, 200, 100},
+		{SpriteId::Arm2, AutomapIcon::Armor, 16, 0, 100, 100, 200},
 
-		{SPR_CLIP, am_icon_ammo, 10, 0, 180, 150, 50},
-		{SPR_AMMO, am_icon_ammo, 16, 0, 180, 150, 50},
-		{SPR_ROCK, am_icon_ammo, 10, 0, 180, 150, 50},
-		{SPR_BROK, am_icon_ammo, 16, 0, 180, 150, 50},
+		{SpriteId::Clip, AutomapIcon::Ammo, 10, 0, 180, 150, 50},
+		{SpriteId::Ammo, AutomapIcon::Ammo, 16, 0, 180, 150, 50},
+		{SpriteId::Rock, AutomapIcon::Ammo, 10, 0, 180, 150, 50},
+		{SpriteId::Brok, AutomapIcon::Ammo, 16, 0, 180, 150, 50},
 
-		{SPR_CELL, am_icon_ammo, 10, 0, 180, 150, 50},
-		{SPR_CELP, am_icon_ammo, 16, 0, 180, 150, 50},
-		{SPR_SHEL, am_icon_ammo, 10, 0, 180, 150, 50},
-		{SPR_SBOX, am_icon_ammo, 16, 0, 180, 150, 50},
-		{SPR_BPAK, am_icon_ammo, 16, 0, 180, 150, 50},
+		{SpriteId::Cell, AutomapIcon::Ammo, 10, 0, 180, 150, 50},
+		{SpriteId::Celp, AutomapIcon::Ammo, 16, 0, 180, 150, 50},
+		{SpriteId::Shel, AutomapIcon::Ammo, 10, 0, 180, 150, 50},
+		{SpriteId::Sbox, AutomapIcon::Ammo, 16, 0, 180, 150, 50},
+		{SpriteId::Bpak, AutomapIcon::Ammo, 16, 0, 180, 150, 50},
 
-		{SPR_BKEY, am_icon_key, 10, 0, 0, 0, 255},
-		{SPR_BSKU, am_icon_key, 10, 0, 0, 0, 255},
-		{SPR_YKEY, am_icon_key, 10, 0, 255, 255, 0},
-		{SPR_YSKU, am_icon_key, 10, 0, 255, 255, 0},
-		{SPR_RKEY, am_icon_key, 10, 0, 255, 0, 0},
-		{SPR_RSKU, am_icon_key, 10, 0, 255, 0, 0},
+		{SpriteId::Bkey, AutomapIcon::Key, 10, 0, 0, 0, 255},
+		{SpriteId::Bsku, AutomapIcon::Key, 10, 0, 0, 0, 255},
+		{SpriteId::Ykey, AutomapIcon::Key, 10, 0, 255, 255, 0},
+		{SpriteId::Ysku, AutomapIcon::Key, 10, 0, 255, 255, 0},
+		{SpriteId::Rkey, AutomapIcon::Key, 10, 0, 255, 0, 0},
+		{SpriteId::Rsku, AutomapIcon::Key, 10, 0, 255, 0, 0},
 
-		{SPR_PINV, am_icon_power, 16, 0, 220, 100, 220},
-		{SPR_PSTR, am_icon_power, 16, 0, 220, 100, 220},
-		{SPR_PINS, am_icon_power, 16, 0, 220, 100, 220},
-		{SPR_SUIT, am_icon_power, 16, 0, 220, 100, 220},
-		{SPR_PMAP, am_icon_power, 16, 0, 220, 100, 220},
-		{SPR_PVIS, am_icon_power, 16, 0, 220, 100, 220},
-		{SPR_SOUL, am_icon_power, 16, 0, 220, 100, 220},
-		{SPR_MEGA, am_icon_power, 16, 0, 220, 100, 220},
+		{SpriteId::Pinv, AutomapIcon::Power, 16, 0, 220, 100, 220},
+		{SpriteId::Pstr, AutomapIcon::Power, 16, 0, 220, 100, 220},
+		{SpriteId::Pins, AutomapIcon::Power, 16, 0, 220, 100, 220},
+		{SpriteId::Suit, AutomapIcon::Power, 16, 0, 220, 100, 220},
+		{SpriteId::Pmap, AutomapIcon::Power, 16, 0, 220, 100, 220},
+		{SpriteId::Pvis, AutomapIcon::Power, 16, 0, 220, 100, 220},
+		{SpriteId::Soul, AutomapIcon::Power, 16, 0, 220, 100, 220},
+		{SpriteId::Mega, AutomapIcon::Power, 16, 0, 220, 100, 220},
 
-		{SPR_BFUG, am_icon_weap, 20, 0, 220, 180, 100},
-		{SPR_MGUN, am_icon_weap, 20, 0, 220, 180, 100},
-		{SPR_CSAW, am_icon_weap, 20, 0, 220, 180, 100},
-		{SPR_LAUN, am_icon_weap, 20, 0, 220, 180, 100},
-		{SPR_PLAS, am_icon_weap, 20, 0, 220, 180, 100},
-		{SPR_SHOT, am_icon_weap, 20, 0, 220, 180, 100},
-		{SPR_SGN2, am_icon_weap, 20, 0, 220, 180, 100},
+		{SpriteId::Bfug, AutomapIcon::Weap, 20, 0, 220, 180, 100},
+		{SpriteId::Mgun, AutomapIcon::Weap, 20, 0, 220, 180, 100},
+		{SpriteId::Csaw, AutomapIcon::Weap, 20, 0, 220, 180, 100},
+		{SpriteId::Laun, AutomapIcon::Weap, 20, 0, 220, 180, 100},
+		{SpriteId::Plas, AutomapIcon::Weap, 20, 0, 220, 180, 100},
+		{SpriteId::Shot, AutomapIcon::Weap, 20, 0, 220, 180, 100},
+		{SpriteId::Sgn2, AutomapIcon::Weap, 20, 0, 220, 180, 100},
 
-		{SPR_BLUD, am_icon_bullet, 8, 0, 255, 0, 0},
-		{SPR_PUFF, am_icon_bullet, 8, 0, 255, 255, 115},
-		{SPR_MISL, am_icon_bullet, 8, 0, 91, 71, 43},
-		{SPR_PLSS, am_icon_bullet, 8, 0, 115, 115, 255},
-		{SPR_PLSE, am_icon_bullet, 8, 0, 115, 115, 255},
-		{SPR_BFS1, am_icon_bullet, 12, 0, 119, 255, 111},
-		{SPR_BFE1, am_icon_bullet, 12, 0, 119, 255, 111},
+		{SpriteId::Blud, AutomapIcon::Bullet, 8, 0, 255, 0, 0},
+		{SpriteId::Puff, AutomapIcon::Bullet, 8, 0, 255, 255, 115},
+		{SpriteId::Misl, AutomapIcon::Bullet, 8, 0, 91, 71, 43},
+		{SpriteId::Plss, AutomapIcon::Bullet, 8, 0, 115, 115, 255},
+		{SpriteId::Plse, AutomapIcon::Bullet, 8, 0, 115, 115, 255},
+		{SpriteId::Bfs1, AutomapIcon::Bullet, 12, 0, 119, 255, 111},
+		{SpriteId::Bfe1, AutomapIcon::Bullet, 12, 0, 119, 255, 111},
 
-		{DOOM_NUMSPRITES}
+		{SpriteId::DoomNumsprites}
 	};
 
 	need_shadow = true;
 
-	type = am_icon_normal;
+	type = AutomapIcon::Normal;
 	r = 220;
 	g = 180;
 	b = 100;
@@ -2198,12 +2203,12 @@ static void AM_ProcessNiceThing(mobj_t* mobj, angle_t angle, fixed_t x, fixed_t 
 		if((deathmatch && !demoplayback) && p != plr)
 			return;
 
-		type = am_icon_player;
+		type = AutomapIcon::Player;
 
 		r = playpal[3 * color + 0];
 		g = playpal[3 * color + 1];
 		b = playpal[3 * color + 2];
-		a = p->powers[pw_invisibility] ? 128 : 255;
+		a = p->powers[std::to_underlying(PowerType::Invisibility)] ? 128 : 255;
 
 		radius = mobj->radius;
 		rotate = true;
@@ -2213,13 +2218,13 @@ static void AM_ProcessNiceThing(mobj_t* mobj, angle_t angle, fixed_t x, fixed_t 
 		if(mobj->flags & MF_CORPSE)
 		{
 			need_shadow = false;
-			type = am_icon_corpse;
+			type = AutomapIcon::Corpse;
 			r = 120;
 			a = 128;
 		}
 		else
 		{
-			type = am_icon_monster;
+			type = AutomapIcon::Monster;
 			r = 200;
 		}
 		g = 0;
@@ -2230,7 +2235,7 @@ static void AM_ProcessNiceThing(mobj_t* mobj, angle_t angle, fixed_t x, fixed_t 
 	else
 	{
 		i = 0;
-		while(icons[i].sprite < DOOM_NUMSPRITES)
+		while(icons[i].sprite < SpriteId::DoomNumsprites)
 		{
 			if(mobj->sprite == icons[i].sprite)
 			{
@@ -2271,7 +2276,7 @@ static void AM_ProcessNiceThing(mobj_t* mobj, angle_t angle, fixed_t x, fixed_t 
 	gld_AddNiceThing(type, fx, fy, fradius, rot, r, g, b, a);
 	if(need_shadow)
 	{
-		gld_AddNiceThing(am_icon_shadow, fx, fy, shadow_radius, rot, 0, 0, 0, 128);
+		gld_AddNiceThing(AutomapIcon::Shadow, fx, fy, shadow_radius, rot, 0, 0, 0, 128);
 	}
 }
 
@@ -2309,10 +2314,10 @@ static void AM_DrawNiceThings()
 		for(i = 0; i < numsectors; i++)
 		{
 			if(!(players[displayplayer].cheats & CF_NOCLIP) &&
-				(sectors[i].bbox[BOXLEFT] > am_frame.bbox[BOXRIGHT] ||
-					sectors[i].bbox[BOXRIGHT] < am_frame.bbox[BOXLEFT] ||
-					sectors[i].bbox[BOXBOTTOM] > am_frame.bbox[BOXTOP] ||
-					sectors[i].bbox[BOXTOP] < am_frame.bbox[BOXBOTTOM]))
+				(sectors[i].bbox[std::to_underlying(BoxEdge::Left)] > am_frame.bbox[std::to_underlying(BoxEdge::Right)] ||
+					sectors[i].bbox[std::to_underlying(BoxEdge::Right)] < am_frame.bbox[std::to_underlying(BoxEdge::Left)] ||
+					sectors[i].bbox[std::to_underlying(BoxEdge::Bottom)] > am_frame.bbox[std::to_underlying(BoxEdge::Top)] ||
+					sectors[i].bbox[std::to_underlying(BoxEdge::Top)] < am_frame.bbox[std::to_underlying(BoxEdge::Bottom)]))
 			{
 				continue;
 			}
@@ -2366,7 +2371,7 @@ static void AM_DrawNiceThings()
 				p.fx = CXMTOF_F(p.fx);
 				p.fy = CYMTOF_F(p.fy);
 
-				gld_AddNiceThing(am_icon_mark, p.fx, p.fy, radius, 0, 255, 255, 0, (unsigned char)anim_flash_level);
+				gld_AddNiceThing(AutomapIcon::Mark, p.fx, p.fy, radius, 0, 255, 255, 0, (unsigned char)anim_flash_level);
 			}
 		}
 	}
@@ -2390,7 +2395,7 @@ static void AM_drawThings()
 #if defined(HAVE_LIBSDL2_IMAGE)
 	if(V_IsOpenGLMode())
 	{
-		if(map_things_appearance == map_things_appearance_icon)
+		if(map_things_appearance == MapThingsAppearance::Icon)
 		{
 			AM_DrawNiceThings();
 			return;
@@ -2413,10 +2418,10 @@ static void AM_drawThings()
 		int enemies = 0;
 
 		if(!(players[displayplayer].cheats & CF_NOCLIP) &&
-			(sectors[i].bbox[BOXLEFT] > am_frame.bbox[BOXRIGHT] ||
-				sectors[i].bbox[BOXRIGHT] < am_frame.bbox[BOXLEFT] ||
-				sectors[i].bbox[BOXBOTTOM] > am_frame.bbox[BOXTOP] ||
-				sectors[i].bbox[BOXTOP] < am_frame.bbox[BOXBOTTOM]))
+			(sectors[i].bbox[std::to_underlying(BoxEdge::Left)] > am_frame.bbox[std::to_underlying(BoxEdge::Right)] ||
+				sectors[i].bbox[std::to_underlying(BoxEdge::Right)] < am_frame.bbox[std::to_underlying(BoxEdge::Left)] ||
+				sectors[i].bbox[std::to_underlying(BoxEdge::Bottom)] > am_frame.bbox[std::to_underlying(BoxEdge::Top)] ||
+				sectors[i].bbox[std::to_underlying(BoxEdge::Top)] < am_frame.bbox[std::to_underlying(BoxEdge::Bottom)]))
 		{
 			continue;
 		}
@@ -2440,8 +2445,8 @@ static void AM_drawThings()
 					continue;
 				}
 
-				if(map_things_appearance == map_things_appearance_scaled
-					|| map_things_appearance == map_things_appearance_box)
+				if(map_things_appearance == MapThingsAppearance::Scaled
+					|| map_things_appearance == MapThingsAppearance::Box)
 					scale = (BETWEEN(4<<FRACBITS, 256<<FRACBITS, t->radius) >> FRACTOMAPBITS); // * 16 / 20;
 				else
 					scale = 16 << MAPBITS;
@@ -2503,7 +2508,7 @@ static void AM_drawThings()
 					}
 				}
 
-				if(map_things_appearance == map_things_appearance_box)
+				if(map_things_appearance == MapThingsAppearance::Box)
 				{
 					lineguy = thingbox_guy;
 					lineguylines = NUMTHINGBOXGUYLINES;
@@ -2667,13 +2672,13 @@ static void AM_drawMarks()
 	snprintf(namebuf, sizeof(namebuf), "%s", !raven ? "AMMNUM0" : "SMALLIN0");
 	namelen = !raven ? 6 : 7;
 
-	if(map_trail_mode && dsda_RevealAutomap())
+	if(map_trail_mode != MapTrailMode::Off && dsda_RevealAutomap())
 		AM_drawPlayerTrail();
 
 #if defined(HAVE_LIBSDL2_IMAGE)
 	if(V_IsOpenGLMode())
 	{
-		if(map_things_appearance == map_things_appearance_icon)
+		if(map_things_appearance == MapThingsAppearance::Icon)
 			return;
 	}
 #endif
@@ -2712,47 +2717,48 @@ static void AM_drawMarks()
 						p.x + markpoints[i].widths[k] * SCREENWIDTH / 320 >= f_x)
 					{
 						float fx, fy;
-						int x, y, flags;
+						int x, y;
+						PatchTranslation flags;
 
-						switch(render_stretch_hud)
+						switch(static_cast<PatchStretch>(render_stretch_hud))
 						{
 							default:
-							case patch_stretch_not_adjusted:
+							case PatchStretch::NotAdjusted:
 								fx = (float)p.fx / patches_scalex;
 								fy = (float)p.fy * 200.0f / SCREENHEIGHT;
 
 								x = p.x / patches_scalex;
 								y = p.y * 200 / SCREENHEIGHT;
 
-								flags = VPT_ALIGN_LEFT | VPT_STRETCH;
+								flags = PatchTranslation::AlignLeft | PatchTranslation::Stretch;
 								break;
-							case patch_stretch_doom_format:
+							case PatchStretch::DoomFormat:
 								fx = (float)p.fx * 320.0f / WIDE_SCREENWIDTH;
 								fy = (float)p.fy * 200.0f / WIDE_SCREENHEIGHT;
 
 								x = p.x * 320 / WIDE_SCREENWIDTH;
 								y = p.y * 200 / WIDE_SCREENHEIGHT;
 
-								flags = VPT_ALIGN_LEFT | VPT_STRETCH;
+								flags = PatchTranslation::AlignLeft | PatchTranslation::Stretch;
 								break;
-							case patch_stretch_fit_to_width:
+							case PatchStretch::FitToWidth:
 								fx = (float)p.fx * 320.0f / SCREENWIDTH;
 								fy = (float)p.fy * 200.0f / SCREENHEIGHT;
 
 								x = p.x * 320 / SCREENWIDTH;
 								y = p.y * 200 / SCREENHEIGHT;
 
-								flags = VPT_ALIGN_WIDE | VPT_STRETCH;
+								flags = PatchTranslation::AlignWide | PatchTranslation::Stretch;
 								break;
 						}
 
 						if(am_frame.precise)
 						{
-							V_DrawNamePatchPrecise(fx, fy, FB, namebuf, CR_DEFAULT, static_cast<enum patch_translation_e>(flags));
+							V_DrawNamePatchPrecise(fx, fy, FB, namebuf, ColorRange::Default, flags);
 						}
 						else
 						{
-							V_DrawNamePatch(x, y, FB, namebuf, CR_DEFAULT, static_cast<enum patch_translation_e>(flags));
+							V_DrawNamePatch(x, y, FB, namebuf, ColorRange::Default, flags);
 						}
 					}
 
@@ -2832,9 +2838,9 @@ static void AM_drawLineTraces()
 
 void M_ChangeMapTextured()
 {
-	map_textured = dsda_IntConfig(dsda_config_map_textured);
+	map_textured = dsda_IntConfig(ConfigId::MapTextured);
 
-	if(in_game && gamestate == GS_LEVEL && V_IsOpenGLMode())
+	if(in_game && gamestate == GameState::Level && V_IsOpenGLMode())
 	{
 		gld_ProcessTexturedMap();
 	}
@@ -2842,7 +2848,7 @@ void M_ChangeMapTextured()
 
 void M_ChangeMapMultisamling()
 {
-	map_use_multisampling = dsda_IntConfig(dsda_config_map_use_multisamling);
+	map_use_multisampling = dsda_IntConfig(ConfigId::MapUseMultisamling);
 
 	if(!raven && map_use_multisampling && V_IsSoftwareMode())
 	{
@@ -2885,17 +2891,17 @@ static void AM_setFrameVariables()
 		float dy = (float)(m_y2 - am_frame.centery);
 		fixed_t r = M_DoubleToInt(sqrt(dx * dx + dy * dy));
 
-		am_frame.bbox[BOXLEFT] = am_frame.centerx - r;
-		am_frame.bbox[BOXRIGHT] = am_frame.centerx + r;
-		am_frame.bbox[BOXBOTTOM] = am_frame.centery - r;
-		am_frame.bbox[BOXTOP] = am_frame.centery + r;
+		am_frame.bbox[std::to_underlying(BoxEdge::Left)] = am_frame.centerx - r;
+		am_frame.bbox[std::to_underlying(BoxEdge::Right)] = am_frame.centerx + r;
+		am_frame.bbox[std::to_underlying(BoxEdge::Bottom)] = am_frame.centery - r;
+		am_frame.bbox[std::to_underlying(BoxEdge::Top)] = am_frame.centery + r;
 	}
 	else
 	{
-		am_frame.bbox[BOXLEFT] = m_x;
-		am_frame.bbox[BOXRIGHT] = m_x2;
-		am_frame.bbox[BOXBOTTOM] = m_y;
-		am_frame.bbox[BOXTOP] = m_y2;
+		am_frame.bbox[std::to_underlying(BoxEdge::Left)] = m_x;
+		am_frame.bbox[std::to_underlying(BoxEdge::Right)] = m_x2;
+		am_frame.bbox[std::to_underlying(BoxEdge::Bottom)] = m_y;
+		am_frame.bbox[std::to_underlying(BoxEdge::Top)] = m_y2;
 	}
 
 	am_frame.precise = (V_IsOpenGLMode());
@@ -2956,7 +2962,7 @@ void AM_Drawer(dboolean minimap)
 		AM_drawGrid(mapcolor_p->grid); //jff 1/7/98 grid default color
 	AM_drawWalls();
 	AM_drawPlayers();
-	if(dsda_IntConfig(dsda_config_map_traces) && dsda_RevealAutomap() == 2)
+	if(dsda_IntConfig(ConfigId::MapTraces) && dsda_RevealAutomap() == 2)
 		AM_drawLineTraces();
 	AM_drawThings(); //jff 1/5/98 default double IDDT sprite
 	AM_DrawConnections();
@@ -2968,7 +2974,7 @@ void AM_Drawer(dboolean minimap)
 		M_ArrayClear(&map_lines);
 
 #if defined(HAVE_LIBSDL2_IMAGE)
-		if(map_things_appearance == map_things_appearance_icon)
+		if(map_things_appearance == MapThingsAppearance::Icon)
 		{
 			gld_DrawNiceThings(f_x, f_y, f_w, f_h);
 		}

@@ -5,23 +5,23 @@
 
 #pragma once
 
+#include <inttypes.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <inttypes.h>
-
-	typedef enum
+	enum struct UdmfNamespace : int32_t
 	{
-		UDMF_NONE,
-		UDMF_DOOM,
-		UDMF_HERETIC,
-		UDMF_HEXEN,
-		UDMF_DSDA,
-	} udmf_namespace_t;
+		None,
+		Doom,
+		Heretic,
+		Hexen,
+		Dsda,
+	};
 
-	extern udmf_namespace_t udmf_namespace;
+	extern UdmfNamespace udmf_namespace;
 
 #define UDMF_ML_BLOCKING           0x0000000000000001ull
 #define UDMF_ML_BLOCKMONSTERS      0x0000000000000002ull

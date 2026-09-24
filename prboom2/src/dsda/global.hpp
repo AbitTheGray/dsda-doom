@@ -5,24 +5,28 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+
+enum struct SfxId : int32_t;
+enum struct MobjType : int32_t;
+enum struct StateId : int32_t;
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "doomtype.hpp"
-
 extern int g_maxplayers;
 extern int g_viewheight;
 extern int g_numammo;
 
-extern int g_mt_player;
-extern int g_mt_tfog;
-extern int g_mt_blood;
-extern int g_skullpop_mt;
-extern int g_s_bloodyskullx1;
-extern int g_s_bloodyskullx2;
-extern int g_s_play_fdth20;
+extern MobjType g_mt_player;
+extern MobjType g_mt_tfog;
+extern MobjType g_mt_blood;
+extern MobjType g_skullpop_mt;
+extern StateId g_s_bloodyskullx1;
+extern StateId g_s_bloodyskullx2;
+extern StateId g_s_play_fdth20;
 
 extern int g_wp_fist;
 extern int g_wp_chainsaw;
@@ -33,71 +37,71 @@ extern int g_thrust_factor;
 extern int g_fuzzy_aim_shift;
 extern int g_jump;
 
-extern int g_s_null;
+extern StateId g_s_null;
 
-extern int g_mt_bloodsplatter;
+extern MobjType g_mt_bloodsplatter;
 extern int g_bloodsplatter_shift;
 extern int g_bloodsplatter_weight;
 extern int g_mons_look_range;
-extern int g_hide_state;
-extern int g_lava_type;
+extern StateId g_hide_state;
+extern MobjType g_lava_type;
 
 extern int g_mntr_charge_speed;
-extern int g_mntr_atk1_sfx;
+extern SfxId g_mntr_atk1_sfx;
 extern int g_mntr_decide_range;
 extern int g_mntr_charge_rng;
 extern int g_mntr_fire_rng;
-extern int g_mntr_charge_state;
-extern int g_mntr_fire_state;
-extern int g_mntr_charge_puff;
-extern int g_mntr_atk2_sfx;
+extern StateId g_mntr_charge_state;
+extern StateId g_mntr_fire_state;
+extern MobjType g_mntr_charge_puff;
+extern SfxId g_mntr_atk2_sfx;
 extern int g_mntr_atk2_dice;
-extern int g_mntr_atk2_missile;
-extern int g_mntr_atk3_sfx;
+extern MobjType g_mntr_atk2_missile;
+extern SfxId g_mntr_atk3_sfx;
 extern int g_mntr_atk3_dice;
-extern int g_mntr_atk3_missile;
-extern int g_mntr_atk3_state;
-extern int g_mntr_fire;
+extern MobjType g_mntr_atk3_missile;
+extern StateId g_mntr_atk3_state;
+extern MobjType g_mntr_fire;
 
 extern int g_arti_health;
 extern int g_arti_superhealth;
 extern int g_arti_fly;
 extern int g_arti_limit;
 
-extern int g_sfx_telept;
-extern int g_sfx_sawup;
-extern int g_sfx_stnmov;
-extern int g_sfx_stnmov_plats;
-extern int g_sfx_swtchn;
-extern int g_sfx_swtchx;
-extern int g_sfx_dorcls;
-extern int g_sfx_doropn;
-extern int g_sfx_dorlnd;
-extern int g_sfx_pstart;
-extern int g_sfx_pstop;
-extern int g_sfx_itemup;
-extern int g_sfx_pistol;
-extern int g_sfx_oof;
-extern int g_sfx_menu;
-extern int g_sfx_respawn;
-extern int g_sfx_secret;
-extern int g_sfx_revive;
-extern int g_sfx_console;
+extern SfxId g_sfx_telept;
+extern SfxId g_sfx_sawup;
+extern SfxId g_sfx_stnmov;
+extern SfxId g_sfx_stnmov_plats;
+extern SfxId g_sfx_swtchn;
+extern SfxId g_sfx_swtchx;
+extern SfxId g_sfx_dorcls;
+extern SfxId g_sfx_doropn;
+extern SfxId g_sfx_dorlnd;
+extern SfxId g_sfx_pstart;
+extern SfxId g_sfx_pstop;
+extern SfxId g_sfx_itemup;
+extern SfxId g_sfx_pistol;
+extern SfxId g_sfx_oof;
+extern SfxId g_sfx_menu;
+extern SfxId g_sfx_respawn;
+extern SfxId g_sfx_secret;
+extern SfxId g_sfx_revive;
+extern SfxId g_sfx_console;
 
 // Optional menu/intermission sounds
-extern int g_sfx_mnuopn;
-extern int g_sfx_mnucls;
-extern int g_sfx_mnuact;
-extern int g_sfx_mnubak;
-extern int g_sfx_mnumov;
-extern int g_sfx_mnusli;
-extern int g_sfx_mnusel;
-extern int g_sfx_mnuerr;
-extern int g_sfx_inttic;
-extern int g_sfx_inttot;
-extern int g_sfx_intnex;
-extern int g_sfx_intnet;
-extern int g_sfx_intdms;
+extern SfxId g_sfx_mnuopn;
+extern SfxId g_sfx_mnucls;
+extern SfxId g_sfx_mnuact;
+extern SfxId g_sfx_mnubak;
+extern SfxId g_sfx_mnumov;
+extern SfxId g_sfx_mnusli;
+extern SfxId g_sfx_mnusel;
+extern SfxId g_sfx_mnuerr;
+extern SfxId g_sfx_inttic;
+extern SfxId g_sfx_inttot;
+extern SfxId g_sfx_intnex;
+extern SfxId g_sfx_intnet;
+extern SfxId g_sfx_intdms;
 
 extern int g_door_normal;
 extern int g_door_raise_in_5_mins;

@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //  System interface for music.
 
+#include <utility>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -298,14 +300,14 @@ static const unsigned int volume_mapping_table[] = {
 };
 
 // DMX version to emulate for OPL emulation:
-typedef enum
+enum struct OplDriverVersion : int32_t
 {
-	opl_doom1_1_666, // Doom 1 v1.666
-	opl_doom2_1_666, // Doom 2 v1.666, Hexen, Heretic
-	opl_doom_1_9     // Doom v1.9, Strife
-} opl_driver_ver_t;
+	Doom1V1666, // Doom 1 v1.666
+	Doom2V1666, // Doom 2 v1.666, Hexen, Heretic
+	DoomV19     // Doom v1.9, Strife
+};
 
-static opl_driver_ver_t opl_drv_ver = opl_doom_1_9;
+static OplDriverVersion opl_drv_ver = OplDriverVersion::DoomV19;
 static dboolean music_initialized = false;
 
 //static dboolean musicpaused = false;
@@ -451,7 +453,7 @@ static void ReleaseVoice(int index)
 
 	voice_free_list[voice_free_num++] = voice;
 
-	if(double_voice && opl_drv_ver < opl_doom_1_9)
+	if(double_voice && opl_drv_ver < OplDriverVersion::DoomV19)
 	{
 		ReleaseVoice(index);
 	}
@@ -913,7 +915,7 @@ static void VoiceKeyOn(opl_channel_data_t* channel,
 {
 	opl_voice_t* voice;
 
-	if(!opl_opl3mode && opl_drv_ver == opl_doom1_1_666)
+	if(!opl_opl3mode && opl_drv_ver == OplDriverVersion::Doom1V1666)
 	{
 		instrument_voice = 0;
 	}
@@ -1009,7 +1011,7 @@ static void KeyOnEvent(opl_track_data_t* track, midi_event_t* event)
 
 	switch(opl_drv_ver)
 	{
-		case opl_doom1_1_666:
+		case OplDriverVersion::Doom1V1666:
 			voicenum = double_voice + 1;
 			if(!opl_opl3mode)
 			{
@@ -1030,7 +1032,7 @@ static void KeyOnEvent(opl_track_data_t* track, midi_event_t* event)
 
 			VoiceKeyOn(channel, instrument, 0, note, key, volume);
 			break;
-		case opl_doom2_1_666:
+		case OplDriverVersion::Doom2V1666:
 			if(voice_alloced_num == num_opl_voices)
 			{
 				ReplaceExistingVoiceDoom2(channel);
@@ -1051,7 +1053,7 @@ static void KeyOnEvent(opl_track_data_t* track, midi_event_t* event)
 			VoiceKeyOn(channel, instrument, 0, note, key, volume);
 			break;
 		default:
-		case opl_doom_1_9:
+		case OplDriverVersion::DoomV19:
 			if(voice_free_num == 0)
 			{
 				ReplaceExistingVoice();
@@ -1195,21 +1197,21 @@ static void ControllerEvent(opl_track_data_t* track, midi_event_t* event)
 
 	switch(controller)
 	{
-		case MIDI_CONTROLLER_MAIN_VOLUME:
+		case std::to_underlying(MidiController::MainVolume):
 			SetChannelVolume(channel, param, true);
 			break;
 
-		case MIDI_CONTROLLER_PAN:
+		case std::to_underlying(MidiController::Pan):
 			SetChannelPan(channel, param);
 			break;
 
-		case MIDI_CONTROLLER_ALL_NOTES_OFF:
+		case std::to_underlying(MidiController::AllNotesOff):
 			AllNotesOff(channel, param);
 			break;
 
 		default:
 #ifdef OPL_MIDI_DEBUG
-			lprintf(LO_WARN, "Unknown MIDI controller type: %i\n", controller);
+			lprintf(OutputLevels::Warn, "Unknown MIDI controller type: %i\n", controller);
 #endif
 			break;
 	}
@@ -1276,18 +1278,18 @@ static void MetaEvent(opl_track_data_t* track, midi_event_t* event)
 	{
 		// Things we can just ignore.
 
-		case MIDI_META_SEQUENCE_NUMBER:
-		case MIDI_META_TEXT:
-		case MIDI_META_COPYRIGHT:
-		case MIDI_META_TRACK_NAME:
-		case MIDI_META_INSTR_NAME:
-		case MIDI_META_LYRICS:
-		case MIDI_META_MARKER:
-		case MIDI_META_CUE_POINT:
-		case MIDI_META_SEQUENCER_SPECIFIC:
+		case std::to_underlying(MidiMetaEventType::SequenceNumber):
+		case std::to_underlying(MidiMetaEventType::Text):
+		case std::to_underlying(MidiMetaEventType::Copyright):
+		case std::to_underlying(MidiMetaEventType::TrackName):
+		case std::to_underlying(MidiMetaEventType::InstrName):
+		case std::to_underlying(MidiMetaEventType::Lyrics):
+		case std::to_underlying(MidiMetaEventType::Marker):
+		case std::to_underlying(MidiMetaEventType::CuePoint):
+		case std::to_underlying(MidiMetaEventType::SequencerSpecific):
 			break;
 
-		case MIDI_META_SET_TEMPO:
+		case std::to_underlying(MidiMetaEventType::SetTempo):
 			if(data_len == 3)
 			{
 				MetaSetTempo((data[0] << 16) | (data[1] << 8) | data[2]);
@@ -1297,12 +1299,12 @@ static void MetaEvent(opl_track_data_t* track, midi_event_t* event)
 		// End of track - actually handled when we run out of events
 		// in the track, see below.
 
-		case MIDI_META_END_OF_TRACK:
+		case std::to_underlying(MidiMetaEventType::EndOfTrack):
 			break;
 
 		default:
 #ifdef OPL_MIDI_DEBUG
-			lprintf(LO_WARN, "Unknown MIDI meta event type: %i\n",
+			lprintf(OutputLevels::Warn, "Unknown MIDI meta event type: %i\n",
 				event->data.meta.type);
 #endif
 			break;
@@ -1315,39 +1317,39 @@ static void ProcessEvent(opl_track_data_t* track, midi_event_t* event)
 {
 	switch(event->event_type)
 	{
-		case MIDI_EVENT_NOTE_OFF:
+		case MidiEventType::NoteOff:
 			KeyOffEvent(track, event);
 			break;
 
-		case MIDI_EVENT_NOTE_ON:
+		case MidiEventType::NoteOn:
 			KeyOnEvent(track, event);
 			break;
 
-		case MIDI_EVENT_CONTROLLER:
+		case MidiEventType::Controller:
 			ControllerEvent(track, event);
 			break;
 
-		case MIDI_EVENT_PROGRAM_CHANGE:
+		case MidiEventType::ProgramChange:
 			ProgramChangeEvent(track, event);
 			break;
 
-		case MIDI_EVENT_PITCH_BEND:
+		case MidiEventType::End:
 			PitchBendEvent(track, event);
 			break;
 
-		case MIDI_EVENT_META:
+		case MidiEventType::Meta:
 			MetaEvent(track, event);
 			break;
 
 		// SysEx events can be ignored.
 
-		case MIDI_EVENT_SYSEX:
-		case MIDI_EVENT_SYSEX_SPLIT:
+		case MidiEventType::Sysex:
+		case MidiEventType::SysexSplit:
 			break;
 
 		default:
 #ifdef OPL_MIDI_DEBUG
-			lprintf(LO_WARN, "Unknown MIDI event type %i\n", event->event_type);
+			lprintf(OutputLevels::Warn, "Unknown MIDI event type %i\n", event->event_type);
 #endif
 			break;
 	}
@@ -1409,8 +1411,8 @@ static void TrackTimerCallback(void* arg)
 
 	// End of track?
 
-	if(event->event_type == MIDI_EVENT_META
-		&& event->data.meta.type == MIDI_META_END_OF_TRACK)
+	if(event->event_type == MidiEventType::Meta
+		&& event->data.meta.type == std::to_underlying(MidiMetaEventType::EndOfTrack))
 	{
 		--running_tracks;
 
@@ -1638,7 +1640,7 @@ static const void* I_OPL_RegisterSong(const void* data, unsigned len)
 	// time numbers we have to traverse the tracks and everything
 	if(mf.len < 100)
 	{
-		lprintf(LO_WARN, "I_OPL_RegisterSong: Very short MIDI (%llu bytes)\n", (unsigned long long)mf.len);
+		lprintf(OutputLevels::Warn, "I_OPL_RegisterSong: Very short MIDI (%llu bytes)\n", (unsigned long long)mf.len);
 		return nullptr;
 	}
 
@@ -1646,7 +1648,7 @@ static const void* I_OPL_RegisterSong(const void* data, unsigned len)
 
 	if(result == nullptr)
 	{
-		lprintf(LO_WARN, "I_OPL_RegisterSong: Failed to load MID.\n");
+		lprintf(OutputLevels::Warn, "I_OPL_RegisterSong: Failed to load MID.\n");
 	}
 
 
@@ -1672,7 +1674,7 @@ static void I_OPL_ShutdownMusic()
 
 int I_OPL_InitMusic(int samplerate)
 {
-	opl_opl3mode = dsda_IntConfig(dsda_config_mus_opl_opl3mode);
+	opl_opl3mode = dsda_IntConfig(ConfigId::MusOplOpl3mode);
 
 	if(!OPL_Init(samplerate))
 	{

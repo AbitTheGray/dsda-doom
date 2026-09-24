@@ -19,17 +19,17 @@ static int patch_delta_x;
 static void dsda_DrawComponent()
 {
 	player_t* player;
-	int cm;
+	ColorRange cm;
 
 	player = &players[displayplayer];
 
-	cm = player->health <= hud_health_red ? dsda_TextCR(dsda_tc_stbar_health_bad) : player->health <= hud_health_yellow ? dsda_TextCR(dsda_tc_stbar_health_warning) : player->health <= hud_health_green ? dsda_TextCR(dsda_tc_stbar_health_ok) : dsda_TextCR(dsda_tc_stbar_health_super);
+	cm = player->health <= hud_health_red ? dsda_TextCR(TextColorIndex::StbarHealthBad) : player->health <= hud_health_yellow ? dsda_TextCR(TextColorIndex::StbarHealthWarning) : player->health <= hud_health_green ? dsda_TextCR(TextColorIndex::StbarHealthOk) : dsda_TextCR(TextColorIndex::StbarHealthSuper);
 
 	dsda_DrawBigNumber(local->component.x, local->component.y, patch_delta_x, 0,
 		cm, local->component.vpt, 3, player->health);
 }
 
-void dsda_InitBigHealthTextHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitBigHealthTextHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	*data = Z_Calloc(1, sizeof(local_component_t));
 	local = static_cast<decltype(local)>(*data);

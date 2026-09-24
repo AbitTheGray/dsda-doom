@@ -2,39 +2,51 @@
 
 #pragma once
 
+// declared in v_video.hpp; the fixed underlying type makes this enough
+enum struct ColorRange : int32_t;
+
+#include <utility>
+
+#include "v_video.hpp"
+#include "xs_Float.hpp"
+
+enum struct GLTextureFlag : uint32_t
+{
+	Sprite   = 0x00000002,
+	HasHoles = 0x00000004,
+	Sky      = 0x00000008,
+
+	ClampX  = 0x00000040,
+	ClampY  = 0x00000080,
+	ClampXy = (ClampX | ClampY),
+	Indexed = 0x00000100,
+	SkyHack = 0x00000200,
+};
+ENUM_FLAGS_FUNC(GLTextureFlag)
+
+enum struct GLFlatFlag : uint32_t
+{
+	Ceiling       = 0x00000001,
+	HaveTransform = 0x00000002,
+};
+ENUM_FLAGS_FUNC(GLFlatFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "v_video.hpp"
-#include "xs_Float.hpp"
-
 #define MAXCOORD (32767.0f / MAP_COEFF)
 
-typedef enum
+enum struct GLTexType : int32_t
 {
-	GLDT_UNREGISTERED,
-	GLDT_BROKEN,
-	GLDT_PATCH,
-	GLDT_TEXTURE,
-	GLDT_FLAT,
-	GLDT_COLORMAP
-} GLTexType;
-
-typedef enum
-{
-	GLTEXTURE_SPRITE   = 0x00000002,
-	GLTEXTURE_HASHOLES = 0x00000004,
-	GLTEXTURE_SKY      = 0x00000008,
-
-
-	GLTEXTURE_CLAMPX  = 0x00000040,
-	GLTEXTURE_CLAMPY  = 0x00000080,
-	GLTEXTURE_CLAMPXY = (GLTEXTURE_CLAMPX | GLTEXTURE_CLAMPY),
-	GLTEXTURE_INDEXED = 0x00000100,
-	GLTEXTURE_SKYHACK = 0x00000200,
-} GLTexture_flag_t;
+	Unregistered,
+	Broken,
+	Patch,
+	Texture,
+	Flat,
+	Colormap
+};
 
 typedef struct gl_strip_coords_s
 {
@@ -73,15 +85,15 @@ typedef struct
 
 	//e6y: support for Boom colormaps
 	GLuint*** glTexExID;
-	unsigned int texflags[CR_LIMIT + MAX_MAXPLAYERS][PLAYERCOLORMAP_COUNT];
+	unsigned int texflags[std::to_underlying(ColorRange::Limit) + MAX_MAXPLAYERS][PLAYERCOLORMAP_COUNT];
 	GLuint* texid_p;
 	unsigned int* texflags_p;
 
-	int cm;
+	ColorRange cm;
 	int player_cm;
 
 	GLTexType textype;
-	unsigned int flags;
+	GLTextureFlag flags;
 	float scalexfac, scaleyfac; //e6y: right/bottom UV coordinates for patch drawing
 } GLTexture;
 
@@ -110,11 +122,6 @@ typedef struct
 	seg_t* seg;
 } GLWall;
 
-typedef enum
-{
-	GLFLAT_CEILING        = 0x00000001,
-	GLFLAT_HAVE_TRANSFORM = 0x00000002,
-} GLFlat_flag_t;
 
 typedef struct
 {
@@ -127,7 +134,7 @@ typedef struct
 	float yscale;
 	float z; // the z position of the flat (height)
 	GLTexture* gltexture;
-	unsigned int flags;
+	GLFlatFlag flags;
 	float alpha;
 } GLFlat;
 
@@ -185,16 +192,16 @@ typedef struct
 	float light;
 } GLShadow;
 
-typedef enum
+enum struct HealthBarColor : int32_t
 {
-	health_bar_null,
-	health_bar_red,
-	health_bar_yellow,
-} health_bar_color_t;
+	Null,
+	Red,
+	Yellow,
+};
 
 typedef struct
 {
-	health_bar_color_t color;
+	HealthBarColor color;
 
 	float x1, x2, x3;
 	float z1, z2, z3;
@@ -215,7 +222,7 @@ extern GLSeg* gl_lines;
 
 typedef struct
 {
-	int cm;
+	ColorRange cm;
 	float x, y, z;
 	float vt, vb;
 	float ul, ur;
@@ -232,35 +239,35 @@ typedef struct
 	fixed_t fx, fy;
 } GLSprite;
 
-typedef enum
+enum struct GLDrawItemType : int32_t
 {
-	GLDIT_NONE,
+	None,
 
-	GLDIT_WALL,  // opaque wall
-	GLDIT_MWALL, // opaque mid wall
-	GLDIT_FWALL, // projected wall
-	GLDIT_TWALL, // transparent walls
-	GLDIT_SWALL, // sky walls
+	Wall,  // opaque wall
+	Mwall, // opaque mid wall
+	Fwall, // projected wall
+	Twall, // transparent walls
+	Swall, // sky walls
 
-	GLDIT_AWALL,  // animated wall
-	GLDIT_FAWALL, // animated projected wall
+	Awall,  // animated wall
+	Fawall, // animated projected wall
 
-	GLDIT_CEILING, // ceiling
-	GLDIT_FLOOR,   // floor
+	Ceiling, // ceiling
+	Floor,   // floor
 
-	GLDIT_ACEILING, // animated ceiling
-	GLDIT_AFLOOR,   // animated floor
+	Aceiling, // animated ceiling
+	Afloor,   // animated floor
 
-	GLDIT_SPRITE,  // opaque sprite
-	GLDIT_TSPRITE, // transparent sprites
-	GLDIT_ASPRITE,
+	Sprite,  // opaque sprite
+	Tsprite, // transparent sprites
+	Asprite,
 
-	GLDIT_SHADOW,
+	Shadow,
 
-	GLDIT_HBAR,
+	Hbar,
 
-	GLDIT_TYPES
-} GLDrawItemType;
+	Types
+};
 
 typedef struct GLDrawItem_s
 {
@@ -288,9 +295,9 @@ typedef struct
 	int maxsize;
 	int size;
 
-	GLDrawItem* items[GLDIT_TYPES];
-	int num_items[GLDIT_TYPES];
-	int max_items[GLDIT_TYPES];
+	GLDrawItem* items[std::to_underlying(GLDrawItemType::Types)];
+	int num_items[std::to_underlying(GLDrawItemType::Types)];
+	int max_items[std::to_underlying(GLDrawItemType::Types)];
 } GLDrawInfo;
 
 void gld_AddDrawItem(GLDrawItemType itemtype, void* itemdata);
@@ -326,11 +333,11 @@ void gld_PreprocessDetail();
 
 extern GLuint* last_glTexID;
 GLTexture* gld_RegisterTexture(int texture_num, dboolean mipmap, dboolean force, dboolean indexed, dboolean sky);
-void gld_BindTexture(GLTexture* gltexture, unsigned int flags, dboolean sky);
-GLTexture* gld_RegisterPatch(int lump, int cm, dboolean is_sprite, dboolean indexed);
-void gld_BindPatch(GLTexture* gltexture, int cm);
+void gld_BindTexture(GLTexture* gltexture, GLTextureFlag flags, dboolean sky);
+GLTexture* gld_RegisterPatch(int lump, ColorRange cm, dboolean is_sprite, dboolean indexed);
+void gld_BindPatch(GLTexture* gltexture, ColorRange cm);
 GLTexture* gld_RegisterRaw(int lump, int width, int height, dboolean mipmap, dboolean indexed);
-void gld_BindRaw(GLTexture* gltexture, unsigned int flags);
+void gld_BindRaw(GLTexture* gltexture, GLTextureFlag flags);
 #define gld_RegisterFlat(lump, mipmap, indexed) \
   gld_RegisterRaw((firstflat+lump), 64, 64, (mipmap), (indexed))
 #define gld_BindFlat(gltexture, flags) \

@@ -18,6 +18,8 @@
  */
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -109,7 +111,7 @@ void R_InitPlanesRes()
 	yslope = static_cast<fixed_t*>(Z_Calloc(1, SCREENHEIGHT * sizeof(*yslope)));
 	distscale = static_cast<decltype(distscale)>(Z_Calloc(1, SCREENWIDTH * sizeof(*distscale)));
 
-	xtoskyangle = dsda_IntConfig(dsda_config_render_linearsky) ? linearskyangle : xtoviewangle;
+	xtoskyangle = dsda_IntConfig(ConfigId::RenderLinearsky) ? linearskyangle : xtoviewangle;
 }
 
 void R_InitVisplanesRes()
@@ -136,7 +138,7 @@ void R_InitPlanes()
 // Refresh "Linear Sky"
 void dsda_RefreshLinearSky()
 {
-	xtoskyangle = dsda_IntConfig(dsda_config_render_linearsky) ? linearskyangle : xtoviewangle;
+	xtoskyangle = dsda_IntConfig(ConfigId::RenderLinearsky) ? linearskyangle : xtoviewangle;
 }
 
 //
@@ -403,7 +405,7 @@ static void R_DoDrawPlane(visplane_t* pl)
 {
 	int x;
 	draw_column_vars_t dcvars;
-	R_DrawColumn_f colfunc = R_GetDrawColumnFunc(RDC_PIPELINE_STANDARD, RDRAW_FILTER_POINT);
+	R_DrawColumn_f colfunc = R_GetDrawColumnFunc(ColumnPipeline::Standard, DrawFilterType::Point);
 
 	R_SetDefaultDrawColumnVars(&dcvars);
 
@@ -572,7 +574,7 @@ static void R_DoDrawPlane(visplane_t* pl)
 			* Because of this hack, sky is not affected by INVUL inverse mapping.
 			* Until Boom fixed this. Compat option added in MBF. */
 
-			if(comp[comp_skymap] || !(dcvars.colormap = fixedcolormap))
+			if(comp[std::to_underlying(CompOption::SkyMap)] || !(dcvars.colormap = fixedcolormap))
 				dcvars.colormap = fullcolormap; // killough 3/20/98
 
 			//dcvars.texturemid = skytexturemid;

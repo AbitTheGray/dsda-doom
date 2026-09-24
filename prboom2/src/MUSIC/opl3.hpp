@@ -59,13 +59,13 @@
 
 #pragma once
 
+#include <inttypes.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 
 #endif
-
-#include <inttypes.h>
 
 #ifndef OPL_ENABLE_STEREOEXT
 #define OPL_ENABLE_STEREOEXT 0

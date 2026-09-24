@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "doomstat.hpp"
 #include "p_mobj.hpp"
@@ -16,116 +18,116 @@
 static dboolean ActivateThing(mobj_t* mobj);
 static dboolean DeactivateThing(mobj_t* mobj);
 
-mobjtype_t TranslateThingType[] = {
-	HEXEN_MT_MAPSPOT,           // T_NONE
-	HEXEN_MT_CENTAUR,           // T_CENTAUR
-	HEXEN_MT_CENTAURLEADER,     // T_CENTAURLEADER
-	HEXEN_MT_DEMON,             // T_DEMON
-	HEXEN_MT_ETTIN,             // T_ETTIN
-	HEXEN_MT_FIREDEMON,         // T_FIREGARGOYLE
-	HEXEN_MT_SERPENT,           // T_WATERLURKER
-	HEXEN_MT_SERPENTLEADER,     // T_WATERLURKERLEADER
-	HEXEN_MT_WRAITH,            // T_WRAITH
-	HEXEN_MT_WRAITHB,           // T_WRAITHBURIED
-	HEXEN_MT_FIREBALL1,         // T_FIREBALL1
-	HEXEN_MT_MANA1,             // T_MANA1
-	HEXEN_MT_MANA2,             // T_MANA2
-	HEXEN_MT_SPEEDBOOTS,        // T_ITEMBOOTS
-	HEXEN_MT_ARTIEGG,           // T_ITEMEGG
-	HEXEN_MT_ARTIFLY,           // T_ITEMFLIGHT
-	HEXEN_MT_SUMMONMAULATOR,    // T_ITEMSUMMON
-	HEXEN_MT_TELEPORTOTHER,     // T_ITEMTPORTOTHER
-	HEXEN_MT_ARTITELEPORT,      // T_ITEMTELEPORT
-	HEXEN_MT_BISHOP,            // T_BISHOP
-	HEXEN_MT_ICEGUY,            // T_ICEGOLEM
-	HEXEN_MT_BRIDGE,            // T_BRIDGE
-	HEXEN_MT_BOOSTARMOR,        // T_DRAGONSKINBRACERS
-	HEXEN_MT_HEALINGBOTTLE,     // T_ITEMHEALTHPOTION
-	HEXEN_MT_HEALTHFLASK,       // T_ITEMHEALTHFLASK
-	HEXEN_MT_ARTISUPERHEAL,     // T_ITEMHEALTHFULL
-	HEXEN_MT_BOOSTMANA,         // T_ITEMBOOSTMANA
-	HEXEN_MT_FW_AXE,            // T_FIGHTERAXE
-	HEXEN_MT_FW_HAMMER,         // T_FIGHTERHAMMER
-	HEXEN_MT_FW_SWORD1,         // T_FIGHTERSWORD1
-	HEXEN_MT_FW_SWORD2,         // T_FIGHTERSWORD2
-	HEXEN_MT_FW_SWORD3,         // T_FIGHTERSWORD3
-	HEXEN_MT_CW_SERPSTAFF,      // T_CLERICSTAFF
-	HEXEN_MT_CW_HOLY1,          // T_CLERICHOLY1
-	HEXEN_MT_CW_HOLY2,          // T_CLERICHOLY2
-	HEXEN_MT_CW_HOLY3,          // T_CLERICHOLY3
-	HEXEN_MT_MW_CONE,           // T_MAGESHARDS
-	HEXEN_MT_MW_STAFF1,         // T_MAGESTAFF1
-	HEXEN_MT_MW_STAFF2,         // T_MAGESTAFF2
-	HEXEN_MT_MW_STAFF3,         // T_MAGESTAFF3
-	HEXEN_MT_EGGFX,             // T_MORPHBLAST
-	HEXEN_MT_ROCK1,             // T_ROCK1
-	HEXEN_MT_ROCK2,             // T_ROCK2
-	HEXEN_MT_ROCK3,             // T_ROCK3
-	HEXEN_MT_DIRT1,             // T_DIRT1
-	HEXEN_MT_DIRT2,             // T_DIRT2
-	HEXEN_MT_DIRT3,             // T_DIRT3
-	HEXEN_MT_DIRT4,             // T_DIRT4
-	HEXEN_MT_DIRT5,             // T_DIRT5
-	HEXEN_MT_DIRT6,             // T_DIRT6
-	HEXEN_MT_ARROW,             // T_ARROW
-	HEXEN_MT_DART,              // T_DART
-	HEXEN_MT_POISONDART,        // T_POISONDART
-	HEXEN_MT_RIPPERBALL,        // T_RIPPERBALL
-	HEXEN_MT_SGSHARD1,          // T_STAINEDGLASS1
-	HEXEN_MT_SGSHARD2,          // T_STAINEDGLASS2
-	HEXEN_MT_SGSHARD3,          // T_STAINEDGLASS3
-	HEXEN_MT_SGSHARD4,          // T_STAINEDGLASS4
-	HEXEN_MT_SGSHARD5,          // T_STAINEDGLASS5
-	HEXEN_MT_SGSHARD6,          // T_STAINEDGLASS6
-	HEXEN_MT_SGSHARD7,          // T_STAINEDGLASS7
-	HEXEN_MT_SGSHARD8,          // T_STAINEDGLASS8
-	HEXEN_MT_SGSHARD9,          // T_STAINEDGLASS9
-	HEXEN_MT_SGSHARD0,          // T_STAINEDGLASS0
-	HEXEN_MT_PROJECTILE_BLADE,  // T_BLADE
-	HEXEN_MT_ICESHARD,          // T_ICESHARD
-	HEXEN_MT_FLAME_SMALL,       // T_FLAME_SMALL
-	HEXEN_MT_FLAME_LARGE,       // T_FLAME_LARGE
-	HEXEN_MT_ARMOR_1,           // T_MESHARMOR
-	HEXEN_MT_ARMOR_2,           // T_FALCONSHIELD
-	HEXEN_MT_ARMOR_3,           // T_PLATINUMHELM
-	HEXEN_MT_ARMOR_4,           // T_AMULETOFWARDING
-	HEXEN_MT_ARTIPOISONBAG,     // T_ITEMFLECHETTE
-	HEXEN_MT_ARTITORCH,         // T_ITEMTORCH
-	HEXEN_MT_BLASTRADIUS,       // T_ITEMREPULSION
-	HEXEN_MT_MANA3,             // T_MANA3
-	HEXEN_MT_ARTIPUZZSKULL,     // T_PUZZSKULL
-	HEXEN_MT_ARTIPUZZGEMBIG,    // T_PUZZGEMBIG
-	HEXEN_MT_ARTIPUZZGEMRED,    // T_PUZZGEMRED
-	HEXEN_MT_ARTIPUZZGEMGREEN1, // T_PUZZGEMGREEN1
-	HEXEN_MT_ARTIPUZZGEMGREEN2, // T_PUZZGEMGREEN2
-	HEXEN_MT_ARTIPUZZGEMBLUE1,  // T_PUZZGEMBLUE1
-	HEXEN_MT_ARTIPUZZGEMBLUE2,  // T_PUZZGEMBLUE2
-	HEXEN_MT_ARTIPUZZBOOK1,     // T_PUZZBOOK1
-	HEXEN_MT_ARTIPUZZBOOK2,     // T_PUZZBOOK2
-	HEXEN_MT_KEY1,              // T_METALKEY
-	HEXEN_MT_KEY2,              // T_SMALLMETALKEY
-	HEXEN_MT_KEY3,              // T_AXEKEY
-	HEXEN_MT_KEY4,              // T_FIREKEY
-	HEXEN_MT_KEY5,              // T_GREENKEY
-	HEXEN_MT_KEY6,              // T_MACEKEY
-	HEXEN_MT_KEY7,              // T_SILVERKEY
-	HEXEN_MT_KEY8,              // T_RUSTYKEY
-	HEXEN_MT_KEY9,              // T_HORNKEY
-	HEXEN_MT_KEYA,              // T_SERPENTKEY
-	HEXEN_MT_WATER_DRIP,        // T_WATERDRIP
-	HEXEN_MT_FLAME_SMALL_TEMP,  // T_TEMPSMALLFLAME
-	HEXEN_MT_FLAME_SMALL,       // T_PERMSMALLFLAME
-	HEXEN_MT_FLAME_LARGE_TEMP,  // T_TEMPLARGEFLAME
-	HEXEN_MT_FLAME_LARGE,       // T_PERMLARGEFLAME
-	HEXEN_MT_DEMON_MASH,        // T_DEMON_MASH
-	HEXEN_MT_DEMON2_MASH,       // T_DEMON2_MASH
-	HEXEN_MT_ETTIN_MASH,        // T_ETTIN_MASH
-	HEXEN_MT_CENTAUR_MASH,      // T_CENTAUR_MASH
-	HEXEN_MT_THRUSTFLOOR_UP,    // T_THRUSTSPIKEUP
-	HEXEN_MT_THRUSTFLOOR_DOWN,  // T_THRUSTSPIKEDOWN
-	HEXEN_MT_WRAITHFX4,         // T_FLESH_DRIP1
-	HEXEN_MT_WRAITHFX5,         // T_FLESH_DRIP2
-	HEXEN_MT_WRAITHFX2          // T_SPARK_DRIP
+MobjType TranslateThingType[] = {
+	MobjType::HexenMapspot,           // T_NONE
+	MobjType::HexenCentaur,           // T_CENTAUR
+	MobjType::HexenCentaurleader,     // T_CENTAURLEADER
+	MobjType::HexenDemon,             // T_DEMON
+	MobjType::HexenEttin,             // T_ETTIN
+	MobjType::HexenFiredemon,         // T_FIREGARGOYLE
+	MobjType::HexenSerpent,           // T_WATERLURKER
+	MobjType::HexenSerpentleader,     // T_WATERLURKERLEADER
+	MobjType::HexenWraith,            // T_WRAITH
+	MobjType::HexenWraithb,           // T_WRAITHBURIED
+	MobjType::HexenFireball1,         // T_FIREBALL1
+	MobjType::HexenMana1,             // T_MANA1
+	MobjType::HexenMana2,             // T_MANA2
+	MobjType::HexenSpeedboots,        // T_ITEMBOOTS
+	MobjType::HexenArtiegg,           // T_ITEMEGG
+	MobjType::HexenArtifly,           // T_ITEMFLIGHT
+	MobjType::HexenSummonmaulator,    // T_ITEMSUMMON
+	MobjType::HexenTeleportother,     // T_ITEMTPORTOTHER
+	MobjType::HexenArtiteleport,      // T_ITEMTELEPORT
+	MobjType::HexenBishop,            // T_BISHOP
+	MobjType::HexenIceguy,            // T_ICEGOLEM
+	MobjType::HexenBridge,            // T_BRIDGE
+	MobjType::HexenBoostarmor,        // T_DRAGONSKINBRACERS
+	MobjType::HexenHealingbottle,     // T_ITEMHEALTHPOTION
+	MobjType::HexenHealthflask,       // T_ITEMHEALTHFLASK
+	MobjType::HexenArtisuperheal,     // T_ITEMHEALTHFULL
+	MobjType::HexenBoostmana,         // T_ITEMBOOSTMANA
+	MobjType::HexenFwAxe,            // T_FIGHTERAXE
+	MobjType::HexenFwHammer,         // T_FIGHTERHAMMER
+	MobjType::HexenFwSword1,         // T_FIGHTERSWORD1
+	MobjType::HexenFwSword2,         // T_FIGHTERSWORD2
+	MobjType::HexenFwSword3,         // T_FIGHTERSWORD3
+	MobjType::HexenCwSerpstaff,      // T_CLERICSTAFF
+	MobjType::HexenCwHoly1,          // T_CLERICHOLY1
+	MobjType::HexenCwHoly2,          // T_CLERICHOLY2
+	MobjType::HexenCwHoly3,          // T_CLERICHOLY3
+	MobjType::HexenMwCone,           // T_MAGESHARDS
+	MobjType::HexenMwStaff1,         // T_MAGESTAFF1
+	MobjType::HexenMwStaff2,         // T_MAGESTAFF2
+	MobjType::HexenMwStaff3,         // T_MAGESTAFF3
+	MobjType::HexenEggfx,             // T_MORPHBLAST
+	MobjType::HexenRock1,             // T_ROCK1
+	MobjType::HexenRock2,             // T_ROCK2
+	MobjType::HexenRock3,             // T_ROCK3
+	MobjType::HexenDirt1,             // T_DIRT1
+	MobjType::HexenDirt2,             // T_DIRT2
+	MobjType::HexenDirt3,             // T_DIRT3
+	MobjType::HexenDirt4,             // T_DIRT4
+	MobjType::HexenDirt5,             // T_DIRT5
+	MobjType::HexenDirt6,             // T_DIRT6
+	MobjType::HexenArrow,             // T_ARROW
+	MobjType::HexenDart,              // T_DART
+	MobjType::HexenPoisondart,        // T_POISONDART
+	MobjType::HexenRipperball,        // T_RIPPERBALL
+	MobjType::HexenSgshard1,          // T_STAINEDGLASS1
+	MobjType::HexenSgshard2,          // T_STAINEDGLASS2
+	MobjType::HexenSgshard3,          // T_STAINEDGLASS3
+	MobjType::HexenSgshard4,          // T_STAINEDGLASS4
+	MobjType::HexenSgshard5,          // T_STAINEDGLASS5
+	MobjType::HexenSgshard6,          // T_STAINEDGLASS6
+	MobjType::HexenSgshard7,          // T_STAINEDGLASS7
+	MobjType::HexenSgshard8,          // T_STAINEDGLASS8
+	MobjType::HexenSgshard9,          // T_STAINEDGLASS9
+	MobjType::HexenSgshard0,          // T_STAINEDGLASS0
+	MobjType::HexenProjectileBlade,  // T_BLADE
+	MobjType::HexenIceshard,          // T_ICESHARD
+	MobjType::HexenFlameSmall,       // T_FLAME_SMALL
+	MobjType::HexenFlameLarge,       // T_FLAME_LARGE
+	MobjType::HexenArmor1,           // T_MESHARMOR
+	MobjType::HexenArmor2,           // T_FALCONSHIELD
+	MobjType::HexenArmor3,           // T_PLATINUMHELM
+	MobjType::HexenArmor4,           // T_AMULETOFWARDING
+	MobjType::HexenArtipoisonbag,     // T_ITEMFLECHETTE
+	MobjType::HexenArtitorch,         // T_ITEMTORCH
+	MobjType::HexenBlastradius,       // T_ITEMREPULSION
+	MobjType::HexenMana3,             // T_MANA3
+	MobjType::HexenArtipuzzskull,     // T_PUZZSKULL
+	MobjType::HexenArtipuzzgembig,    // T_PUZZGEMBIG
+	MobjType::HexenArtipuzzgemred,    // T_PUZZGEMRED
+	MobjType::HexenArtipuzzgemgreen1, // T_PUZZGEMGREEN1
+	MobjType::HexenArtipuzzgemgreen2, // T_PUZZGEMGREEN2
+	MobjType::HexenArtipuzzgemblue1,  // T_PUZZGEMBLUE1
+	MobjType::HexenArtipuzzgemblue2,  // T_PUZZGEMBLUE2
+	MobjType::HexenArtipuzzbook1,     // T_PUZZBOOK1
+	MobjType::HexenArtipuzzbook2,     // T_PUZZBOOK2
+	MobjType::HexenKey1,              // T_METALKEY
+	MobjType::HexenKey2,              // T_SMALLMETALKEY
+	MobjType::HexenKey3,              // T_AXEKEY
+	MobjType::HexenKey4,              // T_FIREKEY
+	MobjType::HexenKey5,              // T_GREENKEY
+	MobjType::HexenKey6,              // T_MACEKEY
+	MobjType::HexenKey7,              // T_SILVERKEY
+	MobjType::HexenKey8,              // T_RUSTYKEY
+	MobjType::HexenKey9,              // T_HORNKEY
+	MobjType::HexenKeya,              // T_SERPENTKEY
+	MobjType::HexenWaterDrip,        // T_WATERDRIP
+	MobjType::HexenFlameSmallTemp,  // T_TEMPSMALLFLAME
+	MobjType::HexenFlameSmall,       // T_PERMSMALLFLAME
+	MobjType::HexenFlameLargeTemp,  // T_TEMPLARGEFLAME
+	MobjType::HexenFlameLarge,       // T_PERMLARGEFLAME
+	MobjType::HexenDemonMash,        // T_DEMON_MASH
+	MobjType::HexenDemon2Mash,       // T_DEMON2_MASH
+	MobjType::HexenEttinMash,        // T_ETTIN_MASH
+	MobjType::HexenCentaurMash,      // T_CENTAUR_MASH
+	MobjType::HexenThrustfloorUp,    // T_THRUSTSPIKEUP
+	MobjType::HexenThrustfloorDown,  // T_THRUSTSPIKEDOWN
+	MobjType::HexenWraithfx4,         // T_FLESH_DRIP1
+	MobjType::HexenWraithfx5,         // T_FLESH_DRIP2
+	MobjType::HexenWraithfx2          // T_SPARK_DRIP
 };
 
 dboolean EV_ThingProjectile(byte* args, dboolean gravity)
@@ -135,7 +137,7 @@ dboolean EV_ThingProjectile(byte* args, dboolean gravity)
 	int fineAngle;
 	fixed_t speed;
 	fixed_t vspeed;
-	mobjtype_t moType;
+	MobjType moType;
 	mobj_t* mobj;
 	mobj_t* newMobj;
 	int searcher;
@@ -145,7 +147,7 @@ dboolean EV_ThingProjectile(byte* args, dboolean gravity)
 	searcher = -1;
 	tid = args[0];
 	moType = TranslateThingType[args[1]];
-	if(nomonsters && (mobjinfo[moType].flags & MF_COUNTKILL))
+	if(nomonsters && (mobjinfo[std::to_underlying(moType)].flags & MF_COUNTKILL))
 	{
 		// Don't spawn monsters if -nomonsters
 		return false;
@@ -156,8 +158,8 @@ dboolean EV_ThingProjectile(byte* args, dboolean gravity)
 	vspeed = (int)args[4] << 13;
 	while((mobj = P_FindMobjFromTID(tid, &searcher)) != nullptr)
 	{
-		newMobj = P_SpawnMobj(mobj->x, mobj->y, mobj->z, static_cast<mobjtype_t>(moType));
-		if(newMobj->info->seesound)
+		newMobj = P_SpawnMobj(mobj->x, mobj->y, mobj->z, moType);
+		if(newMobj->info->seesound != SfxId::None)
 		{
 			S_StartMobjSound(newMobj, newMobj->info->seesound);
 		}
@@ -187,7 +189,7 @@ dboolean EV_ThingSpawn(byte* args, dboolean fog)
 	mobj_t* mobj;
 	mobj_t* newMobj;
 	mobj_t* fogMobj;
-	mobjtype_t moType;
+	MobjType moType;
 	int searcher;
 	dboolean success;
 	fixed_t z;
@@ -196,7 +198,7 @@ dboolean EV_ThingSpawn(byte* args, dboolean fog)
 	searcher = -1;
 	tid = args[0];
 	moType = TranslateThingType[args[1]];
-	if(nomonsters && (mobjinfo[moType].flags & MF_COUNTKILL))
+	if(nomonsters && (mobjinfo[std::to_underlying(moType)].flags & MF_COUNTKILL))
 	{
 		// Don't spawn monsters if -nomonsters
 		return false;
@@ -204,7 +206,7 @@ dboolean EV_ThingSpawn(byte* args, dboolean fog)
 	angle = (int)args[2] << 24;
 	while((mobj = P_FindMobjFromTID(tid, &searcher)) != nullptr)
 	{
-		if(mobjinfo[moType].flags2 & MF2_FLOATBOB)
+		if(mobjinfo[std::to_underlying(moType)].flags2 & MF2_FLOATBOB)
 		{
 			z = mobj->z - mobj->floorz;
 		}
@@ -212,7 +214,7 @@ dboolean EV_ThingSpawn(byte* args, dboolean fog)
 		{
 			z = mobj->z;
 		}
-		newMobj = P_SpawnMobj(mobj->x, mobj->y, z, static_cast<mobjtype_t>(moType));
+		newMobj = P_SpawnMobj(mobj->x, mobj->y, z, moType);
 		if(P_TestMobjLocation(newMobj) == false)
 		{
 			// Didn't fit
@@ -224,8 +226,8 @@ dboolean EV_ThingSpawn(byte* args, dboolean fog)
 			if(fog == true)
 			{
 				fogMobj = P_SpawnMobj(mobj->x, mobj->y,
-					mobj->z + TELEFOGHEIGHT, HEXEN_MT_TFOG);
-				S_StartMobjSound(fogMobj, hexen_sfx_teleport);
+					mobj->z + TELEFOGHEIGHT, MobjType::HexenTfog);
+				S_StartMobjSound(fogMobj, SfxId::HexenTeleport);
 			}
 			newMobj->flags |= MF_DROPPED; // Don't respawn
 			if(newMobj->flags2 & MF2_FLOATBOB)
@@ -284,7 +286,7 @@ dboolean EV_ThingRemove(int tid)
 	searcher = -1;
 	while((mobj = P_FindMobjFromTID(tid, &searcher)) != nullptr)
 	{
-		if(mobj->type == HEXEN_MT_BRIDGE)
+		if(mobj->type == MobjType::HexenBridge)
 		{
 			A_BridgeRemove(mobj);
 			return true;
@@ -329,60 +331,60 @@ static dboolean ActivateThing(mobj_t* mobj)
 	}
 	switch(mobj->type)
 	{
-		case HEXEN_MT_ZTWINEDTORCH:
-		case HEXEN_MT_ZTWINEDTORCH_UNLIT:
-			P_SetMobjState(mobj, HEXEN_S_ZTWINEDTORCH_1);
-			S_StartMobjSound(mobj, hexen_sfx_ignite);
+		case MobjType::HexenZtwinedtorch:
+		case MobjType::HexenZtwinedtorchUnlit:
+			P_SetMobjState(mobj, StateId::HexenZtwinedtorch1);
+			S_StartMobjSound(mobj, SfxId::HexenIgnite);
 			break;
-		case HEXEN_MT_ZWALLTORCH:
-		case HEXEN_MT_ZWALLTORCH_UNLIT:
-			P_SetMobjState(mobj, HEXEN_S_ZWALLTORCH1);
-			S_StartMobjSound(mobj, hexen_sfx_ignite);
+		case MobjType::HexenZwalltorch:
+		case MobjType::HexenZwalltorchUnlit:
+			P_SetMobjState(mobj, StateId::HexenZwalltorch1);
+			S_StartMobjSound(mobj, SfxId::HexenIgnite);
 			break;
-		case HEXEN_MT_ZGEMPEDESTAL:
-			P_SetMobjState(mobj, HEXEN_S_ZGEMPEDESTAL2);
+		case MobjType::HexenZgempedestal:
+			P_SetMobjState(mobj, StateId::HexenZgempedestal2);
 			break;
-		case HEXEN_MT_ZWINGEDSTATUENOSKULL:
-			P_SetMobjState(mobj, HEXEN_S_ZWINGEDSTATUENOSKULL2);
+		case MobjType::HexenZwingedstatuenoskull:
+			P_SetMobjState(mobj, StateId::HexenZwingedstatuenoskull2);
 			break;
-		case HEXEN_MT_THRUSTFLOOR_UP:
-		case HEXEN_MT_THRUSTFLOOR_DOWN:
+		case MobjType::HexenThrustfloorUp:
+		case MobjType::HexenThrustfloorDown:
 			if(mobj->special_args[0] == 0)
 			{
-				S_StartMobjSound(mobj, hexen_sfx_thrustspike_lower);
+				S_StartMobjSound(mobj, SfxId::HexenThrustspikeLower);
 				mobj->flags2 &= ~MF2_DONTDRAW;
 				if(mobj->special_args[1])
-					P_SetMobjState(mobj, HEXEN_S_BTHRUSTRAISE1);
+					P_SetMobjState(mobj, StateId::HexenBthrustraise1);
 				else
-					P_SetMobjState(mobj, HEXEN_S_THRUSTRAISE1);
+					P_SetMobjState(mobj, StateId::HexenThrustraise1);
 			}
 			break;
-		case HEXEN_MT_ZFIREBULL:
-		case HEXEN_MT_ZFIREBULL_UNLIT:
-			P_SetMobjState(mobj, HEXEN_S_ZFIREBULL_BIRTH);
-			S_StartMobjSound(mobj, hexen_sfx_ignite);
+		case MobjType::HexenZfirebull:
+		case MobjType::HexenZfirebullUnlit:
+			P_SetMobjState(mobj, StateId::HexenZfirebullBirth);
+			S_StartMobjSound(mobj, SfxId::HexenIgnite);
 			break;
-		case HEXEN_MT_ZBELL:
+		case MobjType::HexenZbell:
 			if(mobj->health > 0)
 			{
 				P_DamageMobj(mobj, nullptr, nullptr, 10); // 'ring' the bell
 			}
 			break;
-		case HEXEN_MT_ZCAULDRON:
-		case HEXEN_MT_ZCAULDRON_UNLIT:
-			P_SetMobjState(mobj, HEXEN_S_ZCAULDRON1);
-			S_StartMobjSound(mobj, hexen_sfx_ignite);
+		case MobjType::HexenZcauldron:
+		case MobjType::HexenZcauldronUnlit:
+			P_SetMobjState(mobj, StateId::HexenZcauldron1);
+			S_StartMobjSound(mobj, SfxId::HexenIgnite);
 			break;
-		case HEXEN_MT_FLAME_SMALL:
-			S_StartMobjSound(mobj, hexen_sfx_ignite);
-			P_SetMobjState(mobj, HEXEN_S_FLAME_SMALL1);
+		case MobjType::HexenFlameSmall:
+			S_StartMobjSound(mobj, SfxId::HexenIgnite);
+			P_SetMobjState(mobj, StateId::HexenFlameSmall1);
 			break;
-		case HEXEN_MT_FLAME_LARGE:
-			S_StartMobjSound(mobj, hexen_sfx_ignite);
-			P_SetMobjState(mobj, HEXEN_S_FLAME_LARGE1);
+		case MobjType::HexenFlameLarge:
+			S_StartMobjSound(mobj, SfxId::HexenIgnite);
+			P_SetMobjState(mobj, StateId::HexenFlameLarge1);
 			break;
-		case HEXEN_MT_BAT_SPAWNER:
-			P_SetMobjState(mobj, HEXEN_S_SPAWNBATS1);
+		case MobjType::HexenBatSpawner:
+			P_SetMobjState(mobj, StateId::HexenSpawnbats1);
 			break;
 		default:
 			return false;
@@ -406,41 +408,41 @@ static dboolean DeactivateThing(mobj_t* mobj)
 	}
 	switch(mobj->type)
 	{
-		case HEXEN_MT_ZTWINEDTORCH:
-		case HEXEN_MT_ZTWINEDTORCH_UNLIT:
-			P_SetMobjState(mobj, HEXEN_S_ZTWINEDTORCH_UNLIT);
+		case MobjType::HexenZtwinedtorch:
+		case MobjType::HexenZtwinedtorchUnlit:
+			P_SetMobjState(mobj, StateId::HexenZtwinedtorchUnlit);
 			break;
-		case HEXEN_MT_ZWALLTORCH:
-		case HEXEN_MT_ZWALLTORCH_UNLIT:
-			P_SetMobjState(mobj, HEXEN_S_ZWALLTORCH_U);
+		case MobjType::HexenZwalltorch:
+		case MobjType::HexenZwalltorchUnlit:
+			P_SetMobjState(mobj, StateId::HexenZwalltorchU);
 			break;
-		case HEXEN_MT_THRUSTFLOOR_UP:
-		case HEXEN_MT_THRUSTFLOOR_DOWN:
+		case MobjType::HexenThrustfloorUp:
+		case MobjType::HexenThrustfloorDown:
 			if(mobj->special_args[0] == 1)
 			{
-				S_StartMobjSound(mobj, hexen_sfx_thrustspike_raise);
+				S_StartMobjSound(mobj, SfxId::HexenThrustspikeRaise);
 				if(mobj->special_args[1])
-					P_SetMobjState(mobj, HEXEN_S_BTHRUSTLOWER);
+					P_SetMobjState(mobj, StateId::HexenBthrustlower);
 				else
-					P_SetMobjState(mobj, HEXEN_S_THRUSTLOWER);
+					P_SetMobjState(mobj, StateId::HexenThrustlower);
 			}
 			break;
-		case HEXEN_MT_ZFIREBULL:
-		case HEXEN_MT_ZFIREBULL_UNLIT:
-			P_SetMobjState(mobj, HEXEN_S_ZFIREBULL_DEATH);
+		case MobjType::HexenZfirebull:
+		case MobjType::HexenZfirebullUnlit:
+			P_SetMobjState(mobj, StateId::HexenZfirebullDeath);
 			break;
-		case HEXEN_MT_ZCAULDRON:
-		case HEXEN_MT_ZCAULDRON_UNLIT:
-			P_SetMobjState(mobj, HEXEN_S_ZCAULDRON_U);
+		case MobjType::HexenZcauldron:
+		case MobjType::HexenZcauldronUnlit:
+			P_SetMobjState(mobj, StateId::HexenZcauldronU);
 			break;
-		case HEXEN_MT_FLAME_SMALL:
-			P_SetMobjState(mobj, HEXEN_S_FLAME_SDORM1);
+		case MobjType::HexenFlameSmall:
+			P_SetMobjState(mobj, StateId::HexenFlameSdorm1);
 			break;
-		case HEXEN_MT_FLAME_LARGE:
-			P_SetMobjState(mobj, HEXEN_S_FLAME_LDORM1);
+		case MobjType::HexenFlameLarge:
+			P_SetMobjState(mobj, StateId::HexenFlameLdorm1);
 			break;
-		case HEXEN_MT_BAT_SPAWNER:
-			P_SetMobjState(mobj, HEXEN_S_SPAWNBATS_OFF);
+		case MobjType::HexenBatSpawner:
+			P_SetMobjState(mobj, StateId::HexenSpawnbatsOff);
 			break;
 		default:
 			return false;

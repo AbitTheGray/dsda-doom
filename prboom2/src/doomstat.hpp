@@ -11,13 +11,16 @@
 
 #pragma once
 
+#include <utility>
+
+#include "d_player.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
 // We need the playr data structure as well.
-#include "d_player.hpp"
 
 // ------------------------
 // Command line parameters.
@@ -31,8 +34,8 @@ extern dboolean fastparm;    // checkparm of -fast
 // Game Mode - identify IWAD as shareware, retail etc.
 //
 
-extern GameMode_t gamemode;
-extern GameMission_t gamemission;
+extern GameMode gamemode;
+extern GameMission gamemission;
 extern const char* doomverstr;
 
 extern char* VANILLA_MAP_LUMP_NAME(int e, int m);
@@ -44,10 +47,10 @@ extern dboolean modifiedgame;
 extern complevel_t compatibility_level;
 
 // CPhipps - old compatibility testing flags aliased to new handling
-#define compatibility (compatibility_level<=boom_compatibility_compatibility)
-#define demo_compatibility (compatibility_level < boom_compatibility_compatibility)
-#define mbf_features (compatibility_level>=mbf_compatibility)
-#define mbf21 (compatibility_level == mbf21_compatibility)
+#define compatibility (compatibility_level<=CompLevel::BoomCompatibility)
+#define demo_compatibility (compatibility_level < CompLevel::BoomCompatibility)
+#define mbf_features (compatibility_level>=CompLevel::Mbf)
+#define mbf21 (compatibility_level == CompLevel::Mbf21)
 
 extern int demo_insurance; // killough 4/5/98
 
@@ -56,63 +59,65 @@ extern dboolean pistolstart;
 // -------------------------------------------
 // killough 10/98: compatibility vector
 
-enum
+enum struct CompOption : int8_t
 {
-	comp_telefrag,
-	comp_dropoff,
-	comp_vile,
-	comp_pain,
-	comp_skull,
-	comp_blazing,
-	comp_doorlight,
-	comp_model,
-	comp_god,
-	comp_falloff,
-	comp_floors,
-	comp_skymap,
-	comp_pursuit,
-	comp_doorstuck,
-	comp_staylift,
-	comp_zombie,
-	comp_stairs,
-	comp_infcheat,
-	comp_zerotags,
-	comp_moveblock,
-	comp_respawn, /* cph - alias of comp_respawnfix from eternity */
-	comp_sound,
-	comp_666,
-	comp_soul,
-	comp_maskedanim,
+	Telefrag,
+	DropOff,
+	Vile,
+	Pain,
+	Skull,
+	Blazing,
+	DoorLight,
+	Model,
+	God,
+	FallOff,
+	Floors,
+	SkyMap,
+	Pursuit,
+	DoorStuck,
+	StayLift,
+	Zombie,
+	Stairs,
+	InfCheat,
+	ZeroTags,
+	MoveBlock,
+	Respawn, /* cph - alias of comp_respawnfix from eternity */
+	Sound,
+	Value666,
+	Soul,
+	MaskedAnim,
 
 	//e6y
-	comp_ouchface,
-	comp_maxhealth,
-	comp_translucency,
+	OuchFace,
+	MaxHealth,
+	Translucency,
 
 	// mbf21
-	comp_ledgeblock,
-	comp_friendlyspawn,
-	comp_voodooscroller,
-	comp_reservedlineflag,
+	LedgeBlock,
+	FriendlySpawn,
+	VoodooScroller,
+	ReservedLineFlag,
 
-	MBF_COMP_TOTAL = 32 // limit in MBF format
+	MbfCompTotal = 32, // limit in MBF format
+
+	End = -1 // terminates a compatibility option list
 };
 
-enum
+enum struct CompError : int32_t
 {
-	comperr_passuse,
-	comperr_hangsolid,
-	comperr_blockmap,
+	PassUse,
+	HangSolid,
+	BlockMap,
 
-	COMPERR_NUM
+	Count
 };
 
-extern int comp[MBF_COMP_TOTAL];
-extern int default_comperr[COMPERR_NUM];
+extern int comp[std::to_underlying(CompOption::MbfCompTotal)];
+extern int default_comperr[std::to_underlying(CompError::Count)];
 
 // -------------------------------------------
 // Language.
-extern Language_t language;
+extern Language language;
 
 // -------------------------------------------
 // Selected skill type, map etc.
@@ -187,15 +192,15 @@ extern int automap_grid;
 #define automap_input (automap_full)
 #define automap_stbar (automap_full && R_StatusBarVisible())
 
-typedef enum
+enum struct MenuActive : int32_t
 {
-	mnact_nochange = -1,
-	mnact_inactive, // no menu
-	mnact_float,    // doom-style large font menu, doesn't overlap anything
-	mnact_full,     // boom-style small font menu, may overlap status bar
-} menuactive_t;
+	NoChange = -1,
+	Inactive, // no menu
+	Float,    // doom-style large font menu, doesn't overlap anything
+	Full,     // boom-style small font menu, may overlap status bar
+};
 
-extern menuactive_t menuactive; // Type of menu overlaid, if any
+extern MenuActive menuactive; // Type of menu overlaid, if any
 
 extern dboolean nodrawers;
 
@@ -225,7 +230,7 @@ extern dboolean demorecording;
 extern int demover;
 
 #define allow_incompatibility (!demorecording && !demoplayback)
-#define comperr(i) (default_comperr[i] && allow_incompatibility)
+#define comperr(i) (default_comperr[std::to_underlying(i)] && allow_incompatibility)
 
 extern dboolean userdemo;
 #define userplayback (demoplayback && userdemo)
@@ -236,7 +241,7 @@ extern dboolean timingdemo;
 // Run tick clock at fastest speed possible while playing demo.  killough
 extern dboolean fastdemo;
 
-extern gamestate_t gamestate;
+extern GameState gamestate;
 extern dboolean in_game;
 
 //-----------------------------
@@ -260,7 +265,7 @@ extern int upmove;
 // Alive? Disconnected?
 extern dboolean playeringame[MAX_MAXPLAYERS];
 
-extern pclass_t PlayerClass[MAX_MAXPLAYERS];
+extern PClass PlayerClass[MAX_MAXPLAYERS];
 
 extern mapthing_t* deathmatchstarts; // killough
 extern size_t num_deathmatchstarts;  // killough
@@ -284,7 +289,7 @@ extern FILE* debugfile;
 
 // wipegamestate can be set to -1
 //  to force a wipe on the next draw
-extern gamestate_t wipegamestate;
+extern GameState wipegamestate;
 
 // debug flag to cancel adaptiveness
 extern dboolean singletics;

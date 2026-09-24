@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "d_think.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "d_think.hpp"
 
 #define SCROLL_TOP    0x01
 #define SCROLL_MID    0x02

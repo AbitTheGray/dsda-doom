@@ -10,7 +10,7 @@ extern "C"
 {
 #endif
 
-void dsda_InitAmmoTextHC(int x_offset, int y_offset, int vpt_flags, int* args, int arg_count, void** data);
+void dsda_InitAmmoTextHC(int x_offset, int y_offset, PatchTranslation vpt_flags, int* args, int arg_count, void** data);
 void dsda_UpdateAmmoTextHC(void* data);
 void dsda_DrawAmmoTextHC(void* data);
 

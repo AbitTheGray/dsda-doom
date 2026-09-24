@@ -43,7 +43,7 @@ const char* dsda_SplitFileBase()
 {
 	dsda_arg_t* arg;
 
-	arg = dsda_Arg(dsda_arg_track_playback);
+	arg = dsda_Arg(ArgId::TrackPlayback);
 	if(arg->found)
 		return arg->value.v_string;
 

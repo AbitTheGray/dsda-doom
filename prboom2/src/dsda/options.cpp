@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Options Lump
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "w_wad.hpp"
 #include "g_game.hpp"
@@ -188,34 +190,34 @@ static dsda_option_t option_list[] = {
 	{"comp_voodooscroller", &mbf_options.comp_voodooscroller, 0, 1},
 	{"comp_reservedlineflag", &mbf_options.comp_reservedlineflag, 0, 1},
 
-	{"mapcolor_back", nullptr, 0, 255, dsda_config_mapcolor_back},
-	{"mapcolor_grid", nullptr, 0, 255, dsda_config_mapcolor_grid},
-	{"mapcolor_wall", nullptr, 0, 255, dsda_config_mapcolor_wall},
-	{"mapcolor_fchg", nullptr, 0, 255, dsda_config_mapcolor_fchg},
-	{"mapcolor_cchg", nullptr, 0, 255, dsda_config_mapcolor_cchg},
-	{"mapcolor_clsd", nullptr, 0, 255, dsda_config_mapcolor_clsd},
-	{"mapcolor_rkey", nullptr, 0, 255, dsda_config_mapcolor_rkey},
-	{"mapcolor_bkey", nullptr, 0, 255, dsda_config_mapcolor_bkey},
-	{"mapcolor_ykey", nullptr, 0, 255, dsda_config_mapcolor_ykey},
-	{"mapcolor_rdor", nullptr, 0, 255, dsda_config_mapcolor_rdor},
-	{"mapcolor_bdor", nullptr, 0, 255, dsda_config_mapcolor_bdor},
-	{"mapcolor_ydor", nullptr, 0, 255, dsda_config_mapcolor_ydor},
-	{"mapcolor_tele", nullptr, 0, 255, dsda_config_mapcolor_tele},
-	{"mapcolor_secr", nullptr, 0, 255, dsda_config_mapcolor_secr},
-	{"mapcolor_revsecr", nullptr, 0, 255, dsda_config_mapcolor_revsecr},
-	{"mapcolor_tagfinder", nullptr, 0, 255, dsda_config_mapcolor_tagfinder},
-	{"mapcolor_exit", nullptr, 0, 255, dsda_config_mapcolor_exit},
-	{"mapcolor_exitsecr", nullptr, 0, 255, dsda_config_mapcolor_exitsecr},
-	{"mapcolor_unsn", nullptr, 0, 255, dsda_config_mapcolor_unsn},
-	{"mapcolor_flat", nullptr, 0, 255, dsda_config_mapcolor_flat},
-	{"mapcolor_sprt", nullptr, 0, 255, dsda_config_mapcolor_sprt},
-	{"mapcolor_item", nullptr, 0, 255, dsda_config_mapcolor_item},
-	{"mapcolor_enemy", nullptr, 0, 255, dsda_config_mapcolor_enemy},
-	{"mapcolor_frnd", nullptr, 0, 255, dsda_config_mapcolor_frnd},
-	{"mapcolor_hair", nullptr, 0, 255, dsda_config_mapcolor_hair},
-	{"mapcolor_sngl", nullptr, 0, 255, dsda_config_mapcolor_sngl},
-	{"mapcolor_me", nullptr, 0, 255, dsda_config_mapcolor_me},
-	{"mapcolor_pickup", nullptr, 0, 255, dsda_config_mapcolor_pickup},
+	{"mapcolor_back", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorBack)},
+	{"mapcolor_grid", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorGrid)},
+	{"mapcolor_wall", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorWall)},
+	{"mapcolor_fchg", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorFchg)},
+	{"mapcolor_cchg", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorCchg)},
+	{"mapcolor_clsd", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorClsd)},
+	{"mapcolor_rkey", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorRkey)},
+	{"mapcolor_bkey", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorBkey)},
+	{"mapcolor_ykey", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorYkey)},
+	{"mapcolor_rdor", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorRdor)},
+	{"mapcolor_bdor", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorBdor)},
+	{"mapcolor_ydor", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorYdor)},
+	{"mapcolor_tele", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorTele)},
+	{"mapcolor_secr", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorSecr)},
+	{"mapcolor_revsecr", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorRevsecr)},
+	{"mapcolor_tagfinder", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorTagfinder)},
+	{"mapcolor_exit", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorExit)},
+	{"mapcolor_exitsecr", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorExitsecr)},
+	{"mapcolor_unsn", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorUnsn)},
+	{"mapcolor_flat", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorFlat)},
+	{"mapcolor_sprt", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorSprt)},
+	{"mapcolor_item", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorItem)},
+	{"mapcolor_enemy", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorEnemy)},
+	{"mapcolor_frnd", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorFrnd)},
+	{"mapcolor_hair", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorHair)},
+	{"mapcolor_sngl", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorSngl)},
+	{"mapcolor_me", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorMe)},
+	{"mapcolor_pickup", nullptr, 0, 255, std::to_underlying(ConfigId::MapcolorPickup)},
 	{nullptr}
 };
 
@@ -291,9 +293,9 @@ void dsda_ParseOptionsLump()
 					parsed_option_list[i].value = BETWEEN(option_list[i].min, option_list[i].max, value);
 				}
 				else
-					dsda_UpdateIntConfig((dsda_config_identifier_t)option_list[i].config_key, value, false);
+					dsda_UpdateIntConfig((ConfigId)option_list[i].config_key, value, false);
 
-				lprintf(LO_INFO, "dsda_LumpOptions: %s = %d\n", key, value);
+				lprintf(OutputLevels::Info, "dsda_LumpOptions: %s = %d\n", key, value);
 
 				break;
 			}
@@ -307,7 +309,7 @@ static const dsda_options_t* dsda_MBFOptions()
 {
 	int i;
 
-	if(compatibility_level == mbf_compatibility)
+	if(compatibility_level == CompLevel::Mbf)
 		mbf_options = default_mbf_options;
 	else
 		mbf_options = default_latest_options;
@@ -333,31 +335,31 @@ const dsda_options_t* dsda_Options()
 #define MBF21_COMP_TOTAL 25
 
 static int mbf21_comp_translation[MBF21_COMP_TOTAL] = {
-	comp_telefrag,
-	comp_dropoff,
-	comp_vile,
-	comp_pain,
-	comp_skull,
-	comp_blazing,
-	comp_doorlight,
-	comp_model,
-	comp_god,
-	comp_falloff,
-	comp_floors,
-	comp_skymap,
-	comp_pursuit,
-	comp_doorstuck,
-	comp_staylift,
-	comp_zombie,
-	comp_stairs,
-	comp_infcheat,
-	comp_zerotags,
-	comp_respawn,
-	comp_soul,
-	comp_ledgeblock,
-	comp_friendlyspawn,
-	comp_voodooscroller,
-	comp_reservedlineflag,
+	std::to_underlying(CompOption::Telefrag),
+	std::to_underlying(CompOption::DropOff),
+	std::to_underlying(CompOption::Vile),
+	std::to_underlying(CompOption::Pain),
+	std::to_underlying(CompOption::Skull),
+	std::to_underlying(CompOption::Blazing),
+	std::to_underlying(CompOption::DoorLight),
+	std::to_underlying(CompOption::Model),
+	std::to_underlying(CompOption::God),
+	std::to_underlying(CompOption::FallOff),
+	std::to_underlying(CompOption::Floors),
+	std::to_underlying(CompOption::SkyMap),
+	std::to_underlying(CompOption::Pursuit),
+	std::to_underlying(CompOption::DoorStuck),
+	std::to_underlying(CompOption::StayLift),
+	std::to_underlying(CompOption::Zombie),
+	std::to_underlying(CompOption::Stairs),
+	std::to_underlying(CompOption::InfCheat),
+	std::to_underlying(CompOption::ZeroTags),
+	std::to_underlying(CompOption::Respawn),
+	std::to_underlying(CompOption::Soul),
+	std::to_underlying(CompOption::LedgeBlock),
+	std::to_underlying(CompOption::FriendlySpawn),
+	std::to_underlying(CompOption::VoodooScroller),
+	std::to_underlying(CompOption::ReservedLineFlag),
 };
 
 // killough 5/2/98: number of bytes reserved for saving options

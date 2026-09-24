@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <utility>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -30,57 +32,57 @@ extern "C"
 #define KEY_EQUALS     0x3d
 #define KEY_MINUS      0x2d
 
-enum
+enum struct Key : int32_t
 {
 	// Keys without character representations
 
-	KEY_F1 = 0x80,
-	KEY_F2,
-	KEY_F3,
-	KEY_F4,
-	KEY_F5,
-	KEY_F6,
-	KEY_F7,
-	KEY_F8,
-	KEY_F9,
-	KEY_F10,
-	KEY_F11,
-	KEY_F12,
+	F1 = 0x80,
+	F2,
+	F3,
+	F4,
+	F5,
+	F6,
+	F7,
+	F8,
+	F9,
+	F10,
+	F11,
+	F12,
 
-	KEY_RSHIFT,
-	KEY_RCTRL,
-	KEY_RALT,
-	KEY_LALT = KEY_RALT,
-	KEY_CAPSLOCK,
-	KEY_NUMLOCK,
-	KEY_SCRLCK,
-	KEY_PRTSCR,
-	KEY_HOME,
-	KEY_END,
-	KEY_PGUP,
-	KEY_PGDN,
-	KEY_INS,
-	KEY_DEL,
+	Rshift,
+	Rctrl,
+	Ralt,
+	Lalt = Ralt,
+	Capslock,
+	Numlock,
+	Scrlck,
+	Prtscr,
+	Home,
+	End,
+	Pgup,
+	Pgdn,
+	Ins,
+	Del,
 
 	// Keys on the numerics keypad
 
-	KEYP_0,
-	KEYP_1,
-	KEYP_2,
-	KEYP_3,
-	KEYP_4,
-	KEYP_5,
-	KEYP_6,
-	KEYP_7,
-	KEYP_8,
-	KEYP_9,
-	KEYP_DIVIDE,
-	KEYP_PLUS,
-	KEYP_MINUS,
-	KEYP_MULTIPLY,
-	KEYP_PERIOD,
-	KEYP_EQUALS = KEY_EQUALS,
-	KEYP_ENTER  = KEY_ENTER,
+	Keyp0,
+	Keyp1,
+	Keyp2,
+	Keyp3,
+	Keyp4,
+	Keyp5,
+	Keyp6,
+	Keyp7,
+	Keyp8,
+	Keyp9,
+	KeypDivide,
+	KeypPlus,
+	KeypMinus,
+	KeypMultiply,
+	KeypPeriod,
+	KeypEquals = KEY_EQUALS,
+	KeypEnter  = KEY_ENTER,
 };
 
 #define SCANCODE_TO_KEYS_ARRAY {                                            \
@@ -95,40 +97,40 @@ enum
     KEY_ENTER, KEY_ESCAPE, KEY_BACKSPACE, KEY_TAB, ' ',       /* 40-49 */   \
     KEY_MINUS, KEY_EQUALS, '[', ']', '\\',                                  \
     0,   ';', '\'', '`', ',',                                 /* 50-59 */   \
-    '.', '/', KEY_CAPSLOCK, KEY_F1, KEY_F2,                                 \
-    KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7,                   /* 60-69 */   \
-    KEY_F8, KEY_F9, KEY_F10, KEY_F11, KEY_F12,                              \
-    KEY_PRTSCR, KEY_SCRLCK, KEY_PAUSE, KEY_INS, KEY_HOME,     /* 70-79 */   \
-    KEY_PGUP, KEY_DEL, KEY_END, KEY_PGDN, KEY_RIGHTARROW,                   \
+    '.', '/', std::to_underlying(Key::Capslock), std::to_underlying(Key::F1), std::to_underlying(Key::F2),                                 \
+    std::to_underlying(Key::F3), std::to_underlying(Key::F4), std::to_underlying(Key::F5), std::to_underlying(Key::F6), std::to_underlying(Key::F7),                   /* 60-69 */   \
+    std::to_underlying(Key::F8), std::to_underlying(Key::F9), std::to_underlying(Key::F10), std::to_underlying(Key::F11), std::to_underlying(Key::F12),                              \
+    std::to_underlying(Key::Prtscr), std::to_underlying(Key::Scrlck), KEY_PAUSE, std::to_underlying(Key::Ins), std::to_underlying(Key::Home),     /* 70-79 */   \
+    std::to_underlying(Key::Pgup), std::to_underlying(Key::Del), std::to_underlying(Key::End), std::to_underlying(Key::Pgdn), KEY_RIGHTARROW,                   \
     KEY_LEFTARROW, KEY_DOWNARROW, KEY_UPARROW,                /* 80-89 */   \
-    KEY_NUMLOCK, KEYP_DIVIDE,                                               \
-    KEYP_MULTIPLY, KEYP_MINUS, KEYP_PLUS, KEYP_ENTER, KEYP_1,               \
-    KEYP_2, KEYP_3, KEYP_4, KEYP_5, KEYP_6,                   /* 90-99 */   \
-    KEYP_7, KEYP_8, KEYP_9, KEYP_0, KEYP_PERIOD,                            \
-    0, 0, 0, KEYP_EQUALS,                                     /* 100-103 */ \
+    std::to_underlying(Key::Numlock), std::to_underlying(Key::KeypDivide),                                               \
+    std::to_underlying(Key::KeypMultiply), std::to_underlying(Key::KeypMinus), std::to_underlying(Key::KeypPlus), std::to_underlying(Key::KeypEnter), std::to_underlying(Key::Keyp1),               \
+    std::to_underlying(Key::Keyp2), std::to_underlying(Key::Keyp3), std::to_underlying(Key::Keyp4), std::to_underlying(Key::Keyp5), std::to_underlying(Key::Keyp6),                   /* 90-99 */   \
+    std::to_underlying(Key::Keyp7), std::to_underlying(Key::Keyp8), std::to_underlying(Key::Keyp9), std::to_underlying(Key::Keyp0), std::to_underlying(Key::KeypPeriod),                            \
+    0, 0, 0, std::to_underlying(Key::KeypEquals),                                     /* 100-103 */ \
 }
 
 // Default names for keys, to use in English or as fallback.
 #define KEY_NAMES_ARRAY {                                            \
     { KEY_BACKSPACE,  "BACKSP" },   { KEY_TAB,        "TAB" },       \
-    { KEY_INS,        "INS" },      { KEY_DEL,        "DEL" },       \
-    { KEY_PGUP,       "PGUP" },     { KEY_PGDN,       "PGDN" },      \
+    { Key::Ins,        "INS" },      { Key::Del,        "DEL" },       \
+    { Key::Pgup,       "PGUP" },     { Key::Pgdn,       "PGDN" },      \
     { KEY_ENTER,      "ENTER" },    { KEY_ESCAPE,     "ESC" },       \
-    { KEY_F1,         "F1" },       { KEY_F2,         "F2" },        \
-    { KEY_F3,         "F3" },       { KEY_F4,         "F4" },        \
-    { KEY_F5,         "F5" },       { KEY_F6,         "F6" },        \
-    { KEY_F7,         "F7" },       { KEY_F8,         "F8" },        \
-    { KEY_F9,         "F9" },       { KEY_F10,        "F10" },       \
-    { KEY_F11,        "F11" },      { KEY_F12,        "F12" },       \
-    { KEY_HOME,       "HOME" },     { KEY_END,        "END" },       \
+    { Key::F1,         "F1" },       { Key::F2,         "F2" },        \
+    { Key::F3,         "F3" },       { Key::F4,         "F4" },        \
+    { Key::F5,         "F5" },       { Key::F6,         "F6" },        \
+    { Key::F7,         "F7" },       { Key::F8,         "F8" },        \
+    { Key::F9,         "F9" },       { Key::F10,        "F10" },       \
+    { Key::F11,        "F11" },      { Key::F12,        "F12" },       \
+    { Key::Home,       "HOME" },     { Key::End,        "END" },       \
     { KEY_MINUS,      "-" },        { KEY_EQUALS,     "=" },         \
-    { KEY_NUMLOCK,    "NUMLCK" },   { KEY_SCRLCK,     "SCRLCK" },    \
-    { KEY_PAUSE,      "PAUSE" },    { KEY_PRTSCR,     "PRTSC" },     \
+    { Key::Numlock,    "NUMLCK" },   { Key::Scrlck,     "SCRLCK" },    \
+    { KEY_PAUSE,      "PAUSE" },    { Key::Prtscr,     "PRTSC" },     \
     { KEY_UPARROW,    "UP" },       { KEY_DOWNARROW,  "DOWN" },      \
     { KEY_LEFTARROW,  "LEFT" },     { KEY_RIGHTARROW, "RIGHT" },     \
-    { KEY_RALT,       "ALT" },      { KEY_LALT,       "ALT" },       \
-    { KEY_RSHIFT,     "SHIFT" },    { KEY_CAPSLOCK,   "CAPS" },      \
-    { KEY_RCTRL,      "CTRL" },     { KEYP_5,         "NUM5" },      \
+    { Key::Ralt,       "ALT" },      { Key::Lalt,       "ALT" },       \
+    { Key::Rshift,     "SHIFT" },    { Key::Capslock,   "CAPS" },      \
+    { Key::Rctrl,      "CTRL" },     { Key::Keyp5,         "NUM5" },      \
     { ' ',            "SPACE" },                                     \
     { 'a', "A" },   { 'b', "B" },   { 'c', "C" },   { 'd', "D" },    \
     { 'e', "E" },   { 'f', "F" },   { 'g', "G" },   { 'h', "H" },    \
@@ -144,83 +146,83 @@ enum
     { '\'', "\'" },                                                  \
 }
 
-enum
+enum struct GamepadButton : int32_t
 {
-	GAMEPAD_A,
-	GAMEPAD_B,
-	GAMEPAD_X,
-	GAMEPAD_Y,
-	GAMEPAD_BACK,
-	GAMEPAD_GUIDE,
-	GAMEPAD_START,
-	GAMEPAD_LEFT_STICK,
-	GAMEPAD_RIGHT_STICK,
-	GAMEPAD_LEFT_SHOULDER,
-	GAMEPAD_RIGHT_SHOULDER,
-	GAMEPAD_DPAD_UP,
-	GAMEPAD_DPAD_DOWN,
-	GAMEPAD_DPAD_LEFT,
-	GAMEPAD_DPAD_RIGHT,
-	GAMEPAD_MISC1,
-	GAMEPAD_PADDLE1,
-	GAMEPAD_PADDLE2,
-	GAMEPAD_PADDLE3,
-	GAMEPAD_PADDLE4,
-	GAMEPAD_TOUCHPAD_PRESS,
-	GAMEPAD_TOUCHPAD_TOUCH,
-	GAMEPAD_LEFT_TRIGGER,
-	GAMEPAD_RIGHT_TRIGGER,
-	GAMEPAD_LEFT_STICK_UP,
-	GAMEPAD_LEFT_STICK_DOWN,
-	GAMEPAD_LEFT_STICK_LEFT,
-	GAMEPAD_LEFT_STICK_RIGHT,
-	GAMEPAD_RIGHT_STICK_UP,
-	GAMEPAD_RIGHT_STICK_DOWN,
-	GAMEPAD_RIGHT_STICK_LEFT,
-	GAMEPAD_RIGHT_STICK_RIGHT,
+	A,
+	B,
+	X,
+	Y,
+	Back,
+	Guide,
+	Start,
+	LeftStick,
+	RightStick,
+	LeftShoulder,
+	RightShoulder,
+	DpadUp,
+	DpadDown,
+	DpadLeft,
+	DpadRight,
+	Misc1,
+	Paddle1,
+	Paddle2,
+	Paddle3,
+	Paddle4,
+	TouchpadPress,
+	TouchpadTouch,
+	LeftTrigger,
+	RightTrigger,
+	LeftStickUp,
+	LeftStickDown,
+	LeftStickLeft,
+	LeftStickRight,
+	RightStickUp,
+	RightStickDown,
+	RightStickLeft,
+	RightStickRight,
 
-	NUM_GAMEPAD_BUTTONS
+	NumGamepadButtons
 };
 
-enum
+enum struct MouseButton : int32_t
 {
-	MOUSE_BUTTON_LEFT,
-	MOUSE_BUTTON_RIGHT,
-	MOUSE_BUTTON_MIDDLE,
-	MOUSE_BUTTON_X1,
-	MOUSE_BUTTON_X2,
-	MOUSE_BUTTON_WHEELUP,
-	MOUSE_BUTTON_WHEELDOWN,
-	MOUSE_BUTTON_WHEELLEFT,
-	MOUSE_BUTTON_WHEELRIGHT,
+	Left,
+	Right,
+	Middle,
+	X1,
+	X2,
+	Wheelup,
+	Wheeldown,
+	Wheelleft,
+	Wheelright,
 
-	NUM_MOUSE_BUTTONS
+	NumMouseButtons
 };
 
-enum
+enum struct GamepadAxis : int32_t
 {
-	AXIS_LEFTX,
-	AXIS_LEFTY,
-	AXIS_RIGHTX,
-	AXIS_RIGHTY,
+	LeftX,
+	LeftY,
+	RightX,
+	RightY,
 
-	NUM_AXES
+	Count
 };
 
-enum
+enum struct AxisAction : int32_t
 {
-	AXIS_STRAFE,
-	AXIS_FORWARD,
-	AXIS_TURN,
-	AXIS_LOOK,
+	Strafe,
+	Forward,
+	Turn,
+	Look,
 };
 
-enum
+enum struct GyroAxis : int32_t
 {
-	GYRO_TURN,
-	GYRO_LOOK,
+	Turn,
+	Look,
 
-	NUM_GYRO_AXES
+	Count
 };
 
 #ifdef __cplusplus

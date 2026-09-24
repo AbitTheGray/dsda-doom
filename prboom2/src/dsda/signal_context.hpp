@@ -5,32 +5,33 @@
 
 #pragma once
 
+enum struct SignalContext : uint32_t
+{
+	Display             = 0x0001,
+	PlayerView         = 0x0002,
+	SetupFrame         = 0x0004,
+	Clear               = 0x0008,
+	InitScene          = 0x0010,
+	GlFrustum          = 0x0020,
+	BspNodes           = 0x0040,
+	DrawPlanes         = 0x0080,
+	ResetColumnBuffer = 0x0100,
+	DrawMasked         = 0x0200,
+	DrawScene          = 0x0400,
+	StatusBar          = 0x0800,
+	Hud                 = 0x1000,
+};
+ENUM_FLAGS_FUNC(SignalContext)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef enum
-{
-	sf_display             = 0x0001,
-	sf_player_view         = 0x0002,
-	sf_setup_frame         = 0x0004,
-	sf_clear               = 0x0008,
-	sf_init_scene          = 0x0010,
-	sf_gl_frustum          = 0x0020,
-	sf_bsp_nodes           = 0x0040,
-	sf_draw_planes         = 0x0080,
-	sf_reset_column_buffer = 0x0100,
-	sf_draw_masked         = 0x0200,
-	sf_draw_scene          = 0x0400,
-	sf_status_bar          = 0x0800,
-	sf_hud                 = 0x1000,
-} signal_context_t;
+extern SignalContext signal_context;
 
-extern int signal_context;
-
-#define DSDA_ADD_CONTEXT(x) signal_context |= x
-#define DSDA_REMOVE_CONTEXT(x) signal_context &= ~x;
+#define DSDA_ADD_CONTEXT(x) signal_context |= (x)
+#define DSDA_REMOVE_CONTEXT(x) signal_context -= (x)
 
 #ifdef __cplusplus
 }

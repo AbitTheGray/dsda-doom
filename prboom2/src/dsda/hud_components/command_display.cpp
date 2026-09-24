@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Command Display HUD Component
 
+#include <utility>
+
 #include "d_ticcmd.hpp"
 
 #include "dsda/build.hpp"
@@ -57,16 +59,16 @@ static void dsda_TicCmdToCommand(dsda_command_t* command, ticcmd_t* cmd)
 
 	command->use = command->attack = command->change = 0;
 
-	if(cmd->buttons && !(cmd->buttons & BT_SPECIAL))
+	if(cmd->buttons != static_cast<ButtonCode>(0) && (cmd->buttons & ButtonCode::Special) == ButtonCode{})
 	{
-		if(cmd->buttons & BT_ATTACK)
+		if((cmd->buttons & ButtonCode::Attack) != ButtonCode{})
 			command->attack = 1;
 
-		if(cmd->buttons & BT_USE)
+		if((cmd->buttons & ButtonCode::Use) != ButtonCode{})
 			command->use = 1;
 
-		if(cmd->buttons & BT_CHANGE)
-			command->change = 1 + ((cmd->buttons & BT_WEAPONMASK) >> BT_WEAPONSHIFT);
+		if((cmd->buttons & ButtonCode::Change) != ButtonCode{})
+			command->change = 1 + ButtonWeapon(cmd->buttons);
 	}
 }
 
@@ -111,8 +113,8 @@ void dsda_InitCommandHistory()
 {
 	int i;
 
-	dsda_command_history_size = dsda_IntConfig(dsda_config_command_history_size);
-	dsda_hide_empty_commands = dsda_IntConfig(dsda_config_hide_empty_commands);
+	dsda_command_history_size = dsda_IntConfig(ConfigId::CommandHistorySize);
+	dsda_hide_empty_commands = dsda_IntConfig(ConfigId::HideEmptyCommands);
 
 	for(i = 1; i < MAX_HISTORY; ++i)
 	{
@@ -124,7 +126,7 @@ void dsda_InitCommandHistory()
 	command_history[MAX_HISTORY - 1].next = &command_history[0];
 }
 
-void dsda_InitCommandDisplayHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitCommandDisplayHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	int i;
 
@@ -133,12 +135,12 @@ void dsda_InitCommandDisplayHC(int x_offset, int y_offset, int vpt, int* args, i
 
 	for(i = 0; i < MAX_HISTORY; ++i)
 	{
-		command_history[i].color = dsda_TextColor(dsda_tc_exhud_command_entry);
+		command_history[i].color = dsda_TextColor(TextColorIndex::ExhudCommandEntry);
 		command_history[i].component = &local->component[i];
 		dsda_InitTextHC(command_history[i].component, x_offset, y_offset + i * 8, vpt);
 	}
 
-	next_command_display.color = dsda_TextColor(dsda_tc_exhud_command_queue);
+	next_command_display.color = dsda_TextColor(TextColorIndex::ExhudCommandQueue);
 	next_command_display.component = &local->next_command_component;
 	dsda_InitTextHC(next_command_display.component, x_offset, y_offset, vpt);
 

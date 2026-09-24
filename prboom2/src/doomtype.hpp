@@ -7,6 +7,58 @@
 
 #pragma once
 
+#include <stdint.h>
+
+#include "cpp/Util.hpp"
+
+/* cph - from v_video.h, needed by gl_struct.h
+ * The low nibble selects an alignment; the higher bits are independent flags.
+ */
+enum struct PatchTranslation : uint32_t
+{
+	// e6y: wide-res
+	AlignLeft        = 1,
+	AlignRight       = 2,
+	AlignTop         = 3,
+	AlignLeftTop     = 4,
+	AlignRightTop    = 5,
+	AlignBottom      = 6,
+	AlignWide        = 7,
+	AlignLeftBottom  = 8,
+	AlignRightBottom = 9,
+	AlignMax         = 10,
+	Stretch          = 16, // Stretch to compensate for high-res
+	ExText           = 32,
+
+	None        = 128, // Normal
+	Flip        = 256, // Flip image horizontally
+	Trans       = 512, // Translate image via a translation table
+	NoOffset    = 1024,
+	StretchReal = 2048, // [XA] VPT_STRETCH in gld_fillRect means "tile", rather than "stretch"... these flags probably need a rename.
+
+	AlignMask   = 0xf,
+	StretchMask = 0x1f,
+};
+ENUM_FLAGS_FUNC(PatchTranslation)
+
+// the low nibble of the flags selects the alignment
+inline constexpr PatchTranslation PatchAlignment(const PatchTranslation flags) noexcept
+{
+	return static_cast<PatchTranslation>(
+		std::to_underlying(flags) & std::to_underlying(PatchTranslation::AlignMask));
+}
+
+// the alignment nibble plus the stretch bit
+inline constexpr PatchTranslation PatchStretchBits(const PatchTranslation flags) noexcept
+{
+	return static_cast<PatchTranslation>(
+		std::to_underlying(flags) & std::to_underlying(PatchTranslation::StretchMask));
+}
+
+#include <stdbool.h>
+#include <inttypes.h>
+#include <limits.h>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -16,7 +68,6 @@ extern "C"
 #include "config.h"
 #endif
 
-#include <stdbool.h>
 typedef int dboolean;
 
 typedef unsigned char byte;
@@ -31,9 +82,6 @@ typedef unsigned char byte;
 #ifndef BETWEEN
 #define BETWEEN(l,u,x) ((l)>(x)?(l):(x)>(u)?(u):(x))
 #endif
-
-#include <inttypes.h>
-#include <limits.h>
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -87,74 +135,48 @@ typedef unsigned char byte;
 #define INLINE inline        /* use standard inline */
 #endif
 
-typedef enum
+enum struct CompLevel : int32_t
 {
-	doom_12_compatibility,            /* Doom v1.2 */
-	doom_1666_compatibility,          /* Doom v1.666 */
-	doom2_19_compatibility,           /* Doom & Doom 2 v1.9 */
-	ultdoom_compatibility,            /* Ultimate Doom and Doom95 */
-	finaldoom_compatibility,          /* Final Doom */
-	dosdoom_compatibility,            /* DosDoom 0.47 */
-	tasdoom_compatibility,            /* TASDoom */
-	boom_compatibility_compatibility, /* Boom's compatibility mode */
-	boom_201_compatibility,           /* Boom v2.01 */
-	boom_202_compatibility,           /* Boom v2.02 */
-	lxdoom_1_compatibility,           /* LxDoom v1.3.2+ */
-	mbf_compatibility,                /* MBF */
-	prboom_1_compatibility,           /* PrBoom 2.03beta? */
-	prboom_2_compatibility,           /* PrBoom 2.1.0-2.1.1 */
-	prboom_3_compatibility,           /* PrBoom 2.2.x */
-	prboom_4_compatibility,           /* PrBoom 2.3.x */
-	prboom_5_compatibility,           /* PrBoom 2.4.0 */
-	prboom_6_compatibility,           /* Latest PrBoom */
-	placeholder_18_compatibility,
-	placeholder_19_compatibility,
-	placeholder_20_compatibility,
-	mbf21_compatibility,                         /* MBF21 */
-	MAX_COMPATIBILITY_LEVEL,                     /* Must be last entry */
+	Doom12,            /* Doom v1.2 */
+	Doom1666,          /* Doom v1.666 */
+	Doom219,           /* Doom & Doom 2 v1.9 */
+	Ultdoom,            /* Ultimate Doom and Doom95 */
+	Finaldoom,          /* Final Doom */
+	Dosdoom,            /* DosDoom 0.47 */
+	Tasdoom,            /* TASDoom */
+	BoomCompatibility, /* Boom's compatibility mode */
+	Boom201,           /* Boom v2.01 */
+	Boom202,           /* Boom v2.02 */
+	Lxdoom1,           /* LxDoom v1.3.2+ */
+	Mbf,                /* MBF */
+	Prboom1,           /* PrBoom 2.03beta? */
+	Prboom2,           /* PrBoom 2.1.0-2.1.1 */
+	Prboom3,           /* PrBoom 2.2.x */
+	Prboom4,           /* PrBoom 2.3.x */
+	Prboom5,           /* PrBoom 2.4.0 */
+	Prboom6,           /* Latest PrBoom */
+	Placeholder18,
+	Placeholder19,
+	Placeholder20,
+	Mbf21,                         /* MBF21 */
+	Max,                     /* Must be last entry */
 	/* Aliases follow */
-	boom_compatibility = boom_201_compatibility, /* Alias used by G_Compatibility */
-	best_compatibility = mbf21_compatibility
-} complevel_t_e;
-
-typedef int complevel_t;
-
-/* cph - from v_video.h, needed by gl_struct.h */
-#define VPT_ALIGN_MASK 0xf
-#define VPT_STRETCH_MASK 0x1f
-
-enum patch_translation_e
-{
-	// e6y: wide-res
-	VPT_ALIGN_LEFT         = 1,
-	VPT_ALIGN_RIGHT        = 2,
-	VPT_ALIGN_TOP          = 3,
-	VPT_ALIGN_LEFT_TOP     = 4,
-	VPT_ALIGN_RIGHT_TOP    = 5,
-	VPT_ALIGN_BOTTOM       = 6,
-	VPT_ALIGN_WIDE         = 7,
-	VPT_ALIGN_LEFT_BOTTOM  = 8,
-	VPT_ALIGN_RIGHT_BOTTOM = 9,
-	VPT_ALIGN_MAX          = 10,
-	VPT_STRETCH            = 16, // Stretch to compensate for high-res
-	VPT_EX_TEXT            = 32,
-
-	VPT_NONE         = 128, // Normal
-	VPT_FLIP         = 256, // Flip image horizontally
-	VPT_TRANS        = 512, // Translate image via a translation table
-	VPT_NOOFFSET     = 1024,
-	VPT_STRETCH_REAL = 2048, // [XA] VPT_STRETCH in gld_fillRect means "tile", rather than "stretch"... these flags probably need a rename.
+	Boom = Boom201, /* Alias used by G_Compatibility */
+	Best = Mbf21
 };
 
+typedef CompLevel complevel_t;
+
+/* cph - from v_video.h, needed by gl_struct.h */
 extern int global_patch_top_offset;
 
-#define BOTTOM_ALIGNMENT(x) ((x) == VPT_ALIGN_BOTTOM || \
-                             (x) == VPT_ALIGN_LEFT_BOTTOM || \
-                             (x) == VPT_ALIGN_RIGHT_BOTTOM)
+#define BOTTOM_ALIGNMENT(x) ((x) == PatchTranslation::AlignBottom || \
+                             (x) == PatchTranslation::AlignLeftBottom || \
+                             (x) == PatchTranslation::AlignRightBottom)
 
-#define TOP_ALIGNMENT(x) ((x) == VPT_ALIGN_TOP || \
-                          (x) == VPT_ALIGN_LEFT_TOP || \
-                          (x) == VPT_ALIGN_RIGHT_TOP)
+#define TOP_ALIGNMENT(x) ((x) == PatchTranslation::AlignTop || \
+                          (x) == PatchTranslation::AlignLeftTop || \
+                          (x) == PatchTranslation::AlignRightTop)
 
 #define arrlen(array) (sizeof(array) / sizeof(*array))
 

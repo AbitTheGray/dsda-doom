@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include "info.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "info.hpp"
 
 typedef struct
 {

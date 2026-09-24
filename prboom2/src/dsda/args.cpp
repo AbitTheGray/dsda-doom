@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA (Command Line) Args
 
+#include <utility>
+
 #include <stdio.h>
 #include <string.h>
 
@@ -14,14 +16,14 @@
 int dsda_argc;
 char** dsda_argv;
 
-typedef enum
+enum struct ArgType : int32_t
 {
-	arg_null,
-	arg_int,
-	arg_string,
-	arg_int_array,
-	arg_string_array,
-} arg_type_t;
+	Null,
+	Int,
+	String,
+	IntArray,
+	StringArray,
+};
 
 typedef struct
 {
@@ -30,7 +32,7 @@ typedef struct
 	const char* default_value;
 	const char* description;
 
-	arg_type_t type;
+	ArgType type;
 
 	int lower_limit;
 	int upper_limit;
@@ -42,656 +44,656 @@ typedef struct
 #define AT_LEAST_ONE_NONNEGATIVE_INT 0, INT_MAX, 1, INT_MAX
 #define EXACT_ARRAY_LENGTH(x) 0, 0, x, x
 
-static arg_config_t arg_config[dsda_arg_count] = {
-	[dsda_arg_help] = {
+static arg_config_t arg_config[std::to_underlying(ArgId::Count)] = {
+	[std::to_underlying(ArgId::Help)] = {
 		"-help", "--help", nullptr,
 		"prints out command line argument information",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_iwad] = {
+	[std::to_underlying(ArgId::Iwad)] = {
 		"-iwad", nullptr, nullptr,
 		"loads the given iwad file",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_file] = {
+	[std::to_underlying(ArgId::File)] = {
 		"-file", nullptr, nullptr,
 		"loads additional wad files",
-		arg_string_array, AT_LEAST_ONE_STRING,
+		ArgType::StringArray, AT_LEAST_ONE_STRING,
 	},
-	[dsda_arg_deh] = {
+	[std::to_underlying(ArgId::Deh)] = {
 		"-deh", "-bex", nullptr,
 		"loads additional deh files",
-		arg_string_array, AT_LEAST_ONE_STRING,
+		ArgType::StringArray, AT_LEAST_ONE_STRING,
 	},
-	[dsda_arg_loadgame] = {
+	[std::to_underlying(ArgId::Loadgame)] = {
 		"-loadgame", nullptr, nullptr,
 		"loads the given savegame slot",
-		arg_int, 0, 118,
+		ArgType::Int, 0, 118,
 	},
-	[dsda_arg_playdemo] = {
+	[std::to_underlying(ArgId::Playdemo)] = {
 		"-playdemo", nullptr, nullptr,
 		"plays the given demo file",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_playlump] = {
+	[std::to_underlying(ArgId::Playlump)] = {
 		"-playlump", nullptr, nullptr,
 		"plays the given internal demo lump (e.g., DEMO1)",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_timedemo] = {
+	[std::to_underlying(ArgId::Timedemo)] = {
 		"-timedemo", nullptr, nullptr,
 		"plays the given demo file as fast as possible, timing the process",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_fastdemo] = {
+	[std::to_underlying(ArgId::Fastdemo)] = {
 		"-fastdemo", nullptr, nullptr,
 		"plays the given demo file as fast as possible, skipping some frames",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_record] = {
+	[std::to_underlying(ArgId::Record)] = {
 		"-record", nullptr, nullptr,
 		"records a demo to the given file",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_recordfromto] = {
+	[std::to_underlying(ArgId::Recordfromto)] = {
 		"-recordfromto", nullptr, nullptr,
 		"plays back the first file while writing to the second",
-		arg_string_array, EXACT_ARRAY_LENGTH(2),
+		ArgType::StringArray, EXACT_ARRAY_LENGTH(2),
 	},
-	[dsda_arg_from_key_frame] = {
+	[std::to_underlying(ArgId::FromKeyFrame)] = {
 		"-from_key_frame", nullptr, nullptr,
 		"restores state and demo buffer from a key frame file",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_warp] = {
+	[std::to_underlying(ArgId::Warp)] = {
 		"-warp", nullptr, nullptr,
 		"warp to the given episode and / or map",
-		arg_int_array, 0, 99, 0, 2,
+		ArgType::IntArray, 0, 99, 0, 2,
 	},
-	[dsda_arg_skill] = {
+	[std::to_underlying(ArgId::Skill)] = {
 		"-skill", nullptr, nullptr,
 		"sets the skill level",
-		arg_int, 1, 255,
+		ArgType::Int, 1, 255,
 	},
-	[dsda_arg_uv] = {
+	[std::to_underlying(ArgId::Uv)] = {
 		"-uv", nullptr, nullptr,
 		"sets the skill level to 4",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_nm] = {
+	[std::to_underlying(ArgId::Nm)] = {
 		"-nm", nullptr, nullptr,
 		"sets the skill level to 5",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_episode] = {
+	[std::to_underlying(ArgId::Episode)] = {
 		"-episode", nullptr, nullptr,
 		"warp to the first map in the given episode",
-		arg_int, 0, 9,
+		ArgType::Int, 0, 9,
 	},
-	[dsda_arg_complevel] = {
+	[std::to_underlying(ArgId::Complevel)] = {
 		"-complevel", "-cl", nullptr,
 		"sets the compatibility level",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_fast] = {
+	[std::to_underlying(ArgId::Fast)] = {
 		"-fast", nullptr, nullptr,
 		"turns on fast monsters",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_respawn] = {
+	[std::to_underlying(ArgId::Respawn)] = {
 		"-respawn", nullptr, nullptr,
 		"turns on monster respawning",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_nomonsters] = {
+	[std::to_underlying(ArgId::Nomonsters)] = {
 		"-nomonsters", "-nomo", nullptr,
 		"turns off monster spawning",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_longtics] = {
+	[std::to_underlying(ArgId::Longtics)] = {
 		"-longtics", nullptr, nullptr,
 		"enables high precision turn angles (in supported formats)",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_shorttics] = {
+	[std::to_underlying(ArgId::Shorttics)] = {
 		"-shorttics", nullptr, nullptr,
 		"restricts turn angles to lower precision",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_heretic] = {
+	[std::to_underlying(ArgId::Heretic)] = {
 		"-heretic", nullptr, nullptr,
 		"sets the game to heretic",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_hexen] = {
+	[std::to_underlying(ArgId::Hexen)] = {
 		"-hexen", nullptr, nullptr,
 		"sets the game to hexen",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_class] = {
+	[std::to_underlying(ArgId::Class)] = {
 		"-class", nullptr, nullptr,
 		"sets the player class in hexen",
-		arg_int, 0, 2,
+		ArgType::Int, 0, 2,
 	},
-	[dsda_arg_randclass] = {
+	[std::to_underlying(ArgId::Randclass)] = {
 		"-randclass", nullptr, nullptr,
 		"sets a random player class in hexen deathmatch",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_dsdademo] = {
+	[std::to_underlying(ArgId::Dsdademo)] = {
 		"-dsdademo", nullptr, nullptr,
 		"turns on extended demo format (for testing)",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_solo_net] = {
+	[std::to_underlying(ArgId::SoloNet)] = {
 		"-solo-net", nullptr, nullptr,
 		"play a net game with one player",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_coop_spawns] = {
+	[std::to_underlying(ArgId::CoopSpawns)] = {
 		"-coop_spawns", nullptr, nullptr,
 		"play single player with coop thing spawns",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_pistol_start] = {
+	[std::to_underlying(ArgId::PistolStart)] = {
 		"-pistolstart", "-wandstart", nullptr,
 		"automatically pistol start each map",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_chain_episodes] = {
+	[std::to_underlying(ArgId::ChainEpisodes)] = {
 		"-chain_episodes", nullptr, nullptr,
 		"completing one episode leads to the next without interruption",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_stroller] = {
+	[std::to_underlying(ArgId::Stroller)] = {
 		"-stroller", nullptr, nullptr,
 		"applies stroller category limitations",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_turbo] = {
+	[std::to_underlying(ArgId::Turbo)] = {
 		"-turbo", nullptr, "255",
 		"sets player speed percent",
-		arg_int, 10, 255,
+		ArgType::Int, 10, 255,
 	},
-	[dsda_arg_game_speed] = {
+	[std::to_underlying(ArgId::GameSpeed)] = {
 		"-game_speed", nullptr, nullptr,
 		"sets game speed percent",
-		arg_int, 10, 10000,
+		ArgType::Int, 10, 10000,
 	},
-	[dsda_arg_tas] = {
+	[std::to_underlying(ArgId::Tas)] = {
 		"-tas", nullptr, nullptr,
 		"lifts strict mode restrictions",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_build] = {
+	[std::to_underlying(ArgId::Build)] = {
 		"-build", nullptr, nullptr,
 		"starts in build mode",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_quit_after_brute_force] = {
+	[std::to_underlying(ArgId::QuitAfterBruteForce)] = {
 		"-quit_after_brute_force", nullptr, nullptr,
 		"quits the game when brute force ends",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_first_input] = {
+	[std::to_underlying(ArgId::FirstInput)] = {
 		"-first_input", nullptr, nullptr,
 		"builds the first frame F S T",
-		arg_int_array, -128, 127, 3, 3
+		ArgType::IntArray, -128, 127, 3, 3
 	},
-	[dsda_arg_command] = {
+	[std::to_underlying(ArgId::Command)] = {
 		"-command", nullptr, nullptr,
 		"runs a console command",
-		arg_string
+		ArgType::String
 	},
-	[dsda_arg_skipsec] = {
+	[std::to_underlying(ArgId::Skipsec)] = {
 		"-skipsec", nullptr, nullptr,
 		"skip to the given time (mm:ss or ss) - negative times seek from the end",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_skiptic] = {
+	[std::to_underlying(ArgId::Skiptic)] = {
 		"-skiptic", nullptr, nullptr,
 		"skip to the given tic - negative tics seek from the end",
-		arg_int, INT_MIN, INT_MAX,
+		ArgType::Int, INT_MIN, INT_MAX,
 	},
-	[dsda_arg_track_pacifist] = {
+	[std::to_underlying(ArgId::TrackPacifist)] = {
 		"-track_pacifist", nullptr, nullptr,
 		"tracks pacifist category restrictions",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_track_100k] = {
+	[std::to_underlying(ArgId::Track100k)] = {
 		"-track_100k", nullptr, nullptr,
 		"tracks when 100% kills is reached",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_track_reality] = {
+	[std::to_underlying(ArgId::TrackReality)] = {
 		"-track_reality", nullptr, nullptr,
 		"tracks reality and almost reality categories restrictions",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_time_keys] = {
+	[std::to_underlying(ArgId::TimeKeys)] = {
 		"-time_keys", nullptr, "105",
 		"announces the time when keys are picked up",
-		arg_int, 0, 350
+		ArgType::Int, 0, 350
 	},
-	[dsda_arg_time_use] = {
+	[std::to_underlying(ArgId::TimeUse)] = {
 		"-time_use", nullptr, "105",
 		"announces the time when the use command is activated",
-		arg_int, 0, 350
+		ArgType::Int, 0, 350
 	},
-	[dsda_arg_time_secrets] = {
+	[std::to_underlying(ArgId::TimeSecrets)] = {
 		"-time_secrets", nullptr, "105",
 		"announces the time when a secret is collected",
-		arg_int, 0, 350
+		ArgType::Int, 0, 350
 	},
-	[dsda_arg_time_all] = {
+	[std::to_underlying(ArgId::TimeAll)] = {
 		"-time_all", nullptr, "105",
 		"announces the time when any -time_* event happens",
-		arg_int, 0, 350
+		ArgType::Int, 0, 350
 	},
-	[dsda_arg_track_player] = {
+	[std::to_underlying(ArgId::TrackPlayer)] = {
 		"-track_player", nullptr, nullptr,
 		"adds player info to the tracker",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_track_line] = {
+	[std::to_underlying(ArgId::TrackLine)] = {
 		"-track_line", nullptr, nullptr,
 		"adds at least one line to the tracker",
-		arg_int_array, AT_LEAST_ONE_NONNEGATIVE_INT,
+		ArgType::IntArray, AT_LEAST_ONE_NONNEGATIVE_INT,
 	},
-	[dsda_arg_track_line_distance] = {
+	[std::to_underlying(ArgId::TrackLineDistance)] = {
 		"-track_line_distance", nullptr, nullptr,
 		"adds at least one line distance to the tracker",
-		arg_int_array, AT_LEAST_ONE_NONNEGATIVE_INT,
+		ArgType::IntArray, AT_LEAST_ONE_NONNEGATIVE_INT,
 	},
-	[dsda_arg_track_sector] = {
+	[std::to_underlying(ArgId::TrackSector)] = {
 		"-track_sector", nullptr, nullptr,
 		"adds at least one sector to the tracker",
-		arg_int_array, AT_LEAST_ONE_NONNEGATIVE_INT,
+		ArgType::IntArray, AT_LEAST_ONE_NONNEGATIVE_INT,
 	},
-	[dsda_arg_track_mobj] = {
+	[std::to_underlying(ArgId::TrackMobj)] = {
 		"-track_mobj", nullptr, nullptr,
 		"adds at least one mobj to the tracker",
-		arg_int_array, AT_LEAST_ONE_NONNEGATIVE_INT,
+		ArgType::IntArray, AT_LEAST_ONE_NONNEGATIVE_INT,
 	},
-	[dsda_arg_assign] = {
+	[std::to_underlying(ArgId::Assign)] = {
 		"-assign", nullptr, nullptr,
 		"temporarily assign config variables",
-		arg_string_array, AT_LEAST_ONE_STRING,
+		ArgType::StringArray, AT_LEAST_ONE_STRING,
 	},
-	[dsda_arg_update] = {
+	[std::to_underlying(ArgId::Update)] = {
 		"-update", nullptr, nullptr,
 		"permanently update config variables",
-		arg_string_array, AT_LEAST_ONE_STRING,
+		ArgType::StringArray, AT_LEAST_ONE_STRING,
 	},
-	[dsda_arg_analysis] = {
+	[std::to_underlying(ArgId::Analysis)] = {
 		"-analysis", nullptr, nullptr,
 		"writes various data to analysis.txt",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_levelstat] = {
+	[std::to_underlying(ArgId::Levelstat)] = {
 		"-levelstat", nullptr, nullptr,
 		"writes level stats to levelstat.txt",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_export_text_file] = {
+	[std::to_underlying(ArgId::ExportTextFile)] = {
 		"-export_text_file", nullptr, nullptr,
 		"export a dsda-format text file template",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_track_playback] = {
+	[std::to_underlying(ArgId::TrackPlayback)] = {
 		"-track_playback", nullptr, nullptr,
 		"treat demo playback as an attempt for the given split file base",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_export_ghost] = {
+	[std::to_underlying(ArgId::ExportGhost)] = {
 		"-export_ghost", nullptr, nullptr,
 		"exports a ghost file",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_import_ghost] = {
+	[std::to_underlying(ArgId::ImportGhost)] = {
 		"-import_ghost", nullptr, nullptr,
 		"imports at least one ghost file",
-		arg_string_array, AT_LEAST_ONE_STRING,
+		ArgType::StringArray, AT_LEAST_ONE_STRING,
 	},
-	[dsda_arg_consoleplayer] = {
+	[std::to_underlying(ArgId::Consoleplayer)] = {
 		"-consoleplayer", nullptr, nullptr,
 		"sets the console player (for coop playback)",
-		arg_int, 0, 7,
+		ArgType::Int, 0, 7,
 	},
-	[dsda_arg_spechit] = {
+	[std::to_underlying(ArgId::Spechit)] = {
 		"-spechit", nullptr, nullptr,
 		"sets a magic spechit base address for certain overrun demos",
-		arg_int, INT_MIN, INT_MAX,
+		ArgType::Int, INT_MIN, INT_MAX,
 	},
-	[dsda_arg_setmem] = {
+	[std::to_underlying(ArgId::Setmem)] = {
 		"-setmem", nullptr, nullptr,
 		"sets a magic block of memory for certain overrun demos",
-		arg_string_array, 0, 0, 1, 10,
+		ArgType::StringArray, 0, 0, 1, 10,
 	},
-	[dsda_arg_data] = {
+	[std::to_underlying(ArgId::Data)] = {
 		"-data", nullptr, nullptr,
 		"sets the data directory",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_save] = {
+	[std::to_underlying(ArgId::Save)] = {
 		"-save", nullptr, nullptr,
 		"sets the save directory",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_config] = {
+	[std::to_underlying(ArgId::Config)] = {
 		"-config", nullptr, nullptr,
 		"sets the config file",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_hud] = {
+	[std::to_underlying(ArgId::Hud)] = {
 		"-hud", nullptr, nullptr,
 		"sets the hud config file",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_shotdir] = {
+	[std::to_underlying(ArgId::Shotdir)] = {
 		"-shotdir", nullptr, nullptr,
 		"sets the screenshot directory",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_movie] = {
+	[std::to_underlying(ArgId::Movie)] = {
 		"-movie", nullptr, nullptr,
 		"sets the target final level for movie demos (for automatic exit detection)",
-		arg_int, 0, 99,
+		ArgType::Int, 0, 99,
 	},
-	[dsda_arg_viddump] = {
+	[std::to_underlying(ArgId::Viddump)] = {
 		"-viddump", nullptr, nullptr,
 		"dumps a video to the chosen file name",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_dehout] = {
+	[std::to_underlying(ArgId::Dehout)] = {
 		"-dehout", "-bexout", nullptr,
 		"sets dehacked log file",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_verbose] = {
+	[std::to_underlying(ArgId::Verbose)] = {
 		"-verbose", nullptr, nullptr,
 		"enable all logging",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_quiet] = {
+	[std::to_underlying(ArgId::Quiet)] = {
 		"-quiet", nullptr, nullptr,
 		"disable all logging",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_v] = {
+	[std::to_underlying(ArgId::V)] = {
 		"-v", nullptr, nullptr,
 		"print the version and exit",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_resetgamma] = {
+	[std::to_underlying(ArgId::Resetgamma)] = {
 		"-resetgamma", nullptr, nullptr,
 		"reset gamma and exit",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_old_zdoom_nodes] = {
+	[std::to_underlying(ArgId::ForceOldZdoomNodes)] = {
 		"-force_old_zdoom_nodes", nullptr, nullptr,
 		"force extended (non-gl) zdoom nodes",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_sigsegv] = {
+	[std::to_underlying(ArgId::Sigsegv)] = {
 		"-sigsegv", nullptr, nullptr,
 		"disable the SIGSEGV signal handler",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_deathmatch] = {
+	[std::to_underlying(ArgId::Deathmatch)] = {
 		"-deathmatch", nullptr, nullptr,
 		"turn on deathmatch mode",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_altdeath] = {
+	[std::to_underlying(ArgId::Altdeath)] = {
 		"-altdeath", nullptr, nullptr,
 		"turn on altdeath mode",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_timer] = {
+	[std::to_underlying(ArgId::Timer)] = {
 		"-timer", nullptr, nullptr,
 		"sets the level time limit (in minutes) for deathmatch",
-		arg_int, 1, INT_MAX,
+		ArgType::Int, 1, INT_MAX,
 	},
-	[dsda_arg_frags] = {
+	[std::to_underlying(ArgId::Frags)] = {
 		"-frags", nullptr, "10",
 		"sets the level frag limit for deathmatch",
-		arg_int, 1, INT_MAX,
+		ArgType::Int, 1, INT_MAX,
 	},
-	[dsda_arg_nosound] = {
+	[std::to_underlying(ArgId::Nosound)] = {
 		"-nosound", nullptr, nullptr,
 		"turn off sound",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_nomusic] = {
+	[std::to_underlying(ArgId::Nomusic)] = {
 		"-nomusic", nullptr, nullptr,
 		"turn off music",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_nosfx] = {
+	[std::to_underlying(ArgId::Nosfx)] = {
 		"-nosfx", nullptr, nullptr,
 		"turn off sfx",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_nodraw] = {
+	[std::to_underlying(ArgId::Nodraw)] = {
 		"-nodraw", nullptr, nullptr,
 		"turn off drawing",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_nodeh] = {
+	[std::to_underlying(ArgId::Nodeh)] = {
 		"-nodeh", nullptr, nullptr,
 		"skip dehacked lumps inside wads",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_nomapinfo] = {
+	[std::to_underlying(ArgId::Nomapinfo)] = {
 		"-nomapinfo", nullptr, nullptr,
 		"skip *MAPINFO lumps",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_noautoload] = {
+	[std::to_underlying(ArgId::Noautoload)] = {
 		"-noautoload", "-noload", nullptr,
 		"ignore autoload files",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_nocheats] = {
+	[std::to_underlying(ArgId::Nocheats)] = {
 		"-nocheats", nullptr, nullptr,
 		"ignore dehacked cheats",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_nojoy] = {
+	[std::to_underlying(ArgId::Nojoy)] = {
 		"-nojoy", nullptr, nullptr,
 		"disable joystick input",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_nomouse] = {
+	[std::to_underlying(ArgId::Nomouse)] = {
 		"-nomouse", nullptr, nullptr,
 		"disable mouse input",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_no_message_box] = {
+	[std::to_underlying(ArgId::NoMessageBox)] = {
 		"-no_message_box", nullptr, nullptr,
 		"disable message boxes",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_fullscreen] = {
+	[std::to_underlying(ArgId::Fullscreen)] = {
 		"-fullscreen", nullptr, nullptr,
 		"temporarily turns on fullscreen mode",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_window] = {
+	[std::to_underlying(ArgId::Window)] = {
 		"-window", nullptr, nullptr,
 		"temporarily turns on windowed mode",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_width] = {
+	[std::to_underlying(ArgId::Width)] = {
 		"-width", nullptr, nullptr,
 		"temporarily sets the resolution width",
-		arg_int, 320, INT_MAX,
+		ArgType::Int, 320, INT_MAX,
 	},
-	[dsda_arg_height] = {
+	[std::to_underlying(ArgId::Height)] = {
 		"-height", nullptr, nullptr,
 		"temporarily sets the resolution height",
-		arg_int, 200, INT_MAX,
+		ArgType::Int, 200, INT_MAX,
 	},
-	[dsda_arg_geometry] = {
+	[std::to_underlying(ArgId::Geometry)] = {
 		"-geometry", "-geom", nullptr,
 		"temporarily sets the resolution and, optionally, the window mode WxH[w|f]",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_vidmode] = {
+	[std::to_underlying(ArgId::Vidmode)] = {
 		"-vidmode", nullptr, nullptr,
 		"temporarily sets the graphics renderer (sw or gl)",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_aspect] = {
+	[std::to_underlying(ArgId::Aspect)] = {
 		"-aspect", nullptr, nullptr,
 		"sets the fov aspect ratio WxH",
-		arg_string, 0, 21,
+		ArgType::String, 0, 21,
 	},
-	[dsda_arg_emulate] = {
+	[std::to_underlying(ArgId::Emulate)] = {
 		"-emulate", nullptr, nullptr,
 		"emulates errors from a version of prboom+ (a.b.c.d)",
-		arg_string,
+		ArgType::String,
 	},
-	[dsda_arg_doom95] = {
+	[std::to_underlying(ArgId::Doom95)] = {
 		"-doom95", nullptr, nullptr,
 		"use doom95's adjacent sector limit",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_blockmap] = {
+	[std::to_underlying(ArgId::Blockmap)] = {
 		"-blockmap", nullptr, nullptr,
 		"rebuild the blockmap (ignore BLOCKMAP lump)",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_monster_avoid_hazards] = {
+	[std::to_underlying(ArgId::ForceMonsterAvoidHazards)] = {
 		"-force_monster_avoid_hazards", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_remove_slime_trails] = {
+	[std::to_underlying(ArgId::ForceRemoveSlimeTrails)] = {
 		"-force_remove_slime_trails", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_no_dropoff] = {
+	[std::to_underlying(ArgId::ForceNoDropoff)] = {
 		"-force_no_dropoff", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_truncated_sector_specials] = {
+	[std::to_underlying(ArgId::ForceTruncatedSectorSpecials)] = {
 		"-force_truncated_sector_specials", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_boom_brainawake] = {
+	[std::to_underlying(ArgId::ForceBoomBrainawake)] = {
 		"-force_boom_brainawake", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_prboom_friction] = {
+	[std::to_underlying(ArgId::ForcePrboomFriction)] = {
 		"-force_prboom_friction", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_reject_pad_with_ff] = {
+	[std::to_underlying(ArgId::RejectPadWithFf)] = {
 		"-reject_pad_with_ff", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_lxdoom_demo_compatibility] = {
+	[std::to_underlying(ArgId::ForceLxdoomDemoCompatibility)] = {
 		"-force_lxdoom_demo_compatibility", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_allow_ssg_direct] = {
+	[std::to_underlying(ArgId::AllowSsgDirect)] = {
 		"-allow_ssg_direct", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_treat_no_clipping_things_as_not_blocking] = {
+	[std::to_underlying(ArgId::TreatNoClippingThingsAsNotBlocking)] = {
 		"-treat_no_clipping_things_as_not_blocking", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_incorrect_processing_of_respawn_frame_entry] = {
+	[std::to_underlying(ArgId::ForceIncorrectProcessingOfRespawnFrameEntry)] = {
 		"-force_incorrect_processing_of_respawn_frame_entry", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_correct_code_for_3_keys_doors_in_mbf] = {
+	[std::to_underlying(ArgId::ForceCorrectCodeFor3KeysDoorsInMbf)] = {
 		"-force_correct_code_for_3_keys_doors_in_mbf", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_uninitialize_crush_field_for_stairs] = {
+	[std::to_underlying(ArgId::UninitializeCrushFieldForStairs)] = {
 		"-uninitialize_crush_field_for_stairs", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_boom_findnexthighestfloor] = {
+	[std::to_underlying(ArgId::ForceBoomFindnexthighestfloor)] = {
 		"-force_boom_findnexthighestfloor", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_allow_sky_transfer_in_boom] = {
+	[std::to_underlying(ArgId::AllowSkyTransferInBoom)] = {
 		"-allow_sky_transfer_in_boom", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_apply_green_armor_class_to_armor_bonuses] = {
+	[std::to_underlying(ArgId::ApplyGreenArmorClassToArmorBonuses)] = {
 		"-apply_green_armor_class_to_armor_bonuses", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_apply_blue_armor_class_to_megasphere] = {
+	[std::to_underlying(ArgId::ApplyBlueArmorClassToMegasphere)] = {
 		"-apply_blue_armor_class_to_megasphere", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_force_incorrect_bobbing_in_boom] = {
+	[std::to_underlying(ArgId::ForceIncorrectBobbingInBoom)] = {
 		"-force_incorrect_bobbing_in_boom", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_boom_deh_parser] = {
+	[std::to_underlying(ArgId::BoomDehParser)] = {
 		"-boom_deh_parser", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_mbf_remove_thinker_in_killmobj] = {
+	[std::to_underlying(ArgId::MbfRemoveThinkerInKillmobj)] = {
 		"-mbf_remove_thinker_in_killmobj", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_do_not_inherit_friendlyness_flag_on_spawn] = {
+	[std::to_underlying(ArgId::DoNotInheritFriendlynessFlagOnSpawn)] = {
 		"-do_not_inherit_friendlyness_flag_on_spawn", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_do_not_use_misc12_frame_parameters_in_a_mushroom] = {
+	[std::to_underlying(ArgId::DoNotUseMisc12FrameParametersInAMushroom)] = {
 		"-do_not_use_misc12_frame_parameters_in_a_mushroom", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_apply_mbf_codepointers_to_any_complevel] = {
+	[std::to_underlying(ArgId::ApplyMbfCodepointersToAnyComplevel)] = {
 		"-apply_mbf_codepointers_to_any_complevel", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
-	[dsda_arg_reset_monsterspawner_params_after_loading] = {
+	[std::to_underlying(ArgId::ResetMonsterspawnerParamsAfterLoading)] = {
 		"-reset_monsterspawner_params_after_loading", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
-		arg_null,
+		ArgType::Null,
 	},
 };
 
-static dsda_arg_t arg_value[dsda_arg_count];
+static dsda_arg_t arg_value[std::to_underlying(ArgId::Count)];
 
 static void dsda_ParseIntArg(arg_config_t* config, int* value, const char* param)
 {
 	if(sscanf(param, "%d", value) != 1)
 	{
-		if(config->type == arg_int)
+		if(config->type == ArgType::Int)
 			I_Error("%s requires an integer argument", config->name);
 		else
 			I_Error("%s requires integer arguments", config->name);
@@ -741,7 +743,7 @@ static void dsda_ParseArg(arg_config_t* config, dsda_arg_t* arg, int argv_i)
 		if(dsda_argv[argv_i + arg->count + 1][0] == '-' && !is_integer)
 			break;
 
-		if(config->type == arg_int || config->type == arg_int_array)
+		if(config->type == ArgType::Int || config->type == ArgType::IntArray)
 		{
 			// only valid integers should be interpreted as arguments
 			if(!is_integer)
@@ -753,12 +755,12 @@ static void dsda_ParseArg(arg_config_t* config, dsda_arg_t* arg, int argv_i)
 
 	switch(config->type)
 	{
-		case arg_null:
+		case ArgType::Null:
 			if(arg->count)
 				I_Error("%s does not take an argument", config->name);
 
 			break;
-		case arg_int:
+		case ArgType::Int:
 			if(arg->count == 0)
 			{
 				if(config->default_value)
@@ -776,7 +778,7 @@ static void dsda_ParseArg(arg_config_t* config, dsda_arg_t* arg, int argv_i)
 			dsda_ParseIntArg(config, &arg->value.v_int, dsda_argv[argv_i + 1]);
 
 			break;
-		case arg_string:
+		case ArgType::String:
 			if(arg->count == 0)
 			{
 				if(config->default_value)
@@ -794,7 +796,7 @@ static void dsda_ParseArg(arg_config_t* config, dsda_arg_t* arg, int argv_i)
 			dsda_ParseStringArg(config, &arg->value.v_string, dsda_argv[argv_i + 1]);
 
 			break;
-		case arg_int_array:
+		case ArgType::IntArray:
 			dsda_ValidateArrayArg(config, arg);
 
 			{
@@ -808,7 +810,7 @@ static void dsda_ParseArg(arg_config_t* config, dsda_arg_t* arg, int argv_i)
 
 			break;
 
-		case arg_string_array:
+		case ArgType::StringArray:
 			dsda_ValidateArrayArg(config, arg);
 
 			{
@@ -842,7 +844,7 @@ void dsda_ParseCommandLineArgs(int argc, char** argv)
 
 		if(dsda_argv[argv_i][0] == '-' && !is_integer)
 		{
-			for(i = 0; i < dsda_arg_count; ++i)
+			for(i = 0; i < std::to_underlying(ArgId::Count); ++i)
 			{
 				config = &arg_config[i];
 
@@ -852,80 +854,80 @@ void dsda_ParseCommandLineArgs(int argc, char** argv)
 				)
 				{
 					if(arg_value[i].found)
-						lprintf(LO_WARN, "Warning: ignoring duplicate argument %s\n", config->name);
+						lprintf(OutputLevels::Warn, "Warning: ignoring duplicate argument %s\n", config->name);
 					else
 						dsda_ParseArg(config, &arg_value[i], argv_i);
 					break;
 				}
 			}
 
-			if(i == dsda_arg_count)
+			if(i == std::to_underlying(ArgId::Count))
 				I_Error("Unknown command line option %s\n", dsda_argv[argv_i]);
 		}
 	}
 
-	if(dsda_Flag(dsda_arg_uv))
-		dsda_UpdateIntArg(dsda_arg_skill, "4");
+	if(dsda_Flag(ArgId::Uv))
+		dsda_UpdateIntArg(ArgId::Skill, "4");
 
-	if(dsda_Flag(dsda_arg_nm))
-		dsda_UpdateIntArg(dsda_arg_skill, "5");
+	if(dsda_Flag(ArgId::Nm))
+		dsda_UpdateIntArg(ArgId::Skill, "5");
 }
 
-void dsda_UpdateIntArg(dsda_arg_identifier_t id, const char* param)
+void dsda_UpdateIntArg(ArgId id, const char* param)
 {
-	arg_value[id].count = 1;
-	arg_value[id].found = true;
-	dsda_ParseIntArg(&arg_config[id], &arg_value[id].value.v_int, param);
+	arg_value[std::to_underlying(id)].count = 1;
+	arg_value[std::to_underlying(id)].found = true;
+	dsda_ParseIntArg(&arg_config[std::to_underlying(id)], &arg_value[std::to_underlying(id)].value.v_int, param);
 }
 
-void dsda_UpdateStringArg(dsda_arg_identifier_t id, const char* param)
+void dsda_UpdateStringArg(ArgId id, const char* param)
 {
 	param = Z_Strdup(param);
-	arg_value[id].count = 1;
-	arg_value[id].found = true;
-	dsda_ParseStringArg(&arg_config[id], &arg_value[id].value.v_string, param);
+	arg_value[std::to_underlying(id)].count = 1;
+	arg_value[std::to_underlying(id)].found = true;
+	dsda_ParseStringArg(&arg_config[std::to_underlying(id)], &arg_value[std::to_underlying(id)].value.v_string, param);
 }
 
-void dsda_AppendStringArg(dsda_arg_identifier_t id, const char* param)
+void dsda_AppendStringArg(ArgId id, const char* param)
 {
-	if(arg_config[id].type == arg_string)
+	if(arg_config[std::to_underlying(id)].type == ArgType::String)
 		return dsda_UpdateStringArg(id, param);
 
 	param = Z_Strdup(param);
 
-	++arg_value[id].count;
-	arg_value[id].found = true;
-	arg_value[id].value.v_string_array =
-		static_cast<const char **>(Z_Realloc(arg_value[id].value.v_string_array, arg_value[id].count * sizeof(char*)));
+	++arg_value[std::to_underlying(id)].count;
+	arg_value[std::to_underlying(id)].found = true;
+	arg_value[std::to_underlying(id)].value.v_string_array =
+		static_cast<const char **>(Z_Realloc(arg_value[std::to_underlying(id)].value.v_string_array, arg_value[std::to_underlying(id)].count * sizeof(char*)));
 
 	dsda_ParseStringArg(
-		&arg_config[id],
-		&arg_value[id].value.v_string_array[arg_value[id].count - 1],
+		&arg_config[std::to_underlying(id)],
+		&arg_value[std::to_underlying(id)].value.v_string_array[arg_value[std::to_underlying(id)].count - 1],
 		param
 	);
 
-	dsda_ValidateArrayArg(&arg_config[id], &arg_value[id]);
+	dsda_ValidateArrayArg(&arg_config[std::to_underlying(id)], &arg_value[std::to_underlying(id)]);
 }
 
-dsda_arg_t* dsda_Arg(dsda_arg_identifier_t id)
+dsda_arg_t* dsda_Arg(ArgId id)
 {
-	return &arg_value[id];
+	return &arg_value[std::to_underlying(id)];
 }
 
-void dsda_UpdateFlag(dsda_arg_identifier_t id, dboolean found)
+void dsda_UpdateFlag(ArgId id, dboolean found)
 {
-	arg_value[id].found = found;
+	arg_value[std::to_underlying(id)].found = found;
 }
 
-dboolean dsda_Flag(dsda_arg_identifier_t id)
+dboolean dsda_Flag(ArgId id)
 {
-	return arg_value[id].found;
+	return arg_value[std::to_underlying(id)].found;
 }
 
-int dsda_SimpleIntArg(dsda_arg_identifier_t id)
+int dsda_SimpleIntArg(ArgId id)
 {
-	if(arg_value[id].found)
-		return arg_value[id].value.v_int;
+	if(arg_value[std::to_underlying(id)].found)
+		return arg_value[std::to_underlying(id)].value.v_int;
 
 	return 0;
 }
@@ -934,21 +936,21 @@ void dsda_PrintArgHelp()
 {
 	int i;
 
-	lprintf(LO_INFO, "\nCommand Line Arguments:\n\n");
+	lprintf(OutputLevels::Info, "\nCommand Line Arguments:\n\n");
 
-	for(i = 0; i < dsda_arg_count; ++i)
+	for(i = 0; i < std::to_underlying(ArgId::Count); ++i)
 	{
 		arg_config_t* config;
 
 		config = &arg_config[i];
 
-		lprintf(LO_INFO, "  %s", config->name);
+		lprintf(OutputLevels::Info, "  %s", config->name);
 		if(config->alias)
-			lprintf(LO_INFO, " / %s", config->alias);
-		lprintf(LO_INFO, ":\n");
-		lprintf(LO_INFO, "    %s\n", config->description);
+			lprintf(OutputLevels::Info, " / %s", config->alias);
+		lprintf(OutputLevels::Info, ":\n");
+		lprintf(OutputLevels::Info, "    %s\n", config->description);
 		if(config->default_value)
-			lprintf(LO_INFO, "    Default: %s\n", config->default_value);
-		lprintf(LO_INFO, "\n");
+			lprintf(OutputLevels::Info, "    Default: %s\n", config->default_value);
+		lprintf(OutputLevels::Info, "\n");
 	}
 }

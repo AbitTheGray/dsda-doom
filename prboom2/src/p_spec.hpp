@@ -5,13 +5,13 @@
 
 #pragma once
 
+#include "r_defs.hpp"
+#include "d_player.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "r_defs.hpp"
-#include "d_player.hpp"
 
 //      Define values for map objects
 #define MO_TELEPORTMAN  14
@@ -203,7 +203,7 @@ extern TAnimItemParam* anim_textures;
 
 // define names for the TriggerType field of the general linedefs
 
-typedef enum
+enum struct GenTriggerType : int32_t
 {
 	WalkOnce,
 	WalkMany,
@@ -213,115 +213,115 @@ typedef enum
 	GunMany,
 	PushOnce,
 	PushMany,
-} triggertype_e;
+};
 
 // define names for the Speed field of the general linedefs
 
-typedef enum
+enum struct MotionSpeed : int32_t
 {
-	SpeedSlow,
-	SpeedNormal,
-	SpeedFast,
-	SpeedTurbo,
-} motionspeed_e;
+	Slow,
+	Normal,
+	Fast,
+	Turbo,
+};
 
 // define names for the Target field of the general floor
 
-typedef enum
+enum struct GenFloorTarget : int32_t
 {
-	FtoHnF,
-	FtoLnF,
-	FtoNnF,
-	FtoLnC,
-	FtoC,
-	FbyST,
-	Fby24,
-	Fby32,
-} floortarget_e;
+	ToHnF,
+	ToLnF,
+	ToNnF,
+	ToLnC,
+	ToC,
+	ByST,
+	By24,
+	By32,
+};
 
 // define names for the Changer Type field of the general floor
 
-typedef enum
+enum struct GenFloorChange : int32_t
 {
-	FNoChg,
-	FChgZero,
-	FChgTxt,
-	FChgTyp,
-} floorchange_e;
+	NoChg,
+	ChgZero,
+	ChgTxt,
+	ChgTyp,
+};
 
 // define names for the Change Model field of the general floor
 
-typedef enum
+enum struct GenFloorModel : int32_t
 {
-	FTriggerModel,
-	FNumericModel,
-} floormodel_t;
+	TriggerModel,
+	NumericModel,
+};
 
 // define names for the Target field of the general ceiling
 
-typedef enum
+enum struct GenCeilingTarget : int32_t
 {
-	CtoHnC,
-	CtoLnC,
-	CtoNnC,
-	CtoHnF,
-	CtoF,
-	CbyST,
-	Cby24,
-	Cby32,
-} ceilingtarget_e;
+	ToHnC,
+	ToLnC,
+	ToNnC,
+	ToHnF,
+	ToF,
+	ByST,
+	By24,
+	By32,
+};
 
 // define names for the Changer Type field of the general ceiling
 
-typedef enum
+enum struct GenCeilingChange : int32_t
 {
-	CNoChg,
-	CChgZero,
-	CChgTxt,
-	CChgTyp,
-} ceilingchange_e;
+	NoChg,
+	ChgZero,
+	ChgTxt,
+	ChgTyp,
+};
 
 // define names for the Change Model field of the general ceiling
 
-typedef enum
+enum struct GenCeilingModel : int32_t
 {
-	CTriggerModel,
-	CNumericModel,
-} ceilingmodel_t;
+	TriggerModel,
+	NumericModel,
+};
 
 // define names for the Target field of the general lift
 
-typedef enum
+enum struct GenLiftTarget : int32_t
 {
 	F2LnF,
 	F2NnF,
 	F2LnC,
 	LnF2HnF,
-} lifttarget_e;
+};
 
 // define names for the door Kind field of the general ceiling
 
-typedef enum
+enum struct GenDoorKind : int32_t
 {
-	OdCDoor,
-	ODoor,
-	CdODoor,
-	CDoor,
-} doorkind_e;
+	OpenDelayClose,
+	Open,
+	CloseDelayOpen,
+	Close,
+};
 
 // define names for the locked door Kind field of the general ceiling
 
-typedef enum
+enum struct KeyKind : int32_t
 {
-	AnyKey,
-	RCard,
-	BCard,
-	YCard,
-	RSkull,
-	BSkull,
-	YSkull,
-	AllKeys,
-} keykind_e;
+	Any,
+	RedCard,
+	BlueCard,
+	YellowCard,
+	RedSkull,
+	BlueSkull,
+	YellowSkull,
+	All,
+};
 
 //////////////////////////////////////////////////////////////////
 //
@@ -331,297 +331,297 @@ typedef enum
 
 //jff 2/23/98 identify the special classes that can share sectors
 
-typedef enum
+enum struct SpecialKind : int32_t
 {
-	floor_special,
-	ceiling_special,
-	lighting_special,
-} special_e;
+	Floor,
+	Ceiling,
+	Lighting,
+};
 
 //jff 3/15/98 pure texture/type change for better generalized support
-typedef enum
+enum struct ChangeKind : int32_t
 {
-	trigChangeOnly,
-	numChangeOnly,
-} change_e;
+	TriggerOnly,
+	NumericOnly,
+};
 
 // p_plats
 
-typedef enum
+enum struct PlatState : int32_t
 {
-	up,
-	down,
-	waiting,
-	in_stasis
-} plat_e;
+	Up,
+	Down,
+	Waiting,
+	InStasis
+};
 
-typedef enum
+enum struct PlatType : int32_t
 {
-	perpetualRaise,
-	downWaitUpStay,
-	raiseAndChange,
-	raiseToNearestAndChange,
-	blazeDWUS,
-	genLift, //jff added to support generalized Plat types
-	genPerpetual,
-	toggleUpDn, //jff 3/14/98 added to support instant toggle type
+	PerpetualRaise,
+	DownWaitUpStay,
+	RaiseAndChange,
+	RaiseToNearestAndChange,
+	BlazeDWUS,
+	GenLift, //jff added to support generalized Plat types
+	GenPerpetual,
+	ToggleUpDn, //jff 3/14/98 added to support instant toggle type
 
 	// hexen - can probably be merged
-	PLAT_PERPETUALRAISE,
-	PLAT_DOWNWAITUPSTAY,
-	PLAT_DOWNBYVALUEWAITUPSTAY,
-	PLAT_UPWAITDOWNSTAY,
-	PLAT_UPBYVALUEWAITDOWNSTAY,
+	PlatPerpetualraise,
+	PlatDownwaitupstay,
+	PlatDownbyvaluewaitupstay,
+	PlatUpwaitdownstay,
+	PlatUpbyvaluewaitdownstay,
 
 	// zdoom
-	platPerpetualRaise,
-	platDownWaitUpStay,
-	platDownWaitUpStayStone,
-	platDownByValue,
-	platUpByValue,
-	platUpWaitDownStay,
-	platUpNearestWaitDownStay,
-	platRaiseAndStay,
-	platRaiseAndStayLockout,
-	platUpByValueStay,
-	platToggle,
-	platDownToNearestFloor,
-	platDownToLowestCeiling,
-} plattype_e;
+	PlatPerpetualRaise,
+	PlatDownWaitUpStay,
+	PlatDownWaitUpStayStone,
+	PlatDownByValue,
+	PlatUpByValue,
+	PlatUpWaitDownStay,
+	PlatUpNearestWaitDownStay,
+	PlatRaiseAndStay,
+	PlatRaiseAndStayLockout,
+	PlatUpByValueStay,
+	PlatToggle,
+	PlatDownToNearestFloor,
+	PlatDownToLowestCeiling,
+};
 
 // p_doors
 
-typedef enum
+enum struct VerticalDoorType : int32_t
 {
-	normal,
-	close30ThenOpen,
-	closeDoor,
-	openDoor,
-	waitRaiseDoor,
-	waitCloseDoor,
-	blazeRaise,
-	blazeOpen,
-	blazeClose,
+	Normal,
+	Close30ThenOpen,
+	CloseDoor,
+	OpenDoor,
+	WaitRaiseDoor,
+	WaitCloseDoor,
+	BlazeRaise,
+	BlazeOpen,
+	BlazeClose,
 
 	//jff 02/05/98 add generalize door types
-	genRaise,
-	genBlazeRaise,
-	genOpen,
-	genBlazeOpen,
-	genClose,
-	genBlazeClose,
-	genCdO,
-	genBlazeCdO,
+	GenRaise,
+	GenBlazeRaise,
+	GenOpen,
+	GenBlazeOpen,
+	GenClose,
+	GenBlazeClose,
+	GenCdO,
+	GenBlazeCdO,
 
 	// heretic
-	vld_normal,
-	vld_normal_turbo,
-	vld_close30ThenOpen,
-	vld_close,
-	vld_open,
-	vld_raiseIn5Mins,
+	VldNormal,
+	VldNormalTurbo,
+	VldClose30ThenOpen,
+	VldClose,
+	VldOpen,
+	VldRaiseIn5Mins,
 
 	// hexen - can probably be merged
-	DREV_NORMAL,
-	DREV_CLOSE30THENOPEN,
-	DREV_CLOSE,
-	DREV_OPEN,
-	DREV_RAISEIN5MINS,
-} vldoor_e;
+	DrevNormal,
+	DrevClose30thenopen,
+	DrevClose,
+	DrevOpen,
+	DrevRaisein5mins,
+};
 
 // p_ceilng
 
-typedef enum
+enum struct CeilingKind : int32_t
 {
-	lowerToFloor,
-	raiseToHighest,
-	lowerToLowest,
-	lowerToMaxFloor,
-	lowerAndCrush,
-	crushAndRaise,
-	fastCrushAndRaise,
-	silentCrushAndRaise,
+	LowerToFloor,
+	RaiseToHighest,
+	LowerToLowest,
+	LowerToMaxFloor,
+	LowerAndCrush,
+	CrushAndRaise,
+	FastCrushAndRaise,
+	SilentCrushAndRaise,
 
 	//jff 02/04/98 add types for generalized ceiling mover
-	genCeiling,
-	genCeilingChg,
-	genCeilingChg0,
-	genCeilingChgT,
+	GenCeiling,
+	GenCeilingChg,
+	GenCeilingChg0,
+	GenCeilingChgT,
 
 	//jff 02/05/98 add types for generalized ceiling mover
-	genCrusher,
-	genSilentCrusher,
+	GenCrusher,
+	GenSilentCrusher,
 
 	// hexen - can probably be merged
-	CLEV_LOWERTOFLOOR,
-	CLEV_RAISETOHIGHEST,
-	CLEV_LOWERANDCRUSH,
-	CLEV_CRUSHANDRAISE,
-	CLEV_LOWERBYVALUE,
-	CLEV_RAISEBYVALUE,
-	CLEV_CRUSHRAISEANDSTAY,
-	CLEV_MOVETOVALUETIMES8,
+	ClevLowertofloor,
+	ClevRaisetohighest,
+	ClevLowerandcrush,
+	ClevCrushandraise,
+	ClevLowerbyvalue,
+	ClevRaisebyvalue,
+	ClevCrushraiseandstay,
+	ClevMovetovaluetimes8,
 
 	// zdoom
-	ceilLowerByValue,
-	ceilRaiseByValue,
-	ceilMoveToValue,
-	ceilLowerToHighestFloor,
-	ceilLowerInstant,
-	ceilRaiseInstant,
-	ceilCrushAndRaise,
-	ceilLowerAndCrush,
-	ceil_placeholder,
-	ceilCrushRaiseAndStay,
-	ceilRaiseToNearest,
-	ceilLowerToLowest,
-	ceilLowerToFloor,
-	ceilRaiseToHighest,
-	ceilLowerToHighest,
-	ceilRaiseToLowest,
-	ceilLowerToNearest,
-	ceilRaiseToHighestFloor,
-	ceilRaiseToFloor,
-	ceilRaiseByTexture,
-	ceilLowerByTexture,
-} ceiling_e;
+	CeilLowerByValue,
+	CeilRaiseByValue,
+	CeilMoveToValue,
+	CeilLowerToHighestFloor,
+	CeilLowerInstant,
+	CeilRaiseInstant,
+	CeilCrushAndRaise,
+	CeilLowerAndCrush,
+	CeilPlaceholder,
+	CeilCrushRaiseAndStay,
+	CeilRaiseToNearest,
+	CeilLowerToLowest,
+	CeilLowerToFloor,
+	CeilRaiseToHighest,
+	CeilLowerToHighest,
+	CeilRaiseToLowest,
+	CeilLowerToNearest,
+	CeilRaiseToHighestFloor,
+	CeilRaiseToFloor,
+	CeilRaiseByTexture,
+	CeilLowerByTexture,
+};
 
-typedef enum
+enum struct CrushMode : int32_t
 {
-	crushDoom     = 0,
-	crushHexen    = 1,
-	crushSlowdown = 2,
-} crushmode_e;
+	Doom     = 0,
+	Hexen    = 1,
+	Slowdown = 2,
+};
 
 // p_floor
 
-typedef enum
+enum struct FloorKind : int32_t
 {
 	// lower floor to highest surrounding floor
-	lowerFloor,
+	LowerFloor,
 
 	// lower floor to lowest surrounding floor
-	lowerFloorToLowest,
+	LowerFloorToLowest,
 
 	// lower floor to highest surrounding floor VERY FAST
-	turboLower,
+	TurboLower,
 
 	// raise floor to lowest surrounding CEILING
-	raiseFloor,
+	RaiseFloor,
 
 	// raise floor to next highest surrounding floor
-	raiseFloorToNearest,
+	RaiseFloorToNearest,
 
 	//jff 02/03/98 lower floor to next lowest neighbor
-	lowerFloorToNearest,
+	LowerFloorToNearest,
 
 	//jff 02/03/98 lower floor 24 absolute
-	lowerFloor24,
+	LowerFloor24,
 
 	//jff 02/03/98 lower floor 32 absolute
-	lowerFloor32Turbo,
+	LowerFloor32Turbo,
 
 	// raise floor to shortest height texture around it
-	raiseToTexture,
+	RaiseToTexture,
 
 	// lower floor to lowest surrounding floor
 	//  and change floorpic
-	lowerAndChange,
+	LowerAndChange,
 
-	raiseFloor24,
+	RaiseFloor24,
 
 	//jff 02/03/98 raise floor 32 absolute
-	raiseFloor32Turbo,
+	RaiseFloor32Turbo,
 
-	raiseFloor24AndChange,
-	raiseFloorCrush,
+	RaiseFloor24AndChange,
+	RaiseFloorCrush,
 
 	// raise to next highest floor, turbo-speed
-	raiseFloorTurbo,
-	donutRaise,
-	raiseFloor512,
+	RaiseFloorTurbo,
+	DonutRaise,
+	RaiseFloor512,
 
 	//jff 02/04/98  add types for generalized floor mover
-	genFloor,
-	genFloorChg,
-	genFloorChg0,
-	genFloorChgT,
+	GenFloor,
+	GenFloorChg,
+	GenFloorChg0,
+	GenFloorChgT,
 
 	//new types for stair builders
-	buildStair,
-	genBuildStair,
+	BuildStair,
+	GenBuildStair,
 
 	// hexen
-	FLEV_LOWERFLOOR,         // lower floor to highest surrounding floor
-	FLEV_LOWERFLOORTOLOWEST, // lower floor to lowest surrounding floor
-	FLEV_LOWERFLOORBYVALUE,
-	FLEV_RAISEFLOOR,          // raise floor to lowest surrounding CEILING
-	FLEV_RAISEFLOORTONEAREST, // raise floor to next highest surrounding floor
-	FLEV_RAISEFLOORBYVALUE,
-	FLEV_RAISEFLOORCRUSH,
-	FLEV_RAISEBUILDSTEP, // One step of a staircase
-	FLEV_RAISEBYVALUETIMES8,
-	FLEV_LOWERBYVALUETIMES8,
-	FLEV_LOWERTIMES8INSTANT,
-	FLEV_RAISETIMES8INSTANT,
-	FLEV_MOVETOVALUETIMES8,
+	FlevLowerfloor,         // lower floor to highest surrounding floor
+	FlevLowerfloortolowest, // lower floor to lowest surrounding floor
+	FlevLowerfloorbyvalue,
+	FlevRaisefloor,          // raise floor to lowest surrounding CEILING
+	FlevRaisefloortonearest, // raise floor to next highest surrounding floor
+	FlevRaisefloorbyvalue,
+	FlevRaisefloorcrush,
+	FlevRaisebuildstep, // One step of a staircase
+	FlevRaisebyvaluetimes8,
+	FlevLowerbyvaluetimes8,
+	FlevLowertimes8instant,
+	FlevRaisetimes8instant,
+	FlevMovetovaluetimes8,
 
 	// zdoom
-	floorLowerByValue,
-	floorLowerToLowest,
-	floorLowerToHighest,
-	floorLowerToNearest,
-	floorRaiseByValue,
-	floorRaiseToHighest,
-	floorRaiseToNearest,
-	floorRaiseToLowest,
-	floorRaiseAndCrush,
-	floorRaiseAndCrushDoom,
-	floorLowerInstant,
-	floorRaiseInstant,
-	floorLowerToCeiling,
-	floorMoveToValue,
-	floorRaiseToLowestCeiling,
-	floorLowerToLowestCeiling,
-	floorRaiseByTexture,
-	floorLowerByTexture,
-	floorRaiseToCeiling,
-	floorRaiseAndChange,
-	floorLowerAndChange,
+	FloorLowerByValue,
+	FloorLowerToLowest,
+	FloorLowerToHighest,
+	FloorLowerToNearest,
+	FloorRaiseByValue,
+	FloorRaiseToHighest,
+	FloorRaiseToNearest,
+	FloorRaiseToLowest,
+	FloorRaiseAndCrush,
+	FloorRaiseAndCrushDoom,
+	FloorLowerInstant,
+	FloorRaiseInstant,
+	FloorLowerToCeiling,
+	FloorMoveToValue,
+	FloorRaiseToLowestCeiling,
+	FloorLowerToLowestCeiling,
+	FloorRaiseByTexture,
+	FloorLowerByTexture,
+	FloorRaiseToCeiling,
+	FloorRaiseAndChange,
+	FloorLowerAndChange,
 
-	floorBuildStair,
-	floorWaitStair,
-	floorResetStair,
-} floor_e;
+	FloorBuildStair,
+	FloorWaitStair,
+	FloorResetStair,
+};
 
-typedef enum
+enum struct StairType : int32_t
 {
-	build8,  // slowly build by 8
-	turbo16, // quickly build by 16
+	Build8,  // slowly build by 8
+	Turbo16, // quickly build by 16
 
 	// heretic
-	heretic_build8,
-	heretic_turbo16,
+	HereticBuild8,
+	HereticTurbo16,
 
 	// zdoom
-	stairBuildDown,
-	stairBuildUp,
-} stair_e;
+	BuildDown,
+	BuildUp,
+};
 
 #define STAIR_USE_SPECIALS 1
 #define STAIR_SYNC         2
 #define STAIR_CRUSH        4
 
-typedef enum
+enum struct ElevatorType : int32_t
 {
-	elevateUp,
-	elevateDown,
-	elevateCurrent,
+	Up,
+	Down,
+	Current,
 
 	// zdoom
-	elevateLower,
-	elevateRaise,
-} elevator_e;
+	Lower,
+	Raise,
+};
 
 //////////////////////////////////////////////////////////////////
 //
@@ -630,20 +630,20 @@ typedef enum
 //////////////////////////////////////////////////////////////////
 
 // texture type enum
-typedef enum
+enum struct ButtonWhere : int32_t
 {
-	top,
-	middle,
-	bottom
-} bwhere_e;
+	Top,
+	Middle,
+	Bottom
+};
 
 // crush check returns
-typedef enum
+enum struct MoveResult : int32_t
 {
-	ok,
-	crushed,
-	pastdest
-} result_e;
+	Ok,
+	Crushed,
+	PastDest
+};
 
 //////////////////////////////////////////////////////////////////
 //
@@ -674,7 +674,7 @@ typedef struct
 typedef struct
 {
 	line_t* line;
-	bwhere_e where;
+	ButtonWhere where;
 	int btexture;
 	int btimer;
 	degenmobj_t* soundorg;
@@ -753,11 +753,11 @@ typedef struct
 	fixed_t high;
 	int wait;
 	int count;
-	plat_e status;
-	plat_e oldstatus;
+	PlatState status;
+	PlatState oldstatus;
 	int crush;
 	int tag;
-	plattype_e type;
+	PlatType type;
 
 	struct platlist* list; // killough
 } plat_t;
@@ -775,7 +775,7 @@ typedef struct platlist
 typedef struct
 {
 	thinker_t thinker;
-	vldoor_e type;
+	VerticalDoorType type;
 	sector_t* sector;
 	fixed_t topheight;
 	fixed_t speed;
@@ -808,7 +808,7 @@ typedef struct
 typedef struct
 {
 	thinker_t thinker;
-	ceiling_e type;
+	CeilingKind type;
 	sector_t* sector;
 	fixed_t bottomheight;
 	fixed_t topheight;
@@ -830,7 +830,7 @@ typedef struct
 
 	// zdoom
 	fixed_t speed2;
-	crushmode_e crushmode;
+	CrushMode crushmode;
 	byte silent;
 } ceiling_t;
 
@@ -845,7 +845,7 @@ typedef struct ceilinglist
 typedef struct
 {
 	thinker_t thinker;
-	floor_e type;
+	FloorKind type;
 	int crush;
 	sector_t* sector;
 	int direction;
@@ -871,7 +871,7 @@ typedef struct
 typedef struct
 {
 	thinker_t thinker;
-	elevator_e type;
+	ElevatorType type;
 	sector_t* sector;
 	int direction;
 	fixed_t floordestheight;
@@ -895,18 +895,18 @@ typedef struct
 
 // Declared outside the struct: in C++ an enum nested in a struct scopes its
 // enumerators to that struct, while the code uses them unqualified as C did.
-typedef enum
+enum struct PusherType : int32_t
 {
-	p_push,
-	p_pull,
-	p_wind,
-	p_current,
-} pushertype_e;
+	Push,
+	Pull,
+	Wind,
+	Current,
+};
 
 typedef struct
 {
 	thinker_t thinker; // Thinker structure for Pusher
-	pushertype_e type;
+	PusherType type;
 
 	mobj_t* source; // Point source if point pusher
 	int x_mag;      // X Strength
@@ -1072,7 +1072,7 @@ void T_MoveCeiling
 
 // p_floor
 
-result_e T_MoveFloorPlane
+MoveResult T_MoveFloorPlane
 (sector_t* sector,
 	fixed_t speed,
 	fixed_t dest,
@@ -1115,19 +1115,19 @@ int EV_SilentLineTeleport
 int
 EV_DoElevator
 (line_t* line,
-	elevator_e type);
+	ElevatorType type);
 
 int EV_BuildStairs
 (line_t* line,
-	stair_e type);
+	StairType type);
 
 int EV_DoFloor
 (line_t* line,
-	floor_e floortype);
+	FloorKind floortype);
 
 // p_ceilng
 
-result_e T_MoveCeilingPlane
+MoveResult T_MoveCeilingPlane
 (sector_t* sector,
 	fixed_t speed,
 	fixed_t dest,
@@ -1137,7 +1137,7 @@ result_e T_MoveCeilingPlane
 
 int EV_DoCeiling
 (line_t* line,
-	ceiling_e type);
+	CeilingKind type);
 
 int EV_CeilingCrushStop
 (line_t* line);
@@ -1150,11 +1150,11 @@ int EV_VerticalDoor
 
 int EV_DoDoor
 (line_t* line,
-	vldoor_e type);
+	VerticalDoorType type);
 
 int EV_DoLockedDoor
 (line_t* line,
-	vldoor_e type,
+	VerticalDoorType type,
 	mobj_t* thing);
 
 // p_lights
@@ -1175,7 +1175,7 @@ int EV_LightTurnOnPartway(line_t* line, fixed_t level); // killough 10/10/98
 
 int EV_DoChange
 (line_t* line,
-	change_e changetype,
+	ChangeKind changetype,
 	int tag);
 
 int EV_DoDonut
@@ -1185,7 +1185,7 @@ int EV_DoDonut
 
 int EV_DoPlat
 (line_t* line,
-	plattype_e type,
+	PlatType type,
 	int amount);
 
 int EV_StopPlat
@@ -1229,7 +1229,7 @@ void P_InitSwitchList
 
 void P_StartButton
 (line_t* line,
-	bwhere_e w,
+	ButtonWhere w,
 	int texture,
 	int time);
 
@@ -1332,22 +1332,22 @@ void Heretic_EV_VerticalDoor(line_t* line, mobj_t* thing);
 
 // p_lights
 
-typedef enum
+enum struct LightType : int32_t
 {
-	LITE_RAISEBYVALUE,
-	LITE_LOWERBYVALUE,
-	LITE_CHANGETOVALUE,
-	LITE_FADE,
-	LITE_GLOW,
-	LITE_FLICKER,
-	LITE_STROBE
-} lighttype_t;
+	RaiseByValue,
+	LowerByValue,
+	ChangeToValue,
+	Fade,
+	Glow,
+	Flicker,
+	Strobe
+};
 
 typedef struct
 {
 	thinker_t thinker;
 	sector_t* sector;
-	lighttype_t type;
+	LightType type;
 	int value1;
 	int value2;
 	int tics1;
@@ -1371,12 +1371,12 @@ void T_Phase(phase_t* phase);
 void T_Light(light_t* light);
 void P_SpawnPhasedLight(sector_t* sector, int base, int index);
 void P_SpawnLightSequence(sector_t* sector, int indexStep);
-dboolean EV_SpawnLight(line_t* line, byte* arg, lighttype_t type);
+dboolean EV_SpawnLight(line_t* line, byte* arg, LightType type);
 
 // p_ceilng
 
 int Hexen_EV_CeilingCrushStop(line_t* line, byte* args);
-int Hexen_EV_DoCeiling(line_t* line, byte* arg, ceiling_e type);
+int Hexen_EV_DoCeiling(line_t* line, byte* arg, CeilingKind type);
 
 // p_telept
 
@@ -1384,7 +1384,7 @@ dboolean EV_HexenTeleport(int tid, mobj_t* thing, dboolean fog);
 
 // p_doors
 
-int Hexen_EV_DoDoor(line_t* line, byte* args, vldoor_e type);
+int Hexen_EV_DoDoor(line_t* line, byte* args, VerticalDoorType type);
 dboolean Hexen_EV_VerticalDoor(line_t* line, mobj_t* thing);
 
 // p_floor
@@ -1404,11 +1404,11 @@ typedef struct
 	dboolean hexencrush;
 } pillar_t;
 
-typedef enum
+enum struct PillarType : int32_t
 {
-	pillarBuild,
-	pillarOpen,
-} pillar_e;
+	Build,
+	Open,
+};
 
 typedef struct
 {
@@ -1424,16 +1424,16 @@ typedef struct
 	int state;
 } planeWaggle_t;
 
-typedef enum
+enum struct StairsMode : int32_t
 {
-	STAIRS_NORMAL,
-	STAIRS_SYNC,
-	STAIRS_PHASED
-} stairs_e;
+	Normal,
+	Sync,
+	Phased
+};
 
-int Hexen_EV_DoFloor(line_t* line, byte* args, floor_e floortype);
+int Hexen_EV_DoFloor(line_t* line, byte* args, FloorKind floortype);
 int EV_DoFloorAndCeiling(line_t* line, byte* args, dboolean raise);
-int Hexen_EV_BuildStairs(line_t* line, byte* args, int direction, stairs_e stairsType);
+int Hexen_EV_BuildStairs(line_t* line, byte* args, int direction, StairsMode stairsType);
 void T_BuildPillar(pillar_t* pillar);
 int EV_BuildPillar(line_t* line, byte* args, int crush);
 int EV_OpenPillar(line_t* line, byte* args);
@@ -1444,7 +1444,7 @@ dboolean EV_StartFloorWaggle(int tag, int height, int speed, int offset, int tim
 
 // p_plats
 
-int EV_DoHexenPlat(line_t* line, byte* args, plattype_e type, int amount);
+int EV_DoHexenPlat(line_t* line, byte* args, PlatType type, int amount);
 void Hexen_EV_StopPlat(line_t* line, byte* args);
 
 // quake
@@ -1468,7 +1468,7 @@ void dsda_SpawnQuake(mobj_t* location, int intensity, int duration,
 //
 
 dboolean P_ActivateLine(line_t* line, mobj_t* mo, int side, line_activation_t activationType);
-void P_PlayerOnSpecialFlat(player_t* player, int floorType);
+void P_PlayerOnSpecialFlat(player_t* player, FloorType floorType);
 line_t* P_FindLine(int lineTag, int* searchPosition);
 
 dboolean P_IsSpecialSector(sector_t* sector);
@@ -1479,167 +1479,167 @@ void P_ResetTransferSpecial(newspecial_t* newspecial);
 void P_ResetSectorSpecial(sector_t* sector);
 void P_ClearNonGeneralizedSectorSpecial(sector_t* sector);
 
-typedef enum
+enum struct ZDoomSectorSpecial : int32_t
 {
-	zs_light_phased            = 1,
-	zs_light_sequence_start    = 2,
-	zs_light_sequence_special1 = 3,
-	zs_light_sequence_special2 = 4,
+	LightPhased            = 1,
+	LightSequenceStart    = 2,
+	LightSequenceSpecial1 = 3,
+	LightSequenceSpecial2 = 4,
 
-	zs_stairs_special1 = 26,
-	zs_stairs_special2 = 27,
+	StairsSpecial1 = 26,
+	StairsSpecial2 = 27,
 
-	zs_wind_east_weak    = 40,
-	zs_wind_east_medium  = 41,
-	zs_wind_east_strong  = 42,
-	zs_wind_north_weak   = 43,
-	zs_wind_north_medium = 44,
-	zs_wind_north_strong = 45,
-	zs_wind_south_weak   = 46,
-	zs_wind_south_medium = 47,
-	zs_wind_south_strong = 48,
-	zs_wind_west_weak    = 49,
-	zs_wind_west_medium  = 50,
-	zs_wind_west_strong  = 51,
+	WindEastWeak    = 40,
+	WindEastMedium  = 41,
+	WindEastStrong  = 42,
+	WindNorthWeak   = 43,
+	WindNorthMedium = 44,
+	WindNorthStrong = 45,
+	WindSouthWeak   = 46,
+	WindSouthMedium = 47,
+	WindSouthStrong = 48,
+	WindWestWeak    = 49,
+	WindWestMedium  = 50,
+	WindWestStrong  = 51,
 
-	zs_d_light_flicker     = 65,
-	zs_d_light_strobe_fast = 66,
-	zs_d_light_strobe_slow = 67,
-	zs_d_light_strobe_hurt = 68,
-	zs_d_damage_hellslime  = 69,
+	DLightFlicker     = 65,
+	DLightStrobeFast = 66,
+	DLightStrobeSlow = 67,
+	DLightStrobeHurt = 68,
+	DDamageHellslime  = 69,
 
-	zs_d_damage_nukage = 71,
-	zs_d_light_glow    = 72,
+	DDamageNukage = 71,
+	DLightGlow    = 72,
 
-	zs_d_sector_door_close_in_30     = 74,
-	zs_d_damage_end                  = 75,
-	zs_d_light_strobe_slow_sync      = 76,
-	zs_d_light_strobe_fast_sync      = 77,
-	zs_d_sector_door_raise_in_5_mins = 78,
-	zs_d_friction_low                = 79,
-	zs_d_damage_super_hellslime      = 80,
-	zs_d_light_fire_flicker          = 81,
-	zs_d_damage_lava_wimpy           = 82,
-	zs_d_damage_lava_hefty           = 83,
-	zs_d_scroll_east_lava_damage     = 84,
-	zs_h_damage_sludge               = 85,
+	DSectorDoorCloseIn30     = 74,
+	DDamageEnd                  = 75,
+	DLightStrobeSlowSync      = 76,
+	DLightStrobeFastSync      = 77,
+	DSectorDoorRaiseIn5Mins = 78,
+	DFrictionLow                = 79,
+	DDamageSuperHellslime      = 80,
+	DLightFireFlicker          = 81,
+	DDamageLavaWimpy           = 82,
+	DDamageLavaHefty           = 83,
+	DScrollEastLavaDamage     = 84,
+	HDamageSludge               = 85,
 
-	zs_sector_outside = 87,
+	SectorOutside = 87,
 
-	zs_s_light_strobe_hurt = 104,
-	zs_s_damage_hellslime  = 105,
+	SLightStrobeHurt = 104,
+	SDamageHellslime  = 105,
 
-	zs_damage_instant_death     = 115,
-	zs_s_damage_super_hellslime = 116,
+	DamageInstantDeath     = 115,
+	SDamageSuperHellslime = 116,
 
-	zs_scroll_strife_current = 118,
+	ScrollStrifeCurrent = 118,
 
-	zs_sector_hidden           = 195,
-	zs_sector_heal             = 196,
-	zs_light_outdoor_lightning = 197,
-	zs_light_indoor_lightning1 = 198,
-	zs_light_indoor_lightning2 = 199,
-	zs_sky2                    = 200,
+	SectorHidden           = 195,
+	SectorHeal             = 196,
+	LightOutdoorLightning = 197,
+	LightIndoorLightning1 = 198,
+	LightIndoorLightning2 = 199,
+	Sky2                    = 200,
 
 	// hexen-type scrollers
-	zs_scroll_north_slow       = 201,
-	zs_scroll_north_medium     = 202,
-	zs_scroll_north_fast       = 203,
-	zs_scroll_east_slow        = 204,
-	zs_scroll_east_medium      = 205,
-	zs_scroll_east_fast        = 206,
-	zs_scroll_south_slow       = 207,
-	zs_scroll_south_medium     = 208,
-	zs_scroll_south_fast       = 209,
-	zs_scroll_west_slow        = 210,
-	zs_scroll_west_medium      = 211,
-	zs_scroll_west_fast        = 212,
-	zs_scroll_northwest_slow   = 213,
-	zs_scroll_northwest_medium = 214,
-	zs_scroll_northwest_fast   = 215,
-	zs_scroll_northeast_slow   = 216,
-	zs_scroll_northeast_medium = 217,
-	zs_scroll_northeast_fast   = 218,
-	zs_scroll_southeast_slow   = 219,
-	zs_scroll_southeast_medium = 220,
-	zs_scroll_southeast_fast   = 221,
-	zs_scroll_southwest_slow   = 222,
-	zs_scroll_southwest_medium = 223,
-	zs_scroll_southwest_fast   = 224,
+	ScrollNorthSlow       = 201,
+	ScrollNorthMedium     = 202,
+	ScrollNorthFast       = 203,
+	ScrollEastSlow        = 204,
+	ScrollEastMedium      = 205,
+	ScrollEastFast        = 206,
+	ScrollSouthSlow       = 207,
+	ScrollSouthMedium     = 208,
+	ScrollSouthFast       = 209,
+	ScrollWestSlow        = 210,
+	ScrollWestMedium      = 211,
+	ScrollWestFast        = 212,
+	ScrollNorthwestSlow   = 213,
+	ScrollNorthwestMedium = 214,
+	ScrollNorthwestFast   = 215,
+	ScrollNortheastSlow   = 216,
+	ScrollNortheastMedium = 217,
+	ScrollNortheastFast   = 218,
+	ScrollSoutheastSlow   = 219,
+	ScrollSoutheastMedium = 220,
+	ScrollSoutheastFast   = 221,
+	ScrollSouthwestSlow   = 222,
+	ScrollSouthwestMedium = 223,
+	ScrollSouthwestFast   = 224,
 
 	// heretic-type scrollers
-	zs_carry_east5   = 225,
-	zs_carry_east10  = 226,
-	zs_carry_east25  = 227,
-	zs_carry_east30  = 228,
-	zs_carry_east35  = 229,
-	zs_carry_north5  = 230,
-	zs_carry_north10 = 231,
-	zs_carry_north25 = 232,
-	zs_carry_north30 = 233,
-	zs_carry_north35 = 234,
-	zs_carry_south5  = 235,
-	zs_carry_south10 = 236,
-	zs_carry_south25 = 237,
-	zs_carry_south30 = 238,
-	zs_carry_south35 = 239,
-	zs_carry_west5   = 240,
-	zs_carry_west10  = 241,
-	zs_carry_west25  = 242,
-	zs_carry_west30  = 243,
-	zs_carry_west35  = 244
-} zdoom_sectorspecial_t;
+	CarryEast5   = 225,
+	CarryEast10  = 226,
+	CarryEast25  = 227,
+	CarryEast30  = 228,
+	CarryEast35  = 229,
+	CarryNorth5  = 230,
+	CarryNorth10 = 231,
+	CarryNorth25 = 232,
+	CarryNorth30 = 233,
+	CarryNorth35 = 234,
+	CarrySouth5  = 235,
+	CarrySouth10 = 236,
+	CarrySouth25 = 237,
+	CarrySouth30 = 238,
+	CarrySouth35 = 239,
+	CarryWest5   = 240,
+	CarryWest10  = 241,
+	CarryWest25  = 242,
+	CarryWest30  = 243,
+	CarryWest35  = 244
+};
 
 #define ZDOOM_DAMAGE_MASK   0x0300
 #define ZDOOM_SECRET_MASK   0x0400
 #define ZDOOM_FRICTION_MASK 0x0800
 #define ZDOOM_PUSH_MASK     0x1000
 
-typedef enum
+enum struct ZDoomLock : int32_t
 {
-	zk_none         = 0,
-	zk_red_card     = 1,
-	zk_blue_card    = 2,
-	zk_yellow_card  = 3,
-	zk_red_skull    = 4,
-	zk_blue_skull   = 5,
-	zk_yellow_skull = 6,
-	zk_any          = 100,
-	zk_all          = 101,
-	zk_red          = 129,
-	zk_blue         = 130,
-	zk_yellow       = 131,
-	zk_redx         = 132, // not sure why these redundant ones exist
-	zk_bluex        = 133,
-	zk_yellowx      = 134,
-	zk_each_color   = 229,
-} zdoom_lock_t;
+	None         = 0,
+	RedCard     = 1,
+	BlueCard    = 2,
+	YellowCard  = 3,
+	RedSkull    = 4,
+	BlueSkull   = 5,
+	YellowSkull = 6,
+	Any          = 100,
+	All          = 101,
+	Red          = 129,
+	Blue         = 130,
+	Yellow       = 131,
+	Redx         = 132, // not sure why these redundant ones exist
+	Bluex        = 133,
+	Yellowx      = 134,
+	EachColor   = 229,
+};
 
 void P_AddMobjSecret(mobj_t* mobj);
 void P_PlayerCollectSecret(player_t* player);
-dboolean P_CheckKeys(mobj_t* mo, zdoom_lock_t lock, dboolean legacy);
+dboolean P_CheckKeys(mobj_t* mo, ZDoomLock lock, dboolean legacy);
 dboolean P_CheckSwitchRange(line_t* line, mobj_t* mo, int sideno);
-int EV_DoZDoomDoor(vldoor_e type, line_t* line, mobj_t* mo, int tag, fixed_t speed, int topwait,
-	zdoom_lock_t lock, int lightTag, dboolean boomgen, int topcountdown);
-int EV_DoZDoomFloor(floor_e floortype, line_t* line, int tag, fixed_t speed, fixed_t height,
+int EV_DoZDoomDoor(VerticalDoorType type, line_t* line, mobj_t* mo, int tag, fixed_t speed, int topwait,
+	ZDoomLock lock, int lightTag, dboolean boomgen, int topcountdown);
+int EV_DoZDoomFloor(FloorKind floortype, line_t* line, int tag, fixed_t speed, fixed_t height,
 	int crush, int change, dboolean hexencrush, dboolean hereticlower);
 int EV_ZDoomFloorStop(int tag, line_t* line);
 int EV_ZDoomFloorCrushStop(int tag);
 int EV_DoZDoomDonut(int tag, line_t* line, fixed_t pillarspeed, fixed_t slimespeed);
-int EV_DoZDoomCeiling(ceiling_e type, line_t* line, int tag, fixed_t speed, fixed_t speed2,
-	fixed_t height, int crush, byte silent, int change, crushmode_e crushmode);
+int EV_DoZDoomCeiling(CeilingKind type, line_t* line, int tag, fixed_t speed, fixed_t speed2,
+	fixed_t height, int crush, byte silent, int change, CrushMode crushmode);
 int EV_ZDoomCeilingStop(int tag, line_t* line);
 int EV_ZDoomCeilingCrushStop(int tag, dboolean remove);
-int EV_DoZDoomPlat(int tag, line_t* line, plattype_e type, fixed_t height,
+int EV_DoZDoomPlat(int tag, line_t* line, PlatType type, fixed_t height,
 	fixed_t speed, int delay, fixed_t lip, int change);
 void EV_StopZDoomPlat(int tag, dboolean remove);
-int EV_BuildZDoomStairs(int tag, stair_e type, line_t* line, fixed_t stairsize,
+int EV_BuildZDoomStairs(int tag, StairType type, line_t* line, fixed_t stairsize,
 	fixed_t speed, int delay, int reset, int igntxt, int usespecials);
 dboolean EV_StartPlaneWaggle(int tag, line_t* line, int height,
 	int speed, int offset, int timer, dboolean ceiling);
-int EV_DoZDoomPillar(pillar_e type, line_t* line, int tag, fixed_t speed,
+int EV_DoZDoomPillar(PillarType type, line_t* line, int tag, fixed_t speed,
 	fixed_t height, fixed_t height2, int crush, dboolean hexencrush);
-int EV_DoZDoomElevator(line_t* line, elevator_e type, fixed_t speed, fixed_t height, int tag);
+int EV_DoZDoomElevator(line_t* line, ElevatorType type, fixed_t speed, fixed_t height, int tag);
 void EV_LightChange(int tag, short change);
 void EV_LightSet(int tag, short level);
 void EV_LightSetMinNeighbor(int tag);

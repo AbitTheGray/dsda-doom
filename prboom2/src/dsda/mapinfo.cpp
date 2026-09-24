@@ -291,47 +291,47 @@ void dsda_InterMusic(int* music_index, int* music_lump)
 	dsda_LegacyInterMusic(music_index, music_lump);
 }
 
-typedef enum
+enum struct FinaleOwner : int32_t
 {
-	finale_owner_legacy,
-	finale_owner_u,
-	finale_owner_hexen,
-} finale_owner_t;
+	Legacy,
+	U,
+	Hexen,
+};
 
-static finale_owner_t finale_owner = finale_owner_legacy;
+static FinaleOwner finale_owner = FinaleOwner::Legacy;
 
 void dsda_StartFinale()
 {
 	if(dsda_HexenStartFinale())
 	{
-		finale_owner = finale_owner_hexen;
+		finale_owner = FinaleOwner::Hexen;
 		return;
 	}
 
 	if(dsda_UStartFinale())
 	{
-		finale_owner = finale_owner_u;
+		finale_owner = FinaleOwner::U;
 		return;
 	}
 
 	dsda_LegacyStartFinale();
-	finale_owner = finale_owner_legacy;
+	finale_owner = FinaleOwner::Legacy;
 }
 
 int dsda_FTicker()
 {
-	if(finale_owner == finale_owner_hexen)
+	if(finale_owner == FinaleOwner::Hexen)
 	{
 		if(!dsda_HexenFTicker())
-			finale_owner = finale_owner_legacy;
+			finale_owner = FinaleOwner::Legacy;
 
 		return true;
 	}
 
-	if(finale_owner == finale_owner_u)
+	if(finale_owner == FinaleOwner::U)
 	{
 		if(!dsda_UFTicker())
-			finale_owner = finale_owner_legacy;
+			finale_owner = FinaleOwner::Legacy;
 
 		return true;
 	}
@@ -342,14 +342,14 @@ int dsda_FTicker()
 
 int dsda_FDrawer()
 {
-	if(finale_owner == finale_owner_hexen)
+	if(finale_owner == FinaleOwner::Hexen)
 	{
 		dsda_HexenFDrawer();
 
 		return true;
 	}
 
-	if(finale_owner == finale_owner_u)
+	if(finale_owner == FinaleOwner::U)
 	{
 		dsda_UFDrawer();
 

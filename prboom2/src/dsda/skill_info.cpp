@@ -148,25 +148,25 @@ void dsda_InitSkills()
 // During demo recording/playback only use args, else use cfgs
 static void dsda_ResetGameModifiers()
 {
-	pistolstart = (allow_incompatibility ? dsda_IntConfig(dsda_config_pistol_start) : false); // pistolstart not allowed in demos
-	respawnparm = (allow_incompatibility ? dsda_IntConfig(dsda_config_respawn_monsters) : dsda_Flag(dsda_arg_respawn));
-	fastparm = (allow_incompatibility ? dsda_IntConfig(dsda_config_fast_monsters) : dsda_Flag(dsda_arg_fast));
-	nomonsters = (allow_incompatibility ? dsda_IntConfig(dsda_config_no_monsters) : dsda_Flag(dsda_arg_nomonsters));
-	coop_spawns = (allow_incompatibility ? dsda_IntConfig(dsda_config_coop_spawns) : dsda_Flag(dsda_arg_coop_spawns));
+	pistolstart = (allow_incompatibility ? dsda_IntConfig(ConfigId::PistolStart) : false); // pistolstart not allowed in demos
+	respawnparm = (allow_incompatibility ? dsda_IntConfig(ConfigId::RespawnMonsters) : dsda_Flag(ArgId::Respawn));
+	fastparm = (allow_incompatibility ? dsda_IntConfig(ConfigId::FastMonsters) : dsda_Flag(ArgId::Fast));
+	nomonsters = (allow_incompatibility ? dsda_IntConfig(ConfigId::NoMonsters) : dsda_Flag(ArgId::Nomonsters));
+	coop_spawns = (allow_incompatibility ? dsda_IntConfig(ConfigId::CoopSpawns) : dsda_Flag(ArgId::CoopSpawns));
 }
 
 void dsda_InitGameModifiers()
 {
-	if(dsda_Flag(dsda_arg_pistol_start) || dsda_IntConfig(dsda_config_always_pistol_start))
-		dsda_UpdateIntConfig(dsda_config_pistol_start, true, true);
-	if(dsda_Flag(dsda_arg_respawn))
-		dsda_UpdateIntConfig(dsda_config_respawn_monsters, true, true);
-	if(dsda_Flag(dsda_arg_fast))
-		dsda_UpdateIntConfig(dsda_config_fast_monsters, true, true);
-	if(dsda_Flag(dsda_arg_nomonsters))
-		dsda_UpdateIntConfig(dsda_config_no_monsters, true, true);
-	if(dsda_Flag(dsda_arg_coop_spawns))
-		dsda_UpdateIntConfig(dsda_config_coop_spawns, true, true);
+	if(dsda_Flag(ArgId::PistolStart) || dsda_IntConfig(ConfigId::AlwaysPistolStart))
+		dsda_UpdateIntConfig(ConfigId::PistolStart, true, true);
+	if(dsda_Flag(ArgId::Respawn))
+		dsda_UpdateIntConfig(ConfigId::RespawnMonsters, true, true);
+	if(dsda_Flag(ArgId::Fast))
+		dsda_UpdateIntConfig(ConfigId::FastMonsters, true, true);
+	if(dsda_Flag(ArgId::Nomonsters))
+		dsda_UpdateIntConfig(ConfigId::NoMonsters, true, true);
+	if(dsda_Flag(ArgId::CoopSpawns))
+		dsda_UpdateIntConfig(ConfigId::CoopSpawns, true, true);
 
 	// Pistol-start config can reset other modifier configs
 	// Explicitly refresh everything for configs to match args
@@ -176,12 +176,12 @@ void dsda_InitGameModifiers()
 // if "Pistol Start" is disabled, disable "Always Pistol Start" (avoid impossible condition)
 void dsda_RefreshPistolStart()
 {
-	dboolean pistol_start_conflict = dsda_IntConfig(dsda_config_always_pistol_start) && !dsda_IntConfig(dsda_config_pistol_start);
+	dboolean pistol_start_conflict = dsda_IntConfig(ConfigId::AlwaysPistolStart) && !dsda_IntConfig(ConfigId::PistolStart);
 
 	// Fix pistolstart option "conflict"
 	if(allow_incompatibility || in_game)
 		if(pistol_start_conflict)
-			dsda_UpdateIntConfig(dsda_config_always_pistol_start, false, true);
+			dsda_UpdateIntConfig(ConfigId::AlwaysPistolStart, false, true);
 
 	// Refresh pistolstart status
 	dsda_ResetGameModifiers();
@@ -190,12 +190,12 @@ void dsda_RefreshPistolStart()
 // if "Always Pistol Start" is enabled, enable "Pistol Start" (avoid impossible condition)
 void dsda_RefreshAlwaysPistolStart()
 {
-	dboolean pistol_start_conflict = dsda_IntConfig(dsda_config_always_pistol_start) && !dsda_IntConfig(dsda_config_pistol_start);
+	dboolean pistol_start_conflict = dsda_IntConfig(ConfigId::AlwaysPistolStart) && !dsda_IntConfig(ConfigId::PistolStart);
 
 	// Fix pistolstart option "conflict"
 	if(allow_incompatibility || in_game)
 		if(pistol_start_conflict)
-			dsda_UpdateIntConfig(dsda_config_pistol_start, true, true);
+			dsda_UpdateIntConfig(ConfigId::PistolStart, true, true);
 
 	// Refresh pistolstart status
 	dsda_ResetGameModifiers();

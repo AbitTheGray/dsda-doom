@@ -5,28 +5,28 @@
 
 #pragma once
 
+#include "p_mobj.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "p_mobj.hpp"
-
 #define TRACKER_LIMIT 16
 
-typedef enum
+enum struct TrackerType : int32_t
 {
-	dsda_tracker_nothing,
-	dsda_tracker_line,
-	dsda_tracker_line_distance,
-	dsda_tracker_sector,
-	dsda_tracker_mobj,
-	dsda_tracker_player,
-} dsda_tracker_type_t;
+	Nothing,
+	Line,
+	LineDistance,
+	Sector,
+	Mobj,
+	Player,
+};
 
 typedef struct
 {
-	dsda_tracker_type_t type;
+	TrackerType type;
 	int id;
 	mobj_t* mobj;
 } dsda_tracker_t;

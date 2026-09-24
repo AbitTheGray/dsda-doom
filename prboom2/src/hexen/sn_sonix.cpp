@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <utility>
+
 #include <string.h>
 
 #include "doomdef.hpp"
@@ -29,92 +31,92 @@
 #define SS_STRING_END           "end"
 #define SS_STRING_STOPSOUND     "stopsound"
 
-typedef enum
+enum struct SoundSeqCmd : int32_t
 {
-	SS_CMD_NONE,
-	SS_CMD_PLAY,
-	SS_CMD_WAITUNTILDONE, // used by PLAYUNTILDONE
-	SS_CMD_PLAYTIME,
-	SS_CMD_PLAYREPEAT,
-	SS_CMD_DELAY,
-	SS_CMD_DELAYRAND,
-	SS_CMD_VOLUME,
-	SS_CMD_STOPSOUND,
-	SS_CMD_END
-} sscmds_t;
+	None,
+	Play,
+	WaitUntilDone, // used by PLAYUNTILDONE
+	PlayTime,
+	PlayRepeat,
+	Delay,
+	DelayRand,
+	Volume,
+	StopSound,
+	End
+};
 
 static void VerifySequencePtr(int* base, int* ptr);
-static int GetSoundOffset(char* name);
+static SfxId GetSoundOffset(char* name);
 
 static struct
 {
 	char name[SS_SEQUENCE_NAME_LENGTH];
 	int scriptNum;
-	int stopSound;
-} SequenceTranslate[SEQ_NUMSEQ] =
+	SfxId stopSound;
+} SequenceTranslate[std::to_underlying(SoundSequence::Numseq)] =
 {
 	{
-		"Platform", 0, 0
+		"Platform", 0, SfxId::None
 	},
 	{
-		"Platform", 0, 0
+		"Platform", 0, SfxId::None
 	}, // a 'heavy' platform is just a platform
 	{
-		"PlatformMetal", 0, 0
+		"PlatformMetal", 0, SfxId::None
 	},
 	{
-		"Platform", 0, 0
+		"Platform", 0, SfxId::None
 	}, // same with a 'creak' platform
 	{
-		"Silence", 0, 0
+		"Silence", 0, SfxId::None
 	},
 	{
-		"Lava", 0, 0
+		"Lava", 0, SfxId::None
 	},
 	{
-		"Water", 0, 0
+		"Water", 0, SfxId::None
 	},
 	{
-		"Ice", 0, 0
+		"Ice", 0, SfxId::None
 	},
 	{
-		"Earth", 0, 0
+		"Earth", 0, SfxId::None
 	},
 	{
-		"PlatformMetal2", 0, 0
+		"PlatformMetal2", 0, SfxId::None
 	},
 	{
-		"DoorNormal", 0, 0
+		"DoorNormal", 0, SfxId::None
 	},
 	{
-		"DoorHeavy", 0, 0
+		"DoorHeavy", 0, SfxId::None
 	},
 	{
-		"DoorMetal", 0, 0
+		"DoorMetal", 0, SfxId::None
 	},
 	{
-		"DoorCreak", 0, 0
+		"DoorCreak", 0, SfxId::None
 	},
 	{
-		"Silence", 0, 0
+		"Silence", 0, SfxId::None
 	},
 	{
-		"Lava", 0, 0
+		"Lava", 0, SfxId::None
 	},
 	{
-		"Water", 0, 0
+		"Water", 0, SfxId::None
 	},
 	{
-		"Ice", 0, 0
+		"Ice", 0, SfxId::None
 	},
 	{
-		"Earth", 0, 0
+		"Earth", 0, SfxId::None
 	},
 	{
-		"DoorMetal2", 0, 0
+		"DoorMetal2", 0, SfxId::None
 	},
 	{
-		"Wind", 0, 0
+		"Wind", 0, SfxId::None
 	}
 };
 
@@ -131,19 +133,17 @@ static void VerifySequencePtr(int* base, int* ptr)
 	}
 }
 
-static int GetSoundOffset(char* name)
+static SfxId GetSoundOffset(char* name)
 {
-	int i;
-
-	for(i = 0; i < num_sfx; i++)
+	for(int32_t i = 0; i < num_sfx; i++)
 	{
 		if(!strcasecmp(name, S_sfx[i].tagname))
 		{
-			return i;
+			return static_cast<SfxId>(i);
 		}
 	}
 	SC_ScriptError("GetSoundOffset:  Unknown sound name\n");
-	return 0;
+	return SfxId::None;
 }
 
 void SN_InitSequenceScript()
@@ -182,7 +182,7 @@ void SN_InitSequenceScript()
 			{
 				I_Error("Number of SS Scripts >= SS_MAX_SCRIPTS");
 			}
-			for(j = 0; j < SEQ_NUMSEQ; j++)
+			for(j = 0; j < std::to_underlying(SoundSequence::Numseq); j++)
 			{
 				if(!strcasecmp(SequenceTranslate[j].name, sc_String + 1))
 				{
@@ -201,45 +201,45 @@ void SN_InitSequenceScript()
 		{
 			VerifySequencePtr(tempDataStart, tempDataPtr);
 			SC_MustGetString();
-			*tempDataPtr++ = SS_CMD_PLAY;
-			*tempDataPtr++ = GetSoundOffset(sc_String);
-			*tempDataPtr++ = SS_CMD_WAITUNTILDONE;
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::Play);
+			*tempDataPtr++ = std::to_underlying(GetSoundOffset(sc_String));
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::WaitUntilDone);
 		}
 		else if(SC_Compare(SS_STRING_PLAY))
 		{
 			VerifySequencePtr(tempDataStart, tempDataPtr);
 			SC_MustGetString();
-			*tempDataPtr++ = SS_CMD_PLAY;
-			*tempDataPtr++ = GetSoundOffset(sc_String);
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::Play);
+			*tempDataPtr++ = std::to_underlying(GetSoundOffset(sc_String));
 		}
 		else if(SC_Compare(SS_STRING_PLAYTIME))
 		{
 			VerifySequencePtr(tempDataStart, tempDataPtr);
 			SC_MustGetString();
-			*tempDataPtr++ = SS_CMD_PLAY;
-			*tempDataPtr++ = GetSoundOffset(sc_String);
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::Play);
+			*tempDataPtr++ = std::to_underlying(GetSoundOffset(sc_String));
 			SC_MustGetNumber();
-			*tempDataPtr++ = SS_CMD_DELAY;
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::Delay);
 			*tempDataPtr++ = sc_Number;
 		}
 		else if(SC_Compare(SS_STRING_PLAYREPEAT))
 		{
 			VerifySequencePtr(tempDataStart, tempDataPtr);
 			SC_MustGetString();
-			*tempDataPtr++ = SS_CMD_PLAYREPEAT;
-			*tempDataPtr++ = GetSoundOffset(sc_String);
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::PlayRepeat);
+			*tempDataPtr++ = std::to_underlying(GetSoundOffset(sc_String));
 		}
 		else if(SC_Compare(SS_STRING_DELAY))
 		{
 			VerifySequencePtr(tempDataStart, tempDataPtr);
-			*tempDataPtr++ = SS_CMD_DELAY;
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::Delay);
 			SC_MustGetNumber();
 			*tempDataPtr++ = sc_Number;
 		}
 		else if(SC_Compare(SS_STRING_DELAYRAND))
 		{
 			VerifySequencePtr(tempDataStart, tempDataPtr);
-			*tempDataPtr++ = SS_CMD_DELAYRAND;
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::DelayRand);
 			SC_MustGetNumber();
 			*tempDataPtr++ = sc_Number;
 			SC_MustGetNumber();
@@ -248,7 +248,7 @@ void SN_InitSequenceScript()
 		else if(SC_Compare(SS_STRING_VOLUME))
 		{
 			VerifySequencePtr(tempDataStart, tempDataPtr);
-			*tempDataPtr++ = SS_CMD_VOLUME;
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::Volume);
 			SC_MustGetNumber();
 			*tempDataPtr++ = sc_Number;
 		}
@@ -256,7 +256,7 @@ void SN_InitSequenceScript()
 		{
 			int dataSize;
 
-			*tempDataPtr++ = SS_CMD_END;
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::End);
 			dataSize = (tempDataPtr - tempDataStart) * sizeof(int);
 			SequenceData[i] = (int*)Z_Malloc(dataSize);
 			memcpy(SequenceData[i], tempDataStart, dataSize);
@@ -268,7 +268,7 @@ void SN_InitSequenceScript()
 			SC_MustGetString();
 			SequenceTranslate[inSequence].stopSound =
 				GetSoundOffset(sc_String);
-			*tempDataPtr++ = SS_CMD_STOPSOUND;
+			*tempDataPtr++ = std::to_underlying(SoundSeqCmd::StopSound);
 		}
 		else
 		{
@@ -310,7 +310,7 @@ void SN_StartSequenceName(mobj_t* mobj, const char* name)
 {
 	int i;
 
-	for(i = 0; i < SEQ_NUMSEQ; i++)
+	for(i = 0; i < std::to_underlying(SoundSequence::Numseq); i++)
 	{
 		if(!strcmp(name, SequenceTranslate[i].name))
 		{
@@ -331,7 +331,7 @@ void SN_StopSequence(mobj_t* mobj)
 		if(node->mobj == mobj)
 		{
 			S_StopSound(mobj);
-			if(node->stopSound)
+			if(node->stopSound != SfxId::None)
 			{
 				S_StartSoundAtVolume(mobj, node->stopSound, node->volume, false, 0);
 			}
@@ -373,52 +373,52 @@ void SN_UpdateActiveSequences()
 			continue;
 		}
 		sndPlaying = S_GetSoundPlayingInfo(node->mobj, node->currentSoundID);
-		switch(*node->sequencePtr)
+		switch(static_cast<SoundSeqCmd>(*node->sequencePtr))
 		{
-			case SS_CMD_PLAY:
+			case SoundSeqCmd::Play:
 				if(!sndPlaying)
 				{
-					node->currentSoundID = *(node->sequencePtr + 1);
+					node->currentSoundID = static_cast<SfxId>(*(node->sequencePtr + 1));
 					S_StartSoundAtVolume(node->mobj, node->currentSoundID,
 						node->volume, false, 0);
 				}
 				node->sequencePtr += 2;
 				break;
-			case SS_CMD_WAITUNTILDONE:
+			case SoundSeqCmd::WaitUntilDone:
 				if(!sndPlaying)
 				{
 					node->sequencePtr++;
-					node->currentSoundID = 0;
+					node->currentSoundID = SfxId::None;
 				}
 				break;
-			case SS_CMD_PLAYREPEAT:
+			case SoundSeqCmd::PlayRepeat:
 				if(!sndPlaying)
 				{
-					node->currentSoundID = *(node->sequencePtr + 1);
+					node->currentSoundID = static_cast<SfxId>(*(node->sequencePtr + 1));
 					S_StartSoundAtVolume(node->mobj, node->currentSoundID,
 						node->volume, false, 0);
 				}
 				break;
-			case SS_CMD_DELAY:
+			case SoundSeqCmd::Delay:
 				node->delayTics = *(node->sequencePtr + 1);
 				node->sequencePtr += 2;
-				node->currentSoundID = 0;
+				node->currentSoundID = SfxId::None;
 				break;
-			case SS_CMD_DELAYRAND:
+			case SoundSeqCmd::DelayRand:
 				node->delayTics = *(node->sequencePtr + 1) +
 					M_Random() % (*(node->sequencePtr + 2) -
 						*(node->sequencePtr + 1));
 				node->sequencePtr += 2;
-				node->currentSoundID = 0;
+				node->currentSoundID = SfxId::None;
 				break;
-			case SS_CMD_VOLUME:
+			case SoundSeqCmd::Volume:
 				node->volume = (127 * (*(node->sequencePtr + 1))) / 100;
 				node->sequencePtr += 2;
 				break;
-			case SS_CMD_STOPSOUND:
+			case SoundSeqCmd::StopSound:
 				// Wait until something else stops the sequence
 				break;
-			case SS_CMD_END:
+			case SoundSeqCmd::End:
 				SN_StopSequence(node->mobj);
 				break;
 			default:
@@ -435,7 +435,7 @@ void SN_StopAllSequences()
 	for(node = SequenceListHead; node; node = next_node)
 	{
 		next_node = node->next;
-		node->stopSound = 0; // don't play any stop sounds
+		node->stopSound = SfxId::None; // don't play any stop sounds
 		SN_StopSequence(node->mobj);
 	}
 }
@@ -447,7 +447,7 @@ int SN_GetSequenceOffset(int sequence, int* sequencePtr)
 }
 
 void SN_ChangeNodeData(int nodeNum, int seqOffset, int delayTics, int volume,
-	int currentSoundID)
+	SfxId currentSoundID)
 {
 	int i;
 	seqnode_t* node;

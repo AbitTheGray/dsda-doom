@@ -5,6 +5,8 @@
  */
 
 // We are referring to sprite numbers.
+#include <utility>
+
 #include "doomtype.hpp"
 #include "info.hpp"
 
@@ -23,121 +25,121 @@
 //  atkstate, i.e. attack/fire/hit frame
 //  flashstate, muzzle flash
 //
-weaponinfo_t doom_weaponinfo[NUMWEAPONS + 2] =
+weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 {
 	{
 		// fist
-		am_noammo,
-		S_PUNCHUP,
-		S_PUNCHDOWN,
-		S_PUNCH,
-		S_PUNCH1,
-		MT_NULL,
-		S_NULL,
+		AmmoType::NoAmmo,
+		StateId::Punchup,
+		StateId::Punchdown,
+		StateId::Punch,
+		StateId::Punch1,
+		static_cast<StateId>(-1), // upstream wrote MT_NULL here, not a state id //TODO Check correctness
+		StateId::Null,
 		1,
 		0,
 		WPF_FLEEMELEE | WPF_AUTOSWITCHFROM | WPF_NOAUTOSWITCHTO
 	},
 	{
 		// pistol
-		am_clip,
-		S_PISTOLUP,
-		S_PISTOLDOWN,
-		S_PISTOL,
-		S_PISTOL1,
-		S_NULL,
-		S_PISTOLFLASH,
+		AmmoType::Clip,
+		StateId::Pistolup,
+		StateId::Pistoldown,
+		StateId::Pistol,
+		StateId::Pistol1,
+		StateId::Null,
+		StateId::Pistolflash,
 		1,
 		0,
 		WPF_AUTOSWITCHFROM
 	},
 	{
 		// shotgun
-		am_shell,
-		S_SGUNUP,
-		S_SGUNDOWN,
-		S_SGUN,
-		S_SGUN1,
-		S_NULL,
-		S_SGUNFLASH1,
+		AmmoType::Shell,
+		StateId::Sgunup,
+		StateId::Sgundown,
+		StateId::Sgun,
+		StateId::Sgun1,
+		StateId::Null,
+		StateId::Sgunflash1,
 		1,
 		0,
 		WPF_NOFLAG
 	},
 	{
 		// chaingun
-		am_clip,
-		S_CHAINUP,
-		S_CHAINDOWN,
-		S_CHAIN,
-		S_CHAIN1,
-		S_NULL,
-		S_CHAINFLASH1,
+		AmmoType::Clip,
+		StateId::Chainup,
+		StateId::Chaindown,
+		StateId::Chain,
+		StateId::Chain1,
+		StateId::Null,
+		StateId::Chainflash1,
 		1,
 		0,
 		WPF_NOFLAG
 	},
 	{
 		// missile launcher
-		am_misl,
-		S_MISSILEUP,
-		S_MISSILEDOWN,
-		S_MISSILE,
-		S_MISSILE1,
-		S_NULL,
-		S_MISSILEFLASH1,
+		AmmoType::Misl,
+		StateId::Missileup,
+		StateId::Missiledown,
+		StateId::Missile,
+		StateId::Missile1,
+		StateId::Null,
+		StateId::Missileflash1,
 		1,
 		0,
 		WPF_NOAUTOFIRE
 	},
 	{
 		// plasma rifle
-		am_cell,
-		S_PLASMAUP,
-		S_PLASMADOWN,
-		S_PLASMA,
-		S_PLASMA1,
-		S_NULL,
-		S_PLASMAFLASH1,
+		AmmoType::Cell,
+		StateId::Plasmaup,
+		StateId::Plasmadown,
+		StateId::Plasma,
+		StateId::Plasma1,
+		StateId::Null,
+		StateId::Plasmaflash1,
 		1,
 		0,
 		WPF_NOFLAG
 	},
 	{
 		// bfg 9000
-		am_cell,
-		S_BFGUP,
-		S_BFGDOWN,
-		S_BFG,
-		S_BFG1,
-		S_NULL,
-		S_BFGFLASH1,
+		AmmoType::Cell,
+		StateId::Bfgup,
+		StateId::Bfgdown,
+		StateId::Bfg,
+		StateId::Bfg1,
+		StateId::Null,
+		StateId::Bfgflash1,
 		40,
 		0,
 		WPF_NOAUTOFIRE
 	},
 	{
 		// chainsaw
-		am_noammo,
-		S_SAWUP,
-		S_SAWDOWN,
-		S_SAW,
-		S_SAW1,
-		S_NULL,
-		S_NULL,
+		AmmoType::NoAmmo,
+		StateId::Sawup,
+		StateId::Sawdown,
+		StateId::Saw,
+		StateId::Saw1,
+		StateId::Null,
+		StateId::Null,
 		1,
 		0,
 		WPF_NOTHRUST | WPF_FLEEMELEE | WPF_NOAUTOSWITCHTO
 	},
 	{
 		// super shotgun
-		am_shell,
-		S_DSGUNUP,
-		S_DSGUNDOWN,
-		S_DSGUN,
-		S_DSGUN1,
-		S_NULL,
-		S_DSGUNFLASH1,
+		AmmoType::Shell,
+		StateId::Dsgunup,
+		StateId::Dsgundown,
+		StateId::Dsgun,
+		StateId::Dsgun1,
+		StateId::Null,
+		StateId::Dsgunflash1,
 		2,
 		0,
 		WPF_NOFLAG
@@ -152,26 +154,26 @@ weaponinfo_t doom_weaponinfo[NUMWEAPONS + 2] =
 	// dseg03:00082E68                 dd 0                    ; istexture
 	{
 		// ololo weapon
-		ammotype_t{},
-		S_NULL, // states are not used for emulation of weaponinfo overrun
-		S_NULL,
-		S_NULL,
-		S_NULL,
-		S_NULL,
-		S_NULL,
+		AmmoType{},
+		StateId::Null, // states are not used for emulation of weaponinfo overrun
+		StateId::Null,
+		StateId::Null,
+		StateId::Null,
+		StateId::Null,
+		StateId::Null,
 		0,
 		0,
 		WPF_NOFLAG
 	},
 	{
 		// preved medved weapon
-		ammotype_t{},
-		S_NULL,
-		S_NULL,
-		S_NULL,
-		S_NULL,
-		S_NULL,
-		S_NULL,
+		AmmoType{},
+		StateId::Null,
+		StateId::Null,
+		StateId::Null,
+		StateId::Null,
+		StateId::Null,
+		StateId::Null,
 		0,
 		0,
 		WPF_NOFLAG
@@ -182,240 +184,240 @@ weaponinfo_t doom_weaponinfo[NUMWEAPONS + 2] =
 
 #include "heretic/def.hpp"
 
-weaponinfo_t wpnlev1info[NUMWEAPONS] = {
+weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 	{
 		// Staff
-		am_noammo,             // ammo
-		HERETIC_S_STAFFUP,     // upstate
-		HERETIC_S_STAFFDOWN,   // downstate
-		HERETIC_S_STAFFREADY,  // readystate
-		HERETIC_S_STAFFATK1_1, // atkstate
-		HERETIC_S_STAFFATK1_1, // holdatkstate
-		HERETIC_S_NULL,        // flashstate
+		AmmoType::NoAmmo,             // ammo
+		StateId::HereticStaffup,     // upstate
+		StateId::HereticStaffdown,   // downstate
+		StateId::HereticStaffready,  // readystate
+		StateId::HereticStaffatk11, // atkstate
+		StateId::HereticStaffatk11, // holdatkstate
+		StateId::HereticNull,        // flashstate
 		0,                     // ammopershot
 		0,                     // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Gold wand
-		am_goldwand,              // ammo
-		HERETIC_S_GOLDWANDUP,     // upstate
-		HERETIC_S_GOLDWANDDOWN,   // downstate
-		HERETIC_S_GOLDWANDREADY,  // readystate
-		HERETIC_S_GOLDWANDATK1_1, // atkstate
-		HERETIC_S_GOLDWANDATK1_1, // holdatkstate
-		HERETIC_S_NULL,           // flashstate
+		AmmoType::GoldWand,              // ammo
+		StateId::HereticGoldwandup,     // upstate
+		StateId::HereticGoldwanddown,   // downstate
+		StateId::HereticGoldwandready,  // readystate
+		StateId::HereticGoldwandatk11, // atkstate
+		StateId::HereticGoldwandatk11, // holdatkstate
+		StateId::HereticNull,           // flashstate
 		USE_GWND_AMMO_1,          // ammopershot
 		0,                        // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Crossbow
-		am_crossbow,           // ammo
-		HERETIC_S_CRBOWUP,     // upstate
-		HERETIC_S_CRBOWDOWN,   // downstate
-		HERETIC_S_CRBOW1,      // readystate
-		HERETIC_S_CRBOWATK1_1, // atkstate
-		HERETIC_S_CRBOWATK1_1, // holdatkstate
-		HERETIC_S_NULL,        // flashstate
+		AmmoType::Crossbow,           // ammo
+		StateId::HereticCrbowup,     // upstate
+		StateId::HereticCrbowdown,   // downstate
+		StateId::HereticCrbow1,      // readystate
+		StateId::HereticCrbowatk11, // atkstate
+		StateId::HereticCrbowatk11, // holdatkstate
+		StateId::HereticNull,        // flashstate
 		USE_CBOW_AMMO_1,       // ammopershot
 		0,                     // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Blaster
-		am_blaster,              // ammo
-		HERETIC_S_BLASTERUP,     // upstate
-		HERETIC_S_BLASTERDOWN,   // downstate
-		HERETIC_S_BLASTERREADY,  // readystate
-		HERETIC_S_BLASTERATK1_1, // atkstate
-		HERETIC_S_BLASTERATK1_3, // holdatkstate
-		HERETIC_S_NULL,          // flashstate
+		AmmoType::Blaster,              // ammo
+		StateId::HereticBlasterup,     // upstate
+		StateId::HereticBlasterdown,   // downstate
+		StateId::HereticBlasterready,  // readystate
+		StateId::HereticBlasteratk11, // atkstate
+		StateId::HereticBlasteratk13, // holdatkstate
+		StateId::HereticNull,          // flashstate
 		USE_BLSR_AMMO_1,         // ammopershot
 		0,                       // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Skull rod
-		am_skullrod,             // ammo
-		HERETIC_S_HORNRODUP,     // upstate
-		HERETIC_S_HORNRODDOWN,   // downstate
-		HERETIC_S_HORNRODREADY,  // readystae
-		HERETIC_S_HORNRODATK1_1, // atkstate
-		HERETIC_S_HORNRODATK1_1, // holdatkstate
-		HERETIC_S_NULL,          // flashstate
+		AmmoType::SkullRod,             // ammo
+		StateId::HereticHornrodup,     // upstate
+		StateId::HereticHornroddown,   // downstate
+		StateId::HereticHornrodready,  // readystae
+		StateId::HereticHornrodatk11, // atkstate
+		StateId::HereticHornrodatk11, // holdatkstate
+		StateId::HereticNull,          // flashstate
 		USE_SKRD_AMMO_1,         // ammopershot
 		0,                       // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Phoenix rod
-		am_phoenixrod,           // ammo
-		HERETIC_S_PHOENIXUP,     // upstate
-		HERETIC_S_PHOENIXDOWN,   // downstate
-		HERETIC_S_PHOENIXREADY,  // readystate
-		HERETIC_S_PHOENIXATK1_1, // atkstate
-		HERETIC_S_PHOENIXATK1_1, // holdatkstate
-		HERETIC_S_NULL,          // flashstate
+		AmmoType::PhoenixRod,           // ammo
+		StateId::HereticPhoenixup,     // upstate
+		StateId::HereticPhoenixdown,   // downstate
+		StateId::HereticPhoenixready,  // readystate
+		StateId::HereticPhoenixatk11, // atkstate
+		StateId::HereticPhoenixatk11, // holdatkstate
+		StateId::HereticNull,          // flashstate
 		USE_PHRD_AMMO_1,         // ammopershot
 		0,                       // intflags
 		WPF_NOAUTOFIRE
 	},
 	{
 		// Mace
-		am_mace,              // ammo
-		HERETIC_S_MACEUP,     // upstate
-		HERETIC_S_MACEDOWN,   // downstate
-		HERETIC_S_MACEREADY,  // readystate
-		HERETIC_S_MACEATK1_1, // atkstate
-		HERETIC_S_MACEATK1_2, // holdatkstate
-		HERETIC_S_NULL,       // flashstate
+		AmmoType::Mace,              // ammo
+		StateId::HereticMaceup,     // upstate
+		StateId::HereticMacedown,   // downstate
+		StateId::HereticMaceready,  // readystate
+		StateId::HereticMaceatk11, // atkstate
+		StateId::HereticMaceatk12, // holdatkstate
+		StateId::HereticNull,       // flashstate
 		USE_MACE_AMMO_1,      // ammopershot
 		0,                    // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Gauntlets
-		am_noammo,                // ammo
-		HERETIC_S_GAUNTLETUP,     // upstate
-		HERETIC_S_GAUNTLETDOWN,   // downstate
-		HERETIC_S_GAUNTLETREADY,  // readystate
-		HERETIC_S_GAUNTLETATK1_1, // atkstate
-		HERETIC_S_GAUNTLETATK1_3, // holdatkstate
-		HERETIC_S_NULL,           // flashstate
+		AmmoType::NoAmmo,                // ammo
+		StateId::HereticGauntletup,     // upstate
+		StateId::HereticGauntletdown,   // downstate
+		StateId::HereticGauntletready,  // readystate
+		StateId::HereticGauntletatk11, // atkstate
+		StateId::HereticGauntletatk13, // holdatkstate
+		StateId::HereticNull,           // flashstate
 		0,                        // ammopershot
 		0,                        // intflags
 		WPF_NOTHRUST
 	},
 	{
 		// Beak
-		am_noammo,            // ammo
-		HERETIC_S_BEAKUP,     // upstate
-		HERETIC_S_BEAKDOWN,   // downstate
-		HERETIC_S_BEAKREADY,  // readystate
-		HERETIC_S_BEAKATK1_1, // atkstate
-		HERETIC_S_BEAKATK1_1, // holdatkstate
-		HERETIC_S_NULL,       // flashstate
+		AmmoType::NoAmmo,            // ammo
+		StateId::HereticBeakup,     // upstate
+		StateId::HereticBeakdown,   // downstate
+		StateId::HereticBeakready,  // readystate
+		StateId::HereticBeakatk11, // atkstate
+		StateId::HereticBeakatk11, // holdatkstate
+		StateId::HereticNull,       // flashstate
 		0,                    // ammopershot
 		0,                    // intflags
 		WPF_NOFLAG
 	}
 };
 
-weaponinfo_t wpnlev2info[NUMWEAPONS] = {
+weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 	{
 		// Staff
-		am_noammo,               // ammo
-		HERETIC_S_STAFFUP2,      // upstate
-		HERETIC_S_STAFFDOWN2,    // downstate
-		HERETIC_S_STAFFREADY2_1, // readystate
-		HERETIC_S_STAFFATK2_1,   // atkstate
-		HERETIC_S_STAFFATK2_1,   // holdatkstate
-		HERETIC_S_NULL,          // flashstate
+		AmmoType::NoAmmo,               // ammo
+		StateId::HereticStaffup2,      // upstate
+		StateId::HereticStaffdown2,    // downstate
+		StateId::HereticStaffready21, // readystate
+		StateId::HereticStaffatk21,   // atkstate
+		StateId::HereticStaffatk21,   // holdatkstate
+		StateId::HereticNull,          // flashstate
 		0,                       // ammopershot
 		0,                       // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Gold wand
-		am_goldwand,              // ammo
-		HERETIC_S_GOLDWANDUP,     // upstate
-		HERETIC_S_GOLDWANDDOWN,   // downstate
-		HERETIC_S_GOLDWANDREADY,  // readystate
-		HERETIC_S_GOLDWANDATK2_1, // atkstate
-		HERETIC_S_GOLDWANDATK2_1, // holdatkstate
-		HERETIC_S_NULL,           // flashstate
+		AmmoType::GoldWand,              // ammo
+		StateId::HereticGoldwandup,     // upstate
+		StateId::HereticGoldwanddown,   // downstate
+		StateId::HereticGoldwandready,  // readystate
+		StateId::HereticGoldwandatk21, // atkstate
+		StateId::HereticGoldwandatk21, // holdatkstate
+		StateId::HereticNull,           // flashstate
 		USE_GWND_AMMO_2,          // ammopershot
 		0,                        // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Crossbow
-		am_crossbow,           // ammo
-		HERETIC_S_CRBOWUP,     // upstate
-		HERETIC_S_CRBOWDOWN,   // downstate
-		HERETIC_S_CRBOW1,      // readystate
-		HERETIC_S_CRBOWATK2_1, // atkstate
-		HERETIC_S_CRBOWATK2_1, // holdatkstate
-		HERETIC_S_NULL,        // flashstate
+		AmmoType::Crossbow,           // ammo
+		StateId::HereticCrbowup,     // upstate
+		StateId::HereticCrbowdown,   // downstate
+		StateId::HereticCrbow1,      // readystate
+		StateId::HereticCrbowatk21, // atkstate
+		StateId::HereticCrbowatk21, // holdatkstate
+		StateId::HereticNull,        // flashstate
 		USE_CBOW_AMMO_2,       // ammopershot
 		0,                     // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Blaster
-		am_blaster,              // ammo
-		HERETIC_S_BLASTERUP,     // upstate
-		HERETIC_S_BLASTERDOWN,   // downstate
-		HERETIC_S_BLASTERREADY,  // readystate
-		HERETIC_S_BLASTERATK2_1, // atkstate
-		HERETIC_S_BLASTERATK2_3, // holdatkstate
-		HERETIC_S_NULL,          // flashstate
+		AmmoType::Blaster,              // ammo
+		StateId::HereticBlasterup,     // upstate
+		StateId::HereticBlasterdown,   // downstate
+		StateId::HereticBlasterready,  // readystate
+		StateId::HereticBlasteratk21, // atkstate
+		StateId::HereticBlasteratk23, // holdatkstate
+		StateId::HereticNull,          // flashstate
 		USE_BLSR_AMMO_2,         // ammopershot
 		0,                       // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Skull rod
-		am_skullrod,             // ammo
-		HERETIC_S_HORNRODUP,     // upstate
-		HERETIC_S_HORNRODDOWN,   // downstate
-		HERETIC_S_HORNRODREADY,  // readystae
-		HERETIC_S_HORNRODATK2_1, // atkstate
-		HERETIC_S_HORNRODATK2_1, // holdatkstate
-		HERETIC_S_NULL,          // flashstate
+		AmmoType::SkullRod,             // ammo
+		StateId::HereticHornrodup,     // upstate
+		StateId::HereticHornroddown,   // downstate
+		StateId::HereticHornrodready,  // readystae
+		StateId::HereticHornrodatk21, // atkstate
+		StateId::HereticHornrodatk21, // holdatkstate
+		StateId::HereticNull,          // flashstate
 		USE_SKRD_AMMO_2,         // ammopershot
 		0,                       // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Phoenix rod
-		am_phoenixrod,           // ammo
-		HERETIC_S_PHOENIXUP,     // upstate
-		HERETIC_S_PHOENIXDOWN,   // downstate
-		HERETIC_S_PHOENIXREADY,  // readystate
-		HERETIC_S_PHOENIXATK2_1, // atkstate
-		HERETIC_S_PHOENIXATK2_2, // holdatkstate
-		HERETIC_S_NULL,          // flashstate
+		AmmoType::PhoenixRod,           // ammo
+		StateId::HereticPhoenixup,     // upstate
+		StateId::HereticPhoenixdown,   // downstate
+		StateId::HereticPhoenixready,  // readystate
+		StateId::HereticPhoenixatk21, // atkstate
+		StateId::HereticPhoenixatk22, // holdatkstate
+		StateId::HereticNull,          // flashstate
 		USE_PHRD_AMMO_2,         // ammopershot
 		0,                       // intflags
 		WPF_NOAUTOFIRE
 	},
 	{
 		// Mace
-		am_mace,              // ammo
-		HERETIC_S_MACEUP,     // upstate
-		HERETIC_S_MACEDOWN,   // downstate
-		HERETIC_S_MACEREADY,  // readystate
-		HERETIC_S_MACEATK2_1, // atkstate
-		HERETIC_S_MACEATK2_1, // holdatkstate
-		HERETIC_S_NULL,       // flashstate
+		AmmoType::Mace,              // ammo
+		StateId::HereticMaceup,     // upstate
+		StateId::HereticMacedown,   // downstate
+		StateId::HereticMaceready,  // readystate
+		StateId::HereticMaceatk21, // atkstate
+		StateId::HereticMaceatk21, // holdatkstate
+		StateId::HereticNull,       // flashstate
 		USE_MACE_AMMO_2,      // ammopershot
 		0,                    // intflags
 		WPF_NOFLAG
 	},
 	{
 		// Gauntlets
-		am_noammo,                  // ammo
-		HERETIC_S_GAUNTLETUP2,      // upstate
-		HERETIC_S_GAUNTLETDOWN2,    // downstate
-		HERETIC_S_GAUNTLETREADY2_1, // readystate
-		HERETIC_S_GAUNTLETATK2_1,   // atkstate
-		HERETIC_S_GAUNTLETATK2_3,   // holdatkstate
-		HERETIC_S_NULL,             // flashstate
+		AmmoType::NoAmmo,                  // ammo
+		StateId::HereticGauntletup2,      // upstate
+		StateId::HereticGauntletdown2,    // downstate
+		StateId::HereticGauntletready21, // readystate
+		StateId::HereticGauntletatk21,   // atkstate
+		StateId::HereticGauntletatk23,   // holdatkstate
+		StateId::HereticNull,             // flashstate
 		0,                          // ammopershot
 		0,                          // intflags
 		WPF_NOTHRUST
 	},
 	{
 		// Beak
-		am_noammo,            // ammo
-		HERETIC_S_BEAKUP,     // upstate
-		HERETIC_S_BEAKDOWN,   // downstate
-		HERETIC_S_BEAKREADY,  // readystate
-		HERETIC_S_BEAKATK2_1, // atkstate
-		HERETIC_S_BEAKATK2_1, // holdatkstate
-		HERETIC_S_NULL,       // flashstate
+		AmmoType::NoAmmo,            // ammo
+		StateId::HereticBeakup,     // upstate
+		StateId::HereticBeakdown,   // downstate
+		StateId::HereticBeakready,  // readystate
+		StateId::HereticBeakatk21, // atkstate
+		StateId::HereticBeakatk21, // holdatkstate
+		StateId::HereticNull,       // flashstate
 		0,                    // ammopershot
 		0,                    // intflags
 		WPF_NOFLAG
@@ -424,57 +426,57 @@ weaponinfo_t wpnlev2info[NUMWEAPONS] = {
 
 // hexen
 
-weaponinfo_t hexen_weaponinfo[HEXEN_NUMWEAPONS][NUMCLASSES] = {
+weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::to_underlying(PClass::Count)] = {
 	{
 		// First Weapons
-		[PCLASS_FIGHTER] = {
+		[std::to_underlying(PClass::Fighter)] = {
 			// Fighter First Weapon - Punch
-			MANA_NONE,           // mana
-			HEXEN_S_PUNCHUP,     // upstate
-			HEXEN_S_PUNCHDOWN,   // downstate
-			HEXEN_S_PUNCHREADY,  // readystate
-			HEXEN_S_PUNCHATK1_1, // atkstate
-			HEXEN_S_PUNCHATK1_1, // holdatkstate
-			HEXEN_S_NULL,        // flashstate
+			AmmoType::ManaNone,           // mana
+			StateId::HexenPunchup,     // upstate
+			StateId::HexenPunchdown,   // downstate
+			StateId::HexenPunchready,  // readystate
+			StateId::HexenPunchatk11, // atkstate
+			StateId::HexenPunchatk11, // holdatkstate
+			StateId::HexenNull,        // flashstate
 			0,                   // ammopershot
 			0,                   // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Cleric First Weapon - Mace
-			MANA_NONE,          // mana
-			HEXEN_S_CMACEUP,    // upstate
-			HEXEN_S_CMACEDOWN,  // downstate
-			HEXEN_S_CMACEREADY, // readystate
-			HEXEN_S_CMACEATK_1, // atkstate
-			HEXEN_S_CMACEATK_1, // holdatkstate
-			HEXEN_S_NULL,       // flashstate
+			AmmoType::ManaNone,          // mana
+			StateId::HexenCmaceup,    // upstate
+			StateId::HexenCmacedown,  // downstate
+			StateId::HexenCmaceready, // readystate
+			StateId::HexenCmaceatk1, // atkstate
+			StateId::HexenCmaceatk1, // holdatkstate
+			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			0,                  // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Mage First Weapon - Wand
-			MANA_NONE,
-			HEXEN_S_MWANDUP,    // upstate
-			HEXEN_S_MWANDDOWN,  // downstate
-			HEXEN_S_MWANDREADY, // readystate
-			HEXEN_S_MWANDATK_1, // atkstate
-			HEXEN_S_MWANDATK_1, // holdatkstate
-			HEXEN_S_NULL,       // flashstate
+			AmmoType::ManaNone,
+			StateId::HexenMwandup,    // upstate
+			StateId::HexenMwanddown,  // downstate
+			StateId::HexenMwandready, // readystate
+			StateId::HexenMwandatk1, // atkstate
+			StateId::HexenMwandatk1, // holdatkstate
+			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			0,                  // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Pig - Snout
-			MANA_NONE,          // mana
-			HEXEN_S_SNOUTUP,    // upstate
-			HEXEN_S_SNOUTDOWN,  // downstate
-			HEXEN_S_SNOUTREADY, // readystate
-			HEXEN_S_SNOUTATK1,  // atkstate
-			HEXEN_S_SNOUTATK1,  // holdatkstate
-			HEXEN_S_NULL,       // flashstate
+			AmmoType::ManaNone,          // mana
+			StateId::HexenSnoutup,    // upstate
+			StateId::HexenSnoutdown,  // downstate
+			StateId::HexenSnoutready, // readystate
+			StateId::HexenSnoutatk1,  // atkstate
+			StateId::HexenSnoutatk1,  // holdatkstate
+			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			0,                  // intflags
 			WPF_NOFLAG
@@ -482,54 +484,54 @@ weaponinfo_t hexen_weaponinfo[HEXEN_NUMWEAPONS][NUMCLASSES] = {
 	},
 	{
 		// Second Weapons
-		[PCLASS_FIGHTER] = {
+		[std::to_underlying(PClass::Fighter)] = {
 			// Fighter - Axe
-			MANA_NONE,         // mana
-			HEXEN_S_FAXEUP,    // upstate
-			HEXEN_S_FAXEDOWN,  // downstate
-			HEXEN_S_FAXEREADY, // readystate
-			HEXEN_S_FAXEATK_1, // atkstate
-			HEXEN_S_FAXEATK_1, // holdatkstate
-			HEXEN_S_NULL,      // flashstate
+			AmmoType::ManaNone,         // mana
+			StateId::HexenFaxeup,    // upstate
+			StateId::HexenFaxedown,  // downstate
+			StateId::HexenFaxeready, // readystate
+			StateId::HexenFaxeatk1, // atkstate
+			StateId::HexenFaxeatk1, // holdatkstate
+			StateId::HexenNull,      // flashstate
 			2,                 // ammopershot
 			0,                 // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Cleric - Serpent Staff
-			MANA_1,              // mana
-			HEXEN_S_CSTAFFUP,    // upstate
-			HEXEN_S_CSTAFFDOWN,  // downstate
-			HEXEN_S_CSTAFFREADY, // readystate
-			HEXEN_S_CSTAFFATK_1, // atkstate
-			HEXEN_S_CSTAFFATK_1, // holdatkstate
-			HEXEN_S_NULL,        // flashstate
+			AmmoType::Mana1,              // mana
+			StateId::HexenCstaffup,    // upstate
+			StateId::HexenCstaffdown,  // downstate
+			StateId::HexenCstaffready, // readystate
+			StateId::HexenCstaffatk1, // atkstate
+			StateId::HexenCstaffatk1, // holdatkstate
+			StateId::HexenNull,        // flashstate
 			1,                   // ammopershot
 			0,                   // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Mage - Cone of shards
-			MANA_1,             // mana
-			HEXEN_S_CONEUP,     // upstate
-			HEXEN_S_CONEDOWN,   // downstate
-			HEXEN_S_CONEREADY,  // readystate
-			HEXEN_S_CONEATK1_1, // atkstate
-			HEXEN_S_CONEATK1_3, // holdatkstate
-			HEXEN_S_NULL,       // flashstate
+			AmmoType::Mana1,             // mana
+			StateId::HexenConeup,     // upstate
+			StateId::HexenConedown,   // downstate
+			StateId::HexenConeready,  // readystate
+			StateId::HexenConeatk11, // atkstate
+			StateId::HexenConeatk13, // holdatkstate
+			StateId::HexenNull,       // flashstate
 			3,                  // ammopershot
 			0,                  // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Pig - Snout
-			MANA_NONE,          // mana
-			HEXEN_S_SNOUTUP,    // upstate
-			HEXEN_S_SNOUTDOWN,  // downstate
-			HEXEN_S_SNOUTREADY, // readystate
-			HEXEN_S_SNOUTATK1,  // atkstate
-			HEXEN_S_SNOUTATK1,  // holdatkstate
-			HEXEN_S_NULL,       // flashstate
+			AmmoType::ManaNone,          // mana
+			StateId::HexenSnoutup,    // upstate
+			StateId::HexenSnoutdown,  // downstate
+			StateId::HexenSnoutready, // readystate
+			StateId::HexenSnoutatk1,  // atkstate
+			StateId::HexenSnoutatk1,  // holdatkstate
+			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			0,                  // intflags
 			WPF_NOFLAG
@@ -537,54 +539,54 @@ weaponinfo_t hexen_weaponinfo[HEXEN_NUMWEAPONS][NUMCLASSES] = {
 	},
 	{
 		// Third Weapons
-		[PCLASS_FIGHTER] = {
+		[std::to_underlying(PClass::Fighter)] = {
 			// Fighter - Hammer
-			MANA_NONE,            // mana
-			HEXEN_S_FHAMMERUP,    // upstate
-			HEXEN_S_FHAMMERDOWN,  // downstate
-			HEXEN_S_FHAMMERREADY, // readystate
-			HEXEN_S_FHAMMERATK_1, // atkstate
-			HEXEN_S_FHAMMERATK_1, // holdatkstate
-			HEXEN_S_NULL,         // flashstate
+			AmmoType::ManaNone,            // mana
+			StateId::HexenFhammerup,    // upstate
+			StateId::HexenFhammerdown,  // downstate
+			StateId::HexenFhammerready, // readystate
+			StateId::HexenFhammeratk1, // atkstate
+			StateId::HexenFhammeratk1, // holdatkstate
+			StateId::HexenNull,         // flashstate
 			3,                    // ammopershot
 			0,                    // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Cleric - Flame Strike
-			MANA_2,               // mana
-			HEXEN_S_CFLAMEUP,     // upstate
-			HEXEN_S_CFLAMEDOWN,   // downstate
-			HEXEN_S_CFLAMEREADY1, // readystate
-			HEXEN_S_CFLAMEATK_1,  // atkstate
-			HEXEN_S_CFLAMEATK_1,  // holdatkstate
-			HEXEN_S_NULL,         // flashstate
+			AmmoType::Mana2,               // mana
+			StateId::HexenCflameup,     // upstate
+			StateId::HexenCflamedown,   // downstate
+			StateId::HexenCflameready1, // readystate
+			StateId::HexenCflameatk1,  // atkstate
+			StateId::HexenCflameatk1,  // holdatkstate
+			StateId::HexenNull,         // flashstate
 			4,                    // ammopershot
 			0,                    // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Mage - Lightning
-			MANA_2,                  // mana
-			HEXEN_S_MLIGHTNINGUP,    // upstate
-			HEXEN_S_MLIGHTNINGDOWN,  // downstate
-			HEXEN_S_MLIGHTNINGREADY, // readystate
-			HEXEN_S_MLIGHTNINGATK_1, // atkstate
-			HEXEN_S_MLIGHTNINGATK_1, // holdatkstate
-			HEXEN_S_NULL,            // flashstate
+			AmmoType::Mana2,                  // mana
+			StateId::HexenMlightningup,    // upstate
+			StateId::HexenMlightningdown,  // downstate
+			StateId::HexenMlightningready, // readystate
+			StateId::HexenMlightningatk1, // atkstate
+			StateId::HexenMlightningatk1, // holdatkstate
+			StateId::HexenNull,            // flashstate
 			5,                       // ammopershot
 			0,                       // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Pig - Snout
-			MANA_NONE,          // mana
-			HEXEN_S_SNOUTUP,    // upstate
-			HEXEN_S_SNOUTDOWN,  // downstate
-			HEXEN_S_SNOUTREADY, // readystate
-			HEXEN_S_SNOUTATK1,  // atkstate
-			HEXEN_S_SNOUTATK1,  // holdatkstate
-			HEXEN_S_NULL,       // flashstate
+			AmmoType::ManaNone,          // mana
+			StateId::HexenSnoutup,    // upstate
+			StateId::HexenSnoutdown,  // downstate
+			StateId::HexenSnoutready, // readystate
+			StateId::HexenSnoutatk1,  // atkstate
+			StateId::HexenSnoutatk1,  // holdatkstate
+			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			0,                  // intflags
 			WPF_NOFLAG
@@ -592,54 +594,54 @@ weaponinfo_t hexen_weaponinfo[HEXEN_NUMWEAPONS][NUMCLASSES] = {
 	},
 	{
 		// Fourth Weapons
-		[PCLASS_FIGHTER] = {
+		[std::to_underlying(PClass::Fighter)] = {
 			// Fighter - Rune Sword
-			MANA_BOTH,           // mana
-			HEXEN_S_FSWORDUP,    // upstate
-			HEXEN_S_FSWORDDOWN,  // downstate
-			HEXEN_S_FSWORDREADY, // readystate
-			HEXEN_S_FSWORDATK_1, // atkstate
-			HEXEN_S_FSWORDATK_1, // holdatkstate
-			HEXEN_S_NULL,        // flashstate
+			AmmoType::ManaBoth,           // mana
+			StateId::HexenFswordup,    // upstate
+			StateId::HexenFsworddown,  // downstate
+			StateId::HexenFswordready, // readystate
+			StateId::HexenFswordatk1, // atkstate
+			StateId::HexenFswordatk1, // holdatkstate
+			StateId::HexenNull,        // flashstate
 			14,                  // ammopershot
 			0,                   // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Cleric - Holy Symbol
-			MANA_BOTH,          // mana
-			HEXEN_S_CHOLYUP,    // upstate
-			HEXEN_S_CHOLYDOWN,  // downstate
-			HEXEN_S_CHOLYREADY, // readystate
-			HEXEN_S_CHOLYATK_1, // atkstate
-			HEXEN_S_CHOLYATK_1, // holdatkstate
-			HEXEN_S_NULL,       // flashstate
+			AmmoType::ManaBoth,          // mana
+			StateId::HexenCholyup,    // upstate
+			StateId::HexenCholydown,  // downstate
+			StateId::HexenCholyready, // readystate
+			StateId::HexenCholyatk1, // atkstate
+			StateId::HexenCholyatk1, // holdatkstate
+			StateId::HexenNull,       // flashstate
 			18,                 // ammopershot
 			0,                  // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Mage - Staff
-			MANA_BOTH,           // mana
-			HEXEN_S_MSTAFFUP,    // upstate
-			HEXEN_S_MSTAFFDOWN,  // downstate
-			HEXEN_S_MSTAFFREADY, // readystate
-			HEXEN_S_MSTAFFATK_1, // atkstate
-			HEXEN_S_MSTAFFATK_1, // holdatkstate
-			HEXEN_S_NULL,        // flashstate
+			AmmoType::ManaBoth,           // mana
+			StateId::HexenMstaffup,    // upstate
+			StateId::HexenMstaffdown,  // downstate
+			StateId::HexenMstaffready, // readystate
+			StateId::HexenMstaffatk1, // atkstate
+			StateId::HexenMstaffatk1, // holdatkstate
+			StateId::HexenNull,        // flashstate
 			15,                  // ammopershot
 			0,                   // intflags
 			WPF_NOFLAG
 		},
 		{
 			// Pig - Snout
-			MANA_NONE,          // mana
-			HEXEN_S_SNOUTUP,    // upstate
-			HEXEN_S_SNOUTDOWN,  // downstate
-			HEXEN_S_SNOUTREADY, // readystate
-			HEXEN_S_SNOUTATK1,  // atkstate
-			HEXEN_S_SNOUTATK1,  // holdatkstate
-			HEXEN_S_NULL,       // flashstate
+			AmmoType::ManaNone,          // mana
+			StateId::HexenSnoutup,    // upstate
+			StateId::HexenSnoutdown,  // downstate
+			StateId::HexenSnoutready, // readystate
+			StateId::HexenSnoutatk1,  // atkstate
+			StateId::HexenSnoutatk1,  // holdatkstate
+			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			0,                  // intflags
 			WPF_NOFLAG

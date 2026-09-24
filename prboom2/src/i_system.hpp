@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "m_fixed.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -17,8 +19,6 @@ extern "C"
 #endif
 #include <windows.h>
 #endif
-
-#include "m_fixed.hpp"
 
 #ifdef _MSC_VER
 #define F_OK    0    /* Check for file existence */
@@ -81,17 +81,17 @@ int I_Filelength(int handle);
 // If run_if_error is true, the function is called if the exit
 // is due to an error (I_Error)
 
-typedef enum
+enum struct ExitPriority : int32_t
 {
-	exit_priority_first,
-	exit_priority_normal,
-	exit_priority_last,
-	exit_priority_max,
-} exit_priority_t;
+	First,
+	Normal,
+	Last,
+	Max,
+};
 
 typedef void (*atexit_func_t)();
 void I_AtExit(atexit_func_t func, dboolean run_if_error,
-	const char* name, exit_priority_t priority);
+	const char* name, ExitPriority priority);
 
 #ifdef __cplusplus
 }

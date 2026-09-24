@@ -25,7 +25,7 @@ typedef struct
 
 static local_component_t* local;
 
-void dsda_InitTrackerHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitTrackerHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	int i;
 
@@ -46,22 +46,22 @@ void dsda_UpdateTrackerHC(void* data)
 	{
 		switch(dsda_tracker[i].type)
 		{
-			case dsda_tracker_nothing:
+			case TrackerType::Nothing:
 				dsda_NullHC(local->component[i].msg, sizeof(local->component[i].msg));
 				break;
-			case dsda_tracker_line:
+			case TrackerType::Line:
 				dsda_LineTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id);
 				break;
-			case dsda_tracker_line_distance:
+			case TrackerType::LineDistance:
 				dsda_LineDistanceTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id);
 				break;
-			case dsda_tracker_sector:
+			case TrackerType::Sector:
 				dsda_SectorTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id);
 				break;
-			case dsda_tracker_mobj:
+			case TrackerType::Mobj:
 				dsda_MobjTrackerHC(local->component[i].msg, sizeof(local->component[i].msg), dsda_tracker[i].id, dsda_tracker[i].mobj);
 				break;
-			case dsda_tracker_player:
+			case TrackerType::Player:
 				dsda_PlayerTrackerHC(local->component[i].msg, sizeof(local->component[i].msg));
 				break;
 		}

@@ -2,19 +2,18 @@
 
 #pragma once
 
+#include "doomtype.hpp"
+#include "dstrings.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "doomtype.hpp"
-
 extern int inv_ptr;
 extern int curpos;
 extern int ArtifactFlash;
 extern dboolean inventory;
-
-#include "dstrings.hpp"
 
 #ifdef __cplusplus
 }

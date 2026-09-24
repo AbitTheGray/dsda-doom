@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "doomdef.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -13,16 +15,14 @@ extern "C"
 
 //#include "v_video.hpp"
 
-#include "doomdef.hpp"
-
 // States for the intermission
 
-typedef enum
+enum struct WiState : int32_t
 {
 	NoState = -1,
 	StatCount,
 	ShowNextLoc
-} stateenum_t;
+};
 
 // Called by main loop, animate the intermission.
 void WI_Ticker();

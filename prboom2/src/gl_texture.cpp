@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #ifdef HAVE_CONFIG_H
+#include <utility>
+
 #include "config.h"
 #endif
 
@@ -136,7 +138,7 @@ void* NewIntDynArray(int dimCount, int* dims)
 // There are 9 known values for player->fixedcolormap:
 // 0 (normal) -> 0; 1 (pw_infrared) -> 1; 2..7 -> 2..7 (heretic torch flicker);
 // 32 (pw_invulnerability) -> 8
-static void gld_GetTextureTexID(GLTexture* gltexture, int cm)
+static void gld_GetTextureTexID(GLTexture* gltexture, ColorRange cm)
 {
 	static int data[NUMCOLORMAPS + 1] = {
 		0, 1, 2, 3, 4, 5, 6, 7,
@@ -152,19 +154,19 @@ static void gld_GetTextureTexID(GLTexture* gltexture, int cm)
 	gltexture->player_cm = player_cm = data[frame_fixedcolormap];
 	assert(gltexture->player_cm != -1);
 
-	if(gltexture->flags & GLTEXTURE_INDEXED)
+	if((gltexture->flags & GLTextureFlag::Indexed) != GLTextureFlag{})
 	{
 		// Collapse indices that share the same texture contents in indexed mode
-		if(cm == CR_LIMIT)
-			cm = CR_DEFAULT;
+		if(cm == ColorRange::Limit)
+			cm = ColorRange::Default;
 		if(player_cm != INVULN_PLAYER_CM)
 		{
 			player_cm = 0;
 			bcm = 0;
 		}
 	}
-	gltexture->texflags_p = &gltexture->texflags[cm][player_cm];
-	gltexture->texid_p = &gltexture->glTexExID[cm][player_cm][bcm];
+	gltexture->texflags_p = &gltexture->texflags[std::to_underlying(cm)][player_cm];
+	gltexture->texid_p = &gltexture->glTexExID[std::to_underlying(cm)][player_cm][bcm];
 	return;
 }
 
@@ -184,11 +186,11 @@ static GLTexture* gld_AddNewGLTexItem(int num, int count, GLTexture*** items)
 	if(!(*items)[num])
 	{
 		(*items)[num] = static_cast<GLTexture*>(Z_Calloc(1, sizeof(GLTexture)));
-		(*items)[num]->textype = GLDT_UNREGISTERED;
+		(*items)[num]->textype = GLTexType::Unregistered;
 
 		{
 			GLTexture* texture = (*items)[num];
-			int dims[3] = {(CR_LIMIT + MAX_MAXPLAYERS), (PLAYERCOLORMAP_COUNT), numcolormaps};
+			int dims[3] = {(std::to_underlying(ColorRange::Limit) + MAX_MAXPLAYERS), (PLAYERCOLORMAP_COUNT), numcolormaps};
 			texture->glTexExID = static_cast<decltype(texture->glTexExID)>(NewIntDynArray(3, dims));
 		}
 	}
@@ -296,17 +298,17 @@ static void gld_AddPatchToTexture_UnTranslated(GLTexture* gltexture, unsigned ch
 		xe += (gltexture->realtexwidth - (xe + originx));
 
 	//e6y
-	if(patch->flags & PATCH_HASHOLES)
-		gltexture->flags |= GLTEXTURE_HASHOLES;
+	if((patch->flags & PatchFlag::HasHoles) != PatchFlag{})
+		gltexture->flags |= GLTextureFlag::HasHoles;
 
-	bpp = gltexture->flags & GLTEXTURE_INDEXED ? 2 : 4;
+	bpp = (gltexture->flags & GLTextureFlag::Indexed) != GLTextureFlag{} ? 2 : 4;
 
 	for(x = xs; x < xe; x++)
 	{
 #ifdef RANGECHECK
 		if(x >= patch->width)
 		{
-			lprintf(LO_ERROR, "gld_AddPatchToTexture_UnTranslated x>=patch->width (%i >= %i)\n", x, patch->width);
+			lprintf(OutputLevels::Error, "gld_AddPatchToTexture_UnTranslated x>=patch->width (%i >= %i)\n", x, patch->width);
 			return;
 		}
 #endif
@@ -332,18 +334,18 @@ static void gld_AddPatchToTexture_UnTranslated(GLTexture* gltexture, unsigned ch
 #ifdef RANGECHECK
 				if((pos + bpp) > gltexture->buffer_size)
 				{
-					lprintf(LO_ERROR, "gld_AddPatchToTexture_UnTranslated pos+bpp>size (%i > %i)\n", pos + bpp, gltexture->buffer_size);
+					lprintf(OutputLevels::Error, "gld_AddPatchToTexture_UnTranslated pos+bpp>size (%i > %i)\n", pos + bpp, gltexture->buffer_size);
 					return;
 				}
 #endif
-				if(gltexture->flags & GLTEXTURE_INDEXED)
+				if((gltexture->flags & GLTextureFlag::Indexed) != GLTextureFlag{})
 				{
 					// [XA] new indexed color mode: store the palette index in
 					// the R channel and get the colormap index in the shader.
 					buffer[pos] = gltexture->player_cm == INVULN_PLAYER_CM ? colormap[source[j]] : source[j];
 					buffer[pos + 1] = 255;
 				}
-				else if(use_boom_cm && !(comp[comp_skymap] && (gltexture->flags & GLTEXTURE_SKY)))
+				else if(use_boom_cm && !(comp[std::to_underlying(CompOption::SkyMap)] && (gltexture->flags & GLTextureFlag::Sky) != GLTextureFlag{}))
 				{
 					//e6y: Boom's color maps
 					buffer[pos + 0] = playpal[colormap[source[j]] * 3 + 0];
@@ -363,7 +365,7 @@ static void gld_AddPatchToTexture_UnTranslated(GLTexture* gltexture, unsigned ch
 	}
 }
 
-void gld_AddPatchToTexture(GLTexture* gltexture, unsigned char* buffer, const rpatch_t* patch, int originx, int originy, int cm)
+void gld_AddPatchToTexture(GLTexture* gltexture, unsigned char* buffer, const rpatch_t* patch, int originx, int originy, ColorRange cm)
 {
 	int x, y, j;
 	int xs, xe;
@@ -381,14 +383,14 @@ void gld_AddPatchToTexture(GLTexture* gltexture, unsigned char* buffer, const rp
 	if(!patch)
 		return;
 
-	if((cm == CR_DEFAULT) || (cm == CR_LIMIT))
+	if((cm == ColorRange::Default) || (cm == ColorRange::Limit))
 		outr = &colormaps[0][0];
-	else if(cm == CR_DARKEN)
+	else if(cm == ColorRange::Darken)
 		outr = &colormaps[0][256 * 15];
-	else if(cm < CR_LIMIT)
-		outr = colrngs[cm];
+	else if(cm < ColorRange::Limit)
+		outr = colrngs[std::to_underlying(cm)];
 	else
-		outr = translationtables + 256 * ((cm - CR_LIMIT) - 1);
+		outr = translationtables + 256 * ((std::to_underlying(cm) - std::to_underlying(ColorRange::Limit)) - 1);
 
 	playpal = V_GetPlaypal();
 	xs = 0;
@@ -403,17 +405,17 @@ void gld_AddPatchToTexture(GLTexture* gltexture, unsigned char* buffer, const rp
 		xe += (gltexture->realtexwidth - (xe + originx));
 
 	//e6y
-	if(patch->flags & PATCH_HASHOLES)
-		gltexture->flags |= GLTEXTURE_HASHOLES;
+	if((patch->flags & PatchFlag::HasHoles) != PatchFlag{})
+		gltexture->flags |= GLTextureFlag::HasHoles;
 
-	bpp = gltexture->flags & GLTEXTURE_INDEXED ? 2 : 4;
+	bpp = (gltexture->flags & GLTextureFlag::Indexed) != GLTextureFlag{} ? 2 : 4;
 
 	for(x = xs; x < xe; x++)
 	{
 #ifdef RANGECHECK
 		if(x >= patch->width)
 		{
-			lprintf(LO_ERROR, "gld_AddPatchToTexture x>=patch->width (%i >= %i)\n", x, patch->width);
+			lprintf(OutputLevels::Error, "gld_AddPatchToTexture x>=patch->width (%i >= %i)\n", x, patch->width);
 			return;
 		}
 #endif
@@ -439,12 +441,12 @@ void gld_AddPatchToTexture(GLTexture* gltexture, unsigned char* buffer, const rp
 #ifdef RANGECHECK
 				if((pos + bpp) > gltexture->buffer_size)
 				{
-					lprintf(LO_ERROR, "gld_AddPatchToTexture pos+bpp>size (%i > %i)\n", pos + bpp, gltexture->buffer_size);
+					lprintf(OutputLevels::Error, "gld_AddPatchToTexture pos+bpp>size (%i > %i)\n", pos + bpp, gltexture->buffer_size);
 					return;
 				}
 #endif
 				//e6y: Boom's color maps
-				if(gltexture->flags & GLTEXTURE_INDEXED)
+				if((gltexture->flags & GLTextureFlag::Indexed) != GLTextureFlag{})
 				{
 					// [XA] new indexed color mode
 					buffer[pos] = gltexture->player_cm == INVULN_PLAYER_CM ? colormap[outr[source[j]]] : outr[source[j]];
@@ -482,7 +484,7 @@ static void gld_AddRawToTexture(GLTexture* gltexture, unsigned char* buffer, con
 		return;
 	w = gltexture->realtexwidth;
 	playpal = V_GetPlaypal();
-	bpp = gltexture->flags & GLTEXTURE_INDEXED ? 2 : 4;
+	bpp = (gltexture->flags & GLTextureFlag::Indexed) != GLTextureFlag{} ? 2 : 4;
 	for(y = 0; y < gltexture->realtexheight; y++)
 	{
 		pos = bpp * (y * gltexture->buffer_width);
@@ -491,11 +493,11 @@ static void gld_AddRawToTexture(GLTexture* gltexture, unsigned char* buffer, con
 #ifdef RANGECHECK
 			if((pos + bpp) >= gltexture->buffer_size)
 			{
-				lprintf(LO_ERROR, "gld_AddRawToTexture pos+bpp>size (%i > %i)\n", pos + bpp, gltexture->buffer_size);
+				lprintf(OutputLevels::Error, "gld_AddRawToTexture pos+bpp>size (%i > %i)\n", pos + bpp, gltexture->buffer_size);
 				return;
 			}
 #endif
-			if(gltexture->flags & GLTEXTURE_INDEXED)
+			if((gltexture->flags & GLTextureFlag::Indexed) != GLTextureFlag{})
 			{
 				// [XA] new indexed color mode
 				buffer[pos] = gltexture->player_cm == INVULN_PLAYER_CM ? colormap[raw[y * w + x]] : raw[y * w + x];
@@ -546,7 +548,7 @@ static void gld_AddColormapToTexture(GLTexture* gltexture, unsigned char* buffer
 
 	// also yoink the gamma table and apply
 	// software gamma emulation to the texture.
-	gtlump = W_CheckNumForName2("GAMMATBL", ns_prboom);
+	gtlump = W_CheckNumForName2("GAMMATBL", LumpNamespace::Prboom);
 	gtable = (const byte*)W_LumpByNum(gtlump) + 256 * gamma_level;
 
 	// construct a colormap texture using the selected
@@ -559,7 +561,7 @@ static void gld_AddColormapToTexture(GLTexture* gltexture, unsigned char* buffer
 #ifdef RANGECHECK
 			if((pos + 3) >= gltexture->buffer_size)
 			{
-				lprintf(LO_ERROR, "gld_AddColormapToTexture pos+3>=size (%i >= %i)\n", pos + 3, gltexture->buffer_size);
+				lprintf(OutputLevels::Error, "gld_AddColormapToTexture pos+3>=size (%i >= %i)\n", pos + 3, gltexture->buffer_size);
 				return;
 			}
 #endif
@@ -607,7 +609,7 @@ static void gld_AddIndexedSkyToTexture(GLTexture* gltexture, unsigned char* buff
 
 	// get palette & gamma table for the given args
 	playpal = V_GetPlaypal() + (palette_index * PALETTE_SIZE);
-	gtlump = W_CheckNumForName2("GAMMATBL", ns_prboom);
+	gtlump = W_CheckNumForName2("GAMMATBL", LumpNamespace::Prboom);
 	gtable = (const byte*)W_LumpByNum(gtlump) + 256 * gamma_level;
 
 	xs = 0;
@@ -622,15 +624,15 @@ static void gld_AddIndexedSkyToTexture(GLTexture* gltexture, unsigned char* buff
 		xe += (gltexture->realtexwidth - xe);
 
 	//e6y
-	if(patch->flags & PATCH_HASHOLES)
-		gltexture->flags |= GLTEXTURE_HASHOLES;
+	if((patch->flags & PatchFlag::HasHoles) != PatchFlag{})
+		gltexture->flags |= GLTextureFlag::HasHoles;
 
 	for(x = xs; x < xe; x++)
 	{
 #ifdef RANGECHECK
 		if(x >= patch->width)
 		{
-			lprintf(LO_ERROR, "gld_AddIndexedSkyToTexture x>=patch->width (%i >= %i)\n", x, patch->width);
+			lprintf(OutputLevels::Error, "gld_AddIndexedSkyToTexture x>=patch->width (%i >= %i)\n", x, patch->width);
 			return;
 		}
 #endif
@@ -656,12 +658,12 @@ static void gld_AddIndexedSkyToTexture(GLTexture* gltexture, unsigned char* buff
 #ifdef RANGECHECK
 				if((pos + 3) >= gltexture->buffer_size)
 				{
-					lprintf(LO_ERROR, "gld_AddIndexedSkyToTexture pos+3>=size (%i >= %i)\n", pos + 3, gltexture->buffer_size);
+					lprintf(OutputLevels::Error, "gld_AddIndexedSkyToTexture pos+3>=size (%i >= %i)\n", pos + 3, gltexture->buffer_size);
 					return;
 				}
 #endif
 				//e6y: Boom's color maps
-				if(use_boom_cm && !comp[comp_skymap])
+				if(use_boom_cm && !comp[std::to_underlying(CompOption::SkyMap)])
 				{
 					const lighttable_t* colormap = (fixedcolormap ? fixedcolormap : fullcolormap);
 					buffer[pos + 0] = gtable[playpal[colormap[source[j]] * 3 + 0]];
@@ -690,14 +692,14 @@ static GLTexture* gld_InitUnregisteredTexture(int texture_num, GLTexture* gltext
 	if(!texture)
 		return nullptr;
 
-	gltexture->textype = GLDT_BROKEN;
+	gltexture->textype = GLTexType::Broken;
 	gltexture->index = texture_num;
 
 	//e6y
-	gltexture->flags = 0;
+	gltexture->flags = static_cast<GLTextureFlag>(0);
 
 	if(indexed && !sky)
-		gltexture->flags |= GLTEXTURE_INDEXED;
+		gltexture->flags |= GLTextureFlag::Indexed;
 
 	gltexture->realtexwidth = texture->width;
 	gltexture->realtexheight = texture->height;
@@ -711,7 +713,7 @@ static GLTexture* gld_InitUnregisteredTexture(int texture_num, GLTexture* gltext
 		if(patch)
 		{
 			gltexture->patch_index = texture->patches[0].patch;
-			gltexture->flags |= GLTEXTURE_SKYHACK;
+			gltexture->flags |= GLTextureFlag::SkyHack;
 			gltexture->realtexheight = patch->height;
 		}
 	}
@@ -741,7 +743,7 @@ static GLTexture* gld_InitUnregisteredTexture(int texture_num, GLTexture* gltext
 	if(gltexture->realtexheight > gltexture->buffer_height)
 		return gltexture;
 
-	gltexture->textype = GLDT_TEXTURE;
+	gltexture->textype = GLTexType::Texture;
 
 	return gltexture;
 }
@@ -764,7 +766,7 @@ GLTexture* gld_RegisterTexture(int texture_num, dboolean mipmap, dboolean force,
 	if(!gltexture)
 		return nullptr;
 
-	if(gltexture->textype == GLDT_UNREGISTERED)
+	if(gltexture->textype == GLTexType::Unregistered)
 		gltexture = gld_InitUnregisteredTexture(texture_num, gltexture, indexed, sky);
 
 	return gltexture;
@@ -814,22 +816,22 @@ void gld_SetTexFilters(GLTexture* gltexture)
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso_filter);
 }
 
-void gld_SetTexClamp(GLTexture* gltexture, unsigned int flags)
+void gld_SetTexClamp(GLTexture* gltexture, GLTextureFlag flags)
 {
 	//if ((gltexture->flags & GLTEXTURE_CLAMPXY) != (flags & GLTEXTURE_CLAMPXY))
 	/* sp1n0za 05/2010: simplify */
-	if((*gltexture->texflags_p ^ flags) & GLTEXTURE_CLAMPXY)
+	if((*gltexture->texflags_p ^ std::to_underlying(flags)) & std::to_underlying(GLTextureFlag::ClampXy))
 	{
-		int need_clamp_x = (flags & GLTEXTURE_CLAMPX);
-		int need_clamp_y = (flags & GLTEXTURE_CLAMPY);
-		int has_clamp_x = (*gltexture->texflags_p & GLTEXTURE_CLAMPX);
-		int has_clamp_y = (*gltexture->texflags_p & GLTEXTURE_CLAMPY);
+		const bool need_clamp_x = (flags & GLTextureFlag::ClampX) != GLTextureFlag{};
+		const bool need_clamp_y = (flags & GLTextureFlag::ClampY) != GLTextureFlag{};
+		int has_clamp_x = (*gltexture->texflags_p & std::to_underlying(GLTextureFlag::ClampX));
+		int has_clamp_y = (*gltexture->texflags_p & std::to_underlying(GLTextureFlag::ClampY));
 
 		if(need_clamp_x)
 		{
 			if(!has_clamp_x)
 			{
-				*gltexture->texflags_p |= GLTEXTURE_CLAMPX;
+				*gltexture->texflags_p |= std::to_underlying(GLTextureFlag::ClampX);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			}
 		}
@@ -837,7 +839,7 @@ void gld_SetTexClamp(GLTexture* gltexture, unsigned int flags)
 		{
 			if(has_clamp_x)
 			{
-				*gltexture->texflags_p &= ~GLTEXTURE_CLAMPX;
+				*gltexture->texflags_p &= ~std::to_underlying(GLTextureFlag::ClampX);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			}
 		}
@@ -846,7 +848,7 @@ void gld_SetTexClamp(GLTexture* gltexture, unsigned int flags)
 		{
 			if(!has_clamp_y)
 			{
-				*gltexture->texflags_p |= GLTEXTURE_CLAMPY;
+				*gltexture->texflags_p |= std::to_underlying(GLTextureFlag::ClampY);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			}
 		}
@@ -854,7 +856,7 @@ void gld_SetTexClamp(GLTexture* gltexture, unsigned int flags)
 		{
 			if(has_clamp_y)
 			{
-				*gltexture->texflags_p &= ~GLTEXTURE_CLAMPY;
+				*gltexture->texflags_p &= ~std::to_underlying(GLTextureFlag::ClampY);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			}
 		}
@@ -865,7 +867,7 @@ int gld_BuildTexture(GLTexture* gltexture, void* data, dboolean readonly, int wi
 {
 	int tex_width, tex_height, tex_format;
 
-	tex_format = gltexture->flags & GLTEXTURE_INDEXED ? GL_RG : GL_RGBA;
+	tex_format = (gltexture->flags & GLTextureFlag::Indexed) != GLTextureFlag{} ? GL_RG : GL_RGBA;
 	tex_width = gld_GetTexDimension(width);
 	tex_height = gld_GetTexDimension(height);
 
@@ -889,7 +891,7 @@ int gld_BuildTexture(GLTexture* gltexture, void* data, dboolean readonly, int wi
 	return true;
 }
 
-void gld_BindTexture(GLTexture* gltexture, unsigned int flags, dboolean sky)
+void gld_BindTexture(GLTexture* gltexture, GLTextureFlag flags, dboolean sky)
 {
 	const rpatch_t* patch;
 	unsigned char* buffer;
@@ -900,14 +902,14 @@ void gld_BindTexture(GLTexture* gltexture, unsigned int flags, dboolean sky)
 		gltexture = gld_GetGLSkyTexture(gltexture);
 	}
 
-	if(!gltexture || gltexture->textype != GLDT_TEXTURE)
+	if(!gltexture || gltexture->textype != GLTexType::Texture)
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
 		last_glTexID = nullptr;
 		return;
 	}
 
-	gld_GetTextureTexID(gltexture, CR_DEFAULT);
+	gld_GetTextureTexID(gltexture, ColorRange::Default);
 
 	if(last_glTexID == gltexture->texid_p)
 	{
@@ -928,7 +930,7 @@ void gld_BindTexture(GLTexture* gltexture, unsigned int flags, dboolean sky)
 	buffer = (unsigned char*)Z_Malloc(gltexture->buffer_size);
 	memset(buffer, 0, gltexture->buffer_size);
 
-	if(gltexture->flags & GLTEXTURE_SKYHACK)
+	if((gltexture->flags & GLTextureFlag::SkyHack) != GLTextureFlag{})
 	{
 		patch = R_PatchByNum(gltexture->patch_index);
 	}
@@ -943,7 +945,7 @@ void gld_BindTexture(GLTexture* gltexture, unsigned int flags, dboolean sky)
 	}
 	else
 	{
-		gld_AddPatchToTexture(gltexture, buffer, patch, 0, 0, CR_DEFAULT);
+		gld_AddPatchToTexture(gltexture, buffer, patch, 0, 0, ColorRange::Default);
 	}
 
 	if(*gltexture->texid_p == 0)
@@ -956,7 +958,7 @@ void gld_BindTexture(GLTexture* gltexture, unsigned int flags, dboolean sky)
 	glsl_SetTextureDims(0, gltexture->realtexwidth, gltexture->realtexheight);
 }
 
-GLTexture* gld_RegisterPatch(int lump, int cm, dboolean is_sprite, dboolean indexed)
+GLTexture* gld_RegisterPatch(int lump, ColorRange cm, dboolean is_sprite, dboolean indexed)
 {
 	const rpatch_t* patch;
 	GLTexture* gltexture;
@@ -964,23 +966,23 @@ GLTexture* gld_RegisterPatch(int lump, int cm, dboolean is_sprite, dboolean inde
 	gltexture = gld_AddNewGLPatchTexture(lump, indexed);
 	if(!gltexture)
 		return nullptr;
-	if(gltexture->textype == GLDT_UNREGISTERED)
+	if(gltexture->textype == GLTexType::Unregistered)
 	{
 		patch = R_PatchByNum(lump);
 		if(!patch)
 			return nullptr;
-		gltexture->textype = GLDT_BROKEN;
+		gltexture->textype = GLTexType::Broken;
 		gltexture->index = lump;
 
 		//e6y
-		gltexture->flags = 0;
+		gltexture->flags = static_cast<GLTextureFlag>(0);
 		if(is_sprite)
 		{
-			gltexture->flags |= GLTEXTURE_SPRITE;
+			gltexture->flags |= GLTextureFlag::Sprite;
 		}
 
 		if(indexed)
-			gltexture->flags |= GLTEXTURE_INDEXED;
+			gltexture->flags |= GLTextureFlag::Indexed;
 
 		gltexture->realtexwidth = patch->width;
 		gltexture->realtexheight = patch->height;
@@ -1006,17 +1008,17 @@ GLTexture* gld_RegisterPatch(int lump, int cm, dboolean is_sprite, dboolean inde
 			return gltexture;
 		if(gltexture->realtexheight > gltexture->buffer_height)
 			return gltexture;
-		gltexture->textype = GLDT_PATCH;
+		gltexture->textype = GLTexType::Patch;
 	}
 	return gltexture;
 }
 
-void gld_BindPatch(GLTexture* gltexture, int cm)
+void gld_BindPatch(GLTexture* gltexture, ColorRange cm)
 {
 	const rpatch_t* patch;
 	unsigned char* buffer;
 
-	if(!gltexture || gltexture->textype != GLDT_PATCH)
+	if(!gltexture || gltexture->textype != GLTexType::Patch)
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
 		last_glTexID = nullptr;
@@ -1027,7 +1029,7 @@ void gld_BindPatch(GLTexture* gltexture, int cm)
 
 	if(last_glTexID == gltexture->texid_p)
 	{
-		gld_SetTexClamp(gltexture, GLTEXTURE_CLAMPXY);
+		gld_SetTexClamp(gltexture, GLTextureFlag::ClampXy);
 		return;
 	}
 
@@ -1036,7 +1038,7 @@ void gld_BindPatch(GLTexture* gltexture, int cm)
 	if(*gltexture->texid_p != 0)
 	{
 		glBindTexture(GL_TEXTURE_2D, *gltexture->texid_p);
-		gld_SetTexClamp(gltexture, GLTEXTURE_CLAMPXY);
+		gld_SetTexClamp(gltexture, GLTextureFlag::ClampXy);
 		glsl_SetTextureDims(0, gltexture->realtexwidth, gltexture->realtexheight);
 		return;
 	}
@@ -1052,7 +1054,7 @@ void gld_BindPatch(GLTexture* gltexture, int cm)
 
 	gld_BuildTexture(gltexture, buffer, false, gltexture->buffer_width, gltexture->buffer_height);
 
-	gld_SetTexClamp(gltexture, GLTEXTURE_CLAMPXY);
+	gld_SetTexClamp(gltexture, GLTextureFlag::ClampXy);
 	glsl_SetTextureDims(0, gltexture->realtexwidth, gltexture->realtexheight);
 }
 
@@ -1063,16 +1065,16 @@ GLTexture* gld_RegisterRaw(int lump, int width, int height, dboolean mipmap, dbo
 	gltexture = gld_AddNewGLPatchTexture(lump, indexed);
 	if(!gltexture)
 		return nullptr;
-	if(gltexture->textype == GLDT_UNREGISTERED)
+	if(gltexture->textype == GLTexType::Unregistered)
 	{
-		gltexture->textype = GLDT_BROKEN;
+		gltexture->textype = GLTexType::Broken;
 		gltexture->index = lump;
 
 		//e6y
-		gltexture->flags = 0;
+		gltexture->flags = static_cast<GLTextureFlag>(0);
 
 		if(indexed)
-			gltexture->flags |= GLTEXTURE_INDEXED;
+			gltexture->flags |= GLTextureFlag::Indexed;
 
 		gltexture->realtexwidth = width;
 		gltexture->realtexheight = height;
@@ -1099,24 +1101,24 @@ GLTexture* gld_RegisterRaw(int lump, int width, int height, dboolean mipmap, dbo
 		if(gltexture->realtexheight > gltexture->buffer_height)
 			return gltexture;
 
-		gltexture->textype = GLDT_FLAT;
+		gltexture->textype = GLTexType::Flat;
 	}
 	return gltexture;
 }
 
-void gld_BindRaw(GLTexture* gltexture, unsigned int flags)
+void gld_BindRaw(GLTexture* gltexture, GLTextureFlag flags)
 {
 	const unsigned char* raw;
 	unsigned char* buffer;
 
-	if(!gltexture || gltexture->textype != GLDT_FLAT)
+	if(!gltexture || gltexture->textype != GLTexType::Flat)
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
 		last_glTexID = nullptr;
 		return;
 	}
 
-	gld_GetTextureTexID(gltexture, CR_DEFAULT);
+	gld_GetTextureTexID(gltexture, ColorRange::Default);
 
 	if(last_glTexID == gltexture->texid_p)
 	{
@@ -1175,7 +1177,7 @@ GLTexture* gld_RegisterSkyTexture(int texture_num, dboolean force)
 	for(i = 0; i < gld_numGLColormaps; i++)
 	{
 		gltexture = gld_GetGLIndexedSkyTexture(texture_num, i);
-		if(gltexture->textype == GLDT_UNREGISTERED)
+		if(gltexture->textype == GLTexType::Unregistered)
 			gld_InitUnregisteredTexture(texture_num, gltexture, true, true);
 	}
 
@@ -1184,7 +1186,7 @@ GLTexture* gld_RegisterSkyTexture(int texture_num, dboolean force)
 
 void gld_BindSkyTexture(GLTexture* gltexture)
 {
-	gld_BindTexture(gltexture, 0, true);
+	gld_BindTexture(gltexture, static_cast<GLTextureFlag>(0), true);
 }
 
 GLTexture* gld_RegisterColormapTexture(int palette_index, int gamma_level, dboolean fullbright)
@@ -1194,9 +1196,9 @@ GLTexture* gld_RegisterColormapTexture(int palette_index, int gamma_level, dbool
 	gltexture = gld_AddNewGLColormapTexture(palette_index, gamma_level, fullbright);
 	if(!gltexture)
 		return nullptr;
-	if(gltexture->textype == GLDT_UNREGISTERED)
+	if(gltexture->textype == GLTexType::Unregistered)
 	{
-		gltexture->textype = GLDT_BROKEN;
+		gltexture->textype = GLTexType::Broken;
 		gltexture->index = palette_index;
 
 		gltexture->realtexwidth = 256;
@@ -1220,7 +1222,7 @@ GLTexture* gld_RegisterColormapTexture(int palette_index, int gamma_level, dbool
 			return gltexture;
 		if(gltexture->realtexheight > gltexture->buffer_height)
 			return gltexture;
-		gltexture->textype = GLDT_COLORMAP;
+		gltexture->textype = GLTexType::Colormap;
 	}
 	return gltexture;
 }
@@ -1230,7 +1232,7 @@ void gld_BindColormapTexture(GLTexture* gltexture, int palette_index, int gamma_
 	unsigned char* buffer;
 
 	// abort if we're trying to bind the wrong texture type
-	if(!gltexture || gltexture->textype != GLDT_COLORMAP)
+	if(!gltexture || gltexture->textype != GLTexType::Colormap)
 	{
 		glBindTexture(GL_TEXTURE_2D, 0);
 		last_glTexID = nullptr;
@@ -1241,7 +1243,7 @@ void gld_BindColormapTexture(GLTexture* gltexture, int palette_index, int gamma_
 	// colormaps since texture1 is already in use.
 	GLEXT_glActiveTextureARB(GL_TEXTURE2_ARB);
 
-	gld_GetTextureTexID(gltexture, CR_DEFAULT);
+	gld_GetTextureTexID(gltexture, ColorRange::Default);
 
 	if(last_glTexID == gltexture->texid_p)
 	{
@@ -1361,7 +1363,7 @@ static void gld_CleanTexItems(int count, GLTexture*** items)
 		if((*items)[i])
 		{
 			int cm, n;
-			for(j = 0; j < (CR_LIMIT + MAX_MAXPLAYERS); j++)
+			for(j = 0; j < (std::to_underlying(ColorRange::Limit) + MAX_MAXPLAYERS); j++)
 			{
 				for(n = 0; n < PLAYERCOLORMAP_COUNT; n++)
 				{
@@ -1488,7 +1490,7 @@ void gld_Precache()
 			gltexture = gld_RegisterFlat(i, true, true);
 			if(gltexture)
 			{
-				gld_BindFlat(gltexture, 0);
+				gld_BindFlat(gltexture, static_cast<GLTextureFlag>(0));
 			}
 		}
 
@@ -1551,7 +1553,7 @@ void gld_Precache()
 			gltexture = gld_RegisterTexture(i, i != skytexture, false, true, false);
 			if(gltexture)
 			{
-				gld_BindTexture(gltexture, 0, false);
+				gld_BindTexture(gltexture, static_cast<GLTextureFlag>(0), false);
 			}
 		}
 
@@ -1564,7 +1566,7 @@ void gld_Precache()
 		for(th = thinkercap.next; th != &thinkercap; th = th->next)
 		{
 			if(th->function == reinterpret_cast<think_t>(P_MobjThinker))
-				hitlist[((mobj_t*)th)->sprite] = 1;
+				hitlist[std::to_underlying(((mobj_t*)th)->sprite)] = 1;
 		}
 	}
 
@@ -1587,10 +1589,10 @@ void gld_Precache()
 				do
 				{
 					gld_ProgressUpdate("Loading Sprites...", ++hit, hitcount);
-					gltexture = gld_RegisterPatch(firstspritelump + sflump[k], CR_LIMIT, true, true);
+					gltexture = gld_RegisterPatch(firstspritelump + sflump[k], ColorRange::Limit, true, true);
 					if(gltexture)
 					{
-						gld_BindPatch(gltexture, CR_LIMIT);
+						gld_BindPatch(gltexture, ColorRange::Limit);
 					}
 				}
 				while(--k >= 0);
@@ -1608,7 +1610,7 @@ void gld_Precache()
 
 		snprintf(map, sizeof(map), "%s", dsda_MapLumpName(gameepisode, gamemap));
 
-		lprintf(LO_DEBUG, "gld_Precache: %s done in %d ms\n", map, SDL_GetTicks() - tics);
+		lprintf(OutputLevels::Debug, "gld_Precache: %s done in %d ms\n", map, SDL_GetTicks() - tics);
 	}
 }
 

@@ -2,12 +2,12 @@
 
 #pragma once
 
+#include "doomdef.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include "doomdef.hpp"
 
 void Hexen_IN_Ticker();
 void Hexen_IN_Drawer();

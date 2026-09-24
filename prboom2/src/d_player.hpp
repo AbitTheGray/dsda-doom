@@ -6,41 +6,43 @@
 
 #pragma once
 
+#include <utility>
+
+#include "dsda/pclass.hpp"
+#include "d_items.hpp"
+#include "p_pspr.hpp"
+#include "p_mobj.hpp"
+#include "d_ticcmd.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include "dsda/pclass.hpp"
-
 // The player data structure depends on a number
 // of other structs: items (internal inventory),
 // animation states (closely tied to the sprites
 // used to represent them, unfortunately).
-#include "d_items.hpp"
-#include "p_pspr.hpp"
 
 // In addition, the player is just a special
 // case of the generic moving object/actor.
-#include "p_mobj.hpp"
 
 // Finally, for odd reasons, the player input
 // is buffered within the player data struct,
 // as commands per game tick.
-#include "d_ticcmd.hpp"
 
 //
 // Player states.
 //
-typedef enum
+enum struct PlayerState : int32_t
 {
 	// Playing or camping.
-	PST_LIVE,
+	Live,
 	// Dead on the ground, view follows killer.
-	PST_DEAD,
+	Dead,
 	// Ready to restart/respawn???
-	PST_REBORN
-} playerstate_t;
+	Reborn
+};
 
 #define CF_NOCLIP        0x01 // no clipping
 #define CF_GODMODE       0x02 // immune to damage
@@ -56,61 +58,61 @@ typedef struct
 } inventory_t;
 
 // heretic
-typedef enum
+enum struct ArtiType : int32_t
 {
-	arti_none,
-	arti_invulnerability,
-	arti_invisibility,
-	arti_health,
-	arti_superhealth,
-	arti_tomeofpower,
-	arti_torch,
-	arti_firebomb,
-	arti_egg,
-	arti_fly,
-	arti_teleport,
-	NUMARTIFACTS,
+	None,
+	Invulnerability,
+	Invisibility,
+	Health,
+	SuperHealth,
+	TomeOfPower,
+	Torch,
+	Firebomb,
+	Egg,
+	Fly,
+	Teleport,
+	Count,
 
 	// hexen
-	hexen_arti_none = arti_none,
-	hexen_arti_invulnerability,
-	hexen_arti_health,
-	hexen_arti_superhealth,
-	hexen_arti_healingradius,
-	hexen_arti_summon,
-	hexen_arti_torch,
-	hexen_arti_egg,
-	hexen_arti_fly,
-	hexen_arti_blastradius,
-	hexen_arti_poisonbag,
-	hexen_arti_teleportother,
-	hexen_arti_speed,
-	hexen_arti_boostmana,
-	hexen_arti_boostarmor,
-	hexen_arti_teleport,
+	HexenNone = None,
+	HexenInvulnerability,
+	HexenHealth,
+	HexenSuperhealth,
+	HexenHealingradius,
+	HexenSummon,
+	HexenTorch,
+	HexenEgg,
+	HexenFly,
+	HexenBlastradius,
+	HexenPoisonbag,
+	HexenTeleportother,
+	HexenSpeed,
+	HexenBoostmana,
+	HexenBoostarmor,
+	HexenTeleport,
 	// Puzzle artifacts
-	hexen_arti_firstpuzzitem,
-	hexen_arti_puzzskull = hexen_arti_firstpuzzitem,
-	hexen_arti_puzzgembig,
-	hexen_arti_puzzgemred,
-	hexen_arti_puzzgemgreen1,
-	hexen_arti_puzzgemgreen2,
-	hexen_arti_puzzgemblue1,
-	hexen_arti_puzzgemblue2,
-	hexen_arti_puzzbook1,
-	hexen_arti_puzzbook2,
-	hexen_arti_puzzskull2,
-	hexen_arti_puzzfweapon,
-	hexen_arti_puzzcweapon,
-	hexen_arti_puzzmweapon,
-	hexen_arti_puzzgear1,
-	hexen_arti_puzzgear2,
-	hexen_arti_puzzgear3,
-	hexen_arti_puzzgear4,
-	HEXEN_NUMARTIFACTS
-} artitype_t;
+	HexenFirstpuzzitem,
+	HexenPuzzskull = HexenFirstpuzzitem,
+	HexenPuzzgembig,
+	HexenPuzzgemred,
+	HexenPuzzgemgreen1,
+	HexenPuzzgemgreen2,
+	HexenPuzzgemblue1,
+	HexenPuzzgemblue2,
+	HexenPuzzbook1,
+	HexenPuzzbook2,
+	HexenPuzzskull2,
+	HexenPuzzfweapon,
+	HexenPuzzcweapon,
+	HexenPuzzmweapon,
+	HexenPuzzgear1,
+	HexenPuzzgear2,
+	HexenPuzzgear3,
+	HexenPuzzgear4,
+	HexenCount
+};
 
-#define NUMINVENTORYSLOTS	HEXEN_NUMARTIFACTS
+#define NUMINVENTORYSLOTS	std::to_underlying(ArtiType::HexenCount)
 
 //
 // Extended player object info: player_t
@@ -118,7 +120,7 @@ typedef enum
 typedef struct player_s
 {
 	mobj_t* mo;
-	playerstate_t playerstate;
+	PlayerState playerstate;
 	ticcmd_t cmd;
 
 	// Determine POV,
@@ -135,25 +137,25 @@ typedef struct player_s
 	// This is only used between levels,
 	// mo->health is used during levels.
 	int health;
-	int armorpoints[NUMARMOR];
+	int armorpoints[std::to_underlying(ArmorType::Count)];
 	// Armor type is 0-2.
 	int armortype;
 
 	// Power ups. invinc and invis are tic counters.
-	int powers[NUMPOWERS];
-	dboolean cards[NUMCARDS];
+	int powers[std::to_underlying(PowerType::Count)];
+	dboolean cards[std::to_underlying(Card::Count)];
 	dboolean backpack;
 
 	// Frags, kills of other players.
 	int frags[MAX_MAXPLAYERS];
-	weapontype_t readyweapon;
+	WeaponType readyweapon;
 
 	// Is wp_nochange if not changing.
-	weapontype_t pendingweapon;
+	WeaponType pendingweapon;
 
-	dboolean weaponowned[NUMWEAPONS];
-	int ammo[NUMAMMO];
-	int maxammo[NUMAMMO];
+	dboolean weaponowned[std::to_underlying(WeaponType::Count)];
+	int ammo[std::to_underlying(AmmoType::Count)];
+	int maxammo[std::to_underlying(AmmoType::Count)];
 
 	// True if button down last tic.
 	int attackdown;
@@ -189,7 +191,7 @@ typedef struct player_s
 	int colormap;
 
 	// Overlay view sprites (gun, etc).
-	pspdef_t psprites[NUMPSPRITES];
+	pspdef_t psprites[std::to_underlying(PspNum::Count)];
 
 	// True if secret level has been done.
 	dboolean didsecret;
@@ -217,7 +219,7 @@ typedef struct player_s
 	int lookdir;
 	dboolean centering;
 	inventory_t inventory[NUMINVENTORYSLOTS];
-	artitype_t readyArtifact;
+	ArtiType readyArtifact;
 	int artifactCount;
 	int inventorySlotNum;
 	int flamecount;  // for flame thrower duration
@@ -227,7 +229,7 @@ typedef struct player_s
 	mobj_t* rain2;   // active rain maker 2
 
 	// hexen
-	pclass_t pclass; // player class type
+	PClass pclass; // player class type
 	int morphTics;   // player is a pig if > 0
 	int pieces;      // Fourth Weapon pieces
 	int ravenkeys;   // Track statusbar keys
@@ -241,7 +243,6 @@ typedef struct player_s
 	int hazardcount;
 	byte hazardinterval;
 } player_t;
-
 
 //
 // INTERMISSION

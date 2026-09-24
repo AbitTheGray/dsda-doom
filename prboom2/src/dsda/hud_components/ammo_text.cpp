@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Ammo Text HUD Component
 
+#include <utility>
+
 #include "base.hpp"
 
 #include "ammo_text.hpp"
@@ -72,9 +74,9 @@ static void dsda_UpdateComponentText(char* str, size_t max_size, int i)
 			str,
 			max_size,
 			"%s%s %s%3d\x1b\x01/\x1b\x01%3d",
-			dsda_TextColor(dsda_tc_exhud_ammo_label),
+			dsda_TextColor(TextColorIndex::ExhudAmmoLabel),
 			name,
-			dsda_TextColor(dsda_tc_exhud_ammo_value),
+			dsda_TextColor(TextColorIndex::ExhudAmmoValue),
 			current_ammo,
 			max_ammo
 		);
@@ -83,13 +85,13 @@ static void dsda_UpdateComponentText(char* str, size_t max_size, int i)
 			str,
 			max_size,
 			"%s%3d\x1b\x01/\x1b\x01%3d",
-			dsda_TextColor(dsda_tc_exhud_ammo_value),
+			dsda_TextColor(TextColorIndex::ExhudAmmoValue),
 			current_ammo,
 			max_ammo
 		);
 }
 
-void dsda_InitAmmoTextHC(int x_offset, int y_offset, int vpt, int* args, int arg_count, void** data)
+void dsda_InitAmmoTextHC(int x_offset, int y_offset, PatchTranslation vpt, int* args, int arg_count, void** data)
 {
 	int i;
 	int y_delta;
@@ -109,7 +111,7 @@ void dsda_InitAmmoTextHC(int x_offset, int y_offset, int vpt, int* args, int arg
 	else
 		component_config = &doom_ammo;
 
-	y_delta = BOTTOM_ALIGNMENT(vpt & VPT_ALIGN_MASK) ? -8 : 8;
+	y_delta = BOTTOM_ALIGNMENT(PatchAlignment(vpt)) ? -8 : 8;
 
 	for(i = 0; i < component_config->count; ++i)
 		dsda_InitTextHC(&local->component[i], x_offset, y_offset + i * y_delta, vpt);
