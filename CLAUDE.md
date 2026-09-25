@@ -7,6 +7,9 @@ We are rewriting a project from old C to Modern C++. We do not need to solve eve
 Keep everything simple and readable.
 Prefer the obvious solution over the clever one. Do not add abstraction, indirection or configuration that the current task does not need.
 
+## Avoid Undefined Behavior
+We have well-defined UB nowadays (in C++ standard), please make sure we don't leave any in code.
+
 ## Do not start or reload the project without explaining why
 Do not run any CMake commands unless necessary.
 
