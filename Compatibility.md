@@ -3,6 +3,14 @@
 Deliberate differences in behaviour from upstream dsda-doom.
 Anything not listed here should behave exactly as upstream does.
 
+## Fix signed integer overflow
+From official [MR 999](https://github.com/kraflab/dsda-doom/pull/999).
+
+Overly-active compiler could optimize integer overflow, causing a demo desync for one of tested demo files.
+The fix is somewhat simple (use unsigned `angle_t` and convert it to signed only at the end) but necessary.
+
+There are other similar Undefined Behaviors throughout the code. We fixed just enough to have working demo (and a little on top of it), not all instances.
+
 ## Unreadable autoload files are skipped
 
 A `.wad`, `.lmp` or `.zip` found in an autoload directory that cannot be read, a
