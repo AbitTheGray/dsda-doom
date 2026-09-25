@@ -185,6 +185,9 @@ static void W_AddFile(wadfile_info_t* wadfile)
 	for(i = startlump; (int)i < numlumps; i++, lump_p++, fileinfo++)
 	{
 		lump_p->flags = flags;
+		// Not hashed until W_HashLumps; lookups before that find nothing
+		lump_p->index = LUMP_NOT_FOUND;
+		lump_p->next = LUMP_NOT_FOUND;
 		lump_p->wadfile = wadfile; //  killough 4/25/98
 		lump_p->position = LittleLong(fileinfo->filepos);
 		lump_p->size = LittleLong(fileinfo->size);

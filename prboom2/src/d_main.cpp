@@ -1394,6 +1394,17 @@ static void D_ProcessDehAutoloadQueue(deh_queue_t* queue)
 	Z_Free(queue->list);
 }
 
+// A dangling symlink or a file without read permission still matches a glob.
+// Warn and skip it, rather than let it end the game (see Compatibility.md).
+static bool IsReadableOrWarn(const char* filename)
+{
+	if(M_ReadAccess(filename))
+		return true;
+
+	lprintf(OutputLevels::Warn, "Skipping unreadable %s\n", filename);
+	return false;
+}
+
 // Load all WAD files from the given directory.
 
 static void LoadWADsAtPath(const char* path, WadSource source)
@@ -1410,6 +1421,10 @@ static void LoadWADsAtPath(const char* path, WadSource source)
 		{
 			break;
 		}
+
+		if(!IsReadableOrWarn(filename))
+			continue;
+
 		D_AddFile(filename, source);
 	}
 
@@ -1491,6 +1506,10 @@ static void LoadZIPsAtPath(const char* path, WadSource source, deh_queue_t* deh_
 		{
 			break;
 		}
+
+		if(!IsReadableOrWarn(filename))
+			continue;
+
 		D_AddZip(filename, source, deh_queue);
 	}
 
