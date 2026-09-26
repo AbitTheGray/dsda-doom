@@ -7,6 +7,33 @@
 
 #include <inttypes.h>
 
+#include "cpp/Util.hpp"
+
+// udmf_thing_t::flags
+enum struct UdmfThingFlag : uint32_t
+{
+	Skill1 = Bit<uint32_t>(0u),
+	Skill2 = Bit<uint32_t>(1u),
+	Skill3 = Bit<uint32_t>(2u),
+	Skill4 = Bit<uint32_t>(3u),
+	Skill5 = Bit<uint32_t>(4u),
+	Ambush = Bit<uint32_t>(5u),
+	Single = Bit<uint32_t>(6u),
+	Dm = Bit<uint32_t>(7u),
+	Coop = Bit<uint32_t>(8u),
+	Friend = Bit<uint32_t>(9u),
+	Dormant = Bit<uint32_t>(10u),
+	Class1 = Bit<uint32_t>(11u),
+	Class2 = Bit<uint32_t>(12u),
+	Class3 = Bit<uint32_t>(13u),
+	Standing = Bit<uint32_t>(14u),
+	StrifeAlly = Bit<uint32_t>(15u),
+	Translucent = Bit<uint32_t>(16u),
+	Invisible = Bit<uint32_t>(17u),
+	CountSecret = Bit<uint32_t>(18u),
+};
+ENUM_FLAGS_FUNC(UdmfThingFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -220,28 +247,6 @@ extern "C"
 		udmf_sector_flags_t flags;
 	} udmf_sector_t;
 
-#define UDMF_TF_SKILL1      0x00000001
-#define UDMF_TF_SKILL2      0x00000002
-#define UDMF_TF_SKILL3      0x00000004
-#define UDMF_TF_SKILL4      0x00000008
-#define UDMF_TF_SKILL5      0x00000010
-#define UDMF_TF_AMBUSH      0x00000020
-#define UDMF_TF_SINGLE      0x00000040
-#define UDMF_TF_DM          0x00000080
-#define UDMF_TF_COOP        0x00000100
-#define UDMF_TF_FRIEND      0x00000200
-#define UDMF_TF_DORMANT     0x00000400
-#define UDMF_TF_CLASS1      0x00000800
-#define UDMF_TF_CLASS2      0x00001000
-#define UDMF_TF_CLASS3      0x00002000
-#define UDMF_TF_STANDING    0x00004000
-#define UDMF_TF_STRIFEALLY  0x00008000
-#define UDMF_TF_TRANSLUCENT 0x00010000
-#define UDMF_TF_INVISIBLE   0x00020000
-#define UDMF_TF_COUNTSECRET 0x00040000
-
-	typedef uint32_t udmf_thing_flags_t;
-
 	typedef struct
 	{
 		int id;
@@ -264,7 +269,7 @@ extern "C"
 		float scale;
 		float alpha;
 		int floatbobphase;
-		udmf_thing_flags_t flags;
+		UdmfThingFlag flags;
 	} udmf_thing_t;
 
 	typedef struct

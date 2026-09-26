@@ -4,6 +4,7 @@
  *      Moving object handling. Spawn functions.
  */
 
+#include <array>
 #include <utility>
 
 #include "doomdef.hpp"
@@ -1206,7 +1207,7 @@ static void P_NightmareRespawn(mobj_t* mobj)
 	if(hexen && mo->type == MobjType::HexenPig)
 		mo->special2.i = std::to_underlying(MobjType::HexenZero);
 
-	if(mthing->options & MTF_AMBUSH)
+	if((mthing->options & MapThingFlag::Ambush) != MapThingFlag{})
 		mo->flags |= MobjFlag::Ambush;
 
 	/* killough 11/98: transfer friendliness from deceased */
@@ -2080,7 +2081,7 @@ void P_SpawnPlayer(int n, const mapthing_t* mthing)
 	/* cph 2001/08/14 - use the options field of memorised player starts to
 	* indicate whether the start really exists in the level.
 	*/
-	if(!mthing->options)
+	if(mthing->options == MapThingFlag{})
 		I_Error("P_SpawnPlayer: attempt to spawn player at unavailable start point");
 
 	x = mthing->x;
@@ -2232,9 +2233,9 @@ static dboolean P_ShouldSpawnPlayer(const mapthing_t* mthing)
 	return !deathmatch && (map_format.zdoom ? mthing->special_args[0] == leave_data.position : !mthing->special_args[0]);
 }
 
-static dboolean P_ShouldSpawnMapThing(int options)
+static dboolean P_ShouldSpawnMapThing(MapThingFlag options)
 {
-	unsigned int spawnMask;
+	MapThingFlag spawnMask;
 	dboolean spawn_multi;
 
 	spawn_multi = skill_info.flags & SI_SPAWN_MULTI;
@@ -2244,21 +2245,21 @@ static dboolean P_ShouldSpawnMapThing(int options)
 		// Check current game type with spawn flags
 		if(netgame == false)
 		{
-			spawnMask = MTF_GSINGLE;
+			spawnMask = MapThingFlag::GSingle;
 
 			if(spawn_multi)
-				spawnMask |= MTF_GCOOP;
+				spawnMask |= MapThingFlag::GCoop;
 		}
 		else if(deathmatch)
 		{
-			spawnMask = MTF_GDEATHMATCH;
+			spawnMask = MapThingFlag::GDeathmatch;
 		}
 		else
 		{
-			spawnMask = MTF_GCOOP;
+			spawnMask = MapThingFlag::GCoop;
 		}
 
-		if(!(options & spawnMask))
+		if((options & spawnMask) == MapThingFlag{})
 		{
 			return false;
 		}
@@ -2266,31 +2267,31 @@ static dboolean P_ShouldSpawnMapThing(int options)
 	else
 	{
 		/* jff "not single" thing flag */
-		if(!spawn_multi && !netgame && options & MTF_NOTSINGLE)
+		if(!spawn_multi && !netgame && (options & MapThingFlag::NotSingle) != MapThingFlag{})
 			return false;
 
 		//jff 3/30/98 implement "not deathmatch" thing flag
-		if(netgame && deathmatch && options & MTF_NOTDM)
+		if(netgame && deathmatch && (options & MapThingFlag::NotDm) != MapThingFlag{})
 			return false;
 
 		//jff 3/30/98 implement "not cooperative" thing flag
-		if((spawn_multi || netgame) && !deathmatch && options & MTF_NOTCOOP)
+		if((spawn_multi || netgame) && !deathmatch && (options & MapThingFlag::NotCoop) != MapThingFlag{})
 			return false;
 	}
 
 	// check for appropriate skill level
 	if(
-		skill_info.spawn_filter == 1 ? !(options & MTF_SKILL1) : skill_info.spawn_filter == 2 ? !(options & MTF_SKILL2) : skill_info.spawn_filter == 3 ? !(options & MTF_SKILL3) : skill_info.spawn_filter == 4 ? !(options & MTF_SKILL4) : !(options & MTF_SKILL5)
+		skill_info.spawn_filter == 1 ? (options & MapThingFlag::Skill1) == MapThingFlag{} : skill_info.spawn_filter == 2 ? (options & MapThingFlag::Skill2) == MapThingFlag{} : skill_info.spawn_filter == 3 ? (options & MapThingFlag::Skill3) == MapThingFlag{} : skill_info.spawn_filter == 4 ? (options & MapThingFlag::Skill4) == MapThingFlag{} : (options & MapThingFlag::Skill5) == MapThingFlag{}
 	)
 		return false;
 
 	if(hexen)
 	{
-		static unsigned int classFlags[] = {
-			0, // null class
-			MTF_FIGHTER,
-			MTF_CLERIC,
-			MTF_MAGE
+		static constexpr std::array classFlags {
+			MapThingFlag{}, // null class
+			MapThingFlag::Fighter,
+			MapThingFlag::Cleric,
+			MapThingFlag::Mage
 		};
 
 		int i;
@@ -2299,7 +2300,7 @@ static dboolean P_ShouldSpawnMapThing(int options)
 		if(netgame == false)
 		{
 			// Single player
-			if((options & classFlags[std::to_underlying(PlayerClass[0])]) == 0)
+			if((options & classFlags[std::to_underlying(PlayerClass[0])]) == MapThingFlag{})
 			{
 				// Not for current class
 				return false;
@@ -2308,7 +2309,7 @@ static dboolean P_ShouldSpawnMapThing(int options)
 		else if(deathmatch == false)
 		{
 			// Cooperative
-			spawnMask = 0;
+			spawnMask = MapThingFlag{};
 			for(i = 0; i < g_maxplayers; i++)
 			{
 				if(playeringame[i])
@@ -2316,7 +2317,7 @@ static dboolean P_ShouldSpawnMapThing(int options)
 					spawnMask |= classFlags[std::to_underlying(PlayerClass[i])];
 				}
 			}
-			if((options & spawnMask) == 0)
+			if((options & spawnMask) == MapThingFlag{})
 			{
 				return false;
 			}
@@ -2344,7 +2345,7 @@ void P_TrySpawnPlayer(const mapthing_t* mthing, int player)
 	* this start is present (so we know which elements of the array are filled
 	* in, in effect). Also note that the call below to P_SpawnPlayer must use
 	* the playerstarts version with this field set */
-	player_start->options = 1;
+	player_start->options = MapThingFlag::Easy;
 
 	if(P_ShouldSpawnPlayer(mthing))
 		P_SpawnPlayer(player, player_start);
@@ -2369,7 +2370,7 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index)
 	fixed_t x;
 	fixed_t y;
 	fixed_t z;
-	int options = mthing->options; /* cph 2001/07/07 - make writable copy */
+	MapThingFlag options = mthing->options; /* cph 2001/07/07 - make writable copy */
 	short thingtype = mthing->type;
 	int iden_num = 0;
 
@@ -2403,14 +2404,14 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index)
 			demo_compatibility ||
 			(
 				compatibility_level >= CompLevel::Lxdoom1 &&
-				options & MTF_RESERVED
+				(options & MapThingFlag::Reserved) != MapThingFlag{}
 			)
 		)
 	)
 	{
 		if(!demo_compatibility) // cph - Add warning about bad thing flags
-			lprintf(OutputLevels::Warn, "P_SpawnMapThing: correcting bad flags (%u) (thing type %d)\n", options, thingtype);
-		options &= MTF_SKILL1 | MTF_SKILL2 | MTF_SKILL3 | MTF_SKILL4 | MTF_SKILL5 | MTF_AMBUSH | MTF_NOTSINGLE;
+			lprintf(OutputLevels::Warn, "P_SpawnMapThing: correcting bad flags (%u) (thing type %d)\n", std::to_underlying(options), thingtype);
+		options = options & (MapThingFlag::Skill1 | MapThingFlag::Skill2 | MapThingFlag::Skill3 | MapThingFlag::Skill4 | MapThingFlag::Skill5 | MapThingFlag::Ambush | MapThingFlag::NotSingle);
 	}
 
 	// count deathmatch start positions
@@ -2437,7 +2438,7 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index)
 				deathmatch_p = deathmatchstarts + offset;
 			}
 			memcpy(deathmatch_p++, mthing, sizeof(*mthing));
-			(deathmatch_p - 1)->options = 1;
+			(deathmatch_p - 1)->options = MapThingFlag::Easy;
 
 			return nullptr;
 		}
@@ -2466,7 +2467,7 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index)
 			players[player].secretcount = 1;
 
 			// killough 10/98: force it to be a friend
-			options |= (map_format.zdoom ? MTF_FRIENDLY : MTF_FRIEND);
+			options |= (map_format.zdoom ? MapThingFlag::Friendly : MapThingFlag::Friend);
 			if(HelperThing != -1) // haleyjd 9/22/99: deh substitution
 			{
 				int type = HelperThing - 1;
@@ -2601,7 +2602,7 @@ spawnit:
 	mobj = P_SpawnMobj(x, y, z, static_cast<MobjType>(i));
 
 	if((mobj->flags & MobjFlag::Friend) == MobjFlag{} &&
-		options & (map_format.zdoom ? MTF_FRIENDLY : MTF_FRIEND) &&
+		(options & (map_format.zdoom ? MapThingFlag::Friendly : MapThingFlag::Friend)) != MapThingFlag{} &&
 		mbf_features)
 	{
 		mobj->flags |= MobjFlag::Friend;        // killough 10/98:
@@ -2672,17 +2673,17 @@ spawnit:
 
 	if(map_format.zdoom)
 	{
-		if(options & MTF_TRANSLUCENT)
+		if((options & MapThingFlag::Translucent) != MapThingFlag{})
 			mobj->flags |= MobjFlag::Translucent;
 
-		if(options & MTF_INVISIBLE)
+		if((options & MapThingFlag::Invisible) != MapThingFlag{})
 		{
 			P_UnsetThingPosition(mobj);
 			mobj->flags |= MobjFlag::NoSector;
 			P_SetThingPosition(mobj);
 		}
 
-		if(options & MTF_COUNTSECRET)
+		if((options & MapThingFlag::CountSecret) != MapThingFlag{})
 			P_AddMobjSecret(mobj);
 	}
 
@@ -2709,10 +2710,10 @@ spawnit:
 	else
 		mobj->angle = ANG45 * (mthing->angle / 45);
 
-	if(options & MTF_AMBUSH)
+	if((options & MapThingFlag::Ambush) != MapThingFlag{})
 		mobj->flags |= MobjFlag::Ambush;
 
-	if(map_format.hexen && mthing->options & MTF_DORMANT)
+	if(map_format.hexen && (mthing->options & MapThingFlag::Dormant) != MapThingFlag{})
 	{
 		mobj->flags2 |= MobjFlag2::Dormant;
 		if(hexen && mobj->type == MobjType::HexenIceguy)

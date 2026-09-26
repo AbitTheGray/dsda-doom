@@ -912,79 +912,79 @@ static void dsda_ParseUDMFThing(Scanner& scanner)
 		}
 		else if(scanner.StringMatch("skill1"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_SKILL1);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Skill1);
 		}
 		else if(scanner.StringMatch("skill2"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_SKILL2);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Skill2);
 		}
 		else if(scanner.StringMatch("skill3"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_SKILL3);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Skill3);
 		}
 		else if(scanner.StringMatch("skill4"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_SKILL4);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Skill4);
 		}
 		else if(scanner.StringMatch("skill5"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_SKILL5);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Skill5);
 		}
 		else if(scanner.StringMatch("ambush"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_AMBUSH);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Ambush);
 		}
 		else if(scanner.StringMatch("single"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_SINGLE);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Single);
 		}
 		else if(scanner.StringMatch("dm"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_DM);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Dm);
 		}
 		else if(scanner.StringMatch("coop"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_COOP);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Coop);
 		}
 		else if(scanner.StringMatch("friend"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_FRIEND);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Friend);
 		}
 		else if(scanner.StringMatch("dormant"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_DORMANT);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Dormant);
 		}
 		else if(scanner.StringMatch("class1"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_CLASS1);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Class1);
 		}
 		else if(scanner.StringMatch("class2"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_CLASS2);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Class2);
 		}
 		else if(scanner.StringMatch("class3"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_CLASS3);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Class3);
 		}
 		else if(scanner.StringMatch("standing"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_STANDING);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Standing);
 		}
 		else if(scanner.StringMatch("strifeally"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_STRIFEALLY);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::StrifeAlly);
 		}
 		else if(scanner.StringMatch("translucent"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_TRANSLUCENT);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Translucent);
 		}
 		else if(scanner.StringMatch("invisible"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_INVISIBLE);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::Invisible);
 		}
 		else if(scanner.StringMatch("countsecret"))
 		{
-			SCAN_FLAG(thing.flags, UDMF_TF_COUNTSECRET);
+			SCAN_FLAG(thing.flags, UdmfThingFlag::CountSecret);
 		}
 		else if(scanner.StringMatch("arg0str"))
 		{

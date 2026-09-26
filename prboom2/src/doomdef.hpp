@@ -141,46 +141,6 @@ enum struct GameState : int32_t
 };
 
 //
-// Difficulty/skill settings/filters.
-//
-// These are Thing flags
-
-// Skill flags.
-#define MTF_EASY        0x0001
-#define MTF_NORMAL      0x0002
-#define MTF_HARD        0x0004
-// Deaf monsters/do not react to sound.
-#define MTF_AMBUSH      0x0008
-
-/* killough 11/98 */
-#define MTF_NOTSINGLE   0x0010
-#define MTF_NOTDM       0x0020
-#define MTF_NOTCOOP     0x0040
-#define MTF_FRIEND      0x0080
-#define MTF_RESERVED    0x0100
-
-// hexen
-#define MTF_DORMANT     0x0010
-#define MTF_FIGHTER     0x0020
-#define MTF_CLERIC      0x0040
-#define MTF_MAGE        0x0080
-#define MTF_GSINGLE     0x0100
-#define MTF_GCOOP       0x0200
-#define MTF_GDEATHMATCH 0x0400
-
-// zdoom
-#define MTF_TRANSLUCENT 0x0800
-#define MTF_INVISIBLE   0x1000
-#define MTF_FRIENDLY    0x2000
-#define MTF_STANDSTILL  0x4000
-#define MTF_COUNTSECRET 0x8000
-#define MTF_SKILL1  0x00010000
-#define MTF_SKILL2  0x00020000
-#define MTF_SKILL3  0x00040000
-#define MTF_SKILL4  0x00080000
-#define MTF_SKILL5  0x00100000
-
-//
 // Key cards.
 //
 

@@ -12,6 +12,47 @@
 #include "doomtype.hpp"
 #include "m_fixed.hpp"
 
+// mapthing_t::options - difficulty/skill settings/filters.
+// Doom and Hexen give bits 4 to 8 different meanings, so some values repeat.
+enum struct MapThingFlag : uint32_t
+{
+	// Skill flags.
+	Easy = Bit<uint32_t>(0u),
+	Normal = Bit<uint32_t>(1u),
+	Hard = Bit<uint32_t>(2u),
+	// Deaf monsters/do not react to sound.
+	Ambush = Bit<uint32_t>(3u),
+
+	/* killough 11/98 */
+	NotSingle = Bit<uint32_t>(4u),
+	NotDm = Bit<uint32_t>(5u),
+	NotCoop = Bit<uint32_t>(6u),
+	Friend = Bit<uint32_t>(7u),
+	Reserved = Bit<uint32_t>(8u),
+
+	// hexen
+	Dormant = Bit<uint32_t>(4u),
+	Fighter = Bit<uint32_t>(5u),
+	Cleric = Bit<uint32_t>(6u),
+	Mage = Bit<uint32_t>(7u),
+	GSingle = Bit<uint32_t>(8u),
+	GCoop = Bit<uint32_t>(9u),
+	GDeathmatch = Bit<uint32_t>(10u),
+
+	// zdoom
+	Translucent = Bit<uint32_t>(11u),
+	Invisible = Bit<uint32_t>(12u),
+	Friendly = Bit<uint32_t>(13u),
+	StandStill = Bit<uint32_t>(14u),
+	CountSecret = Bit<uint32_t>(15u),
+	Skill1 = Bit<uint32_t>(16u),
+	Skill2 = Bit<uint32_t>(17u),
+	Skill3 = Bit<uint32_t>(18u),
+	Skill4 = Bit<uint32_t>(19u),
+	Skill5 = Bit<uint32_t>(20u),
+};
+ENUM_FLAGS_FUNC(MapThingFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -332,7 +373,7 @@ typedef struct
 	fixed_t height;
 	short angle;
 	short type;
-	int options;
+	MapThingFlag options;
 	int special;
 	int special_args[5];
 	fixed_t gravity;

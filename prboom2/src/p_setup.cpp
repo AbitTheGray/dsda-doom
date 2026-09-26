@@ -1632,7 +1632,9 @@ static void P_LoadThings(int lump)
 			mt.height = LittleShort(hmt->height) << FRACBITS;
 			mt.angle = LittleShort(hmt->angle);
 			mt.type = LittleShort(hmt->type);
-			mt.options = LittleShort(hmt->options);
+			// The WAD field is a signed 16-bit `short`; bit 15 sign-extends into bits 16-31
+			// (e.g. 0x8000 -> 0xFFFF8000), exactly as upstream's `int` field did.
+			mt.options = static_cast<MapThingFlag>(static_cast<uint32_t>(static_cast<int32_t>(LittleShort(hmt->options))));
 			mt.special = hmt->special;
 			mt.special_args[0] = hmt->arg1;
 			mt.special_args[1] = hmt->arg2;
@@ -1653,7 +1655,9 @@ static void P_LoadThings(int lump)
 			mt.height = 0;
 			mt.angle = LittleShort(dmt->angle);
 			mt.type = LittleShort(dmt->type);
-			mt.options = LittleShort(dmt->options);
+			// The WAD field is a signed 16-bit `short`; bit 15 sign-extends into bits 16-31
+			// (e.g. 0x8000 -> 0xFFFF8000), exactly as upstream's `int` field did.
+			mt.options = static_cast<MapThingFlag>(static_cast<uint32_t>(static_cast<int32_t>(LittleShort(dmt->options))));
 			mt.special = 0;
 			mt.special_args[0] = 0;
 			mt.special_args[1] = 0;
@@ -1665,14 +1669,14 @@ static void P_LoadThings(int lump)
 			mt.alpha = 1.f;
 		}
 
-		if(mt.options & MTF_EASY)
-			mt.options |= MTF_SKILL1 | MTF_SKILL2;
+		if((mt.options & MapThingFlag::Easy) != MapThingFlag{})
+			mt.options |= MapThingFlag::Skill1 | MapThingFlag::Skill2;
 
-		if(mt.options & MTF_NORMAL)
-			mt.options |= MTF_SKILL3;
+		if((mt.options & MapThingFlag::Normal) != MapThingFlag{})
+			mt.options |= MapThingFlag::Skill3;
 
-		if(mt.options & MTF_HARD)
-			mt.options |= MTF_SKILL4 | MTF_SKILL5;
+		if((mt.options & MapThingFlag::Hard) != MapThingFlag{})
+			mt.options |= MapThingFlag::Skill4 | MapThingFlag::Skill5;
 
 		P_PostProcessMapThing(&mt, i, &mobjcount, mobjlist);
 	}
@@ -1701,7 +1705,7 @@ static void P_LoadUDMFThings(int lump)
 		mt.height = dsda_StringToFixed(dmt->height);
 		mt.angle = dmt->angle;
 		mt.type = dmt->type;
-		mt.options = 0;
+		mt.options = MapThingFlag{};
 		mt.special = dmt->special;
 		mt.special_args[0] = dmt->arg0;
 		mt.special_args[1] = dmt->arg1;
@@ -1740,67 +1744,67 @@ static void P_LoadUDMFThings(int lump)
 			}
 		}
 
-		mt.options |= MTF_NOTSINGLE | MTF_NOTDM | MTF_NOTCOOP;
+		mt.options |= MapThingFlag::NotSingle | MapThingFlag::NotDm | MapThingFlag::NotCoop;
 
-		if(dmt->flags & UDMF_TF_SKILL1)
-			mt.options |= MTF_SKILL1;
+		if((dmt->flags & UdmfThingFlag::Skill1) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Skill1;
 
-		if(dmt->flags & UDMF_TF_SKILL2)
-			mt.options |= MTF_SKILL2;
+		if((dmt->flags & UdmfThingFlag::Skill2) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Skill2;
 
-		if(dmt->flags & UDMF_TF_SKILL3)
-			mt.options |= MTF_SKILL3;
+		if((dmt->flags & UdmfThingFlag::Skill3) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Skill3;
 
-		if(dmt->flags & UDMF_TF_SKILL4)
-			mt.options |= MTF_SKILL4;
+		if((dmt->flags & UdmfThingFlag::Skill4) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Skill4;
 
-		if(dmt->flags & UDMF_TF_SKILL5)
-			mt.options |= MTF_SKILL5;
+		if((dmt->flags & UdmfThingFlag::Skill5) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Skill5;
 
-		if(dmt->flags & UDMF_TF_AMBUSH)
-			mt.options |= MTF_AMBUSH;
+		if((dmt->flags & UdmfThingFlag::Ambush) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Ambush;
 
-		if(dmt->flags & UDMF_TF_SINGLE)
+		if((dmt->flags & UdmfThingFlag::Single) != UdmfThingFlag{})
 		{
-			mt.options |= MTF_GSINGLE;
-			mt.options &= ~MTF_NOTSINGLE;
+			mt.options |= MapThingFlag::GSingle;
+			mt.options -= MapThingFlag::NotSingle;
 		}
 
-		if(dmt->flags & UDMF_TF_DM)
+		if((dmt->flags & UdmfThingFlag::Dm) != UdmfThingFlag{})
 		{
-			mt.options |= MTF_GDEATHMATCH;
-			mt.options &= ~MTF_NOTDM;
+			mt.options |= MapThingFlag::GDeathmatch;
+			mt.options -= MapThingFlag::NotDm;
 		}
 
-		if(dmt->flags & UDMF_TF_COOP)
+		if((dmt->flags & UdmfThingFlag::Coop) != UdmfThingFlag{})
 		{
-			mt.options |= MTF_GCOOP;
-			mt.options &= ~MTF_NOTCOOP;
+			mt.options |= MapThingFlag::GCoop;
+			mt.options -= MapThingFlag::NotCoop;
 		}
 
-		if(dmt->flags & UDMF_TF_FRIEND)
-			mt.options |= MTF_FRIENDLY;
+		if((dmt->flags & UdmfThingFlag::Friend) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Friendly;
 
-		if(dmt->flags & UDMF_TF_DORMANT)
-			mt.options |= MTF_DORMANT;
+		if((dmt->flags & UdmfThingFlag::Dormant) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Dormant;
 
-		if(dmt->flags & UDMF_TF_CLASS1)
-			mt.options |= MTF_FIGHTER;
+		if((dmt->flags & UdmfThingFlag::Class1) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Fighter;
 
-		if(dmt->flags & UDMF_TF_CLASS2)
-			mt.options |= MTF_CLERIC;
+		if((dmt->flags & UdmfThingFlag::Class2) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Cleric;
 
-		if(dmt->flags & UDMF_TF_CLASS3)
-			mt.options |= MTF_MAGE;
+		if((dmt->flags & UdmfThingFlag::Class3) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Mage;
 
-		if(dmt->flags & UDMF_TF_TRANSLUCENT)
-			mt.options |= MTF_TRANSLUCENT;
+		if((dmt->flags & UdmfThingFlag::Translucent) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Translucent;
 
-		if(dmt->flags & UDMF_TF_INVISIBLE)
-			mt.options |= MTF_INVISIBLE;
+		if((dmt->flags & UdmfThingFlag::Invisible) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::Invisible;
 
-		if(dmt->flags & UDMF_TF_COUNTSECRET)
-			mt.options |= MTF_COUNTSECRET;
+		if((dmt->flags & UdmfThingFlag::CountSecret) != UdmfThingFlag{})
+			mt.options |= MapThingFlag::CountSecret;
 
 		P_PostProcessMapThing(&mt, i, &mobjcount, mobjlist);
 	}

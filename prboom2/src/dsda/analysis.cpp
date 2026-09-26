@@ -136,8 +136,11 @@ void dsda_WriteAnalysis()
 	std::println(file, "signature {}", std::to_underlying(analysis.signature));
 }
 
-#define SKILL4 3
-#define SKILL5 4
+// `gameskill` values of the two skills with speedrun categories.
+// `gameskill` is an index into the skills, which MAPINFO can extend, so these are not an enum.
+// They are needed for detecting a category anyway.
+constexpr int32_t k_Skill_UltraViolence = 3;
+constexpr int32_t k_Skill_Nightmare = 4;
 
 const char* dsda_DetectCategory()
 {
@@ -178,7 +181,7 @@ const char* dsda_DetectCategory()
 	if(solo_net) return "Other";
 	if(dsda_reborn) return "Other";
 
-	if(gameskill == SKILL4)
+	if(gameskill == k_Skill_UltraViolence)
 	{
 		if(dsda_nomo && !dsda_respawn && !dsda_fast)
 		{
@@ -210,7 +213,7 @@ const char* dsda_DetectCategory()
 
 		return "UV Speed";
 	}
-	else if(gameskill == SKILL5)
+	else if(gameskill == k_Skill_Nightmare)
 	{
 		if(nomonsters) return "Other";
 		if(satisfies_100s) return "NM 100S";

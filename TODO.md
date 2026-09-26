@@ -54,3 +54,16 @@ The written files must not change:
 - `M_OpenFile` converts the UTF-8 name to wide on Windows; open streams from a `std::filesystem::path` built with `std::u8string` so non-ASCII paths keep working.
 
 `dsda_WriteAnalysis` in `dsda/analysis.cpp` is already converted and shows the pattern.
+
+## Enums still written as `#define`
+
+Groups of `#define`s that are really an enum or a set of flags, to become `enum struct`s (see the enum rules in `CLAUDE.md`).
+Done so far: `MTF_*` (now `MapThingFlag`), `UDMF_TF_*` (`UdmfThingFlag`), and `SKILL4`/`SKILL5` (local constants, because `gameskill` is an open index).
+Convert a few groups per batch, then build and run the spec suite.
+
+Candidates found by scanning for 3+ adjacent numeric `#define`s with a shared prefix; check each one, some may turn out to be plain constants:
+- **Flags:** `ML_` (`doomdata.hpp`), `CF_` (`d_player.hpp`), `CF_` (`dsda/console.cpp`), `WIF_` (`d_items.hpp`), `DF_` (`dsda/demo.cpp`), `XC_` (`dsda/excmd.hpp`), `VF_` (`dsda/map_format.hpp`), `WI_SHOW_NEXT_` (`dsda/mapinfo.hpp`), `PAUSE_` (`dsda/pause.hpp`), `SCROLL_` (`dsda/scroll.hpp`), `SI_` (`dsda/skill_info.hpp`), `UDMF_ML_`, `UDMF_SF_`, `UDMF_SECF_` (`dsda/udmf.hpp`), `DEMOHEADER_` (`g_game.cpp`), `PT_` (`p_maputl.hpp`), `SHARDSPAWN_` (`p_pspr.cpp`), `STAIR_`, `TELF_` and the other groups after `NO_CRUSH` (`p_spec.hpp`), `NO_TOPTEXTURES`... (`r_defs.hpp`), `SF_`, `RF_` (`r_defs.hpp`), `RDC_` (`r_draw.cpp`), `TI_` (`d_deh.cpp`), `S_` menu item flags (`m_menu.cpp`, ~1800 uses).
+- **Flags with a packed field** (need extractor functions): `HML_`/`ZML_` (`doomdata.hpp`, the `SPAC` bits), `AFLAG_` (`doomdef.hpp`), `ZDOOM_*_MASK` (`p_spec.hpp`).
+- **Plain enumerations:** `MCMD_` (`dsda/mapinfo/hexen.cpp`), `PRB_MB_` (`e6y.hpp`), `GLDWF_`, `SKY_` (`gl_intern.hpp`), `WGLSTATE_` (`p_floor.cpp`), `LIGHT_SEQUENCE*` (`p_spec.hpp`), `SIL_` (`r_defs.hpp`), `KEYD_` (`doomdef.hpp`).
+
+The scan misses two-entry groups like the old `SKILL4`/`SKILL5`, so expect a few more.
