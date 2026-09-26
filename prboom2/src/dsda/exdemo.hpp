@@ -7,12 +7,14 @@
 
 #include "doomtype.hpp"
 
+#include "dsda/exdemo_signature.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-int dsda_IsExDemoSigned();
+Signature dsda_IsExDemoSigned();
 void dsda_MergeExDemoFeatures();
 void dsda_LoadExDemo(const char* filename);
 int dsda_CopyExDemo(const byte** buffer, int* length);

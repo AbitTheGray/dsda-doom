@@ -34,7 +34,7 @@ typedef struct
 	size_t demo_size;
 	size_t footer_size;
 	byte features[FEATURE_SLOTS];
-	int is_signed;
+	Signature is_signed;
 } exdemo_t;
 
 static exdemo_t exdemo;
@@ -419,20 +419,20 @@ static void DemoEx_AddParams(wadtbl_t* wadtbl)
 	dsda_FreeString(&dehs);
 }
 
-int dsda_IsExDemoSigned()
+Signature dsda_IsExDemoSigned()
 {
 	return exdemo.is_signed;
 }
 
 void dsda_MergeExDemoFeatures()
 {
-	if(!exdemo.is_signed)
+	if(exdemo.is_signed == Signature::Unsigned)
 		dsda_TrackFeature(FeatureFlag::Unknown);
 	else
 	{
 		dsda_MergeFeatures(exdemo.features);
 
-		if(exdemo.is_signed == -1)
+		if(exdemo.is_signed == Signature::Invalid)
 			dsda_TrackFeature(FeatureFlag::Invalid);
 	}
 }
@@ -445,7 +445,7 @@ static void DemoEx_GetFeatures(const wadinfo_t* header)
 	int ftext_start = 0;
 	int ftext_end = 0;
 
-	exdemo.is_signed = 0;
+	exdemo.is_signed = Signature::Unsigned;
 	for(int f = 0; f < FEATURE_SLOTS; f++)
 	{
 		exdemo.features[f] = 0;
@@ -479,14 +479,14 @@ static void DemoEx_GetFeatures(const wadinfo_t* header)
 		dsda_GetDemoCheckSum(&cksum, features, ftext_slots, exdemo.demo, exdemo.demo_size);
 
 		if(!strcmp(signature, cksum.string))
-			exdemo.is_signed = 1;
+			exdemo.is_signed = Signature::Signed;
 		else
-			exdemo.is_signed = -1;
+			exdemo.is_signed = Signature::Invalid;
 
 		Z_Free(features);
 	}
 	else
-		exdemo.is_signed = -1;
+		exdemo.is_signed = Signature::Invalid;
 
 	Z_Free(str);
 }

@@ -5,6 +5,7 @@
 
 #include <charconv>
 #include <format>
+#include <utility>
 
 #include "Analysis.hpp"
 #include "Text.hpp"
@@ -32,9 +33,25 @@ namespace
 
 		return *value != 0;
 	}
+
+	[[nodiscard]] std::expected<Signature, std::string> ParseSignature(const std::string_view text)
+	{
+		const auto value = ParseInteger(text);
+
+		if(!value)
+			return std::unexpected(value.error());
+
+		for(const Signature signature : {Signature::Invalid, Signature::Unsigned, Signature::Signed})
+		{
+			if(*value == std::to_underlying(signature))
+				return signature;
+		}
+
+		return std::unexpected(std::format("'{}' is not a signature state", text));
+	}
 }
 
-std::expected<Analysis, std::string> Analysis::Parse(const std::string_view contents)
+std::expected<Analysis, std::string> ParseAnalysis(const std::string_view contents)
 {
 	Analysis analysis;
 
@@ -74,6 +91,17 @@ std::expected<Analysis, std::string> Analysis::Parse(const std::string_view cont
 			return {};
 		};
 
+		const auto assignSignature = [&](Signature& target) -> std::expected<void, std::string>
+		{
+			const auto parsed = ParseSignature(value);
+
+			if(!parsed)
+				return std::unexpected(std::format("{}: {}", key, parsed.error()));
+
+			target = *parsed;
+			return {};
+		};
+
 		std::expected<void, std::string> result;
 
 		if(key == "skill")                 result = assignInteger(analysis.skill);
@@ -95,7 +123,7 @@ std::expected<Analysis, std::string> Analysis::Parse(const std::string_view cont
 		else if(key == "solo_net")         result = assignFlag(analysis.soloNet);
 		else if(key == "coop_spawns")      result = assignFlag(analysis.coopSpawns);
 		else if(key == "category")         analysis.category = value;
-		else if(key == "signature")        result = assignFlag(analysis.signature);
+		else if(key == "signature")        result = assignSignature(analysis.signature);
 		// An unknown key means the game grew a field we do not track yet, which
 		// is not a reason to fail the run that produced it.
 
@@ -106,12 +134,12 @@ std::expected<Analysis, std::string> Analysis::Parse(const std::string_view cont
 	return analysis;
 }
 
-std::expected<Analysis, std::string> Analysis::Read(const std::filesystem::path& file)
+std::expected<Analysis, std::string> ReadAnalysis(const std::filesystem::path& file)
 {
 	const auto contents = Spec::ReadFile(file);
 
 	if(!contents)
 		return std::unexpected(contents.error());
 
-	return Parse(*contents);
+	return ParseAnalysis(*contents);
 }

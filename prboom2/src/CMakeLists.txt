@@ -17,6 +17,7 @@ set(COMMON_SRC
     dsda/ambient.hpp
     dsda/analysis.cpp
     dsda/analysis.hpp
+    dsda/analysis_report.hpp
     dsda/args.cpp
     dsda/args.hpp
     dsda/brute_force.cpp
@@ -49,6 +50,7 @@ set(COMMON_SRC
     dsda/excmd.hpp
     dsda/exdemo.cpp
     dsda/exdemo.hpp
+    dsda/exdemo_signature.hpp
     dsda/exhud.cpp
     dsda/exhud.hpp
     dsda/features.cpp

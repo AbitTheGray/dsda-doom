@@ -3,6 +3,8 @@
 // DESCRIPTION:
 //	DSDA Analysis
 
+#include <utility>
+
 #include "doomstat.hpp"
 #include "m_file.hpp"
 
@@ -11,6 +13,7 @@
 #include "dsda/settings.hpp"
 
 #include "analysis.hpp"
+#include "analysis_report.hpp"
 
 int dsda_analysis;
 
@@ -65,13 +68,9 @@ void dsda_ResetAnalysis()
 
 void dsda_WriteAnalysis()
 {
-	FILE* fstream = nullptr;
-	const char* category = nullptr;
-	int is_signed;
-
 	if(!dsda_analysis) return;
 
-	fstream = M_OpenFile("analysis.txt", "w");
+	FILE* fstream = M_OpenFile("analysis.txt", "w");
 
 	if(fstream == nullptr)
 	{
@@ -79,29 +78,55 @@ void dsda_WriteAnalysis()
 		return;
 	}
 
-	category = dsda_DetectCategory();
-	is_signed = dsda_IsExDemoSigned();
+	// Detect the category first - it sets `dsda_nomo`, `dsda_respawn` and
+	// `dsda_fast`, and clears `dsda_almost_reality`, `dsda_stroller` and
+	// `dsda_weapon_collector`, all of which are read below.
+	const std::string category = dsda_DetectCategory();
 
-	fprintf(fstream, "skill %d\n", gameskill + 1);
-	fprintf(fstream, "nomonsters %d\n", dsda_nomo);
-	fprintf(fstream, "respawn %d\n", dsda_respawn);
-	fprintf(fstream, "fast %d\n", dsda_fast);
-	fprintf(fstream, "pacifist %d\n", dsda_pacifist);
-	fprintf(fstream, "stroller %d\n", dsda_stroller);
-	fprintf(fstream, "reality %d\n", dsda_reality);
-	fprintf(fstream, "almost_reality %d\n", dsda_almost_reality);
-	fprintf(fstream, "reborn %d\n", dsda_reborn);
-	fprintf(fstream, "100k %d\n", dsda_100k);
-	fprintf(fstream, "100s %d\n", dsda_100s);
-	fprintf(fstream, "missed_monsters %d\n", dsda_missed_monsters);
-	fprintf(fstream, "missed_secrets %d\n", dsda_missed_secrets);
-	fprintf(fstream, "weapon_collector %d\n", dsda_weapon_collector);
-	fprintf(fstream, "tyson_weapons %d\n", dsda_tyson_weapons);
-	fprintf(fstream, "turbo %d\n", dsda_turbo);
-	fprintf(fstream, "solo_net %d\n", solo_net);
-	fprintf(fstream, "coop_spawns %d\n", coop_spawns);
-	fprintf(fstream, "category %s\n", category);
-	fprintf(fstream, "signature %d\n", is_signed);
+	const Analysis analysis {
+		.skill = gameskill + 1,
+		.noMonsters = dsda_nomo != 0,
+		.respawn = dsda_respawn != 0,
+		.fast = dsda_fast != 0,
+		.pacifist = dsda_pacifist != 0,
+		.stroller = dsda_stroller != 0,
+		.reality = dsda_reality != 0,
+		.almostReality = dsda_almost_reality != 0,
+		.reborn = dsda_reborn != 0,
+		.hundredKills = dsda_100k != 0,
+		.hundredSecrets = dsda_100s != 0,
+		.missedMonsters = dsda_missed_monsters,
+		.missedSecrets = dsda_missed_secrets,
+		.weaponCollector = dsda_weapon_collector != 0,
+		.tysonWeapons = dsda_tyson_weapons != 0,
+		.turbo = dsda_turbo != 0,
+		.soloNet = solo_net != 0,
+		.coopSpawns = coop_spawns != 0,
+		.category = category,
+		.signature = dsda_IsExDemoSigned(),
+	};
+
+	// A `bool` passed to `%d` is promoted to `int`, so the flags print as 0 or 1.
+	fprintf(fstream, "skill %d\n", analysis.skill);
+	fprintf(fstream, "nomonsters %d\n", analysis.noMonsters);
+	fprintf(fstream, "respawn %d\n", analysis.respawn);
+	fprintf(fstream, "fast %d\n", analysis.fast);
+	fprintf(fstream, "pacifist %d\n", analysis.pacifist);
+	fprintf(fstream, "stroller %d\n", analysis.stroller);
+	fprintf(fstream, "reality %d\n", analysis.reality);
+	fprintf(fstream, "almost_reality %d\n", analysis.almostReality);
+	fprintf(fstream, "reborn %d\n", analysis.reborn);
+	fprintf(fstream, "100k %d\n", analysis.hundredKills);
+	fprintf(fstream, "100s %d\n", analysis.hundredSecrets);
+	fprintf(fstream, "missed_monsters %d\n", analysis.missedMonsters);
+	fprintf(fstream, "missed_secrets %d\n", analysis.missedSecrets);
+	fprintf(fstream, "weapon_collector %d\n", analysis.weaponCollector);
+	fprintf(fstream, "tyson_weapons %d\n", analysis.tysonWeapons);
+	fprintf(fstream, "turbo %d\n", analysis.turbo);
+	fprintf(fstream, "solo_net %d\n", analysis.soloNet);
+	fprintf(fstream, "coop_spawns %d\n", analysis.coopSpawns);
+	fprintf(fstream, "category %s\n", analysis.category.c_str());
+	fprintf(fstream, "signature %d\n", std::to_underlying(analysis.signature));
 
 	fclose(fstream);
 

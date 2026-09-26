@@ -154,7 +154,7 @@ Analysis DemoRun::GetAnalysis() const
 	if(m_analysis.empty())
 		Fail("the game wrote no analysis.txt");
 
-	const auto analysis = Analysis::Parse(m_analysis);
+	const auto analysis = ParseAnalysis(m_analysis);
 
 	if(!analysis)
 		Fail(std::format("could not read analysis.txt: {}", analysis.error()));

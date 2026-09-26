@@ -76,6 +76,11 @@ It needs `prboom2/src/cpp/Util.hpp`.
 Use owning `std::string` if we own it, and `std::string_view` if we don't but can trust its lifetime.
 `std::string_view` is especially good for procedure arguments as it allows some processing in parent without allocating new strings.
 
+## Use `std::format`, not `printf`
+Format text with `std::format` (`"Some {} text"`), not the `printf` family (`"Some %d text"`).
+The type comes from the argument itself, so it cannot be mistyped.
+Where the output must stay identical to upstream, mind where the two differ: a `bool` prints `true`/`false` unless formatted as `{:d}`, and a `char` prints as a character, not a number.
+
 ## Implement `std::formatter` override
 For types where it makes sense, let's implement a formatter so it is easier to write it out.
 ```cpp

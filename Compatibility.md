@@ -38,3 +38,23 @@ A button number from 23 up to the byte size read past the table; it now gets the
 Only the name shown in the menu is affected, not input or demos.
 
 Code: `dsda_GameControllerButtonName` in `prboom2/src/dsda/game_controller.cpp`.
+
+# To report upstream
+
+Behaviour that looks like an upstream bug, kept as it is here for compatibility.
+
+## `analysis.txt` writes `signature -1`
+
+Every flag in `analysis.txt` is written as 0 or 1, and `signature` reads like one of
+them. It has a third value: `-1` when the
+demo's `FEATURES` lump is malformed or its signature does not match (`0` means there
+is no lump, `1` a valid signature). A reader that treats it as a flag takes `-1` as
+set, so a demo with a bad signature passes as signed. Our own spec suite did exactly
+that until it was fixed.
+
+We still write `-1`. Upstream could document the three values, or split them into
+separate keys.
+
+Code: `DemoEx_GetFeatures` in `prboom2/src/dsda/exdemo.cpp` sets the value
+(`Signature` in `prboom2/src/dsda/exdemo_signature.hpp`), and `dsda_WriteAnalysis`
+in `prboom2/src/dsda/analysis.cpp` writes it.

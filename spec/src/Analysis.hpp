@@ -2,40 +2,17 @@
 
 // DESCRIPTION:
 //	Parser for the `analysis.txt` report.
-//	Mirrors `dsda_WriteAnalysis` in `prboom2/src/dsda/analysis.c` - every key it
-//	writes has a field here, in the same order.
+//	The struct itself is the game's, filled by `dsda_WriteAnalysis` in
+//	`prboom2/src/dsda/analysis.cpp`.
 
 #pragma once
 
-#include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <string>
 #include <string_view>
 
-struct Analysis
-{
-	int32_t skill = 0;
-	bool noMonsters = false;
-	bool respawn = false;
-	bool fast = false;
-	bool pacifist = false;
-	bool stroller = false;
-	bool reality = false;
-	bool almostReality = false;
-	bool reborn = false;
-	bool hundredKills = false;
-	bool hundredSecrets = false;
-	int32_t missedMonsters = 0;
-	int32_t missedSecrets = 0;
-	bool weaponCollector = false;
-	bool tysonWeapons = false;
-	bool turbo = false;
-	bool soloNet = false;
-	bool coopSpawns = false;
-	std::string category;
-	bool signature = false;
+#include "dsda/analysis_report.hpp"
 
-	[[nodiscard]] static std::expected<Analysis, std::string> Parse(std::string_view contents);
-	[[nodiscard]] static std::expected<Analysis, std::string> Read(const std::filesystem::path& file);
-};
+[[nodiscard]] std::expected<Analysis, std::string> ParseAnalysis(std::string_view contents);
+[[nodiscard]] std::expected<Analysis, std::string> ReadAnalysis(const std::filesystem::path& file);
