@@ -131,8 +131,8 @@ int g_door_open;
 
 int g_st_height;
 int g_border_offset;
-int g_mf_translucent;
-int g_mf_shadow;
+MobjFlag g_mf_translucent;
+MobjFlag g_mf_shadow;
 
 const char* g_menu_flat;
 int g_menu_save_page_size;
@@ -220,8 +220,8 @@ static void dsda_InitDoom()
 
 	g_st_height = 32;
 	g_border_offset = 8;
-	g_mf_translucent = MF_TRANSLUCENT;
-	g_mf_shadow = MF_SHADOW;
+	g_mf_translucent = MobjFlag::Translucent;
+	g_mf_shadow = MobjFlag::Shadow;
 
 	g_menu_flat = "FLOOR4_6";
 	g_menu_save_page_size = 7;
@@ -410,8 +410,8 @@ static void dsda_InitHeretic()
 
 	g_st_height = 42;
 	g_border_offset = 4;
-	g_mf_translucent = MF_SHADOW;
-	g_mf_shadow = 0; // doesn't exist in heretic
+	g_mf_translucent = MobjFlag::Shadow;
+	g_mf_shadow = MobjFlag{}; // doesn't exist in heretic
 
 	g_menu_flat = "FLOOR30";
 	g_menu_save_page_size = 5;
@@ -578,8 +578,8 @@ static void dsda_InitHexen()
 
 	g_st_height = 39;
 	g_border_offset = 4;
-	g_mf_translucent = MF_SHADOW; // hexen_note: how does ALTSHADOW fit in?
-	g_mf_shadow = 0;              // doesn't exist in hexen
+	g_mf_translucent = MobjFlag::Shadow; // hexen_note: how does ALTSHADOW fit in?
+	g_mf_shadow = MobjFlag{};     // doesn't exist in hexen
 
 	g_menu_flat = "F_032";
 	g_menu_save_page_size = 5;

@@ -142,7 +142,7 @@ static mobj_t* P_TeleportDestination(short thing_id, int tag)
 					dsda_ResetThingIDSearch(&search);
 					while((target = dsda_FindMobjFromThingID(thing_id, &search)))
 					{
-						if(!(target->flags & MF_SOLID))
+						if((target->flags & MobjFlag::Solid) == MobjFlag{})
 						{
 							break;
 						}
@@ -441,7 +441,7 @@ extern "C" int EV_CompatibleTeleport(short thing_id, int tag, line_t* line, int 
 	// don't teleport missiles
 	// Don't teleport if hit back of line,
 	//  so you can get out of teleporter.
-	if(side || thing->flags & MF_MISSILE)
+	if(side || (thing->flags & MobjFlag::Missile) != MobjFlag{})
 		return 0;
 
 	if((m = P_TeleportDestination(thing_id, tag)) != nullptr)
@@ -468,7 +468,7 @@ int EV_SilentLineTeleport(line_t* line, int side, mobj_t* thing,
 	const int* i;
 	line_t* l;
 
-	if(side || thing->flags & MF_MISSILE)
+	if(side || (thing->flags & MobjFlag::Missile) != MobjFlag{})
 		return 0;
 
 	for(i = dsda_FindLinesFromID(tag); *i >= 0; i++)
@@ -633,7 +633,7 @@ dboolean P_Teleport(mobj_t* thing, fixed_t x, fixed_t y, angle_t angle, dboolean
 			}
 		}
 	}
-	else if(thing->flags & MF_MISSILE)
+	else if((thing->flags & MobjFlag::Missile) != MobjFlag{})
 	{
 		thing->z = thing->floorz + aboveFloor;
 		if(thing->z + thing->height > thing->ceilingz)
@@ -648,7 +648,7 @@ dboolean P_Teleport(mobj_t* thing, fixed_t x, fixed_t y, angle_t angle, dboolean
 	// Spawn teleport fog at source and destination
 	if(useFog)
 	{
-		fogDelta = thing->flags & MF_MISSILE ? 0 : TELEFOGHEIGHT;
+		fogDelta = (thing->flags & MobjFlag::Missile) != MobjFlag{} ? 0 : TELEFOGHEIGHT;
 		fog = P_SpawnMobj(oldx, oldy, oldz + fogDelta, static_cast<MobjType>(g_mt_tfog));
 		S_StartMobjSound(fog, g_sfx_telept);
 		an = angle >> ANGLETOFINESHIFT;
@@ -693,7 +693,7 @@ dboolean P_Teleport(mobj_t* thing, fixed_t x, fixed_t y, angle_t angle, dboolean
 		}
 	}
 
-	if(thing->flags & MF_MISSILE)
+	if((thing->flags & MobjFlag::Missile) != MobjFlag{})
 	{
 		angle >>= ANGLETOFINESHIFT;
 		thing->momx = FixedMul(thing->info->speed, finecosine[angle]);

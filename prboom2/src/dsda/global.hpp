@@ -10,6 +10,7 @@
 enum struct SfxId : int32_t;
 enum struct MobjType : int32_t;
 enum struct StateId : int32_t;
+enum struct MobjFlag : uint64_t;
 
 #ifdef __cplusplus
 extern "C"
@@ -109,8 +110,8 @@ extern int g_door_open;
 
 extern int g_st_height;
 extern int g_border_offset;
-extern int g_mf_translucent;
-extern int g_mf_shadow;
+extern MobjFlag g_mf_translucent;
+extern MobjFlag g_mf_shadow;
 
 extern const char* g_skyflatname;
 

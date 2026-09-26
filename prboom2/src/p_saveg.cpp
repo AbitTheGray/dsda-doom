@@ -1606,7 +1606,7 @@ void P_UnArchiveThinkers()
 				if(heretic && mobj->type == MobjType::HereticBlasterfx1)
 					mobj->thinker.function = reinterpret_cast<think_t>(P_BlasterMobjThinker);
 
-				if(!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL | MF_CORPSE)))
+				if(((mobj->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill | MobjFlag::Corpse)) == MobjFlag{})
 					totallive++;
 				break;
 			}

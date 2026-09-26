@@ -132,7 +132,7 @@ static dboolean P_CheckRange(mobj_t* actor, fixed_t range)
 
 	return // killough 7/18/98: friendly monsters don't attack other friends
 		pl &&
-		!(actor->flags & pl->flags & MF_FRIEND) &&
+		(actor->flags & pl->flags & MobjFlag::Friend) == MobjFlag{} &&
 		P_AproxDistance(pl->x - actor->x, pl->y - actor->y) < range &&
 		P_CheckSight(actor, actor->target) &&
 		( // finite height!
@@ -172,14 +172,14 @@ static dboolean P_CheckMeleeRange(mobj_t* actor)
 
 static dboolean P_HitFriend(mobj_t* actor)
 {
-	return actor->flags & MF_FRIEND && actor->target &&
+	return (actor->flags & MobjFlag::Friend) != MobjFlag{} && actor->target &&
 		(P_AimLineAttack(actor,
 				R_PointToAngle2(actor->x, actor->y,
 					actor->target->x, actor->target->y),
 				P_AproxDistance(actor->x - actor->target->x,
-					actor->y - actor->target->y), 0),
+					actor->y - actor->target->y), MobjFlag{}),
 			linetarget) && linetarget != actor->target &&
-		!((linetarget->flags ^ actor->flags) & MF_FRIEND);
+		((linetarget->flags ^ actor->flags) & MobjFlag::Friend) == MobjFlag{};
 }
 
 //
@@ -195,26 +195,26 @@ static dboolean P_CheckMissileRange(mobj_t* actor)
 	if(!P_CheckSight(actor, actor->target))
 		return false;
 
-	if(actor->flags & MF_JUSTHIT)
+	if((actor->flags & MobjFlag::JustHit) != MobjFlag{})
 	{
 		// the target just hit the enemy, so fight back!
-		actor->flags &= ~MF_JUSTHIT;
+		actor->flags -= MobjFlag::JustHit;
 
 		/* killough 7/18/98: no friendly fire at corpses
 		* killough 11/98: prevent too much infighting among friends
 		* cph - yikes, talk about fitting everything on one line... */
 
 		return
-			!(actor->flags & MF_FRIEND) ||
+			(actor->flags & MobjFlag::Friend) == MobjFlag{} ||
 			(actor->target->health > 0 &&
-				(!(actor->target->flags & MF_FRIEND) ||
-					(actor->target->player ? monster_infighting || P_Random(RandomClass::Defect) > 128 : !(actor->target->flags & MF_JUSTHIT) && P_Random(RandomClass::Defect) > 128)));
+				((actor->target->flags & MobjFlag::Friend) == MobjFlag{} ||
+					(actor->target->player ? monster_infighting || P_Random(RandomClass::Defect) > 128 : (actor->target->flags & MobjFlag::JustHit) == MobjFlag{} && P_Random(RandomClass::Defect) > 128)));
 	}
 
 	/* killough 7/18/98: friendly monsters don't attack other friendly
 	* monsters or players (except when attacked, and then only once)
 	*/
-	if(actor->flags & actor->target->flags & MF_FRIEND)
+	if((actor->flags & actor->target->flags & MobjFlag::Friend) != MobjFlag{})
 		return false;
 
 	if(actor->reactiontime)
@@ -412,7 +412,7 @@ static dboolean P_Move(mobj_t* actor, dboolean dropoff) /* killough 9/12/98 */
 		map_format.zdoom &&
 		actor->z > actor->floorz &&
 		actor->z <= actor->floorz + (24 << FRACBITS) &&
-		!(actor->flags & MF_NOGRAVITY) &&
+		(actor->flags & MobjFlag::NoGravity) == MobjFlag{} &&
 		(actor->flags2 & MobjFlag2::OnMobj) == MobjFlag2{})
 	{
 		fixed_t saved_z = actor->z;
@@ -432,14 +432,14 @@ static dboolean P_Move(mobj_t* actor, dboolean dropoff) /* killough 9/12/98 */
 		// open any specials
 		int good;
 
-		if(actor->flags & MF_FLOAT && floatok)
+		if((actor->flags & MobjFlag::Float) != MobjFlag{} && floatok)
 		{
 			if(actor->z < tmfloorz) // must adjust height
 				actor->z += FLOATSPEED;
 			else
 				actor->z -= FLOATSPEED;
 
-			actor->flags |= MF_INFLOAT;
+			actor->flags |= MobjFlag::InFloat;
 
 			return true;
 		}
@@ -488,10 +488,10 @@ static dboolean P_Move(mobj_t* actor, dboolean dropoff) /* killough 9/12/98 */
 			return ((P_Random(RandomClass::Opendoor) >= 230) ^ (good & 1));
 	}
 	else
-		actor->flags &= ~MF_INFLOAT;
+		actor->flags -= MobjFlag::InFloat;
 
 	/* killough 11/98: fall more slowly, under gravity, if felldown==true */
-	if(!map_format.zdoom && !(actor->flags & MF_FLOAT) && (!felldown || !mbf_features))
+	if(!map_format.zdoom && (actor->flags & MobjFlag::Float) == MobjFlag{} && (!felldown || !mbf_features))
 	{
 		if(raven && actor->z > actor->floorz)
 		{
@@ -529,9 +529,9 @@ static dboolean P_SmartMove(mobj_t* actor)
 
 	// haleyjd: allow all friends of HelperType to also jump down
 
-	if((actor->type == MobjType::Dogs || (actor->type == static_cast<MobjType>(HelperThing - 1) && actor->flags & MF_FRIEND))
+	if((actor->type == MobjType::Dogs || (actor->type == static_cast<MobjType>(HelperThing - 1) && (actor->flags & MobjFlag::Friend) != MobjFlag{}))
 		&& target && dog_jumping &&
-		!((target->flags ^ actor->flags) & MF_FRIEND) &&
+		((target->flags ^ actor->flags) & MobjFlag::Friend) == MobjFlag{} &&
 		P_AproxDistance(actor->x - target->x,
 			actor->y - target->y) < FRACUNIT * 144 &&
 		P_Random(RandomClass::Dropoff) < 235)
@@ -736,7 +736,7 @@ static void P_NewChaseDir(mobj_t* actor)
 		if(
 			actor->floorz - actor->dropoffz > FRACUNIT * 24 &&
 			actor->z <= actor->floorz &&
-			!(actor->flags & (MF_DROPOFF | MF_FLOAT)) &&
+			(actor->flags & (MobjFlag::DropOff | MobjFlag::Float)) == MobjFlag{} &&
 			!comp[std::to_underlying(CompOption::DropOff)] &&
 			P_AvoidDropoff(actor)
 		) /* Move away from dropoff */
@@ -756,13 +756,13 @@ static void P_NewChaseDir(mobj_t* actor)
 			// Move away from friends when too close, except
 			// in certain situations (e.g. a crowded lift)
 
-			if(actor->flags & target->flags & MF_FRIEND &&
+			if((actor->flags & target->flags & MobjFlag::Friend) != MobjFlag{} &&
 				distfriend << FRACBITS > dist &&
 				!P_IsOnLift(target) && !P_IsUnderDamage(actor))
 			{
 				deltax = -deltax, deltay = -deltay;
 			}
-			else if(target->health > 0 && (actor->flags ^ target->flags) & MF_FRIEND)
+			else if(target->health > 0 && ((actor->flags ^ target->flags) & MobjFlag::Friend) != MobjFlag{})
 			{
 				// Live enemy target
 				if(
@@ -828,8 +828,8 @@ static dboolean PIT_FindTarget(mobj_t* mo)
 {
 	mobj_t* actor = current_actor;
 
-	if(!((mo->flags ^ actor->flags) & MF_FRIEND && // Invalid target
-		mo->health > 0 && (mo->flags & MF_COUNTKILL || mo->type == MobjType::Skull)))
+	if(!(((mo->flags ^ actor->flags) & MobjFlag::Friend) != MobjFlag{} && // Invalid target
+		mo->health > 0 && ((mo->flags & MobjFlag::CountKill) != MobjFlag{} || mo->type == MobjType::Skull)))
 		return true;
 
 	// If the monster is already engaged in a one-on-one attack
@@ -838,7 +838,7 @@ static dboolean PIT_FindTarget(mobj_t* mo)
 		const mobj_t* targ = mo->target;
 		if(targ && targ->target == mo &&
 			P_Random(RandomClass::Skiptarget) > 100 &&
-			(targ->flags ^ mo->flags) & MF_FRIEND &&
+			((targ->flags ^ mo->flags) & MobjFlag::Friend) != MobjFlag{} &&
 			targ->health * 2 >= P_MobjSpawnHealth(targ))
 			return true;
 	}
@@ -853,7 +853,7 @@ static dboolean PIT_FindTarget(mobj_t* mo)
 	// list, so that it gets searched last next time.
 
 	{
-		thinker_t* cap = &thinkerclasscap[std::to_underlying(mo->flags & MF_FRIEND ? ThinkerClass::Friends : ThinkerClass::Enemies)];
+		thinker_t* cap = &thinkerclasscap[std::to_underlying((mo->flags & MobjFlag::Friend) != MobjFlag{} ? ThinkerClass::Friends : ThinkerClass::Enemies)];
 		(mo->thinker.cprev->cnext = mo->thinker.cnext)->cprev = mo->thinker.cprev;
 		(mo->thinker.cprev = cap->cprev)->cnext = &mo->thinker;
 		(mo->thinker.cnext = cap)->cprev = &mo->thinker;
@@ -876,7 +876,7 @@ static dboolean P_LookForPlayers(mobj_t* actor, dboolean allaround)
 
 	if(raven) return Raven_P_LookForPlayers(actor, allaround);
 
-	if(actor->flags & MF_FRIEND)
+	if((actor->flags & MobjFlag::Friend) != MobjFlag{})
 	{
 		// killough 9/9/98: friendly monsters go about players differently
 		int anyone;
@@ -895,7 +895,7 @@ static dboolean P_LookForPlayers(mobj_t* actor, dboolean allaround)
 					if(actor->info->missilestate != StateId::Null)
 					{
 						P_SetMobjState(actor, actor->info->seestate);
-						actor->flags &= ~MF_JUSTHIT;
+						actor->flags -= MobjFlag::JustHit;
 					}
 
 					return true;
@@ -982,7 +982,7 @@ static dboolean P_LookForMonsters(mobj_t* actor, dboolean allaround)
 		return false;
 
 	if(actor->lastenemy && actor->lastenemy->health > 0 && monsters_remember &&
-		!(actor->lastenemy->flags & actor->flags & MF_FRIEND)) // not friends
+		(actor->lastenemy->flags & actor->flags & MobjFlag::Friend) == MobjFlag{}) // not friends
 	{
 		P_SetTarget(&actor->target, actor->lastenemy);
 		P_SetTarget(&actor->lastenemy, nullptr);
@@ -994,7 +994,7 @@ static dboolean P_LookForMonsters(mobj_t* actor, dboolean allaround)
 		return false;
 
 	// Search the threaded list corresponding to this object's potential targets
-	cap = &thinkerclasscap[std::to_underlying(actor->flags & MF_FRIEND ? ThinkerClass::Enemies : ThinkerClass::Friends)];
+	cap = &thinkerclasscap[std::to_underlying((actor->flags & MobjFlag::Friend) != MobjFlag{} ? ThinkerClass::Enemies : ThinkerClass::Friends)];
 
 	// Search for new enemy
 
@@ -1070,7 +1070,7 @@ static dboolean P_LookForMonsters(mobj_t* actor, dboolean allaround)
 
 static dboolean P_LookForTargets(mobj_t* actor, int allaround)
 {
-	return actor->flags & MF_FRIEND ? P_LookForMonsters(actor, allaround) || P_LookForPlayers(actor, allaround) : P_LookForPlayers(actor, allaround) || P_LookForMonsters(actor, allaround);
+	return (actor->flags & MobjFlag::Friend) != MobjFlag{} ? P_LookForMonsters(actor, allaround) || P_LookForPlayers(actor, allaround) : P_LookForPlayers(actor, allaround) || P_LookForMonsters(actor, allaround);
 }
 
 //
@@ -1091,7 +1091,7 @@ static dboolean P_HelpFriend(mobj_t* actor)
 	current_allaround = true;
 
 	// Possibly help a friend under 50% health
-	cap = &thinkerclasscap[std::to_underlying(actor->flags & MF_FRIEND ? ThinkerClass::Friends : ThinkerClass::Enemies)];
+	cap = &thinkerclasscap[std::to_underlying((actor->flags & MobjFlag::Friend) != MobjFlag{} ? ThinkerClass::Friends : ThinkerClass::Enemies)];
 
 	for(th = cap->cnext; th != cap; th = th->cnext)
 		if(((mobj_t*)th)->health * 2 >= P_MobjSpawnHealth((mobj_t*)th))
@@ -1099,7 +1099,7 @@ static dboolean P_HelpFriend(mobj_t* actor)
 			if(P_Random(RandomClass::Helpfriend) < 180)
 				break;
 		}
-		else if(((mobj_t*)th)->flags & MF_JUSTHIT &&
+		else if((((mobj_t*)th)->flags & MobjFlag::JustHit) != MobjFlag{} &&
 			((mobj_t*)th)->target &&
 			((mobj_t*)th)->target != actor->target &&
 			!PIT_FindTarget(((mobj_t*)th)->target))
@@ -1164,18 +1164,18 @@ extern "C" void A_Look(mobj_t* actor)
 	actor->pursuecount = 0;
 
 	if(
-		!(actor->flags & MF_FRIEND && P_LookForTargets(actor, false)) &&
+		!((actor->flags & MobjFlag::Friend) != MobjFlag{} && P_LookForTargets(actor, false)) &&
 		!(
 			(targ = actor->subsector->sector->soundtarget) &&
-			targ->flags & MF_SHOOTABLE &&
+			(targ->flags & MobjFlag::Shootable) != MobjFlag{} &&
 			(
 				P_SetTarget(&actor->target, targ),
-				!(actor->flags & MF_AMBUSH) ||
+				(actor->flags & MobjFlag::Ambush) == MobjFlag{} ||
 				P_CheckSight(actor, targ)
 			)
 		) &&
 		(
-			actor->flags & MF_FRIEND || !P_LookForTargets(actor, false)
+			(actor->flags & MobjFlag::Friend) != MobjFlag{} || !P_LookForTargets(actor, false)
 		)
 	)
 		return;
@@ -1289,7 +1289,7 @@ extern "C" void A_Chase(mobj_t* actor)
 			actor->angle += ANG90 / 2;
 	}
 
-	if(!actor->target || !(actor->target->flags & MF_SHOOTABLE))
+	if(!actor->target || (actor->target->flags & MobjFlag::Shootable) == MobjFlag{})
 	{
 		if(!P_LookForTargets(actor,true))                   // look for a new target
 			P_SetMobjState(actor, actor->info->spawnstate); // no new target
@@ -1297,9 +1297,9 @@ extern "C" void A_Chase(mobj_t* actor)
 	}
 
 	// do not attack twice in a row
-	if(actor->flags & MF_JUSTATTACKED)
+	if((actor->flags & MobjFlag::JustAttacked) != MobjFlag{})
 	{
-		actor->flags &= ~MF_JUSTATTACKED;
+		actor->flags -= MobjFlag::JustAttacked;
 		if(!(skill_info.flags & SI_FAST_MONSTERS))
 			P_NewChaseDir(actor);
 		return;
@@ -1314,7 +1314,7 @@ extern "C" void A_Chase(mobj_t* actor)
 		/* killough 8/98: remember an attack
 		* cph - DEMOSYNC? */
 		if(actor->info->missilestate == StateId::Null && !raven)
-			actor->flags |= MF_JUSTHIT;
+			actor->flags |= MobjFlag::JustHit;
 		return;
 	}
 
@@ -1324,7 +1324,7 @@ extern "C" void A_Chase(mobj_t* actor)
 			if(P_CheckMissileRange(actor))
 			{
 				P_SetMobjState(actor, actor->info->missilestate);
-				actor->flags |= MF_JUSTATTACKED;
+				actor->flags |= MobjFlag::JustAttacked;
 				return;
 			}
 
@@ -1358,8 +1358,8 @@ extern "C" void A_Chase(mobj_t* actor)
 						(comp[std::to_underlying(CompOption::Pursuit)] && !netgame) || // and using old pursuit behaviour
 						(
 							( // or the target is not friendly
-								(actor->target->flags ^ actor->flags) & MF_FRIEND ||
-								(!(actor->flags & MF_FRIEND) && monster_infighting)
+								((actor->target->flags ^ actor->flags) & MobjFlag::Friend) != MobjFlag{} ||
+								((actor->flags & MobjFlag::Friend) == MobjFlag{} && monster_infighting)
 							) &&
 							P_CheckSight(actor, actor->target) // and we can see it
 						)
@@ -1375,10 +1375,10 @@ extern "C" void A_Chase(mobj_t* actor)
 			* return to player, if no attacks have occurred recently.
 			*/
 
-			if(actor->info->missilestate == StateId::Null && actor->flags & MF_FRIEND)
+			if(actor->info->missilestate == StateId::Null && (actor->flags & MobjFlag::Friend) != MobjFlag{})
 			{
-				if(actor->flags & MF_JUSTHIT)          /* if recent action, */
-					actor->flags &= ~MF_JUSTHIT;       /* keep fighting */
+				if((actor->flags & MobjFlag::JustHit) != MobjFlag{})          /* if recent action, */
+					actor->flags -= MobjFlag::JustHit;       /* keep fighting */
 				else if(P_LookForPlayers(actor, true)) /* else return to player */
 					return;
 			}
@@ -1429,10 +1429,10 @@ extern "C" void A_FaceTarget(mobj_t* actor)
 {
 	if(!actor->target)
 		return;
-	actor->flags &= ~MF_AMBUSH;
+	actor->flags -= MobjFlag::Ambush;
 	actor->angle = R_PointToAngle2(actor->x, actor->y,
 		actor->target->x, actor->target->y);
-	if(actor->target->flags & MF_SHADOW)
+	if((actor->target->flags & MobjFlag::Shadow) != MobjFlag{})
 	{
 		// killough 5/5/98: remove dependence on order of evaluation:
 		int t = P_Random(RandomClass::Facetarget);
@@ -1452,7 +1452,7 @@ extern "C" void A_PosAttack(mobj_t* actor)
 		return;
 	A_FaceTarget(actor);
 	angle = actor->angle;
-	slope = P_AimLineAttack(actor, angle, MISSILERANGE, 0); /* killough 8/2/98 */
+	slope = P_AimLineAttack(actor, angle, MISSILERANGE, MobjFlag{}); /* killough 8/2/98 */
 	S_StartMobjSound(actor, SfxId::Pistol);
 
 	// killough 5/5/98: remove dependence on order of evaluation:
@@ -1471,7 +1471,7 @@ extern "C" void A_SPosAttack(mobj_t* actor)
 	S_StartMobjSound(actor, SfxId::Shotgn);
 	A_FaceTarget(actor);
 	bangle = actor->angle;
-	slope = P_AimLineAttack(actor, bangle, MISSILERANGE, 0); /* killough 8/2/98 */
+	slope = P_AimLineAttack(actor, bangle, MISSILERANGE, MobjFlag{}); /* killough 8/2/98 */
 	for(i = 0; i < 3; i++)
 	{
 		// killough 5/5/98: remove dependence on order of evaluation:
@@ -1491,7 +1491,7 @@ extern "C" void A_CPosAttack(mobj_t* actor)
 	S_StartMobjSound(actor, SfxId::Shotgn);
 	A_FaceTarget(actor);
 	bangle = actor->angle;
-	slope = P_AimLineAttack(actor, bangle, MISSILERANGE, 0); /* killough 8/2/98 */
+	slope = P_AimLineAttack(actor, bangle, MISSILERANGE, MobjFlag{}); /* killough 8/2/98 */
 
 	// killough 5/5/98: remove dependence on order of evaluation:
 	t = P_Random(RandomClass::Cposattack);
@@ -1512,7 +1512,7 @@ extern "C" void A_CPosRefire(mobj_t* actor)
 	/* killough 11/98: prevent refiring on friends continuously */
 	if(P_Random(RandomClass::Cposrefire) < 40)
 	{
-		if(actor->target && actor->flags & actor->target->flags & MF_FRIEND)
+		if(actor->target && (actor->flags & actor->target->flags & MobjFlag::Friend) != MobjFlag{})
 			goto stop;
 		else
 			return;
@@ -1538,7 +1538,7 @@ extern "C" void A_SpidRefire(mobj_t* actor)
 
 	// killough 11/98: prevent refiring on friends continuously
 	if(!actor->target || actor->target->health <= 0
-		|| actor->flags & actor->target->flags & MF_FRIEND
+		|| (actor->flags & actor->target->flags & MobjFlag::Friend) != MobjFlag{}
 		|| !P_CheckSight(actor, actor->target))
 	stop:
 		P_SetMobjState(actor, actor->info->seestate);
@@ -1843,7 +1843,7 @@ static dboolean PIT_VileCheck(mobj_t* thing)
 	int maxdist;
 	dboolean check;
 
-	if(!(thing->flags & MF_CORPSE))
+	if((thing->flags & MobjFlag::Corpse) == MobjFlag{})
 		return true; // not a monster
 
 	if(thing->tics != -1)
@@ -1886,11 +1886,11 @@ static dboolean PIT_VileCheck(mobj_t* thing)
 		radius = corpsehit->radius; // save temporarily
 		corpsehit->height = corpsehit->info->height;
 		corpsehit->radius = corpsehit->info->radius;
-		corpsehit->flags |= MF_SOLID;
+		corpsehit->flags |= MobjFlag::Solid;
 		check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
 		corpsehit->height = height; // restore
 		corpsehit->radius = radius; // restore                      //   ^
-		corpsehit->flags &= ~MF_SOLID;
+		corpsehit->flags -= MobjFlag::Solid;
 	} //   |
 	// phares
 	if(!check)
@@ -1900,11 +1900,11 @@ static dboolean PIT_VileCheck(mobj_t* thing)
 
 dboolean P_RaiseThing(mobj_t* corpse, mobj_t* raiser)
 {
-	uint64_t oldflags;
+	MobjFlag oldflags;
 	fixed_t oldheight, oldradius;
 	mobjinfo_t* info;
 
-	if(!(corpse->flags & MF_CORPSE))
+	if((corpse->flags & MobjFlag::Corpse) == MobjFlag{})
 		return false;
 
 	info = corpse->info;
@@ -1921,7 +1921,7 @@ dboolean P_RaiseThing(mobj_t* corpse, mobj_t* raiser)
 
 	corpse->height = info->height;
 	corpse->radius = info->radius;
-	corpse->flags |= MF_SOLID;
+	corpse->flags |= MobjFlag::Solid;
 
 	if(!P_CheckPosition(corpse, corpse->x, corpse->y))
 	{
@@ -1936,12 +1936,12 @@ dboolean P_RaiseThing(mobj_t* corpse, mobj_t* raiser)
 	P_SetMobjState(corpse, info->raisestate);
 
 	corpse->flags = info->flags;
-	corpse->flags |= MF_RESSURECTED;
-	corpse->flags &= ~MF_JUSTHIT;
+	corpse->flags |= MobjFlag::Ressurected;
+	corpse->flags -= MobjFlag::JustHit;
 
 	if(raiser)
 	{
-		corpse->flags = (corpse->flags & ~MF_FRIEND) | (raiser->flags & MF_FRIEND);
+		corpse->flags = (corpse->flags - MobjFlag::Friend) | (raiser->flags & MobjFlag::Friend);
 	}
 
 	dsda_WatchResurrection(corpse, raiser);
@@ -1949,9 +1949,9 @@ dboolean P_RaiseThing(mobj_t* corpse, mobj_t* raiser)
 	// Allow ghost monsters to be rendered translucent
 	if(corpse->height == 0 && corpse->radius == 0
 		&& dsda_IntConfig(ConfigId::TranslucentGhosts))
-		corpse->flags |= MF_TRANSLUCENT;
+		corpse->flags |= MobjFlag::Translucent;
 
-	if(!((corpse->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+	if(((corpse->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 		totallive++;
 
 	corpse->health = P_MobjSpawnHealth(corpse);
@@ -2025,17 +2025,17 @@ static dboolean P_HealCorpse(mobj_t* actor, int radius, StateId healstate, SfxId
 					* friendliness is transferred from AV to raised corpse
 					*/
 					corpsehit->flags =
-						(info->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
-					corpsehit->flags = corpsehit->flags | MF_RESSURECTED; //e6y
+						(info->flags - MobjFlag::Friend) | (actor->flags & MobjFlag::Friend);
+					corpsehit->flags = corpsehit->flags | MobjFlag::Ressurected; //e6y
 
 					dsda_WatchResurrection(corpsehit, actor);
 
 					// Allow ghost monsters to be rendered translucent
 					if(corpsehit->height == 0 && corpsehit->radius == 0
 						&& dsda_IntConfig(ConfigId::TranslucentGhosts))
-						corpsehit->flags |= MF_TRANSLUCENT;
+						corpsehit->flags |= MobjFlag::Translucent;
 
-					if(!((corpsehit->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+					if(((corpsehit->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 						totallive++;
 
 					corpsehit->health = P_MobjSpawnHealth(corpsehit);
@@ -2046,7 +2046,7 @@ static dboolean P_HealCorpse(mobj_t* actor, int radius, StateId healstate, SfxId
 					{
 						/* kilough 9/9/98 */
 						P_SetTarget(&corpsehit->lastenemy, nullptr);
-						corpsehit->flags &= ~MF_JUSTHIT;
+						corpsehit->flags -= MobjFlag::JustHit;
 					}
 
 					/* killough 8/29/98: add to appropriate thread */
@@ -2282,7 +2282,7 @@ extern "C" void A_SkullAttack(mobj_t* actor)
 		return;
 
 	dest = actor->target;
-	actor->flags |= MF_SKULLFLY;
+	actor->flags |= MobjFlag::SkullFly;
 
 	S_StartMobjSound(actor, actor->info->attacksound);
 	A_FaceTarget(actor);
@@ -2389,7 +2389,7 @@ static void A_PainShootSkull(mobj_t* actor, angle_t angle)
 	}               // phares
 
 	/* killough 7/20/98: PEs shoot lost souls with the same friendliness */
-	newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (actor->flags & MF_FRIEND);
+	newmobj->flags = (newmobj->flags - MobjFlag::Friend) | (actor->flags & MobjFlag::Friend);
 
 	/* killough 8/29/98: add to appropriate thread */
 	P_UpdateThinker(&newmobj->thinker);
@@ -2482,7 +2482,7 @@ extern "C" void A_SkullPop(mobj_t* actor)
 		return;
 	}
 
-	actor->flags &= ~MF_SOLID;
+	actor->flags -= MobjFlag::Solid;
 	mo = P_SpawnMobj(actor->x, actor->y, actor->z + 48 * FRACUNIT, static_cast<MobjType>(g_skullpop_mt));
 	//mo->target = actor;
 	mo->momx = P_SubRandom() << 9;
@@ -2514,7 +2514,7 @@ extern "C" void A_Pain(mobj_t* actor)
 extern "C" void A_Fall(mobj_t* actor)
 {
 	// actor is on ground, it can be walked over
-	actor->flags &= ~MF_SOLID;
+	actor->flags -= MobjFlag::Solid;
 }
 
 //
@@ -2537,7 +2537,7 @@ extern "C" void A_Explode(mobj_t* thingy)
 			case MobjType::HereticFirebomb: // Time Bombs
 			case MobjType::HexenFirebomb:   // Time Bombs
 				thingy->z += 32 * FRACUNIT;
-				thingy->flags &= ~MF_SHADOW;
+				thingy->flags -= MobjFlag::Shadow;
 				break;
 			case MobjType::HereticMntrfx2: // Minotaur floor fire
 				damage = 24;
@@ -2955,7 +2955,7 @@ extern "C" void A_BrainSpit(mobj_t* mo)
 	newmobj->reactiontime = (short)(((targ->y - mo->y) / newmobj->momy) / newmobj->state->tics);
 
 	// killough 7/18/98: brain friendliness is transferred
-	newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
+	newmobj->flags = (newmobj->flags - MobjFlag::Friend) | (mo->flags & MobjFlag::Friend);
 
 	// killough 8/29/98: add to appropriate thread
 	P_UpdateThinker(&newmobj->thinker);
@@ -3017,10 +3017,10 @@ extern "C" void A_SpawnFly(mobj_t* mo)
 	newmobj = P_SpawnMobj(targ->x, targ->y, targ->z, static_cast<MobjType>(type));
 
 	/* killough 7/18/98: brain friendliness is transferred */
-	newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
+	newmobj->flags = (newmobj->flags - MobjFlag::Friend) | (mo->flags & MobjFlag::Friend);
 
 	//e6y: monsters spawned by Icon of Sin should not be countable for total killed.
-	newmobj->flags |= MF_RESSURECTED;
+	newmobj->flags |= MobjFlag::Ressurected;
 
 	dsda_WatchIconSpawn(newmobj);
 
@@ -3110,7 +3110,7 @@ extern "C" void A_Mushroom(mobj_t* actor)
 			mo->momx = FixedMul(mo->momx, misc2);
 			mo->momy = FixedMul(mo->momy, misc2); // Slow down a bit
 			mo->momz = FixedMul(mo->momz, misc2);
-			mo->flags &= ~MF_NOGRAVITY; // Make debris fall under gravity
+			mo->flags -= MobjFlag::NoGravity; // Make debris fall under gravity
 		}
 }
 
@@ -3138,7 +3138,7 @@ extern "C" void A_Spawn(mobj_t* mo)
 			comp[std::to_underlying(CompOption::FriendlySpawn)] &&
 			!prboom_comp[std::to_underlying(PrboomComp::DoNotInheritFriendlynessFlagOnSpawn)].state
 		)
-			newmobj->flags = (newmobj->flags & ~MF_FRIEND) | (mo->flags & MF_FRIEND);
+			newmobj->flags = (newmobj->flags - MobjFlag::Friend) | (mo->flags & MobjFlag::Friend);
 	}
 }
 
@@ -3276,10 +3276,10 @@ extern "C" void A_SpawnObject(mobj_t* actor)
 	mo->momz = vel_z;
 
 	// if spawned object is a missile, set target+tracer
-	if(mo->info->flags & (MF_MISSILE | MF_BOUNCES))
+	if((mo->info->flags & (MobjFlag::Missile | MobjFlag::Bounces)) != MobjFlag{})
 	{
 		// if spawner is also a missile, copy 'em
-		if(actor->info->flags & (MF_MISSILE | MF_BOUNCES))
+		if((actor->info->flags & (MobjFlag::Missile | MobjFlag::Bounces)) != MobjFlag{})
 		{
 			P_SetTarget(&mo->target, actor->target);
 			P_SetTarget(&mo->tracer, actor->tracer);
@@ -3372,7 +3372,7 @@ extern "C" void A_MonsterBulletAttack(mobj_t* actor)
 	A_FaceTarget(actor);
 	S_StartMobjSound(actor, actor->info->attacksound);
 
-	aimslope = P_AimLineAttack(actor, actor->angle, MISSILERANGE, 0);
+	aimslope = P_AimLineAttack(actor, actor->angle, MISSILERANGE, MobjFlag{});
 
 	for(i = 0; i < numbullets; i++)
 	{
@@ -3640,14 +3640,14 @@ extern "C" void A_JumpIfTracerCloser(mobj_t* actor)
 extern "C" void A_JumpIfFlagsSet(mobj_t* actor)
 {
 	int state;
-	uint64_t flags;
+	MobjFlag flags;
 	MobjFlag2 flags2;
 
 	if(!mbf21 || !actor)
 		return;
 
 	state = actor->state->args[0];
-	flags = actor->state->args[1];
+	flags = static_cast<MobjFlag>(actor->state->args[1]);
 	flags2 = static_cast<MobjFlag2>(actor->state->args[2]);
 
 	if((actor->flags & flags) == flags &&
@@ -3663,20 +3663,20 @@ extern "C" void A_JumpIfFlagsSet(mobj_t* actor)
 //
 extern "C" void A_AddFlags(mobj_t* actor)
 {
-	uint64_t flags;
+	MobjFlag flags;
 	MobjFlag2 flags2;
 	dboolean update_blockmap;
 
 	if(!mbf21 || !actor)
 		return;
 
-	flags = actor->state->args[0];
+	flags = static_cast<MobjFlag>(actor->state->args[0]);
 	flags2 = static_cast<MobjFlag2>(actor->state->args[1]);
 
 	// unlink/relink the thing from the blockmap if
 	// the NOBLOCKMAP or NOSECTOR flags are added
-	update_blockmap = ((flags & MF_NOBLOCKMAP) && !(actor->flags & MF_NOBLOCKMAP))
-		|| ((flags & MF_NOSECTOR) && !(actor->flags & MF_NOSECTOR));
+	update_blockmap = ((flags & MobjFlag::NoBlockmap) != MobjFlag{} && (actor->flags & MobjFlag::NoBlockmap) == MobjFlag{})
+		|| ((flags & MobjFlag::NoSector) != MobjFlag{} && (actor->flags & MobjFlag::NoSector) == MobjFlag{});
 
 	if(update_blockmap)
 		P_UnsetThingPosition(actor);
@@ -3696,25 +3696,25 @@ extern "C" void A_AddFlags(mobj_t* actor)
 //
 extern "C" void A_RemoveFlags(mobj_t* actor)
 {
-	uint64_t flags;
+	MobjFlag flags;
 	MobjFlag2 flags2;
 	dboolean update_blockmap;
 
 	if(!mbf21 || !actor)
 		return;
 
-	flags = actor->state->args[0];
+	flags = static_cast<MobjFlag>(actor->state->args[0]);
 	flags2 = static_cast<MobjFlag2>(actor->state->args[1]);
 
 	// unlink/relink the thing from the blockmap if
 	// the NOBLOCKMAP or NOSECTOR flags are removed
-	update_blockmap = ((flags & MF_NOBLOCKMAP) && (actor->flags & MF_NOBLOCKMAP))
-		|| ((flags & MF_NOSECTOR) && (actor->flags & MF_NOSECTOR));
+	update_blockmap = ((flags & MobjFlag::NoBlockmap) != MobjFlag{} && (actor->flags & MobjFlag::NoBlockmap) != MobjFlag{})
+		|| ((flags & MobjFlag::NoSector) != MobjFlag{} && (actor->flags & MobjFlag::NoSector) != MobjFlag{});
 
 	if(update_blockmap)
 		P_UnsetThingPosition(actor);
 
-	actor->flags &= ~flags;
+	actor->flags -= flags;
 	actor->flags2 -= flags2;
 
 	if(update_blockmap)
@@ -3854,7 +3854,7 @@ extern "C" void A_ImpMsAttack(mobj_t* actor)
 		return;
 	}
 	dest = actor->target;
-	actor->flags |= MF_SKULLFLY;
+	actor->flags |= MobjFlag::SkullFly;
 	S_StartMobjSound(actor, actor->info->attacksound);
 	A_FaceTarget(actor);
 	an = actor->angle >> ANGLETOFINESHIFT;
@@ -3886,7 +3886,7 @@ extern "C" void A_ImpMsAttack2(mobj_t* actor)
 
 extern "C" void A_ImpDeath(mobj_t* actor)
 {
-	actor->flags &= ~MF_SOLID;
+	actor->flags -= MobjFlag::Solid;
 	actor->flags2 |= MobjFlag2::FootClip;
 	if(actor->z <= actor->floorz)
 	{
@@ -3896,15 +3896,15 @@ extern "C" void A_ImpDeath(mobj_t* actor)
 
 extern "C" void A_ImpXDeath1(mobj_t* actor)
 {
-	actor->flags &= ~MF_SOLID;
-	actor->flags |= MF_NOGRAVITY;
+	actor->flags -= MobjFlag::Solid;
+	actor->flags |= MobjFlag::NoGravity;
 	actor->flags2 |= MobjFlag2::FootClip;
 	actor->special1.i = 666; // Flag the crash routine
 }
 
 extern "C" void A_ImpXDeath2(mobj_t* actor)
 {
-	actor->flags &= ~MF_NOGRAVITY;
+	actor->flags -= MobjFlag::NoGravity;
 	if(actor->z <= actor->floorz)
 	{
 		P_SetMobjState(actor, StateId::HereticImpCrash1);
@@ -4148,7 +4148,7 @@ extern "C" void A_SorcererRise(mobj_t* actor)
 {
 	mobj_t* mo;
 
-	actor->flags &= ~MF_SOLID;
+	actor->flags -= MobjFlag::Solid;
 	mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HereticSorcerer2);
 	P_SetMobjState(mo, StateId::HereticSor2Rise1);
 	mo->angle = actor->angle;
@@ -4270,7 +4270,7 @@ extern "C" void A_GenWizard(mobj_t* actor)
 	}
 	actor->momx = actor->momy = actor->momz = 0;
 	P_SetMobjState(actor, static_cast<StateId>(mobjinfo[std::to_underlying(actor->type)].deathstate));
-	actor->flags &= ~MF_MISSILE;
+	actor->flags -= MobjFlag::Missile;
 	fog = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HereticTfog);
 	S_StartMobjSound(fog, SfxId::HereticTelept);
 }
@@ -4288,12 +4288,12 @@ void P_Massacre()
 			continue;
 		}
 		mo = (mobj_t*)think;
-		if((mo->flags & MF_COUNTKILL) && (mo->health > 0))
+		if((mo->flags & MobjFlag::CountKill) != MobjFlag{} && (mo->health > 0))
 		{
 			if(hexen)
 			{
 				mo->flags2 -= (MobjFlag2::NonShootable | MobjFlag2::Invulnerable);
-				mo->flags |= MF_SHOOTABLE;
+				mo->flags |= MobjFlag::Shootable;
 			}
 			P_DamageMobj(mo, nullptr, nullptr, 10000);
 		}
@@ -4387,7 +4387,7 @@ extern "C" void A_MinotaurDecide(mobj_t* actor)
 		// Charge attack
 		// Don't call the state function right away
 		P_SetMobjStateNF(actor, static_cast<StateId>(g_mntr_charge_state));
-		actor->flags |= MF_SKULLFLY;
+		actor->flags |= MobjFlag::SkullFly;
 		A_FaceTarget(actor);
 		angle = actor->angle >> ANGLETOFINESHIFT;
 		actor->momx = FixedMul(g_mntr_charge_speed, finecosine[angle]);
@@ -4432,7 +4432,7 @@ extern "C" void A_MinotaurCharge(mobj_t* actor)
 	}
 	else
 	{
-		actor->flags &= ~MF_SKULLFLY;
+		actor->flags -= MobjFlag::SkullFly;
 		P_SetMobjState(actor, actor->info->seestate);
 	}
 }
@@ -4539,7 +4539,7 @@ extern "C" void A_WhirlwindSeek(mobj_t* actor)
 	{
 		actor->momx = actor->momy = actor->momz = 0;
 		P_SetMobjState(actor, static_cast<StateId>(mobjinfo[std::to_underlying(actor->type)].deathstate));
-		actor->flags &= ~MF_MISSILE;
+		actor->flags -= MobjFlag::Missile;
 		return;
 	}
 	if((actor->special2.i -= 3) < 0)
@@ -4548,7 +4548,7 @@ extern "C" void A_WhirlwindSeek(mobj_t* actor)
 		S_StartMobjSound(actor, SfxId::HereticHedat3);
 	}
 	if(actor->special1.m
-		&& (((mobj_t*)(actor->special1.m))->flags & MF_SHADOW))
+		&& (((mobj_t*)(actor->special1.m))->flags & MobjFlag::Shadow) != MobjFlag{})
 	{
 		return;
 	}
@@ -4628,19 +4628,19 @@ extern "C" void A_ClinkAttack(mobj_t* actor)
 
 extern "C" void A_GhostOff(mobj_t* actor)
 {
-	actor->flags &= ~MF_SHADOW;
+	actor->flags -= MobjFlag::Shadow;
 }
 
 extern "C" void A_WizAtk1(mobj_t* actor)
 {
 	A_FaceTarget(actor);
-	actor->flags &= ~MF_SHADOW;
+	actor->flags -= MobjFlag::Shadow;
 }
 
 extern "C" void A_WizAtk2(mobj_t* actor)
 {
 	A_FaceTarget(actor);
-	actor->flags |= MF_SHADOW;
+	actor->flags |= MobjFlag::Shadow;
 }
 
 extern "C" void A_WizAtk3(mobj_t* actor)
@@ -4649,7 +4649,7 @@ extern "C" void A_WizAtk3(mobj_t* actor)
 	angle_t angle;
 	fixed_t momz;
 
-	actor->flags &= ~MF_SHADOW;
+	actor->flags -= MobjFlag::Shadow;
 	if(!actor->target)
 	{
 		return;
@@ -4683,13 +4683,13 @@ void P_DropItem(mobj_t* source, MobjType type, int special, int chance)
 	mo->momx = P_SubRandom() << 8;
 	mo->momy = P_SubRandom() << 8;
 	mo->momz = FRACUNIT * 5 + (P_Random(RandomClass::Heretic) << 10);
-	mo->flags |= MF_DROPPED;
+	mo->flags |= MobjFlag::Dropped;
 	mo->health = special;
 }
 
 extern "C" void A_NoBlocking(mobj_t* actor)
 {
-	actor->flags &= ~MF_SOLID;
+	actor->flags -= MobjFlag::Solid;
 
 	if(hexen)
 		return;
@@ -4916,7 +4916,7 @@ extern "C" void A_VolcBallImpact(mobj_t* ball)
 
 	if(ball->z <= ball->floorz)
 	{
-		ball->flags |= MF_NOGRAVITY;
+		ball->flags |= MobjFlag::NoGravity;
 		ball->flags2 -= MobjFlag2::LoGrav;
 		ball->z += 28 * FRACUNIT;
 		//ball->momz = 3*FRACUNIT;
@@ -4966,15 +4966,15 @@ extern "C" void A_FreeTargMobj(mobj_t* mo)
 {
 	mo->momx = mo->momy = mo->momz = 0;
 	mo->z = mo->ceilingz + 4 * FRACUNIT;
-	mo->flags &= ~(MF_SHOOTABLE | MF_FLOAT | MF_SKULLFLY | MF_SOLID);
-	mo->flags |= MF_CORPSE | MF_DROPOFF | MF_NOGRAVITY;
+	mo->flags -= (MobjFlag::Shootable | MobjFlag::Float | MobjFlag::SkullFly | MobjFlag::Solid);
+	mo->flags |= MobjFlag::Corpse | MobjFlag::DropOff | MobjFlag::NoGravity;
 	mo->flags2 -= (MobjFlag2::PassMobj | MobjFlag2::LoGrav);
 	mo->player = nullptr;
 
 	// hexen_note: can we do this in heretic too?
 	if(hexen)
 	{
-		mo->flags &= ~(MF_COUNTKILL);
+		mo->flags -= (MobjFlag::CountKill);
 		mo->flags2 |= MobjFlag2::DontDraw;
 		mo->health = -1000; // Don't resurrect
 	}
@@ -5138,7 +5138,7 @@ dboolean Heretic_P_LookForMonsters(mobj_t* actor)
 			continue;
 		}
 		mo = (mobj_t*)think;
-		if(!(mo->flags & MF_COUNTKILL) || (mo == actor) || (mo->health <= 0))
+		if((mo->flags & MobjFlag::CountKill) == MobjFlag{} || (mo == actor) || (mo->health <= 0))
 		{
 			// Not a valid monster
 			continue;
@@ -5229,7 +5229,7 @@ dboolean Raven_P_LookForPlayers(mobj_t* actor, dboolean allaround)
 					continue; // behind back
 			}
 		}
-		if(player->mo->flags & MF_SHADOW)
+		if((player->mo->flags & MobjFlag::Shadow) != MobjFlag{})
 		{
 			// Player is invisible
 			if((P_AproxDistance(player->mo->x - actor->x,
@@ -5322,9 +5322,9 @@ void P_InitCreatureCorpseQueue(dboolean corpseScan)
 		if(think->function != reinterpret_cast<think_t>(P_MobjThinker))
 			continue;
 		mo = (mobj_t*)think;
-		if(!(mo->flags & MF_CORPSE))
+		if((mo->flags & MobjFlag::Corpse) == MobjFlag{})
 			continue; // Must be a corpse
-		if(mo->flags & MF_ICECORPSE)
+		if((mo->flags & MobjFlag::IceCorpse) != MobjFlag{})
 			continue; // Not ice corpses
 		// Only corpses that call A_QueueCorpse from death routine
 		switch(mo->type)
@@ -5578,22 +5578,22 @@ void FaceMovementDirection(mobj_t* actor)
 
 extern "C" void A_MinotaurFade0(mobj_t* actor)
 {
-	actor->flags &= ~MF_ALTSHADOW;
-	actor->flags |= MF_SHADOW;
+	actor->flags -= MobjFlag::AltShadow;
+	actor->flags |= MobjFlag::Shadow;
 }
 
 extern "C" void A_MinotaurFade1(mobj_t* actor)
 {
 	// Second level of transparency
-	actor->flags &= ~MF_SHADOW;
-	actor->flags |= MF_ALTSHADOW;
+	actor->flags -= MobjFlag::Shadow;
+	actor->flags |= MobjFlag::AltShadow;
 }
 
 extern "C" void A_MinotaurFade2(mobj_t* actor)
 {
 	// Make fully visible
-	actor->flags &= ~MF_SHADOW;
-	actor->flags &= ~MF_ALTSHADOW;
+	actor->flags -= MobjFlag::Shadow;
+	actor->flags -= MobjFlag::AltShadow;
 }
 
 extern "C" void A_MinotaurLook(mobj_t* actor);
@@ -5618,8 +5618,8 @@ static dboolean CheckMinotaurAge(mobj_t* mo)
 
 extern "C" void A_MinotaurRoam(mobj_t* actor)
 {
-	actor->flags &= ~MF_SHADOW;    // In case pain caused him to
-	actor->flags &= ~MF_ALTSHADOW; // skip his fade in.
+	actor->flags -= MobjFlag::Shadow;    // In case pain caused him to
+	actor->flags -= MobjFlag::AltShadow; // skip his fade in.
 
 	if(!CheckMinotaurAge(actor))
 	{
@@ -5695,11 +5695,11 @@ extern "C" void A_MinotaurLook(mobj_t* actor)
 			if(think->function != reinterpret_cast<think_t>(P_MobjThinker))
 				continue;
 			mo = (mobj_t*)think;
-			if(!(mo->flags & MF_COUNTKILL))
+			if((mo->flags & MobjFlag::CountKill) == MobjFlag{})
 				continue;
 			if(mo->health <= 0)
 				continue;
-			if(!(mo->flags & MF_SHOOTABLE))
+			if((mo->flags & MobjFlag::Shootable) == MobjFlag{})
 				continue;
 			dist = P_AproxDistance(actor->x - mo->x, actor->y - mo->y);
 			if(dist > MINOTAUR_LOOK_DIST)
@@ -5726,8 +5726,8 @@ extern "C" void A_MinotaurLook(mobj_t* actor)
 
 extern "C" void A_MinotaurChase(mobj_t* actor)
 {
-	actor->flags &= ~MF_SHADOW;    // In case pain caused him to
-	actor->flags &= ~MF_ALTSHADOW; // skip his fade in.
+	actor->flags -= MobjFlag::Shadow;    // In case pain caused him to
+	actor->flags -= MobjFlag::AltShadow; // skip his fade in.
 
 	if(!CheckMinotaurAge(actor))
 	{
@@ -5738,7 +5738,7 @@ extern "C" void A_MinotaurChase(mobj_t* actor)
 		A_MinotaurLook(actor); // adjust to closest target
 
 	if(!actor->target || (actor->target->health <= 0) ||
-		!(actor->target->flags & MF_SHOOTABLE))
+		(actor->target->flags & MobjFlag::Shootable) == MobjFlag{})
 	{
 		// look for a new target
 		P_SetMobjState(actor, StateId::HexenMntrLook1);
@@ -5920,7 +5920,7 @@ extern "C" void A_SerpentChase(mobj_t* actor)
 		}
 	}
 
-	if(!actor->target || !(actor->target->flags & MF_SHOOTABLE))
+	if(!actor->target || (actor->target->flags & MobjFlag::Shootable) == MobjFlag{})
 	{
 		// look for a new target
 		if(P_LookForPlayers(actor, true))
@@ -5935,9 +5935,9 @@ extern "C" void A_SerpentChase(mobj_t* actor)
 	//
 	// don't attack twice in a row
 	//
-	if(actor->flags & MF_JUSTATTACKED)
+	if((actor->flags & MobjFlag::JustAttacked) != MobjFlag{})
 	{
-		actor->flags &= ~MF_JUSTATTACKED;
+		actor->flags -= MobjFlag::JustAttacked;
 		if(!(skill_info.flags & SI_FAST_MONSTERS))
 			P_NewChaseDir(actor);
 		return;
@@ -6086,7 +6086,7 @@ extern "C" void A_SerpentWalk(mobj_t* actor)
 		}
 	}
 
-	if(!actor->target || !(actor->target->flags & MF_SHOOTABLE))
+	if(!actor->target || (actor->target->flags & MobjFlag::Shootable) == MobjFlag{})
 	{
 		// look for a new target
 		if(P_LookForPlayers(actor, true))
@@ -6101,9 +6101,9 @@ extern "C" void A_SerpentWalk(mobj_t* actor)
 	//
 	// don't attack twice in a row
 	//
-	if(actor->flags & MF_JUSTATTACKED)
+	if((actor->flags & MobjFlag::JustAttacked) != MobjFlag{})
 	{
-		actor->flags &= ~MF_JUSTATTACKED;
+		actor->flags -= MobjFlag::JustAttacked;
 		if(!(skill_info.flags & SI_FAST_MONSTERS))
 			P_NewChaseDir(actor);
 		return;
@@ -6567,7 +6567,7 @@ static void DragonSeek(mobj_t* actor, angle_t thresh, angle_t turnMax)
 		dist = P_AproxDistance(target->x - actor->x, target->y - actor->y);
 		dist = dist / actor->info->speed;
 	}
-	if(target->flags & MF_SHOOTABLE && P_Random(RandomClass::Hexen) < 64)
+	if((target->flags & MobjFlag::Shootable) != MobjFlag{} && P_Random(RandomClass::Hexen) < 64)
 	{
 		// attack the destination mobj if it's attackable
 		mobj_t* oldTarget;
@@ -6683,7 +6683,7 @@ extern "C" void A_DragonFlight(mobj_t* actor)
 	DragonSeek(actor, 4 * ANG1, 8 * ANG1);
 	if(actor->target)
 	{
-		if(!(actor->target->flags & MF_SHOOTABLE))
+		if((actor->target->flags & MobjFlag::Shootable) == MobjFlag{})
 		{
 			// target died
 			P_SetTarget(&actor->target, nullptr);
@@ -6995,7 +6995,7 @@ extern "C" void A_WraithRaiseInit(mobj_t* actor)
 {
 	actor->flags2 -= MobjFlag2::DontDraw;
 	actor->flags2 -= MobjFlag2::NonShootable;
-	actor->flags |= MF_SHOOTABLE | MF_SOLID;
+	actor->flags |= MobjFlag::Shootable | MobjFlag::Solid;
 	actor->floorclip = actor->info->height;
 }
 
@@ -7212,7 +7212,7 @@ extern "C" void A_FiredSpawnRock(mobj_t* actor)
 
 	// Initialize fire demon
 	actor->special2.i = 0;
-	actor->flags &= ~MF_JUSTATTACKED;
+	actor->flags -= MobjFlag::JustAttacked;
 }
 
 extern "C" void A_FiredRocks(mobj_t* actor)
@@ -7265,7 +7265,7 @@ extern "C" void A_FiredChase(mobj_t* actor)
 		actor->z += 2 * FRACUNIT;
 	}
 
-	if(!actor->target || !(actor->target->flags & MF_SHOOTABLE))
+	if(!actor->target || (actor->target->flags & MobjFlag::Shootable) == MobjFlag{})
 	{
 		// Invalid target
 		P_LookForPlayers(actor, true);
@@ -7312,18 +7312,18 @@ extern "C" void A_FiredChase(mobj_t* actor)
 	}
 
 	// Do missile attack
-	if(!(actor->flags & MF_JUSTATTACKED))
+	if((actor->flags & MobjFlag::JustAttacked) == MobjFlag{})
 	{
 		if(P_CheckMissileRange(actor) && (P_Random(RandomClass::Hexen) < 20))
 		{
 			P_SetMobjState(actor, actor->info->missilestate);
-			actor->flags |= MF_JUSTATTACKED;
+			actor->flags |= MobjFlag::JustAttacked;
 			return;
 		}
 	}
 	else
 	{
-		actor->flags &= ~MF_JUSTATTACKED;
+		actor->flags -= MobjFlag::JustAttacked;
 	}
 
 	// make active sound
@@ -7359,7 +7359,7 @@ extern "C" void A_FreezeDeath(mobj_t* actor)
 {
 	int r = P_Random(RandomClass::Hexen);
 	actor->tics = 75 + r + P_Random(RandomClass::Hexen);
-	actor->flags |= MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD;
+	actor->flags |= MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::NoBlood;
 	actor->flags2 |= MobjFlag2::Pushable | MobjFlag2::TeleStomp | MobjFlag2::PassMobj | MobjFlag2::Slide;
 	actor->height <<= 2;
 	S_StartMobjSound(actor, SfxId::HexenFreezeDeath);
@@ -7374,7 +7374,7 @@ extern "C" void A_FreezeDeath(mobj_t* actor)
 			SB_PaletteFlash(false);
 		}
 	}
-	else if(actor->flags & MF_COUNTKILL && actor->special)
+	else if((actor->flags & MobjFlag::CountKill) != MobjFlag{} && actor->special)
 	{
 		// Initiate monster death actions.
 		map_format.execute_line_special(actor->special, actor->special_args, nullptr, 0, actor);
@@ -8140,7 +8140,7 @@ extern "C" void A_SorcFX4Check(mobj_t* actor)
 extern "C" void A_SorcBallPop(mobj_t* actor)
 {
 	S_StartVoidSound(SfxId::HexenSorcererBallpop);
-	actor->flags &= ~MF_NOGRAVITY;
+	actor->flags -= MobjFlag::NoGravity;
 	actor->flags2 |= MobjFlag2::LoGrav;
 	actor->momx = ((P_Random(RandomClass::Hexen) % 10) - 5) << FRACBITS;
 	actor->momy = ((P_Random(RandomClass::Hexen) % 10) - 5) << FRACBITS;
@@ -8225,7 +8225,7 @@ extern "C" void A_FastChase(mobj_t* actor)
 		}
 	}
 
-	if(!actor->target || !(actor->target->flags & MF_SHOOTABLE))
+	if(!actor->target || (actor->target->flags & MobjFlag::Shootable) == MobjFlag{})
 	{
 		// look for a new target
 		if(P_LookForPlayers(actor, true))
@@ -8240,9 +8240,9 @@ extern "C" void A_FastChase(mobj_t* actor)
 	//
 	// don't attack twice in a row
 	//
-	if(actor->flags & MF_JUSTATTACKED)
+	if((actor->flags & MobjFlag::JustAttacked) != MobjFlag{})
 	{
-		actor->flags &= ~MF_JUSTATTACKED;
+		actor->flags -= MobjFlag::JustAttacked;
 		if(!(skill_info.flags & SI_FAST_MONSTERS))
 			P_NewChaseDir(actor);
 		return;
@@ -8287,7 +8287,7 @@ extern "C" void A_FastChase(mobj_t* actor)
 		if(!P_CheckMissileRange(actor))
 			goto nomissile;
 		P_SetMobjState(actor, actor->info->missilestate);
-		actor->flags |= MF_JUSTATTACKED;
+		actor->flags |= MobjFlag::JustAttacked;
 		return;
 	}
 nomissile:

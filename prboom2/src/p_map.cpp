@@ -79,7 +79,7 @@ fixed_t tmceilingz; // ceiling of sector you're in
 fixed_t tmdropoffz; // dropoff on other side of line you're crossing
 
 // heretic
-int tmflags;
+MobjFlag tmflags;
 
 // hexen
 int tmfloorpic;
@@ -126,7 +126,7 @@ dboolean PIT_StompThing(mobj_t* thing)
 	if(thing == tmthing)
 		return true;
 
-	if(!(thing->flags & MF_SHOOTABLE)) // Can't shoot it? Can't stomp it!
+	if((thing->flags & MobjFlag::Shootable) == MobjFlag{}) // Can't shoot it? Can't stomp it!
 		return true;
 
 	blockdist = thing->radius + tmthing->radius;
@@ -170,14 +170,14 @@ int P_GetFriction(const mobj_t* mo, int* frictionfactor)
 	* friction value (muddy has precedence over icy).
 	*/
 
-	if(mo->flags & MF_FLY)
+	if((mo->flags & MobjFlag::Fly) != MobjFlag{})
 	{
 		friction = FRICTION_FLY;
 	}
 	else
 	{
 		if(
-			!(mo->flags & (MF_NOCLIP | MF_NOGRAVITY)) &&
+			(mo->flags & (MobjFlag::NoClip | MobjFlag::NoGravity)) == MobjFlag{} &&
 			(mbf_features || (mo->player && !compatibility)) &&
 			variable_friction
 		)
@@ -225,7 +225,7 @@ int P_GetMoveFactor(mobj_t* mo, int* frictionp)
 		movefactor = ORIG_FRICTION_FACTOR;
 
 		if(!compatibility && variable_friction &&
-			!(mo->flags & (MF_NOGRAVITY | MF_NOCLIP)))
+			(mo->flags & (MobjFlag::NoGravity | MobjFlag::NoClip)) == MobjFlag{})
 		{
 			friction = mo->friction;
 			if(friction == ORIG_FRICTION) // normal floor
@@ -503,7 +503,7 @@ static void CheckForDamageSpecial(line_t* line, mobj_t* mo)
 	// TODO: lost souls don't damage walls in gzdoom
 	if(
 		!line->health ||
-		!(mo->flags & (/* MF_SKULLFLY |*/ MF_MISSILE /*| MF_BOUNCES */)) ||
+		(mo->flags & (/* MF_SKULLFLY |*/ MobjFlag::Missile /*| MF_BOUNCES */)) == MobjFlag{} ||
 		!mo->info->damage
 	)
 	{
@@ -545,7 +545,7 @@ dboolean PIT_CheckLine(line_t* ld)
 	{
 		if(heretic)
 		{
-			if(tmthing->flags & MF_MISSILE)
+			if((tmthing->flags & MobjFlag::Missile) != MobjFlag{})
 			{
 				// Missiles can trigger impact specials
 				if(ld->special)
@@ -569,7 +569,7 @@ dboolean PIT_CheckLine(line_t* ld)
 	}
 
 	// killough 8/10/98: allow bouncing objects to pass through as missiles
-	if(!(tmthing->flags & (MF_MISSILE | MF_BOUNCES)) ||
+	if((tmthing->flags & (MobjFlag::Missile | MobjFlag::Bounces)) == MobjFlag{} ||
 		ld->flags & (ML_BLOCKPROJECTILES | ML_BLOCKEVERYTHING))
 	{
 		if(ld->flags & ML_JUMPOVER)
@@ -584,7 +584,7 @@ dboolean PIT_CheckLine(line_t* ld)
 			if(
 				ld->flags & ML_BLOCKING ||
 				(mbf21 && tmthing->player && ld->flags & ML_BLOCKPLAYERS) ||
-				tmthing->flags & (MF_MISSILE | MF_BOUNCES)
+				(tmthing->flags & (MobjFlag::Missile | MobjFlag::Bounces)) != MobjFlag{}
 			)
 			{
 				if(map_format.hexen)
@@ -601,11 +601,11 @@ dboolean PIT_CheckLine(line_t* ld)
 
 			// killough 8/9/98: monster-blockers don't affect friends
 			if(
-				!(tmthing->flags & MF_FRIEND || tmthing->player) &&
+				!((tmthing->flags & MobjFlag::Friend) != MobjFlag{} || tmthing->player) &&
 				(
 					ld->flags & ML_BLOCKMONSTERS ||
-					(mbf21 && ld->flags & ML_BLOCKLANDMONSTERS && !(tmthing->flags & MF_FLOAT)) ||
-					(ld->flags & ML_BLOCKFLOATERS && tmthing->flags & MF_FLOAT)
+					(mbf21 && ld->flags & ML_BLOCKLANDMONSTERS && (tmthing->flags & MobjFlag::Float) == MobjFlag{}) ||
+					(ld->flags & ML_BLOCKFLOATERS && (tmthing->flags & MobjFlag::Float) != MobjFlag{})
 				) &&
 				(!heretic || tmthing->type != MobjType::HereticPod)
 			)
@@ -683,7 +683,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 	int damage;
 
 	// killough 11/98: add touchy things
-	if(!(thing->flags & (MF_SOLID | MF_SPECIAL | MF_SHOOTABLE | MF_TOUCHY)))
+	if((thing->flags & (MobjFlag::Solid | MobjFlag::Special | MobjFlag::Shootable | MobjFlag::Touchy)) == MobjFlag{})
 		return true;
 
 	blockdist = thing->radius + tmthing->radius;
@@ -712,8 +712,8 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 	* surroundings such as walls, then the touchy thing dies immediately.
 	*/
 
-	if(thing->flags & MF_TOUCHY &&                // touchy object
-		tmthing->flags & MF_SOLID &&              // solid object touches it
+	if((thing->flags & MobjFlag::Touchy) != MobjFlag{} &&                // touchy object
+		(tmthing->flags & MobjFlag::Solid) != MobjFlag{} &&              // solid object touches it
 		thing->health > 0 &&                      // touchy object is alive
 		((thing->intflags & MobjIntFlag::Armed) != MobjIntFlag{} || // Thing is an armed mine
 			sentient(thing)) &&                   // ... or a sentient thing
@@ -753,7 +753,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			(map_format.hexen
 				? tmthing->z >= thing->z + thing->height
 				: tmthing->z > thing->z + thing->height)
-			&& !(thing->flags & MF_SPECIAL)
+			&& (thing->flags & MobjFlag::Special) == MobjFlag{}
 		)
 		{
 			return (true);
@@ -762,7 +762,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			(map_format.zdoom
 				? tmthing->z + tmthing->height <= thing->z
 				: tmthing->z + tmthing->height < thing->z)
-			&& !(thing->flags & MF_SPECIAL))
+			&& (thing->flags & MobjFlag::Special) == MobjFlag{})
 		{
 			// under thing
 			return (true);
@@ -771,7 +771,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 
 	// check for skulls slamming into things
 
-	if(tmthing->flags & MF_SKULLFLY)
+	if((tmthing->flags & MobjFlag::SkullFly) != MobjFlag{})
 	{
 		// A flying skull is smacking something.
 		// Determine damage amount, and the skull comes to a dead stop.
@@ -784,14 +784,14 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			if(tmthing->type == MobjType::HexenMinotaur)
 			{
 				// Slamming minotaurs shouldn't move non-creatures
-				if(!(thing->flags & MF_COUNTKILL))
+				if((thing->flags & MobjFlag::CountKill) == MobjFlag{})
 				{
 					return (false);
 				}
 			}
 			else if(tmthing->type == MobjType::HexenHolyFx)
 			{
-				if(thing->flags & MF_SHOOTABLE && thing != tmthing->target)
+				if((thing->flags & MobjFlag::Shootable) != MobjFlag{} && thing != tmthing->target)
 				{
 					if(netgame && !deathmatch && thing->player)
 					{
@@ -805,7 +805,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 						P_SetTarget(&tmthing->target, thing);
 						return true;
 					}
-					if(thing->flags & MF_COUNTKILL || thing->player)
+					if((thing->flags & MobjFlag::CountKill) != MobjFlag{} || thing->player)
 					{
 						P_SetTarget(&tmthing->special1.m, thing);
 					}
@@ -824,7 +824,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 							P_SpawnMobj(tmthing->x, tmthing->y, tmthing->z,
 								MobjType::HexenHolyPuff);
 							S_StartMobjSound(tmthing, SfxId::HexenSpiritAttack);
-							if(thing->flags & MF_COUNTKILL && P_Random(RandomClass::Hexen) < 128
+							if((thing->flags & MobjFlag::CountKill) != MobjFlag{} && P_Random(RandomClass::Hexen) < 128
 								&& !S_GetSoundPlayingInfo(thing, SfxId::HexenPuppybeat))
 							{
 								if((thing->type == MobjType::HexenCentaur) ||
@@ -850,7 +850,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 
 		P_DamageMobj(thing, tmthing, tmthing, damage);
 
-		tmthing->flags &= ~MF_SKULLFLY;
+		tmthing->flags -= MobjFlag::SkullFly;
 		tmthing->momx = tmthing->momy = tmthing->momz = 0;
 
 		if(raven)
@@ -864,9 +864,9 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 	}
 
 	// Check for blasted thing running into another
-	if((tmthing->flags2 & MobjFlag2::Blasted) != MobjFlag2{} && thing->flags & MF_SHOOTABLE)
+	if((tmthing->flags2 & MobjFlag2::Blasted) != MobjFlag2{} && (thing->flags & MobjFlag::Shootable) != MobjFlag{})
 	{
-		if((thing->flags2 & MobjFlag2::Boss) == MobjFlag2{} && (thing->flags & MF_COUNTKILL))
+		if((thing->flags2 & MobjFlag2::Boss) == MobjFlag2{} && (thing->flags & MobjFlag::CountKill) != MobjFlag{})
 		{
 			thing->momx += tmthing->momx;
 			thing->momy += tmthing->momy;
@@ -884,8 +884,8 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 	// missiles can hit other things
 	// killough 8/10/98: bouncing non-solid things can hit other things too
 
-	if(tmthing->flags & MF_MISSILE ||
-		(tmthing->flags & MF_BOUNCES && !(tmthing->flags & MF_SOLID)))
+	if((tmthing->flags & MobjFlag::Missile) != MobjFlag{} ||
+		((tmthing->flags & MobjFlag::Bounces) != MobjFlag{} && (tmthing->flags & MobjFlag::Solid) == MobjFlag{}))
 	{
 		// Check for a non-shootable mobj
 		if((thing->flags2 & MobjFlag2::NonShootable) != MobjFlag2{})
@@ -894,7 +894,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		}
 
 		// Check for passing through a ghost
-		if((thing->flags & MF_SHADOW) && (tmthing->flags2 & MobjFlag2::ThruGhost) != MobjFlag2{})
+		if((thing->flags & MobjFlag::Shadow) != MobjFlag{} && (tmthing->flags2 & MobjFlag2::ThruGhost) != MobjFlag2{})
 		{
 			return (true);
 		}
@@ -911,7 +911,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		{
 			if((tmthing->flags2 & MobjFlag2::FloorBounce) != MobjFlag2{})
 			{
-				if(tmthing->target == thing || !(thing->flags & MF_SOLID))
+				if(tmthing->target == thing || (thing->flags & MobjFlag::Solid) == MobjFlag{})
 				{
 					return true;
 				}
@@ -924,7 +924,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			if(tmthing->type == MobjType::HexenLightningFloor
 				|| tmthing->type == MobjType::HexenLightningCeiling)
 			{
-				if(thing->flags & MF_SHOOTABLE && thing != tmthing->target)
+				if((thing->flags & MobjFlag::Shootable) != MobjFlag{} && thing != tmthing->target)
 				{
 					if(thing->info->mass != INT_MAX)
 					{
@@ -949,7 +949,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 						{
 							S_StartMobjSound(tmthing, SfxId::HexenMageLightningZap);
 						}
-						if(thing->flags & MF_COUNTKILL && P_Random(RandomClass::Hexen) < 64
+						if((thing->flags & MobjFlag::CountKill) != MobjFlag{} && P_Random(RandomClass::Hexen) < 64
 							&& !S_GetSoundPlayingInfo(thing, SfxId::HexenPuppybeat))
 						{
 							if((thing->type == MobjType::HexenCentaur) ||
@@ -984,7 +984,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			{
 				mobj_t* lmo;
 
-				if(thing->flags & MF_SHOOTABLE && thing != tmthing->target)
+				if((thing->flags & MobjFlag::Shootable) != MobjFlag{} && thing != tmthing->target)
 				{
 					lmo = tmthing->special2.m;
 					if(lmo)
@@ -1040,9 +1040,9 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		// killough 8/10/98: if moving thing is not a missile, no damage
 		// is inflicted, and momentum is reduced if object hit is solid.
 
-		if(!(tmthing->flags & MF_MISSILE))
+		if((tmthing->flags & MobjFlag::Missile) == MobjFlag{})
 		{
-			if(!(thing->flags & MF_SOLID))
+			if((thing->flags & MobjFlag::Solid) == MobjFlag{})
 			{
 				return true;
 			}
@@ -1050,7 +1050,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			{
 				tmthing->momx = -tmthing->momx;
 				tmthing->momy = -tmthing->momy;
-				if(!(tmthing->flags & MF_NOGRAVITY))
+				if((tmthing->flags & MobjFlag::NoGravity) == MobjFlag{})
 				{
 					tmthing->momx >>= 2;
 					tmthing->momy >>= 2;
@@ -1059,14 +1059,14 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			}
 		}
 
-		if(!(thing->flags & MF_SHOOTABLE))
-			return !(thing->flags & MF_SOLID); // didn't do any damage
+		if((thing->flags & MobjFlag::Shootable) == MobjFlag{})
+			return (thing->flags & MobjFlag::Solid) == MobjFlag{}; // didn't do any damage
 
 		if((tmthing->flags2 & MobjFlag2::Rip) != MobjFlag2{})
 		{
 			if(raven)
 			{
-				if(!(thing->flags & MF_NOBLOOD) &&
+				if((thing->flags & MobjFlag::NoBlood) == MobjFlag{} &&
 					(thing->flags2 & MobjFlag2::Reflective) == MobjFlag2{} &&
 					(thing->flags2 & MobjFlag2::Invulnerable) == MobjFlag2{})
 				{
@@ -1079,7 +1079,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			else
 			{
 				damage = ((P_Random(RandomClass::Mbf21) & 3) + 2) * tmthing->info->damage;
-				if(!(thing->flags & MF_NOBLOOD))
+				if((thing->flags & MobjFlag::NoBlood) == MobjFlag{})
 					P_SpawnBlood(tmthing->x, tmthing->y, tmthing->z, damage, thing);
 				if(tmthing->info->ripsound != SfxId::None)
 					S_StartMobjSound(tmthing, tmthing->info->ripsound);
@@ -1103,7 +1103,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		if(
 			raven &&
 			damage &&
-			!(thing->flags & MF_NOBLOOD) &&
+			(thing->flags & MobjFlag::NoBlood) == MobjFlag{} &&
 			(thing->flags2 & MobjFlag2::Reflective) == MobjFlag2{} &&
 			(thing->flags2 & MobjFlag2::Invulnerable) == MobjFlag2{} &&
 			!(tmthing->type == MobjType::HexenTelotherFx1) &&
@@ -1132,20 +1132,20 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 
 	// check for special pickup
 
-	if(thing->flags & MF_SPECIAL)
+	if((thing->flags & MobjFlag::Special) != MobjFlag{})
 	{
-		uint64_t solid = thing->flags & MF_SOLID;
-		if(tmthing->flags & MF_PICKUP)           // hexen_note: can probably use tmflags here?
+		MobjFlag solid = thing->flags & MobjFlag::Solid;
+		if((tmthing->flags & MobjFlag::Pickup) != MobjFlag{})           // hexen_note: can probably use tmflags here?
 			P_TouchSpecialThing(thing, tmthing); // can remove thing
-		return !solid;
+		return solid == MobjFlag{};
 	}
 
 	// RjY
 	// comperr_hangsolid, an attempt to handle blocking hanging bodies
 	// A solid hanging body will allow sufficiently small things underneath it.
 	if(comperr(CompError::HangSolid) &&
-		!((~thing->flags) & (MF_SOLID | MF_SPAWNCEILING)) // solid and hanging
-		// invert everything, then both bits should be clear
+		(thing->flags & (MobjFlag::Solid | MobjFlag::SpawnCeiling)) == (MobjFlag::Solid | MobjFlag::SpawnCeiling) // solid and hanging
+		// both bits should be set
 		&& tmthing->z + tmthing->height <= thing->z)      // head height <= base
 	// top of thing trying to move under the body <= bottom of body
 	{
@@ -1164,10 +1164,10 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 	// There is no more synch on http://www.doomworld.com/sda/dwdemo/w303-115.zip
 	// (with correction in setMobjInfoValue)
 	if(demo_compatibility && !prboom_comp[std::to_underlying(PrboomComp::TreatNoClippingThingsAsNotBlocking)].state)
-		return !(thing->flags & MF_SOLID);
+		return (thing->flags & MobjFlag::Solid) == MobjFlag{};
 	else
-		return !((thing->flags & MF_SOLID && !(thing->flags & MF_NOCLIP))
-			&& (tmthing->flags & MF_SOLID || demo_compatibility));
+		return !(((thing->flags & MobjFlag::Solid) != MobjFlag{} && (thing->flags & MobjFlag::NoClip) == MobjFlag{})
+			&& ((tmthing->flags & MobjFlag::Solid) != MobjFlag{} || demo_compatibility));
 
 	// return !(thing->flags & MF_SOLID);   // old code -- killough
 }
@@ -1287,7 +1287,7 @@ dboolean P_CheckPosition(mobj_t* thing, fixed_t x, fixed_t y)
 	validcount++;
 	numspechit = 0;
 
-	if(tmflags & MF_NOCLIP && (!hexen || !(tmflags & MF_SKULLFLY)))
+	if((tmflags & MobjFlag::NoClip) != MobjFlag{} && (!hexen || (tmflags & MobjFlag::SkullFly) == MobjFlag{}))
 		return true;
 
 	// Check things first, possibly picking things up.
@@ -1308,7 +1308,7 @@ dboolean P_CheckPosition(mobj_t* thing, fixed_t x, fixed_t y)
 			if(!P_BlockThingsIterator(bx, by, PIT_CheckThing))
 				return false;
 
-	if(hexen && tmflags & MF_NOCLIP)
+	if(hexen && (tmflags & MobjFlag::NoClip) != MobjFlag{})
 	{
 		return true;
 	}
@@ -1421,7 +1421,7 @@ extern "C" void P_CheckHereticImpact(mobj_t* thing)
 {
 	int i;
 
-	if(!numspechit || !(thing->flags & MF_MISSILE) || !thing->target || !thing->target->player)
+	if(!numspechit || (thing->flags & MobjFlag::Missile) == MobjFlag{} || !thing->target || !thing->target->player)
 	{
 		return;
 	}
@@ -1434,7 +1434,7 @@ extern "C" void P_CheckHereticImpact(mobj_t* thing)
 
 extern "C" void P_CheckZDoomImpact(mobj_t* thing)
 {
-	if(!(thing->flags & (MF_TELEPORT | MF_NOCLIP)))
+	if((thing->flags & (MobjFlag::Teleport | MobjFlag::NoClip)) == MobjFlag{})
 	{
 		int i, side;
 		line_t* ld;
@@ -1510,9 +1510,9 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 		return false;
 	}
 
-	if(!(thing->flags & MF_NOCLIP))
+	if((thing->flags & MobjFlag::NoClip) == MobjFlag{})
 	{
-		if(thing->flags & MF_FLY)
+		if((thing->flags & MobjFlag::Fly) != MobjFlag{})
 		{
 			// When flying, slide up or down blocking lines until the actor
 			// is not blocked.
@@ -1535,9 +1535,9 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 			// mobj must lower to fit
 			(
 				floatok = true,
-				!(thing->flags & MF_TELEPORT) &&
+				(thing->flags & MobjFlag::Teleport) == MobjFlag{} &&
 				tmceilingz - thing->z < thing->height &&
-				!(thing->flags & MF_FLY) &&
+				(thing->flags & MobjFlag::Fly) == MobjFlag{} &&
 				(thing->flags2 & MobjFlag2::Fly) == MobjFlag2{}
 			)
 		)
@@ -1566,7 +1566,7 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 		}
 
 		if(
-			!(thing->flags & MF_TELEPORT) &&
+			(thing->flags & MobjFlag::Teleport) == MobjFlag{} &&
 			(!heretic || thing->type != MobjType::HereticMntrfx2) &&
 			tmfloorz - thing->z > 24 * FRACUNIT
 		)
@@ -1590,7 +1590,7 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 		* killough 10/98: Allow dropoffs in controlled circumstances
 		* killough 11/98: Improve symmetry of clipping on stairs
 		*/
-		if(!(thing->flags & (MF_DROPOFF | MF_FLOAT)))
+		if((thing->flags & (MobjFlag::DropOff | MobjFlag::Float)) == MobjFlag{})
 		{
 			dboolean ledgeblock = comp[std::to_underlying(CompOption::LedgeBlock)] &&
 				!(mbf21 && (thing->intflags & MobjIntFlag::Scrolling) != MobjIntFlag{});
@@ -1632,12 +1632,12 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 			else
 			{
 				/* dropoff allowed -- check for whether it fell more than 24 */
-				felldown = !(thing->flags & MF_NOGRAVITY) && thing->z - tmfloorz > 24 * FRACUNIT;
+				felldown = (thing->flags & MobjFlag::NoGravity) == MobjFlag{} && thing->z - tmfloorz > 24 * FRACUNIT;
 			}
 		}
 
-		if(thing->flags & MF_BOUNCES && // killough 8/13/98
-			!(thing->flags & (MF_MISSILE | MF_NOGRAVITY)) &&
+		if((thing->flags & MobjFlag::Bounces) != MobjFlag{} && // killough 8/13/98
+			(thing->flags & (MobjFlag::Missile | MobjFlag::NoGravity)) == MobjFlag{} &&
 			!sentient(thing) && tmfloorz - thing->z > 16 * FRACUNIT)
 			return false; // too big a step up for bouncers under gravity
 
@@ -1680,7 +1680,7 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 
 	// if any special lines were hit, do the effect
 
-	if(!(thing->flags & (MF_TELEPORT | MF_NOCLIP)))
+	if((thing->flags & (MobjFlag::Teleport | MobjFlag::NoClip)) == MobjFlag{})
 	{
 		map_format.iterate_spechit(thing, oldx, oldy);
 	}
@@ -1852,7 +1852,7 @@ dboolean P_ThingHeightClip(mobj_t* thing)
 		if(
 			!hexen ||
 			(thing->z - thing->floorz < 9 * FRACUNIT) ||
-			(thing->flags & MF_NOGRAVITY)
+			(thing->flags & MobjFlag::NoGravity) != MobjFlag{}
 		)
 			thing->z = thing->floorz;
 
@@ -2176,7 +2176,7 @@ mobj_t* crosshair_target;
 static mobj_t* shootthing;
 
 /* killough 8/2/98: for more intelligent autoaiming */
-static uint64_t aim_flags_mask;
+static MobjFlag aim_flags_mask;
 
 // Height if not aiming up or down
 fixed_t shootz;
@@ -2253,7 +2253,7 @@ dboolean PTR_AimTraverse(intercept_t* in)
 	if(th == shootthing)
 		return true; // can't shoot self
 
-	if(!(th->flags & MF_SHOOTABLE))
+	if((th->flags & MobjFlag::Shootable) == MobjFlag{})
 		return true; // corpse or something
 
 	if(heretic && th->type == MobjType::HereticPod)
@@ -2268,7 +2268,7 @@ dboolean PTR_AimTraverse(intercept_t* in)
 	/* killough 7/19/98, 8/2/98:
 	* friends don't aim at friends (except players), at least not first
 	*/
-	if(th->flags & shootthing->flags & aim_flags_mask && !th->player)
+	if((th->flags & shootthing->flags & aim_flags_mask) != MobjFlag{} && !th->player)
 		return true;
 
 	// check angles to see if the thing can be aimed at
@@ -2440,10 +2440,10 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 	if(th == shootthing)
 		return true; // can't shoot self
 
-	if(!(th->flags & MF_SHOOTABLE))
+	if((th->flags & MobjFlag::Shootable) == MobjFlag{})
 		return true; // corpse or something
 
-	if(heretic && th->flags & MF_SHADOW && shootthing->player->readyweapon == WeaponType::Staff)
+	if(heretic && (th->flags & MobjFlag::Shadow) != MobjFlag{} && shootthing->player->readyweapon == WeaponType::Staff)
 		return true;
 
 	// check angles to see if the thing can be aimed at
@@ -2479,7 +2479,7 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 	}
 	else
 	{
-		if(raven || in->d.thing->flags & MF_NOBLOOD)
+		if(raven || (in->d.thing->flags & MobjFlag::NoBlood) != MobjFlag{})
 			P_SpawnPuff(x, y, z);
 		else
 			P_SpawnBlood(x, y, z, la_damage, th);
@@ -2489,7 +2489,7 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 	{
 		if(
 			raven &&
-			!(in->d.thing->flags & MF_NOBLOOD) &&
+			(in->d.thing->flags & MobjFlag::NoBlood) == MobjFlag{} &&
 			(in->d.thing->flags2 & MobjFlag2::Invulnerable) == MobjFlag2{}
 		)
 		{
@@ -2524,7 +2524,7 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 //
 // P_AimLineAttack
 //
-fixed_t P_AimLineAttack(mobj_t* t1, angle_t angle, fixed_t distance, uint64_t mask)
+fixed_t P_AimLineAttack(mobj_t* t1, angle_t angle, fixed_t distance, MobjFlag mask)
 {
 	fixed_t x2;
 	fixed_t y2;
@@ -2818,7 +2818,7 @@ dboolean PIT_RadiusAttack(mobj_t* thing)
 	* (missile bouncers are already excluded with MF_NOBLOCKMAP)
 	*/
 
-	if(!(thing->flags & (MF_SHOOTABLE | MF_BOUNCES)))
+	if((thing->flags & (MobjFlag::Shootable | MobjFlag::Bounces)) == MobjFlag{})
 		return true;
 
 	if(P_SplashImmune(thing, bomb.spot))
@@ -2845,7 +2845,7 @@ dboolean PIT_RadiusAttack(mobj_t* thing)
 		// killough 8/10/98: allow grenades to hurt anyone, unless
 		// fired by Cyberdemons, in which case it won't hurt Cybers.
 
-		if(bomb.spot->flags & MF_BOUNCES
+		if((bomb.spot->flags & MobjFlag::Bounces) != MobjFlag{}
 			? thing->type == MobjType::Cyborg && bomb.source->type == MobjType::Cyborg
 			: (thing->flags2 & (MobjFlag2::NoRadiusDmg | MobjFlag2::Boss)) != MobjFlag2{} &&
 			(bomb.spot->flags2 & MobjFlag2::ForceRadiusDmg) == MobjFlag2{})
@@ -2991,9 +2991,9 @@ dboolean PIT_ChangeSector(mobj_t* thing)
 	{
 		if(hexen)
 		{
-			if((thing->flags & MF_CORPSE))
+			if((thing->flags & MobjFlag::Corpse) != MobjFlag{})
 			{
-				if(thing->flags & MF_NOBLOOD)
+				if((thing->flags & MobjFlag::NoBlood) != MobjFlag{})
 				{
 					P_RemoveMobj(thing);
 				}
@@ -3016,7 +3016,7 @@ dboolean PIT_ChangeSector(mobj_t* thing)
 
 			if(compatibility_level != CompLevel::Doom12)
 			{
-				thing->flags &= ~MF_SOLID;
+				thing->flags -= MobjFlag::Solid;
 			}
 			thing->height = 0;
 			thing->radius = 0;
@@ -3027,7 +3027,7 @@ dboolean PIT_ChangeSector(mobj_t* thing)
 
 	// crunch dropped items
 
-	if(thing->flags & MF_DROPPED)
+	if((thing->flags & MobjFlag::Dropped) != MobjFlag{})
 	{
 		P_RemoveMobj(thing);
 
@@ -3036,14 +3036,14 @@ dboolean PIT_ChangeSector(mobj_t* thing)
 	}
 
 	/* killough 11/98: kill touchy things immediately */
-	if(thing->flags & MF_TOUCHY &&
+	if((thing->flags & MobjFlag::Touchy) != MobjFlag{} &&
 		((thing->intflags & MobjIntFlag::Armed) != MobjIntFlag{} || sentient(thing)))
 	{
 		P_DamageMobj(thing, nullptr, nullptr, thing->health); // kill object
 		return true;                                    // keep checking
 	}
 
-	if(!(thing->flags & MF_SHOOTABLE))
+	if((thing->flags & MobjFlag::Shootable) == MobjFlag{})
 	{
 		// assume it is bloody gibs or something
 		return true;
@@ -3061,7 +3061,7 @@ dboolean PIT_ChangeSector(mobj_t* thing)
 		if(
 			!hexen ||
 			(
-				!(thing->flags & MF_NOBLOOD) &&
+				(thing->flags & MobjFlag::NoBlood) == MobjFlag{} &&
 				(thing->flags2 & MobjFlag2::Invulnerable) == MobjFlag2{}
 			)
 		)
@@ -3175,7 +3175,7 @@ dboolean P_CheckSector(sector_t* sector, int crunch)
 			if(!n->visited)                                    // unprocessed thing found
 			{
 				n->visited = true;                       // mark thing as processed
-				if(!(n->m_thing->flags & MF_NOBLOCKMAP)) //jff 4/7/98 don't do these
+				if((n->m_thing->flags & MobjFlag::NoBlockmap) == MobjFlag{}) //jff 4/7/98 don't do these
 					PIT_ChangeSector(n->m_thing);        // process it
 				break;                                   // exit and start over
 			}
@@ -3516,14 +3516,17 @@ mobj_t* onmobj; // generic global onmobj...used for landing on pods/players
 
 dboolean P_TestMobjLocation(mobj_t* mobj)
 {
-	int flags;
+	int flags; // not MobjFlag: upstream truncates to int, see below
 
-	flags = mobj->flags;
-	mobj->flags &= ~MF_PICKUP;
+	// Truncates on purpose, as upstream: flags is 64 bits but upstream keeps it in an int,
+	// so bits 32-63 are lost when it is written back below.
+	flags = static_cast<int>(std::to_underlying(mobj->flags));
+	mobj->flags -= MobjFlag::Pickup;
 	if(P_CheckPosition(mobj, mobj->x, mobj->y))
 	{
 		// XY is ok, now check Z
-		mobj->flags = flags;
+		// The truncated copy: the original bits 32-63 are gone, replaced by copies of bit 31
+		mobj->flags = static_cast<MobjFlag>(static_cast<uint64_t>(flags));
 		if((mobj->z < mobj->floorz)
 			|| (mobj->z + mobj->height > mobj->ceilingz))
 		{
@@ -3532,7 +3535,7 @@ dboolean P_TestMobjLocation(mobj_t* mobj)
 		}
 		return (true);
 	}
-	mobj->flags = flags;
+	mobj->flags = static_cast<MobjFlag>(static_cast<uint64_t>(flags)); // the truncated copy
 	return (false);
 }
 
@@ -3540,7 +3543,7 @@ dboolean PIT_CheckOnmobjZ(mobj_t* thing)
 {
 	fixed_t blockdist;
 
-	if(!(thing->flags & (MF_SOLID | MF_SPECIAL | MF_SHOOTABLE)))
+	if((thing->flags & (MobjFlag::Solid | MobjFlag::Special | MobjFlag::Shootable)) == MobjFlag{})
 	{
 		// Can't hit thing
 		return (true);
@@ -3565,11 +3568,11 @@ dboolean PIT_CheckOnmobjZ(mobj_t* thing)
 		// under thing
 		return (true);
 	}
-	if(thing->flags & MF_SOLID)
+	if((thing->flags & MobjFlag::Solid) != MobjFlag{})
 	{
 		onmobj = thing;
 	}
-	return (!(thing->flags & MF_SOLID));
+	return ((thing->flags & MobjFlag::Solid) == MobjFlag{});
 }
 
 // Checks if the new Z position is legal
@@ -3610,7 +3613,7 @@ mobj_t* P_CheckOnmobj(mobj_t* thing)
 	validcount++;
 	numspechit = 0;
 
-	if(tmflags & MF_NOCLIP)
+	if((tmflags & MobjFlag::NoClip) != MobjFlag{})
 		return nullptr;
 
 	//
@@ -3643,10 +3646,10 @@ void P_FakeZMovement(mobj_t* mo)
 	// adjust height
 	//
 	mo->z += mo->momz;
-	if(mo->flags & MF_FLOAT && mo->target)
+	if((mo->flags & MobjFlag::Float) != MobjFlag{} && mo->target)
 	{
 		// float down towards target if too close
-		if(!(mo->flags & MF_SKULLFLY) && !(mo->flags & MF_INFLOAT))
+		if((mo->flags & MobjFlag::SkullFly) == MobjFlag{} && (mo->flags & MobjFlag::InFloat) == MobjFlag{})
 		{
 			dist =
 				P_AproxDistance(mo->x - mo->target->x, mo->y - mo->target->y);
@@ -3674,12 +3677,12 @@ void P_FakeZMovement(mobj_t* mo)
 		{
 			mo->momz = 0;
 		}
-		if(mo->flags & MF_SKULLFLY)
+		if((mo->flags & MobjFlag::SkullFly) != MobjFlag{})
 		{
 			// The skull slammed into something
 			mo->momz = -mo->momz;
 		}
-		if(mo->info->crashstate != StateId::Null && (mo->flags & MF_CORPSE))
+		if(mo->info->crashstate != StateId::Null && (mo->flags & MobjFlag::Corpse) != MobjFlag{})
 		{
 			return;
 		}
@@ -3693,7 +3696,7 @@ void P_FakeZMovement(mobj_t* mo)
 		else
 			mo->momz -= gravity >> 3;
 	}
-	else if(!(mo->flags & MF_NOGRAVITY))
+	else if((mo->flags & MobjFlag::NoGravity) == MobjFlag{})
 	{
 		fixed_t gravity = P_MobjGravity(mo);
 
@@ -3709,7 +3712,7 @@ void P_FakeZMovement(mobj_t* mo)
 		if(mo->momz > 0)
 			mo->momz = 0;
 		mo->z = mo->ceilingz - mo->height;
-		if(mo->flags & MF_SKULLFLY)
+		if((mo->flags & MobjFlag::SkullFly) != MobjFlag{})
 		{
 			// the skull slammed into something
 			mo->momz = -mo->momz;
@@ -3840,7 +3843,7 @@ dboolean PIT_ThrustStompThing(mobj_t* thing)
 {
 	fixed_t blockdist;
 
-	if(!(thing->flags & MF_SHOOTABLE))
+	if((thing->flags & MobjFlag::Shootable) == MobjFlag{})
 		return true;
 
 	blockdist = thing->radius + tsthing->radius;
@@ -3893,7 +3896,7 @@ static void CheckForPushSpecial(line_t* line, int side, mobj_t* mobj)
 		{
 			// TODO: possible "missile activates impact lines" mapinfo flag
 			// By default, hexen always has this flag
-			if(hexen || !(mobj->flags & MF_MISSILE) ||
+			if(hexen || (mobj->flags & MobjFlag::Missile) == MobjFlag{} ||
 				!mobj->target)
 			{
 				P_ActivateLine(line, mobj, side, SPAC_IMPACT);
@@ -3931,7 +3934,7 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 			goto pushline;
 		}
 	}
-	if(!(thing->flags & MF_NOCLIP))
+	if((thing->flags & MobjFlag::NoClip) == MobjFlag{})
 	{
 		if(tmceilingz - tmfloorz < thing->height)
 		{
@@ -3939,7 +3942,7 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 			goto pushline;
 		}
 		floatok = true;
-		if(!(thing->flags & MF_TELEPORT)
+		if((thing->flags & MobjFlag::Teleport) == MobjFlag{}
 			&& tmceilingz - thing->z < thing->height
 			&& thing->type != MobjType::HexenLightningCeiling
 			&& (thing->flags2 & MobjFlag2::Fly) == MobjFlag2{})
@@ -3961,14 +3964,14 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 				goto pushline;
 			}
 		}
-		if(!(thing->flags & MF_TELEPORT)
+		if((thing->flags & MobjFlag::Teleport) == MobjFlag{}
 			// The Minotaur floor fire (HEXEN_MT_MNTRFX2) can step up any amount
 			&& thing->type != MobjType::HexenMntrfx2 && thing->type != MobjType::HexenLightningFloor
 			&& tmfloorz - thing->z > 24 * FRACUNIT)
 		{
 			goto pushline;
 		}
-		if(!(thing->flags & (MF_DROPOFF | MF_FLOAT)) &&
+		if((thing->flags & (MobjFlag::DropOff | MobjFlag::Float)) == MobjFlag{} &&
 			(tmfloorz - tmdropoffz > 24 * FRACUNIT) &&
 			(thing->flags2 & MobjFlag2::Blasted) == MobjFlag2{})
 		{
@@ -4015,7 +4018,7 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 	//
 	// if any special lines were hit, do the effect
 	//
-	if(!(thing->flags & (MF_TELEPORT | MF_NOCLIP)))
+	if((thing->flags & (MobjFlag::Teleport | MobjFlag::NoClip)) == MobjFlag{})
 	{
 		while(numspechit > 0)
 		{
@@ -4036,7 +4039,7 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 	return true;
 
 pushline:
-	if(!(thing->flags & (MF_TELEPORT | MF_NOCLIP)))
+	if((thing->flags & (MobjFlag::Teleport | MobjFlag::NoClip)) == MobjFlag{})
 	{
 		int numSpecHitTemp;
 

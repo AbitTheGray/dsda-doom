@@ -82,7 +82,7 @@ mobjinfo_t dsda_ghost_info = {
 	0,                              // mass
 	0,                              // damage
 	SfxId::None,                       // activesound
-	MF_NOBLOCKMAP | MF_TRANSLUCENT, // flags
+	MobjFlag::NoBlockmap | MobjFlag::Translucent, // flags
 	StateId::Null                          // raisestate
 };
 
@@ -250,13 +250,13 @@ void dsda_SpawnGhost()
 				case 0:
 					break;
 				case 1:
-					mobj->flags |= MF_TRANSLATION1;
+					mobj->flags |= MobjFlag::Translation1;
 					break;
 				case 2:
-					mobj->flags |= MF_TRANSLATION2;
+					mobj->flags |= MobjFlag::Translation2;
 					break;
 				case 3:
-					mobj->flags |= MF_TRANSLATION;
+					mobj->flags |= MobjFlag::Translation;
 					break;
 			}
 		}

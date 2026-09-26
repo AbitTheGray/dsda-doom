@@ -481,7 +481,7 @@ typedef struct vissprite_s
 	fixed_t xiscale; // negative if flipped
 	fixed_t texturemid;
 	int patch;
-	uint64_t mobjflags;
+	MobjFlag mobjflags;
 
 	// for color translation and shadow draw, maxbright frames as well
 	const lighttable_t* colormap;

@@ -70,9 +70,9 @@ void P_UpdateThinker(thinker_t* thinker)
 		? ThinkerClass::Delete
 		: thinker->function == reinterpret_cast<think_t>(P_MobjThinker) &&
 		((mobj_t*)thinker)->health > 0 &&
-		(((mobj_t*)thinker)->flags & MF_COUNTKILL ||
+		((((mobj_t*)thinker)->flags & MobjFlag::CountKill) != MobjFlag{} ||
 			((mobj_t*)thinker)->type == MobjType::Skull)
-		? ((mobj_t*)thinker)->flags & MF_FRIEND
+		? (((mobj_t*)thinker)->flags & MobjFlag::Friend) != MobjFlag{}
 		? ThinkerClass::Friends
 		: ThinkerClass::Enemies
 		: ThinkerClass::Misc;

@@ -1220,7 +1220,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                             // mass
 		0,                                                               // damage
 		SfxId::None,                                                        // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_DROPOFF | MF_PICKUP | MF_NOTDMATCH, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::DropOff | MobjFlag::Pickup | MobjFlag::NotDMatch, // flags
 		StateId::Null                                                           // raisestate
 	},
 
@@ -1247,7 +1247,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                    // mass
 		0,                                      // damage
 		SfxId::Posact,                             // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::PossRaise1                           // raisestate
 	},
 
@@ -1274,7 +1274,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                    // mass
 		0,                                      // damage
 		SfxId::Posact,                             // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::SposRaise1                           // raisestate
 	},
 
@@ -1301,7 +1301,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		500,                                    // mass
 		0,                                      // damage
 		SfxId::Vilact,                             // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::Null                                  // raisestate
 	},
 
@@ -1328,7 +1328,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                           // mass
 		0,                                             // damage
 		SfxId::None,                                      // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_TRANSLUCENT, // flags  // killough 2/21/98
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Translucent, // flags  // killough 2/21/98
 		StateId::Null                                         // raisestate
 	},
 
@@ -1355,7 +1355,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		500,                                    // mass
 		0,                                      // damage
 		SfxId::Skeact,                             // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::SkelRaise1                           // raisestate
 	},
 
@@ -1382,7 +1382,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                    // mass
 		10,                                                     // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		StateId::Null                                                  // raisestate
 	},
 
@@ -1409,7 +1409,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                           // mass
 		0,                                             // damage
 		SfxId::None,                                      // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_TRANSLUCENT, // flags             // phares
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Translucent, // flags             // phares
 		StateId::Null                                         // raisestate
 	},
 
@@ -1436,7 +1436,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		1000,                                   // mass
 		0,                                      // damage
 		SfxId::Posact,                             // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::FattRaise1                           // raisestate
 	},
 
@@ -1463,7 +1463,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                                     // mass
 		8,                                                                       // damage
 		SfxId::None,                                                                // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_TRANSLUCENT, // flags \\ killough 2/21/98
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Translucent, // flags \\ killough 2/21/98
 		StateId::Null                                                                   // raisestate
 	},
 
@@ -1490,7 +1490,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                    // mass
 		0,                                      // damage
 		SfxId::Posact,                             // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::CposRaise1                           // raisestate
 	},
 
@@ -1517,7 +1517,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                    // mass
 		0,                                      // damage
 		SfxId::Bgact,                              // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // killough |MF_TRANSLUCENT,   // flags     // phares
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // killough |MF_TRANSLUCENT,   // flags     // phares
 		StateId::TrooRaise1                           // raisestate
 	},
 
@@ -1544,7 +1544,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		400,                                    // mass
 		0,                                      // damage
 		SfxId::Dmact,                              // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::SargRaise1                           // raisestate
 	},
 
@@ -1571,7 +1571,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		400,                                                // mass
 		0,                                                  // damage
 		SfxId::Dmact,                                          // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_SHADOW | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::Shadow | MobjFlag::CountKill, // flags
 		StateId::SargRaise1                                       // raisestate
 	},
 
@@ -1598,7 +1598,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		400,                                                              // mass
 		0,                                                                // damage
 		SfxId::Dmact,                                                        // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_FLOAT | MF_NOGRAVITY | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::Float | MobjFlag::NoGravity | MobjFlag::CountKill, // flags
 		StateId::HeadRaise1                                                     // raisestate
 	},
 
@@ -1625,7 +1625,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		1000,                                   // mass
 		0,                                      // damage
 		SfxId::Dmact,                              // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::BossRaise1                           // raisestate
 	},
 
@@ -1652,7 +1652,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                                     // mass
 		8,                                                                       // damage
 		SfxId::None,                                                                // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_TRANSLUCENT, // flags  killough 2/21/98
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Translucent, // flags  killough 2/21/98
 		StateId::Null                                                                   // raisestate
 	},
 
@@ -1679,7 +1679,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		1000,                                   // mass
 		0,                                      // damage
 		SfxId::Dmact,                              // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::Bos2Raise1                           // raisestate
 	},
 
@@ -1706,7 +1706,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		50,                                                // mass
 		3,                                                 // damage
 		SfxId::Dmact,                                         // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_FLOAT | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::Float | MobjFlag::NoGravity, // flags
 		StateId::Null                                             // raisestate
 	},
 
@@ -1733,7 +1733,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		1000,                                   // mass
 		0,                                      // damage
 		SfxId::Dmact,                              // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::Null                                  // raisestate
 	},
 
@@ -1760,7 +1760,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		600,                                    // mass
 		0,                                      // damage
 		SfxId::Bspact,                             // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::BspiRaise1                           // raisestate
 	},
 
@@ -1787,7 +1787,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		1000,                                   // mass
 		0,                                      // damage
 		SfxId::Dmact,                              // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::Null                                  // raisestate
 	},
 
@@ -1814,7 +1814,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		400,                                                              // mass
 		0,                                                                // damage
 		SfxId::Dmact,                                                        // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_FLOAT | MF_NOGRAVITY | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::Float | MobjFlag::NoGravity | MobjFlag::CountKill, // flags
 		StateId::PainRaise1                                                     // raisestate
 	},
 
@@ -1841,7 +1841,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                    // mass
 		0,                                      // damage
 		SfxId::Posact,                             // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::SswvRaise1                           // raisestate
 	},
 
@@ -1868,7 +1868,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		10000000,                                                                // mass
 		0,                                                                       // damage
 		SfxId::None,                                                                // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::Null                                                                   // raisestate
 	},
 
@@ -1895,7 +1895,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		10000000,                // mass
 		0,                       // damage
 		SfxId::None,                // activesound
-		MF_SOLID | MF_SHOOTABLE, // flags
+		MobjFlag::Solid | MobjFlag::Shootable, // flags
 		StateId::Null                   // raisestate
 	},
 
@@ -1922,7 +1922,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                         // mass
 		0,                           // damage
 		SfxId::None,                    // activesound
-		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoSector, // flags
 		StateId::Null                       // raisestate
 	},
 
@@ -1949,7 +1949,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                         // mass
 		0,                           // damage
 		SfxId::None,                    // activesound
-		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoSector, // flags
 		StateId::Null                       // raisestate
 	},
 
@@ -1976,7 +1976,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                                // mass
 		3,                                                                  // damage
 		SfxId::None,                                                           // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_NOCLIP, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::NoClip, // flags
 		StateId::Null                                                              // raisestate
 	},
 
@@ -2003,7 +2003,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                           // mass
 		0,                                             // damage
 		SfxId::None,                                      // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_TRANSLUCENT, // flags             // phares
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Translucent, // flags             // phares
 		StateId::Null                                         // raisestate
 	},
 
@@ -2030,7 +2030,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                  // mass
 		0,                                    // damage
 		SfxId::None,                             // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::NoBlood, // flags
 		StateId::Null                                // raisestate
 	},
 
@@ -2057,7 +2057,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                                     // mass
 		3,                                                                       // damage
 		SfxId::None,                                                                // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_TRANSLUCENT, // flags // phares
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Translucent, // flags // phares
 		StateId::Null                                                                   // raisestate
 	},
 
@@ -2084,7 +2084,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                                     // mass
 		5,                                                                       // damage
 		SfxId::None,                                                                // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_TRANSLUCENT, // flags // phares,   // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Translucent, // flags // phares,   // flags
 		StateId::Null                                                                   // raisestate
 	},
 
@@ -2111,7 +2111,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                    // mass
 		20,                                                     // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		StateId::Null                                                  // raisestate
 	},
 
@@ -2138,7 +2138,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                                     // mass
 		5,                                                                       // damage
 		SfxId::None,                                                                // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_TRANSLUCENT, // flags // phares
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Translucent, // flags // phares
 		StateId::Null                                                                   // raisestate
 	},
 
@@ -2165,7 +2165,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                                     // mass
 		100,                                                                     // damage
 		SfxId::None,                                                                // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_TRANSLUCENT, // flags // phares
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Translucent, // flags // phares
 		StateId::Null                                                                   // raisestate
 	},
 
@@ -2192,7 +2192,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                                     // mass
 		5,                                                                       // damage
 		SfxId::None,                                                                // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_TRANSLUCENT, // flags // phares
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Translucent, // flags // phares
 		StateId::Null                                                                   // raisestate
 	},
 
@@ -2219,7 +2219,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                           // mass
 		0,                                             // damage
 		SfxId::None,                                      // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_TRANSLUCENT, // flags // phares
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Translucent, // flags // phares
 		StateId::Null                                         // raisestate
 	},
 
@@ -2246,7 +2246,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_NOBLOCKMAP, // flags
+		MobjFlag::NoBlockmap, // flags
 		StateId::Null         // raisestate
 	},
 
@@ -2273,7 +2273,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                           // mass
 		0,                                             // damage
 		SfxId::None,                                      // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_TRANSLUCENT, // flags // phares
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Translucent, // flags // phares
 		StateId::Null                                         // raisestate
 	},
 
@@ -2300,7 +2300,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                           // mass
 		0,                                             // damage
 		SfxId::None,                                      // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_TRANSLUCENT, // flags // phares
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Translucent, // flags // phares
 		StateId::Null                                         // raisestate
 	},
 
@@ -2327,7 +2327,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                         // mass
 		0,                           // damage
 		SfxId::None,                    // activesound
-		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoSector, // flags
 		StateId::Null                       // raisestate
 	},
 
@@ -2354,7 +2354,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                          // mass
 		0,                            // damage
 		SfxId::None,                     // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity, // flags
 		StateId::Null                        // raisestate
 	},
 
@@ -2381,7 +2381,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -2408,7 +2408,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -2435,7 +2435,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2462,7 +2462,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2489,7 +2489,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_NOTDMATCH, // flags
+		MobjFlag::Special | MobjFlag::NotDMatch, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2516,7 +2516,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_NOTDMATCH, // flags
+		MobjFlag::Special | MobjFlag::NotDMatch, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2543,7 +2543,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_NOTDMATCH, // flags
+		MobjFlag::Special | MobjFlag::NotDMatch, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2570,7 +2570,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_NOTDMATCH, // flags
+		MobjFlag::Special | MobjFlag::NotDMatch, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2597,7 +2597,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_NOTDMATCH, // flags
+		MobjFlag::Special | MobjFlag::NotDMatch, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2624,7 +2624,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_NOTDMATCH, // flags
+		MobjFlag::Special | MobjFlag::NotDMatch, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2651,7 +2651,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -2678,7 +2678,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -2705,7 +2705,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                        // mass
 		0,                                          // damage
 		SfxId::None,                                   // activesound
-		MF_SPECIAL | MF_COUNTITEM | MF_TRANSLUCENT, // flags   // killough 2/21/98
+		MobjFlag::Special | MobjFlag::CountItem | MobjFlag::Translucent, // flags   // killough 2/21/98
 		StateId::Null                                      // raisestate
 	},
 
@@ -2732,7 +2732,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                        // mass
 		0,                                          // damage
 		SfxId::None,                                   // activesound
-		MF_SPECIAL | MF_COUNTITEM | MF_TRANSLUCENT, // flags // killough 2/21/98
+		MobjFlag::Special | MobjFlag::CountItem | MobjFlag::Translucent, // flags // killough 2/21/98
 		StateId::Null                                      // raisestate
 	},
 
@@ -2759,7 +2759,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2786,7 +2786,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                        // mass
 		0,                                          // damage
 		SfxId::None,                                   // activesound
-		MF_SPECIAL | MF_COUNTITEM | MF_TRANSLUCENT, // flags // killough 2/21/98
+		MobjFlag::Special | MobjFlag::CountItem | MobjFlag::Translucent, // flags // killough 2/21/98
 		StateId::Null                                      // raisestate
 	},
 
@@ -2813,7 +2813,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -2840,7 +2840,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2867,7 +2867,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -2894,7 +2894,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                        // mass
 		0,                                          // damage
 		SfxId::None,                                   // activesound
-		MF_SPECIAL | MF_COUNTITEM | MF_TRANSLUCENT, // flags // killough 2/21/98
+		MobjFlag::Special | MobjFlag::CountItem | MobjFlag::Translucent, // flags // killough 2/21/98
 		StateId::Null                                      // raisestate
 	},
 
@@ -2921,7 +2921,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -2948,7 +2948,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -2975,7 +2975,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3002,7 +3002,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3029,7 +3029,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3056,7 +3056,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3083,7 +3083,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3110,7 +3110,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3137,7 +3137,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3164,7 +3164,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3191,7 +3191,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3218,7 +3218,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3245,7 +3245,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3272,7 +3272,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3299,7 +3299,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3326,7 +3326,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SPECIAL,    // flags
+		MobjFlag::Special,    // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3353,7 +3353,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3380,7 +3380,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3407,7 +3407,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3434,7 +3434,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3461,7 +3461,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3488,7 +3488,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3515,7 +3515,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3542,7 +3542,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3569,7 +3569,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3596,7 +3596,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3623,7 +3623,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3650,7 +3650,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3677,7 +3677,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3704,7 +3704,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3731,7 +3731,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3758,7 +3758,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3785,7 +3785,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3812,7 +3812,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3839,7 +3839,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3866,7 +3866,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3893,7 +3893,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3920,7 +3920,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -3947,7 +3947,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -3974,7 +3974,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -4001,7 +4001,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -4028,7 +4028,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -4055,7 +4055,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -4082,7 +4082,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                          // raisestate
 	},
 
@@ -4109,7 +4109,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                          // raisestate
 	},
 
@@ -4136,7 +4136,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                          // raisestate
 	},
 
@@ -4163,7 +4163,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                          // raisestate
 	},
 
@@ -4190,7 +4190,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                          // raisestate
 	},
 
@@ -4217,7 +4217,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4244,7 +4244,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4271,7 +4271,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4298,7 +4298,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4325,7 +4325,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4352,7 +4352,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4379,7 +4379,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4406,7 +4406,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4433,7 +4433,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4460,7 +4460,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,            // mass
 		0,              // damage
 		SfxId::None,       // activesound
-		MF_SOLID,       // flags
+		MobjFlag::Solid,       // flags
 		StateId::Null          // raisestate
 	},
 
@@ -4487,7 +4487,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		0,             // flags
+		MobjFlag{},             // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4514,7 +4514,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,            // mass
 		0,              // damage
 		SfxId::None,       // activesound
-		MF_SOLID,       // flags
+		MobjFlag::Solid,       // flags
 		StateId::Null          // raisestate
 	},
 
@@ -4541,7 +4541,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4568,7 +4568,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4595,7 +4595,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4622,7 +4622,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4649,7 +4649,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_SOLID,      // flags
+		MobjFlag::Solid,      // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4676,7 +4676,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -4703,7 +4703,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -4730,7 +4730,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -4757,7 +4757,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -4784,7 +4784,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -4811,7 +4811,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		StateId::Null                                     // raisestate
 	},
 
@@ -4838,7 +4838,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_NOBLOCKMAP, // flags
+		MobjFlag::NoBlockmap, // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4865,7 +4865,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_NOBLOCKMAP, // flags
+		MobjFlag::NoBlockmap, // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4892,7 +4892,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_NOBLOCKMAP, // flags
+		MobjFlag::NoBlockmap, // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4920,7 +4920,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		10,            // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_NOBLOCKMAP, // flags
+		MobjFlag::NoBlockmap, // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4948,7 +4948,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		10,            // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_NOBLOCKMAP, // flags
+		MobjFlag::NoBlockmap, // flags
 		StateId::Null         // raisestate
 	},
 
@@ -4976,7 +4976,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                    // mass
 		0,                                      // damage
 		SfxId::Dgact,                              // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		StateId::DogsRaise1                           // raisestate
 	},
 
@@ -5004,7 +5004,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                                 // mass
 		4,                                                                   // damage
 		SfxId::None,                                                            // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_BOUNCES, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Bounces, // flags
 		StateId::Null                                                               // raisestate
 	},
 
@@ -5032,7 +5032,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                                                                 // mass
 		4,                                                                   // damage
 		SfxId::None,                                                            // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_BOUNCES, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Bounces, // flags
 		StateId::Null                                                               // raisestate
 	},
 
@@ -5060,7 +5060,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -5088,7 +5088,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		StateId::Null                     // raisestate
 	},
 
@@ -5117,7 +5117,7 @@ doom_mobjinfo_t doom_mobjinfo[std::to_underlying(MobjType::DoomCount)] = {
 		100,           // mass
 		0,             // damage
 		SfxId::None,      // activesound
-		MF_NOBLOCKMAP, // flags
+		MobjFlag::NoBlockmap, // flags
 		StateId::Null         // raisestate
 	},
 

@@ -232,7 +232,7 @@ typedef struct
 	float alpha;
 	fixed_t scale;
 	GLTexture* gltexture;
-	uint64_t flags;
+	MobjFlag flags;
 	int index;
 	int id;
 	int xy;

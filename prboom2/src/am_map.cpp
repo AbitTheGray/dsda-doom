@@ -2213,9 +2213,9 @@ static void AM_ProcessNiceThing(mobj_t* mobj, angle_t angle, fixed_t x, fixed_t 
 		radius = mobj->radius;
 		rotate = true;
 	}
-	else if(mobj->flags & MF_COUNTKILL)
+	else if((mobj->flags & MobjFlag::CountKill) != MobjFlag{})
 	{
-		if(mobj->flags & MF_CORPSE)
+		if((mobj->flags & MobjFlag::Corpse) != MobjFlag{})
 		{
 			need_shadow = false;
 			type = AutomapIcon::Corpse;
@@ -2439,7 +2439,7 @@ static void AM_drawThings()
 				//e6y: stop if all enemies from current sector already has been drawn
 				if(pass == 1 && enemies == 0)
 					break;
-				if(pass == ((t->flags & (MF_COUNTKILL | MF_CORPSE)) == MF_COUNTKILL ? (pass == 0 ? enemies++ : enemies--), 0 : 1))
+				if(pass == ((t->flags & (MobjFlag::CountKill | MobjFlag::Corpse)) == MobjFlag::CountKill ? (pass == 0 ? enemies++ : enemies--), 0 : 1))
 				{
 					t = t->snext;
 					continue;
@@ -2517,15 +2517,15 @@ static void AM_drawThings()
 
 				color = mapcolor_p->sprt;
 
-				if(t->flags & MF_FRIEND && !t->player)
+				if((t->flags & MobjFlag::Friend) != MobjFlag{} && !t->player)
 					color = mapcolor_p->frnd;
 					/* cph 2006/07/30 - Show count-as-kills in red. */
-				else if((t->flags & (MF_COUNTKILL | MF_CORPSE)) == MF_COUNTKILL)
+				else if((t->flags & (MobjFlag::CountKill | MobjFlag::Corpse)) == MobjFlag::CountKill)
 					color = mapcolor_p->enemy;
 					/* bbm 2/28/03 Show countable items in yellow. */
-				else if(t->flags & MF_COUNTITEM)
+				else if((t->flags & MobjFlag::CountItem) != MobjFlag{})
 					color = mapcolor_p->item;
-				else if(t->flags & MF_SPECIAL)
+				else if((t->flags & MobjFlag::Special) != MobjFlag{})
 					color = mapcolor_p->pickup;
 
 				//jff 1/5/98 end added code for keys

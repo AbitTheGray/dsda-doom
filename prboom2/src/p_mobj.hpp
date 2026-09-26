@@ -110,127 +110,7 @@ extern "C"
 // Any questions?
 //
 
-//
-// Misc. mobj flags
-//
-
-// Call P_SpecialThing when touched.
-#define MF_SPECIAL      0x0000000000000001ull
-// Blocks.
-#define MF_SOLID        0x0000000000000002ull
-// Can be hit.
-#define MF_SHOOTABLE    0x0000000000000004ull
-// Don't use the sector links (invisible but touchable).
-#define MF_NOSECTOR     0x0000000000000008ull
-// Don't use the blocklinks (inert but displayable)
-#define MF_NOBLOCKMAP   0x0000000000000010ull
-
-// Not to be activated by sound, deaf monster.
-#define MF_AMBUSH       0x0000000000000020ull
-// Will try to attack right back.
-#define MF_JUSTHIT      0x0000000000000040ull
-// Will take at least one step before attacking.
-#define MF_JUSTATTACKED 0x0000000000000080ull
-// On level spawning (initial position),
-//  hang from ceiling instead of stand on floor.
-#define MF_SPAWNCEILING 0x0000000000000100ull
-// Don't apply gravity (every tic),
-//  that is, object will float, keeping current height
-//  or changing it actively.
-#define MF_NOGRAVITY    0x0000000000000200ull
-
-// Movement flags.
-// This allows jumps from high places.
-#define MF_DROPOFF      0x0000000000000400ull
-// For players, will pick up items.
-#define MF_PICKUP       0x0000000000000800ull
-// Player cheat. ???
-#define MF_NOCLIP       0x0000000000001000ull
-// Player: keep info about sliding along walls.
-#define MF_SLIDE        0x0000000000002000ull
-// Allow moves to any height, no gravity.
-// For active floaters, e.g. cacodemons, pain elementals.
-#define MF_FLOAT        0x0000000000004000ull
-// Don't cross lines
-//   ??? or look at heights on teleport.
-#define MF_TELEPORT     0x0000000000008000ull
-// Don't hit same species, explode on block.
-// Player missiles as well as fireballs of various kinds.
-#define MF_MISSILE      0x0000000000010000ull
-// Dropped by a demon, not level spawned.
-// E.g. ammo clips dropped by dying former humans.
-#define MF_DROPPED      0x0000000000020000ull
-// Use fuzzy draw (shadow demons or spectres),
-//  temporary player invisibility powerup.
-#define MF_SHADOW       0x0000000000040000ull
-// Flag: don't bleed when shot (use puff),
-//  barrels and shootable furniture shall not bleed.
-#define MF_NOBLOOD      0x0000000000080000ull
-// Don't stop moving halfway off a step,
-//  that is, have dead bodies slide down all the way.
-#define MF_CORPSE       0x0000000000100000ull
-// Floating to a height for a move, ???
-//  don't auto float to target's height.
-#define MF_INFLOAT      0x0000000000200000ull
-
-// On kill, count this enemy object
-//  towards intermission kill total.
-// Happy gathering.
-#define MF_COUNTKILL    0x0000000000400000ull
-
-// On picking up, count this item object
-//  towards intermission item total.
-#define MF_COUNTITEM    0x0000000000800000ull
-
-// Special handling: skull in flight.
-// Neither a cacodemon nor a missile.
-#define MF_SKULLFLY     0x0000000001000000ull
-
-// Don't spawn this object
-//  in death match mode (e.g. key cards).
-#define MF_NOTDMATCH    0x0000000002000000ull
-
-// Player sprites in multiplayer modes are modified
-//  using an internal color lookup table for re-indexing.
-// If 0x4 0x8 or 0xc,
-//  use a translation table for player colormaps
-#define MF_TRANSLATION  (uint64_t)(0x000000000c000000)
-#define MF_TRANSLATION1 0x0000000004000000ull
-#define MF_TRANSLATION2 0x0000000008000000ull
-// Hmm ???.
-#define MF_TRANSSHIFT 26
-
-#define MF_UNUSED2      0x0000000010000000ull
-#define MF_UNUSED3      0x0000000020000000ull
-
-// Translucent sprite?                                          // phares
-#define MF_TRANSLUCENT  0x0000000040000000ull
-
-// this is free            0x0000000100000000ull
-
-// these are greater than an int. That's why the flags below are now uint64_t
-
-#define MF_TOUCHY          0x0000000100000000ull
-#define MF_BOUNCES         0x0000000200000000ull
-#define MF_FRIEND          0x0000000400000000ull
-
-#define MF_RESSURECTED     0x0000001000000000ull
-#define MF_NO_DEPTH_TEST   0x0000002000000000ull
-#define MF_FOREGROUND      0x0000004000000000ull
-#define MF_PLAYERSPRITE    0x0000008000000000ull
-
-// This actor not targetted when it hurts something else
-#define MF_NOTARGET        0x0000010000000000ull
-// fly mode is active
-#define MF_FLY             0x0000020000000000ull
-
-// hexen
-#define MF_ALTSHADOW	0x0000040000000000ull // alternate translucent draw
-#define MF_ICECORPSE	0x0000080000000000ull // a frozen corpse (for blasting)
-
-// hexen_note: MF_TRANSLATION covers doom's (MF_TRANSLATION | MF_UNUSED2)
-
-#define ALIVE(thing) ((thing->health > 0) && ((thing->flags & (MF_COUNTKILL | MF_CORPSE | MF_RESSURECTED)) == MF_COUNTKILL))
+#define ALIVE(thing) ((thing->health > 0) && ((thing->flags & (MobjFlag::CountKill | MobjFlag::Corpse | MobjFlag::Ressurected)) == MobjFlag::CountKill))
 
 // killough 9/15/98: Same, but internal flags, not intended for .deh
 // (some degree of opaqueness is good, to avoid compatibility woes)
@@ -311,7 +191,7 @@ typedef struct mobj_s
 
 	int tics; // state tic counter
 	state_t* state;
-	uint64_t flags;
+	MobjFlag flags;
 	MobjIntFlag intflags; // killough 9/15/98: internal flags
 	int health;
 

@@ -190,13 +190,13 @@ mobj_t* HU_Target()
 
 	// intercepts overflow guard
 	overflows_enabled = false;
-	P_AimLineAttack(plr->mo, an, 16 * 64 * FRACUNIT, 0);
+	P_AimLineAttack(plr->mo, an, 16 * 64 * FRACUNIT, MobjFlag{});
 	if(plr->readyweapon == WeaponType::Missile || plr->readyweapon == WeaponType::Plasma || plr->readyweapon == WeaponType::Bfg)
 	{
 		if(!linetarget)
-			P_AimLineAttack(plr->mo, an += 1 << 26, 16 * 64 * FRACUNIT, 0);
+			P_AimLineAttack(plr->mo, an += 1 << 26, 16 * 64 * FRACUNIT, MobjFlag{});
 		if(!linetarget)
-			P_AimLineAttack(plr->mo, an -= 2 << 26, 16 * 64 * FRACUNIT, 0);
+			P_AimLineAttack(plr->mo, an -= 2 << 26, 16 * 64 * FRACUNIT, MobjFlag{});
 	}
 	overflows_enabled = true;
 
@@ -234,7 +234,7 @@ void HU_DrawCrosshair()
 
 		target = HU_Target();
 
-		if(target && !(target->flags & MF_SHADOW))
+		if(target && (target->flags & MobjFlag::Shadow) == MobjFlag{})
 		{
 			crosshair.target_x = target->x;
 			crosshair.target_y = target->y;

@@ -629,13 +629,13 @@ static void cheat_massacre() // jff 2/01/98 kill all monsters
 	thinker_t* currentthinker = nullptr;
 
 	// killough 7/20/98: kill friendly monsters only if no others to kill
-	uint64_t mask = MF_FRIEND;
+	MobjFlag mask = MobjFlag::Friend;
 	P_MapStart();
 	do
 		while((currentthinker = P_NextThinker(currentthinker, ThinkerClass::All)) != nullptr)
 			if(currentthinker->function == reinterpret_cast<think_t>(P_MobjThinker) &&
-				!(((mobj_t*)currentthinker)->flags & mask) && // killough 7/20/98
-				(((mobj_t*)currentthinker)->flags & MF_COUNTKILL ||
+				(((mobj_t*)currentthinker)->flags & mask) == MobjFlag{} && // killough 7/20/98
+				((((mobj_t*)currentthinker)->flags & MobjFlag::CountKill) != MobjFlag{} ||
 					((mobj_t*)currentthinker)->type == MobjType::Skull))
 			{
 				// killough 3/6/98: kill even if PE is dead
@@ -650,7 +650,7 @@ static void cheat_massacre() // jff 2/01/98 kill all monsters
 					P_SetMobjState((mobj_t*)currentthinker, StateId::PainDie6);
 				}
 			}
-	while(!killcount && mask ? mask = 0, 1 : 0); // killough 7/20/98
+	while(!killcount && mask != MobjFlag{} ? mask = MobjFlag{}, 1 : 0); // killough 7/20/98
 	P_MapEnd();
 	// killough 3/22/98: make more intelligent about plural
 	// Ty 03/27/98 - string(s) *not* externalized
@@ -714,7 +714,7 @@ static void cheat_reveal_secret()
 	}
 }
 
-static void cheat_cycle_mobj(mobj_t** last_mobj, int* last_count, int flags, int alive)
+static void cheat_cycle_mobj(mobj_t** last_mobj, int* last_count, MobjFlag flags, int alive)
 {
 	extern int init_thinkers_count;
 	thinker_t *th, *start_th;
@@ -747,7 +747,7 @@ static void cheat_cycle_mobj(mobj_t** last_mobj, int* last_count, int flags, int
 				continue;
 			}
 
-			if((!alive || mobj->health > 0) && mobj->flags & flags)
+			if((!alive || mobj->health > 0) && (mobj->flags & flags) != MobjFlag{})
 			{
 				dsda_UpdateIntConfig(ConfigId::AutomapFollow, false, true);
 				AM_SetMapCenter(mobj->x, mobj->y);
@@ -768,7 +768,7 @@ static void cheat_reveal_kill()
 
 		dsda_TrackFeature(FeatureFlag::Iddt);
 
-		cheat_cycle_mobj(&last_mobj, &last_count, MF_COUNTKILL, true);
+		cheat_cycle_mobj(&last_mobj, &last_count, MobjFlag::CountKill, true);
 	}
 }
 
@@ -781,7 +781,7 @@ static void cheat_reveal_item()
 
 		dsda_TrackFeature(FeatureFlag::Iddt);
 
-		cheat_cycle_mobj(&last_mobj, &last_count, MF_COUNTITEM, false);
+		cheat_cycle_mobj(&last_mobj, &last_count, MobjFlag::CountItem, false);
 	}
 }
 
@@ -928,14 +928,14 @@ static void cheat_fly()
 			plyr->cheats ^= CF_FLY;
 			if(plyr->cheats & CF_FLY)
 			{
-				plyr->mo->flags |= MF_NOGRAVITY;
-				plyr->mo->flags |= MF_FLY;
+				plyr->mo->flags |= MobjFlag::NoGravity;
+				plyr->mo->flags |= MobjFlag::Fly;
 				dsda_AddMessage("Fly mode ON");
 			}
 			else
 			{
-				plyr->mo->flags &= ~MF_NOGRAVITY;
-				plyr->mo->flags &= ~MF_FLY;
+				plyr->mo->flags -= MobjFlag::NoGravity;
+				plyr->mo->flags -= MobjFlag::Fly;
 				dsda_AddMessage("Fly mode OFF");
 			}
 		}

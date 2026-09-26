@@ -108,8 +108,8 @@ extern "C" void A_PotteryExplode(mobj_t* actor)
 	{
 		// Spawn an item
 		if(!nomonsters
-			|| !(mobjinfo[std::to_underlying(TranslateThingType[actor->special_args[0]])].
-				flags & MF_COUNTKILL))
+			|| (mobjinfo[std::to_underlying(TranslateThingType[actor->special_args[0]])].
+				flags & MobjFlag::CountKill) == MobjFlag{})
 		{
 			// Only spawn monsters if not -nomonsters
 			P_SpawnMobj(actor->x, actor->y, actor->z,
@@ -298,7 +298,7 @@ extern "C" void A_LeafCheck(mobj_t* actor)
 	actor->momz = (P_Random(RandomClass::Hexen) << 9) + FRACUNIT;
 	P_ThrustMobj(actor, actor->target->angle,
 		(P_Random(RandomClass::Hexen) << 9) + 2 * FRACUNIT);
-	actor->flags |= MF_MISSILE;
+	actor->flags |= MobjFlag::Missile;
 }
 
 extern "C" void A_BridgeOrbit(mobj_t* actor)
@@ -347,26 +347,26 @@ extern "C" void A_BridgeInit(mobj_t* actor)
 extern "C" void A_BridgeRemove(mobj_t* actor)
 {
 	actor->special1.i = true; // Removing the bridge
-	actor->flags &= ~MF_SOLID;
+	actor->flags -= MobjFlag::Solid;
 	P_SetMobjState(actor, StateId::HexenFreeBridge1);
 }
 
 extern "C" void A_SetShootable(mobj_t* actor)
 {
 	actor->flags2 -= MobjFlag2::NonShootable;
-	actor->flags |= MF_SHOOTABLE;
+	actor->flags |= MobjFlag::Shootable;
 }
 
 extern "C" void A_UnSetShootable(mobj_t* actor)
 {
 	actor->flags2 |= MobjFlag2::NonShootable;
-	actor->flags &= ~MF_SHOOTABLE;
+	actor->flags -= MobjFlag::Shootable;
 }
 
 extern "C" void A_SetAltShadow(mobj_t* actor)
 {
-	actor->flags &= ~MF_SHADOW;
-	actor->flags |= MF_ALTSHADOW;
+	actor->flags -= MobjFlag::Shadow;
+	actor->flags |= MobjFlag::AltShadow;
 }
 
 extern "C" void A_Summon(mobj_t* actor)
@@ -383,7 +383,7 @@ extern "C" void A_Summon(mobj_t* actor)
 			P_SetMobjState(mo, StateId::HexenNull);
 			mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenSummonmaulator);
 			if(mo)
-				mo->flags |= MF_DROPPED;
+				mo->flags |= MobjFlag::Dropped;
 			return;
 		}
 
@@ -393,7 +393,7 @@ extern "C" void A_Summon(mobj_t* actor)
 		mo->special_args[2] = (leveltime >> 16) & 0xff;
 		mo->special_args[3] = (leveltime >> 24) & 0xff;
 		master = actor->special1.m;
-		if(master->flags & MF_CORPSE)
+		if((master->flags & MobjFlag::Corpse) != MobjFlag{})
 		{
 			// Master dead
 			P_SetTarget(&mo->special1.m, nullptr); // No master
@@ -506,7 +506,7 @@ extern "C" void A_PoisonBagInit(mobj_t* actor)
 	P_SetTarget(&mo->target, actor->target);
 	mo->radius = 20 * FRACUNIT;
 	mo->height = 30 * FRACUNIT;
-	mo->flags &= ~MF_NOCLIP;
+	mo->flags -= MobjFlag::NoClip;
 }
 
 extern "C" void A_PoisonBagCheck(mobj_t* actor)
@@ -549,7 +549,7 @@ extern "C" void A_CheckThrowBomb(mobj_t* actor)
 		actor->z = actor->floorz;
 		actor->momz = 0;
 		actor->flags2 -= MobjFlag2::FloorBounce;
-		actor->flags &= ~MF_MISSILE;
+		actor->flags -= MobjFlag::Missile;
 	}
 	if(!--actor->health)
 	{
@@ -738,7 +738,7 @@ extern "C" void A_ThrustInitUp(mobj_t* actor)
 	actor->special2.i = 5;      // Raise speed
 	actor->special_args[0] = 1; // Mark as up
 	actor->floorclip = 0;
-	actor->flags = MF_SOLID;
+	actor->flags = MobjFlag::Solid;
 	actor->flags2 = MobjFlag2::NoTeleport | MobjFlag2::FootClip;
 	P_SetTarget(&actor->special1.m, nullptr);
 }
@@ -749,7 +749,7 @@ extern "C" void A_ThrustInitDn(mobj_t* actor)
 	actor->special2.i = 5;      // Raise speed
 	actor->special_args[0] = 0; // Mark as down
 	actor->floorclip = actor->info->height;
-	actor->flags = 0;
+	actor->flags = MobjFlag{};
 	actor->flags2 = MobjFlag2::NoTeleport | MobjFlag2::FootClip | MobjFlag2::DontDraw;
 	mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenDirtclump);
 	P_SetTarget(&actor->special1.m, mo);
@@ -795,7 +795,7 @@ extern "C" void A_ThrustLower(mobj_t* actor)
 
 extern "C" void A_ThrustBlock(mobj_t* actor)
 {
-	actor->flags |= MF_SOLID;
+	actor->flags |= MobjFlag::Solid;
 }
 
 extern "C" void A_ThrustImpale(mobj_t* actor)
@@ -830,8 +830,8 @@ extern "C" void A_SoAExplode(mobj_t* actor)
 		// TODO: should this be on or off?
 #if 0 // Checks are not present in version 1.1
 		if(!nomonsters
-			|| !(mobjinfo[std::to_underlying(TranslateThingType[actor->special_args[0]])].
-				flags & MF_COUNTKILL))
+			|| (mobjinfo[std::to_underlying(TranslateThingType[actor->special_args[0]])].
+				flags & MobjFlag::CountKill) == MobjFlag{})
 #endif
 		{
 			// Only spawn monsters if not -nomonsters
@@ -845,14 +845,14 @@ extern "C" void A_SoAExplode(mobj_t* actor)
 
 extern "C" void A_BellReset1(mobj_t* actor)
 {
-	actor->flags |= MF_NOGRAVITY;
+	actor->flags |= MobjFlag::NoGravity;
 	actor->height <<= 2;
 }
 
 extern "C" void A_BellReset2(mobj_t* actor)
 {
-	actor->flags |= MF_SHOOTABLE;
-	actor->flags &= ~MF_CORPSE;
+	actor->flags |= MobjFlag::Shootable;
+	actor->flags -= MobjFlag::Corpse;
 	actor->health = 5;
 }
 
@@ -948,8 +948,8 @@ extern "C" void A_TreeDeath(mobj_t* actor)
 	if((actor->flags2 & MobjFlag2::FireDamage) == MobjFlag2{})
 	{
 		actor->height <<= 2;
-		actor->flags |= MF_SHOOTABLE;
-		actor->flags &= ~(MF_CORPSE + MF_DROPOFF);
+		actor->flags |= MobjFlag::Shootable;
+		actor->flags -= (MobjFlag::Corpse | MobjFlag::DropOff);
 		actor->health = 35;
 		return;
 	}
@@ -961,5 +961,5 @@ extern "C" void A_TreeDeath(mobj_t* actor)
 
 extern "C" void A_NoGravity(mobj_t* actor)
 {
-	actor->flags |= MF_NOGRAVITY;
+	actor->flags |= MobjFlag::NoGravity;
 }

@@ -324,7 +324,7 @@ void dsda_WatchDamage(mobj_t* target, mobj_t* inflictor, mobj_t* source, int dam
 
 void dsda_WatchDeath(mobj_t* thing)
 {
-	if(thing->flags & MF_COUNTKILL)
+	if((thing->flags & MobjFlag::CountKill) != MobjFlag{})
 	{
 		++dsda_kills_on_map;
 
@@ -347,10 +347,8 @@ void dsda_WatchResurrection(mobj_t* target, mobj_t* raiser)
 		target->intflags |= MobjIntFlag::SpawnedByIcon;
 
 	if(
-		(
-			(target->flags ^ MF_COUNTKILL) &
-			(MF_FRIEND | MF_COUNTKILL)
-		) || (target->intflags & MobjIntFlag::SpawnedByIcon) != MobjIntFlag{}
+		((target->flags ^ MobjFlag::CountKill) &
+			(MobjFlag::Friend | MobjFlag::CountKill)) != MobjFlag{} || (target->intflags & MobjIntFlag::SpawnedByIcon) != MobjIntFlag{}
 	)
 		return;
 
@@ -386,7 +384,7 @@ void dsda_WatchCrush(mobj_t* thing, int damage)
 void dsda_WatchSpawn(mobj_t* spawned)
 {
 	if(
-		(spawned->flags & MF_COUNTKILL)
+		(spawned->flags & MobjFlag::CountKill) != MobjFlag{}
 		|| spawned->type == MobjType::Skull
 		|| spawned->type == MobjType::Bossbrain
 	)
@@ -394,28 +392,28 @@ void dsda_WatchSpawn(mobj_t* spawned)
 
 	if(!dsda_any_weapons) dsda_any_weapons = dsda_IsWeapon(spawned);
 
-	if(!((spawned->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+	if(((spawned->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 		++dsda_max_kill_requirement;
 }
 
 void dsda_WatchFailedSpawn(mobj_t* spawned)
 {
 	// Fix count from dsda_WatchSpawn
-	if(!((spawned->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+	if(((spawned->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 		--dsda_max_kill_requirement;
 }
 
 void dsda_WatchMorph(mobj_t* morphed)
 {
 	// Fix count from dsda_WatchSpawn
-	if(!((morphed->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+	if(((morphed->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 		--dsda_max_kill_requirement;
 }
 
 void dsda_WatchUnMorph(mobj_t* morphed)
 {
 	// Fix count from dsda_WatchSpawn
-	if(!((morphed->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+	if(((morphed->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 		--dsda_max_kill_requirement;
 }
 
@@ -426,7 +424,7 @@ void dsda_WatchIconSpawn(mobj_t* spawned)
 	// Fix count from dsda_WatchSpawn
 	// We can't know inside P_SpawnMobj what the source is
 	// This is less invasive than introducing a spawn source concept
-	if(!((spawned->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+	if(((spawned->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 		--dsda_max_kill_requirement;
 }
 
@@ -532,7 +530,7 @@ void dsda_WatchLevelCompletion()
 
 		// max rules: everything dead that affects kill counter except icon spawns
 		if(
-			!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL))
+			((mobj->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{}
 			&& (mobj->intflags & MobjIntFlag::SpawnedByIcon) == MobjIntFlag{}
 			&& mobj->health > 0
 		)

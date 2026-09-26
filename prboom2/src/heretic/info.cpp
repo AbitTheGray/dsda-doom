@@ -1267,7 +1267,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                   // mass
 		0,                     // damage
 		SfxId::None,              // activesound
-		MF_SPECIAL,            // flags
+		MobjFlag::Special,            // flags
 		MobjFlag2::FloatBob           // flags2
 	},
 
@@ -1295,7 +1295,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                  // mass
 		0,                    // damage
 		SfxId::None,             // activesound
-		MF_SPECIAL,           // flags
+		MobjFlag::Special,           // flags
 		MobjFlag2::FloatBob          // flags2
 	},
 
@@ -1323,7 +1323,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                   // mass
 		0,                     // damage
 		SfxId::None,              // activesound
-		MF_SPECIAL,            // flags
+		MobjFlag::Special,            // flags
 		MobjFlag2::FloatBob           // flags2
 	},
 
@@ -1351,7 +1351,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1379,7 +1379,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1407,7 +1407,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                   // mass
 		0,                                     // damage
 		SfxId::None,                              // activesound
-		MF_SPECIAL | MF_SHADOW | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::Shadow | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob                           // flags2
 	},
 
@@ -1435,7 +1435,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1463,7 +1463,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1491,7 +1491,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1519,7 +1519,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1547,7 +1547,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1575,7 +1575,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -1603,7 +1603,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1631,7 +1631,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1659,7 +1659,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1687,7 +1687,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                      // mass
 		0,                        // damage
 		SfxId::None,                 // activesound
-		MF_NOGRAVITY | MF_SHADOW, // flags
+		MobjFlag::NoGravity | MobjFlag::Shadow, // flags
 		MobjFlag2{}                         // flags2
 	},
 
@@ -1715,7 +1715,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_COUNTITEM, // flags
+		MobjFlag::Special | MobjFlag::CountItem, // flags
 		MobjFlag2::FloatBob               // flags2
 	},
 
@@ -1743,7 +1743,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                                     // mass
 		0,                                                                       // damage
 		SfxId::None,                                                                // activesound
-		MF_SOLID | MF_NOBLOOD | MF_SHOOTABLE | MF_DROPOFF,                       // flags
+		MobjFlag::Solid | MobjFlag::NoBlood | MobjFlag::Shootable | MobjFlag::DropOff,                       // flags
 		MobjFlag2::WindThrust | MobjFlag2::Pushable | MobjFlag2::Slide | MobjFlag2::PassMobj | MobjFlag2::TeleStomp // flags2
 	},
 
@@ -1771,7 +1771,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                         // mass
 		0,                                           // damage
 		SfxId::None,                                    // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,     // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff,     // flags
 		MobjFlag2::NoTeleport | MobjFlag2::LoGrav | MobjFlag2::CannotPush // flags2
 	},
 
@@ -1799,7 +1799,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                         // mass
 		0,                           // damage
 		SfxId::None,                    // activesound
-		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoSector, // flags
 		MobjFlag2{}                            // flags2
 	},
 
@@ -1827,7 +1827,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                         // mass
 		0,                                           // damage
 		SfxId::None,                                    // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,     // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff,     // flags
 		MobjFlag2::NoTeleport | MobjFlag2::LoGrav | MobjFlag2::CannotPush // flags2
 	},
 
@@ -1855,7 +1855,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                   // mass
 		0,                     // damage
 		SfxId::None,              // activesound
-		MF_NOBLOCKMAP,         // flags
+		MobjFlag::NoBlockmap,         // flags
 		MobjFlag2{}                      // flags2
 	},
 
@@ -1883,7 +1883,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                   // mass
 		0,                     // damage
 		SfxId::None,              // activesound
-		MF_NOBLOCKMAP,         // flags
+		MobjFlag::NoBlockmap,         // flags
 		MobjFlag2{}                      // flags2
 	},
 
@@ -1911,7 +1911,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                      // mass
 		0,                                        // damage
 		SfxId::None,                                 // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Shadow, // flags
 		MobjFlag2{}                                         // flags2
 	},
 
@@ -1939,7 +1939,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                         // mass
 		0,                                           // damage
 		SfxId::None,                                    // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,     // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff,     // flags
 		MobjFlag2::NoTeleport | MobjFlag2::LoGrav | MobjFlag2::CannotPush // flags2
 	},
 
@@ -1967,7 +1967,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                     // mass
 		0,                       // damage
 		SfxId::None,                // activesound
-		MF_NOBLOCKMAP,           // flags
+		MobjFlag::NoBlockmap,           // flags
 		MobjFlag2{}                        // flags2
 	},
 
@@ -1995,7 +1995,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                               // flags2
 	},
 
@@ -2023,7 +2023,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                               // flags2
 	},
 
@@ -2051,7 +2051,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                               // flags2
 	},
 
@@ -2079,7 +2079,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                               // flags2
 	},
 
@@ -2107,7 +2107,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                               // flags2
 	},
 
@@ -2135,7 +2135,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                  // mass
 		0,                    // damage
 		SfxId::None,             // activesound
-		MF_SOLID,             // flags
+		MobjFlag::Solid,             // flags
 		MobjFlag2{}                     // flags2
 	},
 
@@ -2163,7 +2163,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                   // mass
 		0,                     // damage
 		SfxId::None,              // activesound
-		MF_SOLID,              // flags
+		MobjFlag::Solid,              // flags
 		MobjFlag2{}                      // flags2
 	},
 
@@ -2191,7 +2191,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SOLID,                  // flags
+		MobjFlag::Solid,                  // flags
 		MobjFlag2{}                          // flags2
 	},
 
@@ -2219,7 +2219,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SOLID,                  // flags
+		MobjFlag::Solid,                  // flags
 		MobjFlag2{}                          // flags2
 	},
 
@@ -2247,7 +2247,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                                          // flags2
 	},
 
@@ -2275,7 +2275,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                                          // flags2
 	},
 
@@ -2303,7 +2303,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                    // mass
 		0,                      // damage
 		SfxId::None,               // activesound
-		MF_SOLID,               // flags
+		MobjFlag::Solid,               // flags
 		MobjFlag2{}                       // flags2
 	},
 
@@ -2331,7 +2331,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,              // mass
 		0,                // damage
 		SfxId::None,         // activesound
-		MF_SOLID,         // flags
+		MobjFlag::Solid,         // flags
 		MobjFlag2{}                 // flags2
 	},
 
@@ -2359,7 +2359,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                // mass
 		0,                  // damage
 		SfxId::None,           // activesound
-		MF_SOLID,           // flags
+		MobjFlag::Solid,           // flags
 		MobjFlag2{}                   // flags2
 	},
 
@@ -2387,7 +2387,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                               // flags2
 	},
 
@@ -2415,7 +2415,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                               // flags2
 	},
 
@@ -2443,7 +2443,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                  // mass
 		0,                    // damage
 		SfxId::None,             // activesound
-		MF_NOGRAVITY,         // flags
+		MobjFlag::NoGravity,         // flags
 		MobjFlag2{}                     // flags2
 	},
 
@@ -2471,7 +2471,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::SpawnCeiling | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                                          // flags2
 	},
 
@@ -2499,7 +2499,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                 // mass
 		0,                   // damage
 		SfxId::None,            // activesound
-		MF_SOLID,            // flags
+		MobjFlag::Solid,            // flags
 		MobjFlag2{}                    // flags2
 	},
 
@@ -2527,7 +2527,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                 // mass
 		0,                   // damage
 		SfxId::None,            // activesound
-		MF_SOLID,            // flags
+		MobjFlag::Solid,            // flags
 		MobjFlag2{}                    // flags2
 	},
 
@@ -2555,7 +2555,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                 // mass
 		0,                   // damage
 		SfxId::None,            // activesound
-		MF_SOLID,            // flags
+		MobjFlag::Solid,            // flags
 		MobjFlag2{}                    // flags2
 	},
 
@@ -2583,7 +2583,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                     // mass
 		0,                       // damage
 		SfxId::None,                // activesound
-		MF_SOLID | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                        // flags2
 	},
 
@@ -2611,7 +2611,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                // mass
 		0,                  // damage
 		SfxId::None,           // activesound
-		MF_SOLID,           // flags
+		MobjFlag::Solid,           // flags
 		MobjFlag2{}                   // flags2
 	},
 
@@ -2639,7 +2639,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                         // mass
 		2,                                           // damage
 		SfxId::None,                                    // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,     // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff,     // flags
 		MobjFlag2::LoGrav | MobjFlag2::NoTeleport | MobjFlag2::FireDamage // flags2
 	},
 
@@ -2667,7 +2667,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                         // mass
 		1,                                           // damage
 		SfxId::None,                                    // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,     // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff,     // flags
 		MobjFlag2::LoGrav | MobjFlag2::NoTeleport | MobjFlag2::FireDamage // flags2
 	},
 
@@ -2695,7 +2695,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                        // mass
 		0,                                          // damage
 		SfxId::None,                                   // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_NOSECTOR, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::NoSector, // flags
 		MobjFlag2{}                                           // flags2
 	},
 
@@ -2723,7 +2723,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                        // mass
 		0,                                          // damage
 		SfxId::None,                                   // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_NOSECTOR, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::NoSector, // flags
 		MobjFlag2{}                                           // flags2
 	},
 
@@ -2751,7 +2751,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Missile, // flags
 		MobjFlag2{}                                          // flags2
 	},
 
@@ -2779,7 +2779,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                       // mass
 		0,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Missile, // flags
 		MobjFlag2{}                                          // flags2
 	},
 
@@ -2807,7 +2807,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                          // mass
 		0,                            // damage
 		SfxId::None,                     // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                             // flags2
 	},
 
@@ -2835,7 +2835,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                         // mass
 		0,                           // damage
 		SfxId::None,                    // activesound
-		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoSector, // flags
 		MobjFlag2{}                            // flags2
 	},
 
@@ -2863,7 +2863,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                          // mass
 		0,                            // damage
 		SfxId::None,                     // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                             // flags2
 	},
 
@@ -2891,7 +2891,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                          // mass
 		0,                            // damage
 		SfxId::None,                     // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                             // flags2
 	},
 
@@ -2919,7 +2919,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                          // mass
 		0,                            // damage
 		SfxId::None,                     // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                             // flags2
 	},
 
@@ -2947,7 +2947,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,            // mass
 		0,              // damage
 		SfxId::None,       // activesound
-		MF_SPECIAL,     // flags
+		MobjFlag::Special,     // flags
 		MobjFlag2{}               // flags2
 	},
 
@@ -2975,7 +2975,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                      // mass
 		0,                                        // damage
 		SfxId::None,                                 // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Shadow, // flags
 		MobjFlag2{}                                         // flags2
 	},
 
@@ -3003,7 +3003,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                      // mass
 		0,                                        // damage
 		SfxId::None,                                 // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Shadow, // flags
 		MobjFlag2{}                                         // flags2
 	},
 
@@ -3031,7 +3031,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,            // mass
 		0,              // damage
 		SfxId::None,       // activesound
-		MF_SPECIAL,     // flags
+		MobjFlag::Special,     // flags
 		MobjFlag2{}               // flags2
 	},
 
@@ -3059,7 +3059,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3087,7 +3087,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                      // mass
 		0,                                        // damage
 		SfxId::None,                                 // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Shadow, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::CannotPush           // flags2
 	},
 
@@ -3115,7 +3115,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::Rip                                // flags2
 	},
 
@@ -3143,7 +3143,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                          // mass
 		0,                            // damage
 		SfxId::None,                     // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                             // flags2
 	},
 
@@ -3171,7 +3171,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                          // mass
 		0,                            // damage
 		SfxId::None,                     // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                             // flags2
 	},
 
@@ -3199,7 +3199,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,            // mass
 		0,              // damage
 		SfxId::None,       // activesound
-		MF_SPECIAL,     // flags
+		MobjFlag::Special,     // flags
 		MobjFlag2{}               // flags2
 	},
 
@@ -3227,7 +3227,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::FloorBounce | MobjFlag2::ThruGhost | MobjFlag2::NoTeleport        // flags2
 	},
 
@@ -3255,7 +3255,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                          // mass
 		6,                                                            // damage
 		SfxId::None,                                                     // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,                      // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff,                      // flags
 		MobjFlag2::LoGrav | MobjFlag2::FloorBounce | MobjFlag2::ThruGhost | MobjFlag2::NoTeleport // flags2
 	},
 
@@ -3283,7 +3283,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                          // mass
 		4,                                                            // damage
 		SfxId::None,                                                     // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,                      // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff,                      // flags
 		MobjFlag2::LoGrav | MobjFlag2::FloorBounce | MobjFlag2::ThruGhost | MobjFlag2::NoTeleport // flags2
 	},
 
@@ -3311,7 +3311,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                         // mass
 		18,                                                          // damage
 		SfxId::None,                                                    // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,                     // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff,                     // flags
 		MobjFlag2::LoGrav | MobjFlag2::FloorBounce | MobjFlag2::ThruGhost | MobjFlag2::TeleStomp // flags2
 	},
 
@@ -3339,7 +3339,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,            // mass
 		0,              // damage
 		SfxId::None,       // activesound
-		MF_SPECIAL,     // flags
+		MobjFlag::Special,     // flags
 		MobjFlag2{}               // flags2
 	},
 
@@ -3367,7 +3367,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		3,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::WindThrust | MobjFlag2::NoTeleport                         // flags2
 	},
 
@@ -3395,7 +3395,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		10,                                                     // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3423,7 +3423,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		5,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3451,7 +3451,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		5,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3479,7 +3479,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		5,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3507,7 +3507,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		5,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3535,7 +3535,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3563,7 +3563,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3591,7 +3591,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                          // mass
 		0,                            // damage
 		SfxId::None,                     // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                             // flags2
 	},
 
@@ -3619,7 +3619,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                          // mass
 		0,                            // damage
 		SfxId::None,                     // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                             // flags2
 	},
 
@@ -3647,7 +3647,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,            // mass
 		0,              // damage
 		SfxId::None,       // activesound
-		MF_SPECIAL,     // flags
+		MobjFlag::Special,     // flags
 		MobjFlag2{}               // flags2
 	},
 
@@ -3675,7 +3675,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		20,                                                     // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::ThruGhost | MobjFlag2::NoTeleport                          // flags2
 	},
 
@@ -3707,7 +3707,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3735,7 +3735,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                      // mass
 		0,                                        // damage
 		SfxId::None,                                 // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Shadow, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::CannotPush           // flags2
 	},
 
@@ -3763,7 +3763,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
@@ -3791,7 +3791,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,            // mass
 		0,              // damage
 		SfxId::None,       // activesound
-		MF_SPECIAL,     // flags
+		MobjFlag::Special,     // flags
 		MobjFlag2{}               // flags2
 	},
 
@@ -3819,7 +3819,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		10,                                                     // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3847,7 +3847,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		6,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -3875,7 +3875,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::WindThrust | MobjFlag2::ThruGhost | MobjFlag2::NoTeleport         // flags2
 	},
 
@@ -3903,7 +3903,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                  // mass
 		0,                    // damage
 		SfxId::None,             // activesound
-		MF_NOBLOCKMAP,        // flags
+		MobjFlag::NoBlockmap,        // flags
 		MobjFlag2::LoGrav            // flags2
 	},
 
@@ -3931,7 +3931,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,              // mass
 		0,                // damage
 		SfxId::None,         // activesound
-		MF_NOBLOCKMAP,    // flags
+		MobjFlag::NoBlockmap,    // flags
 		MobjFlag2{}                 // flags2
 	},
 
@@ -3959,7 +3959,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                     // mass
 		0,                                       // damage
 		SfxId::None,                                // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::CannotPush          // flags2
 	},
 
@@ -3987,7 +3987,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                                     // mass
 		0,                                                                       // damage
 		SfxId::None,                                                                // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_DROPOFF | MF_PICKUP | MF_NOTDMATCH,         // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::DropOff | MobjFlag::Pickup | MobjFlag::NotDMatch,         // flags
 		MobjFlag2::WindThrust | MobjFlag2::FootClip | MobjFlag2::Slide | MobjFlag2::PassMobj | MobjFlag2::TeleStomp // flags2
 	},
 
@@ -4015,7 +4015,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                        // mass
 		0,                          // damage
 		SfxId::None,                   // activesound
-		MF_NOBLOCKMAP | MF_DROPOFF, // flags
+		MobjFlag::NoBlockmap | MobjFlag::DropOff, // flags
 		MobjFlag2::LoGrav | MobjFlag2::CannotPush // flags2
 	},
 
@@ -4043,7 +4043,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                                                  // mass
 		0,                                                                                    // damage
 		SfxId::None,                                                                             // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_DROPOFF | MF_NOTDMATCH,                                  // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::DropOff | MobjFlag::NotDMatch,                                  // flags
 		MobjFlag2::WindThrust | MobjFlag2::Slide | MobjFlag2::PassMobj | MobjFlag2::FootClip | MobjFlag2::LoGrav | MobjFlag2::TeleStomp // flags2
 	},
 
@@ -4071,7 +4071,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		40,                                                  // mass
 		0,                                                   // damage
 		SfxId::HereticChicact,                                 // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_DROPOFF, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::DropOff, // flags
 		MobjFlag2::WindThrust | MobjFlag2::FootClip | MobjFlag2::PassMobj         // flags2
 	},
 
@@ -4099,7 +4099,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                          // mass
 		0,                                                            // damage
 		SfxId::None,                                                     // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,                      // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff,                      // flags
 		MobjFlag2::NoTeleport | MobjFlag2::LoGrav | MobjFlag2::CannotPush | MobjFlag2::WindThrust // flags2
 	},
 
@@ -4127,7 +4127,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		75,                                     // mass
 		0,                                      // damage
 		SfxId::HereticMumact,                     // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj             // flags2
 	},
 
@@ -4155,7 +4155,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		75,                                     // mass
 		0,                                      // damage
 		SfxId::HereticMumact,                     // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj             // flags2
 	},
 
@@ -4183,7 +4183,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		75,                                                 // mass
 		0,                                                  // damage
 		SfxId::HereticMumact,                                 // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_SHADOW, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::Shadow, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj                         // flags2
 	},
 
@@ -4211,7 +4211,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		75,                                                 // mass
 		0,                                                  // damage
 		SfxId::HereticMumact,                                 // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_SHADOW, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::Shadow, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj                         // flags2
 	},
 
@@ -4239,7 +4239,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                          // mass
 		0,                            // damage
 		SfxId::None,                     // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity, // flags
 		MobjFlag2{}                             // flags2
 	},
 
@@ -4267,7 +4267,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -4295,7 +4295,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		200,                                    // mass
 		0,                                      // damage
 		SfxId::HereticBstact,                     // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj             // flags2
 	},
 
@@ -4323,7 +4323,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::WindThrust | MobjFlag2::NoTeleport                         // flags2
 	},
 
@@ -4351,7 +4351,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                       // mass
 		2,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Missile, // flags
 		MobjFlag2::NoTeleport                             // flags2
 	},
 
@@ -4379,7 +4379,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                       // mass
 		2,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Missile, // flags
 		MobjFlag2::NoTeleport                             // flags2
 	},
 
@@ -4407,7 +4407,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                       // mass
 		2,                                         // damage
 		SfxId::None,                                  // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Missile, // flags
 		MobjFlag2::NoTeleport                             // flags2
 	},
 
@@ -4435,7 +4435,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                    // mass
 		0,                                      // damage
 		SfxId::HereticSnkact,                     // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj             // flags2
 	},
 
@@ -4463,7 +4463,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::WindThrust | MobjFlag2::NoTeleport                         // flags2
 	},
 
@@ -4491,7 +4491,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		3,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -4519,7 +4519,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		325,                                                 // mass
 		0,                                                   // damage
 		SfxId::HereticHedact,                                  // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_NOBLOOD, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::NoBlood, // flags
 		MobjFlag2::PassMobj                                         // flags2
 	},
 
@@ -4547,7 +4547,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::ThruGhost                          // flags2
 	},
 
@@ -4575,7 +4575,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		3,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -4603,7 +4603,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		5,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::WindThrust | MobjFlag2::NoTeleport                         // flags2
 	},
 
@@ -4631,7 +4631,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                                // mass
 		1,                                                                  // damage
 		SfxId::None,                                                           // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_SHADOW, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Shadow, // flags
 		MobjFlag2::NoTeleport                                                      // flags2
 	},
 
@@ -4659,7 +4659,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		75,                                                  // mass
 		0,                                                   // damage
 		SfxId::HereticClkact,                                  // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_NOBLOOD, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::NoBlood, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj                          // flags2
 	},
 
@@ -4687,7 +4687,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                              // mass
 		0,                                                                // damage
 		SfxId::HereticWizact,                                               // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_FLOAT | MF_NOGRAVITY, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::Float | MobjFlag::NoGravity, // flags
 		MobjFlag2::PassMobj                                                      // flags2
 	},
 
@@ -4715,7 +4715,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		3,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -4743,7 +4743,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		50,                                                               // mass
 		0,                                                                // damage
 		SfxId::HereticImpact,                                               // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_FLOAT | MF_NOGRAVITY | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::Float | MobjFlag::NoGravity | MobjFlag::CountKill, // flags
 		MobjFlag2::SpawnFloat | MobjFlag2::PassMobj | MobjFlag2::RangeHalf                     // flags2
 	},
 
@@ -4771,7 +4771,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		50,                                                               // mass
 		0,                                                                // damage
 		SfxId::HereticImpact,                                               // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_FLOAT | MF_NOGRAVITY | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::Float | MobjFlag::NoGravity | MobjFlag::CountKill, // flags
 		MobjFlag2::SpawnFloat | MobjFlag2::PassMobj                                     // flags2
 	},
 
@@ -4799,7 +4799,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                   // mass
 		0,                     // damage
 		SfxId::None,              // activesound
-		MF_NOBLOCKMAP,         // flags
+		MobjFlag::NoBlockmap,         // flags
 		MobjFlag2{}                      // flags2
 	},
 
@@ -4827,7 +4827,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                   // mass
 		0,                     // damage
 		SfxId::None,              // activesound
-		MF_NOBLOCKMAP,         // flags
+		MobjFlag::NoBlockmap,         // flags
 		MobjFlag2{}                      // flags2
 	},
 
@@ -4855,7 +4855,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::WindThrust | MobjFlag2::NoTeleport                         // flags2
 	},
 
@@ -4883,7 +4883,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		150,                                    // mass
 		0,                                      // damage
 		SfxId::HereticKgtact,                     // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj             // flags2
 	},
 
@@ -4911,7 +4911,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		150,                                                // mass
 		0,                                                  // damage
 		SfxId::HereticKgtact,                                 // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_SHADOW, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::Shadow, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj                         // flags2
 	},
 
@@ -4939,7 +4939,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::WindThrust | MobjFlag2::NoTeleport | MobjFlag2::ThruGhost         // flags2
 	},
 
@@ -4967,7 +4967,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		7,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::ThruGhost                          // flags2
 	},
 
@@ -4995,7 +4995,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		800,                                    // mass
 		0,                                      // damage
 		SfxId::HereticSbtact,                     // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::Boss  // flags2
 	},
 
@@ -5023,7 +5023,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		10,                                                     // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
@@ -5051,7 +5051,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		300,                                                 // mass
 		0,                                                   // damage
 		SfxId::HereticSoract,                                  // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_DROPOFF, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::DropOff, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::Boss               // flags2
 	},
 
@@ -5079,7 +5079,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -5107,7 +5107,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                            // mass
 		0,                              // damage
 		SfxId::None,                       // activesound
-		MF_NOBLOCKMAP | MF_NOGRAVITY,   // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoGravity,   // flags
 		MobjFlag2::NoTeleport | MobjFlag2::CannotPush // flags2
 	},
 
@@ -5135,7 +5135,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		10,                                                     // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport                                          // flags2
 	},
 
@@ -5163,7 +5163,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                     // mass
 		0,                       // damage
 		SfxId::None,                // activesound
-		MF_NOBLOCKMAP,           // flags
+		MobjFlag::NoBlockmap,           // flags
 		MobjFlag2{}                        // flags2
 	},
 
@@ -5191,7 +5191,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		800,                                                 // mass
 		7,                                                   // damage
 		SfxId::HereticMinact,                                  // activesound
-		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_DROPOFF, // flags
+		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::DropOff, // flags
 		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::Boss               // flags2
 	},
 
@@ -5219,7 +5219,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		3,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
@@ -5247,7 +5247,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
@@ -5275,7 +5275,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                                                    // mass
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
-		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
+		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
 		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
@@ -5303,7 +5303,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_NOTDMATCH, // flags
+		MobjFlag::Special | MobjFlag::NotDMatch, // flags
 		MobjFlag2{}                          // flags2
 	},
 
@@ -5331,7 +5331,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_NOTDMATCH, // flags
+		MobjFlag::Special | MobjFlag::NotDMatch, // flags
 		MobjFlag2{}                          // flags2
 	},
 
@@ -5359,7 +5359,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                       // mass
 		0,                         // damage
 		SfxId::None,                  // activesound
-		MF_SPECIAL | MF_NOTDMATCH, // flags
+		MobjFlag::Special | MobjFlag::NotDMatch, // flags
 		MobjFlag2{}                          // flags2
 	},
 
@@ -5387,7 +5387,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,             // mass
 		0,               // damage
 		SfxId::None,        // activesound
-		MF_SPECIAL,      // flags
+		MobjFlag::Special,      // flags
 		MobjFlag2{}                // flags2
 	},
 
@@ -5415,7 +5415,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,              // mass
 		0,                // damage
 		SfxId::None,         // activesound
-		MF_SPECIAL,       // flags
+		MobjFlag::Special,       // flags
 		MobjFlag2{}                 // flags2
 	},
 
@@ -5443,7 +5443,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,             // mass
 		0,               // damage
 		SfxId::None,        // activesound
-		MF_SPECIAL,      // flags
+		MobjFlag::Special,      // flags
 		MobjFlag2{}                // flags2
 	},
 
@@ -5471,7 +5471,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,             // mass
 		0,               // damage
 		SfxId::None,        // activesound
-		MF_SPECIAL,      // flags
+		MobjFlag::Special,      // flags
 		MobjFlag2{}                // flags2
 	},
 
@@ -5499,7 +5499,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,             // mass
 		0,               // damage
 		SfxId::None,        // activesound
-		MF_SPECIAL,      // flags
+		MobjFlag::Special,      // flags
 		MobjFlag2{}                // flags2
 	},
 
@@ -5527,7 +5527,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,              // mass
 		0,                // damage
 		SfxId::None,         // activesound
-		MF_SPECIAL,       // flags
+		MobjFlag::Special,       // flags
 		MobjFlag2{}                 // flags2
 	},
 
@@ -5555,7 +5555,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,              // mass
 		0,                // damage
 		SfxId::None,         // activesound
-		MF_SPECIAL,       // flags
+		MobjFlag::Special,       // flags
 		MobjFlag2{}                 // flags2
 	},
 
@@ -5583,7 +5583,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,              // mass
 		0,                // damage
 		SfxId::None,         // activesound
-		MF_SPECIAL,       // flags
+		MobjFlag::Special,       // flags
 		MobjFlag2{}                 // flags2
 	},
 
@@ -5611,7 +5611,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,              // mass
 		0,                // damage
 		SfxId::None,         // activesound
-		MF_SPECIAL,       // flags
+		MobjFlag::Special,       // flags
 		MobjFlag2{}                 // flags2
 	},
 
@@ -5639,7 +5639,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,              // mass
 		0,                // damage
 		SfxId::None,         // activesound
-		MF_SPECIAL,       // flags
+		MobjFlag::Special,       // flags
 		MobjFlag2{}                 // flags2
 	},
 
@@ -5667,7 +5667,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,              // mass
 		0,                // damage
 		SfxId::None,         // activesound
-		MF_SPECIAL,       // flags
+		MobjFlag::Special,       // flags
 		MobjFlag2{}                 // flags2
 	},
 
@@ -5695,7 +5695,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,              // mass
 		0,                // damage
 		SfxId::None,         // activesound
-		MF_SPECIAL,       // flags
+		MobjFlag::Special,       // flags
 		MobjFlag2{}                 // flags2
 	},
 
@@ -5723,7 +5723,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                         // mass
 		0,                           // damage
 		SfxId::None,                    // activesound
-		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoSector, // flags
 		MobjFlag2{}                            // flags2
 	},
 
@@ -5751,7 +5751,7 @@ raven_mobjinfo_t heretic_mobjinfo[std::to_underlying(MobjType::HereticCount)] = 
 		100,                         // mass
 		0,                           // damage
 		SfxId::None,                    // activesound
-		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
+		MobjFlag::NoBlockmap | MobjFlag::NoSector, // flags
 		MobjFlag2{}                            // flags2
 	}
 };

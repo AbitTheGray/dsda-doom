@@ -121,7 +121,7 @@ void P_ForwardThrust(player_t* player, angle_t angle, fixed_t move)
 {
 	angle >>= ANGLETOFINESHIFT;
 
-	if((player->mo->flags & MF_FLY) && player->mo->pitch != 0)
+	if((player->mo->flags & MobjFlag::Fly) != MobjFlag{} && player->mo->pitch != 0)
 	{
 		angle_t pitch = player->mo->pitch >> ANGLETOFINESHIFT;
 		fixed_t zpush = FixedMul(move, finesine[pitch]);
@@ -187,7 +187,7 @@ void P_CalcHeight(player_t* player)
 
 	player->bob = 0;
 
-	if((player->mo->flags & MF_FLY) && !onground)
+	if((player->mo->flags & MobjFlag::Fly) != MobjFlag{} && !onground)
 	{
 		player->bob = FRACUNIT / 2;
 	}
@@ -347,7 +347,7 @@ void P_MovePlayer(player_t* player)
 
 	onground = (mo->z <= mo->floorz || (mo->flags2 & MobjFlag2::OnMobj) != MobjFlag2{});
 
-	if((player->mo->flags & MF_FLY) && player == &players[consoleplayer] && upmove != 0)
+	if((player->mo->flags & MobjFlag::Fly) != MobjFlag{} && player == &players[consoleplayer] && upmove != 0)
 	{
 		mo->momz = upmove << 8;
 	}
@@ -363,7 +363,7 @@ void P_MovePlayer(player_t* player)
 	if((!demo_compatibility && !mbf_features && !prboom_comp[std::to_underlying(PrboomComp::PrboomFriction)].state) ||
 		(cmd->forwardmove | cmd->sidemove)) // killough 10/98
 	{
-		if(onground || mo->flags & MF_BOUNCES || (mo->flags & MF_FLY)) // killough 8/9/98
+		if(onground || (mo->flags & MobjFlag::Bounces) != MobjFlag{} || (mo->flags & MobjFlag::Fly) != MobjFlag{}) // killough 8/9/98
 		{
 			int friction, movefactor = P_GetMoveFactor(mo, &friction);
 
@@ -590,7 +590,7 @@ void P_PlayerEndFlight(player_t* player)
 	}
 
 	player->mo->flags2 -= MobjFlag2::Fly;
-	player->mo->flags &= ~MF_NOGRAVITY;
+	player->mo->flags -= MobjFlag::NoGravity;
 }
 
 //
@@ -619,19 +619,19 @@ void P_PlayerThink(player_t* player)
 
 	// killough 2/8/98, 3/21/98:
 	if(player->cheats & CF_NOCLIP)
-		player->mo->flags |= MF_NOCLIP;
+		player->mo->flags |= MobjFlag::NoClip;
 	else
-		player->mo->flags &= ~MF_NOCLIP;
+		player->mo->flags -= MobjFlag::NoClip;
 
 	// chain saw run forward
 
 	cmd = &player->cmd;
-	if(player->mo->flags & MF_JUSTATTACKED)
+	if((player->mo->flags & MobjFlag::JustAttacked) != MobjFlag{})
 	{
 		cmd->angleturn = 0;
 		cmd->forwardmove = 0xc800 / 512;
 		cmd->sidemove = 0;
-		player->mo->flags &= ~MF_JUSTATTACKED;
+		player->mo->flags -= MobjFlag::JustAttacked;
 	}
 
 	if(hexen)
@@ -688,17 +688,17 @@ void P_PlayerThink(player_t* player)
 						// third should be the Fighter's original gold color
 						if(playerNum == 0)
 						{
-							speedMo->flags |= 2 << MF_TRANSSHIFT;
+							speedMo->flags |= MobjTranslationFlags(2u);
 						}
 						else if(playerNum != 2)
 						{
-							speedMo->flags |= playerNum << MF_TRANSSHIFT;
+							speedMo->flags |= MobjTranslationFlags(playerNum);
 						}
 					}
 					else if(playerNum)
 					{
 						// Set color translation bits for player sprites
-						speedMo->flags |= playerNum << MF_TRANSSHIFT;
+						speedMo->flags |= MobjTranslationFlags(playerNum);
 					}
 					P_SetTarget(&speedMo->target, pmo);
 					speedMo->special1.i = std::to_underlying(player->pclass);
@@ -939,11 +939,11 @@ void P_PlayerThink(player_t* player)
 	{
 		if(player->pclass == PClass::Cleric)
 		{
-			if(!(leveltime & 7) && player->mo->flags & MF_SHADOW
+			if(!(leveltime & 7) && (player->mo->flags & MobjFlag::Shadow) != MobjFlag{}
 				&& (player->mo->flags2 & MobjFlag2::DontDraw) == MobjFlag2{})
 			{
-				player->mo->flags &= ~MF_SHADOW;
-				if(!(player->mo->flags & MF_ALTSHADOW))
+				player->mo->flags -= MobjFlag::Shadow;
+				if((player->mo->flags & MobjFlag::AltShadow) == MobjFlag{})
 				{
 					player->mo->flags2 |= MobjFlag2::DontDraw | MobjFlag2::NonShootable;
 				}
@@ -952,9 +952,9 @@ void P_PlayerThink(player_t* player)
 			{
 				if((player->mo->flags2 & MobjFlag2::DontDraw) != MobjFlag2{})
 				{
-					if(!(player->mo->flags & MF_SHADOW))
+					if((player->mo->flags & MobjFlag::Shadow) == MobjFlag{})
 					{
-						player->mo->flags |= MF_SHADOW | MF_ALTSHADOW;
+						player->mo->flags |= MobjFlag::Shadow | MobjFlag::AltShadow;
 					}
 					else
 					{
@@ -963,8 +963,8 @@ void P_PlayerThink(player_t* player)
 				}
 				else
 				{
-					player->mo->flags |= MF_SHADOW;
-					player->mo->flags &= ~MF_ALTSHADOW;
+					player->mo->flags |= MobjFlag::Shadow;
+					player->mo->flags -= MobjFlag::AltShadow;
 				}
 			}
 		}
@@ -975,7 +975,7 @@ void P_PlayerThink(player_t* player)
 			if(player->pclass == PClass::Cleric)
 			{
 				player->mo->flags2 -= (MobjFlag2::DontDraw | MobjFlag2::NonShootable);
-				player->mo->flags &= ~(MF_SHADOW | MF_ALTSHADOW);
+				player->mo->flags -= (MobjFlag::Shadow | MobjFlag::AltShadow);
 			}
 		}
 	}
@@ -988,7 +988,7 @@ void P_PlayerThink(player_t* player)
 
 	if(player->powers[std::to_underlying(PowerType::Invisibility)] > 0) // killough
 		if(!--player->powers[std::to_underlying(PowerType::Invisibility)])
-			player->mo->flags &= ~MF_SHADOW;
+			player->mo->flags -= MobjFlag::Shadow;
 
 	if(player->powers[std::to_underlying(PowerType::Infrared)] > 0) // killough
 		player->powers[std::to_underlying(PowerType::Infrared)]--;
@@ -1144,7 +1144,7 @@ dboolean P_UndoPlayerChicken(player_t* player)
 	angle_t angle;
 	int playerNum;
 	WeaponType weapon;
-	int oldFlags;
+	int oldFlags; // not MobjFlag: upstream truncates to int, see below
 	int oldFlags2; // not MobjFlag2: upstream truncates to int, see below
 
 	pmo = player->mo;
@@ -1153,7 +1153,9 @@ dboolean P_UndoPlayerChicken(player_t* player)
 	z = pmo->z;
 	angle = pmo->angle;
 	weapon = static_cast<WeaponType>(pmo->special1.i);
-	oldFlags = pmo->flags;
+	// Truncates on purpose, as upstream: flags is 64 bits but upstream keeps it in an int,
+	// so bits 32-63 are lost if a failed unmorph writes it back below.
+	oldFlags = static_cast<int>(std::to_underlying(pmo->flags));
 	// Truncates on purpose, as upstream: flags2 is 64 bits but upstream keeps it in an int,
 	// so bits 32-63 are lost if a failed unmorph writes it back below.
 	oldFlags2 = static_cast<int>(std::to_underlying(pmo->flags2));
@@ -1168,7 +1170,8 @@ dboolean P_UndoPlayerChicken(player_t* player)
 		mo->health = player->health;
 		mo->special1.i = std::to_underlying(weapon);
 		mo->player = player;
-		mo->flags = oldFlags;
+		// The truncated copy: the original bits 32-63 are gone, replaced by copies of bit 31
+		mo->flags = static_cast<MobjFlag>(static_cast<uint64_t>(oldFlags));
 		// The truncated copy: the original bits 32-63 are gone, replaced by copies of bit 31
 		mo->flags2 = static_cast<MobjFlag2>(static_cast<uint64_t>(oldFlags2));
 		player->mo = mo;
@@ -1179,7 +1182,7 @@ dboolean P_UndoPlayerChicken(player_t* player)
 	if(playerNum != 0)
 	{
 		// Set color translation
-		mo->flags |= playerNum << MF_TRANSSHIFT;
+		mo->flags |= MobjTranslationFlags(playerNum);
 	}
 	mo->angle = angle;
 	mo->player = player;
@@ -1187,7 +1190,7 @@ dboolean P_UndoPlayerChicken(player_t* player)
 	if(oldFlags2 & std::to_underlying(MobjFlag2::Fly))
 	{
 		mo->flags2 |= MobjFlag2::Fly;
-		mo->flags |= MF_NOGRAVITY;
+		mo->flags |= MobjFlag::NoGravity;
 	}
 	player->chickenTics = 0;
 	player->powers[std::to_underlying(PowerType::WeaponLevel2)] = 0;
@@ -1570,7 +1573,7 @@ void Raven_P_MovePlayer(player_t* player)
 			if((player->mo->flags2 & MobjFlag2::Fly) == MobjFlag2{})
 			{
 				player->mo->flags2 |= MobjFlag2::Fly;
-				player->mo->flags |= MF_NOGRAVITY;
+				player->mo->flags |= MobjFlag::NoGravity;
 				if(hexen && player->mo->momz <= -39 * FRACUNIT)
 				{
 					// stop falling scream
@@ -1581,7 +1584,7 @@ void Raven_P_MovePlayer(player_t* player)
 		else
 		{
 			player->mo->flags2 -= MobjFlag2::Fly;
-			player->mo->flags &= ~MF_NOGRAVITY;
+			player->mo->flags -= MobjFlag::NoGravity;
 		}
 	}
 	else if(fly > 0)
@@ -1640,7 +1643,7 @@ void P_ChickenPlayerThink(player_t* player)
 void ResetBlasted(mobj_t* mo)
 {
 	mo->flags2 -= MobjFlag2::Blasted;
-	if(!(mo->flags & MF_ICECORPSE))
+	if((mo->flags & MobjFlag::IceCorpse) == MobjFlag{})
 	{
 		mo->flags2 -= MobjFlag2::Slide;
 	}
@@ -1670,7 +1673,7 @@ void P_BlastMobj(mobj_t* source, mobj_t* victim, fixed_t strength)
 	}
 	else // full strength blast from artifact
 	{
-		if(victim->flags & MF_MISSILE)
+		if((victim->flags & MobjFlag::Missile) != MobjFlag{})
 		{
 			switch(victim->type)
 			{
@@ -1711,7 +1714,7 @@ void P_BlastMobj(mobj_t* source, mobj_t* victim, fixed_t strength)
 			mo->momy = victim->momy;
 		}
 
-		if(victim->flags & MF_MISSILE)
+		if((victim->flags & MobjFlag::Missile) != MobjFlag{})
 		{
 			victim->momz = 8 * FRACUNIT;
 			mo->momz = victim->momz;
@@ -1758,16 +1761,16 @@ void P_BlastRadius(player_t* player)
 		}
 		if((mo->type == MobjType::HexenPoisoncloud) || // poison cloud
 			(mo->type == MobjType::HexenHolyFx) ||    // holy fx
-			(mo->flags & MF_ICECORPSE))          // frozen corpse
+			(mo->flags & MobjFlag::IceCorpse) != MobjFlag{})          // frozen corpse
 		{
 			// Let these special cases go
 		}
-		else if((mo->flags & MF_COUNTKILL) && (mo->health <= 0))
+		else if((mo->flags & MobjFlag::CountKill) != MobjFlag{} && (mo->health <= 0))
 		{
 			continue;
 		}
-		else if(!(mo->flags & MF_COUNTKILL) &&
-			!(mo->player) && !(mo->flags & MF_MISSILE))
+		else if((mo->flags & MobjFlag::CountKill) == MobjFlag{} &&
+			!(mo->player) && (mo->flags & MobjFlag::Missile) == MobjFlag{})
 		{
 			// Must be monster, player, or missile
 			continue;
@@ -1838,7 +1841,7 @@ dboolean P_UndoPlayerMorph(player_t* player)
 	angle_t angle;
 	int playerNum;
 	WeaponType weapon;
-	int oldFlags;
+	int oldFlags; // not MobjFlag: upstream truncates to int, see below
 	int oldFlags2; // not MobjFlag2: upstream truncates to int, see below
 	MobjType oldBeast;
 
@@ -1848,7 +1851,9 @@ dboolean P_UndoPlayerMorph(player_t* player)
 	z = pmo->z;
 	angle = pmo->angle;
 	weapon = static_cast<WeaponType>(pmo->special1.i);
-	oldFlags = pmo->flags;
+	// Truncates on purpose, as upstream: flags is 64 bits but upstream keeps it in an int,
+	// so bits 32-63 are lost if a failed unmorph writes it back below.
+	oldFlags = static_cast<int>(std::to_underlying(pmo->flags));
 	// Truncates on purpose, as upstream: flags2 is 64 bits but upstream keeps it in an int,
 	// so bits 32-63 are lost if a failed unmorph writes it back below.
 	oldFlags2 = static_cast<int>(std::to_underlying(pmo->flags2));
@@ -1880,7 +1885,8 @@ dboolean P_UndoPlayerMorph(player_t* player)
 		mo->health = player->health;
 		mo->special1.i = std::to_underlying(weapon);
 		mo->player = player;
-		mo->flags = oldFlags;
+		// The truncated copy: the original bits 32-63 are gone, replaced by copies of bit 31
+		mo->flags = static_cast<MobjFlag>(static_cast<uint64_t>(oldFlags));
 		// The truncated copy: the original bits 32-63 are gone, replaced by copies of bit 31
 		mo->flags2 = static_cast<MobjFlag2>(static_cast<uint64_t>(oldFlags2));
 		player->mo = mo;
@@ -1893,17 +1899,17 @@ dboolean P_UndoPlayerMorph(player_t* player)
 		// Fighter's original gold color
 		if(playerNum == 0)
 		{
-			mo->flags |= 2 << MF_TRANSSHIFT;
+			mo->flags |= MobjTranslationFlags(2u);
 		}
 		else if(playerNum != 2)
 		{
-			mo->flags |= playerNum << MF_TRANSSHIFT;
+			mo->flags |= MobjTranslationFlags(playerNum);
 		}
 	}
 	else if(playerNum)
 	{
 		// Set color translation bits for player sprites
-		mo->flags |= playerNum << MF_TRANSSHIFT;
+		mo->flags |= MobjTranslationFlags(playerNum);
 	}
 	mo->angle = angle;
 	mo->player = player;
@@ -1911,7 +1917,7 @@ dboolean P_UndoPlayerMorph(player_t* player)
 	if(oldFlags2 & std::to_underlying(MobjFlag2::Fly))
 	{
 		mo->flags2 |= MobjFlag2::Fly;
-		mo->flags |= MF_NOGRAVITY;
+		mo->flags |= MobjFlag::NoGravity;
 	}
 	player->morphTics = 0;
 	player->health = mo->health = MAXHEALTH;
@@ -1989,7 +1995,7 @@ void P_TeleportOther(mobj_t* victim)
 	else
 	{
 		// If death action, run it upon teleport
-		if(victim->flags & MF_COUNTKILL && victim->special)
+		if((victim->flags & MobjFlag::CountKill) != MobjFlag{} && victim->special)
 		{
 			map_format.remove_mobj_thing_id(victim);
 			map_format.execute_line_special(victim->special, victim->special_args, nullptr, 0, victim);
@@ -2258,7 +2264,7 @@ static dboolean Hexen_P_UseArtifact(player_t* player, ArtiType arti)
 
 extern "C" void A_SpeedFade(mobj_t* actor)
 {
-	actor->flags |= MF_SHADOW;
-	actor->flags &= ~MF_ALTSHADOW;
+	actor->flags |= MobjFlag::Shadow;
+	actor->flags -= MobjFlag::AltShadow;
 	actor->sprite = actor->target->sprite;
 }

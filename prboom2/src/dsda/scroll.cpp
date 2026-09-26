@@ -96,8 +96,8 @@ static void dsda_UpdateFloorCarryScrollerPosition(scroll_t* s, fixed_t dx, fixed
 
 		// Move objects only if on floor or underwater, non-floating, and clipped
 		if(
-			!(thing->flags & MF_NOCLIP) && (
-				!(thing->flags & MF_NOGRAVITY || thing->z > height) ||
+			(thing->flags & MobjFlag::NoClip) == MobjFlag{} && (
+				!((thing->flags & MobjFlag::NoGravity) != MobjFlag{} || thing->z > height) ||
 				thing->z < waterheight
 			)
 		)
@@ -220,8 +220,8 @@ void dsda_UpdateZDoomFloorScroller(scroll_t* s)
 
 			// Move objects only if on floor or underwater, non-floating, and clipped
 			if(
-				!(thing->flags & MF_NOCLIP) && (
-					!(thing->flags & MF_NOGRAVITY || thing->z > height) ||
+				(thing->flags & MobjFlag::NoClip) == MobjFlag{} && (
+					!((thing->flags & MobjFlag::NoGravity) != MobjFlag{} || thing->z > height) ||
 					thing->z < waterheight
 				)
 			)
@@ -229,7 +229,7 @@ void dsda_UpdateZDoomFloorScroller(scroll_t* s)
 				dboolean scroll_it;
 
 				scroll_it = false;
-				if(thing->type == MobjType::Skull || thing->flags & MF_COUNTKILL)
+				if(thing->type == MobjType::Skull || (thing->flags & MobjFlag::CountKill) != MobjFlag{})
 				{
 					if(s->flags & SCROLL_MONSTER)
 						scroll_it = true;
@@ -281,16 +281,16 @@ void dsda_UpdateZDoomCeilingScroller(scroll_t* s)
 			thing = node->m_thing;
 
 			if(
-				!(thing->flags & MF_NOCLIP) &&
-				thing->flags & MF_SPAWNCEILING &&
-				thing->flags & MF_NOGRAVITY &&
+				(thing->flags & MobjFlag::NoClip) == MobjFlag{} &&
+				(thing->flags & MobjFlag::SpawnCeiling) != MobjFlag{} &&
+				(thing->flags & MobjFlag::NoGravity) != MobjFlag{} &&
 				thing->z + thing->height == sec->ceilingheight
 			)
 			{
 				dboolean scroll_it;
 
 				scroll_it = false;
-				if(thing->type == MobjType::Skull || thing->flags & MF_COUNTKILL)
+				if(thing->type == MobjType::Skull || (thing->flags & MobjFlag::CountKill) != MobjFlag{})
 				{
 					if(s->flags & SCROLL_MONSTER)
 						scroll_it = true;
@@ -335,24 +335,24 @@ void dsda_UpdateThruster(scroll_t* s)
 		thrust_it = false;
 		thing = node->m_thing;
 
-		if(thing->flags & MF_NOCLIP)
+		if((thing->flags & MobjFlag::NoClip) != MobjFlag{})
 			continue;
 
-		if(!(thing->flags & MF_NOGRAVITY) && thing->z <= thing->floorz)
+		if((thing->flags & MobjFlag::NoGravity) == MobjFlag{} && thing->z <= thing->floorz)
 		{
 			if(s->flags & THRUST_GROUNDED)
 				thrust_it = true;
 		}
 		else if(
-			thing->flags & MF_SPAWNCEILING &&
-			thing->flags & MF_NOGRAVITY &&
+			(thing->flags & MobjFlag::SpawnCeiling) != MobjFlag{} &&
+			(thing->flags & MobjFlag::NoGravity) != MobjFlag{} &&
 			thing->z + thing->height == sec->ceilingheight
 		)
 		{
 			if(s->flags & THRUST_CEILING)
 				thrust_it = true;
 		}
-		else if(thing->flags & MF_NOGRAVITY || thing->z > thing->floorz)
+		else if((thing->flags & MobjFlag::NoGravity) != MobjFlag{} || thing->z > thing->floorz)
 		{
 			if(s->flags & THRUST_AIRBORNE)
 				thrust_it = true;
@@ -364,7 +364,7 @@ void dsda_UpdateThruster(scroll_t* s)
 
 			if((thing->flags2 & MobjFlag2::WindThrust) != MobjFlag2{} && s->flags & THRUST_WINDTHRUST)
 				thrust_it = true;
-			else if(thing->type == MobjType::Skull || thing->flags & MF_COUNTKILL)
+			else if(thing->type == MobjType::Skull || (thing->flags & MobjFlag::CountKill) != MobjFlag{})
 			{
 				if(s->flags & THRUST_MONSTER)
 					thrust_it = true;
@@ -374,7 +374,7 @@ void dsda_UpdateThruster(scroll_t* s)
 				if(s->flags & THRUST_PLAYER)
 					thrust_it = true;
 			}
-			else if(thing->flags & MF_MISSILE)
+			else if((thing->flags & MobjFlag::Missile) != MobjFlag{})
 			{
 				if(s->flags & THRUST_PROJECTILE)
 					thrust_it = true;

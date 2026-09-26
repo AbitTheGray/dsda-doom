@@ -143,7 +143,7 @@ void P_ExplodeMissile(mobj_t* mo)
 			mo->tics = 1;
 	}
 
-	mo->flags &= ~MF_MISSILE;
+	mo->flags -= MobjFlag::Missile;
 
 	if(!hexen)
 	{
@@ -228,12 +228,12 @@ static void P_XYMovement(mobj_t* mo)
 
 	if(!(mo->momx | mo->momy)) // Any momentum?
 	{
-		if(mo->flags & MF_SKULLFLY)
+		if((mo->flags & MobjFlag::SkullFly) != MobjFlag{})
 		{
 			StateId new_state;
 			// the skull slammed into something
 
-			mo->flags &= ~MF_SKULLFLY;
+			mo->flags -= MobjFlag::SkullFly;
 			mo->momz = 0;
 
 			if(raven)
@@ -306,10 +306,10 @@ static void P_XYMovement(mobj_t* mo)
 			// Add ability for objects other than players to bounce on ice
 
 			if(
-				!(mo->flags & MF_MISSILE) &&
+				(mo->flags & MobjFlag::Missile) == MobjFlag{} &&
 				mbf_features &&
 				(
-					mo->flags & MF_BOUNCES ||
+					(mo->flags & MobjFlag::Bounces) != MobjFlag{} ||
 					(
 						!player &&
 						blockline &&
@@ -337,7 +337,7 @@ static void P_XYMovement(mobj_t* mo)
 					// if under gravity, slow down in
 					// direction perpendicular to wall.
 
-					if(!(mo->flags & MF_NOGRAVITY))
+					if((mo->flags & MobjFlag::NoGravity) == MobjFlag{})
 					{
 						mo->momx = (mo->momx + x) / 2;
 						mo->momy = (mo->momy + y) / 2;
@@ -368,7 +368,7 @@ static void P_XYMovement(mobj_t* mo)
 					}
 				}
 			}
-			else if(mo->flags & MF_MISSILE)
+			else if((mo->flags & MobjFlag::Missile) != MobjFlag{})
 			{
 				if(hexen && (mo->flags2 & MobjFlag2::FloorBounce) != MobjFlag2{})
 				{
@@ -376,7 +376,7 @@ static void P_XYMovement(mobj_t* mo)
 					{
 						if((BlockingMobj->flags2 & MobjFlag2::Reflective) != MobjFlag2{} ||
 							((!BlockingMobj->player) &&
-								(!(BlockingMobj->flags & MF_COUNTKILL))))
+								((BlockingMobj->flags & MobjFlag::CountKill) == MobjFlag{})))
 						{
 							fixed_t speed;
 
@@ -510,11 +510,11 @@ static void P_XYMovement(mobj_t* mo)
 	while(xmove || ymove);
 
 	/* no friction for missiles or skulls ever, no friction when airborne */
-	if(mo->flags & (MF_MISSILE | MF_SKULLFLY))
+	if((mo->flags & (MobjFlag::Missile | MobjFlag::SkullFly)) != MobjFlag{})
 		return;
 
 	if(
-		mo->z > mo->floorz && (mo->flags2 & MobjFlag2::OnMobj) == MobjFlag2{} && !(mo->flags & MF_FLY) &&
+		mo->z > mo->floorz && (mo->flags2 & MobjFlag2::OnMobj) == MobjFlag2{} && (mo->flags & MobjFlag::Fly) == MobjFlag{} &&
 		player && mo->player && map_aircontrol > 256
 	)
 	{
@@ -527,7 +527,7 @@ static void P_XYMovement(mobj_t* mo)
 	}
 
 	if(mo->z > mo->floorz &&
-		!(mo->flags & MF_FLY) &&
+		(mo->flags & MobjFlag::Fly) == MobjFlag{} &&
 		(mo->flags2 & MobjFlag2::Fly) == MobjFlag2{} &&
 		(mo->flags2 & MobjFlag2::OnMobj) == MobjFlag2{} &&
 		(!hexen || mo->type != MobjType::HexenBlasteffect))
@@ -539,8 +539,8 @@ static void P_XYMovement(mobj_t* mo)
 	*/
 	if(
 		(
-			(mo->flags & MF_BOUNCES && mo->z > mo->dropoffz) ||
-			mo->flags & MF_CORPSE ||
+			((mo->flags & MobjFlag::Bounces) != MobjFlag{} && mo->z > mo->dropoffz) ||
+			(mo->flags & MobjFlag::Corpse) != MobjFlag{} ||
 			(mo->intflags & MobjIntFlag::Falling) != MobjIntFlag{}
 		) &&
 		(
@@ -724,7 +724,7 @@ static void P_ZMovement(mobj_t* mo)
 	* (e.g. grenade, mine, pipebomb)
 	*/
 
-	if(mo->flags & MF_BOUNCES && mo->momz)
+	if((mo->flags & MobjFlag::Bounces) != MobjFlag{} && mo->momz)
 	{
 		mo->z += mo->momz;
 		if(mo->z <= mo->floorz) /* bounce off floors */
@@ -733,11 +733,11 @@ static void P_ZMovement(mobj_t* mo)
 			if(mo->momz < 0)
 			{
 				mo->momz = -mo->momz;
-				if(!(mo->flags & MF_NOGRAVITY)) /* bounce back with decay */
+				if((mo->flags & MobjFlag::NoGravity) == MobjFlag{}) /* bounce back with decay */
 				{
-					mo->momz = mo->flags & MF_FLOAT
+					mo->momz = (mo->flags & MobjFlag::Float) != MobjFlag{}
 						? // floaters fall slowly
-						mo->flags & MF_DROPOFF
+						(mo->flags & MobjFlag::DropOff) != MobjFlag{}
 						? // DROPOFF indicates rate
 						FixedMul(mo->momz, (fixed_t)(FRACUNIT * .85))
 						: FixedMul(mo->momz, (fixed_t)(FRACUNIT * .70))
@@ -749,10 +749,10 @@ static void P_ZMovement(mobj_t* mo)
 				}
 
 				/* killough 11/98: touchy objects explode on impact */
-				if(mo->flags & MF_TOUCHY && (mo->intflags & MobjIntFlag::Armed) != MobjIntFlag{}
+				if((mo->flags & MobjFlag::Touchy) != MobjFlag{} && (mo->intflags & MobjIntFlag::Armed) != MobjIntFlag{}
 					&& mo->health > 0)
 					P_DamageMobj(mo, nullptr, nullptr, mo->health);
-				else if(mo->flags & MF_FLOAT && sentient(mo))
+				else if((mo->flags & MobjFlag::Float) != MobjFlag{} && sentient(mo))
 					goto floater;
 				return;
 			}
@@ -765,12 +765,12 @@ static void P_ZMovement(mobj_t* mo)
 			{
 				if(mo->subsector->sector->ceilingpic != skyflatnum)
 					mo->momz = -mo->momz; /* always bounce off non-sky ceiling */
-				else if(mo->flags & MF_MISSILE)
+				else if((mo->flags & MobjFlag::Missile) != MobjFlag{})
 					P_RemoveMobj(mo); /* missiles don't bounce off skies */
-				else if(mo->flags & MF_NOGRAVITY)
+				else if((mo->flags & MobjFlag::NoGravity) != MobjFlag{})
 					mo->momz = -mo->momz; // bounce unless under gravity
 
-				if(mo->flags & MF_FLOAT && sentient(mo))
+				if((mo->flags & MobjFlag::Float) != MobjFlag{} && sentient(mo))
 					goto floater;
 
 				return;
@@ -778,17 +778,17 @@ static void P_ZMovement(mobj_t* mo)
 		}
 		else
 		{
-			if(!(mo->flags & MF_NOGRAVITY)) /* free-fall under gravity */
+			if((mo->flags & MobjFlag::NoGravity) == MobjFlag{}) /* free-fall under gravity */
 				mo->momz -= mo->info->mass * (gravity / 256);
 
-			if(mo->flags & MF_FLOAT && sentient(mo)) goto floater;
+			if((mo->flags & MobjFlag::Float) != MobjFlag{} && sentient(mo)) goto floater;
 			return;
 		}
 
 		/* came to a stop */
 		mo->momz = 0;
 
-		if(mo->flags & MF_MISSILE)
+		if((mo->flags & MobjFlag::Missile) != MobjFlag{})
 		{
 			if(ceilingline &&
 				ceilingline->backsector &&
@@ -799,7 +799,7 @@ static void P_ZMovement(mobj_t* mo)
 				P_ExplodeMissile(mo);
 		}
 
-		if(mo->flags & MF_FLOAT && sentient(mo)) goto floater;
+		if((mo->flags & MobjFlag::Float) != MobjFlag{} && sentient(mo)) goto floater;
 		return;
 	}
 
@@ -820,11 +820,11 @@ static void P_ZMovement(mobj_t* mo)
 	mo->z += mo->momz;
 
 floater:
-	if((mo->flags & MF_FLOAT) && mo->target)
+	if((mo->flags & MobjFlag::Float) != MobjFlag{} && mo->target)
 
 		// float down towards target if too close
 
-		if(!(mo->flags & MF_SKULLFLY) && !(mo->flags & MF_INFLOAT))
+		if((mo->flags & MobjFlag::SkullFly) == MobjFlag{} && (mo->flags & MobjFlag::InFloat) == MobjFlag{})
 		{
 			fixed_t delta;
 			if(P_AproxDistance(mo->x - mo->target->x, mo->y - mo->target->y) <
@@ -832,7 +832,7 @@ floater:
 				mo->z += delta < 0 ? -FLOATSPEED : FLOATSPEED;
 		}
 
-	if(mo->player && (mo->flags & MF_FLY) && (mo->z > mo->floorz))
+	if(mo->player && (mo->flags & MobjFlag::Fly) != MobjFlag{} && (mo->z > mo->floorz))
 	{
 		mo->z += finesine[(FINEANGLES / 80 * gametic) & FINEMASK] / 8;
 		mo->momz = FixedMul(mo->momz, FRICTION_FLY);
@@ -852,7 +852,7 @@ floater:
 
 		if(raven)
 		{
-			if(mo->flags & MF_MISSILE)
+			if((mo->flags & MobjFlag::Missile) != MobjFlag{})
 			{
 				mo->z = mo->floorz;
 				if((mo->flags2 & MobjFlag2::FloorBounce) != MobjFlag2{})
@@ -887,7 +887,7 @@ floater:
 				}
 			}
 
-			if(hexen && mo->flags & MF_COUNTKILL) // Blasted mobj falling
+			if(hexen && (mo->flags & MobjFlag::CountKill) != MobjFlag{}) // Blasted mobj falling
 			{
 				if(mo->momz < -(23 * FRACUNIT))
 				{
@@ -923,7 +923,7 @@ floater:
 		*/
 
 		if(
-			mo->flags & MF_SKULLFLY &&
+			(mo->flags & MobjFlag::SkullFly) != MobjFlag{} &&
 			(
 				!comp[std::to_underlying(CompOption::Soul)] ||
 				(
@@ -938,7 +938,7 @@ floater:
 		if(mo->momz < 0)
 		{
 			/* killough 11/98: touchy objects explode on impact */
-			if(mo->flags & MF_TOUCHY && (mo->intflags & MobjIntFlag::Armed) != MobjIntFlag{} && mo->health > 0)
+			if((mo->flags & MobjFlag::Touchy) != MobjFlag{} && (mo->intflags & MobjIntFlag::Armed) != MobjIntFlag{} && mo->health > 0)
 				P_DamageMobj(mo, nullptr, nullptr, mo->health);
 			else
 			{
@@ -1031,17 +1031,17 @@ floater:
 		* However we might still have upward momentum, in which case this will
 		* incorrectly reverse it, so we might still need this for demo sync
 		*/
-		if(mo->flags & MF_SKULLFLY &&
+		if((mo->flags & MobjFlag::SkullFly) != MobjFlag{} &&
 			compatibility_level <= CompLevel::Doom219)
 			mo->momz = -mo->momz; // the skull slammed into something
 
-		if(mo->info->crashstate != StateId::Null && (mo->flags & MF_CORPSE) && (mo->flags2 & MobjFlag2::IceDamage) == MobjFlag2{})
+		if(mo->info->crashstate != StateId::Null && (mo->flags & MobjFlag::Corpse) != MobjFlag{} && (mo->flags2 & MobjFlag2::IceDamage) == MobjFlag2{})
 		{
 			P_SetMobjState(mo, mo->info->crashstate);
 			return;
 		}
 
-		if(!raven && (mo->flags & MF_MISSILE) && !(mo->flags & MF_NOCLIP))
+		if(!raven && (mo->flags & MobjFlag::Missile) != MobjFlag{} && (mo->flags & MobjFlag::NoClip) == MobjFlag{})
 		{
 			P_ExplodeMissile(mo);
 			return;
@@ -1054,7 +1054,7 @@ floater:
 		else
 			mo->momz -= gravity >> 3;
 	}
-	else if(!(mo->flags & MF_NOGRAVITY))
+	else if((mo->flags & MobjFlag::NoGravity) == MobjFlag{})
 	{
 		if(mo->momz == 0)
 			mo->momz = -gravity;
@@ -1067,7 +1067,7 @@ floater:
 		* Lost souls were meant to bounce off of ceilings;
 		*  new comp_soul compatibility option added
 		*/
-		if(!comp[std::to_underlying(CompOption::Soul)] && mo->flags & MF_SKULLFLY)
+		if(!comp[std::to_underlying(CompOption::Soul)] && (mo->flags & MobjFlag::SkullFly) != MobjFlag{})
 			mo->momz = -mo->momz; // the skull slammed into something
 
 		// hit the ceiling
@@ -1091,10 +1091,10 @@ floater:
 		*  lowering on us), so for old demos we must still do the buggy
 		*  momentum reversal here
 		*/
-		if(comp[std::to_underlying(CompOption::Soul)] && mo->flags & MF_SKULLFLY)
+		if(comp[std::to_underlying(CompOption::Soul)] && (mo->flags & MobjFlag::SkullFly) != MobjFlag{})
 			mo->momz = -mo->momz; // the skull slammed into something
 
-		if((mo->flags & MF_MISSILE) && (hexen || !(mo->flags & MF_NOCLIP)))
+		if((mo->flags & MobjFlag::Missile) != MobjFlag{} && (hexen || (mo->flags & MobjFlag::NoClip) == MobjFlag{}))
 		{
 			if(hexen && mo->type == MobjType::HexenLightningCeiling)
 			{
@@ -1184,7 +1184,7 @@ static void P_NightmareRespawn(mobj_t* mobj)
 	// spawn the new monster
 
 	mthing = &mobj->spawnpoint;
-	if(mobj->info->flags & MF_SPAWNCEILING)
+	if((mobj->info->flags & MobjFlag::SpawnCeiling) != MobjFlag{})
 		z = ONCEILINGZ;
 	else
 		z = ONFLOORZ;
@@ -1207,11 +1207,11 @@ static void P_NightmareRespawn(mobj_t* mobj)
 		mo->special2.i = std::to_underlying(MobjType::HexenZero);
 
 	if(mthing->options & MTF_AMBUSH)
-		mo->flags |= MF_AMBUSH;
+		mo->flags |= MobjFlag::Ambush;
 
 	/* killough 11/98: transfer friendliness from deceased */
-	mo->flags = (mo->flags & ~MF_FRIEND) | (mobj->flags & MF_FRIEND);
-	mo->flags = mo->flags | MF_RESSURECTED; //e6y
+	mo->flags = (mo->flags - MobjFlag::Friend) | (mobj->flags & MobjFlag::Friend);
+	mo->flags = mo->flags | MobjFlag::Ressurected; //e6y
 
 	mo->reactiontime = 18;
 
@@ -1288,7 +1288,7 @@ void P_MobjThinker(mobj_t* mobj)
 
 	// momentum movement
 	BlockingMobj = nullptr;
-	if(mobj->momx | mobj->momy || mobj->flags & MF_SKULLFLY)
+	if(mobj->momx | mobj->momy || (mobj->flags & MobjFlag::SkullFly) != MobjFlag{})
 	{
 		P_XYMovement(mobj);
 		mobj->intflags -= MobjIntFlag::Scrolling;
@@ -1318,7 +1318,7 @@ void P_MobjThinker(mobj_t* mobj)
 				P_ZMovement(mobj);
 
 				// This bug is part of the original source
-				if(hexen && mobj->player && (mobj->flags & std::to_underlying(MobjFlag2::OnMobj)) != 0)
+				if(hexen && mobj->player && (std::to_underlying(mobj->flags) & std::to_underlying(MobjFlag2::OnMobj)) != 0)
 				{
 					mobj->flags2 -= MobjFlag2::OnMobj;
 				}
@@ -1405,7 +1405,7 @@ void P_MobjThinker(mobj_t* mobj)
 		// slightly push off of ledge if hanging more than halfway off
 
 		if(mobj->z > mobj->dropoffz &&       // Only objects contacting dropoff
-			!(mobj->flags & MF_NOGRAVITY) && // Only objects which fall
+			(mobj->flags & MobjFlag::NoGravity) == MobjFlag{} && // Only objects which fall
 			!comp[std::to_underlying(CompOption::FallOff)])             // Not in old demos
 			P_ApplyTorque(mobj);             // Apply torque
 		else
@@ -1442,7 +1442,7 @@ void P_MobjThinker(mobj_t* mobj)
 	{
 		// check for nightmare respawn
 
-		if(!(mobj->flags & MF_COUNTKILL))
+		if((mobj->flags & MobjFlag::CountKill) == MobjFlag{})
 			return;
 
 		if(!skill_info.respawn_time)
@@ -1478,7 +1478,7 @@ mobj_t* P_SubstNullMobj(mobj_t* mobj)
 		dummy_mobj.x = 0;
 		dummy_mobj.y = 0;
 		dummy_mobj.z = 0;
-		dummy_mobj.flags = 0;
+		dummy_mobj.flags = MobjFlag{};
 
 		mobj = &dummy_mobj;
 	}
@@ -1549,7 +1549,7 @@ dboolean P_SpawnProjectile(short thing_id, mobj_t* source, int spawn_num, angle_
 	if(std::to_underlying(type) == num_mobj_types)
 		return false;
 
-	is_monster = (type == MobjType::Skull || (mobjinfo[std::to_underlying(type)].flags & MF_COUNTKILL));
+	is_monster = (type == MobjType::Skull || (mobjinfo[std::to_underlying(type)].flags & MobjFlag::CountKill) != MobjFlag{});
 
 	if(nomonsters && is_monster)
 		return false;
@@ -1577,7 +1577,7 @@ dboolean P_SpawnProjectile(short thing_id, mobj_t* source, int spawn_num, angle_
 
 					if(gravity)
 					{
-						new_mobj->flags &= ~MF_NOGRAVITY;
+						new_mobj->flags -= MobjFlag::NoGravity;
 						if(!is_monster && gravity == 1)
 						{
 							new_mobj->flags2 |= MobjFlag2::LoGrav;
@@ -1585,7 +1585,7 @@ dboolean P_SpawnProjectile(short thing_id, mobj_t* source, int spawn_num, angle_
 					}
 					else
 					{
-						new_mobj->flags |= MF_NOGRAVITY;
+						new_mobj->flags |= MobjFlag::NoGravity;
 					}
 
 					P_SetTarget(&new_mobj->target, spawn_location);
@@ -1612,9 +1612,9 @@ dboolean P_SpawnProjectile(short thing_id, mobj_t* source, int spawn_num, angle_
 						new_mobj->momz = vspeed;
 					}
 
-					new_mobj->flags |= MF_DROPPED; // Don't respawn
+					new_mobj->flags |= MobjFlag::Dropped; // Don't respawn
 
-					if(new_mobj->flags & MF_MISSILE)
+					if((new_mobj->flags & MobjFlag::Missile) != MobjFlag{})
 					{
 						if(P_CheckMissileSpawn(new_mobj))
 						{
@@ -1653,7 +1653,7 @@ dboolean P_SpawnThing(short thing_id, mobj_t* source, int spawn_num,
 	if(std::to_underlying(type) == num_mobj_types)
 		return false;
 
-	if(nomonsters && (type == MobjType::Skull || (mobjinfo[std::to_underlying(type)].flags & MF_COUNTKILL)))
+	if(nomonsters && (type == MobjType::Skull || (mobjinfo[std::to_underlying(type)].flags & MobjFlag::CountKill) != MobjFlag{}))
 		return false;
 
 	dsda_ResetThingIDSearch(&search);
@@ -1677,7 +1677,7 @@ dboolean P_SpawnThing(short thing_id, mobj_t* source, int spawn_num,
 			}
 			if(new_thing_id)
 				dsda_AddMobjThingID(new_mobj, new_thing_id);
-			new_mobj->flags |= MF_DROPPED; // Don't respawn
+			new_mobj->flags |= MobjFlag::Dropped; // Don't respawn
 			success = true;
 		}
 	}
@@ -1689,9 +1689,9 @@ int P_MobjSpawnHealth(const mobj_t* mobj)
 {
 	int result;
 
-	if(mobj->type == MobjType::Skull || mobj->flags & MF_COUNTKILL)
+	if(mobj->type == MobjType::Skull || (mobj->flags & MobjFlag::CountKill) != MobjFlag{})
 	{
-		if(mobj->flags & MF_FRIEND)
+		if((mobj->flags & MobjFlag::Friend) != MobjFlag{})
 		{
 			if(skill_info.friend_health_factor)
 			{
@@ -1735,9 +1735,9 @@ mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, MobjType type)
 
 	/* killough 8/23/98: no friends, bouncers, or touchy things in old demos */
 	if(!mbf_features)
-		mobj->flags &= ~(MF_BOUNCES | MF_FRIEND | MF_TOUCHY);
+		mobj->flags -= (MobjFlag::Bounces | MobjFlag::Friend | MobjFlag::Touchy);
 	else if(type == g_mt_player)  // Except in old demos, players
-		mobj->flags |= MF_FRIEND; // are always friends.
+		mobj->flags |= MobjFlag::Friend; // are always friends.
 
 	// TODO: possible mapinfo "passover" flag
 	//if (mobj->flags & MF_SOLID)
@@ -1847,7 +1847,7 @@ mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, MobjType type)
 
 	mobj->target = mobj->tracer = mobj->lastenemy = nullptr;
 	P_AddThinker(&mobj->thinker);
-	if(!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+	if(((mobj->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 		totallive++;
 
 	dsda_WatchSpawn(mobj);
@@ -1873,7 +1873,7 @@ void P_RemoveMobj(mobj_t* mobj)
 		if(hexen)
 		{
 			// Remove from creature queue
-			if(mobj->flags & MF_COUNTKILL && mobj->flags & MF_CORPSE)
+			if((mobj->flags & MobjFlag::CountKill) != MobjFlag{} && (mobj->flags & MobjFlag::Corpse) != MobjFlag{})
 			{
 				A_DeQueueCorpse(mobj);
 			}
@@ -1895,8 +1895,8 @@ void P_RemoveMobj(mobj_t* mobj)
 		return;
 	}
 
-	if((mobj->flags & MF_SPECIAL)
-		&& !(mobj->flags & MF_DROPPED)
+	if((mobj->flags & MobjFlag::Special) != MobjFlag{}
+		&& (mobj->flags & MobjFlag::Dropped) == MobjFlag{}
 		&& (mobj->type != MobjType::Inv)
 		&& (mobj->type != MobjType::Ins))
 	{
@@ -1972,7 +1972,7 @@ void P_RemoveMonsters()
 
 		if(
 			mobj->type == MobjType::Skull ||
-			mobj->flags & MF_COUNTKILL ||
+			(mobj->flags & MobjFlag::CountKill) != MobjFlag{} ||
 			(mobj->target && !mobj->target->player)
 		)
 			P_RemoveMobj(mobj);
@@ -2028,7 +2028,7 @@ void P_RespawnSpecials()
 
 	// spawn it
 
-	if(mobjinfo[std::to_underlying(i)].flags & MF_SPAWNCEILING)
+	if((mobjinfo[std::to_underlying(i)].flags & MobjFlag::SpawnCeiling) != MobjFlag{})
 		z = ONCEILINGZ;
 	else
 		z = ONFLOORZ;
@@ -2137,17 +2137,17 @@ void P_SpawnPlayer(int n, const mapthing_t* mthing)
 			// Fighter's original gold color
 			if(mthing->type == 1)
 			{
-				mobj->flags |= MF_TRANSLATION2;
+				mobj->flags |= MobjFlag::Translation2;
 			}
 		}
 		else if(mthing->type > 1)
 		{
 			// Set color translation bits for player sprites
-			mobj->flags |= (mthing->type - 1) << MF_TRANSSHIFT;
+			mobj->flags |= MobjTranslationFlags(mthing->type - 1);
 		}
 	}
 	else
-		mobj->flags |= playernumtotrans[n] << MF_TRANSSHIFT;
+		mobj->flags |= MobjTranslationFlags(playernumtotrans[n]);
 
 	if(leave_data.flags & LF_SET_ANGLE)
 		mobj->angle = leave_data.angle;
@@ -2566,12 +2566,12 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index)
 
 	// don't spawn keycards and players in deathmatch
 
-	if(deathmatch && mobjinfo[std::to_underlying(i)].flags & MF_NOTDMATCH)
+	if(deathmatch && (mobjinfo[std::to_underlying(i)].flags & MobjFlag::NotDMatch) != MobjFlag{})
 		return nullptr;
 
 	// don't spawn any monsters if -nomonsters
 
-	if(nomonsters && (i == MobjType::Skull || (mobjinfo[std::to_underlying(i)].flags & MF_COUNTKILL)))
+	if(nomonsters && (i == MobjType::Skull || (mobjinfo[std::to_underlying(i)].flags & MobjFlag::CountKill) != MobjFlag{}))
 		return nullptr;
 
 	// spawn it
@@ -2586,7 +2586,7 @@ spawnit:
 	x = mthing->x;
 	y = mthing->y;
 
-	if(mobjinfo[std::to_underlying(i)].flags & MF_SPAWNCEILING)
+	if((mobjinfo[std::to_underlying(i)].flags & MobjFlag::SpawnCeiling) != MobjFlag{})
 		z = ONCEILINGZ;
 	else if((mobjinfo[std::to_underlying(i)].flags2 & MobjFlag2::SpawnFloat) != MobjFlag2{})
 		z = FLOATRANDZ;
@@ -2600,11 +2600,11 @@ spawnit:
 
 	mobj = P_SpawnMobj(x, y, z, static_cast<MobjType>(i));
 
-	if(!(mobj->flags & MF_FRIEND) &&
+	if((mobj->flags & MobjFlag::Friend) == MobjFlag{} &&
 		options & (map_format.zdoom ? MTF_FRIENDLY : MTF_FRIEND) &&
 		mbf_features)
 	{
-		mobj->flags |= MF_FRIEND;        // killough 10/98:
+		mobj->flags |= MobjFlag::Friend;        // killough 10/98:
 		P_UpdateThinker(&mobj->thinker); // transfer friendliness flag
 
 		// Friends can have a different spawn health
@@ -2673,12 +2673,12 @@ spawnit:
 	if(map_format.zdoom)
 	{
 		if(options & MTF_TRANSLUCENT)
-			mobj->flags |= MF_TRANSLUCENT;
+			mobj->flags |= MobjFlag::Translucent;
 
 		if(options & MTF_INVISIBLE)
 		{
 			P_UnsetThingPosition(mobj);
-			mobj->flags |= MF_NOSECTOR;
+			mobj->flags |= MobjFlag::NoSector;
 			P_SetThingPosition(mobj);
 		}
 
@@ -2687,15 +2687,15 @@ spawnit:
 	}
 
 	/* killough 7/20/98: exclude friends */
-	if(!((mobj->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+	if(((mobj->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 		totalkills++;
 
-	if(mobj->flags & MF_COUNTITEM)
+	if((mobj->flags & MobjFlag::CountItem) != MobjFlag{})
 		totalitems++;
 
 	if(map_format.hexen)
 	{
-		if(mobj->flags & MF_COUNTKILL)
+		if((mobj->flags & MobjFlag::CountKill) != MobjFlag{})
 		{
 			// Quantize angle to 45 degree increments
 			mobj->angle = ANG45 * (mthing->angle / 45);
@@ -2710,7 +2710,7 @@ spawnit:
 		mobj->angle = ANG45 * (mthing->angle / 45);
 
 	if(options & MTF_AMBUSH)
-		mobj->flags |= MF_AMBUSH;
+		mobj->flags |= MobjFlag::Ambush;
 
 	if(map_format.hexen && mthing->options & MTF_DORMANT)
 	{
@@ -2822,7 +2822,7 @@ dboolean P_CheckMissileSpawn(mobj_t* th)
 	}
 
 	// killough 8/12/98: for non-missile objects (e.g. grenades)
-	if(!(th->flags & MF_MISSILE) && mbf_features)
+	if((th->flags & MobjFlag::Missile) == MobjFlag{} && mbf_features)
 		return true;
 
 	// killough 3/15/98: no dropoff (really = don't care for missiles)
@@ -2898,7 +2898,7 @@ mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, MobjType type)
 	an = R_PointToAngle2(source->x, source->y, dest->x, dest->y);
 
 	// fuzzy player
-	if(dest->flags & MF_SHADOW)
+	if((dest->flags & MobjFlag::Shadow) != MobjFlag{})
 	{
 		// killough 5/5/98: remove dependence on order of evaluation:
 		int t = P_Random(RandomClass::Shadow);
@@ -2940,7 +2940,7 @@ mobj_t* P_SpawnPlayerMissile(mobj_t* source, MobjType type)
 	aim_t aim;
 
 	// see which target is to be aimed at
-	dsda_PlayerAim(source, source->angle, &aim, mbf_features ? MF_FRIEND : 0);
+	dsda_PlayerAim(source, source->angle, &aim, mbf_features ? MobjFlag::Friend : MobjFlag{});
 
 	x = source->x;
 	y = source->y;
@@ -3253,7 +3253,7 @@ dboolean P_SeekerMissile(mobj_t* actor, mobj_t** seekTarget, angle_t thresh, ang
 	{
 		return (false);
 	}
-	if(!(target->flags & MF_SHOOTABLE))
+	if((target->flags & MobjFlag::Shootable) == MobjFlag{})
 	{
 		// Target died
 		*seekTarget = nullptr;
@@ -3308,7 +3308,7 @@ mobj_t* P_SPMAngle(mobj_t* source, MobjType type, angle_t angle)
 	//
 	// see which target is to be aimed at
 	//
-	dsda_PlayerAim(source, angle, &aim, 0);
+	dsda_PlayerAim(source, angle, &aim, MobjFlag{});
 
 	x = source->x;
 	y = source->y;
@@ -3578,7 +3578,7 @@ void P_RipperBlood(mobj_t* mo, mobj_t* bleeder)
 	y = mo->y + (P_SubRandom() << 12);
 	z = mo->z + (P_SubRandom() << 12);
 	th = P_SpawnMobj(x, y, z, static_cast<MobjType>(g_mt_blood));
-	if(!hexen) th->flags |= MF_NOGRAVITY;
+	if(!hexen) th->flags |= MobjFlag::NoGravity;
 	th->momx = mo->momx >> 1;
 	th->momy = mo->momy >> 1;
 	th->tics += P_Random(RandomClass::Heretic) & 3;
@@ -3621,7 +3621,7 @@ mobj_t* P_SPMAngleXYZ(mobj_t* source, fixed_t x, fixed_t y,
 	//
 	// see which target is to be aimed at
 	//
-	dsda_PlayerAim(source, angle, &aim, 0);
+	dsda_PlayerAim(source, angle, &aim, MobjFlag{});
 
 	z += 4 * 8 * FRACUNIT + aim.z_offset;
 	z -= source->floorclip;
@@ -3890,7 +3890,7 @@ mobj_t* P_SpawnMissileXYZ(fixed_t x, fixed_t y, fixed_t z,
 	}
 	P_SetTarget(&th->target, source); // Originator
 	an = R_PointToAngle2(source->x, source->y, dest->x, dest->y);
-	if(dest->flags & MF_SHADOW)
+	if((dest->flags & MobjFlag::Shadow) != MobjFlag{})
 	{
 		// Invisible target
 		an += P_SubRandom() << 21;
@@ -3924,7 +3924,7 @@ mobj_t* P_SpawnKoraxMissile(fixed_t x, fixed_t y, fixed_t z,
 	}
 	P_SetTarget(&th->target, source); // Originator
 	an = R_PointToAngle2(x, y, dest->x, dest->y);
-	if(dest->flags & MF_SHADOW)
+	if((dest->flags & MobjFlag::Shadow) != MobjFlag{})
 	{
 		// Invisible target
 		an += P_SubRandom() << 21;

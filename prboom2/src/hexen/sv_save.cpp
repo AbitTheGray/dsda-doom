@@ -364,7 +364,7 @@ static void StreamIn_mobj_t(mobj_t* str)
 	str->damage = SV_ReadLong();
 
 	// int flags;
-	str->flags = SV_ReadFlags();
+	str->flags = static_cast<MobjFlag>(SV_ReadFlags());
 
 	// int flags2;
 	str->flags2 = static_cast<MobjFlag2>(SV_ReadFlags());
@@ -437,7 +437,7 @@ static void StreamOutMobjSpecials(mobj_t* mobj)
 {
 	dboolean corpse;
 
-	corpse = (mobj->flags & MF_CORPSE) != 0;
+	corpse = (mobj->flags & MobjFlag::Corpse) != MobjFlag{};
 
 	SV_WriteLong(mobj->type == MobjType::HexenKorax ? 0 : mobj->special1.i);
 	SV_WriteLong(corpse ? MOBJ_NULL : GetMobjNum(mobj->special1.m));
@@ -499,7 +499,7 @@ static void StreamOut_mobj_t(mobj_t* str)
 	SV_WriteLong(str->damage);
 
 	// int flags;
-	SV_WriteFlags(str->flags);
+	SV_WriteFlags(std::to_underlying(str->flags));
 
 	// int flags2;
 	SV_WriteFlags(std::to_underlying(str->flags2));
@@ -519,7 +519,7 @@ static void StreamOut_mobj_t(mobj_t* str)
 	SV_WriteWord(str->movecount);
 
 	// struct mobj_s *target;
-	if((str->flags & MF_CORPSE) != 0)
+	if((str->flags & MobjFlag::Corpse) != MobjFlag{})
 	{
 		SV_WriteLong(MOBJ_NULL);
 	}

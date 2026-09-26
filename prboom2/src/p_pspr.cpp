@@ -764,7 +764,7 @@ static void A_FireSomething(player_t* player, int adder)
 		StateVariant(weaponinfo[std::to_underlying(player->readyweapon)].flashstate, adder));
 
 	// killough 3/27/98: prevent recoil in no-clipping mode
-	if(!(player->mo->flags & MF_NOCLIP))
+	if((player->mo->flags & MobjFlag::NoClip) == MobjFlag{})
 		if(!compatibility && weapon_recoil) // phares
 			P_ForwardThrust(player, ANG180 + player->mo->angle,
 				2048 * recoil_values[std::to_underlying(player->readyweapon)]);
@@ -813,9 +813,9 @@ extern "C" void A_Punch(player_t* player, pspdef_t* psp)
 
 	/* killough 8/2/98: make autoaiming prefer enemies */
 	if(!mbf_features ||
-		(slope = P_AimLineAttack(player->mo, angle, range, MF_FRIEND),
+		(slope = P_AimLineAttack(player->mo, angle, range, MobjFlag::Friend),
 			!linetarget))
-		slope = P_AimLineAttack(player->mo, angle, range, 0);
+		slope = P_AimLineAttack(player->mo, angle, range, MobjFlag{});
 
 	P_LineAttack(player->mo, angle, range, slope, damage);
 
@@ -854,9 +854,9 @@ extern "C" void A_Saw(player_t* player, pspdef_t* psp)
 
 	/* killough 8/2/98: make autoaiming prefer enemies */
 	if(!mbf_features ||
-		(slope = P_AimLineAttack(player->mo, angle, range, MF_FRIEND),
+		(slope = P_AimLineAttack(player->mo, angle, range, MobjFlag::Friend),
 			!linetarget))
-		slope = P_AimLineAttack(player->mo, angle, range, 0);
+		slope = P_AimLineAttack(player->mo, angle, range, MobjFlag{});
 
 	P_LineAttack(player->mo, angle, range, slope, damage);
 
@@ -887,7 +887,7 @@ extern "C" void A_Saw(player_t* player, pspdef_t* psp)
 			player->mo->angle += ANG90 / 20;
 	}
 
-	player->mo->flags |= MF_JUSTATTACKED;
+	player->mo->flags |= MobjFlag::JustAttacked;
 	R_SmoothPlaying_Reset(player); // e6y
 }
 
@@ -934,7 +934,7 @@ extern "C" void A_FireOldBFG(player_t* player, pspdef_t* psp)
 
 	CHECK_WEAPON_CODEPOINTER("A_FireOldBFG", player);
 
-	if(weapon_recoil && !(player->mo->flags & MF_NOCLIP))
+	if(weapon_recoil && (player->mo->flags & MobjFlag::NoClip) == MobjFlag{})
 		P_ForwardThrust(player, ANG180 + player->mo->angle,
 			512 * recoil_values[std::to_underlying(WeaponType::Plasma)]);
 
@@ -952,7 +952,7 @@ extern "C" void A_FireOldBFG(player_t* player, pspdef_t* psp)
 		if(autoaim/* || !beta_emulation*/)
 		{
 			// killough 8/2/98: make autoaiming prefer enemies
-			uint64_t mask = mbf_features ? MF_FRIEND : 0;
+			MobjFlag mask = mbf_features ? MobjFlag::Friend : MobjFlag{};
 			fixed_t slope;
 			do
 			{
@@ -964,7 +964,7 @@ extern "C" void A_FireOldBFG(player_t* player, pspdef_t* psp)
 				if(!linetarget)
 					slope = 0, an = mo->angle;
 			}
-			while(mask && (mask = 0, !linetarget)); // killough 8/2/98
+			while(mask != MobjFlag{} && (mask = MobjFlag{}, !linetarget)); // killough 8/2/98
 			an1 += an - mo->angle;
 			an2 += tantoangle[slope >> DBITS];
 		}
@@ -1007,7 +1007,7 @@ static void P_BulletSlope(mobj_t* mo)
 {
 	aim_t aim;
 
-	dsda_PlayerAimBad(mo, mo->angle, &aim, mbf_features ? MF_FRIEND : 0);
+	dsda_PlayerAimBad(mo, mo->angle, &aim, mbf_features ? MobjFlag::Friend : MobjFlag{});
 
 	bulletslope = aim.slope;
 }
@@ -1171,9 +1171,9 @@ extern "C" void A_BFGSpray(mobj_t* mo)
 
 		// killough 8/2/98: make autoaiming prefer enemies
 		if(!mbf_features ||
-			(P_AimLineAttack(mo->target, an, 16 * 64 * FRACUNIT, MF_FRIEND),
+			(P_AimLineAttack(mo->target, an, 16 * 64 * FRACUNIT, MobjFlag::Friend),
 				!linetarget))
-			P_AimLineAttack(mo->target, an, 16 * 64 * FRACUNIT, 0);
+			P_AimLineAttack(mo->target, an, 16 * 64 * FRACUNIT, MobjFlag{});
 
 		if(!linetarget)
 			continue;
@@ -1333,9 +1333,9 @@ extern "C" void A_WeaponMeleeAttack(player_t* player, pspdef_t* psp)
 	angle += (t - P_Random(RandomClass::Mbf21)) << 18;
 
 	// make autoaim prefer enemies
-	slope = P_AimLineAttack(player->mo, angle, range, MF_FRIEND);
+	slope = P_AimLineAttack(player->mo, angle, range, MobjFlag::Friend);
 	if(!linetarget)
-		slope = P_AimLineAttack(player->mo, angle, range, 0);
+		slope = P_AimLineAttack(player->mo, angle, range, MobjFlag{});
 
 	// attack, dammit!
 	P_LineAttack(player->mo, angle, range, slope, damage);
@@ -1605,7 +1605,7 @@ extern "C" void A_BeakAttackPL1(player_t* player, pspdef_t* psp)
 
 	damage = 1 + (P_Random(RandomClass::Heretic) & 3);
 	angle = player->mo->angle;
-	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, 0);
+	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, MobjFlag{});
 	PuffType = MobjType::HereticBeakpuff;
 	P_LineAttack(player->mo, angle, MELEERANGE, slope, damage);
 	if(linetarget)
@@ -1627,7 +1627,7 @@ extern "C" void A_BeakAttackPL2(player_t* player, pspdef_t* psp)
 
 	damage = HITDICE(4);
 	angle = player->mo->angle;
-	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, 0);
+	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, MobjFlag{});
 	PuffType = MobjType::HereticBeakpuff;
 	P_LineAttack(player->mo, angle, MELEERANGE, slope, damage);
 	if(linetarget)
@@ -1650,7 +1650,7 @@ extern "C" void A_StaffAttackPL1(player_t* player, pspdef_t* psp)
 	damage = 5 + (P_Random(RandomClass::Heretic) & 15);
 	angle = player->mo->angle;
 	angle += P_SubRandom() << 18;
-	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, 0);
+	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, MobjFlag{});
 	PuffType = MobjType::HereticStaffpuff;
 	P_LineAttack(player->mo, angle, MELEERANGE, slope, damage);
 	if(linetarget)
@@ -1674,7 +1674,7 @@ extern "C" void A_StaffAttackPL2(player_t* player, pspdef_t* psp)
 	damage = 18 + (P_Random(RandomClass::Heretic) & 63);
 	angle = player->mo->angle;
 	angle += P_SubRandom() << 18;
-	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, 0);
+	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, MobjFlag{});
 	PuffType = MobjType::HereticStaffpuff2;
 	P_LineAttack(player->mo, angle, MELEERANGE, slope, damage);
 	if(linetarget)
@@ -1873,7 +1873,7 @@ extern "C" void A_MaceBallImpact(mobj_t* ball)
 	else
 	{
 		// Explode
-		ball->flags |= MF_NOGRAVITY;
+		ball->flags |= MobjFlag::NoGravity;
 		ball->flags2 -= MobjFlag2::LoGrav;
 		S_StartMobjSound(ball, SfxId::HereticLobhit);
 	}
@@ -1894,7 +1894,7 @@ extern "C" void A_MaceBallImpact2(mobj_t* ball)
 	{
 		// Explode
 		ball->momx = ball->momy = ball->momz = 0;
-		ball->flags |= MF_NOGRAVITY;
+		ball->flags |= MobjFlag::NoGravity;
 		ball->flags2 -= (MobjFlag2::LoGrav | MobjFlag2::FloorBounce);
 	}
 	else
@@ -1968,7 +1968,7 @@ extern "C" void A_DeathBallImpact(mobj_t* ball)
 		target = (mobj_t*)ball->special1.m;
 		if(target)
 		{
-			if(!(target->flags & MF_SHOOTABLE))
+			if((target->flags & MobjFlag::Shootable) == MobjFlag{})
 			{
 				// Target died
 				P_SetTarget(&ball->special1.m, nullptr);
@@ -1987,7 +1987,7 @@ extern "C" void A_DeathBallImpact(mobj_t* ball)
 			angle = 0;
 			for(i = 0; i < 16; i++)
 			{
-				P_AimLineAttack(ball, angle, 10 * 64 * FRACUNIT, 0);
+				P_AimLineAttack(ball, angle, 10 * 64 * FRACUNIT, MobjFlag{});
 				if(linetarget && ball->target != linetarget)
 				{
 					P_SetTarget(&ball->special1.m, linetarget);
@@ -2012,7 +2012,7 @@ extern "C" void A_DeathBallImpact(mobj_t* ball)
 	else
 	{
 		// Explode
-		ball->flags |= MF_NOGRAVITY;
+		ball->flags |= MobjFlag::NoGravity;
 		ball->flags2 -= MobjFlag2::LoGrav;
 		S_StartMobjSound(ball, SfxId::HereticPhohit);
 	}
@@ -2367,7 +2367,7 @@ extern "C" void A_GauntletAttack(player_t* player, pspdef_t* psp)
 		angle += P_SubRandom() << 18;
 		PuffType = MobjType::HereticGauntletpuff1;
 	}
-	slope = P_AimLineAttack(player->mo, angle, dist, 0);
+	slope = P_AimLineAttack(player->mo, angle, dist, MobjFlag{});
 	P_LineAttack(player->mo, angle, dist, slope, damage);
 	if(!linetarget)
 	{
@@ -2417,7 +2417,7 @@ extern "C" void A_GauntletAttack(player_t* player, pspdef_t* psp)
 		else
 			player->mo->angle += ANG90 / 20;
 	}
-	player->mo->flags |= MF_JUSTATTACKED;
+	player->mo->flags |= MobjFlag::JustAttacked;
 	R_SmoothPlaying_Reset(player); // e6y
 }
 
@@ -2711,7 +2711,7 @@ extern "C" void A_SnoutAttack(player_t* player, pspdef_t* psp)
 
 	damage = 3 + (P_Random(RandomClass::Hexen) & 3);
 	angle = player->mo->angle;
-	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, 0);
+	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, MobjFlag{});
 	PuffType = MobjType::HexenSnoutpuff;
 	PuffSpawned = nullptr;
 	P_LineAttack(player->mo, angle, MELEERANGE, slope, damage);
@@ -2744,12 +2744,12 @@ extern "C" void A_FHammerAttack(player_t* player, pspdef_t* psp)
 	for(i = 0; i < 16; i++)
 	{
 		angle = pmo->angle + i * (ANG45 / 32);
-		slope = P_AimLineAttack(pmo, angle, HAMMER_RANGE, 0);
+		slope = P_AimLineAttack(pmo, angle, HAMMER_RANGE, MobjFlag{});
 		if(linetarget)
 		{
 			P_LineAttack(pmo, angle, HAMMER_RANGE, slope, damage);
 			AdjustPlayerAngle(pmo);
-			if(linetarget->flags & MF_COUNTKILL || linetarget->player)
+			if((linetarget->flags & MobjFlag::CountKill) != MobjFlag{} || linetarget->player)
 			{
 				P_ThrustMobj(linetarget, angle, power);
 			}
@@ -2757,12 +2757,12 @@ extern "C" void A_FHammerAttack(player_t* player, pspdef_t* psp)
 			goto hammerdone;
 		}
 		angle = pmo->angle - i * (ANG45 / 32);
-		slope = P_AimLineAttack(pmo, angle, HAMMER_RANGE, 0);
+		slope = P_AimLineAttack(pmo, angle, HAMMER_RANGE, MobjFlag{});
 		if(linetarget)
 		{
 			P_LineAttack(pmo, angle, HAMMER_RANGE, slope, damage);
 			AdjustPlayerAngle(pmo);
-			if(linetarget->flags & MF_COUNTKILL || linetarget->player)
+			if((linetarget->flags & MobjFlag::CountKill) != MobjFlag{} || linetarget->player)
 			{
 				P_ThrustMobj(linetarget, angle, power);
 			}
@@ -2773,7 +2773,7 @@ extern "C" void A_FHammerAttack(player_t* player, pspdef_t* psp)
 	// didn't find any targets in meleerange, so set to throw out a hammer
 	PuffSpawned = nullptr;
 	angle = pmo->angle;
-	slope = P_AimLineAttack(pmo, angle, HAMMER_RANGE, 0);
+	slope = P_AimLineAttack(pmo, angle, HAMMER_RANGE, MobjFlag{});
 	P_LineAttack(pmo, angle, HAMMER_RANGE, slope, damage);
 	if(PuffSpawned)
 	{
@@ -3180,7 +3180,7 @@ extern "C" void A_FPunchAttack(player_t* player, pspdef_t* psp)
 	for(i = 0; i < 16; i++)
 	{
 		angle = pmo->angle + i * (ANG45 / 16);
-		slope = P_AimLineAttack(pmo, angle, 2 * MELEERANGE, 0);
+		slope = P_AimLineAttack(pmo, angle, 2 * MELEERANGE, MobjFlag{});
 		if(linetarget)
 		{
 			player->mo->special1.i++;
@@ -3191,7 +3191,7 @@ extern "C" void A_FPunchAttack(player_t* player, pspdef_t* psp)
 				PuffType = MobjType::HexenHammerpuff;
 			}
 			P_LineAttack(pmo, angle, 2 * MELEERANGE, slope, damage);
-			if(linetarget->flags & MF_COUNTKILL || linetarget->player)
+			if((linetarget->flags & MobjFlag::CountKill) != MobjFlag{} || linetarget->player)
 			{
 				P_ThrustMobj(linetarget, angle, power);
 			}
@@ -3199,7 +3199,7 @@ extern "C" void A_FPunchAttack(player_t* player, pspdef_t* psp)
 			goto punchdone;
 		}
 		angle = pmo->angle - i * (ANG45 / 16);
-		slope = P_AimLineAttack(pmo, angle, 2 * MELEERANGE, 0);
+		slope = P_AimLineAttack(pmo, angle, 2 * MELEERANGE, MobjFlag{});
 		if(linetarget)
 		{
 			pmo->special1.i++;
@@ -3210,7 +3210,7 @@ extern "C" void A_FPunchAttack(player_t* player, pspdef_t* psp)
 				PuffType = MobjType::HexenHammerpuff;
 			}
 			P_LineAttack(pmo, angle, 2 * MELEERANGE, slope, damage);
-			if(linetarget->flags & MF_COUNTKILL || linetarget->player)
+			if((linetarget->flags & MobjFlag::CountKill) != MobjFlag{} || linetarget->player)
 			{
 				P_ThrustMobj(linetarget, angle, power);
 			}
@@ -3222,7 +3222,7 @@ extern "C" void A_FPunchAttack(player_t* player, pspdef_t* psp)
 	pmo->special1.i = 0;
 
 	angle = pmo->angle;
-	slope = P_AimLineAttack(pmo, angle, MELEERANGE, 0);
+	slope = P_AimLineAttack(pmo, angle, MELEERANGE, MobjFlag{});
 	P_LineAttack(pmo, angle, MELEERANGE, slope, damage);
 
 punchdone:
@@ -3266,11 +3266,11 @@ extern "C" void A_FAxeAttack(player_t* player, pspdef_t* psp)
 	for(i = 0; i < 16; i++)
 	{
 		angle = pmo->angle + i * (ANG45 / 16);
-		slope = P_AimLineAttack(pmo, angle, AXERANGE, 0);
+		slope = P_AimLineAttack(pmo, angle, AXERANGE, MobjFlag{});
 		if(linetarget)
 		{
 			P_LineAttack(pmo, angle, AXERANGE, slope, damage);
-			if(linetarget->flags & MF_COUNTKILL || linetarget->player)
+			if((linetarget->flags & MobjFlag::CountKill) != MobjFlag{} || linetarget->player)
 			{
 				P_ThrustMobj(linetarget, angle, power);
 			}
@@ -3279,11 +3279,11 @@ extern "C" void A_FAxeAttack(player_t* player, pspdef_t* psp)
 			goto axedone;
 		}
 		angle = pmo->angle - i * (ANG45 / 16);
-		slope = P_AimLineAttack(pmo, angle, AXERANGE, 0);
+		slope = P_AimLineAttack(pmo, angle, AXERANGE, MobjFlag{});
 		if(linetarget)
 		{
 			P_LineAttack(pmo, angle, AXERANGE, slope, damage);
-			if(linetarget->flags & MF_COUNTKILL)
+			if((linetarget->flags & MobjFlag::CountKill) != MobjFlag{})
 			{
 				P_ThrustMobj(linetarget, angle, power);
 			}
@@ -3296,7 +3296,7 @@ extern "C" void A_FAxeAttack(player_t* player, pspdef_t* psp)
 	pmo->special1.i = 0;
 
 	angle = pmo->angle;
-	slope = P_AimLineAttack(pmo, angle, MELEERANGE, 0);
+	slope = P_AimLineAttack(pmo, angle, MELEERANGE, MobjFlag{});
 	P_LineAttack(pmo, angle, MELEERANGE, slope, damage);
 
 axedone:
@@ -3324,7 +3324,7 @@ extern "C" void A_CMaceAttack(player_t* player, pspdef_t* psp)
 	for(i = 0; i < 16; i++)
 	{
 		angle = player->mo->angle + i * (ANG45 / 16);
-		slope = P_AimLineAttack(player->mo, angle, 2 * MELEERANGE, 0);
+		slope = P_AimLineAttack(player->mo, angle, 2 * MELEERANGE, MobjFlag{});
 		if(linetarget)
 		{
 			P_LineAttack(player->mo, angle, 2 * MELEERANGE, slope, damage);
@@ -3333,7 +3333,7 @@ extern "C" void A_CMaceAttack(player_t* player, pspdef_t* psp)
 			goto macedone;
 		}
 		angle = player->mo->angle - i * (ANG45 / 16);
-		slope = P_AimLineAttack(player->mo, angle, 2 * MELEERANGE, 0);
+		slope = P_AimLineAttack(player->mo, angle, 2 * MELEERANGE, MobjFlag{});
 		if(linetarget)
 		{
 			P_LineAttack(player->mo, angle, 2 * MELEERANGE, slope, damage);
@@ -3346,7 +3346,7 @@ extern "C" void A_CMaceAttack(player_t* player, pspdef_t* psp)
 	player->mo->special1.i = 0;
 
 	angle = player->mo->angle;
-	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, 0);
+	slope = P_AimLineAttack(player->mo, angle, MELEERANGE, MobjFlag{});
 	P_LineAttack(player->mo, angle, MELEERANGE, slope, damage);
 macedone:
 	return;
@@ -3367,13 +3367,13 @@ extern "C" void A_CStaffCheck(player_t* player, pspdef_t* psp)
 	for(i = 0; i < 3; i++)
 	{
 		angle = pmo->angle + i * (ANG45 / 16);
-		slope = P_AimLineAttack(pmo, angle, 1.5 * MELEERANGE, 0);
+		slope = P_AimLineAttack(pmo, angle, 1.5 * MELEERANGE, MobjFlag{});
 		if(linetarget)
 		{
 			P_LineAttack(pmo, angle, 1.5 * MELEERANGE, slope, damage);
 			pmo->angle = R_PointToAngle2(pmo->x, pmo->y,
 				linetarget->x, linetarget->y);
-			if((linetarget->player || linetarget->flags & MF_COUNTKILL)
+			if((linetarget->player || (linetarget->flags & MobjFlag::CountKill) != MobjFlag{})
 				&& ((linetarget->flags2 & (MobjFlag2::Dormant | MobjFlag2::Invulnerable)) == MobjFlag2{}))
 			{
 				newLife = player->health + (damage >> 3);
@@ -3386,13 +3386,13 @@ extern "C" void A_CStaffCheck(player_t* player, pspdef_t* psp)
 			break;
 		}
 		angle = pmo->angle - i * (ANG45 / 16);
-		slope = P_AimLineAttack(player->mo, angle, 1.5 * MELEERANGE, 0);
+		slope = P_AimLineAttack(player->mo, angle, 1.5 * MELEERANGE, MobjFlag{});
 		if(linetarget)
 		{
 			P_LineAttack(pmo, angle, 1.5 * MELEERANGE, slope, damage);
 			pmo->angle = R_PointToAngle2(pmo->x, pmo->y,
 				linetarget->x, linetarget->y);
-			if(linetarget->player || linetarget->flags & MF_COUNTKILL)
+			if(linetarget->player || (linetarget->flags & MobjFlag::CountKill) != MobjFlag{})
 			{
 				newLife = player->health + (damage >> 4);
 				newLife = newLife > 100 ? 100 : newLife;
@@ -3494,7 +3494,7 @@ extern "C" void A_CFlameMissile(mobj_t* actor)
 
 	A_UnHideThing(actor);
 	S_StartMobjSound(actor, SfxId::HexenClericFlameExplode);
-	if(BlockingMobj && BlockingMobj->flags & MF_SHOOTABLE)
+	if(BlockingMobj && (BlockingMobj->flags & MobjFlag::Shootable) != MobjFlag{})
 	{
 		// Hit something, so spawn the flame circle around the thing
 		dist = BlockingMobj->radius + 18 * FRACUNIT;
@@ -3595,8 +3595,8 @@ extern "C" void A_CHolyAttack2(mobj_t* actor)
 		if(linetarget)
 		{
 			P_SetTarget(&mo->special1.m, linetarget);
-			mo->flags |= MF_NOCLIP | MF_SKULLFLY;
-			mo->flags &= ~MF_MISSILE;
+			mo->flags |= MobjFlag::NoClip | MobjFlag::SkullFly;
+			mo->flags -= MobjFlag::Missile;
 		}
 		tail = P_SpawnMobj(mo->x, mo->y, mo->z, MobjType::HexenHolyTail);
 		P_SetTarget(&tail->special2.m, mo); // parent
@@ -3651,8 +3651,8 @@ static void CHolyFindTarget(mobj_t* actor)
 	if(target != nullptr)
 	{
 		P_SetTarget(&actor->special1.m, target);
-		actor->flags |= MF_NOCLIP | MF_SKULLFLY;
-		actor->flags &= ~MF_MISSILE;
+		actor->flags |= MobjFlag::NoClip | MobjFlag::SkullFly;
+		actor->flags -= MobjFlag::Missile;
 	}
 }
 
@@ -3672,13 +3672,13 @@ static void CHolySeekerMissile(mobj_t* actor, angle_t thresh,
 	{
 		return;
 	}
-	if(!(target->flags & MF_SHOOTABLE)
-		|| (!(target->flags & MF_COUNTKILL) && !target->player))
+	if((target->flags & MobjFlag::Shootable) == MobjFlag{}
+		|| ((target->flags & MobjFlag::CountKill) == MobjFlag{} && !target->player))
 	{
 		// Target died/target isn't a player or creature
 		P_SetTarget(&actor->special1.m, nullptr);
-		actor->flags &= ~(MF_NOCLIP | MF_SKULLFLY);
-		actor->flags |= MF_MISSILE;
+		actor->flags -= (MobjFlag::NoClip | MobjFlag::SkullFly);
+		actor->flags |= MobjFlag::Missile;
 		CHolyFindTarget(actor);
 		return;
 	}
@@ -3905,7 +3905,7 @@ extern "C" void A_FireConePL1(player_t* player, pspdef_t* psp)
 	for(i = 0; i < 16; i++)
 	{
 		angle = pmo->angle + i * (ANG45 / 16);
-		P_AimLineAttack(pmo, angle, MELEERANGE, 0);
+		P_AimLineAttack(pmo, angle, MELEERANGE, MobjFlag{});
 		if(linetarget)
 		{
 			pmo->flags2 |= MobjFlag2::IceDamage;

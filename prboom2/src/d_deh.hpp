@@ -17,6 +17,7 @@
 #include "doomtype.hpp"
 
 // declared in info.hpp; the fixed underlying type makes this enough
+enum struct MobjFlag : uint64_t;
 enum struct MobjFlag2 : uint64_t;
 
 #ifdef __cplusplus
@@ -1034,7 +1035,7 @@ extern const char* savegamename;
 extern const char* s_HUSTR_SECRETFOUND;
 
 MobjFlag2 deh_stringToMBF21MobjFlags(char* strval);
-uint64_t deh_stringToMobjFlags(char* strval);
+MobjFlag deh_stringToMobjFlags(char* strval);
 void deh_changeCompTranslucency();
 void deh_applyCompatibility();
 

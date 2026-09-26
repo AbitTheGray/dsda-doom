@@ -117,6 +117,10 @@ static_assert(PositiveModulo(-4, 4) == 0);
 	{\
 		return static_cast<enum_name>(std::to_underlying(a) & std::to_underlying(b));\
 	}\
+	[[nodiscard]] inline constexpr enum_name operator ^(const enum_name a, const enum_name b) noexcept\
+	{\
+		return static_cast<enum_name>(std::to_underlying(a) ^ std::to_underlying(b));\
+	}\
 	inline constexpr enum_name& operator |=(enum_name& a, const enum_name b) noexcept\
 	{\
 		return a = a | b;\

@@ -109,7 +109,7 @@ void R_UpdateVisSpriteTranMap(vissprite_t* vis, mobj_t* thing)
 {
 	if(thing && thing->tranmap)
 		vis->tranmap = thing->tranmap;
-	else if(vis->mobjflags & g_mf_translucent)
+	else if((vis->mobjflags & g_mf_translucent) != MobjFlag{})
 		vis->tranmap = main_tranmap;
 	else
 		vis->tranmap = nullptr;
@@ -515,7 +515,7 @@ static void R_DrawVisSprite(vissprite_t* vis)
 
 	dcvars.colormap = vis->colormap;
 
-	if(vis->mobjflags & MF_PLAYERSPRITE)
+	if((vis->mobjflags & MobjFlag::PlayerSprite) != MobjFlag{})
 		dcvars.isplayersprite = true;
 
 	// hexen_note: colfunc: No idea how to merge this right now...
@@ -559,11 +559,11 @@ static void R_DrawVisSprite(vissprite_t* vis)
 		colfunc = R_GetDrawColumnFunc(ColumnPipeline::Translated, DrawFilterType::Point);
 		dcvars.translation = colrngs[vis->color];
 	}
-	else if(vis->mobjflags & MF_TRANSLATION)
+	else if((vis->mobjflags & MobjFlag::Translation) != MobjFlag{})
 	{
 		colfunc = R_GetDrawColumnFunc(ColumnPipeline::Translated, DrawFilterType::Point);
 		dcvars.translation = translationtables - 256 +
-			((vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT - 8));
+			(MobjTranslation(vis->mobjflags) << 8);
 	}
 	else if(vis->tranmap) // phares
 	{
@@ -583,7 +583,7 @@ static void R_DrawVisSprite(vissprite_t* vis)
 	sprtopscreen = centeryfrac - FixedMul(dcvars.texturemid, spryscale);
 
 	// check to see if weapon is a vissprite
-	if(vis->mobjflags & MF_PLAYERSPRITE)
+	if((vis->mobjflags & MobjFlag::PlayerSprite) != MobjFlag{})
 	{
 		// [FG] fix garbage lines at the top of weapon sprites
 		dcvars.iscale = pspriteiyscale;
@@ -591,7 +591,7 @@ static void R_DrawVisSprite(vissprite_t* vis)
 		sprtopscreen += (viewheight / 2 - centery) << FRACBITS;
 	}
 
-	if(vis->floorclip && !(vis->mobjflags & MF_PLAYERSPRITE))
+	if(vis->floorclip && (vis->mobjflags & MobjFlag::PlayerSprite) == MobjFlag{})
 	{
 		fixed_t sprbotscreen = sprtopscreen + FixedMul(LittleShort(patch->height) << FRACBITS, spryscale);
 		dcvars.baseclip = (sprbotscreen - FixedMul(vis->floorclip, spryscale)) >> FRACBITS;
@@ -838,7 +838,7 @@ static void R_ProjectSprite(mobj_t* thing, int lightlevel)
 	}
 	else if(hexen)
 	{
-		if(thing->flags & MF_TRANSLATION)
+		if((thing->flags & MobjFlag::Translation) != MobjFlag{})
 		{
 			if(thing->player)
 			{
@@ -885,7 +885,7 @@ static void R_ProjectSprite(mobj_t* thing, int lightlevel)
 	R_SetSpritelights(lightlevel);
 
 	// get light level
-	if(thing->flags & g_mf_shadow)
+	if((thing->flags & g_mf_shadow) != MobjFlag{})
 		vis->colormap = nullptr; // shadow draw
 	else if(fixedcolormap)
 		vis->colormap = fixedcolormap; // fixed map
@@ -955,9 +955,9 @@ void R_AddAllAliveMonstersSprites()
 		{
 			if(ALIVE(thing))
 			{
-				thing->flags |= MF_NO_DEPTH_TEST;
+				thing->flags |= MobjFlag::NoDepthTest;
 				R_ProjectSprite(thing, 255);
-				thing->flags &= ~MF_NO_DEPTH_TEST;
+				thing->flags -= MobjFlag::NoDepthTest;
 			}
 		}
 	}
@@ -1122,7 +1122,7 @@ static void R_DrawPSprite(pspdef_t* psp)
 
 	// store information in a vissprite
 	vis = &avis;
-	vis->mobjflags = MF_PLAYERSPRITE;
+	vis->mobjflags = MobjFlag::PlayerSprite;
 	vis->pclass = 0;
 	vis->floorclip = 0;
 	// killough 12/98: fix psprite positioning problem
@@ -1168,7 +1168,7 @@ static void R_DrawPSprite(pspdef_t* psp)
 	{
 		if(heretic)
 		{
-			vis->mobjflags |= MF_SHADOW;
+			vis->mobjflags |= MobjFlag::Shadow;
 			vis->colormap = spritelights[MAXLIGHTSCALE - 1];
 		}
 		else
@@ -1184,16 +1184,16 @@ static void R_DrawPSprite(pspdef_t* psp)
 			if((viewplayer->mo->flags2 & MobjFlag2::DontDraw) != MobjFlag2{})
 			{
 				// don't draw the psprite
-				vis->mobjflags |= MF_SHADOW;
+				vis->mobjflags |= MobjFlag::Shadow;
 			}
-			else if(viewplayer->mo->flags & MF_SHADOW)
+			else if((viewplayer->mo->flags & MobjFlag::Shadow) != MobjFlag{})
 			{
-				vis->mobjflags |= MF_ALTSHADOW;
+				vis->mobjflags |= MobjFlag::AltShadow;
 			}
 		}
 		else if(viewplayer->powers[std::to_underlying(PowerType::Invulnerability)] & 8)
 		{
-			vis->mobjflags |= MF_SHADOW;
+			vis->mobjflags |= MobjFlag::Shadow;
 		}
 	}
 	else if(fixedcolormap)

@@ -2996,8 +2996,8 @@ extern "C" dboolean P_MobjInCompatibleSector(mobj_t* mobj)
 			sector->special & KILL_MONSTERS_MASK &&
 			mobj->z == mobj->floorz &&
 			mobj->player == nullptr &&
-			mobj->flags & MF_SHOOTABLE &&
-			!(mobj->flags & MF_FLOAT)
+			(mobj->flags & MobjFlag::Shootable) != MobjFlag{} &&
+			(mobj->flags & MobjFlag::Float) == MobjFlag{}
 		)
 		{
 			P_DamageMobj(mobj, nullptr, nullptr, 10000);
@@ -4076,7 +4076,7 @@ void T_Friction(friction_t* f)
 	{
 		thing = node->m_thing;
 		if(thing->player &&
-			!(thing->flags & (MF_NOGRAVITY | MF_NOCLIP)) &&
+			(thing->flags & (MobjFlag::NoGravity | MobjFlag::NoClip)) == MobjFlag{} &&
 			thing->z <= sec->floorheight)
 		{
 			if((thing->friction == ORIG_FRICTION) || // normal friction?
@@ -4340,9 +4340,9 @@ static dboolean PIT_PushThing(mobj_t* thing)
 {
 	/* killough 10/98: made more general */
 	if(!mbf_features
-		? thing->player && !(thing->flags & (MF_NOCLIP | MF_NOGRAVITY))
-		: (sentient(thing) || thing->flags & MF_SHOOTABLE) &&
-		!(thing->flags & MF_NOCLIP))
+		? thing->player && (thing->flags & (MobjFlag::NoClip | MobjFlag::NoGravity)) == MobjFlag{}
+		: (sentient(thing) || (thing->flags & MobjFlag::Shootable) != MobjFlag{}) &&
+		(thing->flags & MobjFlag::NoClip) == MobjFlag{})
 	{
 		angle_t pushangle;
 		fixed_t speed;
@@ -4456,7 +4456,7 @@ void T_Pusher(pusher_t* p)
 	for(; node; node = node->m_snext)
 	{
 		thing = node->m_thing;
-		if(!thing->player || (thing->flags & (MF_NOGRAVITY | MF_NOCLIP)))
+		if(!thing->player || (thing->flags & (MobjFlag::NoGravity | MobjFlag::NoClip)) != MobjFlag{})
 			continue;
 		if(p->type == PusherType::Wind)
 		{
@@ -5464,7 +5464,7 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 		line->special == std::to_underlying(ZDoomLineSpecial::Teleport) &&
 		lineActivation & SPAC_CROSS &&
 		activationType == SPAC_PCROSS &&
-		mo && mo->flags & MF_MISSILE
+		mo && (mo->flags & MobjFlag::Missile) != MobjFlag{}
 	)
 	{
 		// Let missiles use regular player teleports
@@ -5509,7 +5509,7 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 
 	if(
 		mo && !mo->player &&
-		!(mo->flags & MF_MISSILE) &&
+		(mo->flags & MobjFlag::Missile) == MobjFlag{} &&
 		!(line->flags & ML_MONSTERSCANACTIVATE) &&
 		(activationType != SPAC_MCROSS || !(lineActivation & SPAC_MCROSS))
 	)
@@ -5591,7 +5591,7 @@ extern "C" dboolean P_TestActivateHexenLine(line_t* line, mobj_t* mo, int side, 
 		return false;
 	}
 
-	if(!mo->player && !(mo->flags & MF_MISSILE))
+	if(!mo->player && (mo->flags & MobjFlag::Missile) == MobjFlag{})
 	{
 		if(lineActivation != SPAC_MCROSS)
 		{
@@ -7443,7 +7443,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			while((target = dsda_FindMobjFromThingIDOrMobj(args[1], mo, &target_search)))
 			{
 				if(
-					target->flags & MF_SHOOTABLE &&
+					(target->flags & MobjFlag::Shootable) != MobjFlag{} &&
 					target->health > 0 &&
 					(target->flags2 & MobjFlag2::Dormant) == MobjFlag2{}
 				)
@@ -7462,14 +7462,14 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			{
 				if(
 					hater->health > 0 &&
-					hater->flags & MF_SHOOTABLE &&
+					(hater->flags & MobjFlag::Shootable) != MobjFlag{} &&
 					hater->info->seestate != StateId::Null
 				)
 				{
 					while((target = dsda_FindMobjFromThingIDOrMobj(args[1], mo, &target_search)))
 					{
 						if(
-							target->flags & MF_SHOOTABLE &&
+							(target->flags & MobjFlag::Shootable) != MobjFlag{} &&
 							target->health > 0 &&
 							(target->flags2 & MobjFlag2::Dormant) == MobjFlag2{} &&
 							target != hater
@@ -7486,7 +7486,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 						while((target = dsda_FindMobjFromThingIDOrMobj(args[1], mo, &target_search)))
 						{
 							if(
-								target->flags & MF_SHOOTABLE &&
+								(target->flags & MobjFlag::Shootable) != MobjFlag{} &&
 								target->health > 0 &&
 								(target->flags2 & MobjFlag2::Dormant) == MobjFlag2{} &&
 								target != hater
@@ -7522,7 +7522,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			{
 				if(!target->player)
 				{
-					if(target->flags & MF_COUNTKILL)
+					if((target->flags & MobjFlag::CountKill) != MobjFlag{})
 						dsda_WatchKill(&players[consoleplayer], target);
 
 					P_RemoveMobj(target);
@@ -7641,7 +7641,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			dsda_ResetThingIDSearch(&search);
 			while((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
 			{
-				if(target->flags & MF_SHOOTABLE)
+				if((target->flags & MobjFlag::Shootable) != MobjFlag{})
 				{
 					if(args[1] > 0)
 					{
@@ -7679,7 +7679,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 						//   so let's get the next node before applying the damage
 						n = n->m_snext;
 
-						if(target->flags & MF_SHOOTABLE)
+						if((target->flags & MobjFlag::Shootable) != MobjFlag{})
 							P_DamageMobj(target, nullptr, mo, args[1] ? 10000 : target->health);
 					}
 				}
@@ -7693,7 +7693,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				while((target = dsda_FindMobjFromThingID(args[0], &search)))
 				{
 					if(
-						target->flags & MF_SHOOTABLE &&
+						(target->flags & MobjFlag::Shootable) != MobjFlag{} &&
 						(!args[2] || target->subsector->sector->tag == args[2])
 					)
 						P_DamageMobj(target, nullptr, mo, args[1] ? 10000 : target->health);

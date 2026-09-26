@@ -16,6 +16,140 @@
 
 enum struct SfxId : int32_t;
 
+// mobj_t::flags / mobjinfo_t::flags
+enum struct MobjFlag : uint64_t
+{
+	// Call P_SpecialThing when touched.
+	Special = Bit<uint64_t>(0u),
+	// Blocks.
+	Solid = Bit<uint64_t>(1u),
+	// Can be hit.
+	Shootable = Bit<uint64_t>(2u),
+	// Don't use the sector links (invisible but touchable).
+	NoSector = Bit<uint64_t>(3u),
+	// Don't use the blocklinks (inert but displayable)
+	NoBlockmap = Bit<uint64_t>(4u),
+
+	// Not to be activated by sound, deaf monster.
+	Ambush = Bit<uint64_t>(5u),
+	// Will try to attack right back.
+	JustHit = Bit<uint64_t>(6u),
+	// Will take at least one step before attacking.
+	JustAttacked = Bit<uint64_t>(7u),
+	// On level spawning (initial position),
+	//  hang from ceiling instead of stand on floor.
+	SpawnCeiling = Bit<uint64_t>(8u),
+	// Don't apply gravity (every tic),
+	//  that is, object will float, keeping current height
+	//  or changing it actively.
+	NoGravity = Bit<uint64_t>(9u),
+
+	// Movement flags.
+	// This allows jumps from high places.
+	DropOff = Bit<uint64_t>(10u),
+	// For players, will pick up items.
+	Pickup = Bit<uint64_t>(11u),
+	// Player cheat. ???
+	NoClip = Bit<uint64_t>(12u),
+	// Player: keep info about sliding along walls.
+	Slide = Bit<uint64_t>(13u),
+	// Allow moves to any height, no gravity.
+	// For active floaters, e.g. cacodemons, pain elementals.
+	Float = Bit<uint64_t>(14u),
+	// Don't cross lines
+	//   ??? or look at heights on teleport.
+	Teleport = Bit<uint64_t>(15u),
+	// Don't hit same species, explode on block.
+	// Player missiles as well as fireballs of various kinds.
+	Missile = Bit<uint64_t>(16u),
+	// Dropped by a demon, not level spawned.
+	// E.g. ammo clips dropped by dying former humans.
+	Dropped = Bit<uint64_t>(17u),
+	// Use fuzzy draw (shadow demons or spectres),
+	//  temporary player invisibility powerup.
+	Shadow = Bit<uint64_t>(18u),
+	// Flag: don't bleed when shot (use puff),
+	//  barrels and shootable furniture shall not bleed.
+	NoBlood = Bit<uint64_t>(19u),
+	// Don't stop moving halfway off a step,
+	//  that is, have dead bodies slide down all the way.
+	Corpse = Bit<uint64_t>(20u),
+	// Floating to a height for a move, ???
+	//  don't auto float to target's height.
+	InFloat = Bit<uint64_t>(21u),
+
+	// On kill, count this enemy object
+	//  towards intermission kill total.
+	// Happy gathering.
+	CountKill = Bit<uint64_t>(22u),
+
+	// On picking up, count this item object
+	//  towards intermission item total.
+	CountItem = Bit<uint64_t>(23u),
+
+	// Special handling: skull in flight.
+	// Neither a cacodemon nor a missile.
+	SkullFly = Bit<uint64_t>(24u),
+
+	// Don't spawn this object
+	//  in death match mode (e.g. key cards).
+	NotDMatch = Bit<uint64_t>(25u),
+
+	// Player sprites in multiplayer modes are modified
+	//  using an internal color lookup table for re-indexing.
+	// If 0x4 0x8 or 0xc,
+	//  use a translation table for player colormaps
+	// Not a flag but a number: read and write it with MobjTranslation / MobjTranslationFlags.
+	Translation1 = Bit<uint64_t>(26u),
+	Translation2 = Bit<uint64_t>(27u),
+	Translation = Translation1 | Translation2,
+
+	// hexen_note: Hexen's translation also uses Unused2 (a three-bit number)
+	Unused2 = Bit<uint64_t>(28u),
+	Unused3 = Bit<uint64_t>(29u),
+
+	// Translucent sprite?                                          // phares
+	Translucent = Bit<uint64_t>(30u),
+
+	// this is free            Bit<uint64_t>(31u)
+
+	// these are greater than an int. That's why the flags below are now uint64_t
+
+	Touchy = Bit<uint64_t>(32u),
+	Bounces = Bit<uint64_t>(33u),
+	Friend = Bit<uint64_t>(34u),
+
+	Ressurected = Bit<uint64_t>(36u),
+	NoDepthTest = Bit<uint64_t>(37u),
+	Foreground = Bit<uint64_t>(38u),
+	PlayerSprite = Bit<uint64_t>(39u),
+
+	// This actor not targetted when it hurts something else
+	NoTarget = Bit<uint64_t>(40u),
+	// fly mode is active
+	Fly = Bit<uint64_t>(41u),
+
+	// hexen
+	AltShadow = Bit<uint64_t>(42u), // alternate translucent draw
+	IceCorpse = Bit<uint64_t>(43u), // a frozen corpse (for blasting)
+};
+ENUM_FLAGS_FUNC(MobjFlag)
+
+inline constexpr uint32_t MobjTranslationShift = 26u;
+
+// The player color number stored in MobjFlag::Translation (Doom's two bits)
+[[nodiscard]] inline constexpr uint32_t MobjTranslation(const MobjFlag flags) noexcept
+{
+	return static_cast<uint32_t>(std::to_underlying(flags & MobjFlag::Translation) >> MobjTranslationShift);
+}
+
+// The flag bits that store player color number `translation`; not masked, so Hexen's
+// three-bit numbers reach Unused2 as upstream
+[[nodiscard]] inline constexpr MobjFlag MobjTranslationFlags(const uint32_t translation) noexcept
+{
+	return static_cast<MobjFlag>(static_cast<uint64_t>(translation) << MobjTranslationShift);
+}
+
 // mobj_t::flags2 / mobjinfo_t::flags2
 enum struct MobjFlag2 : uint64_t
 {
@@ -6624,7 +6758,7 @@ typedef struct
 	int damage;       /* If this is a missile, how much does it hurt? */
 	SfxId activesound;  /* What sound it makes wandering around, once
            in a while.  Chance is 3/256 it will. */
-	uint64_t flags;   /* Bit masks for lots of things.  See p_mobj.h */
+	MobjFlag flags;   /* Bit masks for lots of things.  See p_mobj.h */
 
 	// not in heretic
 	StateId raisestate;         /* The first state for an Archvile or respawn
@@ -6674,7 +6808,7 @@ typedef struct
 	int mass;
 	int damage;
 	SfxId activesound;
-	uint64_t flags;
+	MobjFlag flags;
 	StateId raisestate;
 	MobjType droppeditem;
 } doom_mobjinfo_t;
@@ -6703,7 +6837,7 @@ typedef struct
 	int mass;
 	int damage;
 	SfxId activesound;
-	uint64_t flags;
+	MobjFlag flags;
 	MobjFlag2 flags2;
 } raven_mobjinfo_t;
 

@@ -1816,7 +1816,7 @@ static void G_PlayerFinishLevel(int player)
 
 	// TODO: need to understand the life cycle of p->mo in hexen
 	if(hexen)
-		p->mo->flags &= ~MF_SHADOW; // Remove invisibility
+		p->mo->flags -= MobjFlag::Shadow; // Remove invisibility
 	else
 		p->mo = nullptr; // cph - this is zone-allocated so it's gone
 
@@ -1854,8 +1854,8 @@ void G_ChangedPlayerColour(int pn, int cl)
 	{
 		if((gamestate == GameState::Level) && playeringame[i] && (players[i].mo != nullptr))
 		{
-			players[i].mo->flags &= ~MF_TRANSLATION;
-			players[i].mo->flags |= ((uint64_t)playernumtotrans[i]) << MF_TRANSSHIFT;
+			players[i].mo->flags -= MobjFlag::Translation;
+			players[i].mo->flags |= MobjTranslationFlags(playernumtotrans[i]);
 		}
 	}
 }
@@ -1977,9 +1977,9 @@ static dboolean G_CheckSpot(int playernum, mapthing_t* mthing)
 	// if (!P_CheckPosition (players[playernum].mo, x, y))
 	//    return false;
 
-	players[playernum].mo->flags |= MF_SOLID;
+	players[playernum].mo->flags |= MobjFlag::Solid;
 	i = P_CheckPosition(players[playernum].mo, x, y);
-	players[playernum].mo->flags &= ~MF_SOLID;
+	players[playernum].mo->flags -= MobjFlag::Solid;
 	if(!i)
 		return false;
 

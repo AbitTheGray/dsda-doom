@@ -216,7 +216,7 @@ void P_LineOpening_3dMidtex(const line_t* line, const mobj_t* actor)
 {
 	fixed_t bottom3d, top3d;
 
-	if(line->flags & ML_3DMIDTEXIMPASSIBLE && actor->flags & (MF_MISSILE | MF_BOUNCES))
+	if(line->flags & ML_3DMIDTEXIMPASSIBLE && (actor->flags & (MobjFlag::Missile | MobjFlag::Bounces)) != MobjFlag{})
 	{
 		return;
 	}
@@ -297,7 +297,7 @@ void P_LineOpening(const line_t* linedef, const mobj_t* actor)
 
 void P_UnsetThingPosition(mobj_t* thing)
 {
-	if(!(thing->flags & MF_NOSECTOR))
+	if((thing->flags & MobjFlag::NoSector) == MobjFlag{})
 	{
 		/* invisible things don't need to be in sector list
 		* unlink from subsector
@@ -328,7 +328,7 @@ void P_UnsetThingPosition(mobj_t* thing)
 		thing->touching_sectorlist = nullptr; //to be restored by P_SetThingPosition
 	}
 
-	if(!(thing->flags & MF_NOBLOCKMAP))
+	if((thing->flags & MobjFlag::NoBlockmap) == MobjFlag{})
 	{
 		/* inert things don't need to be in blockmap
 		*
@@ -364,7 +364,7 @@ void P_SetThingPosition(mobj_t* thing)
 {
 	// link into subsector
 	subsector_t* ss = thing->subsector = R_PointInSubsector(thing->x, thing->y);
-	if(!(thing->flags & MF_NOSECTOR))
+	if((thing->flags & MobjFlag::NoSector) == MobjFlag{})
 	{
 		// invisible things don't go into the sector links
 
@@ -397,7 +397,7 @@ void P_SetThingPosition(mobj_t* thing)
 	}
 
 	// link into blockmap
-	if(!(thing->flags & MF_NOBLOCKMAP))
+	if((thing->flags & MobjFlag::NoBlockmap) == MobjFlag{})
 	{
 		// inert things don't need to be in blockmap
 		int blockx = P_GetSafeBlockX(thing->x - bmaporgx);
@@ -944,7 +944,7 @@ static mobj_t* RoughBlockCheck(mobj_t* mo, int index, angle_t fov)
 	while(link)
 	{
 		// skip non-shootable actors
-		if(!(link->flags & MF_SHOOTABLE))
+		if((link->flags & MobjFlag::Shootable) == MobjFlag{})
 		{
 			link = link->bnext;
 			continue;
@@ -966,7 +966,7 @@ static mobj_t* RoughBlockCheck(mobj_t* mo, int index, angle_t fov)
 
 		// skip actors on the same "team", unless infighting or deathmatching
 		if(mo->target &&
-			!((link->flags ^ mo->target->flags) & MF_FRIEND) &&
+			((link->flags ^ mo->target->flags) & MobjFlag::Friend) == MobjFlag{} &&
 			mo->target->target != link &&
 			!(deathmatch && link->player && mo->target->player))
 		{
@@ -1195,10 +1195,10 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 	{
 		if(mo->player) // Minotaur looking around player
 		{
-			if((link->flags & MF_COUNTKILL) ||
+			if((link->flags & MobjFlag::CountKill) != MobjFlag{} ||
 				(link->player && (link != mo)))
 			{
-				if(!(link->flags & MF_SHOOTABLE))
+				if((link->flags & MobjFlag::Shootable) == MobjFlag{})
 				{
 					link = link->bnext;
 					continue;
@@ -1229,10 +1229,10 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 		else if(mo->type == MobjType::HexenMinotaur) // looking around minotaur
 		{
 			master = mo->special1.m;
-			if((link->flags & MF_COUNTKILL) ||
+			if((link->flags & MobjFlag::CountKill) != MobjFlag{} ||
 				(link->player && (link != master)))
 			{
-				if(!(link->flags & MF_SHOOTABLE))
+				if((link->flags & MobjFlag::Shootable) == MobjFlag{})
 				{
 					link = link->bnext;
 					continue;
@@ -1262,11 +1262,11 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 		}
 		else if(mo->type == MobjType::HexenMstaffFx2) // bloodscourge
 		{
-			if((link->flags & MF_COUNTKILL ||
+			if(((link->flags & MobjFlag::CountKill) != MobjFlag{} ||
 					(link->player && link != mo->target))
 				&& (link->flags2 & MobjFlag2::Dormant) == MobjFlag2{})
 			{
-				if(!(link->flags & MF_SHOOTABLE))
+				if((link->flags & MobjFlag::Shootable) == MobjFlag{})
 				{
 					link = link->bnext;
 					continue;
@@ -1292,11 +1292,11 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 		}
 		else // spirits
 		{
-			if((link->flags & MF_COUNTKILL ||
+			if(((link->flags & MobjFlag::CountKill) != MobjFlag{} ||
 					(link->player && link != mo->target))
 				&& (link->flags2 & MobjFlag2::Dormant) == MobjFlag2{})
 			{
-				if(!(link->flags & MF_SHOOTABLE))
+				if((link->flags & MobjFlag::Shootable) == MobjFlag{})
 				{
 					link = link->bnext;
 					continue;

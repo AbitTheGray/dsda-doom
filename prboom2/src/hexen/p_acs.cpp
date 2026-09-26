@@ -1310,7 +1310,7 @@ static void ThingCount(int type, int tid)
 			}
 			else if(moType == mobj->type)
 			{
-				if(mobj->flags & MF_COUNTKILL && mobj->health <= 0)
+				if((mobj->flags & MobjFlag::CountKill) != MobjFlag{} && mobj->health <= 0)
 				{
 					// Don't count dead monsters
 					continue;
@@ -1336,7 +1336,7 @@ static void ThingCount(int type, int tid)
 				// Doesn't match
 				continue;
 			}
-			if(mobj->flags & MF_COUNTKILL && mobj->health <= 0)
+			if((mobj->flags & MobjFlag::CountKill) != MobjFlag{} && mobj->health <= 0)
 			{
 				// Don't count dead monsters
 				continue;

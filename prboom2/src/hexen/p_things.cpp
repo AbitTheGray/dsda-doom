@@ -147,7 +147,7 @@ dboolean EV_ThingProjectile(byte* args, dboolean gravity)
 	searcher = -1;
 	tid = args[0];
 	moType = TranslateThingType[args[1]];
-	if(nomonsters && (mobjinfo[std::to_underlying(moType)].flags & MF_COUNTKILL))
+	if(nomonsters && (mobjinfo[std::to_underlying(moType)].flags & MobjFlag::CountKill) != MobjFlag{})
 	{
 		// Don't spawn monsters if -nomonsters
 		return false;
@@ -168,10 +168,10 @@ dboolean EV_ThingProjectile(byte* args, dboolean gravity)
 		newMobj->momx = FixedMul(speed, finecosine[fineAngle]);
 		newMobj->momy = FixedMul(speed, finesine[fineAngle]);
 		newMobj->momz = vspeed;
-		newMobj->flags |= MF_DROPPED; // Don't respawn
+		newMobj->flags |= MobjFlag::Dropped; // Don't respawn
 		if(gravity == true)
 		{
-			newMobj->flags &= ~MF_NOGRAVITY;
+			newMobj->flags -= MobjFlag::NoGravity;
 			newMobj->flags2 |= MobjFlag2::LoGrav;
 		}
 		if(P_CheckMissileSpawn(newMobj) == true)
@@ -198,7 +198,7 @@ dboolean EV_ThingSpawn(byte* args, dboolean fog)
 	searcher = -1;
 	tid = args[0];
 	moType = TranslateThingType[args[1]];
-	if(nomonsters && (mobjinfo[std::to_underlying(moType)].flags & MF_COUNTKILL))
+	if(nomonsters && (mobjinfo[std::to_underlying(moType)].flags & MobjFlag::CountKill) != MobjFlag{})
 	{
 		// Don't spawn monsters if -nomonsters
 		return false;
@@ -229,7 +229,7 @@ dboolean EV_ThingSpawn(byte* args, dboolean fog)
 					mobj->z + TELEFOGHEIGHT, MobjType::HexenTfog);
 				S_StartMobjSound(fogMobj, SfxId::HexenTeleport);
 			}
-			newMobj->flags |= MF_DROPPED; // Don't respawn
+			newMobj->flags |= MobjFlag::Dropped; // Don't respawn
 			if((newMobj->flags2 & MobjFlag2::FloatBob) != MobjFlag2{})
 			{
 				newMobj->special1.i = newMobj->z - newMobj->floorz;
@@ -307,7 +307,7 @@ dboolean EV_ThingDestroy(int tid)
 	searcher = -1;
 	while((mobj = P_FindMobjFromTID(tid, &searcher)) != nullptr)
 	{
-		if(mobj->flags & MF_SHOOTABLE)
+		if((mobj->flags & MobjFlag::Shootable) != MobjFlag{})
 		{
 			P_DamageMobj(mobj, nullptr, nullptr, 10000);
 			success = true;
@@ -318,7 +318,7 @@ dboolean EV_ThingDestroy(int tid)
 
 static dboolean ActivateThing(mobj_t* mobj)
 {
-	if(mobj->flags & MF_COUNTKILL)
+	if((mobj->flags & MobjFlag::CountKill) != MobjFlag{})
 	{
 		// Monster
 		if((mobj->flags2 & MobjFlag2::Dormant) != MobjFlag2{})
@@ -395,7 +395,7 @@ static dboolean ActivateThing(mobj_t* mobj)
 
 static dboolean DeactivateThing(mobj_t* mobj)
 {
-	if(mobj->flags & MF_COUNTKILL)
+	if((mobj->flags & MobjFlag::CountKill) != MobjFlag{})
 	{
 		// Monster
 		if((mobj->flags2 & MobjFlag2::Dormant) == MobjFlag2{})

@@ -1162,82 +1162,82 @@ static uint64_t deh_translate_bits(uint64_t value, const struct deh_flag_s* flag
 
 // CPhipps - static const
 static const struct deh_flag_s deh_mobjflags[] = {
-	{"SPECIAL", MF_SPECIAL},           // call  P_Specialthing when touched
-	{"SOLID", MF_SOLID},               // block movement
-	{"SHOOTABLE", MF_SHOOTABLE},       // can be hit
-	{"NOSECTOR", MF_NOSECTOR},         // invisible but touchable
-	{"NOBLOCKMAP", MF_NOBLOCKMAP},     // inert but displayable
-	{"AMBUSH", MF_AMBUSH},             // deaf monster
-	{"JUSTHIT", MF_JUSTHIT},           // will try to attack right back
-	{"JUSTATTACKED", MF_JUSTATTACKED}, // take at least 1 step before attacking
-	{"SPAWNCEILING", MF_SPAWNCEILING}, // initially hang from ceiling
-	{"NOGRAVITY", MF_NOGRAVITY},       // don't apply gravity during play
-	{"DROPOFF", MF_DROPOFF},           // can jump from high places
-	{"PICKUP", MF_PICKUP},             // will pick up items
-	{"NOCLIP", MF_NOCLIP},             // goes through walls
-	{"SLIDE", MF_SLIDE},               // keep info about sliding along walls
-	{"FLOAT", MF_FLOAT},               // allow movement to any height
-	{"TELEPORT", MF_TELEPORT},         // don't cross lines or look at heights
-	{"MISSILE", MF_MISSILE},           // don't hit same species, explode on block
-	{"DROPPED", MF_DROPPED},           // dropped, not spawned (like ammo clip)
-	{"SHADOW", MF_SHADOW},             // use fuzzy draw like spectres
-	{"NOBLOOD", MF_NOBLOOD},           // puffs instead of blood when shot
-	{"CORPSE", MF_CORPSE},             // so it will slide down steps when dead
-	{"INFLOAT", MF_INFLOAT},           // float but not to target height
-	{"COUNTKILL", MF_COUNTKILL},       // count toward the kills total
-	{"COUNTITEM", MF_COUNTITEM},       // count toward the items total
-	{"SKULLFLY", MF_SKULLFLY},         // special handling for flying skulls
-	{"NOTDMATCH", MF_NOTDMATCH},       // do not spawn in deathmatch
+	{"SPECIAL", std::to_underlying(MobjFlag::Special)},           // call  P_Specialthing when touched
+	{"SOLID", std::to_underlying(MobjFlag::Solid)},               // block movement
+	{"SHOOTABLE", std::to_underlying(MobjFlag::Shootable)},       // can be hit
+	{"NOSECTOR", std::to_underlying(MobjFlag::NoSector)},         // invisible but touchable
+	{"NOBLOCKMAP", std::to_underlying(MobjFlag::NoBlockmap)},     // inert but displayable
+	{"AMBUSH", std::to_underlying(MobjFlag::Ambush)},             // deaf monster
+	{"JUSTHIT", std::to_underlying(MobjFlag::JustHit)},           // will try to attack right back
+	{"JUSTATTACKED", std::to_underlying(MobjFlag::JustAttacked)}, // take at least 1 step before attacking
+	{"SPAWNCEILING", std::to_underlying(MobjFlag::SpawnCeiling)}, // initially hang from ceiling
+	{"NOGRAVITY", std::to_underlying(MobjFlag::NoGravity)},       // don't apply gravity during play
+	{"DROPOFF", std::to_underlying(MobjFlag::DropOff)},           // can jump from high places
+	{"PICKUP", std::to_underlying(MobjFlag::Pickup)},             // will pick up items
+	{"NOCLIP", std::to_underlying(MobjFlag::NoClip)},             // goes through walls
+	{"SLIDE", std::to_underlying(MobjFlag::Slide)},               // keep info about sliding along walls
+	{"FLOAT", std::to_underlying(MobjFlag::Float)},               // allow movement to any height
+	{"TELEPORT", std::to_underlying(MobjFlag::Teleport)},         // don't cross lines or look at heights
+	{"MISSILE", std::to_underlying(MobjFlag::Missile)},           // don't hit same species, explode on block
+	{"DROPPED", std::to_underlying(MobjFlag::Dropped)},           // dropped, not spawned (like ammo clip)
+	{"SHADOW", std::to_underlying(MobjFlag::Shadow)},             // use fuzzy draw like spectres
+	{"NOBLOOD", std::to_underlying(MobjFlag::NoBlood)},           // puffs instead of blood when shot
+	{"CORPSE", std::to_underlying(MobjFlag::Corpse)},             // so it will slide down steps when dead
+	{"INFLOAT", std::to_underlying(MobjFlag::InFloat)},           // float but not to target height
+	{"COUNTKILL", std::to_underlying(MobjFlag::CountKill)},       // count toward the kills total
+	{"COUNTITEM", std::to_underlying(MobjFlag::CountItem)},       // count toward the items total
+	{"SKULLFLY", std::to_underlying(MobjFlag::SkullFly)},         // special handling for flying skulls
+	{"NOTDMATCH", std::to_underlying(MobjFlag::NotDMatch)},       // do not spawn in deathmatch
 
 	// killough 10/98: TRANSLATION consists of 2 bits, not 1:
 
-	{"TRANSLATION", MF_TRANSLATION1},  // for Boom bug-compatibility
-	{"TRANSLATION1", MF_TRANSLATION1}, // use translation table for color (players)
-	{"TRANSLATION2", MF_TRANSLATION2}, // use translation table for color (players)
-	{"UNUSED1", MF_TRANSLATION2},      // unused bit # 1 -- For Boom bug-compatibility
-	{"UNUSED2", MF_UNUSED2},           // unused bit # 2 -- For Boom compatibility
-	{"UNUSED3", MF_UNUSED3},           // unused bit # 3 -- For Boom compatibility
-	{"UNUSED4", MF_TRANSLUCENT},       // unused bit # 4 -- For Boom compatibility
-	{"TRANSLUCENT", MF_TRANSLUCENT},   // apply translucency to sprite (BOOM)
-	{"TOUCHY", MF_TOUCHY},             // dies on contact with solid objects (MBF)
-	{"BOUNCES", MF_BOUNCES},           // bounces off floors, ceilings and maybe walls (MBF)
-	{"FRIEND", MF_FRIEND},             // a friend of the player(s) (MBF)
+	{"TRANSLATION", std::to_underlying(MobjFlag::Translation1)},  // for Boom bug-compatibility
+	{"TRANSLATION1", std::to_underlying(MobjFlag::Translation1)}, // use translation table for color (players)
+	{"TRANSLATION2", std::to_underlying(MobjFlag::Translation2)}, // use translation table for color (players)
+	{"UNUSED1", std::to_underlying(MobjFlag::Translation2)},      // unused bit # 1 -- For Boom bug-compatibility
+	{"UNUSED2", std::to_underlying(MobjFlag::Unused2)},           // unused bit # 2 -- For Boom compatibility
+	{"UNUSED3", std::to_underlying(MobjFlag::Unused3)},           // unused bit # 3 -- For Boom compatibility
+	{"UNUSED4", std::to_underlying(MobjFlag::Translucent)},       // unused bit # 4 -- For Boom compatibility
+	{"TRANSLUCENT", std::to_underlying(MobjFlag::Translucent)},   // apply translucency to sprite (BOOM)
+	{"TOUCHY", std::to_underlying(MobjFlag::Touchy)},             // dies on contact with solid objects (MBF)
+	{"BOUNCES", std::to_underlying(MobjFlag::Bounces)},           // bounces off floors, ceilings and maybe walls (MBF)
+	{"FRIEND", std::to_underlying(MobjFlag::Friend)},             // a friend of the player(s) (MBF)
 	{nullptr}
 };
 
 static const struct deh_flag_s deh_mobjflags_standard[] = {
-	{"SPECIAL", MF_SPECIAL},           // call  P_Specialthing when touched
-	{"SOLID", MF_SOLID},               // block movement
-	{"SHOOTABLE", MF_SHOOTABLE},       // can be hit
-	{"NOSECTOR", MF_NOSECTOR},         // invisible but touchable
-	{"NOBLOCKMAP", MF_NOBLOCKMAP},     // inert but displayable
-	{"AMBUSH", MF_AMBUSH},             // deaf monster
-	{"JUSTHIT", MF_JUSTHIT},           // will try to attack right back
-	{"JUSTATTACKED", MF_JUSTATTACKED}, // take at least 1 step before attacking
-	{"SPAWNCEILING", MF_SPAWNCEILING}, // initially hang from ceiling
-	{"NOGRAVITY", MF_NOGRAVITY},       // don't apply gravity during play
-	{"DROPOFF", MF_DROPOFF},           // can jump from high places
-	{"PICKUP", MF_PICKUP},             // will pick up items
-	{"NOCLIP", MF_NOCLIP},             // goes through walls
-	{"SLIDE", MF_SLIDE},               // keep info about sliding along walls
-	{"FLOAT", MF_FLOAT},               // allow movement to any height
-	{"TELEPORT", MF_TELEPORT},         // don't cross lines or look at heights
-	{"MISSILE", MF_MISSILE},           // don't hit same species, explode on block
-	{"DROPPED", MF_DROPPED},           // dropped, not spawned (like ammo clip)
-	{"SHADOW", MF_SHADOW},             // use fuzzy draw like spectres
-	{"NOBLOOD", MF_NOBLOOD},           // puffs instead of blood when shot
-	{"CORPSE", MF_CORPSE},             // so it will slide down steps when dead
-	{"INFLOAT", MF_INFLOAT},           // float but not to target height
-	{"COUNTKILL", MF_COUNTKILL},       // count toward the kills total
-	{"COUNTITEM", MF_COUNTITEM},       // count toward the items total
-	{"SKULLFLY", MF_SKULLFLY},         // special handling for flying skulls
-	{"NOTDMATCH", MF_NOTDMATCH},       // do not spawn in deathmatch
-	{"TRANSLATION1", MF_TRANSLATION1}, // use translation table for color (players)
-	{"TRANSLATION2", MF_TRANSLATION2}, // use translation table for color (players)
-	{"TOUCHY", MF_TOUCHY},             // dies on contact with solid objects (MBF)
-	{"BOUNCES", MF_BOUNCES},           // bounces off floors, ceilings and maybe walls (MBF)
-	{"FRIEND", MF_FRIEND},             // a friend of the player(s) (MBF)
-	{"TRANSLUCENT", MF_TRANSLUCENT},   // apply translucency to sprite (BOOM)
+	{"SPECIAL", std::to_underlying(MobjFlag::Special)},           // call  P_Specialthing when touched
+	{"SOLID", std::to_underlying(MobjFlag::Solid)},               // block movement
+	{"SHOOTABLE", std::to_underlying(MobjFlag::Shootable)},       // can be hit
+	{"NOSECTOR", std::to_underlying(MobjFlag::NoSector)},         // invisible but touchable
+	{"NOBLOCKMAP", std::to_underlying(MobjFlag::NoBlockmap)},     // inert but displayable
+	{"AMBUSH", std::to_underlying(MobjFlag::Ambush)},             // deaf monster
+	{"JUSTHIT", std::to_underlying(MobjFlag::JustHit)},           // will try to attack right back
+	{"JUSTATTACKED", std::to_underlying(MobjFlag::JustAttacked)}, // take at least 1 step before attacking
+	{"SPAWNCEILING", std::to_underlying(MobjFlag::SpawnCeiling)}, // initially hang from ceiling
+	{"NOGRAVITY", std::to_underlying(MobjFlag::NoGravity)},       // don't apply gravity during play
+	{"DROPOFF", std::to_underlying(MobjFlag::DropOff)},           // can jump from high places
+	{"PICKUP", std::to_underlying(MobjFlag::Pickup)},             // will pick up items
+	{"NOCLIP", std::to_underlying(MobjFlag::NoClip)},             // goes through walls
+	{"SLIDE", std::to_underlying(MobjFlag::Slide)},               // keep info about sliding along walls
+	{"FLOAT", std::to_underlying(MobjFlag::Float)},               // allow movement to any height
+	{"TELEPORT", std::to_underlying(MobjFlag::Teleport)},         // don't cross lines or look at heights
+	{"MISSILE", std::to_underlying(MobjFlag::Missile)},           // don't hit same species, explode on block
+	{"DROPPED", std::to_underlying(MobjFlag::Dropped)},           // dropped, not spawned (like ammo clip)
+	{"SHADOW", std::to_underlying(MobjFlag::Shadow)},             // use fuzzy draw like spectres
+	{"NOBLOOD", std::to_underlying(MobjFlag::NoBlood)},           // puffs instead of blood when shot
+	{"CORPSE", std::to_underlying(MobjFlag::Corpse)},             // so it will slide down steps when dead
+	{"INFLOAT", std::to_underlying(MobjFlag::InFloat)},           // float but not to target height
+	{"COUNTKILL", std::to_underlying(MobjFlag::CountKill)},       // count toward the kills total
+	{"COUNTITEM", std::to_underlying(MobjFlag::CountItem)},       // count toward the items total
+	{"SKULLFLY", std::to_underlying(MobjFlag::SkullFly)},         // special handling for flying skulls
+	{"NOTDMATCH", std::to_underlying(MobjFlag::NotDMatch)},       // do not spawn in deathmatch
+	{"TRANSLATION1", std::to_underlying(MobjFlag::Translation1)}, // use translation table for color (players)
+	{"TRANSLATION2", std::to_underlying(MobjFlag::Translation2)}, // use translation table for color (players)
+	{"TOUCHY", std::to_underlying(MobjFlag::Touchy)},             // dies on contact with solid objects (MBF)
+	{"BOUNCES", std::to_underlying(MobjFlag::Bounces)},           // bounces off floors, ceilings and maybe walls (MBF)
+	{"FRIEND", std::to_underlying(MobjFlag::Friend)},             // a friend of the player(s) (MBF)
+	{"TRANSLUCENT", std::to_underlying(MobjFlag::Translucent)},   // apply translucency to sprite (BOOM)
 	{nullptr}
 };
 
@@ -1565,9 +1565,9 @@ MobjFlag2 deh_stringToMBF21MobjFlags(char* strval)
 	return static_cast<MobjFlag2>(deh_stringToFlags(strval, deh_mobjflags_mbf21));
 }
 
-uint64_t deh_stringToMobjFlags(char* strval)
+MobjFlag deh_stringToMobjFlags(char* strval)
 {
-	return deh_stringToFlags(strval, deh_mobjflags);
+	return static_cast<MobjFlag>(deh_stringToFlags(strval, deh_mobjflags));
 }
 
 void deh_changeCompTranslucency()
@@ -1590,14 +1590,14 @@ void deh_changeCompTranslucency()
 	// Reset translucency
 	for(i = 0; (size_t)i < sizeof(predefined_translucency) / sizeof(predefined_translucency[0]); i++)
 		if(!edited_mobjinfo_bits[std::to_underlying(predefined_translucency[i])])
-			mobjinfo[std::to_underlying(predefined_translucency[i])].flags &= ~MF_TRANSLUCENT;
+			mobjinfo[std::to_underlying(predefined_translucency[i])].flags -= MobjFlag::Translucent;
 
 	// Set translucency
 	if(translucency_active)
 		for(i = 0; (size_t)i < sizeof(predefined_translucency) / sizeof(predefined_translucency[0]); i++)
 			if(!edited_mobjinfo_bits[std::to_underlying(predefined_translucency[i])])
 				if(boom_translucent_sprites)
-					mobjinfo[std::to_underlying(predefined_translucency[i])].flags |= MF_TRANSLUCENT;
+					mobjinfo[std::to_underlying(predefined_translucency[i])].flags |= MobjFlag::Translucent;
 
 	// This updates the existing things in the map.
 	if(in_game)
@@ -1648,9 +1648,9 @@ void deh_applyCompatibility()
 	if(!edited_mobjinfo_bits[std::to_underlying(MobjType::Skull)])
 	{
 		if(compatibility_level == CompLevel::Doom12)
-			mobjinfo[std::to_underlying(MobjType::Skull)].flags |= (MF_COUNTKILL);
+			mobjinfo[std::to_underlying(MobjType::Skull)].flags |= (MobjFlag::CountKill);
 		else
-			mobjinfo[std::to_underlying(MobjType::Skull)].flags &= ~(MF_COUNTKILL);
+			mobjinfo[std::to_underlying(MobjType::Skull)].flags -= (MobjFlag::CountKill);
 	}
 
 	deh_changeCompTranslucency();
@@ -1885,52 +1885,52 @@ static void deh_procBexCodePointers(DEHFILE* fpin, char* line)
 //---------------------------------------------------------------------------
 static uint64_t getConvertedDEHBits(uint64_t bits)
 {
-	static const uint64_t bitMap[32] = {
+	static const MobjFlag bitMap[32] = {
 		/* cf linuxdoom-1.10 p_mobj.h */
-		MF_SPECIAL,      // 0 Can be picked up - When touched the thing can be picked up.
-		MF_SOLID,        // 1 Obstacle - The thing is solid and will not let you (or others) pass through it
-		MF_SHOOTABLE,    // 2 Shootable - Can be shot.
-		MF_NOSECTOR,     // 3 Total Invisibility - Invisible, but can be touched
-		MF_NOBLOCKMAP,   // 4 Don't use the blocklinks (inert but displayable)
-		MF_AMBUSH,       // 5 Semi deaf - The thing is a deaf monster
-		MF_JUSTHIT,      // 6 In pain - Will try to attack right back after being hit
-		MF_JUSTATTACKED, // 7 Steps before attack - Will take at least one step before attacking
-		MF_SPAWNCEILING, // 8 Hangs from ceiling - When the level starts, this thing will be at ceiling height.
-		MF_NOGRAVITY,    // 9 No gravity - Gravity does not affect this thing
-		MF_DROPOFF,      // 10 Travels over cliffs - Monsters normally do not walk off ledges/steps they could not walk up. With this set they can walk off any height of cliff. Usually only used for flying monsters.
-		MF_PICKUP,       // 11 Pick up items - The thing can pick up gettable items.
-		MF_NOCLIP,       // 12 No clipping - Thing can walk through walls.
-		MF_SLIDE,        // 13 Slides along walls - Keep info about sliding along walls (don't really know much about this one).
-		MF_FLOAT,        // 14 Floating - Thing can move to any height
-		MF_TELEPORT,     // 15 Semi no clipping - Don't cross lines or look at teleport heights. (don't really know much about this one either).
-		MF_MISSILE,      // 16 Projectiles - Behaves like a projectile, explodes when hitting something that blocks movement
-		MF_DROPPED,      // 17 Disappearing weapon - Dropped, not spawned (like an ammo clip) I have not had much success in using this one.
-		MF_SHADOW,       // 18 Partial invisibility - Drawn like a spectre.
-		MF_NOBLOOD,      // 19 Puffs (vs. bleeds) - If hit will spawn bullet puffs instead of blood splats.
-		MF_CORPSE,       // 20 Sliding helpless - Will slide down steps when dead.
-		MF_INFLOAT,      // 21 No auto levelling - float but not to target height (?)
-		MF_COUNTKILL,    // 22 Affects kill % - counted as a killable enemy and affects percentage kills on level summary.
-		MF_COUNTITEM,    // 23 Affects item % - affects percentage items gathered on level summary.
-		MF_SKULLFLY,     // 24 Running - special handling for flying skulls.
-		MF_NOTDMATCH,    // 25 Not in deathmatch - do not spawn in deathmatch (like keys)
-		MF_TRANSLATION1, // 26 Color 1 (grey / red)
-		MF_TRANSLATION2, // 27 Color 2 (brown / red)
+		MobjFlag::Special,      // 0 Can be picked up - When touched the thing can be picked up.
+		MobjFlag::Solid,        // 1 Obstacle - The thing is solid and will not let you (or others) pass through it
+		MobjFlag::Shootable,    // 2 Shootable - Can be shot.
+		MobjFlag::NoSector,     // 3 Total Invisibility - Invisible, but can be touched
+		MobjFlag::NoBlockmap,   // 4 Don't use the blocklinks (inert but displayable)
+		MobjFlag::Ambush,       // 5 Semi deaf - The thing is a deaf monster
+		MobjFlag::JustHit,      // 6 In pain - Will try to attack right back after being hit
+		MobjFlag::JustAttacked, // 7 Steps before attack - Will take at least one step before attacking
+		MobjFlag::SpawnCeiling, // 8 Hangs from ceiling - When the level starts, this thing will be at ceiling height.
+		MobjFlag::NoGravity,    // 9 No gravity - Gravity does not affect this thing
+		MobjFlag::DropOff,      // 10 Travels over cliffs - Monsters normally do not walk off ledges/steps they could not walk up. With this set they can walk off any height of cliff. Usually only used for flying monsters.
+		MobjFlag::Pickup,       // 11 Pick up items - The thing can pick up gettable items.
+		MobjFlag::NoClip,       // 12 No clipping - Thing can walk through walls.
+		MobjFlag::Slide,        // 13 Slides along walls - Keep info about sliding along walls (don't really know much about this one).
+		MobjFlag::Float,        // 14 Floating - Thing can move to any height
+		MobjFlag::Teleport,     // 15 Semi no clipping - Don't cross lines or look at teleport heights. (don't really know much about this one either).
+		MobjFlag::Missile,      // 16 Projectiles - Behaves like a projectile, explodes when hitting something that blocks movement
+		MobjFlag::Dropped,      // 17 Disappearing weapon - Dropped, not spawned (like an ammo clip) I have not had much success in using this one.
+		MobjFlag::Shadow,       // 18 Partial invisibility - Drawn like a spectre.
+		MobjFlag::NoBlood,      // 19 Puffs (vs. bleeds) - If hit will spawn bullet puffs instead of blood splats.
+		MobjFlag::Corpse,       // 20 Sliding helpless - Will slide down steps when dead.
+		MobjFlag::InFloat,      // 21 No auto levelling - float but not to target height (?)
+		MobjFlag::CountKill,    // 22 Affects kill % - counted as a killable enemy and affects percentage kills on level summary.
+		MobjFlag::CountItem,    // 23 Affects item % - affects percentage items gathered on level summary.
+		MobjFlag::SkullFly,     // 24 Running - special handling for flying skulls.
+		MobjFlag::NotDMatch,    // 25 Not in deathmatch - do not spawn in deathmatch (like keys)
+		MobjFlag::Translation1, // 26 Color 1 (grey / red)
+		MobjFlag::Translation2, // 27 Color 2 (brown / red)
 		// Convert bit 28 to MF_TOUCHY, not (MF_TRANSLATION1|MF_TRANSLATION2)
 		// fixes bug #1576151 (part 1)
-		MF_TOUCHY,       // 28 - explodes on contact (MBF)
-		MF_BOUNCES,      // 29 - bounces off walls and floors (MBF)
-		MF_FRIEND,       // 30 - friendly monster helps players (MBF)
-		MF_TRANSLUCENT   // e6y: Translucency via dehacked/bex doesn't work without it
+		MobjFlag::Touchy,       // 28 - explodes on contact (MBF)
+		MobjFlag::Bounces,      // 29 - bounces off walls and floors (MBF)
+		MobjFlag::Friend,       // 30 - friendly monster helps players (MBF)
+		MobjFlag::Translucent   // e6y: Translucency via dehacked/bex doesn't work without it
 	};
 	int i;
 	uint64_t shiftBits = bits;
-	uint64_t convertedBits = 0;
+	MobjFlag convertedBits = MobjFlag{};
 	for(i = 0; i < 32; i++)
 	{
 		if(shiftBits & 0x1) convertedBits |= bitMap[i];
 		shiftBits >>= 1;
 	}
-	return convertedBits;
+	return std::to_underlying(convertedBits);
 }
 
 //---------------------------------------------------------------------------
@@ -1985,7 +1985,7 @@ static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint64_t value)
 			return;
 		case 20: mi->activesound = static_cast<SfxId>(value);
 			return;
-		case 21: mi->flags = value;
+		case 21: mi->flags = static_cast<MobjFlag>(value);
 			return;
 		// e6y
 		// Correction of wrong processing of "Respawn frame" entry.
@@ -2153,18 +2153,18 @@ static void deh_procThing(DEHFILE* fpin, char* line)
 				// No more desync on HACX demos.
 
 				value = getConvertedDEHBits(value);
-				deh_mobjinfo.info->flags = value;
+				deh_mobjinfo.info->flags = static_cast<MobjFlag>(value);
 				*deh_mobjinfo.edited_bits = true; //e6y: changed by DEH
 			}
 			else
 			{
-				value = deh_stringToMobjFlags(strval);
+				value = std::to_underlying(deh_stringToMobjFlags(strval));
 
 				// Don't worry about conversion -- simply print values
 				deh_log("Bits = 0x%08lX%08lX\n",
 					(unsigned long)(value >> 32) & 0xffffffff,
 					(unsigned long)value & 0xffffffff);
-				deh_mobjinfo.info->flags = value; // e6y
+				deh_mobjinfo.info->flags = static_cast<MobjFlag>(value); // e6y
 				*deh_mobjinfo.edited_bits = true; //e6y: changed by DEH
 			}
 

@@ -635,7 +635,7 @@ static void ThrustMobj(mobj_t* mobj, seg_t* seg, polyobj_t* po)
 
 	int force;
 
-	if(!(mobj->flags & MF_SHOOTABLE) && !mobj->player)
+	if((mobj->flags & MobjFlag::Shootable) == MobjFlag{} && !mobj->player)
 	{
 		return;
 	}
@@ -1113,7 +1113,7 @@ static dboolean CheckMobjBlocking(seg_t* seg, polyobj_t* po)
 		{
 			for(mobj = blocklinks[j + i]; mobj; mobj = mobj->bnext)
 			{
-				if(mobj->flags & MF_SOLID || mobj->player)
+				if((mobj->flags & MobjFlag::Solid) != MobjFlag{} || mobj->player)
 				{
 					tmbbox[std::to_underlying(BoxEdge::Top)] = mobj->y + mobj->radius;
 					tmbbox[std::to_underlying(BoxEdge::Bottom)] = mobj->y - mobj->radius;

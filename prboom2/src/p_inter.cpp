@@ -411,7 +411,7 @@ dboolean P_GivePower(player_t* player, PowerType power)
 			}
 			break;
 		case PowerType::Invisibility:
-			player->mo->flags |= MF_SHADOW;
+			player->mo->flags |= MobjFlag::Shadow;
 			break;
 		case PowerType::AllMap:
 			if(player->powers[std::to_underlying(PowerType::AllMap)])
@@ -422,7 +422,7 @@ dboolean P_GivePower(player_t* player, PowerType power)
 			break;
 		case PowerType::Flight:
 			player->mo->flags2 |= MobjFlag2::Fly;
-			player->mo->flags |= MF_NOGRAVITY;
+			player->mo->flags |= MobjFlag::NoGravity;
 			if(player->mo->z <= player->mo->floorz)
 			{
 				player->flyheight = 10; // thrust the player in the air a bit
@@ -661,7 +661,7 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 
 		// ammo
 		case SpriteId::Clip:
-			if(special->flags & MF_DROPPED)
+			if((special->flags & MobjFlag::Dropped) != MobjFlag{})
 			{
 				if(!P_GiveAmmo(player, static_cast<AmmoType>(AmmoType::Clip), 0))
 					return;
@@ -737,7 +737,7 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			break;
 
 		case SpriteId::Mgun:
-			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Chaingun), (special->flags & MF_DROPPED) != 0))
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Chaingun), (special->flags & MobjFlag::Dropped) != MobjFlag{}))
 				return;
 			dsda_AddPlayerMessage(s_GOTCHAINGUN, player);
 			sound = SfxId::Wpnup;
@@ -765,14 +765,14 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			break;
 
 		case SpriteId::Shot:
-			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Shotgun), (special->flags & MF_DROPPED) != 0))
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Shotgun), (special->flags & MobjFlag::Dropped) != MobjFlag{}))
 				return;
 			dsda_AddPlayerMessage(s_GOTSHOTGUN, player);
 			sound = SfxId::Wpnup;
 			break;
 
 		case SpriteId::Sgn2:
-			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Supershotgun), (special->flags & MF_DROPPED) != 0))
+			if(!P_GiveWeapon(player, static_cast<WeaponType>(WeaponType::Supershotgun), (special->flags & MobjFlag::Dropped) != MobjFlag{}))
 				return;
 			dsda_AddPlayerMessage(s_GOTSHOTGUN2, player);
 			sound = SfxId::Wpnup;
@@ -788,7 +788,7 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 		special->special = 0;
 	}
 
-	if(special->flags & MF_COUNTITEM)
+	if((special->flags & MobjFlag::CountItem) != MobjFlag{})
 		player->itemcount++;
 
 	if((special->flags2 & MobjFlag2::CountSecret) != MobjFlag2{})
@@ -819,12 +819,12 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 	mobj_t* mo;
 	int xdeath_limit;
 
-	target->flags &= ~(MF_SHOOTABLE | MF_FLOAT | MF_SKULLFLY);
+	target->flags -= (MobjFlag::Shootable | MobjFlag::Float | MobjFlag::SkullFly);
 
 	if(target->type != MobjType::Skull)
-		target->flags &= ~MF_NOGRAVITY;
+		target->flags -= MobjFlag::NoGravity;
 
-	target->flags |= MF_CORPSE | MF_DROPOFF;
+	target->flags |= MobjFlag::Corpse | MobjFlag::DropOff;
 	target->height >>= 2;
 
 	// heretic
@@ -841,14 +841,14 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 		P_UpdateThinker(&target->thinker);
 	}
 
-	if(!((target->flags ^ MF_COUNTKILL) & (MF_FRIEND | MF_COUNTKILL)))
+	if(((target->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 		totallive--;
 
 	dsda_WatchDeath(target);
 
 	if(map_format.hexen && target->special)
 	{
-		if(!hexen || (target->flags & MF_COUNTKILL || target->type == MobjType::HexenZbell))
+		if(!hexen || ((target->flags & MobjFlag::CountKill) != MobjFlag{} || target->type == MobjType::HexenZbell))
 		{
 			// Initiate monster death actions
 			if(hexen && target->type == MobjType::HexenSorcboss)
@@ -867,7 +867,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 	if(source && source->player)
 	{
 		// count for intermission
-		if(target->flags & MF_COUNTKILL)
+		if((target->flags & MobjFlag::CountKill) != MobjFlag{})
 		{
 			dsda_WatchKill(source->player, target);
 		}
@@ -889,7 +889,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 			}
 		}
 	}
-	else if(target->flags & MF_COUNTKILL)
+	else if((target->flags & MobjFlag::CountKill) != MobjFlag{})
 	{
 		/* Add to kills tally */
 		if((compatibility_level < CompLevel::Lxdoom1) || !netgame)
@@ -962,7 +962,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 		if(!source)
 			target->player->frags[target->player - players]++;
 
-		target->flags &= ~MF_SOLID;
+		target->flags -= MobjFlag::Solid;
 
 		// heretic
 		target->flags2 -= MobjFlag2::Fly;
@@ -1002,8 +1002,8 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 		if((target->flags2 & MobjFlag2::IceDamage) != MobjFlag2{})
 		{
 			// Player ice death
-			target->flags &= ~(7 << MF_TRANSSHIFT); //no translation
-			target->flags |= MF_ICECORPSE;
+			target->flags -= MobjTranslationFlags(7u); //no translation (Hexen's is three bits)
+			target->flags |= MobjFlag::IceCorpse;
 			switch(target->player->pclass)
 			{
 				case PClass::Fighter:
@@ -1063,7 +1063,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 		}
 		if((target->flags2 & MobjFlag2::IceDamage) != MobjFlag2{})
 		{
-			target->flags |= MF_ICECORPSE;
+			target->flags |= MobjFlag::IceCorpse;
 			switch(target->type)
 			{
 				case MobjType::HexenBishop:
@@ -1104,7 +1104,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 					P_SetMobjState(target, StateId::HexenPigIce);
 					return;
 				default:
-					target->flags &= ~MF_ICECORPSE;
+					target->flags -= MobjFlag::IceCorpse;
 					break;
 			}
 		}
@@ -1179,11 +1179,11 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 	else return;
 
 	mo = P_SpawnMobj(target->x, target->y,ONFLOORZ, static_cast<MobjType>(item));
-	mo->flags |= MF_DROPPED; // special versions of items
+	mo->flags |= MobjFlag::Dropped; // special versions of items
 
 	if(target->momx == 0 && target->momy == 0)
 	{
-		target->flags |= MF_FOREGROUND;
+		target->flags |= MobjFlag::Foreground;
 	}
 }
 
@@ -1214,7 +1214,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 	dboolean justhit = false; /* killough 11/98 */
 
 	/* killough 8/31/98: allow bouncers to take damage */
-	if(!(target->flags & (MF_SHOOTABLE | MF_BOUNCES)))
+	if((target->flags & (MobjFlag::Shootable | MobjFlag::Bounces)) == MobjFlag{})
 		return; // shouldn't happen...
 
 	if(target->health <= 0)
@@ -1224,7 +1224,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		{
 			return;
 		}
-		else if(target->flags & MF_ICECORPSE) // frozen
+		else if((target->flags & MobjFlag::IceCorpse) != MobjFlag{}) // frozen
 		{
 			target->tics = 1;
 			target->momx = target->momy = 0;
@@ -1268,7 +1268,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		}
 	}
 
-	if(target->flags & MF_SKULLFLY)
+	if((target->flags & MobjFlag::SkullFly) != MobjFlag{})
 	{
 		if(heretic && target->type == MobjType::HereticMinotaur) return;
 		target->momx = target->momy = target->momz = 0;
@@ -1303,7 +1303,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 				P_TouchWhirlwind(target);
 				return;
 			case MobjType::HereticMinotaur:
-				if(inflictor->flags & MF_SKULLFLY)
+				if((inflictor->flags & MobjFlag::SkullFly) != MobjFlag{})
 				{
 					// Slam only when in charge mode
 					P_MinotaurSlam(inflictor, target);
@@ -1393,7 +1393,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 			case MobjType::HexenTelotherFx3:
 			case MobjType::HexenTelotherFx4:
 			case MobjType::HexenTelotherFx5:
-				if((target->flags & MF_COUNTKILL) &&
+				if((target->flags & MobjFlag::CountKill) != MobjFlag{} &&
 					(target->type != MobjType::HexenSerpent) &&
 					(target->type != MobjType::HexenSerpentleader) &&
 					((target->flags2 & MobjFlag2::Boss) == MobjFlag2{}))
@@ -1402,7 +1402,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 				}
 				return;
 			case MobjType::HexenMinotaur:
-				if(inflictor->flags & MF_SKULLFLY)
+				if((inflictor->flags & MobjFlag::SkullFly) != MobjFlag{})
 				{
 					// Slam only when in charge mode
 					P_MinotaurSlam(inflictor, target);
@@ -1458,7 +1458,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 					}
 					return;
 				}
-				else if(!(target->flags & MF_COUNTKILL))
+				else if((target->flags & MobjFlag::CountKill) == MobjFlag{})
 				{
 					// only damage monsters/players with the poison cloud
 					return;
@@ -1481,7 +1481,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 
 	if(
 		inflictor &&
-		!(target->flags & MF_NOCLIP) && // hexen_note: not done in hexen, does it matter?
+		(target->flags & MobjFlag::NoClip) == MobjFlag{} && // hexen_note: not done in hexen, does it matter?
 		!(
 			source &&
 			source->player &&
@@ -1513,7 +1513,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 			// Staff power level 2
 			target->momx += FixedMul(10 * FRACUNIT, finecosine[ang]);
 			target->momy += FixedMul(10 * FRACUNIT, finesine[ang]);
-			if(!(target->flags & MF_NOGRAVITY))
+			if((target->flags & MobjFlag::NoGravity) == MobjFlag{})
 			{
 				target->momz += 5 * FRACUNIT;
 			}
@@ -1724,7 +1724,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		*/
 		if(target->health * 2 < P_MobjSpawnHealth(target))
 		{
-			thinker_t* cap = &thinkerclasscap[std::to_underlying(target->flags & MF_FRIEND ? ThinkerClass::Friends : ThinkerClass::Enemies)];
+			thinker_t* cap = &thinkerclasscap[std::to_underlying((target->flags & MobjFlag::Friend) != MobjFlag{} ? ThinkerClass::Friends : ThinkerClass::Enemies)];
 			(target->thinker.cprev->cnext = target->thinker.cnext)->cprev =
 				target->thinker.cprev;
 			(target->thinker.cnext = cap->cnext)->cprev = &target->thinker;
@@ -1734,21 +1734,21 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 
 	if(!(skill_info.flags & SI_NO_PAIN) &&
 		P_Random(RandomClass::Painchance) < target->info->painchance &&
-		!(target->flags & MF_SKULLFLY)) //killough 11/98: see below
+		(target->flags & MobjFlag::SkullFly) == MobjFlag{}) //killough 11/98: see below
 	{
 		if(hexen && inflictor && inflictor->type >= MobjType::HexenLightningFloor &&
 			inflictor->type <= MobjType::HexenLightningZap)
 		{
 			if(P_Random(RandomClass::Hexen) < 96)
 			{
-				target->flags |= MF_JUSTHIT; // fight back!
+				target->flags |= MobjFlag::JustHit; // fight back!
 				P_SetMobjState(target, target->info->painstate);
 			}
 			else
 			{
 				// "electrocute" the target
 				target->frame |= FF_FULLBRIGHT;
-				if(target->flags & MF_COUNTKILL && P_Random(RandomClass::Hexen) < 128
+				if((target->flags & MobjFlag::CountKill) != MobjFlag{} && P_Random(RandomClass::Hexen) < 128
 					&& !S_GetSoundPlayingInfo(target, SfxId::HexenPuppybeat))
 				{
 					if((target->type == MobjType::HexenCentaur) ||
@@ -1765,13 +1765,13 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 			if(mbf_features)
 				justhit = true;
 			else
-				target->flags |= MF_JUSTHIT; // fight back!
+				target->flags |= MobjFlag::JustHit; // fight back!
 
 			P_SetMobjState(target, target->info->painstate);
 
 			if(hexen && inflictor && inflictor->type == MobjType::HexenPoisoncloud)
 			{
-				if(target->flags & MF_COUNTKILL && P_Random(RandomClass::Hexen) < 128
+				if((target->flags & MobjFlag::CountKill) != MobjFlag{} && P_Random(RandomClass::Hexen) < 128
 					&& !S_GetSoundPlayingInfo(target, SfxId::HexenPuppybeat))
 				{
 					if((target->type == MobjType::HexenCentaur) ||
@@ -1794,7 +1794,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		(source != target || compatibility_level == CompLevel::Doom12) &&
 		(source->flags2 & MobjFlag2::DmgIgnored) == MobjFlag2{} &&
 		(!target->threshold || (target->flags2 & MobjFlag2::NoThreshold) != MobjFlag2{}) &&
-		((source->flags ^ target->flags) & MF_FRIEND || monster_infighting || !mbf_features) &&
+		(((source->flags ^ target->flags) & MobjFlag::Friend) != MobjFlag{} || monster_infighting || !mbf_features) &&
 		!(
 			raven && (
 				(source->flags2 & MobjFlag2::Boss) != MobjFlag2{} ||
@@ -1819,7 +1819,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 			!target->lastenemy ||
 			target->lastenemy->health <= 0 ||
 			(
-				!mbf_features ? !target->lastenemy->player : !((target->flags ^ target->lastenemy->flags) & MF_FRIEND) && target->target != source
+				!mbf_features ? !target->lastenemy->player : ((target->flags ^ target->lastenemy->flags) & MobjFlag::Friend) == MobjFlag{} && target->target != source
 			)
 		) // remember last enemy - killough
 			P_SetTarget(&target->lastenemy, target->target);
@@ -1835,8 +1835,8 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 	* cph 2006/04/01 - implicitly this is only if mbf_features */
 	if(!demo_compatibility) //e6y
 		if(justhit && (target->target == source || !target->target ||
-			!(target->flags & target->target->flags & MF_FRIEND)))
-			target->flags |= MF_JUSTHIT; // fight back!
+			(target->flags & target->target->flags & MobjFlag::Friend) == MobjFlag{}))
+			target->flags |= MobjFlag::JustHit; // fight back!
 }
 
 // heretic
@@ -1847,7 +1847,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 
 extern "C" void A_RestoreArtifact(mobj_t* arti)
 {
-	arti->flags |= MF_SPECIAL;
+	arti->flags |= MobjFlag::Special;
 	P_SetMobjState(arti, arti->info->spawnstate);
 	S_StartMobjSound(arti, g_sfx_respawn);
 }
@@ -1865,7 +1865,7 @@ extern "C" void A_RestoreSpecialThing1(mobj_t* thing)
 
 extern "C" void A_RestoreSpecialThing2(mobj_t* thing)
 {
-	thing->flags |= MF_SPECIAL;
+	thing->flags |= MobjFlag::Special;
 	P_SetMobjState(thing, thing->info->spawnstate);
 }
 
@@ -2194,11 +2194,11 @@ static void Heretic_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 		default:
 			I_Error("Heretic_P_TouchSpecialThing: Unknown gettable thing");
 	}
-	if(special->flags & MF_COUNTITEM)
+	if((special->flags & MobjFlag::CountItem) != MobjFlag{})
 	{
 		player->itemcount++;
 	}
-	if(deathmatch && !(special->flags & MF_DROPPED))
+	if(deathmatch && (special->flags & MobjFlag::Dropped) == MobjFlag{})
 	{
 		P_HideSpecialThing(special);
 	}
@@ -2279,7 +2279,7 @@ dboolean P_GiveArtifact(player_t* player, ArtiType arti, mobj_t* mo)
 		}
 	}
 	player->artifactCount++;
-	if(mo && (mo->flags & MF_COUNTITEM))
+	if(mo && (mo->flags & MobjFlag::CountItem) != MobjFlag{})
 	{
 		player->itemcount++;
 	}
@@ -2288,7 +2288,7 @@ dboolean P_GiveArtifact(player_t* player, ArtiType arti, mobj_t* mo)
 
 void P_SetDormantArtifact(mobj_t* arti)
 {
-	arti->flags &= ~MF_SPECIAL;
+	arti->flags -= MobjFlag::Special;
 	if(deathmatch && (arti->type != MobjType::HereticArtiinvulnerability)
 		&& (arti->type != MobjType::HereticArtiinvisibility))
 	{
@@ -2369,7 +2369,7 @@ dboolean Heretic_P_GiveWeapon(player_t* player, WeaponType weapon)
 
 void P_HideSpecialThing(mobj_t* thing)
 {
-	thing->flags &= ~MF_SPECIAL;
+	thing->flags -= MobjFlag::Special;
 	thing->flags2 |= MobjFlag2::DontDraw;
 	P_SetMobjState(thing, static_cast<StateId>(g_hide_state));
 }
@@ -2490,7 +2490,7 @@ dboolean P_ChickenMorph(mobj_t* actor)
 	fixed_t y;
 	fixed_t z;
 	angle_t angle;
-	int ghost;
+	MobjFlag ghost;
 
 	if(actor->player)
 	{
@@ -2513,7 +2513,7 @@ dboolean P_ChickenMorph(mobj_t* actor)
 	y = actor->y;
 	z = actor->z;
 	angle = actor->angle;
-	ghost = actor->flags & MF_SHADOW;
+	ghost = actor->flags & MobjFlag::Shadow;
 	target = actor->target;
 	P_SetMobjState(actor, StateId::HereticFreetargmobj);
 	fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, MobjType::HereticTfog);
@@ -2945,7 +2945,7 @@ void TryPickupWeapon(player_t* player, PClass weaponClass,
 
 	if(remove && (weapon->intflags & MobjIntFlag::Fake) == MobjIntFlag{})
 	{
-		if(deathmatch && !(weapon->flags & MF_DROPPED))
+		if(deathmatch && (weapon->flags & MobjFlag::Dropped) == MobjFlag{})
 		{
 			P_HideSpecialThing(weapon);
 		}
@@ -3048,7 +3048,7 @@ static void TryPickupWeaponPiece(player_t* player, PClass matchClass,
 	}
 	if(remove)
 	{
-		if(deathmatch && !(pieceMobj->flags & MF_DROPPED))
+		if(deathmatch && (pieceMobj->flags & MobjFlag::Dropped) == MobjFlag{})
 		{
 			P_HideSpecialThing(pieceMobj);
 		}
@@ -3108,8 +3108,8 @@ int P_GiveKey(player_t* player, Card key)
 
 static void SetDormantArtifact(mobj_t* arti)
 {
-	arti->flags &= ~MF_SPECIAL;
-	if(deathmatch && !(arti->flags & MF_DROPPED))
+	arti->flags -= MobjFlag::Special;
+	if(deathmatch && (arti->flags & MobjFlag::Dropped) == MobjFlag{})
 	{
 		if(arti->type == MobjType::HexenArtiinvulnerability)
 		{
@@ -3501,7 +3501,7 @@ static void Hexen_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 		map_format.execute_line_special(special->special, special->special_args, nullptr, 0, toucher);
 		special->special = 0;
 	}
-	if(deathmatch && respawn && !(special->flags & MF_DROPPED))
+	if(deathmatch && respawn && (special->flags & MobjFlag::Dropped) == MobjFlag{})
 	{
 		P_HideSpecialThing(special);
 	}
@@ -3535,9 +3535,9 @@ static mobj_t* ActiveMinotaur(player_t* master)
 			continue;
 		if(mo->health <= 0)
 			continue;
-		if(!(mo->flags & MF_COUNTKILL))
+		if((mo->flags & MobjFlag::CountKill) == MobjFlag{})
 			continue; // for morphed minotaurs
-		if(mo->flags & MF_CORPSE)
+		if((mo->flags & MobjFlag::Corpse) != MobjFlag{})
 			continue;
 
 		COLLAPSE_SPECIAL_ARGS(args, mo->special_args);
@@ -3610,7 +3610,7 @@ static dboolean P_MorphMonster(mobj_t* actor)
 
 	if(actor->player)
 		return (false);
-	if(!(actor->flags & MF_COUNTKILL))
+	if((actor->flags & MobjFlag::CountKill) == MobjFlag{})
 		return false;
 	if((actor->flags2 & MobjFlag2::Boss) != MobjFlag2{})
 		return false;
@@ -3638,7 +3638,7 @@ static dboolean P_MorphMonster(mobj_t* actor)
 	monster = P_SpawnMobj(x, y, z, MobjType::HexenPig);
 	monster->special2.i = std::to_underlying(moType);
 	monster->special1.i = std::to_underlying(PowerDuration::Morphtics) + P_Random(RandomClass::Hexen);
-	monster->flags |= (oldMonster.flags & MF_SHADOW);
+	monster->flags |= (oldMonster.flags & MobjFlag::Shadow);
 	P_SetTarget(&monster->target, oldMonster.target);
 	monster->angle = oldMonster.angle;
 	monster->tid = oldMonster.tid;

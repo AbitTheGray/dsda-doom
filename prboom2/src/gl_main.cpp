@@ -802,7 +802,7 @@ void gld_DrawWeapon(int weaponlump, vissprite_t* vis, int lightlevel)
 	}
 	else
 	{
-		if(viewplayer->mo->flags & g_mf_translucent)
+		if((viewplayer->mo->flags & g_mf_translucent) != MobjFlag{})
 			gld_StaticLightAlpha(light, (float)tran_filter_pct / 100.0f);
 		else
 			gld_StaticLight(light);
@@ -1978,9 +1978,9 @@ static void gld_DrawSprite(GLSprite* sprite)
 
 	gld_BindPatch(sprite->gltexture, sprite->cm);
 
-	if(!(sprite->flags & MF_NO_DEPTH_TEST))
+	if((sprite->flags & MobjFlag::NoDepthTest) == MobjFlag{})
 	{
-		if(sprite->flags & g_mf_shadow)
+		if((sprite->flags & g_mf_shadow) != MobjFlag{})
 		{
 			// Fuzz has less aliasing if ratio is an integer
 			float ratio = floor((SCREENWIDTH > SCREENHEIGHT ? SCREENHEIGHT : SCREENWIDTH) / 200.0);
@@ -1998,7 +1998,7 @@ static void gld_DrawSprite(GLSprite* sprite)
 		}
 	}
 
-	if(!(sprite->flags & (MF_SOLID | MF_SPAWNCEILING)))
+	if((sprite->flags & (MobjFlag::Solid | MobjFlag::SpawnCeiling)) == MobjFlag{})
 	{
 		float x1, x2, x3, x4, z1, z2, z3, z4;
 		float y1, y2, cy, ycenter, y1c, y2c;
@@ -2070,7 +2070,7 @@ static void gld_DrawSprite(GLSprite* sprite)
 
 static void gld_AddHealthBar(mobj_t* thing, GLSprite* sprite)
 {
-	if(((thing->flags & (MF_COUNTKILL | MF_CORPSE)) == MF_COUNTKILL) && (thing->health > 0))
+	if(((thing->flags & (MobjFlag::CountKill | MobjFlag::Corpse)) == MobjFlag::CountKill) && (thing->health > 0))
 	{
 		GLHealthBar hbar;
 		int health_percent = thing->health * 100 / P_MobjSpawnHealth(thing);
@@ -2317,8 +2317,8 @@ void gld_ProjectSprite(mobj_t* thing, int lightlevel)
 	if(
 		sprite.y2 < 0 &&
 		sprite.y2 >= -gl_spriteclip_threshold_f &&
-		!(thing->flags & (MF_SPAWNCEILING | MF_FLOAT | MF_MISSILE | MF_NOGRAVITY)) &&
-		!(thing->flags & MF_CORPSE && thing->tics == -1)
+		(thing->flags & (MobjFlag::SpawnCeiling | MobjFlag::Float | MobjFlag::Missile | MobjFlag::NoGravity)) == MobjFlag{} &&
+		!((thing->flags & MobjFlag::Corpse) != MobjFlag{} && thing->tics == -1)
 	)
 	{
 		sprite.y1 -= sprite.y2;
@@ -2350,13 +2350,13 @@ void gld_ProjectSprite(mobj_t* thing, int lightlevel)
 	if(thing->color)
 		sprite.cm = static_cast<ColorRange>(thing->color);
 	else
-		sprite.cm = static_cast<ColorRange>(std::to_underlying(ColorRange::Limit) + (int)((thing->flags & MF_TRANSLATION) >> (MF_TRANSSHIFT)));
+		sprite.cm = static_cast<ColorRange>(std::to_underlying(ColorRange::Limit) + static_cast<int>(MobjTranslation(thing->flags)));
 	sprite.gltexture = gld_RegisterPatch(lump, sprite.cm, true, true);
 	if(!sprite.gltexture)
 		return;
 	sprite.flags = thing->flags;
 
-	if(thing->flags & MF_FOREGROUND)
+	if((thing->flags & MobjFlag::Foreground) != MobjFlag{})
 		scene_has_overlapped_sprites = true;
 
 	sprite.index = gl_spriteindex++;
@@ -2381,17 +2381,17 @@ void gld_ProjectSprite(mobj_t* thing, int lightlevel)
 
 	if(thing->alpha != 1.f)
 		sprite.alpha = thing->alpha;
-	else if(sprite.flags & g_mf_translucent)
+	else if((sprite.flags & g_mf_translucent) != MobjFlag{})
 		sprite.alpha = 0.66f;
 	else
 		sprite.alpha = 1.f;
 
 	//e6y: support for transparent sprites
-	if(sprite.flags & MF_NO_DEPTH_TEST)
+	if((sprite.flags & MobjFlag::NoDepthTest) != MobjFlag{})
 	{
 		gld_AddDrawItem(GLDrawItemType::Asprite, &sprite);
 	}
-	else if(sprite.alpha != 1.f || sprite.flags & (MF_SHADOW | MF_TRANSLUCENT))
+	else if(sprite.alpha != 1.f || (sprite.flags & (MobjFlag::Shadow | MobjFlag::Translucent)) != MobjFlag{})
 	{
 		gld_AddDrawItem(GLDrawItemType::Tsprite, &sprite);
 	}
@@ -2498,7 +2498,7 @@ static void gld_DrawItemsSortSprites(GLDrawItemType itemtype)
 		for(i = 0; i < gld_drawinfo.num_items[std::to_underlying(itemtype)]; i++)
 		{
 			GLSprite* sprite = gld_drawinfo.items[std::to_underlying(itemtype)][i].item.sprite;
-			if(sprite->flags & MF_FOREGROUND)
+			if((sprite->flags & MobjFlag::Foreground) != MobjFlag{})
 			{
 				sprite->index = gl_spriteindex;
 				sprite->x -= delta * sin_inv_yaw;

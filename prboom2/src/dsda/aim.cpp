@@ -35,7 +35,7 @@ int dsda_PlayerLookDir(player_t* player)
 	return dsda_FreeAim() ? dsda_PitchToLookDir(player->mo->pitch) : player->lookdir;
 }
 
-void dsda_PlayerAim(mobj_t* source, angle_t angle, aim_t* aim, uint64_t target_mask)
+void dsda_PlayerAim(mobj_t* source, angle_t angle, aim_t* aim, MobjFlag target_mask)
 {
 	aim->angle = angle;
 
@@ -68,13 +68,13 @@ void dsda_PlayerAim(mobj_t* source, angle_t angle, aim_t* aim, uint64_t target_m
 				aim->slope = raven ? ((source->player->lookdir) << FRACBITS) / 173 : 0;
 			}
 		}
-		while(target_mask && (target_mask = 0, !linetarget)); // killough 8/2/98
+		while(target_mask != MobjFlag{} && (target_mask = MobjFlag{}, !linetarget)); // killough 8/2/98
 
 		aim->z_offset = raven ? ((source->player->lookdir) << FRACBITS) / 173 : 0;
 	}
 }
 
-void dsda_PlayerAimBad(mobj_t* source, angle_t angle, aim_t* aim, uint64_t target_mask)
+void dsda_PlayerAimBad(mobj_t* source, angle_t angle, aim_t* aim, MobjFlag target_mask)
 {
 	aim->angle = angle;
 	aim->z_offset = 0;
@@ -105,6 +105,6 @@ void dsda_PlayerAimBad(mobj_t* source, angle_t angle, aim_t* aim, uint64_t targe
 			if(heretic && !linetarget)
 				aim->slope = ((source->player->lookdir) << FRACBITS) / 173;
 		}
-		while(target_mask && (target_mask = 0, !linetarget)); // killough 8/2/98
+		while(target_mask != MobjFlag{} && (target_mask = MobjFlag{}, !linetarget)); // killough 8/2/98
 	}
 }

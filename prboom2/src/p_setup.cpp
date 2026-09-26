@@ -1567,7 +1567,7 @@ static void P_PostProcessThings(int mobjcount, mobj_t** mobjlist)
 					}
 
 					// 'nearest'
-					mo->flags |= MF_FOREGROUND;
+					mo->flags |= MobjFlag::Foreground;
 				}
 				i++;
 			}
@@ -3897,7 +3897,7 @@ void P_SetupLevel(int episode, int map, int skill)
 
 	if(players[consoleplayer].cheats & CF_FLY)
 	{
-		players[consoleplayer].mo->flags |= (MF_NOGRAVITY | MF_FLY);
+		players[consoleplayer].mo->flags |= (MobjFlag::NoGravity | MobjFlag::Fly);
 	}
 
 	// killough 3/26/98: Spawn icon landings:
