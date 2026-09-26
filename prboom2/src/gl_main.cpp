@@ -2106,7 +2106,7 @@ static void gld_AddHealthBar(mobj_t* thing, GLSprite* sprite)
 	}
 }
 
-static constinit EnumArray<std::array<GLfloat, 3>, EnumCount<HealthBarColor>> health_bar_rgb = {
+static constinit EnumArray<std::array<GLfloat, 3>, HealthBarColor> health_bar_rgb = {
 	{At(HealthBarColor::Null), {0.0f, 0.0f, 0.0f}},
 	{At(HealthBarColor::Red), {1.0f, 0.0f, 0.0f}},
 	{At(HealthBarColor::Yellow), {1.0f, 1.0f, 0.0f}},

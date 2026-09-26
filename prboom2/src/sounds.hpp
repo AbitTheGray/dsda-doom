@@ -1060,7 +1060,7 @@ inline constexpr SfxId SfxWithoutPickup(const SfxId id) noexcept
 // all the stuff - dynamically selected in global.c
 
 extern sfxinfo_t hexen_S_sfx[];
-extern EnumArray<musicinfo_t, MusicId::HexenCount> hexen_S_music;
+extern EnumArray<musicinfo_t, MusicId, MusicId::HexenCount> hexen_S_music;
 
 extern sfxinfo_t heretic_S_sfx[];
 extern musicinfo_t heretic_S_music[];

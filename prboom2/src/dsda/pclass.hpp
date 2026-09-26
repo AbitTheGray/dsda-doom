@@ -38,7 +38,7 @@ typedef struct dsda_pclass_s
 	StateId attack_end_state;
 } dsda_pclass_t;
 
-extern EnumArray<dsda_pclass_t, EnumCount<PClass>> pclass;
+extern EnumArray<dsda_pclass_t, PClass> pclass;
 
 #ifdef __cplusplus
 }

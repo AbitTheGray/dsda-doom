@@ -91,9 +91,9 @@ enum struct BruteForceLimit : int32_t
 	Count = DuoMax
 };
 
-extern EnumArray<const char*, BruteForceAttribute::AttributeMax> dsda_bf_attribute_names;
-extern EnumArray<const char*, BruteForceOperator::Max> dsda_bf_operator_names;
-extern EnumArray<const char*, BruteForceItem::Max> dsda_bf_item_names;
+extern EnumArray<const char*, BruteForceAttribute, BruteForceAttribute::AttributeMax> dsda_bf_attribute_names;
+extern EnumArray<const char*, BruteForceOperator, BruteForceOperator::Max> dsda_bf_operator_names;
+extern EnumArray<const char*, BruteForceItem, BruteForceItem::Max> dsda_bf_item_names;
 extern const char* dsda_bf_limit_names[std::to_underlying(BruteForceLimit::Count)];
 
 dboolean dsda_BruteForce();

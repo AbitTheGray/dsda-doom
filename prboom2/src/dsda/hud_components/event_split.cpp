@@ -16,7 +16,7 @@ typedef struct
 	int delay;
 } dsda_split_state_t;
 
-static constinit EnumArray<dsda_split_state_t, EnumCount<SplitClass>> dsda_split_state = {
+static constinit EnumArray<dsda_split_state_t, SplitClass> dsda_split_state = {
 	{At(SplitClass::BlueKey), {"Blue Key", 0, 0}},
 	{At(SplitClass::YellowKey), {"Yellow Key", 0, 0}},
 	{At(SplitClass::RedKey), {"Red Key", 0, 0}},

@@ -2579,7 +2579,7 @@ void P_CloseWeapons()
 
 extern fixed_t FloatBobOffsets[64];
 
-static constinit EnumArray<EnumArray<int, WeaponType::HexenCount>, EnumCount<PClass>> WeaponManaUse = {
+static constinit EnumArray<EnumArray<int, WeaponType, WeaponType::HexenCount>, PClass> WeaponManaUse = {
 	{At(PClass::Fighter), {0, 2, 3, 14}},
 	{At(PClass::Cleric), {0, 1, 4, 18}},
 	{At(PClass::Mage), {0, 3, 5, 15}},

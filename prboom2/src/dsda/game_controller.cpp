@@ -37,7 +37,7 @@ static axis_t right_trigger = {SDL_CONTROLLER_AXIS_TRIGGERRIGHT};
 
 static int swap_analogs;
 
-static constinit EnumArray<const char*, GameControllerButton::Max> button_names = {
+static constinit EnumArray<const char*, GameControllerButton, GameControllerButton::Max> button_names = {
 	{At(GameControllerButton::A), "pad a"},
 	{At(GameControllerButton::B), "pad b"},
 	{At(GameControllerButton::X), "pad x"},

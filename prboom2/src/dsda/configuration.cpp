@@ -227,7 +227,7 @@ void dsda_UpdateStrictMode()
 	dsda_TrackConfigFeatures();
 }
 
-constinit EnumArray<dsda_config_t, EnumCount<ConfigId>> dsda_config = {
+constinit EnumArray<dsda_config_t, ConfigId> dsda_config = {
 	{At(ConfigId::GameSpeed), {
 		"game_speed", ConfigId::GameSpeed,
 		ConfigType::Int, 3, 10000, {100}, nullptr, STRICT_INT(100), I_Init2

@@ -24,7 +24,7 @@ typedef struct
 } cr_range_t;
 
 // Default values - overridden by DSDACR lump
-constinit EnumArray<cr_range_t, ColorRange::HudLimit> cr_range = {
+constinit EnumArray<cr_range_t, ColorRange, ColorRange::HudLimit> cr_range = {
 	{At(ColorRange::Default), {0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF}},
 	{At(ColorRange::Brick), {0x47, 0x00, 0x00, 0xFF, 0xB8, 0xB8}},
 	{At(ColorRange::Tan), {0x33, 0x2B, 0x13, 0xFF, 0xEB, 0xDF}},

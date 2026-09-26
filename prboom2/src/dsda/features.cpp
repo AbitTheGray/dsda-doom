@@ -17,7 +17,7 @@
 
 static byte used_features[FEATURE_SLOTS];
 
-static constinit EnumArray<const char*, EnumCount<FeatureFlag>> feature_names = {
+static constinit EnumArray<const char*, FeatureFlag> feature_names = {
 	{At(FeatureFlag::Menu), "Menu"},
 	{At(FeatureFlag::Exhud), "Extended HUD"},
 	{At(FeatureFlag::Advhud), "Advanced HUD"},

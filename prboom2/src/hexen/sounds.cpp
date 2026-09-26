@@ -6,7 +6,7 @@
 #include "sounds.hpp"
 
 // Hexen map music is set dynamically in SNDINFO
-constinit EnumArray<musicinfo_t, MusicId::HexenCount> hexen_S_music = {
+constinit EnumArray<musicinfo_t, MusicId, MusicId::HexenCount> hexen_S_music = {
 	{At(MusicId::HexenHexen), {"HEXEN", 0}},
 	{At(MusicId::HexenHub), {"HUB", 0}},
 	{At(MusicId::HexenHall), {"HALL", 0}},

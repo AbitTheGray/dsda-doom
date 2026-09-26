@@ -1253,7 +1253,7 @@ void DrawKeyBar()
 	}
 }
 
-static constinit EnumArray<std::array<int, 3>, EnumCount<PClass>> PieceX = {
+static constinit EnumArray<std::array<int, 3>, PClass> PieceX = {
 	{At(PClass::Fighter), {190, 225, 234}},
 	{At(PClass::Cleric), {190, 213, 226}},
 	{At(PClass::Mage), {190, 205, 224}},

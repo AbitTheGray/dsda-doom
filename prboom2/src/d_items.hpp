@@ -58,7 +58,7 @@ extern weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)];
 
 // hexen
 
-extern EnumArray<EnumArray<weaponinfo_t, EnumCount<PClass>>, WeaponType::HexenCount> hexen_weaponinfo;
+extern EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::HexenCount> hexen_weaponinfo;
 
 // dynamically selected in global.c
 

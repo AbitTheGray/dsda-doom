@@ -25,7 +25,7 @@ typedef struct
 	char color_str[3];
 } dsda_text_color_t;
 
-constinit EnumArray<dsda_text_color_t, EnumCount<TextColorIndex>> dsda_text_colors = {
+constinit EnumArray<dsda_text_color_t, TextColorIndex> dsda_text_colors = {
 	{At(TextColorIndex::ExhudTimeLabel), {"exhud_time_label", ColorRange::Gray}},
 	{At(TextColorIndex::ExhudLevelTime), {"exhud_level_time", ColorRange::Green}},
 	{At(TextColorIndex::ExhudTotalTime), {"exhud_total_time", ColorRange::Gold}},

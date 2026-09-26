@@ -78,7 +78,7 @@ static dsda_key_frame_t nomo_key_frame;
 static bf_target_t bf_target;
 static ticcmd_t bf_result[MAX_BF_DEPTH];
 
-constinit EnumArray<const char*, BruteForceAttribute::AttributeMax> dsda_bf_attribute_names = {
+constinit EnumArray<const char*, BruteForceAttribute, BruteForceAttribute::AttributeMax> dsda_bf_attribute_names = {
 	{At(BruteForceAttribute::X), "x"},
 	{At(BruteForceAttribute::Y), "y"},
 	{At(BruteForceAttribute::Z), "z"},
@@ -104,7 +104,7 @@ const char* dsda_bf_misc_names[std::to_underlying(BruteForceAttribute::MiscMax)]
 	"have item",
 };
 
-constinit EnumArray<const char*, BruteForceOperator::Max> dsda_bf_operator_names = {
+constinit EnumArray<const char*, BruteForceOperator, BruteForceOperator::Max> dsda_bf_operator_names = {
 	{At(BruteForceOperator::LessThan), "<"},
 	{At(BruteForceOperator::LessThanOrEqualTo), "<="},
 	{At(BruteForceOperator::GreaterThan), ">"},
@@ -119,7 +119,7 @@ const char* dsda_bf_limit_names[std::to_underlying(BruteForceLimit::Count)] = {
 	"min",
 };
 
-constinit EnumArray<const char*, BruteForceItem::Max> dsda_bf_item_names = {
+constinit EnumArray<const char*, BruteForceItem, BruteForceItem::Max> dsda_bf_item_names = {
 	{At(BruteForceItem::RedKeyCard), "rkc"},
 	{At(BruteForceItem::YellowKeyCard), "ykc"},
 	{At(BruteForceItem::BlueKeyCard), "bkc"},
@@ -138,7 +138,7 @@ constinit EnumArray<const char*, BruteForceItem::Max> dsda_bf_item_names = {
 	{At(BruteForceItem::SuperShotgun), "ssg"},
 };
 
-static constinit EnumArray<dboolean, BruteForceAttribute::AttributeMax> fixed_point_attribute = {
+static constinit EnumArray<dboolean, BruteForceAttribute, BruteForceAttribute::AttributeMax> fixed_point_attribute = {
 	{At(BruteForceAttribute::X), true},
 	{At(BruteForceAttribute::Y), true},
 	{At(BruteForceAttribute::Z), true},

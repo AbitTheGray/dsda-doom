@@ -426,7 +426,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 
 // hexen
 
-constinit EnumArray<EnumArray<weaponinfo_t, EnumCount<PClass>>, WeaponType::HexenCount> hexen_weaponinfo = {
+constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::HexenCount> hexen_weaponinfo = {
 	{At(WeaponType::First), {
 		// First Weapons
 		{At(PClass::Fighter), {

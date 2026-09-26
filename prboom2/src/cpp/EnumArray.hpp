@@ -16,6 +16,7 @@
 #include "cpp/Designated.hpp"
 
 /// The value an enum counts its values with: its `Count`, `COUNT` or `_COUNT`.
+/// The default size of an `EnumArray`.
 template<typename E>
 requires std::is_enum_v<E>
 inline constexpr E EnumCount = []
@@ -27,18 +28,18 @@ inline constexpr E EnumCount = []
 	else if constexpr(requires { E::_COUNT; })
 		return E::_COUNT;
 	else
-		static_assert(false, "The enum has no Count, COUNT or _COUNT; give EnumArray the count explicitly.");
+		static_assert(false, "The enum has no Count, COUNT or _COUNT; give EnumArray the count as its third argument.");
 }();
 
 /// `std::array` of `T` with one value per enum value below `Count`, indexed by that enum.
-/// `EnumArray<state_t, StateId::DoomCount>`, or `EnumArray<config_t, EnumCount<ConfigId>>`.
+/// `EnumArray<config_t, ConfigId>` stops at the enum's `Count` (or `COUNT`, `_COUNT`); `EnumArray<state_t, StateId, StateId::DoomCount>` names a different count.
 /// Takes a designated initializer list: `{ a, b, {At(E::X), x} }`.
-template<typename T, auto Count>
-requires std::is_enum_v<decltype(Count)>
+template<typename T, typename E, E Count = EnumCount<E>>
+requires std::is_enum_v<E>
 class EnumArray
 {
 public:
-	using Enum = decltype(Count);
+	using Enum = E;
 
 	static constexpr std::size_t Size = DesignatedIndex(Count);
 
@@ -105,7 +106,7 @@ static_assert([]
 		Plum,
 		Count,
 	};
-	const EnumArray<int32_t, EnumCount<Fruit>> a = {{At(Fruit::Plum), 3}, {At(Fruit::Apple), 1}, 2};
+	const EnumArray<int32_t, Fruit> a = {{At(Fruit::Plum), 3}, {At(Fruit::Apple), 1}, 2};
 	return a.size() == 3 && a[Fruit::Apple] == 1 && a[Fruit::Pear] == 2 && a[Fruit::Plum] == 3;
 }());
 static_assert([]
@@ -116,7 +117,7 @@ static_assert([]
 		Square,
 		Triangle,
 	};
-	EnumArray<int32_t, Shape::Triangle> a;
+	EnumArray<int32_t, Shape, Shape::Triangle> a;
 	a[Shape::Square] = 4;
 	return a.size() == 2 && a[Shape::Circle] == 0 && a[Shape::Square] == 4;
 }());
@@ -129,7 +130,7 @@ static_assert([]
 		Blue,
 		Count,
 	};
-	const EnumArray<const char*, EnumCount<Color>> names = {"red", "green", "blue"};
+	const EnumArray<const char*, Color> names = {"red", "green", "blue"};
 	const auto found = std::ranges::find_if(names.Keys(), [&](const Color key) { return names[key][0] == 'g'; });
 	return *found == Color::Green && std::ranges::distance(names.Keys()) == 3;
 }());

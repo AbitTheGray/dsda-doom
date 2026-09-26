@@ -47,7 +47,7 @@ typedef struct
 #define AT_LEAST_ONE_NONNEGATIVE_INT 0, INT_MAX, 1, INT_MAX
 #define EXACT_ARRAY_LENGTH(x) 0, 0, x, x
 
-static constinit EnumArray<arg_config_t, EnumCount<ArgId>> arg_config = {
+static constinit EnumArray<arg_config_t, ArgId> arg_config = {
 	{At(ArgId::Help), {
 		"-help", "--help", nullptr,
 		"prints out command line argument information",

@@ -9,7 +9,7 @@
 
 #include "pclass.hpp"
 
-constinit EnumArray<dsda_pclass_t, EnumCount<PClass>> pclass = {
+constinit EnumArray<dsda_pclass_t, PClass> pclass = {
 	{At(PClass::Null), {
 		.armor_increment = {0},
 		.auto_armor_save = 0,
