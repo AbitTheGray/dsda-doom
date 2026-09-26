@@ -11,10 +11,23 @@ Nothing here is being worked on right now.
 
 `spec/src/Analysis.hpp` and `spec/src/Category.hpp` currently mirror the game by
 hand: the game has no struct behind `analysis.txt` (just loose `extern` globals in
-`dsda/analysis.h`) and no enum behind the category (`dsda_DetectCategory` returns
-bare string literals). Once those areas are rewritten, the struct and the
-`enum struct` should live in `prboom2/src/dsda/` so the writer and the spec's
-parser share one definition. Keeping the duplicates until then.
+`dsda/analysis.hpp`) and no enum behind the category (`dsda_DetectCategory` returns
+bare string literals). The output of `analysis.txt` (and the category in the text
+file) must not change. Three steps:
+
+1. **Shared report struct.** Move the spec's `Analysis` (the 20 keys written to
+   `analysis.txt`) into `prboom2/src/dsda/`. `dsda_WriteAnalysis` fills one and
+   writes it; the spec keeps `Parse`/`Read` but uses the game's struct.
+2. **Shared category enum.** Move `Category` and its `to_string` into the game.
+   `dsda_DetectCategory` returns the enum; its two callers (`dsda_WriteAnalysis`,
+   `text_file.cpp`) print it with `to_string`. Its side effects on the tracker
+   (clearing `almost_reality`, `stroller`, `weapon_collector`; setting `nomo`,
+   `respawn`, `fast`) must stay.
+3. **Tracker globals into structs.** The 27 `extern`s in `dsda/analysis.hpp` are
+   the running state, not the report. Group them by how they are reset, so each
+   reset becomes `= {}` without resetting anything new: the run stats
+   (`dsda_ResetAnalysis`), the per-map kill tracking (`kills_on_map`,
+   `100k_on_map`, `100k_note_shown`) and the other note flags.
 
 ## Remove undefined behavior
 
