@@ -16,6 +16,70 @@
 
 enum struct SfxId : int32_t;
 
+// mobj_t::flags2 / mobjinfo_t::flags2
+enum struct MobjFlag2 : uint64_t
+{
+	// heretic
+	LoGrav = Bit<uint64_t>(0u), // alternate gravity setting
+	WindThrust = Bit<uint64_t>(1u), // gets pushed around by the wind
+	FloorBounce = Bit<uint64_t>(2u), // bounces off the floor
+	ThruGhost = Bit<uint64_t>(3u), // missile will pass through ghosts
+	Fly = Bit<uint64_t>(4u), // fly mode is active
+	FootClip = Bit<uint64_t>(5u), // if feet are allowed to be clipped
+	SpawnFloat = Bit<uint64_t>(6u), // spawn random float z
+	NoTeleport = Bit<uint64_t>(7u), // does not teleport
+	Rip = Bit<uint64_t>(8u), // missile rips through solid
+	Pushable = Bit<uint64_t>(9u), // can be pushed by other moving
+	Slide = Bit<uint64_t>(10u), // slides against walls
+	OnMobj = Bit<uint64_t>(11u), // mobj is resting on top of another
+	PassMobj = Bit<uint64_t>(12u), // Enable z block checking (pass over / under)
+	CannotPush = Bit<uint64_t>(13u), // cannot push other pushable mobjs
+	FeetAreClipped = Bit<uint64_t>(14u), // a mobj's feet are now being cut
+	Boss = Bit<uint64_t>(15u), // mobj is a major boss
+	FireDamage = Bit<uint64_t>(16u), // does fire damage
+	NoDmgThrust = Bit<uint64_t>(17u), // does not thrust target when
+	TeleStomp = Bit<uint64_t>(18u), // mobj can stomp another
+	FloatBob = Bit<uint64_t>(19u), // use float bobbing z movement
+	DontDraw = Bit<uint64_t>(20u), // don't generate a vissprite
+
+	// mbf21
+	ShortMRange = Bit<uint64_t>(21u), // has short missile range (archvile)
+	DmgIgnored = Bit<uint64_t>(22u), // other things ignore its attacks (archvile)
+	NoRadiusDmg = Bit<uint64_t>(23u), // Doesn't take damage from blast radii
+	ForceRadiusDmg = Bit<uint64_t>(24u), // Does radius damage to everything, no exceptions
+	HigherMProb = Bit<uint64_t>(25u), // min prob. of miss. att. = 37.5% vs 22%
+	RangeHalf = Bit<uint64_t>(26u), // use half actual distance for missile attack probability
+	NoThreshold = Bit<uint64_t>(27u), // has no target threshold
+	Map07Boss1 = Bit<uint64_t>(28u), // is a MAP07 boss type 1 (666)
+	Map07Boss2 = Bit<uint64_t>(29u), // is a MAP07 boss type 2 (667)
+	E1M8Boss = Bit<uint64_t>(30u), // is an E1M8 boss
+	E2M8Boss = Bit<uint64_t>(31u), // is an E2M8 boss
+	E3M8Boss = Bit<uint64_t>(32u), // is an E3M8 boss
+	E4M6Boss = Bit<uint64_t>(33u), // is an E4M6 boss
+	E4M8Boss = Bit<uint64_t>(34u), // is an E4M8 boss
+	LongMelee = Bit<uint64_t>(35u), // has long melee range (revenant)
+	FullVolSounds = Bit<uint64_t>(36u), // full volume see / death sound
+
+	// hexen
+	Blasted = Bit<uint64_t>(37u), // missile will pass through ghosts
+	Impact = Bit<uint64_t>(38u), // an MF_MISSILE mobj can activate SPAC_IMPACT
+	PushWall = Bit<uint64_t>(39u), // mobj can push walls
+	MCross = Bit<uint64_t>(40u), // can activate monster cross lines
+	PCross = Bit<uint64_t>(41u), // can activate projectile cross lines
+	CantLeaveFloorpic = Bit<uint64_t>(42u), // stay within a certain floor type
+	NonShootable = Bit<uint64_t>(43u), // mobj is totally non-shootable, but still considered solid
+	Invulnerable = Bit<uint64_t>(44u), // mobj is invulnerable
+	Dormant = Bit<uint64_t>(45u), // thing is dormant
+	IceDamage = Bit<uint64_t>(46u), // does ice damage
+	SeekerMissile = Bit<uint64_t>(47u), // is a seeker (for reflection)
+	Reflective = Bit<uint64_t>(48u), // reflects missiles
+
+	// zdoom
+	CanUseWalls = Bit<uint64_t>(49u), // can activate use lines
+	CountSecret = Bit<uint64_t>(50u), // picking up counts as a secret
+};
+ENUM_FLAGS_FUNC(MobjFlag2)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -6570,7 +6634,7 @@ typedef struct
 
 	// heretic
 	StateId crashstate;
-	uint64_t flags2;
+	MobjFlag2 flags2;
 
 	// mbf21
 	int infighting_group;
@@ -6640,7 +6704,7 @@ typedef struct
 	int damage;
 	SfxId activesound;
 	uint64_t flags;
-	uint64_t flags2;
+	MobjFlag2 flags2;
 } raven_mobjinfo_t;
 
 // all the stuff - dynamically selected in global.c

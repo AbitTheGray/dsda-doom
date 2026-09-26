@@ -137,7 +137,7 @@ dboolean PIT_StompThing(mobj_t* thing)
 	// monsters don't stomp things except on boss level
 	// killough 8/9/98: make consistent across all levels
 	// TODO: possible "monster telefrag" mapinfo flag
-	if(!telefrag && !(tmthing->flags2 & MF2_TELESTOMP))
+	if(!telefrag && (tmthing->flags2 & MobjFlag2::TeleStomp) == MobjFlag2{})
 		return false;
 
 	P_DamageMobj(thing, tmthing, tmthing, 10000); // Stomp!
@@ -556,7 +556,7 @@ dboolean PIT_CheckLine(line_t* ld)
 		}
 		else if(map_format.hexen)
 		{
-			if(tmthing->flags2 & MF2_BLASTED)
+			if((tmthing->flags2 & MobjFlag2::Blasted) != MobjFlag2{})
 			{
 				P_DamageMobj(tmthing, nullptr, nullptr, tmthing->info->mass >> 5);
 			}
@@ -589,7 +589,7 @@ dboolean PIT_CheckLine(line_t* ld)
 			{
 				if(map_format.hexen)
 				{
-					if(tmthing->flags2 & MF2_BLASTED)
+					if((tmthing->flags2 & MobjFlag2::Blasted) != MobjFlag2{})
 					{
 						P_DamageMobj(tmthing, nullptr, nullptr, tmthing->info->mass >> 5);
 					}
@@ -610,7 +610,7 @@ dboolean PIT_CheckLine(line_t* ld)
 				(!heretic || tmthing->type != MobjType::HereticPod)
 			)
 			{
-				if(tmthing->flags2 & MF2_BLASTED)
+				if((tmthing->flags2 & MobjFlag2::Blasted) != MobjFlag2{})
 				{
 					P_DamageMobj(tmthing, nullptr, nullptr, tmthing->info->mass >> 5);
 				}
@@ -730,7 +730,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		return true;
 	}
 
-	if(tmthing->flags2 & MF2_PASSMOBJ)
+	if((tmthing->flags2 & MobjFlag2::PassMobj) != MobjFlag2{})
 	{
 		// check if a mobj passed over/under another object
 		if(raven)
@@ -798,8 +798,8 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 						// don't attack other co-op players
 						return true;
 					}
-					if(thing->flags2 & MF2_REFLECTIVE
-						&& (thing->player || thing->flags2 & MF2_BOSS))
+					if((thing->flags2 & MobjFlag2::Reflective) != MobjFlag2{}
+						&& (thing->player || (thing->flags2 & MobjFlag2::Boss) != MobjFlag2{}))
 					{
 						P_SetTarget(&tmthing->special1.m, tmthing->target);
 						P_SetTarget(&tmthing->target, thing);
@@ -812,7 +812,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 					if(P_Random(RandomClass::Hexen) < 96)
 					{
 						damage = 12;
-						if(thing->player || thing->flags2 & MF2_BOSS)
+						if(thing->player || (thing->flags2 & MobjFlag2::Boss) != MobjFlag2{})
 						{
 							damage = 3;
 							// ghost burns out faster when attacking players/bosses
@@ -864,9 +864,9 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 	}
 
 	// Check for blasted thing running into another
-	if(tmthing->flags2 & MF2_BLASTED && thing->flags & MF_SHOOTABLE)
+	if((tmthing->flags2 & MobjFlag2::Blasted) != MobjFlag2{} && thing->flags & MF_SHOOTABLE)
 	{
-		if(!(thing->flags2 & MF2_BOSS) && (thing->flags & MF_COUNTKILL))
+		if((thing->flags2 & MobjFlag2::Boss) == MobjFlag2{} && (thing->flags & MF_COUNTKILL))
 		{
 			thing->momx += tmthing->momx;
 			thing->momy += tmthing->momy;
@@ -888,13 +888,13 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		(tmthing->flags & MF_BOUNCES && !(tmthing->flags & MF_SOLID)))
 	{
 		// Check for a non-shootable mobj
-		if(thing->flags2 & MF2_NONSHOOTABLE)
+		if((thing->flags2 & MobjFlag2::NonShootable) != MobjFlag2{})
 		{
 			return true;
 		}
 
 		// Check for passing through a ghost
-		if((thing->flags & MF_SHADOW) && (tmthing->flags2 & MF2_THRUGHOST))
+		if((thing->flags & MF_SHADOW) && (tmthing->flags2 & MobjFlag2::ThruGhost) != MobjFlag2{})
 		{
 			return (true);
 		}
@@ -909,7 +909,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 
 		if(hexen)
 		{
-			if(tmthing->flags2 & MF2_FLOORBOUNCE)
+			if((tmthing->flags2 & MobjFlag2::FloorBounce) != MobjFlag2{})
 			{
 				if(tmthing->target == thing || !(thing->flags & MF_SOLID))
 				{
@@ -931,7 +931,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 						thing->momx += tmthing->momx >> 4;
 						thing->momy += tmthing->momy >> 4;
 					}
-					if((!thing->player && !(thing->flags2 & MF2_BOSS))
+					if((!thing->player && (thing->flags2 & MobjFlag2::Boss) == MobjFlag2{})
 						|| !(leveltime & 1))
 					{
 						if(thing->type == MobjType::HexenCentaur
@@ -1010,7 +1010,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			}
 			else if(tmthing->type == MobjType::HexenMstaffFx2 && thing != tmthing->target)
 			{
-				if(!thing->player && !(thing->flags2 & MF2_BOSS))
+				if(!thing->player && (thing->flags2 & MobjFlag2::Boss) == MobjFlag2{})
 				{
 					switch(thing->type)
 					{
@@ -1062,13 +1062,13 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		if(!(thing->flags & MF_SHOOTABLE))
 			return !(thing->flags & MF_SOLID); // didn't do any damage
 
-		if(tmthing->flags2 & MF2_RIP)
+		if((tmthing->flags2 & MobjFlag2::Rip) != MobjFlag2{})
 		{
 			if(raven)
 			{
 				if(!(thing->flags & MF_NOBLOOD) &&
-					!(thing->flags2 & MF2_REFLECTIVE) &&
-					!(thing->flags2 & MF2_INVULNERABLE))
+					(thing->flags2 & MobjFlag2::Reflective) == MobjFlag2{} &&
+					(thing->flags2 & MobjFlag2::Invulnerable) == MobjFlag2{})
 				{
 					// Ok to spawn some blood
 					P_RipperBlood(tmthing, thing);
@@ -1086,7 +1086,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			}
 
 			P_DamageMobj(thing, tmthing, tmthing->target, damage);
-			if(thing->flags2 & MF2_PUSHABLE && !(tmthing->flags2 & MF2_CANNOTPUSH))
+			if((thing->flags2 & MobjFlag2::Pushable) != MobjFlag2{} && (tmthing->flags2 & MobjFlag2::CannotPush) == MobjFlag2{})
 			{
 				// Push thing
 				thing->momx += tmthing->momx >> 2;
@@ -1104,8 +1104,8 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 			raven &&
 			damage &&
 			!(thing->flags & MF_NOBLOOD) &&
-			!(thing->flags2 & MF2_REFLECTIVE) &&
-			!(thing->flags2 & MF2_INVULNERABLE) &&
+			(thing->flags2 & MobjFlag2::Reflective) == MobjFlag2{} &&
+			(thing->flags2 & MobjFlag2::Invulnerable) == MobjFlag2{} &&
 			!(tmthing->type == MobjType::HexenTelotherFx1) &&
 			!(tmthing->type == MobjType::HexenTelotherFx2) &&
 			!(tmthing->type == MobjType::HexenTelotherFx3) &&
@@ -1123,7 +1123,7 @@ static dboolean PIT_CheckThing(mobj_t* thing) // killough 3/26/98: make static
 		return false;
 	}
 
-	if(thing->flags2 & MF2_PUSHABLE && !(tmthing->flags2 & MF2_CANNOTPUSH))
+	if((thing->flags2 & MobjFlag2::Pushable) != MobjFlag2{} && (tmthing->flags2 & MobjFlag2::CannotPush) == MobjFlag2{})
 	{
 		// Push thing
 		thing->momx += tmthing->momx >> 2;
@@ -1439,7 +1439,7 @@ extern "C" void P_CheckZDoomImpact(mobj_t* thing)
 		int i, side;
 		line_t* ld;
 
-		if(tmthing->flags2 & MF2_BLASTED)
+		if((tmthing->flags2 & MobjFlag2::Blasted) != MobjFlag2{})
 		{
 			P_DamageMobj(tmthing, nullptr, nullptr, tmthing->info->mass >> 5);
 		}
@@ -1538,7 +1538,7 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 				!(thing->flags & MF_TELEPORT) &&
 				tmceilingz - thing->z < thing->height &&
 				!(thing->flags & MF_FLY) &&
-				!(thing->flags2 & MF2_FLY)
+				(thing->flags2 & MobjFlag2::Fly) == MobjFlag2{}
 			)
 		)
 		{
@@ -1548,7 +1548,7 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 				&& !(floorline && untouched(floorline));
 		}
 
-		if(thing->flags2 & MF2_FLY)
+		if((thing->flags2 & MobjFlag2::Fly) != MobjFlag2{})
 		{
 			if(thing->z + thing->height > tmceilingz)
 			{
@@ -1662,14 +1662,14 @@ dboolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y,
 
 	P_SetThingPosition(thing);
 
-	if(thing->flags2 & MF2_FOOTCLIP
+	if((thing->flags2 & MobjFlag2::FootClip) != MobjFlag2{}
 		&& P_GetThingFloorType(thing) != FloorType::Solid)
 	{
-		thing->flags2 |= MF2_FEETARECLIPPED;
+		thing->flags2 |= MobjFlag2::FeetAreClipped;
 	}
-	else if(thing->flags2 & MF2_FEETARECLIPPED)
+	else if((thing->flags2 & MobjFlag2::FeetAreClipped) != MobjFlag2{})
 	{
-		thing->flags2 &= ~MF2_FEETARECLIPPED;
+		thing->flags2 -= MobjFlag2::FeetAreClipped;
 	}
 
 	if(map_trail_mode == MapTrailMode::IgnoreCollisions &&
@@ -2490,7 +2490,7 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 		if(
 			raven &&
 			!(in->d.thing->flags & MF_NOBLOOD) &&
-			!(in->d.thing->flags2 & MF2_INVULNERABLE)
+			(in->d.thing->flags2 & MobjFlag2::Invulnerable) == MobjFlag2{}
 		)
 		{
 			if(PuffType == MobjType::HexenAxepuff || PuffType == MobjType::HexenAxepuffGlow)
@@ -2580,7 +2580,7 @@ void P_LineAttack(mobj_t* t1, angle_t angle, fixed_t distance, fixed_t slope,
 	{
 		shootz -= t1->floorclip;
 	}
-	else if(t1->flags2 & MF2_FEETARECLIPPED)
+	else if((t1->flags2 & MobjFlag2::FeetAreClipped) != MobjFlag2{})
 	{
 		shootz -= FOOTCLIPSIZE;
 	}
@@ -2847,8 +2847,8 @@ dboolean PIT_RadiusAttack(mobj_t* thing)
 
 		if(bomb.spot->flags & MF_BOUNCES
 			? thing->type == MobjType::Cyborg && bomb.source->type == MobjType::Cyborg
-			: thing->flags2 & (MF2_NORADIUSDMG | MF2_BOSS) &&
-			!(bomb.spot->flags2 & MF2_FORCERADIUSDMG))
+			: (thing->flags2 & (MobjFlag2::NoRadiusDmg | MobjFlag2::Boss)) != MobjFlag2{} &&
+			(bomb.spot->flags2 & MobjFlag2::ForceRadiusDmg) == MobjFlag2{})
 			return true;
 	}
 
@@ -3062,7 +3062,7 @@ dboolean PIT_ChangeSector(mobj_t* thing)
 			!hexen ||
 			(
 				!(thing->flags & MF_NOBLOOD) &&
-				!(thing->flags2 & MF2_INVULNERABLE)
+				(thing->flags2 & MobjFlag2::Invulnerable) == MobjFlag2{}
 			)
 		)
 		{
@@ -3657,7 +3657,7 @@ void P_FakeZMovement(mobj_t* mo)
 				mo->z += FLOATSPEED;
 		}
 	}
-	if(mo->player && mo->flags2 & MF2_FLY && !(mo->z <= mo->floorz)
+	if(mo->player && (mo->flags2 & MobjFlag2::Fly) != MobjFlag2{} && !(mo->z <= mo->floorz)
 		&& leveltime & 2)
 	{
 		mo->z += finesine[(FINEANGLES / 20 * leveltime >> 2) & FINEMASK];
@@ -3684,7 +3684,7 @@ void P_FakeZMovement(mobj_t* mo)
 			return;
 		}
 	}
-	else if(mo->flags2 & MF2_LOGRAV)
+	else if((mo->flags2 & MobjFlag2::LoGrav) != MobjFlag2{})
 	{
 		fixed_t gravity = P_MobjGravity(mo);
 
@@ -3885,11 +3885,11 @@ static void CheckForPushSpecial(line_t* line, int side, mobj_t* mobj)
 {
 	if(line->special)
 	{
-		if(mobj->flags2 & MF2_PUSHWALL)
+		if((mobj->flags2 & MobjFlag2::PushWall) != MobjFlag2{})
 		{
 			P_ActivateLine(line, mobj, side, SPAC_PUSH);
 		}
-		else if(mobj->flags2 & MF2_IMPACT)
+		else if((mobj->flags2 & MobjFlag2::Impact) != MobjFlag2{})
 		{
 			// TODO: possible "missile activates impact lines" mapinfo flag
 			// By default, hexen always has this flag
@@ -3942,12 +3942,12 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 		if(!(thing->flags & MF_TELEPORT)
 			&& tmceilingz - thing->z < thing->height
 			&& thing->type != MobjType::HexenLightningCeiling
-			&& !(thing->flags2 & MF2_FLY))
+			&& (thing->flags2 & MobjFlag2::Fly) == MobjFlag2{})
 		{
 			// mobj must lower itself to fit
 			goto pushline;
 		}
-		if(thing->flags2 & MF2_FLY)
+		if((thing->flags2 & MobjFlag2::Fly) != MobjFlag2{})
 		{
 			if(thing->z + thing->height > tmceilingz)
 			{
@@ -3970,12 +3970,12 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 		}
 		if(!(thing->flags & (MF_DROPOFF | MF_FLOAT)) &&
 			(tmfloorz - tmdropoffz > 24 * FRACUNIT) &&
-			!(thing->flags2 & MF2_BLASTED))
+			(thing->flags2 & MobjFlag2::Blasted) == MobjFlag2{})
 		{
 			// Can't move over a dropoff unless it's been blasted
 			return (false);
 		}
-		if(thing->flags2 & MF2_CANTLEAVEFLOORPIC
+		if((thing->flags2 & MobjFlag2::CantLeaveFloorpic) != MobjFlag2{}
 			&& (tmfloorpic != thing->subsector->sector->floorpic
 				|| tmfloorz - thing->z != 0))
 		{
@@ -3999,7 +3999,7 @@ static dboolean Hexen_P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 
 	P_SetThingPosition(thing);
 
-	if(thing->flags2 & MF2_FOOTCLIP)
+	if((thing->flags2 & MobjFlag2::FootClip) != MobjFlag2{})
 	{
 		if(thing->z == thing->subsector->sector->floorheight
 			&& P_GetThingFloorType(thing) >= FloorType::Liquid)
@@ -4040,7 +4040,7 @@ pushline:
 	{
 		int numSpecHitTemp;
 
-		if(tmthing->flags2 & MF2_BLASTED)
+		if((tmthing->flags2 & MobjFlag2::Blasted) != MobjFlag2{})
 		{
 			P_DamageMobj(tmthing, nullptr, nullptr, tmthing->info->mass >> 5);
 		}

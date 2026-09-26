@@ -362,7 +362,7 @@ void dsda_UpdateThruster(scroll_t* s)
 		{
 			thrust_it = false;
 
-			if(thing->flags2 & MF2_WINDTHRUST && s->flags & THRUST_WINDTHRUST)
+			if((thing->flags2 & MobjFlag2::WindThrust) != MobjFlag2{} && s->flags & THRUST_WINDTHRUST)
 				thrust_it = true;
 			else if(thing->type == MobjType::Skull || thing->flags & MF_COUNTKILL)
 			{

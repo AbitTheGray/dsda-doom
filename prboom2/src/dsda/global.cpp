@@ -259,7 +259,7 @@ static void dsda_InitDoom()
 		mobjinfo[i].raisestate = mobjinfo_p->raisestate;
 		mobjinfo[i].droppeditem = MobjType::Null;
 		mobjinfo[i].crashstate = StateId::Null; // not in doom
-		mobjinfo[i].flags2 = 0;     // not in doom
+		mobjinfo[i].flags2 = MobjFlag2{};     // not in doom
 
 		// mbf21
 		mobjinfo[i].infighting_group = std::to_underlying(InfightingGroup::Default);
@@ -280,16 +280,16 @@ static void dsda_InitDoom()
 	mobjinfo[std::to_underlying(MobjType::Shotguy)].droppeditem = MobjType::Shotgun;
 	mobjinfo[std::to_underlying(MobjType::Chainguy)].droppeditem = MobjType::Chaingun;
 
-	mobjinfo[std::to_underlying(MobjType::Vile)].flags2 = MF2_SHORTMRANGE | MF2_DMGIGNORED | MF2_NOTHRESHOLD;
-	mobjinfo[std::to_underlying(MobjType::Cyborg)].flags2 = MF2_NORADIUSDMG | MF2_HIGHERMPROB | MF2_RANGEHALF |
-		MF2_FULLVOLSOUNDS | MF2_E2M8BOSS | MF2_E4M6BOSS;
-	mobjinfo[std::to_underlying(MobjType::Spider)].flags2 = MF2_NORADIUSDMG | MF2_RANGEHALF | MF2_FULLVOLSOUNDS |
-		MF2_E3M8BOSS | MF2_E4M8BOSS;
-	mobjinfo[std::to_underlying(MobjType::Skull)].flags2 = MF2_RANGEHALF;
-	mobjinfo[std::to_underlying(MobjType::Fatso)].flags2 = MF2_MAP07BOSS1;
-	mobjinfo[std::to_underlying(MobjType::Baby)].flags2 = MF2_MAP07BOSS2;
-	mobjinfo[std::to_underlying(MobjType::Bruiser)].flags2 = MF2_E1M8BOSS;
-	mobjinfo[std::to_underlying(MobjType::Undead)].flags2 = MF2_LONGMELEE | MF2_RANGEHALF;
+	mobjinfo[std::to_underlying(MobjType::Vile)].flags2 = MobjFlag2::ShortMRange | MobjFlag2::DmgIgnored | MobjFlag2::NoThreshold;
+	mobjinfo[std::to_underlying(MobjType::Cyborg)].flags2 = MobjFlag2::NoRadiusDmg | MobjFlag2::HigherMProb | MobjFlag2::RangeHalf |
+		MobjFlag2::FullVolSounds | MobjFlag2::E2M8Boss | MobjFlag2::E4M6Boss;
+	mobjinfo[std::to_underlying(MobjType::Spider)].flags2 = MobjFlag2::NoRadiusDmg | MobjFlag2::RangeHalf | MobjFlag2::FullVolSounds |
+		MobjFlag2::E3M8Boss | MobjFlag2::E4M8Boss;
+	mobjinfo[std::to_underlying(MobjType::Skull)].flags2 = MobjFlag2::RangeHalf;
+	mobjinfo[std::to_underlying(MobjType::Fatso)].flags2 = MobjFlag2::Map07Boss1;
+	mobjinfo[std::to_underlying(MobjType::Baby)].flags2 = MobjFlag2::Map07Boss2;
+	mobjinfo[std::to_underlying(MobjType::Bruiser)].flags2 = MobjFlag2::E1M8Boss;
+	mobjinfo[std::to_underlying(MobjType::Undead)].flags2 = MobjFlag2::LongMelee | MobjFlag2::RangeHalf;
 
 	mobjinfo[std::to_underlying(MobjType::Bruiser)].projectile_group = std::to_underlying(ProjectileGroup::Baron);
 	mobjinfo[std::to_underlying(MobjType::Knight)].projectile_group = std::to_underlying(ProjectileGroup::Baron);

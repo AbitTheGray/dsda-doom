@@ -1036,9 +1036,9 @@ static void R_RenderBSPNodes()
 	// Make displayed player invisible locally
 	if(localQuakeHappening[displayplayer] && gamestate == GameState::Level)
 	{
-		players[displayplayer].mo->flags2 |= MF2_DONTDRAW;
+		players[displayplayer].mo->flags2 |= MobjFlag2::DontDraw;
 		R_RenderBSPNode(numnodes - 1); // head node is the last node output
-		players[displayplayer].mo->flags2 &= ~MF2_DONTDRAW;
+		players[displayplayer].mo->flags2 -= MobjFlag2::DontDraw;
 	}
 	else
 	{

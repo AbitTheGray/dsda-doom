@@ -376,7 +376,7 @@ typedef struct mobj_s
 
 	// heretic
 	int damage;            // For missiles
-	uint64_t flags2;       // Heretic & MBF21 flags
+	MobjFlag2 flags2;      // Heretic & MBF21 flags
 	specialval_t special1; // Special info
 	specialval_t special2; // Special info
 
@@ -448,66 +448,6 @@ void P_ExplodeMissile(mobj_t*);        // killough
 void P_RemoveMonsters();
 
 // heretic
-
-// --- mobj.flags2 ---
-
-#define MF2_LOGRAV         0x00000001ull  // alternate gravity setting
-#define MF2_WINDTHRUST     0x00000002ull  // gets pushed around by the wind
-#define MF2_FLOORBOUNCE    0x00000004ull  // bounces off the floor
-#define MF2_THRUGHOST      0x00000008ull  // missile will pass through ghosts
-#define MF2_FLY            0x00000010ull  // fly mode is active
-#define MF2_FOOTCLIP       0x00000020ull  // if feet are allowed to be clipped
-#define MF2_SPAWNFLOAT     0x00000040ull  // spawn random float z
-#define MF2_NOTELEPORT     0x00000080ull  // does not teleport
-#define MF2_RIP            0x00000100ull  // missile rips through solid
-#define MF2_PUSHABLE       0x00000200ull  // can be pushed by other moving
-#define MF2_SLIDE          0x00000400ull  // slides against walls
-#define MF2_ONMOBJ         0x00000800ull  // mobj is resting on top of another
-#define MF2_PASSMOBJ       0x00001000ull  // Enable z block checking (pass over / under)
-#define MF2_CANNOTPUSH     0x00002000ull  // cannot push other pushable mobjs
-#define MF2_FEETARECLIPPED 0x00004000ull  // a mobj's feet are now being cut
-#define MF2_BOSS           0x00008000ull  // mobj is a major boss
-#define MF2_FIREDAMAGE     0x00010000ull  // does fire damage
-#define MF2_NODMGTHRUST    0x00020000ull  // does not thrust target when
-#define MF2_TELESTOMP      0x00040000ull  // mobj can stomp another
-#define MF2_FLOATBOB       0x00080000ull  // use float bobbing z movement
-#define MF2_DONTDRAW       0x00100000ull  // don't generate a vissprite
-
-// mbf21
-#define MF2_SHORTMRANGE    0x00200000ull // has short missile range (archvile)
-#define MF2_DMGIGNORED     0x00400000ull // other things ignore its attacks (archvile)
-#define MF2_NORADIUSDMG    0x00800000ull // Doesn't take damage from blast radii
-#define MF2_FORCERADIUSDMG 0x01000000ull // Does radius damage to everything, no exceptions
-#define MF2_HIGHERMPROB    0x02000000ull // min prob. of miss. att. = 37.5% vs 22%
-#define MF2_RANGEHALF      0x04000000ull // use half actual distance for missile attack probability
-#define MF2_NOTHRESHOLD    0x08000000ull // has no target threshold
-#define MF2_MAP07BOSS1     0x10000000ull // is a MAP07 boss type 1 (666)
-#define MF2_MAP07BOSS2     0x20000000ull // is a MAP07 boss type 2 (667)
-#define MF2_E1M8BOSS       0x40000000ull // is an E1M8 boss
-#define MF2_E2M8BOSS       0x80000000ull // is an E2M8 boss
-#define MF2_E3M8BOSS  0x0000000100000000ull // is an E3M8 boss
-#define MF2_E4M6BOSS  0x0000000200000000ull // is an E4M6 boss
-#define MF2_E4M8BOSS  0x0000000400000000ull // is an E4M8 boss
-#define MF2_LONGMELEE 0x0000000800000000ull // has long melee range (revenant)
-#define MF2_FULLVOLSOUNDS 0x0000001000000000ull // full volume see / death sound
-
-// hexen
-#define MF2_BLASTED	          0x0000002000000000ull // missile will pass through ghosts
-#define MF2_IMPACT            0x0000004000000000ull // an MF_MISSILE mobj can activate SPAC_IMPACT
-#define MF2_PUSHWALL          0x0000008000000000ull // mobj can push walls
-#define MF2_MCROSS            0x0000010000000000ull // can activate monster cross lines
-#define MF2_PCROSS            0x0000020000000000ull // can activate projectile cross lines
-#define MF2_CANTLEAVEFLOORPIC 0x0000040000000000ull // stay within a certain floor type
-#define MF2_NONSHOOTABLE      0x0000080000000000ull // mobj is totally non-shootable, but still considered solid
-#define MF2_INVULNERABLE      0x0000100000000000ull // mobj is invulnerable
-#define MF2_DORMANT           0x0000200000000000ull // thing is dormant
-#define MF2_ICEDAMAGE         0x0000400000000000ull // does ice damage
-#define MF2_SEEKERMISSILE     0x0000800000000000ull // is a seeker (for reflection)
-#define MF2_REFLECTIVE        0x0001000000000000ull // reflects missiles
-
-// zdoom
-#define MF2_CANUSEWALLS       0x0002000000000000ull // can activate use lines
-#define MF2_COUNTSECRET       0x0004000000000000ull // picking up counts as a secret
 
 #define AMMO_GWND_WIMPY 10
 #define AMMO_GWND_HEFTY 50

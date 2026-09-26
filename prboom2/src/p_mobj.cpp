@@ -187,7 +187,7 @@ extern "C" void P_ApplyHereticSectorMovementSpecial(mobj_t* mo, int special)
 {
 	static int windTab[3] = {2048 * 5, 2048 * 10, 2048 * 25};
 
-	if(mo->flags2 & MF2_WINDTHRUST)
+	if((mo->flags2 & MobjFlag2::WindThrust) != MobjFlag2{})
 	{
 		switch(special)
 		{
@@ -346,7 +346,7 @@ static void P_XYMovement(mobj_t* mo)
 				else
 					mo->momx = mo->momy = 0;
 			}
-			else if(player || mo->flags2 & MF2_SLIDE) // try to slide along it
+			else if(player || (mo->flags2 & MobjFlag2::Slide) != MobjFlag2{}) // try to slide along it
 			{
 				if(BlockingMobj == nullptr || map_format.zdoom)
 				{
@@ -370,11 +370,11 @@ static void P_XYMovement(mobj_t* mo)
 			}
 			else if(mo->flags & MF_MISSILE)
 			{
-				if(hexen && mo->flags2 & MF2_FLOORBOUNCE)
+				if(hexen && (mo->flags2 & MobjFlag2::FloorBounce) != MobjFlag2{})
 				{
 					if(BlockingMobj)
 					{
-						if((BlockingMobj->flags2 & MF2_REFLECTIVE) ||
+						if((BlockingMobj->flags2 & MobjFlag2::Reflective) != MobjFlag2{} ||
 							((!BlockingMobj->player) &&
 								(!(BlockingMobj->flags & MF_COUNTKILL))))
 						{
@@ -422,7 +422,7 @@ static void P_XYMovement(mobj_t* mo)
 					}
 				}
 
-				if(BlockingMobj && (BlockingMobj->flags2 & MF2_REFLECTIVE))
+				if(BlockingMobj && (BlockingMobj->flags2 & MobjFlag2::Reflective) != MobjFlag2{})
 				{
 					angle = R_PointToAngle2(BlockingMobj->x,
 						BlockingMobj->y, mo->x, mo->y);
@@ -455,7 +455,7 @@ static void P_XYMovement(mobj_t* mo)
 					angle >>= ANGLETOFINESHIFT;
 					mo->momx = FixedMul(mo->info->speed >> 1, finecosine[angle]);
 					mo->momy = FixedMul(mo->info->speed >> 1, finesine[angle]);
-					if(mo->flags2 & MF2_SEEKERMISSILE)
+					if((mo->flags2 & MobjFlag2::SeekerMissile) != MobjFlag2{})
 					{
 						P_SetTarget(&mo->special1.m, mo->target);
 					}
@@ -514,7 +514,7 @@ static void P_XYMovement(mobj_t* mo)
 		return;
 
 	if(
-		mo->z > mo->floorz && !(mo->flags2 & MF2_ONMOBJ) && !(mo->flags & MF_FLY) &&
+		mo->z > mo->floorz && (mo->flags2 & MobjFlag2::OnMobj) == MobjFlag2{} && !(mo->flags & MF_FLY) &&
 		player && mo->player && map_aircontrol > 256
 	)
 	{
@@ -528,8 +528,8 @@ static void P_XYMovement(mobj_t* mo)
 
 	if(mo->z > mo->floorz &&
 		!(mo->flags & MF_FLY) &&
-		!(mo->flags2 & MF2_FLY) &&
-		!(mo->flags2 & MF2_ONMOBJ) &&
+		(mo->flags2 & MobjFlag2::Fly) == MobjFlag2{} &&
+		(mo->flags2 & MobjFlag2::OnMobj) == MobjFlag2{} &&
 		(!hexen || mo->type != MobjType::HexenBlasteffect))
 		return;
 
@@ -628,8 +628,8 @@ static void P_XYMovement(mobj_t* mo)
 		//e6y
 		if(compatibility_level <= CompLevel::Boom201 && !prboom_comp[std::to_underlying(PrboomComp::PrboomFriction)].state)
 		{
-			if(mo->flags2 & MF2_FLY && !(mo->z <= mo->floorz)
-				&& !(mo->flags2 & MF2_ONMOBJ))
+			if((mo->flags2 & MobjFlag2::Fly) != MobjFlag2{} && !(mo->z <= mo->floorz)
+				&& (mo->flags2 & MobjFlag2::OnMobj) == MobjFlag2{})
 			{
 				mo->momx = FixedMul(mo->momx, FRICTION_FLY);
 				mo->momy = FixedMul(mo->momy, FRICTION_FLY);
@@ -838,7 +838,7 @@ floater:
 		mo->momz = FixedMul(mo->momz, FRICTION_FLY);
 	}
 
-	if(mo->player && mo->flags2 & MF2_FLY && !(mo->z <= mo->floorz)
+	if(mo->player && (mo->flags2 & MobjFlag2::Fly) != MobjFlag2{} && !(mo->z <= mo->floorz)
 		&& leveltime & 2)
 	{
 		mo->z += finesine[(FINEANGLES / 20 * leveltime >> 2) & FINEMASK];
@@ -855,7 +855,7 @@ floater:
 			if(mo->flags & MF_MISSILE)
 			{
 				mo->z = mo->floorz;
-				if(mo->flags2 & MF2_FLOORBOUNCE)
+				if((mo->flags2 & MobjFlag2::FloorBounce) != MobjFlag2{})
 				{
 					P_FloorBounceMissile(mo);
 					return;
@@ -942,7 +942,7 @@ floater:
 				P_DamageMobj(mo, nullptr, nullptr, mo->health);
 			else
 			{
-				if(mo->flags2 & MF2_ICEDAMAGE && mo->momz < -gravity * 8)
+				if((mo->flags2 & MobjFlag2::IceDamage) != MobjFlag2{} && mo->momz < -gravity * 8)
 				{
 					mo->tics = 1;
 					mo->momx = 0;
@@ -966,7 +966,7 @@ floater:
 					// but Boom does it.
 					(demo_compatibility || mo->player->mo == mo) &&
 					mo->momz < -gravity * 8 &&
-					!(mo->flags2 & MF2_FLY)
+					(mo->flags2 & MobjFlag2::Fly) == MobjFlag2{}
 				)
 				{
 					// Squat down.
@@ -1035,7 +1035,7 @@ floater:
 			compatibility_level <= CompLevel::Doom219)
 			mo->momz = -mo->momz; // the skull slammed into something
 
-		if(mo->info->crashstate != StateId::Null && (mo->flags & MF_CORPSE) && !(mo->flags2 & MF2_ICEDAMAGE))
+		if(mo->info->crashstate != StateId::Null && (mo->flags & MF_CORPSE) && (mo->flags2 & MobjFlag2::IceDamage) == MobjFlag2{})
 		{
 			P_SetMobjState(mo, mo->info->crashstate);
 			return;
@@ -1047,7 +1047,7 @@ floater:
 			return;
 		}
 	}
-	else if(mo->flags2 & MF2_LOGRAV)
+	else if((mo->flags2 & MobjFlag2::LoGrav) != MobjFlag2{})
 	{
 		if(mo->momz == 0)
 			mo->momz = -(gravity >> 3) * 2;
@@ -1077,7 +1077,7 @@ floater:
 
 		mo->z = mo->ceilingz - mo->height;
 
-		if(hexen && mo->flags2 & MF2_FLOORBOUNCE)
+		if(hexen && (mo->flags2 & MobjFlag2::FloorBounce) != MobjFlag2{})
 		{
 			if(mo->info->seesound != SfxId::None)
 			{
@@ -1295,13 +1295,13 @@ void P_MobjThinker(mobj_t* mobj)
 		if(mobj->thinker.function != reinterpret_cast<think_t>(P_MobjThinker)) // cph - Must've been removed
 			return;                                 // killough - mobj was removed
 	}
-	else if(mobj->flags2 & MF2_BLASTED)
+	else if((mobj->flags2 & MobjFlag2::Blasted) != MobjFlag2{})
 	{
 		// Reset to not blasted when momentums are gone
 		ResetBlasted(mobj);
 	}
 
-	if(mobj->flags2 & MF2_FLOATBOB)
+	if((mobj->flags2 & MobjFlag2::FloatBob) != MobjFlag2{})
 	{
 		// Floating item bobbing motion
 		mobj->z = mobj->floorz +
@@ -1309,7 +1309,7 @@ void P_MobjThinker(mobj_t* mobj)
 	}
 	else if(mobj->z != mobj->floorz || mobj->momz || BlockingMobj)
 	{
-		if(mobj->flags2 & MF2_PASSMOBJ)
+		if((mobj->flags2 & MobjFlag2::PassMobj) != MobjFlag2{})
 		{
 			mobj_t* onmo;
 
@@ -1318,14 +1318,14 @@ void P_MobjThinker(mobj_t* mobj)
 				P_ZMovement(mobj);
 
 				// This bug is part of the original source
-				if(hexen && mobj->player && mobj->flags & MF2_ONMOBJ)
+				if(hexen && mobj->player && (mobj->flags & std::to_underlying(MobjFlag2::OnMobj)) != 0)
 				{
-					mobj->flags2 &= ~MF2_ONMOBJ;
+					mobj->flags2 -= MobjFlag2::OnMobj;
 				}
 
 				if(map_format.zdoom)
 				{
-					mobj->flags2 &= ~MF2_ONMOBJ;
+					mobj->flags2 -= MobjFlag2::OnMobj;
 				}
 			}
 			else
@@ -1336,7 +1336,7 @@ void P_MobjThinker(mobj_t* mobj)
 					{
 						fixed_t gravity = P_MobjGravity(mobj);
 
-						if(hexen && mobj->momz < -gravity * 8 && !(mobj->flags2 & MF2_FLY))
+						if(hexen && mobj->momz < -gravity * 8 && (mobj->flags2 & MobjFlag2::Fly) == MobjFlag2{})
 						{
 							PlayerLandedOnThing(mobj, onmo, gravity);
 						}
@@ -1345,7 +1345,7 @@ void P_MobjThinker(mobj_t* mobj)
 							mobj->player->viewheight -= onmo->z + onmo->height - mobj->z;
 							mobj->player->deltaviewheight = (g_viewheight - mobj->player->viewheight) >> 3;
 							mobj->z = onmo->z + onmo->height;
-							mobj->flags2 |= MF2_ONMOBJ;
+							mobj->flags2 |= MobjFlag2::OnMobj;
 							mobj->momz = 0;
 						}
 						else
@@ -1358,7 +1358,7 @@ void P_MobjThinker(mobj_t* mobj)
 					{
 						if(mobj->momz < 0)
 						{
-							mobj->flags2 |= MF2_ONMOBJ;
+							mobj->flags2 |= MobjFlag2::OnMobj;
 							mobj->momz = 0;
 						}
 						if(onmo->player || onmo->type == MobjType::HereticPod)
@@ -1385,7 +1385,7 @@ void P_MobjThinker(mobj_t* mobj)
 					if(onmo->z + onmo->height - mobj->z <= 24 * FRACUNIT)
 					{
 						mobj->z = onmo->z + onmo->height;
-						mobj->flags2 |= MF2_ONMOBJ;
+						mobj->flags2 |= MobjFlag2::OnMobj;
 					}
 				}
 			}
@@ -1580,7 +1580,7 @@ dboolean P_SpawnProjectile(short thing_id, mobj_t* source, int spawn_num, angle_
 						new_mobj->flags &= ~MF_NOGRAVITY;
 						if(!is_monster && gravity == 1)
 						{
-							new_mobj->flags2 |= MF2_LOGRAV;
+							new_mobj->flags2 |= MobjFlag2::LoGrav;
 						}
 					}
 					else
@@ -1794,7 +1794,7 @@ mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, MobjType type)
 			mobj->z = mobj->floorz;
 		}
 	}
-	else if(hexen && mobj->flags2 & MF2_FLOATBOB)
+	else if(hexen && (mobj->flags2 & MobjFlag2::FloatBob) != MobjFlag2{})
 	{
 		mobj->z = mobj->floorz + z; // artifact z passed in as height
 	}
@@ -1805,7 +1805,7 @@ mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, MobjType type)
 
 	if(hexen)
 	{
-		if(mobj->flags2 & MF2_FOOTCLIP
+		if((mobj->flags2 & MobjFlag2::FootClip) != MobjFlag2{}
 			&& P_GetThingFloorType(mobj) >= FloorType::Liquid
 			&& mobj->z == mobj->subsector->sector->floorheight)
 		{
@@ -1818,15 +1818,15 @@ mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, MobjType type)
 	}
 	else
 	{
-		if(mobj->flags2 & MF2_FOOTCLIP
+		if((mobj->flags2 & MobjFlag2::FootClip) != MobjFlag2{}
 			&& P_GetThingFloorType(mobj) != FloorType::Solid
 			&& mobj->floorz == mobj->subsector->sector->floorheight)
 		{
-			mobj->flags2 |= MF2_FEETARECLIPPED;
+			mobj->flags2 |= MobjFlag2::FeetAreClipped;
 		}
 		else
 		{
-			mobj->flags2 &= ~MF2_FEETARECLIPPED;
+			mobj->flags2 -= MobjFlag2::FeetAreClipped;
 		}
 	}
 
@@ -2588,9 +2588,9 @@ spawnit:
 
 	if(mobjinfo[std::to_underlying(i)].flags & MF_SPAWNCEILING)
 		z = ONCEILINGZ;
-	else if(mobjinfo[std::to_underlying(i)].flags2 & MF2_SPAWNFLOAT)
+	else if((mobjinfo[std::to_underlying(i)].flags2 & MobjFlag2::SpawnFloat) != MobjFlag2{})
 		z = FLOATRANDZ;
-	else if(hexen && mobjinfo[std::to_underlying(i)].flags2 & MF2_FLOATBOB)
+	else if(hexen && (mobjinfo[std::to_underlying(i)].flags2 & MobjFlag2::FloatBob) != MobjFlag2{})
 		z = mthing->height;
 	else
 		z = ONFLOORZ;
@@ -2660,7 +2660,7 @@ spawnit:
 		mobj->special_args[4] = mthing->special_args[4];
 	}
 
-	if(mobj->flags2 & MF2_FLOATBOB)
+	if((mobj->flags2 & MobjFlag2::FloatBob) != MobjFlag2{})
 	{
 		// Seed random starting index for bobbing motion
 		mobj->health = P_Random(RandomClass::Heretic);
@@ -2714,7 +2714,7 @@ spawnit:
 
 	if(map_format.hexen && mthing->options & MTF_DORMANT)
 	{
-		mobj->flags2 |= MF2_DORMANT;
+		mobj->flags2 |= MobjFlag2::Dormant;
 		if(hexen && mobj->type == MobjType::HexenIceguy)
 		{
 			P_SetMobjState(mobj, StateId::HexenIceguyDormant);
@@ -2885,7 +2885,7 @@ mobj_t* P_SpawnMissile(mobj_t* source, mobj_t* dest, MobjType type)
 
 		if(hexen)
 			z -= source->floorclip;
-		else if(source->flags2 & MF2_FEETARECLIPPED)
+		else if((source->flags2 & MobjFlag2::FeetAreClipped) != MobjFlag2{})
 			z -= FOOTCLIPSIZE;
 	}
 
@@ -2969,7 +2969,7 @@ mobj_t* P_SpawnPlayerMissile(mobj_t* source, MobjType type)
 			{
 				z -= source->floorclip;
 			}
-			else if(source->flags2 & MF2_FEETARECLIPPED)
+			else if((source->flags2 & MobjFlag2::FeetAreClipped) != MobjFlag2{})
 			{
 				z -= FOOTCLIPSIZE;
 			}
@@ -3195,7 +3195,7 @@ mobj_t* P_SpawnMissileAngle(mobj_t* source, MobjType type, angle_t angle, fixed_
 	{
 		z -= source->floorclip;
 	}
-	else if(source->flags2 & MF2_FEETARECLIPPED)
+	else if((source->flags2 & MobjFlag2::FeetAreClipped) != MobjFlag2{})
 	{
 		z -= FOOTCLIPSIZE;
 	}
@@ -3317,7 +3317,7 @@ mobj_t* P_SPMAngle(mobj_t* source, MobjType type, angle_t angle)
 	{
 		z -= source->floorclip;
 	}
-	else if(source->flags2 & MF2_FEETARECLIPPED)
+	else if((source->flags2 & MobjFlag2::FeetAreClipped) != MobjFlag2{})
 	{
 		z -= FOOTCLIPSIZE;
 	}

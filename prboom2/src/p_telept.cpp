@@ -667,7 +667,7 @@ dboolean P_Teleport(mobj_t* thing, fixed_t x, fixed_t y, angle_t angle, dboolean
 
 	if(hexen)
 	{
-		if(thing->flags2 & MF2_FOOTCLIP)
+		if((thing->flags2 & MobjFlag2::FootClip) != MobjFlag2{})
 		{
 			if(thing->z == thing->subsector->sector->floorheight
 				&& P_GetThingFloorType(thing) > FloorType::Solid)
@@ -682,14 +682,14 @@ dboolean P_Teleport(mobj_t* thing, fixed_t x, fixed_t y, angle_t angle, dboolean
 	}
 	else
 	{
-		if(thing->flags2 & MF2_FOOTCLIP
+		if((thing->flags2 & MobjFlag2::FootClip) != MobjFlag2{}
 			&& P_GetThingFloorType(thing) != FloorType::Solid)
 		{
-			thing->flags2 |= MF2_FEETARECLIPPED;
+			thing->flags2 |= MobjFlag2::FeetAreClipped;
 		}
-		else if(thing->flags2 & MF2_FEETARECLIPPED)
+		else if((thing->flags2 & MobjFlag2::FeetAreClipped) != MobjFlag2{})
 		{
-			thing->flags2 &= ~MF2_FEETARECLIPPED;
+			thing->flags2 -= MobjFlag2::FeetAreClipped;
 		}
 	}
 
@@ -719,7 +719,7 @@ extern "C" int EV_HereticTeleport(short thing_id, int tag, line_t* line, int sid
 	thinker_t* thinker;
 	sector_t* sector;
 
-	if(thing->flags2 & MF2_NOTELEPORT)
+	if((thing->flags2 & MobjFlag2::NoTeleport) != MobjFlag2{})
 	{
 		return (false);
 	}
@@ -776,7 +776,7 @@ dboolean EV_HexenTeleport(int tid, mobj_t* thing, dboolean fog)
 		// Teleport function called with an invalid mobj
 		return false;
 	}
-	if(thing->flags2 & MF2_NOTELEPORT)
+	if((thing->flags2 & MobjFlag2::NoTeleport) != MobjFlag2{})
 	{
 		return false;
 	}

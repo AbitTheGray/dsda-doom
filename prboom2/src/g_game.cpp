@@ -1949,13 +1949,13 @@ static dboolean G_CheckSpot(int playernum, mapthing_t* mthing)
 		unsigned an;
 		mobj_t* mo;
 
-		players[playernum].mo->flags2 &= ~MF2_PASSMOBJ;
+		players[playernum].mo->flags2 -= MobjFlag2::PassMobj;
 		if(!P_CheckPosition(players[playernum].mo, x, y))
 		{
-			players[playernum].mo->flags2 |= MF2_PASSMOBJ;
+			players[playernum].mo->flags2 |= MobjFlag2::PassMobj;
 			return false;
 		}
-		players[playernum].mo->flags2 |= MF2_PASSMOBJ;
+		players[playernum].mo->flags2 |= MobjFlag2::PassMobj;
 
 		// spawn a teleport fog
 		sec = R_PointInSector(x, y);

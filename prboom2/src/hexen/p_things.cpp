@@ -172,7 +172,7 @@ dboolean EV_ThingProjectile(byte* args, dboolean gravity)
 		if(gravity == true)
 		{
 			newMobj->flags &= ~MF_NOGRAVITY;
-			newMobj->flags2 |= MF2_LOGRAV;
+			newMobj->flags2 |= MobjFlag2::LoGrav;
 		}
 		if(P_CheckMissileSpawn(newMobj) == true)
 		{
@@ -206,7 +206,7 @@ dboolean EV_ThingSpawn(byte* args, dboolean fog)
 	angle = (int)args[2] << 24;
 	while((mobj = P_FindMobjFromTID(tid, &searcher)) != nullptr)
 	{
-		if(mobjinfo[std::to_underlying(moType)].flags2 & MF2_FLOATBOB)
+		if((mobjinfo[std::to_underlying(moType)].flags2 & MobjFlag2::FloatBob) != MobjFlag2{})
 		{
 			z = mobj->z - mobj->floorz;
 		}
@@ -230,7 +230,7 @@ dboolean EV_ThingSpawn(byte* args, dboolean fog)
 				S_StartMobjSound(fogMobj, SfxId::HexenTeleport);
 			}
 			newMobj->flags |= MF_DROPPED; // Don't respawn
-			if(newMobj->flags2 & MF2_FLOATBOB)
+			if((newMobj->flags2 & MobjFlag2::FloatBob) != MobjFlag2{})
 			{
 				newMobj->special1.i = newMobj->z - newMobj->floorz;
 			}
@@ -321,9 +321,9 @@ static dboolean ActivateThing(mobj_t* mobj)
 	if(mobj->flags & MF_COUNTKILL)
 	{
 		// Monster
-		if(mobj->flags2 & MF2_DORMANT)
+		if((mobj->flags2 & MobjFlag2::Dormant) != MobjFlag2{})
 		{
-			mobj->flags2 &= ~MF2_DORMANT;
+			mobj->flags2 -= MobjFlag2::Dormant;
 			mobj->tics = 1;
 			return true;
 		}
@@ -352,7 +352,7 @@ static dboolean ActivateThing(mobj_t* mobj)
 			if(mobj->special_args[0] == 0)
 			{
 				S_StartMobjSound(mobj, SfxId::HexenThrustspikeLower);
-				mobj->flags2 &= ~MF2_DONTDRAW;
+				mobj->flags2 -= MobjFlag2::DontDraw;
 				if(mobj->special_args[1])
 					P_SetMobjState(mobj, StateId::HexenBthrustraise1);
 				else
@@ -398,9 +398,9 @@ static dboolean DeactivateThing(mobj_t* mobj)
 	if(mobj->flags & MF_COUNTKILL)
 	{
 		// Monster
-		if(!(mobj->flags2 & MF2_DORMANT))
+		if((mobj->flags2 & MobjFlag2::Dormant) == MobjFlag2{})
 		{
-			mobj->flags2 |= MF2_DORMANT;
+			mobj->flags2 |= MobjFlag2::Dormant;
 			mobj->tics = -1;
 			return true;
 		}

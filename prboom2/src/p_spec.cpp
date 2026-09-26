@@ -1436,7 +1436,7 @@ static void P_AddSectorSecret(sector_t* sector)
 void P_AddMobjSecret(mobj_t* mobj)
 {
 	totalsecret++;
-	mobj->flags2 |= MF2_COUNTSECRET;
+	mobj->flags2 |= MobjFlag2::CountSecret;
 }
 
 void P_PlayerCollectSecret(player_t* player)
@@ -1545,11 +1545,11 @@ extern "C" void P_CrossHexenSpecialLine(line_t* line, int side, mobj_t* thing, d
 	{
 		P_ActivateLine(line, thing, side, SPAC_CROSS);
 	}
-	else if(thing->flags2 & MF2_MCROSS)
+	else if((thing->flags2 & MobjFlag2::MCross) != MobjFlag2{})
 	{
 		P_ActivateLine(line, thing, side, SPAC_MCROSS);
 	}
-	else if(thing->flags2 & MF2_PCROSS)
+	else if((thing->flags2 & MobjFlag2::PCross) != MobjFlag2{})
 	{
 		P_ActivateLine(line, thing, side, SPAC_PCROSS);
 	}
@@ -2492,11 +2492,11 @@ extern "C" void P_CrossZDoomSpecialLine(line_t* line, int side, mobj_t* thing, d
 	{
 		P_ActivateLine(line, thing, side, SPAC_CROSS);
 	}
-	else if(thing->flags2 & MF2_MCROSS)
+	else if((thing->flags2 & MobjFlag2::MCross) != MobjFlag2{})
 	{
 		P_ActivateLine(line, thing, side, SPAC_MCROSS);
 	}
-	else if(thing->flags2 & MF2_PCROSS)
+	else if((thing->flags2 & MobjFlag2::PCross) != MobjFlag2{})
 	{
 		P_ActivateLine(line, thing, side, SPAC_PCROSS);
 	}
@@ -4924,7 +4924,7 @@ void P_InitLava()
 
 	memset(&LavaInflictor, 0, sizeof(mobj_t));
 	LavaInflictor.type = static_cast<MobjType>(g_lava_type);
-	LavaInflictor.flags2 = MF2_FIREDAMAGE | MF2_NODMGTHRUST;
+	LavaInflictor.flags2 = MobjFlag2::FireDamage | MobjFlag2::NoDmgThrust;
 }
 
 void P_InitTerrainTypes()
@@ -5482,14 +5482,14 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 
 	if(activationType == SPAC_USE &&
 		lineActivation & SPAC_MUSE &&
-		mo && !mo->player && mo->flags2 & MF2_CANUSEWALLS)
+		mo && !mo->player && (mo->flags2 & MobjFlag2::CanUseWalls) != MobjFlag2{})
 	{
 		return true;
 	}
 
 	if(activationType == SPAC_PUSH &&
 		lineActivation & SPAC_MPUSH &&
-		mo && !mo->player && mo->flags2 & MF2_PUSHWALL)
+		mo && !mo->player && (mo->flags2 & MobjFlag2::PushWall) != MobjFlag2{})
 	{
 		return true;
 	}
@@ -7445,7 +7445,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				if(
 					target->flags & MF_SHOOTABLE &&
 					target->health > 0 &&
-					!(target->flags2 & MF2_DORMANT)
+					(target->flags2 & MobjFlag2::Dormant) == MobjFlag2{}
 				)
 				{
 					break;
@@ -7471,7 +7471,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 						if(
 							target->flags & MF_SHOOTABLE &&
 							target->health > 0 &&
-							!(target->flags2 & MF2_DORMANT) &&
+							(target->flags2 & MobjFlag2::Dormant) == MobjFlag2{} &&
 							target != hater
 						)
 						{
@@ -7488,7 +7488,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 							if(
 								target->flags & MF_SHOOTABLE &&
 								target->health > 0 &&
-								!(target->flags2 & MF2_DORMANT) &&
+								(target->flags2 & MobjFlag2::Dormant) == MobjFlag2{} &&
 								target != hater
 							)
 							{
@@ -7503,7 +7503,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 						P_SetTarget(&hater->lastenemy, hater->target);
 						P_SetTarget(&hater->target, target);
 
-						if(!(hater->flags2 & MF2_DORMANT))
+						if((hater->flags2 & MobjFlag2::Dormant) == MobjFlag2{})
 						{
 							P_SetMobjState(hater, hater->info->seestate);
 						}
@@ -7539,9 +7539,9 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			dsda_ResetThingIDSearch(&search);
 			while((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
 			{
-				if(target->flags2 & MF2_DORMANT)
+				if((target->flags2 & MobjFlag2::Dormant) != MobjFlag2{})
 				{
-					target->flags2 &= ~MF2_DORMANT;
+					target->flags2 -= MobjFlag2::Dormant;
 					target->tics = 1;
 				}
 
@@ -7557,9 +7557,9 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			dsda_ResetThingIDSearch(&search);
 			while((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
 			{
-				if(!(target->flags2 & MF2_DORMANT))
+				if((target->flags2 & MobjFlag2::Dormant) == MobjFlag2{})
 				{
-					target->flags2 |= MF2_DORMANT;
+					target->flags2 |= MobjFlag2::Dormant;
 					target->tics = -1;
 				}
 

@@ -367,7 +367,7 @@ static void StreamIn_mobj_t(mobj_t* str)
 	str->flags = SV_ReadFlags();
 
 	// int flags2;
-	str->flags2 = SV_ReadFlags();
+	str->flags2 = static_cast<MobjFlag2>(SV_ReadFlags());
 
 	// specialval_t special1;
 	// specialval_t special2;
@@ -502,7 +502,7 @@ static void StreamOut_mobj_t(mobj_t* str)
 	SV_WriteFlags(str->flags);
 
 	// int flags2;
-	SV_WriteFlags(str->flags2);
+	SV_WriteFlags(std::to_underlying(str->flags2));
 
 	// specialval_t special1;
 	// specialval_t special2;

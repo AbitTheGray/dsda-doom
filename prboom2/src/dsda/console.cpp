@@ -460,10 +460,10 @@ static dboolean console_PlayerRemovePower(const char* command, const char* args)
 
 		if(power == std::to_underlying(PowerType::Invulnerability))
 		{
-			target_player.mo->flags2 &= ~(MF2_INVULNERABLE | MF2_REFLECTIVE);
+			target_player.mo->flags2 -= (MobjFlag2::Invulnerable | MobjFlag2::Reflective);
 			if(target_player.pclass == PClass::Cleric)
 			{
-				target_player.mo->flags2 &= ~(MF2_DONTDRAW | MF2_NONSHOOTABLE);
+				target_player.mo->flags2 -= (MobjFlag2::DontDraw | MobjFlag2::NonShootable);
 				target_player.mo->flags &= ~(MF_SHADOW | MF_ALTSHADOW);
 			}
 		}
@@ -1450,7 +1450,7 @@ static dboolean console_SetTarget(mobj_t* mobj, mobj_t* target)
 	return true;
 }
 
-static void console_SetMobjFlags(mobj_t* mobj, uint64_t flags, uint64_t flags2)
+static void console_SetMobjFlags(mobj_t* mobj, uint64_t flags, MobjFlag2 flags2)
 {
 	P_MapStart();
 	P_UnsetThingPosition(mobj);
@@ -1635,7 +1635,8 @@ static dboolean console_TargetActivateLine(const char* command, const char* args
 static dboolean console_TargetAddFlags(const char* command, const char* args)
 {
 	mobj_t* target;
-	uint64_t flags, flags2;
+	uint64_t flags;
+	MobjFlag2 flags2;
 	char flag_str[CONSOLE_ENTRY_SIZE];
 
 	if(sscanf(args, "%s", flag_str) != 1)
@@ -1657,7 +1658,8 @@ static dboolean console_TargetAddFlags(const char* command, const char* args)
 static dboolean console_TargetRemoveFlags(const char* command, const char* args)
 {
 	mobj_t* target;
-	uint64_t flags, flags2;
+	uint64_t flags;
+	MobjFlag2 flags2;
 	char flag_str[CONSOLE_ENTRY_SIZE];
 
 	if(sscanf(args, "%s", flag_str) != 1)
@@ -1669,7 +1671,7 @@ static dboolean console_TargetRemoveFlags(const char* command, const char* args)
 		return false;
 
 	flags = target->flags & ~deh_stringToMobjFlags(flag_str);
-	flags2 = target->flags2 & ~deh_stringToMBF21MobjFlags(flag_str);
+	flags2 = target->flags2 - deh_stringToMBF21MobjFlags(flag_str);
 
 	console_SetMobjFlags(target, flags, flags2);
 
@@ -1679,7 +1681,8 @@ static dboolean console_TargetRemoveFlags(const char* command, const char* args)
 static dboolean console_TargetSetFlags(const char* command, const char* args)
 {
 	mobj_t* target;
-	uint64_t flags, flags2;
+	uint64_t flags;
+	MobjFlag2 flags2;
 	char flag_str[CONSOLE_ENTRY_SIZE];
 
 	if(sscanf(args, "%s", flag_str) != 1)
@@ -1901,7 +1904,8 @@ static dboolean console_MobjAddFlags(const char* command, const char* args)
 {
 	int index;
 	mobj_t* target;
-	uint64_t flags, flags2;
+	uint64_t flags;
+	MobjFlag2 flags2;
 	char flag_str[CONSOLE_ENTRY_SIZE];
 
 	if(sscanf(args, "%d %s", &index, flag_str) != 2)
@@ -1924,7 +1928,8 @@ static dboolean console_MobjRemoveFlags(const char* command, const char* args)
 {
 	int index;
 	mobj_t* target;
-	uint64_t flags, flags2;
+	uint64_t flags;
+	MobjFlag2 flags2;
 	char flag_str[CONSOLE_ENTRY_SIZE];
 
 	if(sscanf(args, "%d %s", &index, flag_str) != 2)
@@ -1936,7 +1941,7 @@ static dboolean console_MobjRemoveFlags(const char* command, const char* args)
 		return false;
 
 	flags = target->flags & ~deh_stringToMobjFlags(flag_str);
-	flags2 = target->flags2 & ~deh_stringToMBF21MobjFlags(flag_str);
+	flags2 = target->flags2 - deh_stringToMBF21MobjFlags(flag_str);
 
 	console_SetMobjFlags(target, flags, flags2);
 
@@ -1947,7 +1952,8 @@ static dboolean console_MobjSetFlags(const char* command, const char* args)
 {
 	int index;
 	mobj_t* target;
-	uint64_t flags, flags2;
+	uint64_t flags;
+	MobjFlag2 flags2;
 	char flag_str[CONSOLE_ENTRY_SIZE];
 
 	if(sscanf(args, "%d %s", &index, flag_str) != 2)
@@ -2453,7 +2459,7 @@ static dboolean console_MobjInfoRemoveFlags(const char* command, const char* arg
 		return false;
 
 	mobjinfo[type].flags &= ~deh_stringToMobjFlags(flag_str);
-	mobjinfo[type].flags2 &= ~deh_stringToMBF21MobjFlags(flag_str);
+	mobjinfo[type].flags2 -= deh_stringToMBF21MobjFlags(flag_str);
 
 	return true;
 }

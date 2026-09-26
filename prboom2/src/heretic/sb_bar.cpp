@@ -654,7 +654,7 @@ void SB_PaletteFlash(dboolean forceChange)
 		}
 		palette += STARTBONUSPALS;
 	}
-	else if(CPlayer->mo->flags2 & MF2_ICEDAMAGE)
+	else if((CPlayer->mo->flags2 & MobjFlag2::IceDamage) != MobjFlag2{})
 	{
 		// Frozen player
 		palette = STARTICEPAL;
@@ -1127,7 +1127,7 @@ static void DrawAnimatedIcons()
 			|| !(CPlayer->powers[std::to_underlying(PowerType::Flight)] & 16))
 		{
 			frame = (leveltime / 3) & 15;
-			if(CPlayer->mo->flags2 & MF2_FLY)
+			if((CPlayer->mo->flags2 & MobjFlag2::Fly) != MobjFlag2{})
 			{
 				if(hitCenterFrame && (frame != 15 && frame != 0))
 				{

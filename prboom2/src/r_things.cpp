@@ -659,7 +659,7 @@ static void R_ProjectSprite(mobj_t* thing, int lightlevel)
 	fixed_t tz, tz2;
 	int width;
 
-	if(thing->flags2 & MF2_DONTDRAW)
+	if((thing->flags2 & MobjFlag2::DontDraw) != MobjFlag2{})
 	{
 		return;
 	}
@@ -828,7 +828,7 @@ static void R_ProjectSprite(mobj_t* thing, int lightlevel)
 
 	if(heretic)
 	{
-		if(thing->flags2 & MF2_FEETARECLIPPED
+		if((thing->flags2 & MobjFlag2::FeetAreClipped) != MobjFlag2{}
 			&& vis->gz <= thing->subsector->sector->floorheight)
 		{
 			vis->floorclip = 10 << FRACBITS;
@@ -1181,7 +1181,7 @@ static void R_DrawPSprite(pspdef_t* psp)
 		vis->colormap = spritelights[MAXLIGHTSCALE - 1];
 		if(viewplayer->powers[std::to_underlying(PowerType::Invulnerability)] > 4 * 32)
 		{
-			if(viewplayer->mo->flags2 & MF2_DONTDRAW)
+			if((viewplayer->mo->flags2 & MobjFlag2::DontDraw) != MobjFlag2{})
 			{
 				// don't draw the psprite
 				vis->mobjflags |= MF_SHADOW;

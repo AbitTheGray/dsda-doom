@@ -353,13 +353,13 @@ extern "C" void A_BridgeRemove(mobj_t* actor)
 
 extern "C" void A_SetShootable(mobj_t* actor)
 {
-	actor->flags2 &= ~MF2_NONSHOOTABLE;
+	actor->flags2 -= MobjFlag2::NonShootable;
 	actor->flags |= MF_SHOOTABLE;
 }
 
 extern "C" void A_UnSetShootable(mobj_t* actor)
 {
-	actor->flags2 |= MF2_NONSHOOTABLE;
+	actor->flags2 |= MobjFlag2::NonShootable;
 	actor->flags &= ~MF_SHOOTABLE;
 }
 
@@ -548,7 +548,7 @@ extern "C" void A_CheckThrowBomb(mobj_t* actor)
 		P_SetMobjState(actor, StateId::HexenThrowingbomb7);
 		actor->z = actor->floorz;
 		actor->momz = 0;
-		actor->flags2 &= ~MF2_FLOORBOUNCE;
+		actor->flags2 -= MobjFlag2::FloorBounce;
 		actor->flags &= ~MF_MISSILE;
 	}
 	if(!--actor->health)
@@ -739,7 +739,7 @@ extern "C" void A_ThrustInitUp(mobj_t* actor)
 	actor->special_args[0] = 1; // Mark as up
 	actor->floorclip = 0;
 	actor->flags = MF_SOLID;
-	actor->flags2 = MF2_NOTELEPORT | MF2_FOOTCLIP;
+	actor->flags2 = MobjFlag2::NoTeleport | MobjFlag2::FootClip;
 	P_SetTarget(&actor->special1.m, nullptr);
 }
 
@@ -750,7 +750,7 @@ extern "C" void A_ThrustInitDn(mobj_t* actor)
 	actor->special_args[0] = 0; // Mark as down
 	actor->floorclip = actor->info->height;
 	actor->flags = 0;
-	actor->flags2 = MF2_NOTELEPORT | MF2_FOOTCLIP | MF2_DONTDRAW;
+	actor->flags2 = MobjFlag2::NoTeleport | MobjFlag2::FootClip | MobjFlag2::DontDraw;
 	mo = P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenDirtclump);
 	P_SetTarget(&actor->special1.m, mo);
 }
@@ -945,7 +945,7 @@ extern "C" void A_BatMove(mobj_t* actor)
 
 extern "C" void A_TreeDeath(mobj_t* actor)
 {
-	if(!(actor->flags2 & MF2_FIREDAMAGE))
+	if((actor->flags2 & MobjFlag2::FireDamage) == MobjFlag2{})
 	{
 		actor->height <<= 2;
 		actor->flags |= MF_SHOOTABLE;

@@ -1789,8 +1789,9 @@ extern "C" void A_FireMacePL1B(player_t* player, pspdef_t* psp)
 	//   (pmo->flags2 & (MF2_FEETARECLIPPED != 0))
 	// Which simplifies to:
 	//   (pmo->flags2 & 1)
+	// Bit 0 is MobjFlag2::LoGrav.
 	ball = P_SpawnMobj(pmo->x, pmo->y, pmo->z + 28 * FRACUNIT
-		- FOOTCLIPSIZE * (pmo->flags2 & 1), MobjType::HereticMacefx2);
+		- FOOTCLIPSIZE * std::to_underlying(pmo->flags2 & MobjFlag2::LoGrav), MobjType::HereticMacefx2);
 
 	ball->momz = 2 * FRACUNIT + (dsda_PlayerLookDir(player) << (FRACBITS - 5));
 	angle = pmo->angle;
@@ -1844,7 +1845,7 @@ extern "C" void A_MacePL1Check(mobj_t* ball)
 		return;
 	}
 	ball->special1.i = 0;
-	ball->flags2 |= MF2_LOGRAV;
+	ball->flags2 |= MobjFlag2::LoGrav;
 	angle = ball->angle >> ANGLETOFINESHIFT;
 	ball->momx = FixedMul(7 * FRACUNIT, finecosine[angle]);
 	ball->momy = FixedMul(7 * FRACUNIT, finesine[angle]);
@@ -1865,7 +1866,7 @@ extern "C" void A_MaceBallImpact(mobj_t* ball)
 		// Bounce
 		ball->health = MAGIC_JUNK;
 		ball->momz = (ball->momz * 192) >> 8;
-		ball->flags2 &= ~MF2_FLOORBOUNCE;
+		ball->flags2 -= MobjFlag2::FloorBounce;
 		P_SetMobjState(ball, ball->info->spawnstate);
 		S_StartMobjSound(ball, SfxId::HereticBounce);
 	}
@@ -1873,7 +1874,7 @@ extern "C" void A_MaceBallImpact(mobj_t* ball)
 	{
 		// Explode
 		ball->flags |= MF_NOGRAVITY;
-		ball->flags2 &= ~MF2_LOGRAV;
+		ball->flags2 -= MobjFlag2::LoGrav;
 		S_StartMobjSound(ball, SfxId::HereticLobhit);
 	}
 }
@@ -1894,7 +1895,7 @@ extern "C" void A_MaceBallImpact2(mobj_t* ball)
 		// Explode
 		ball->momx = ball->momy = ball->momz = 0;
 		ball->flags |= MF_NOGRAVITY;
-		ball->flags2 &= ~(MF2_LOGRAV | MF2_FLOORBOUNCE);
+		ball->flags2 -= (MobjFlag2::LoGrav | MobjFlag2::FloorBounce);
 	}
 	else
 	{
@@ -2012,7 +2013,7 @@ extern "C" void A_DeathBallImpact(mobj_t* ball)
 	{
 		// Explode
 		ball->flags |= MF_NOGRAVITY;
-		ball->flags2 &= ~MF2_LOGRAV;
+		ball->flags2 -= MobjFlag2::LoGrav;
 		S_StartMobjSound(ball, SfxId::HereticPhohit);
 	}
 }
@@ -2306,7 +2307,7 @@ extern "C" void A_FirePhoenixPL2(player_t* player, pspdef_t* psp)
 	x = pmo->x + (P_SubRandom() << 9);
 	y = pmo->y + (P_SubRandom() << 9);
 	z = pmo->z + 26 * FRACUNIT + dsda_PlayerSlope(player);
-	if(pmo->flags2 & MF2_FEETARECLIPPED)
+	if((pmo->flags2 & MobjFlag2::FeetAreClipped) != MobjFlag2{})
 	{
 		z -= FOOTCLIPSIZE;
 	}
@@ -3373,7 +3374,7 @@ extern "C" void A_CStaffCheck(player_t* player, pspdef_t* psp)
 			pmo->angle = R_PointToAngle2(pmo->x, pmo->y,
 				linetarget->x, linetarget->y);
 			if((linetarget->player || linetarget->flags & MF_COUNTKILL)
-				&& (!(linetarget->flags2 & (MF2_DORMANT + MF2_INVULNERABLE))))
+				&& ((linetarget->flags2 & (MobjFlag2::Dormant | MobjFlag2::Invulnerable)) == MobjFlag2{}))
 			{
 				newLife = player->health + (damage >> 3);
 				newLife = newLife > 100 ? 100 : newLife;
@@ -3907,9 +3908,9 @@ extern "C" void A_FireConePL1(player_t* player, pspdef_t* psp)
 		P_AimLineAttack(pmo, angle, MELEERANGE, 0);
 		if(linetarget)
 		{
-			pmo->flags2 |= MF2_ICEDAMAGE;
+			pmo->flags2 |= MobjFlag2::IceDamage;
 			P_DamageMobj(linetarget, pmo, pmo, damage);
-			pmo->flags2 &= ~MF2_ICEDAMAGE;
+			pmo->flags2 -= MobjFlag2::IceDamage;
 			conedone = true;
 			break;
 		}

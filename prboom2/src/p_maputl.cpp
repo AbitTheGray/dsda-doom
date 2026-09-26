@@ -951,7 +951,7 @@ static mobj_t* RoughBlockCheck(mobj_t* mo, int index, angle_t fov)
 		}
 
 		// skip dormant actors
-		if(link->flags2 & MF2_DORMANT)
+		if((link->flags2 & MobjFlag2::Dormant) != MobjFlag2{})
 		{
 			link = link->bnext;
 			continue;
@@ -1203,7 +1203,7 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 					link = link->bnext;
 					continue;
 				}
-				if(link->flags2 & MF2_DORMANT)
+				if((link->flags2 & MobjFlag2::Dormant) != MobjFlag2{})
 				{
 					link = link->bnext;
 					continue;
@@ -1237,7 +1237,7 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 					link = link->bnext;
 					continue;
 				}
-				if(link->flags2 & MF2_DORMANT)
+				if((link->flags2 & MobjFlag2::Dormant) != MobjFlag2{})
 				{
 					link = link->bnext;
 					continue;
@@ -1264,7 +1264,7 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 		{
 			if((link->flags & MF_COUNTKILL ||
 					(link->player && link != mo->target))
-				&& !(link->flags2 & MF2_DORMANT))
+				&& (link->flags2 & MobjFlag2::Dormant) == MobjFlag2{})
 			{
 				if(!(link->flags & MF_SHOOTABLE))
 				{
@@ -1294,7 +1294,7 @@ static mobj_t* Hexen_RoughBlockCheck(mobj_t* mo, int index)
 		{
 			if((link->flags & MF_COUNTKILL ||
 					(link->player && link != mo->target))
-				&& !(link->flags2 & MF2_DORMANT))
+				&& (link->flags2 & MobjFlag2::Dormant) == MobjFlag2{})
 			{
 				if(!(link->flags & MF_SHOOTABLE))
 				{

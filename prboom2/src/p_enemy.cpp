@@ -229,23 +229,23 @@ static dboolean P_CheckMissileRange(mobj_t* actor)
 
 	dist >>= FRACBITS;
 
-	if(actor->flags2 & MF2_SHORTMRANGE)
+	if((actor->flags2 & MobjFlag2::ShortMRange) != MobjFlag2{})
 		if(dist > 14 * 64)
 			return false; // too far away
 
-	if(actor->flags2 & MF2_LONGMELEE)
+	if((actor->flags2 & MobjFlag2::LongMelee) != MobjFlag2{})
 	{
 		if(dist < 196)
 			return false; // close for fist attack
 	}
 
-	if(actor->flags2 & MF2_RANGEHALF)
+	if((actor->flags2 & MobjFlag2::RangeHalf) != MobjFlag2{})
 		dist >>= 1;
 
 	if(dist > 200)
 		dist = 200;
 
-	if(actor->flags2 & MF2_HIGHERMPROB && dist > 160)
+	if((actor->flags2 & MobjFlag2::HigherMProb) != MobjFlag2{} && dist > 160)
 		dist = 160;
 
 	if(P_Random(RandomClass::Missrange) < dist)
@@ -365,7 +365,7 @@ static dboolean P_Move(mobj_t* actor, dboolean dropoff) /* killough 9/12/98 */
 	int friction = ORIG_FRICTION;
 	int speed;
 
-	if(actor->flags2 & MF2_BLASTED)
+	if((actor->flags2 & MobjFlag2::Blasted) != MobjFlag2{})
 		return true;
 	if(actor->movedir == MoveDir(DirType::NoDir))
 		return false;
@@ -413,7 +413,7 @@ static dboolean P_Move(mobj_t* actor, dboolean dropoff) /* killough 9/12/98 */
 		actor->z > actor->floorz &&
 		actor->z <= actor->floorz + (24 << FRACBITS) &&
 		!(actor->flags & MF_NOGRAVITY) &&
-		!(actor->flags2 & MF2_ONMOBJ))
+		(actor->flags2 & MobjFlag2::OnMobj) == MobjFlag2{})
 	{
 		fixed_t saved_z = actor->z;
 
@@ -1205,7 +1205,7 @@ extern "C" void A_Look(mobj_t* actor)
 					break;
 			}
 
-		if(actor->flags2 & (MF2_BOSS | MF2_FULLVOLSOUNDS))
+		if((actor->flags2 & (MobjFlag2::Boss | MobjFlag2::FullVolSounds)) != MobjFlag2{})
 			S_StartVoidSound(sound); // full volume
 		else
 		{
@@ -1411,7 +1411,7 @@ extern "C" void A_Chase(mobj_t* actor)
 		{
 			S_StartMobjSound(actor, SfxVariant(SfxId::HexenPigActive1, P_Random(RandomClass::Hexen) & 1));
 		}
-		else if(hexen && actor->flags2 & MF2_BOSS)
+		else if(hexen && (actor->flags2 & MobjFlag2::Boss) != MobjFlag2{})
 		{
 			S_StartVoidSound(actor->info->activesound);
 		}
@@ -2461,7 +2461,7 @@ extern "C" void A_Scream(mobj_t* actor)
 	}
 
 	// Check for bosses.
-	if(actor->flags2 & (MF2_BOSS | MF2_FULLVOLSOUNDS))
+	if((actor->flags2 & (MobjFlag2::Boss | MobjFlag2::FullVolSounds)) != MobjFlag2{})
 		S_StartVoidSound(sound); // full volume
 	else
 		S_StartMobjSound(actor, sound);
@@ -2671,7 +2671,7 @@ extern "C" void A_BossDeath(mobj_t* mo)
 		if(gamemap != 7)
 			return;
 
-		if(!(mo->flags2 & (MF2_MAP07BOSS1 | MF2_MAP07BOSS2)))
+		if((mo->flags2 & (MobjFlag2::Map07Boss1 | MobjFlag2::Map07Boss2)) == MobjFlag2{})
 			return;
 	}
 	else
@@ -2689,7 +2689,7 @@ extern "C" void A_BossDeath(mobj_t* mo)
 			// http://www.doomworld.com/idgames/index.php?id=6909
 			if(gamemap != 8)
 				return;
-			if(mo->flags2 & MF2_E1M8BOSS && gameepisode != 1)
+			if((mo->flags2 & MobjFlag2::E1M8Boss) != MobjFlag2{} && gameepisode != 1)
 				return;
 		}
 		else
@@ -2700,7 +2700,7 @@ extern "C" void A_BossDeath(mobj_t* mo)
 					if(gamemap != 8)
 						return;
 
-					if(!(mo->flags2 & MF2_E1M8BOSS))
+					if((mo->flags2 & MobjFlag2::E1M8Boss) == MobjFlag2{})
 						return;
 					break;
 
@@ -2708,7 +2708,7 @@ extern "C" void A_BossDeath(mobj_t* mo)
 					if(gamemap != 8)
 						return;
 
-					if(!(mo->flags2 & MF2_E2M8BOSS))
+					if((mo->flags2 & MobjFlag2::E2M8Boss) == MobjFlag2{})
 						return;
 					break;
 
@@ -2716,7 +2716,7 @@ extern "C" void A_BossDeath(mobj_t* mo)
 					if(gamemap != 8)
 						return;
 
-					if(!(mo->flags2 & MF2_E3M8BOSS))
+					if((mo->flags2 & MobjFlag2::E3M8Boss) == MobjFlag2{})
 						return;
 
 					break;
@@ -2725,12 +2725,12 @@ extern "C" void A_BossDeath(mobj_t* mo)
 					switch(gamemap)
 					{
 						case 6:
-							if(!(mo->flags2 & MF2_E4M6BOSS))
+							if((mo->flags2 & MobjFlag2::E4M6Boss) == MobjFlag2{})
 								return;
 							break;
 
 						case 8:
-							if(!(mo->flags2 & MF2_E4M8BOSS))
+							if((mo->flags2 & MobjFlag2::E4M8Boss) == MobjFlag2{})
 								return;
 							break;
 
@@ -2758,14 +2758,14 @@ extern "C" void A_BossDeath(mobj_t* mo)
 	{
 		if(gamemap == 7)
 		{
-			if(mo->flags2 & MF2_MAP07BOSS1)
+			if((mo->flags2 & MobjFlag2::Map07Boss1) != MobjFlag2{})
 			{
 				junk.special_args[0] = 666;
 				EV_DoFloor(&junk, FloorKind::LowerFloorToLowest);
 				return;
 			}
 
-			if(mo->flags2 & MF2_MAP07BOSS2)
+			if((mo->flags2 & MobjFlag2::Map07Boss2) != MobjFlag2{})
 			{
 				junk.special_args[0] = 667;
 				EV_DoFloor(&junk, FloorKind::RaiseToTexture);
@@ -3640,14 +3640,15 @@ extern "C" void A_JumpIfTracerCloser(mobj_t* actor)
 extern "C" void A_JumpIfFlagsSet(mobj_t* actor)
 {
 	int state;
-	uint64_t flags, flags2;
+	uint64_t flags;
+	MobjFlag2 flags2;
 
 	if(!mbf21 || !actor)
 		return;
 
 	state = actor->state->args[0];
 	flags = actor->state->args[1];
-	flags2 = actor->state->args[2];
+	flags2 = static_cast<MobjFlag2>(actor->state->args[2]);
 
 	if((actor->flags & flags) == flags &&
 		(actor->flags2 & flags2) == flags2)
@@ -3662,14 +3663,15 @@ extern "C" void A_JumpIfFlagsSet(mobj_t* actor)
 //
 extern "C" void A_AddFlags(mobj_t* actor)
 {
-	uint64_t flags, flags2;
+	uint64_t flags;
+	MobjFlag2 flags2;
 	dboolean update_blockmap;
 
 	if(!mbf21 || !actor)
 		return;
 
 	flags = actor->state->args[0];
-	flags2 = actor->state->args[1];
+	flags2 = static_cast<MobjFlag2>(actor->state->args[1]);
 
 	// unlink/relink the thing from the blockmap if
 	// the NOBLOCKMAP or NOSECTOR flags are added
@@ -3694,14 +3696,15 @@ extern "C" void A_AddFlags(mobj_t* actor)
 //
 extern "C" void A_RemoveFlags(mobj_t* actor)
 {
-	uint64_t flags, flags2;
+	uint64_t flags;
+	MobjFlag2 flags2;
 	dboolean update_blockmap;
 
 	if(!mbf21 || !actor)
 		return;
 
 	flags = actor->state->args[0];
-	flags2 = actor->state->args[1];
+	flags2 = static_cast<MobjFlag2>(actor->state->args[1]);
 
 	// unlink/relink the thing from the blockmap if
 	// the NOBLOCKMAP or NOSECTOR flags are removed
@@ -3712,7 +3715,7 @@ extern "C" void A_RemoveFlags(mobj_t* actor)
 		P_UnsetThingPosition(actor);
 
 	actor->flags &= ~flags;
-	actor->flags2 &= ~flags2;
+	actor->flags2 -= flags2;
 
 	if(update_blockmap)
 		P_SetThingPosition(actor);
@@ -3766,7 +3769,7 @@ extern "C" void A_DripBlood(mobj_t* actor)
 		MobjType::HereticBlood);
 	mo->momx = P_SubRandom() << 10;
 	mo->momy = P_SubRandom() << 10;
-	mo->flags2 |= MF2_LOGRAV;
+	mo->flags2 |= MobjFlag2::LoGrav;
 }
 
 extern "C" void A_KnightAttack(mobj_t* actor)
@@ -3884,7 +3887,7 @@ extern "C" void A_ImpMsAttack2(mobj_t* actor)
 extern "C" void A_ImpDeath(mobj_t* actor)
 {
 	actor->flags &= ~MF_SOLID;
-	actor->flags2 |= MF2_FOOTCLIP;
+	actor->flags2 |= MobjFlag2::FootClip;
 	if(actor->z <= actor->floorz)
 	{
 		P_SetMobjState(actor, StateId::HereticImpCrash1);
@@ -3895,7 +3898,7 @@ extern "C" void A_ImpXDeath1(mobj_t* actor)
 {
 	actor->flags &= ~MF_SOLID;
 	actor->flags |= MF_NOGRAVITY;
-	actor->flags2 |= MF2_FOOTCLIP;
+	actor->flags2 |= MobjFlag2::FootClip;
 	actor->special1.i = 666; // Flag the crash routine
 }
 
@@ -4289,7 +4292,7 @@ void P_Massacre()
 		{
 			if(hexen)
 			{
-				mo->flags2 &= ~(MF2_NONSHOOTABLE + MF2_INVULNERABLE);
+				mo->flags2 -= (MobjFlag2::NonShootable | MobjFlag2::Invulnerable);
 				mo->flags |= MF_SHOOTABLE;
 			}
 			P_DamageMobj(mo, nullptr, nullptr, 10000);
@@ -4914,7 +4917,7 @@ extern "C" void A_VolcBallImpact(mobj_t* ball)
 	if(ball->z <= ball->floorz)
 	{
 		ball->flags |= MF_NOGRAVITY;
-		ball->flags2 &= ~MF2_LOGRAV;
+		ball->flags2 -= MobjFlag2::LoGrav;
 		ball->z += 28 * FRACUNIT;
 		//ball->momz = 3*FRACUNIT;
 	}
@@ -4965,14 +4968,14 @@ extern "C" void A_FreeTargMobj(mobj_t* mo)
 	mo->z = mo->ceilingz + 4 * FRACUNIT;
 	mo->flags &= ~(MF_SHOOTABLE | MF_FLOAT | MF_SKULLFLY | MF_SOLID);
 	mo->flags |= MF_CORPSE | MF_DROPOFF | MF_NOGRAVITY;
-	mo->flags2 &= ~(MF2_PASSMOBJ | MF2_LOGRAV);
+	mo->flags2 -= (MobjFlag2::PassMobj | MobjFlag2::LoGrav);
 	mo->player = nullptr;
 
 	// hexen_note: can we do this in heretic too?
 	if(hexen)
 	{
 		mo->flags &= ~(MF_COUNTKILL);
-		mo->flags2 |= MF2_DONTDRAW;
+		mo->flags2 |= MobjFlag2::DontDraw;
 		mo->health = -1000; // Don't resurrect
 	}
 }
@@ -5016,13 +5019,13 @@ extern "C" void A_FlameSnd(mobj_t* actor)
 extern "C" void A_HideThing(mobj_t* actor)
 {
 	//P_UnsetThingPosition(actor);
-	actor->flags2 |= MF2_DONTDRAW;
+	actor->flags2 |= MobjFlag2::DontDraw;
 }
 
 extern "C" void A_UnHideThing(mobj_t* actor)
 {
 	//P_SetThingPosition(actor);
-	actor->flags2 &= ~MF2_DONTDRAW;
+	actor->flags2 -= MobjFlag2::DontDraw;
 }
 
 extern "C" void Heretic_A_Scream(mobj_t* actor)
@@ -5391,17 +5394,17 @@ dboolean P_CheckMeleeRange2(mobj_t* actor)
 
 extern "C" void A_SetInvulnerable(mobj_t* actor)
 {
-	actor->flags2 |= MF2_INVULNERABLE;
+	actor->flags2 |= MobjFlag2::Invulnerable;
 }
 
 extern "C" void A_UnSetInvulnerable(mobj_t* actor)
 {
-	actor->flags2 &= ~MF2_INVULNERABLE;
+	actor->flags2 -= MobjFlag2::Invulnerable;
 }
 
 extern "C" void A_SetReflective(mobj_t* actor)
 {
-	actor->flags2 |= MF2_REFLECTIVE;
+	actor->flags2 |= MobjFlag2::Reflective;
 
 	if((actor->type == MobjType::HexenCentaur) || (actor->type == MobjType::HexenCentaurleader))
 	{
@@ -5411,7 +5414,7 @@ extern "C" void A_SetReflective(mobj_t* actor)
 
 extern "C" void A_UnSetReflective(mobj_t* actor)
 {
-	actor->flags2 &= ~MF2_REFLECTIVE;
+	actor->flags2 -= MobjFlag2::Reflective;
 
 	if((actor->type == MobjType::HexenCentaur) || (actor->type == MobjType::HexenCentaurleader))
 	{
@@ -5864,13 +5867,13 @@ extern "C" void Hexen_A_Scream(mobj_t* actor)
 
 extern "C" void A_SerpentUnHide(mobj_t* actor)
 {
-	actor->flags2 &= ~MF2_DONTDRAW;
+	actor->flags2 -= MobjFlag2::DontDraw;
 	actor->floorclip = 24 * FRACUNIT;
 }
 
 extern "C" void A_SerpentHide(mobj_t* actor)
 {
-	actor->flags2 |= MF2_DONTDRAW;
+	actor->flags2 |= MobjFlag2::DontDraw;
 	actor->floorclip = 0;
 }
 
@@ -6990,8 +6993,8 @@ extern "C" void A_WraithInit(mobj_t* actor)
 
 extern "C" void A_WraithRaiseInit(mobj_t* actor)
 {
-	actor->flags2 &= ~MF2_DONTDRAW;
-	actor->flags2 &= ~MF2_NONSHOOTABLE;
+	actor->flags2 -= MobjFlag2::DontDraw;
+	actor->flags2 -= MobjFlag2::NonShootable;
 	actor->flags |= MF_SHOOTABLE | MF_SOLID;
 	actor->floorclip = actor->info->height;
 }
@@ -7357,7 +7360,7 @@ extern "C" void A_FreezeDeath(mobj_t* actor)
 	int r = P_Random(RandomClass::Hexen);
 	actor->tics = 75 + r + P_Random(RandomClass::Hexen);
 	actor->flags |= MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD;
-	actor->flags2 |= MF2_PUSHABLE | MF2_TELESTOMP | MF2_PASSMOBJ | MF2_SLIDE;
+	actor->flags2 |= MobjFlag2::Pushable | MobjFlag2::TeleStomp | MobjFlag2::PassMobj | MobjFlag2::Slide;
 	actor->height <<= 2;
 	S_StartMobjSound(actor, SfxId::HexenFreezeDeath);
 
@@ -7457,8 +7460,8 @@ extern "C" void A_FreezeDeathChunks(mobj_t* actor)
 		mo->momz = FixedDiv(mo->z - actor->z, actor->height) << 2;
 		mo->momx = P_SubRandom() << (FRACBITS - 7);
 		mo->momy = P_SubRandom() << (FRACBITS - 7);
-		mo->flags2 |= MF2_ICEDAMAGE; // used to force blue palette
-		mo->flags2 &= ~MF2_FOOTCLIP;
+		mo->flags2 |= MobjFlag2::IceDamage; // used to force blue palette
+		mo->flags2 -= MobjFlag2::FootClip;
 		mo->player = actor->player;
 		actor->player = nullptr;
 		mo->health = actor->health;
@@ -7468,7 +7471,7 @@ extern "C" void A_FreezeDeathChunks(mobj_t* actor)
 	}
 	map_format.remove_mobj_thing_id(actor);
 	P_SetMobjState(actor, StateId::HexenFreetargmobj);
-	actor->flags2 |= MF2_DONTDRAW;
+	actor->flags2 |= MobjFlag2::DontDraw;
 }
 
 extern "C" void A_IceGuyLook(mobj_t* actor)
@@ -7881,7 +7884,7 @@ extern "C" void A_CastSorcererSpell(mobj_t* actor)
 			z = parent->z - parent->floorclip +
 				SORC_DEFENSE_HEIGHT * FRACUNIT;
 			mo = P_SpawnMobj(actor->x, actor->y, z, MobjType::HexenSorcfx2);
-			parent->flags2 |= MF2_REFLECTIVE | MF2_INVULNERABLE;
+			parent->flags2 |= MobjFlag2::Reflective | MobjFlag2::Invulnerable;
 			parent->special_args[0] = SORC_DEFENSE_TIME;
 			if(mo)
 				P_SetTarget(&mo->target, parent);
@@ -8057,15 +8060,15 @@ extern "C" void A_SorcFX2Orbit(mobj_t* actor)
 	{
 		P_SetMobjStateNF(actor, actor->info->deathstate);
 		parent->special_args[0] = 0;
-		parent->flags2 &= ~MF2_REFLECTIVE;
-		parent->flags2 &= ~MF2_INVULNERABLE;
+		parent->flags2 -= MobjFlag2::Reflective;
+		parent->flags2 -= MobjFlag2::Invulnerable;
 	}
 
 	if(actor->special_args[0] && (parent->special_args[0]-- <= 0)) // Time expired
 	{
 		P_SetMobjStateNF(actor, actor->info->deathstate);
 		parent->special_args[0] = 0;
-		parent->flags2 &= ~MF2_REFLECTIVE;
+		parent->flags2 -= MobjFlag2::Reflective;
 	}
 
 	// Move to new position based on angle
@@ -8138,7 +8141,7 @@ extern "C" void A_SorcBallPop(mobj_t* actor)
 {
 	S_StartVoidSound(SfxId::HexenSorcererBallpop);
 	actor->flags &= ~MF_NOGRAVITY;
-	actor->flags2 |= MF2_LOGRAV;
+	actor->flags2 |= MobjFlag2::LoGrav;
 	actor->momx = ((P_Random(RandomClass::Hexen) % 10) - 5) << FRACBITS;
 	actor->momy = ((P_Random(RandomClass::Hexen) % 10) - 5) << FRACBITS;
 	actor->momz = (2 + (P_Random(RandomClass::Hexen) % 3)) << FRACBITS;
@@ -8354,7 +8357,7 @@ extern "C" void A_CheckFloor(mobj_t* actor)
 	if(actor->z <= actor->floorz)
 	{
 		actor->z = actor->floorz;
-		actor->flags2 &= ~MF2_LOGRAV;
+		actor->flags2 -= MobjFlag2::LoGrav;
 		P_SetMobjState(actor, actor->info->deathstate);
 	}
 }

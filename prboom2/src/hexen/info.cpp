@@ -3151,7 +3151,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                          // damage
 		SfxId::None,                                   // activesound
 		MF_NOBLOCKMAP | MF_NOSECTOR | MF_NOGRAVITY, // flags
-		0                                           // flags2
+		MobjFlag2{}                                           // flags2
 	},
 
 	{
@@ -3179,7 +3179,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,               // damage
 		SfxId::None,        // activesound
 		0,               // flags
-		MF2_DONTDRAW     // flags2
+		MobjFlag2::DontDraw     // flags2
 	},
 
 	{
@@ -3207,7 +3207,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FIREDAMAGE                         // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
 	{
@@ -3235,7 +3235,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -3263,7 +3263,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -3291,7 +3291,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -3319,7 +3319,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_RIP                                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Rip                                // flags2
 	},
 
 	{
@@ -3347,7 +3347,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		3,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -3375,7 +3375,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_ICEDAMAGE                          // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::IceDamage                          // flags2
 	},
 
 	{
@@ -3403,7 +3403,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		0,                     // flags
-		MF2_NOTELEPORT         // flags2
+		MobjFlag2::NoTeleport         // flags2
 	},
 
 	{
@@ -3431,7 +3431,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		0,                     // flags
-		MF2_NOTELEPORT         // flags2
+		MobjFlag2::NoTeleport         // flags2
 	},
 
 	{
@@ -3459,7 +3459,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		0,                            // flags
-		MF2_NOTELEPORT | MF2_DONTDRAW // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::DontDraw // flags2
 	},
 
 	{
@@ -3487,7 +3487,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		0,                            // flags
-		MF2_NOTELEPORT | MF2_DONTDRAW // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::DontDraw // flags2
 	},
 
 	{
@@ -3515,7 +3515,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SPECIAL,          // flags
-		MF2_FLOATBOB         // flags2
+		MobjFlag2::FloatBob         // flags2
 	},
 
 	{
@@ -3543,7 +3543,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SPECIAL,          // flags
-		MF2_FLOATBOB         // flags2
+		MobjFlag2::FloatBob         // flags2
 	},
 
 	{
@@ -3571,7 +3571,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SPECIAL,         // flags
-		MF2_FLOATBOB        // flags2
+		MobjFlag2::FloatBob        // flags2
 	},
 
 	{
@@ -3599,7 +3599,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SPECIAL,         // flags
-		MF2_FLOATBOB        // flags2
+		MobjFlag2::FloatBob        // flags2
 	},
 
 	{
@@ -3627,7 +3627,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SPECIAL,          // flags
-		MF2_FLOATBOB         // flags2
+		MobjFlag2::FloatBob         // flags2
 	},
 
 	{
@@ -3655,7 +3655,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_MISSILE | MF_DROPOFF | MF_NOBLOCKMAP, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -3683,7 +3683,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_SOLID,                     // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip // flags2
 	},
 
 	{
@@ -3711,7 +3711,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                           // damage
 		SfxId::None,                                    // activesound
 		0,                                           // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP | MF2_DONTDRAW // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip | MobjFlag2::DontDraw // flags2
 	},
 
 	{
@@ -3739,7 +3739,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                      // damage
 		SfxId::None,               // activesound
 		MF_SPECIAL,             // flags
-		MF2_FLOATBOB            // flags2
+		MobjFlag2::FloatBob            // flags2
 	},
 
 	{
@@ -3767,7 +3767,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		10001,                                                  // damage
 		SfxId::None,                                               // activesound
 		MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_NOBLOCKMAP, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -3795,7 +3795,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		10001,                                                  // damage
 		SfxId::None,                                               // activesound
 		MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_NOBLOCKMAP, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -3823,7 +3823,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		10001,                                                  // damage
 		SfxId::None,                                               // activesound
 		MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_NOBLOCKMAP, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -3851,7 +3851,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		10001,                                                  // damage
 		SfxId::None,                                               // activesound
 		MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_NOBLOCKMAP, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -3879,7 +3879,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		10001,                                                  // damage
 		SfxId::None,                                               // activesound
 		MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY | MF_NOBLOCKMAP, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -3907,7 +3907,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -3935,7 +3935,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -3963,7 +3963,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -3991,7 +3991,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT | MF2_LOGRAV              // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::LoGrav              // flags2
 	},
 
 	{
@@ -4019,7 +4019,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT | MF2_LOGRAV              // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::LoGrav              // flags2
 	},
 
 	{
@@ -4047,7 +4047,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT | MF2_LOGRAV              // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::LoGrav              // flags2
 	},
 
 	{
@@ -4075,7 +4075,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_NOBLOCKMAP,      // flags
-		MF2_NOTELEPORT      // flags2
+		MobjFlag2::NoTeleport      // flags2
 	},
 
 	{
@@ -4103,7 +4103,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -4131,7 +4131,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -4159,7 +4159,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -4187,7 +4187,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                           // damage
 		SfxId::None,                    // activesound
 		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
-		MF2_DONTDRAW | MF2_FLOATBOB  // flags2
+		MobjFlag2::DontDraw | MobjFlag2::FloatBob  // flags2
 	},
 
 	{
@@ -4215,7 +4215,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                               // damage
 		SfxId::None,                                                        // activesound
 		MF_NOBLOCKMAP | MF_FLOAT | MF_NOGRAVITY | MF_SHADOW | MF_NOCLIP, // flags
-		MF2_NOTELEPORT                                                   // flags2
+		MobjFlag2::NoTeleport                                                   // flags2
 	},
 
 	{
@@ -4243,7 +4243,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                               // damage
 		SfxId::None,                                                        // activesound
 		MF_NOBLOCKMAP | MF_FLOAT | MF_NOGRAVITY | MF_SHADOW | MF_NOCLIP, // flags
-		MF2_NOTELEPORT                                                   // flags2
+		MobjFlag2::NoTeleport                                                   // flags2
 	},
 
 	{
@@ -4271,7 +4271,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                               // damage
 		SfxId::None,                                                        // activesound
 		MF_NOBLOCKMAP | MF_FLOAT | MF_NOGRAVITY | MF_SHADOW | MF_NOCLIP, // flags
-		MF2_NOTELEPORT                                                   // flags2
+		MobjFlag2::NoTeleport                                                   // flags2
 	},
 
 	{
@@ -4299,7 +4299,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                           // damage
 		SfxId::None,                    // activesound
 		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
-		MF2_DONTDRAW                 // flags2
+		MobjFlag2::DontDraw                 // flags2
 	},
 
 	{
@@ -4327,7 +4327,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce                        // flags2
 	},
 
 	{
@@ -4355,7 +4355,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce                        // flags2
 	},
 
 	{
@@ -4383,7 +4383,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce                        // flags2
 	},
 
 	{
@@ -4411,7 +4411,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce                        // flags2
 	},
 
 	{
@@ -4439,7 +4439,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce                        // flags2
 	},
 
 	{
@@ -4467,7 +4467,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce                        // flags2
 	},
 
 	{
@@ -4495,7 +4495,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce                        // flags2
 	},
 
 	{
@@ -4523,7 +4523,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce                        // flags2
 	},
 
 	{
@@ -4551,7 +4551,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce                        // flags2
 	},
 
 	{
@@ -4579,7 +4579,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce                        // flags2
 	},
 
 	{
@@ -4607,7 +4607,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SPECIAL,         // flags
-		MF2_FLOATBOB        // flags2
+		MobjFlag2::FloatBob        // flags2
 	},
 
 	{
@@ -4635,7 +4635,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -4663,7 +4663,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SPECIAL,         // flags
-		MF2_FLOATBOB        // flags2
+		MobjFlag2::FloatBob        // flags2
 	},
 
 	{
@@ -4691,7 +4691,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_SOLID,                     // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -4719,7 +4719,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		MF_SOLID,              // flags
-		0                      // flags2
+		MobjFlag2{}                      // flags2
 	},
 
 	{
@@ -4747,7 +4747,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -4775,7 +4775,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -4803,7 +4803,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -4831,7 +4831,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -4859,7 +4859,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -4887,7 +4887,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -4915,7 +4915,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -4943,7 +4943,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -4971,7 +4971,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -4999,7 +4999,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -5027,7 +5027,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -5055,7 +5055,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -5083,7 +5083,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -5111,7 +5111,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -5139,7 +5139,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -5167,7 +5167,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -5195,7 +5195,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -5223,7 +5223,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SPECIAL,         // flags
-		MF2_FLOATBOB        // flags2
+		MobjFlag2::FloatBob        // flags2
 	},
 
 	{
@@ -5251,7 +5251,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                           // damage
 		SfxId::None,                    // activesound
 		MF_NOGRAVITY | MF_ALTSHADOW, // flags
-		MF2_FIREDAMAGE               // flags2
+		MobjFlag2::FireDamage               // flags2
 	},
 
 	{
@@ -5279,7 +5279,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SPECIAL,         // flags
-		MF2_FLOATBOB        // flags2
+		MobjFlag2::FloatBob        // flags2
 	},
 
 	{
@@ -5307,7 +5307,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SPECIAL,         // flags
-		MF2_FLOATBOB        // flags2
+		MobjFlag2::FloatBob        // flags2
 	},
 
 	{
@@ -5335,7 +5335,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOGRAVITY | MF_NOBLOCKMAP, // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -5363,7 +5363,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                 // damage
 		SfxId::None,                                                          // activesound
 		MF_NOGRAVITY | MF_NOBLOCKMAP | MF_SHADOW | MF_NOCLIP | MF_DROPOFF, // flags
-		MF2_NODMGTHRUST                                                    // flags2
+		MobjFlag2::NoDmgThrust                                                    // flags2
 	},
 
 	{
@@ -5391,7 +5391,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_FLOORBOUNCE | MF2_FIREDAMAGE         // flags2
+		MobjFlag2::FloorBounce | MobjFlag2::FireDamage         // flags2
 	},
 
 	{
@@ -5419,7 +5419,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SPECIAL,          // flags
-		MF2_FLOATBOB         // flags2
+		MobjFlag2::FloatBob         // flags2
 	},
 
 	{
@@ -5447,7 +5447,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                 // damage
 		SfxId::None,          // activesound
 		MF_SPECIAL,        // flags
-		MF2_FLOATBOB       // flags2
+		MobjFlag2::FloatBob       // flags2
 	},
 
 	{
@@ -5475,7 +5475,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SPECIAL,          // flags
-		MF2_FLOATBOB         // flags2
+		MobjFlag2::FloatBob         // flags2
 	},
 
 	{
@@ -5503,7 +5503,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SPECIAL,          // flags
-		MF2_FLOATBOB         // flags2
+		MobjFlag2::FloatBob         // flags2
 	},
 
 	{
@@ -5531,7 +5531,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		MF_SPECIAL,            // flags
-		MF2_FLOATBOB           // flags2
+		MobjFlag2::FloatBob           // flags2
 	},
 
 	{
@@ -5559,7 +5559,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                           // damage
 		SfxId::None,                                    // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,     // flags
-		MF2_NOTELEPORT | MF2_LOGRAV | MF2_CANNOTPUSH // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::LoGrav | MobjFlag2::CannotPush // flags2
 	},
 
 	{
@@ -5587,7 +5587,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -5615,7 +5615,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -5643,7 +5643,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -5671,7 +5671,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                           // damage
 		SfxId::None,                                    // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,     // flags
-		MF2_NOTELEPORT | MF2_LOGRAV | MF2_CANNOTPUSH // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::LoGrav | MobjFlag2::CannotPush // flags2
 	},
 
 	{
@@ -5699,7 +5699,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		MF_NOBLOCKMAP,         // flags
-		0                      // flags2
+		MobjFlag2{}                      // flags2
 	},
 
 	{
@@ -5727,7 +5727,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                      // damage
 		SfxId::None,               // activesound
 		MF_SOLID,               // flags
-		0                       // flags2
+		MobjFlag2{}                       // flags2
 	},
 
 	{
@@ -5755,7 +5755,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                // damage
 		SfxId::None,         // activesound
 		0,                // flags
-		0                 // flags2
+		MobjFlag2{}                 // flags2
 	},
 
 	{
@@ -5783,7 +5783,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                // damage
 		SfxId::None,         // activesound
 		0,                // flags
-		0                 // flags2
+		MobjFlag2{}                 // flags2
 	},
 
 	{
@@ -5811,7 +5811,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                // damage
 		SfxId::None,         // activesound
 		0,                // flags
-		0                 // flags2
+		MobjFlag2{}                 // flags2
 	},
 
 	{
@@ -5839,7 +5839,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                // damage
 		SfxId::None,         // activesound
 		MF_SOLID,         // flags
-		0                 // flags2
+		MobjFlag2{}                 // flags2
 	},
 
 	{
@@ -5867,7 +5867,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                              // damage
 		SfxId::None,                       // activesound
 		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                               // flags2
+		MobjFlag2{}                               // flags2
 	},
 
 	{
@@ -5895,7 +5895,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                              // damage
 		SfxId::None,                       // activesound
 		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                               // flags2
+		MobjFlag2{}                               // flags2
 	},
 
 	{
@@ -5923,7 +5923,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SOLID,           // flags
-		0                   // flags2
+		MobjFlag2{}                   // flags2
 	},
 
 	{
@@ -5951,7 +5951,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,              // damage
 		SfxId::None,       // activesound
 		MF_SOLID,       // flags
-		0               // flags2
+		MobjFlag2{}               // flags2
 	},
 
 	{
@@ -5979,7 +5979,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                    // damage
 		SfxId::None,                             // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD, // flags
-		0                                     // flags2
+		MobjFlag2{}                                     // flags2
 	},
 
 	{
@@ -6007,7 +6007,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		MF_SOLID,                // flags
-		0                        // flags2
+		MobjFlag2{}                        // flags2
 	},
 
 	{
@@ -6035,7 +6035,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		MF_SOLID,                // flags
-		0                        // flags2
+		MobjFlag2{}                        // flags2
 	},
 
 	{
@@ -6063,7 +6063,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		MF_SOLID,              // flags
-		0                      // flags2
+		MobjFlag2{}                      // flags2
 	},
 
 	{
@@ -6091,7 +6091,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SOLID,            // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -6119,7 +6119,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                      // damage
 		SfxId::None,               // activesound
 		0,                      // flags
-		0                       // flags2
+		MobjFlag2{}                       // flags2
 	},
 
 	{
@@ -6147,7 +6147,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                      // damage
 		SfxId::None,               // activesound
 		0,                      // flags
-		0                       // flags2
+		MobjFlag2{}                       // flags2
 	},
 
 	{
@@ -6175,7 +6175,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		0,                       // flags
-		0                        // flags2
+		MobjFlag2{}                        // flags2
 	},
 
 	{
@@ -6203,7 +6203,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		0,                       // flags
-		0                        // flags2
+		MobjFlag2{}                        // flags2
 	},
 
 	{
@@ -6231,7 +6231,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		0,                       // flags
-		0                        // flags2
+		MobjFlag2{}                        // flags2
 	},
 
 	{
@@ -6259,7 +6259,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		0,                       // flags
-		0                        // flags2
+		MobjFlag2{}                        // flags2
 	},
 
 	{
@@ -6287,7 +6287,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		0,                       // flags
-		0                        // flags2
+		MobjFlag2{}                        // flags2
 	},
 
 	{
@@ -6315,7 +6315,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		0,                       // flags
-		0                        // flags2
+		MobjFlag2{}                        // flags2
 	},
 
 	{
@@ -6343,7 +6343,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		0,                       // flags
-		0                        // flags2
+		MobjFlag2{}                        // flags2
 	},
 
 	{
@@ -6371,7 +6371,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		0,                       // flags
-		0                        // flags2
+		MobjFlag2{}                        // flags2
 	},
 
 	{
@@ -6399,7 +6399,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_SOLID,                   // flags
-		0                           // flags2
+		MobjFlag2{}                           // flags2
 	},
 
 	{
@@ -6427,7 +6427,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SOLID,                  // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -6455,7 +6455,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_SOLID,                   // flags
-		0                           // flags2
+		MobjFlag2{}                           // flags2
 	},
 
 	{
@@ -6483,7 +6483,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SOLID,                  // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -6511,7 +6511,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -6539,7 +6539,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -6567,7 +6567,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -6595,7 +6595,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                              // damage
 		SfxId::None,                       // activesound
 		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                               // flags2
+		MobjFlag2{}                               // flags2
 	},
 
 	{
@@ -6623,7 +6623,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                              // damage
 		SfxId::None,                       // activesound
 		MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                               // flags2
+		MobjFlag2{}                               // flags2
 	},
 
 	{
@@ -6651,7 +6651,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SOLID,            // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -6679,7 +6679,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		MF_SOLID,              // flags
-		0                      // flags2
+		MobjFlag2{}                      // flags2
 	},
 
 	{
@@ -6707,7 +6707,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                        // damage
 		SfxId::None,                 // activesound
 		0,                        // flags
-		0                         // flags2
+		MobjFlag2{}                         // flags2
 	},
 
 	{
@@ -6735,7 +6735,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                      // damage
 		SfxId::None,               // activesound
 		MF_SOLID,               // flags
-		0                       // flags2
+		MobjFlag2{}                       // flags2
 	},
 
 	{
@@ -6763,7 +6763,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                        // damage
 		SfxId::None,                 // activesound
 		MF_SOLID,                 // flags
-		0                         // flags2
+		MobjFlag2{}                         // flags2
 	},
 
 	{
@@ -6791,7 +6791,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                           // damage
 		SfxId::None,                    // activesound
 		MF_SOLID,                    // flags
-		0                            // flags2
+		MobjFlag2{}                            // flags2
 	},
 
 	{
@@ -6819,7 +6819,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SOLID,                  // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -6847,7 +6847,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                              // damage
 		SfxId::None,                       // activesound
 		MF_SOLID,                       // flags
-		0                               // flags2
+		MobjFlag2{}                               // flags2
 	},
 
 	{
@@ -6875,7 +6875,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                             // damage
 		SfxId::None,                      // activesound
 		MF_SOLID,                      // flags
-		0                              // flags2
+		MobjFlag2{}                              // flags2
 	},
 
 	{
@@ -6903,7 +6903,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SOLID,                  // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -6931,7 +6931,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -6959,7 +6959,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                  // damage
 		SfxId::None,                           // activesound
 		MF_SOLID,                           // flags
-		0                                   // flags2
+		MobjFlag2{}                                   // flags2
 	},
 
 	{
@@ -6987,7 +6987,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                 // damage
 		SfxId::None,                          // activesound
 		MF_SOLID,                          // flags
-		0                                  // flags2
+		MobjFlag2{}                                  // flags2
 	},
 
 	{
@@ -7015,7 +7015,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                   // damage
 		SfxId::None,                            // activesound
 		MF_SOLID,                            // flags
-		0                                    // flags2
+		MobjFlag2{}                                    // flags2
 	},
 
 	{
@@ -7043,7 +7043,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                  // damage
 		SfxId::None,                           // activesound
 		MF_SOLID,                           // flags
-		0                                   // flags2
+		MobjFlag2{}                                   // flags2
 	},
 
 	{
@@ -7071,7 +7071,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                   // damage
 		SfxId::None,                            // activesound
 		MF_SOLID,                            // flags
-		0                                    // flags2
+		MobjFlag2{}                                    // flags2
 	},
 
 	{
@@ -7099,7 +7099,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                    // damage
 		SfxId::None,                             // activesound
 		MF_SOLID,                             // flags
-		0                                     // flags2
+		MobjFlag2{}                                     // flags2
 	},
 
 	{
@@ -7127,7 +7127,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                // damage
 		SfxId::None,                         // activesound
 		MF_SOLID,                         // flags
-		0                                 // flags2
+		MobjFlag2{}                                 // flags2
 	},
 
 	{
@@ -7155,7 +7155,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                // damage
 		SfxId::None,                         // activesound
 		MF_SOLID,                         // flags
-		0                                 // flags2
+		MobjFlag2{}                                 // flags2
 	},
 
 	{
@@ -7183,7 +7183,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                 // damage
 		SfxId::None,                          // activesound
 		MF_SOLID,                          // flags
-		0                                  // flags2
+		MobjFlag2{}                                  // flags2
 	},
 
 	{
@@ -7211,7 +7211,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                     // damage
 		SfxId::None,                              // activesound
 		MF_SOLID,                              // flags
-		0                                      // flags2
+		MobjFlag2{}                                      // flags2
 	},
 
 	{
@@ -7239,7 +7239,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                 // damage
 		SfxId::None,                          // activesound
 		MF_SOLID,                          // flags
-		0                                  // flags2
+		MobjFlag2{}                                  // flags2
 	},
 
 	{
@@ -7267,7 +7267,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                 // damage
 		SfxId::None,                          // activesound
 		MF_SOLID,                          // flags
-		0                                  // flags2
+		MobjFlag2{}                                  // flags2
 	},
 
 	{
@@ -7295,7 +7295,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                  // damage
 		SfxId::None,                           // activesound
 		MF_SOLID,                           // flags
-		0                                   // flags2
+		MobjFlag2{}                                   // flags2
 	},
 
 	{
@@ -7323,7 +7323,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SOLID,                  // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -7351,7 +7351,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SOLID,            // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -7379,7 +7379,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SOLID,            // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -7407,7 +7407,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		MF_SOLID,              // flags
-		0                      // flags2
+		MobjFlag2{}                      // flags2
 	},
 
 	{
@@ -7435,7 +7435,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		MF_SOLID,              // flags
-		0                      // flags2
+		MobjFlag2{}                      // flags2
 	},
 
 	{
@@ -7463,7 +7463,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SOLID,      // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -7491,7 +7491,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -7519,7 +7519,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -7547,7 +7547,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -7575,7 +7575,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -7603,7 +7603,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                           // damage
 		SfxId::None,                    // activesound
 		MF_SOLID,                    // flags
-		0                            // flags2
+		MobjFlag2{}                            // flags2
 	},
 
 	{
@@ -7631,7 +7631,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_SOLID,                     // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -7659,7 +7659,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                           // damage
 		SfxId::None,                    // activesound
 		MF_SOLID,                    // flags
-		0                            // flags2
+		MobjFlag2{}                            // flags2
 	},
 
 	{
@@ -7687,7 +7687,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_SOLID,                   // flags
-		0                           // flags2
+		MobjFlag2{}                           // flags2
 	},
 
 	{
@@ -7715,7 +7715,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SOLID,            // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -7743,7 +7743,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SOLID,            // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -7771,7 +7771,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SOLID,           // flags
-		0                   // flags2
+		MobjFlag2{}                   // flags2
 	},
 
 	{
@@ -7799,7 +7799,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                // damage
 		SfxId::None,         // activesound
 		0,                // flags
-		0                 // flags2
+		MobjFlag2{}                 // flags2
 	},
 
 	{
@@ -7827,7 +7827,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                // damage
 		SfxId::None,         // activesound
 		0,                // flags
-		0                 // flags2
+		MobjFlag2{}                 // flags2
 	},
 
 	{
@@ -7855,7 +7855,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                // damage
 		SfxId::None,         // activesound
 		0,                // flags
-		0                 // flags2
+		MobjFlag2{}                 // flags2
 	},
 
 	{
@@ -7883,7 +7883,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SOLID,            // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -7911,7 +7911,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD | MF_DROPOFF,      // flags
-		MF2_SLIDE | MF2_PUSHABLE | MF2_TELESTOMP | MF2_PASSMOBJ // flags2
+		MobjFlag2::Slide | MobjFlag2::Pushable | MobjFlag2::TeleStomp | MobjFlag2::PassMobj // flags2
 	},
 
 	{
@@ -7939,7 +7939,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD | MF_DROPOFF,      // flags
-		MF2_SLIDE | MF2_PUSHABLE | MF2_TELESTOMP | MF2_PASSMOBJ // flags2
+		MobjFlag2::Slide | MobjFlag2::Pushable | MobjFlag2::TeleStomp | MobjFlag2::PassMobj // flags2
 	},
 
 	{
@@ -7967,7 +7967,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD | MF_DROPOFF,      // flags
-		MF2_SLIDE | MF2_PUSHABLE | MF2_TELESTOMP | MF2_PASSMOBJ // flags2
+		MobjFlag2::Slide | MobjFlag2::Pushable | MobjFlag2::TeleStomp | MobjFlag2::PassMobj // flags2
 	},
 
 	{
@@ -7995,7 +7995,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                      // damage
 		SfxId::None,               // activesound
 		MF_MISSILE,             // flags
-		MF2_NOTELEPORT          // flags2
+		MobjFlag2::NoTeleport          // flags2
 	},
 
 	{
@@ -8023,7 +8023,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -8051,7 +8051,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -8079,7 +8079,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                    // damage
 		SfxId::None,                             // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD, // flags
-		0                                     // flags2
+		MobjFlag2{}                                     // flags2
 	},
 
 	{
@@ -8107,7 +8107,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		MF2_TELESTOMP        // flags2
+		MobjFlag2::TeleStomp        // flags2
 	},
 
 	{
@@ -8135,7 +8135,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_MISSILE,                 // flags
-		MF2_LOGRAV                  // flags2
+		MobjFlag2::LoGrav                  // flags2
 	},
 
 	{
@@ -8163,7 +8163,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                 // damage
 		SfxId::None,          // activesound
 		MF_NOBLOCKMAP,     // flags
-		0                  // flags2
+		MobjFlag2{}                  // flags2
 	},
 
 	{
@@ -8191,7 +8191,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -8219,7 +8219,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                           // damage
 		SfxId::None,                    // activesound
 		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
-		MF2_DONTDRAW                 // flags2
+		MobjFlag2::DontDraw                 // flags2
 	},
 
 	{
@@ -8247,7 +8247,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_NOBLOCKMAP | MF_MISSILE, // flags
-		MF2_NOTELEPORT | MF2_LOGRAV // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::LoGrav // flags2
 	},
 
 	{
@@ -8275,7 +8275,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_NOBLOCKMAP | MF_MISSILE, // flags
-		MF2_NOTELEPORT | MF2_LOGRAV // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::LoGrav // flags2
 	},
 
 	{
@@ -8303,7 +8303,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                      // damage
 		SfxId::None,               // activesound
 		MF_SOLID,               // flags
-		0                       // flags2
+		MobjFlag2{}                       // flags2
 	},
 
 	{
@@ -8331,7 +8331,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_SOLID,                   // flags
-		0                           // flags2
+		MobjFlag2{}                           // flags2
 	},
 
 	{
@@ -8359,7 +8359,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                       // damage
 		SfxId::None,                // activesound
 		MF_SOLID | MF_NOGRAVITY, // flags
-		MF2_DONTDRAW             // flags2
+		MobjFlag2::DontDraw             // flags2
 	},
 
 	{
@@ -8387,7 +8387,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT                // flags2
+		MobjFlag2::NoTeleport                // flags2
 	},
 
 	{
@@ -8415,7 +8415,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -8443,7 +8443,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -8471,7 +8471,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                // damage
 		SfxId::None,         // activesound
 		MF_SOLID,         // flags
-		0                 // flags2
+		MobjFlag2{}                 // flags2
 	},
 
 	{
@@ -8499,7 +8499,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                    // damage
 		SfxId::None,                             // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD, // flags
-		0                                     // flags2
+		MobjFlag2{}                                     // flags2
 	},
 
 	{
@@ -8527,7 +8527,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                    // damage
 		SfxId::None,                             // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD, // flags
-		0                                     // flags2
+		MobjFlag2{}                                     // flags2
 	},
 
 	{
@@ -8555,7 +8555,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_SOLID | MF_SPAWNCEILING | MF_NOGRAVITY, // flags
-		0                                          // flags2
+		MobjFlag2{}                                          // flags2
 	},
 
 	{
@@ -8583,7 +8583,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                    // damage
 		SfxId::None,                             // activesound
 		MF_SHOOTABLE | MF_SOLID | MF_NOBLOOD, // flags
-		0                                     // flags2
+		MobjFlag2{}                                     // flags2
 	},
 
 	{
@@ -8611,7 +8611,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SOLID,           // flags
-		0                   // flags2
+		MobjFlag2{}                   // flags2
 	},
 
 	{
@@ -8639,7 +8639,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SOLID,            // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -8667,7 +8667,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SOLID,            // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -8695,7 +8695,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                    // damage
 		SfxId::None,             // activesound
 		MF_SOLID,             // flags
-		0                     // flags2
+		MobjFlag2{}                     // flags2
 	},
 
 	{
@@ -8723,7 +8723,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                    // damage
 		SfxId::None,                             // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD, // flags
-		0                                     // flags2
+		MobjFlag2{}                                     // flags2
 	},
 
 	{
@@ -8751,7 +8751,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                    // damage
 		SfxId::None,             // activesound
 		0,                    // flags
-		0                     // flags2
+		MobjFlag2{}                     // flags2
 	},
 
 	{
@@ -8779,7 +8779,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                     // damage
 		SfxId::None,                                                              // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD | MF_NOGRAVITY | MF_SPAWNCEILING, // flags
-		0                                                                      // flags2
+		MobjFlag2{}                                                                      // flags2
 	},
 
 	{
@@ -8807,7 +8807,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		MF_NOBLOCKMAP,         // flags
-		0                      // flags2
+		MobjFlag2{}                      // flags2
 	},
 
 	{
@@ -8835,7 +8835,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                    // damage
 		SfxId::None,             // activesound
 		MF_SOLID,             // flags
-		0                     // flags2
+		MobjFlag2{}                     // flags2
 	},
 
 	{
@@ -8863,7 +8863,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                    // damage
 		SfxId::None,                             // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_NOBLOOD, // flags
-		0                                     // flags2
+		MobjFlag2{}                                     // flags2
 	},
 
 	{
@@ -8891,7 +8891,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                  // damage
 		SfxId::None,           // activesound
 		MF_SOLID,           // flags
-		0                   // flags2
+		MobjFlag2{}                   // flags2
 	},
 
 	{
@@ -8919,7 +8919,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_SOLID,            // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -8947,7 +8947,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                              // damage
 		SfxId::None,                                       // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SPAWNCEILING, // flags
-		0                                               // flags2
+		MobjFlag2{}                                               // flags2
 	},
 
 	{
@@ -8975,7 +8975,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                              // damage
 		SfxId::None,                                       // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SPAWNCEILING, // flags
-		0                                               // flags2
+		MobjFlag2{}                                               // flags2
 	},
 
 	{
@@ -9003,7 +9003,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                              // damage
 		SfxId::None,                                       // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SPAWNCEILING, // flags
-		0                                               // flags2
+		MobjFlag2{}                                               // flags2
 	},
 
 	{
@@ -9031,7 +9031,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                              // damage
 		SfxId::None,                                       // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SPAWNCEILING, // flags
-		0                                               // flags2
+		MobjFlag2{}                                               // flags2
 	},
 
 	{
@@ -9059,7 +9059,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                              // damage
 		SfxId::None,                                       // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SPAWNCEILING, // flags
-		0                                               // flags2
+		MobjFlag2{}                                               // flags2
 	},
 
 	{
@@ -9087,7 +9087,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                              // damage
 		SfxId::None,                                       // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SPAWNCEILING, // flags
-		0                                               // flags2
+		MobjFlag2{}                                               // flags2
 	},
 
 	{
@@ -9115,7 +9115,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                              // damage
 		SfxId::None,                                       // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SPAWNCEILING, // flags
-		0                                               // flags2
+		MobjFlag2{}                                               // flags2
 	},
 
 	{
@@ -9143,7 +9143,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -9171,7 +9171,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -9199,7 +9199,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -9227,7 +9227,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -9255,7 +9255,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -9283,7 +9283,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -9311,7 +9311,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -9339,7 +9339,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -9367,7 +9367,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                   // damage
 		SfxId::None,            // activesound
 		MF_NOBLOCKMAP,       // flags
-		0                    // flags2
+		MobjFlag2{}                    // flags2
 	},
 
 	{
@@ -9395,7 +9395,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                    // damage
 		SfxId::None,             // activesound
 		MF_NOBLOCKMAP,        // flags
-		0                     // flags2
+		MobjFlag2{}                     // flags2
 	},
 
 	{
@@ -9423,7 +9423,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -9451,7 +9451,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -9479,7 +9479,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                           // damage
 		SfxId::None,                    // activesound
 		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
-		0                            // flags2
+		MobjFlag2{}                            // flags2
 	},
 
 	{
@@ -9507,7 +9507,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -9535,7 +9535,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -9563,7 +9563,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -9591,7 +9591,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                // damage
 		SfxId::None,                         // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY,     // flags
-		0                                 // flags2
+		MobjFlag2{}                                 // flags2
 	},
 
 	{
@@ -9619,7 +9619,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_DROPOFF, // flags
-		MF2_NOTELEPORT | MF2_CANNOTPUSH            // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::CannotPush            // flags2
 	},
 
 	{
@@ -9647,7 +9647,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -9675,7 +9675,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		10,                                                       // damage
 		SfxId::None,                                                 // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,   // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS | MF2_FIREDAMAGE // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -9703,7 +9703,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -9731,7 +9731,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		8,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_MISSILE | MF_NOBLOCKMAP | MF_NOGRAVITY | MF_DROPOFF, // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross                // flags2
 	},
 
 	{
@@ -9759,7 +9759,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -9787,7 +9787,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,              // damage
 		SfxId::None,       // activesound
 		MF_SPECIAL,     // flags
-		0               // flags2
+		MobjFlag2{}               // flags2
 	},
 
 	{
@@ -9815,7 +9815,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		5,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross                // flags2
 	},
 
 	{
@@ -9843,7 +9843,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -9871,7 +9871,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -9899,7 +9899,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -9927,7 +9927,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                              // damage
 		SfxId::None,                       // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY,   // flags
-		0                               // flags2
+		MobjFlag2{}                               // flags2
 	},
 
 	{
@@ -9955,7 +9955,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                              // damage
 		SfxId::None,                       // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY,   // flags
-		0                               // flags2
+		MobjFlag2{}                               // flags2
 	},
 
 	{
@@ -9983,7 +9983,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FIREDAMAGE                         // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
 	{
@@ -10011,7 +10011,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		8,                                                                       // damage
 		SfxId::None,                                                                // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,                  // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS | MF2_DONTDRAW | MF2_FIREDAMAGE // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::DontDraw | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -10039,7 +10039,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		3,                                                                     // damage
 		SfxId::None,                                                              // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_ALTSHADOW | MF_MISSILE, // flags
-		MF2_NOTELEPORT | MF2_SEEKERMISSILE | MF2_RIP | MF2_IMPACT | MF2_PCROSS // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::SeekerMissile | MobjFlag2::Rip | MobjFlag2::Impact | MobjFlag2::PCross // flags2
 	},
 
 	{
@@ -10067,7 +10067,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                    // damage
 		SfxId::None,                                                             // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_NOCLIP | MF_ALTSHADOW, // flags
-		MF2_NOTELEPORT                                                        // flags2
+		MobjFlag2::NoTeleport                                                        // flags2
 	},
 
 	{
@@ -10095,7 +10095,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -10123,7 +10123,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_MISSILE, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -10151,7 +10151,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                        // damage
 		SfxId::None,                                                 // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_ALTSHADOW, // flags
-		MF2_NOTELEPORT                                            // flags2
+		MobjFlag2::NoTeleport                                            // flags2
 	},
 
 	{
@@ -10179,7 +10179,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                // damage
 		SfxId::None,                                         // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY,                     // flags
-		MF2_NOTELEPORT | MF2_CANNOTPUSH | MF2_NODMGTHRUST // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::CannotPush | MobjFlag2::NoDmgThrust // flags2
 	},
 
 	{
@@ -10207,7 +10207,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                // damage
 		SfxId::None,                                         // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW,         // flags
-		MF2_NOTELEPORT | MF2_CANNOTPUSH | MF2_NODMGTHRUST // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::CannotPush | MobjFlag2::NoDmgThrust // flags2
 	},
 
 	{
@@ -10235,7 +10235,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		2,                                                                                    // damage
 		SfxId::None,                                                                             // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,                               // flags
-		MF2_NOTELEPORT | MF2_RIP | MF2_IMPACT | MF2_PCROSS | MF2_NODMGTHRUST | MF2_CANNOTPUSH // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Rip | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::NoDmgThrust | MobjFlag2::CannotPush // flags2
 	},
 
 	{
@@ -10263,7 +10263,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -10291,7 +10291,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		8,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE | MF_DROPOFF, // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross                // flags2
 	},
 
 	{
@@ -10319,7 +10319,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		8,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE | MF_DROPOFF, // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross                // flags2
 	},
 
 	{
@@ -10347,7 +10347,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		2,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE | MF_DROPOFF, // flags
-		0                                                       // flags2
+		MobjFlag2{}                                                       // flags2
 	},
 
 	{
@@ -10375,7 +10375,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		6,                                                                  // damage
 		SfxId::None,                                                           // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,             // flags
-		MF2_NOTELEPORT | MF2_FIREDAMAGE | MF2_RIP | MF2_IMPACT | MF2_PCROSS // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage | MobjFlag2::Rip | MobjFlag2::Impact | MobjFlag2::PCross // flags2
 	},
 
 	{
@@ -10403,7 +10403,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		4,                                                                            // damage
 		SfxId::None,                                                                     // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,                       // flags
-		MF2_NOTELEPORT | MF2_FIREDAMAGE | MF2_IMPACT | MF2_PCROSS | MF2_SEEKERMISSILE // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::SeekerMissile // flags2
 	},
 
 	{
@@ -10431,7 +10431,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,               // damage
 		SfxId::None,        // activesound
 		MF_SPECIAL,      // flags
-		MF2_FLOATBOB     // flags2
+		MobjFlag2::FloatBob     // flags2
 	},
 
 	{
@@ -10459,7 +10459,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,               // damage
 		SfxId::None,        // activesound
 		MF_SPECIAL,      // flags
-		MF2_FLOATBOB     // flags2
+		MobjFlag2::FloatBob     // flags2
 	},
 
 	{
@@ -10487,7 +10487,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,               // damage
 		SfxId::None,        // activesound
 		MF_SPECIAL,      // flags
-		MF2_FLOATBOB     // flags2
+		MobjFlag2::FloatBob     // flags2
 	},
 
 	{
@@ -10515,7 +10515,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,              // damage
 		SfxId::None,       // activesound
 		MF_SPECIAL,     // flags
-		MF2_FLOATBOB    // flags2
+		MobjFlag2::FloatBob    // flags2
 	},
 
 	{
@@ -10543,7 +10543,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,              // damage
 		SfxId::None,       // activesound
 		MF_SPECIAL,     // flags
-		MF2_FLOATBOB    // flags2
+		MobjFlag2::FloatBob    // flags2
 	},
 
 	{
@@ -10571,7 +10571,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,              // damage
 		SfxId::None,       // activesound
 		MF_SPECIAL,     // flags
-		MF2_FLOATBOB    // flags2
+		MobjFlag2::FloatBob    // flags2
 	},
 
 	{
@@ -10599,7 +10599,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,               // damage
 		SfxId::None,        // activesound
 		MF_SPECIAL,      // flags
-		MF2_FLOATBOB     // flags2
+		MobjFlag2::FloatBob     // flags2
 	},
 
 	{
@@ -10627,7 +10627,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,               // damage
 		SfxId::None,        // activesound
 		MF_SPECIAL,      // flags
-		MF2_FLOATBOB     // flags2
+		MobjFlag2::FloatBob     // flags2
 	},
 
 	{
@@ -10655,7 +10655,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,               // damage
 		SfxId::None,        // activesound
 		MF_SPECIAL,      // flags
-		MF2_FLOATBOB     // flags2
+		MobjFlag2::FloatBob     // flags2
 	},
 
 	{
@@ -10683,7 +10683,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -10711,7 +10711,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -10739,7 +10739,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                                       // damage
 		SfxId::None,                                                // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,  // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS | MF2_ICEDAMAGE // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::IceDamage // flags2
 	},
 
 	{
@@ -10767,7 +10767,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,              // damage
 		SfxId::None,       // activesound
 		MF_NOBLOCKMAP,  // flags
-		0               // flags2
+		MobjFlag2{}               // flags2
 	},
 
 	{
@@ -10795,7 +10795,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF, // flags
-		MF2_NOTELEPORT | MF2_CANNOTPUSH          // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::CannotPush          // flags2
 	},
 
 	{
@@ -10823,7 +10823,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                      // damage
 		SfxId::None,                               // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT                          // flags2
+		MobjFlag2::NoTeleport                          // flags2
 	},
 
 	{
@@ -10851,7 +10851,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                      // damage
 		SfxId::None,                                                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_DROPOFF | MF_PICKUP | MF_NOTDMATCH,                        // flags
-		MF2_WINDTHRUST | MF2_FOOTCLIP | MF2_SLIDE | MF2_PASSMOBJ | MF2_TELESTOMP | MF2_PUSHWALL // flags2
+		MobjFlag2::WindThrust | MobjFlag2::FootClip | MobjFlag2::Slide | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall // flags2
 	},
 
 	{
@@ -10879,7 +10879,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF, // flags
-		MF2_LOGRAV | MF2_CANNOTPUSH // flags2
+		MobjFlag2::LoGrav | MobjFlag2::CannotPush // flags2
 	},
 
 	{
@@ -10907,7 +10907,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                           // damage
 		SfxId::None,                                    // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_ALTSHADOW, // flags
-		0                                            // flags2
+		MobjFlag2{}                                            // flags2
 	},
 
 	{
@@ -10935,7 +10935,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF,                // flags
-		MF2_LOGRAV | MF2_CANNOTPUSH | MF2_FOOTCLIP // flags2
+		MobjFlag2::LoGrav | MobjFlag2::CannotPush | MobjFlag2::FootClip // flags2
 	},
 
 	{
@@ -10963,7 +10963,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                      // damage
 		SfxId::None,                                                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_DROPOFF | MF_PICKUP | MF_NOTDMATCH,                        // flags
-		MF2_WINDTHRUST | MF2_FOOTCLIP | MF2_SLIDE | MF2_PASSMOBJ | MF2_TELESTOMP | MF2_PUSHWALL // flags2
+		MobjFlag2::WindThrust | MobjFlag2::FootClip | MobjFlag2::Slide | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall // flags2
 	},
 
 	{
@@ -10991,7 +10991,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                      // damage
 		SfxId::None,                                                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_DROPOFF | MF_PICKUP | MF_NOTDMATCH,                        // flags
-		MF2_WINDTHRUST | MF2_FOOTCLIP | MF2_SLIDE | MF2_PASSMOBJ | MF2_TELESTOMP | MF2_PUSHWALL // flags2
+		MobjFlag2::WindThrust | MobjFlag2::FootClip | MobjFlag2::Slide | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall // flags2
 	},
 
 	{
@@ -11019,7 +11019,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                      // damage
 		SfxId::None,                                                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_DROPOFF | MF_NOTDMATCH,                                    // flags
-		MF2_WINDTHRUST | MF2_SLIDE | MF2_PASSMOBJ | MF2_FOOTCLIP | MF2_TELESTOMP | MF2_PUSHWALL // flags2
+		MobjFlag2::WindThrust | MobjFlag2::Slide | MobjFlag2::PassMobj | MobjFlag2::FootClip | MobjFlag2::TeleStomp | MobjFlag2::PushWall // flags2
 	},
 
 	{
@@ -11047,7 +11047,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                          // damage
 		SfxId::HexenPigActive1,                                                      // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,                                     // flags
-		MF2_WINDTHRUST | MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_PUSHWALL | MF2_TELESTOMP // flags2
+		MobjFlag2::WindThrust | MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -11075,7 +11075,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                      // damage
 		SfxId::HexenCentaurActive,                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,                                 // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_PUSHWALL | MF2_MCROSS | MF2_TELESTOMP // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -11103,7 +11103,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                      // damage
 		SfxId::HexenCentaurActive,                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,                                 // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_PUSHWALL | MF2_MCROSS | MF2_TELESTOMP // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -11131,7 +11131,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_MISSILE | MF_NOBLOCKMAP | MF_NOGRAVITY | MF_DROPOFF, // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross                // flags2
 	},
 
 	{
@@ -11159,7 +11159,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_DROPOFF | MF_CORPSE,    // flags
-		MF2_NOTELEPORT             // flags2
+		MobjFlag2::NoTeleport             // flags2
 	},
 
 	{
@@ -11187,7 +11187,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                        // damage
 		SfxId::None,                 // activesound
 		MF_DROPOFF | MF_CORPSE,   // flags
-		MF2_NOTELEPORT            // flags2
+		MobjFlag2::NoTeleport            // flags2
 	},
 
 	{
@@ -11215,7 +11215,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                       // damage
 		SfxId::HexenDemonActive,                                  // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,                  // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_MCROSS | MF2_TELESTOMP // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -11243,7 +11243,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                   // damage
 		SfxId::None,                                            // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip                        // flags2
 	},
 
 	{
@@ -11271,7 +11271,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                   // damage
 		SfxId::None,                                            // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip                        // flags2
 	},
 
 	{
@@ -11299,7 +11299,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                   // damage
 		SfxId::None,                                            // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip                        // flags2
 	},
 
 	{
@@ -11327,7 +11327,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                   // damage
 		SfxId::None,                                            // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip                        // flags2
 	},
 
 	{
@@ -11355,7 +11355,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                   // damage
 		SfxId::None,                                            // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip                        // flags2
 	},
 
 	{
@@ -11383,7 +11383,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		5,                                                        // damage
 		SfxId::None,                                                 // activesound
 		MF_MISSILE | MF_NOBLOCKMAP | MF_NOGRAVITY | MF_DROPOFF,   // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS | MF2_FIREDAMAGE // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -11411,7 +11411,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                       // damage
 		SfxId::HexenDemonActive,                                  // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,                  // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_MCROSS | MF2_TELESTOMP // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -11439,7 +11439,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                   // damage
 		SfxId::None,                                            // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip                        // flags2
 	},
 
 	{
@@ -11467,7 +11467,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                   // damage
 		SfxId::None,                                            // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip                        // flags2
 	},
 
 	{
@@ -11495,7 +11495,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                   // damage
 		SfxId::None,                                            // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip                        // flags2
 	},
 
 	{
@@ -11523,7 +11523,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                   // damage
 		SfxId::None,                                            // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip                        // flags2
 	},
 
 	{
@@ -11551,7 +11551,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                   // damage
 		SfxId::None,                                            // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_CORPSE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP                        // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip                        // flags2
 	},
 
 	{
@@ -11579,7 +11579,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		5,                                                        // damage
 		SfxId::None,                                                 // activesound
 		MF_MISSILE | MF_NOBLOCKMAP | MF_NOGRAVITY | MF_DROPOFF,   // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS | MF2_FIREDAMAGE // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -11607,7 +11607,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		10,                                                                       // damage
 		SfxId::HexenWraithActive,                                                  // activesound
 		MF_DROPOFF | MF_NOGRAVITY | MF_FLOAT | MF_COUNTKILL,                      // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_PUSHWALL | MF2_TELESTOMP | MF2_DONTDRAW // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::TeleStomp | MobjFlag2::DontDraw // flags2
 	},
 
 	{
@@ -11635,7 +11635,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		10,                                                                            // damage
 		SfxId::HexenWraithActive,                                                       // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_DROPOFF | MF_NOGRAVITY | MF_FLOAT, // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_PUSHWALL | MF2_TELESTOMP                     // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::TeleStomp                     // flags2
 	},
 
 	{
@@ -11663,7 +11663,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		5,                                                                       // damage
 		SfxId::None,                                                                // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_DROPOFF | MF_MISSILE,                  // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS | MF2_FOOTCLIP | MF2_FIREDAMAGE // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::FootClip | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -11691,7 +11691,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF,   // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip // flags2
 	},
 
 	{
@@ -11719,7 +11719,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP            // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip            // flags2
 	},
 
 	{
@@ -11747,7 +11747,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -11775,7 +11775,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -11803,7 +11803,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		7,                                                         // damage
 		SfxId::HexenMaulatorActive,                                 // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_SHADOW,        // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_PUSHWALL | MF2_TELESTOMP // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -11831,7 +11831,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		3,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FIREDAMAGE                         // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
 	{
@@ -11859,7 +11859,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FIREDAMAGE                         // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
 	{
@@ -11887,7 +11887,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FIREDAMAGE                         // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
 	{
@@ -11915,7 +11915,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		MF2_NOTELEPORT                            // flags2
+		MobjFlag2::NoTeleport                            // flags2
 	},
 
 	{
@@ -11943,7 +11943,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		MF2_NOTELEPORT                            // flags2
+		MobjFlag2::NoTeleport                            // flags2
 	},
 
 	{
@@ -11971,7 +11971,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                  // damage
 		SfxId::None,                                                                           // activesound
 		MF_SOLID | MF_COUNTKILL | MF_NOBLOOD,                                               // flags
-		MF2_PASSMOBJ | MF2_DONTDRAW | MF2_CANTLEAVEFLOORPIC | MF2_NONSHOOTABLE | MF2_MCROSS // flags2
+		MobjFlag2::PassMobj | MobjFlag2::DontDraw | MobjFlag2::CantLeaveFloorpic | MobjFlag2::NonShootable | MobjFlag2::MCross // flags2
 	},
 
 	{
@@ -11999,7 +11999,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                  // damage
 		SfxId::None,                                                                           // activesound
 		MF_SOLID | MF_COUNTKILL | MF_NOBLOOD,                                               // flags
-		MF2_PASSMOBJ | MF2_DONTDRAW | MF2_CANTLEAVEFLOORPIC | MF2_NONSHOOTABLE | MF2_MCROSS // flags2
+		MobjFlag2::PassMobj | MobjFlag2::DontDraw | MobjFlag2::CantLeaveFloorpic | MobjFlag2::NonShootable | MobjFlag2::MCross // flags2
 	},
 
 	{
@@ -12027,7 +12027,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -12055,7 +12055,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                     // damage
 		SfxId::None,              // activesound
 		MF_NOBLOCKMAP,         // flags
-		MF2_LOGRAV             // flags2
+		MobjFlag2::LoGrav             // flags2
 	},
 
 	{
@@ -12083,7 +12083,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -12111,7 +12111,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -12139,7 +12139,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		0                             // flags2
+		MobjFlag2{}                             // flags2
 	},
 
 	{
@@ -12167,7 +12167,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                             // damage
 		SfxId::HexenBishopActive,                                                       // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_FLOAT | MF_NOGRAVITY | MF_NOBLOOD, // flags
-		MF2_PASSMOBJ | MF2_PUSHWALL | MF2_TELESTOMP                                    // flags2
+		MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::TeleStomp                                    // flags2
 	},
 
 	{
@@ -12195,7 +12195,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_SHADOW | MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -12223,7 +12223,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -12251,7 +12251,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                        // damage
 		SfxId::None,                                 // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW, // flags
-		0                                         // flags2
+		MobjFlag2{}                                         // flags2
 	},
 
 	{
@@ -12279,7 +12279,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_SEEKERMISSILE                      // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::SeekerMissile                      // flags2
 	},
 
 	{
@@ -12307,7 +12307,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                             // damage
 		SfxId::HexenDragonActive,                                                       // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_FLOAT | MF_NOGRAVITY | MF_NOBLOOD, // flags
-		MF2_PASSMOBJ | MF2_BOSS                                                        // flags2
+		MobjFlag2::PassMobj | MobjFlag2::Boss                                                        // flags2
 	},
 
 	{
@@ -12335,7 +12335,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		6,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_FIREDAMAGE                         // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage                         // flags2
 	},
 
 	{
@@ -12363,7 +12363,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                             // damage
 		SfxId::None,                                      // activesound
 		MF_NOBLOCKMAP,                                 // flags
-		MF2_NOTELEPORT | MF2_FIREDAMAGE | MF2_DONTDRAW // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage | MobjFlag2::DontDraw // flags2
 	},
 
 	{
@@ -12391,7 +12391,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -12419,7 +12419,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -12447,7 +12447,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -12475,7 +12475,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                         // damage
 		SfxId::None,                  // activesound
 		MF_SPECIAL | MF_NOGRAVITY, // flags
-		0                          // flags2
+		MobjFlag2{}                          // flags2
 	},
 
 	{
@@ -12503,7 +12503,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,               // damage
 		SfxId::None,        // activesound
 		MF_SPECIAL,      // flags
-		MF2_FLOATBOB     // flags2
+		MobjFlag2::FloatBob     // flags2
 	},
 
 	{
@@ -12531,7 +12531,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,               // damage
 		SfxId::None,        // activesound
 		MF_SPECIAL,      // flags
-		MF2_FLOATBOB     // flags2
+		MobjFlag2::FloatBob     // flags2
 	},
 
 	{
@@ -12559,7 +12559,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,               // damage
 		SfxId::None,        // activesound
 		MF_SPECIAL,      // flags
-		MF2_FLOATBOB     // flags2
+		MobjFlag2::FloatBob     // flags2
 	},
 
 	{
@@ -12587,7 +12587,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12615,7 +12615,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12643,7 +12643,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12671,7 +12671,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12699,7 +12699,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12727,7 +12727,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12755,7 +12755,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12783,7 +12783,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12811,7 +12811,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12839,7 +12839,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12867,7 +12867,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,             // damage
 		SfxId::None,      // activesound
 		MF_SPECIAL,    // flags
-		0              // flags2
+		MobjFlag2{}              // flags2
 	},
 
 	{
@@ -12895,7 +12895,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                           // damage
 		SfxId::None,                    // activesound
 		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
-		0                            // flags2
+		MobjFlag2{}                            // flags2
 	},
 
 	{
@@ -12923,7 +12923,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                           // damage
 		SfxId::None,                    // activesound
 		MF_NOBLOCKMAP | MF_NOSECTOR, // flags
-		0                            // flags2
+		MobjFlag2{}                            // flags2
 	},
 
 	{
@@ -12951,7 +12951,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		3,                                                       // damage
 		SfxId::HexenEttinActive,                                  // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,                  // flags
-		MF2_FOOTCLIP | MF2_PUSHWALL | MF2_MCROSS | MF2_TELESTOMP // flags2
+		MobjFlag2::FootClip | MobjFlag2::PushWall | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -12979,7 +12979,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_DROPOFF | MF_CORPSE,       // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip // flags2
 	},
 
 	{
@@ -13007,7 +13007,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                                                                         // damage
 		SfxId::HexenFiredActive,                                                                    // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_DROPOFF | MF_NOGRAVITY | MF_FLOAT,             // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_PUSHWALL | MF2_INVULNERABLE | MF2_MCROSS | MF2_TELESTOMP // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::Invulnerable | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -13035,7 +13035,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_DROPOFF | MF_CORPSE,       // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip // flags2
 	},
 
 	{
@@ -13063,7 +13063,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_DROPOFF | MF_CORPSE,       // flags
-		MF2_NOTELEPORT | MF2_FOOTCLIP // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FootClip // flags2
 	},
 
 	{
@@ -13091,7 +13091,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -13119,7 +13119,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -13147,7 +13147,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -13175,7 +13175,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -13203,7 +13203,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                       // damage
 		SfxId::None,                                // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE, // flags
-		MF2_NOTELEPORT                           // flags2
+		MobjFlag2::NoTeleport                           // flags2
 	},
 
 	{
@@ -13231,7 +13231,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                                                       // damage
 		SfxId::None,                                                                // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_DROPOFF | MF_MISSILE,                  // flags
-		MF2_NOTELEPORT | MF2_IMPACT | MF2_PCROSS | MF2_FOOTCLIP | MF2_FIREDAMAGE // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::FootClip | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -13259,7 +13259,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                       // damage
 		SfxId::HexenIceguyActive,                                                 // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_NOBLOOD,                     // flags
-		MF2_PASSMOBJ | MF2_PUSHWALL | MF2_ICEDAMAGE | MF2_MCROSS | MF2_TELESTOMP // flags2
+		MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::IceDamage | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -13287,7 +13287,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT | MF2_ICEDAMAGE                          // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::IceDamage                          // flags2
 	},
 
 	{
@@ -13315,7 +13315,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                     // damage
 		SfxId::None,                                              // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW | MF_DROPOFF, // flags
-		MF2_NOTELEPORT                                         // flags2
+		MobjFlag2::NoTeleport                                         // flags2
 	},
 
 	{
@@ -13343,7 +13343,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                          // damage
 		SfxId::None,                                   // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_MISSILE,    // flags
-		MF2_NOTELEPORT | MF2_LOGRAV | MF2_ICEDAMAGE // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::LoGrav | MobjFlag2::IceDamage // flags2
 	},
 
 	{
@@ -13371,7 +13371,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF, // flags
-		MF2_NOTELEPORT | MF2_LOGRAV // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::LoGrav // flags2
 	},
 
 	{
@@ -13399,7 +13399,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                     // damage
 		SfxId::None,                                                              // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_ALTSHADOW | MF_MISSILE, // flags
-		MF2_NOTELEPORT                                                         // flags2
+		MobjFlag2::NoTeleport                                                         // flags2
 	},
 
 	{
@@ -13427,7 +13427,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                     // damage
 		SfxId::None,                                                              // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_ALTSHADOW | MF_MISSILE, // flags
-		MF2_NOTELEPORT                                                         // flags2
+		MobjFlag2::NoTeleport                                                         // flags2
 	},
 
 	{
@@ -13455,7 +13455,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                      // damage
 		SfxId::None,                                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,                                 // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_TELESTOMP | MF2_PUSHWALL | MF2_MCROSS // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall | MobjFlag2::MCross // flags2
 	},
 
 	{
@@ -13483,7 +13483,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                      // damage
 		SfxId::None,                                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,                                 // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_TELESTOMP | MF2_PUSHWALL | MF2_MCROSS // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall | MobjFlag2::MCross // flags2
 	},
 
 	{
@@ -13511,7 +13511,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                      // damage
 		SfxId::None,                                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,                                 // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_TELESTOMP | MF2_PUSHWALL | MF2_MCROSS // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall | MobjFlag2::MCross // flags2
 	},
 
 	{
@@ -13539,7 +13539,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		9,                                                                 // damage
 		SfxId::HexenSorcererActive,                                         // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_NOBLOOD,               // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_PUSHWALL | MF2_BOSS | MF2_MCROSS // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::Boss | MobjFlag2::MCross // flags2
 	},
 
 	{
@@ -13567,7 +13567,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE           // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce           // flags2
 	},
 
 	{
@@ -13595,7 +13595,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE           // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce           // flags2
 	},
 
 	{
@@ -13623,7 +13623,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE, // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE           // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce           // flags2
 	},
 
 	{
@@ -13651,7 +13651,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                               // damage
 		SfxId::None,                        // activesound
 		MF_NOBLOCKMAP | MF_MISSILE,      // flags
-		MF2_NOTELEPORT | MF2_FLOORBOUNCE // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FloorBounce // flags2
 	},
 
 	{
@@ -13679,7 +13679,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                            // damage
 		SfxId::None,                     // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT                // flags2
+		MobjFlag2::NoTeleport                // flags2
 	},
 
 	{
@@ -13707,7 +13707,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                           // damage
 		SfxId::None,                                    // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_ALTSHADOW, // flags
-		MF2_NOTELEPORT                               // flags2
+		MobjFlag2::NoTeleport                               // flags2
 	},
 
 	{
@@ -13735,7 +13735,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                              // damage
 		SfxId::None,                       // activesound
 		MF_NOBLOCKMAP | MF_MISSILE,     // flags
-		MF2_NOTELEPORT                  // flags2
+		MobjFlag2::NoTeleport                  // flags2
 	},
 
 	{
@@ -13763,7 +13763,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                           // damage
 		SfxId::None,                                    // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_ALTSHADOW, // flags
-		MF2_NOTELEPORT                               // flags2
+		MobjFlag2::NoTeleport                               // flags2
 	},
 
 	{
@@ -13791,7 +13791,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_NOBLOCKMAP | MF_MISSILE | MF_NOGRAVITY, // flags
-		MF2_NOTELEPORT                             // flags2
+		MobjFlag2::NoTeleport                             // flags2
 	},
 
 	{
@@ -13819,7 +13819,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF, // flags
-		MF2_NOTELEPORT | MF2_LOGRAV // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::LoGrav // flags2
 	},
 
 	{
@@ -13847,7 +13847,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                       // damage
 		SfxId::None,                                                // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_NOCLIP | MF_ALTSHADOW, // flags
-		MF2_NOTELEPORT                                           // flags2
+		MobjFlag2::NoTeleport                                           // flags2
 	},
 
 	{
@@ -13875,7 +13875,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                          // damage
 		SfxId::None,                   // activesound
 		MF_MISSILE,                 // flags
-		MF2_LOGRAV | MF2_NOTELEPORT // flags2
+		MobjFlag2::LoGrav | MobjFlag2::NoTeleport // flags2
 	},
 
 	{
@@ -13903,7 +13903,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		15,                                                                 // damage
 		SfxId::HexenKoraxActive,                                             // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL,                             // flags
-		MF2_FOOTCLIP | MF2_PUSHWALL | MF2_MCROSS | MF2_TELESTOMP | MF2_BOSS // flags2
+		MobjFlag2::FootClip | MobjFlag2::PushWall | MobjFlag2::MCross | MobjFlag2::TeleStomp | MobjFlag2::Boss // flags2
 	},
 
 	{
@@ -13931,7 +13931,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                 // damage
 		SfxId::None,                                                                          // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_ALTSHADOW | MF_MISSILE | MF_NOCLIP, // flags
-		MF2_NOTELEPORT                                                                     // flags2
+		MobjFlag2::NoTeleport                                                                     // flags2
 	},
 
 	{
@@ -13959,7 +13959,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                 // damage
 		SfxId::None,                                                                          // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_ALTSHADOW | MF_MISSILE | MF_NOCLIP, // flags
-		MF2_NOTELEPORT                                                                     // flags2
+		MobjFlag2::NoTeleport                                                                     // flags2
 	},
 
 	{
@@ -13987,7 +13987,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                 // damage
 		SfxId::None,                                                                          // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_ALTSHADOW | MF_MISSILE | MF_NOCLIP, // flags
-		MF2_NOTELEPORT                                                                     // flags2
+		MobjFlag2::NoTeleport                                                                     // flags2
 	},
 
 	{
@@ -14015,7 +14015,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                 // damage
 		SfxId::None,                                                                          // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_ALTSHADOW | MF_MISSILE | MF_NOCLIP, // flags
-		MF2_NOTELEPORT                                                                     // flags2
+		MobjFlag2::NoTeleport                                                                     // flags2
 	},
 
 	{
@@ -14043,7 +14043,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                 // damage
 		SfxId::None,                                                                          // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_ALTSHADOW | MF_MISSILE | MF_NOCLIP, // flags
-		MF2_NOTELEPORT                                                                     // flags2
+		MobjFlag2::NoTeleport                                                                     // flags2
 	},
 
 	{
@@ -14071,7 +14071,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                 // damage
 		SfxId::None,                                                                          // activesound
 		MF_NOBLOCKMAP | MF_DROPOFF | MF_NOGRAVITY | MF_ALTSHADOW | MF_MISSILE | MF_NOCLIP, // flags
-		MF2_NOTELEPORT                                                                     // flags2
+		MobjFlag2::NoTeleport                                                                     // flags2
 	},
 
 	{
@@ -14099,7 +14099,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                    // damage
 		SfxId::HexenDemonActive,                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_ALTSHADOW | MF_NOBLOOD,   // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_MCROSS | MF2_PUSHWALL | MF2_BLASTED // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
 	},
 
 	{
@@ -14127,7 +14127,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                    // damage
 		SfxId::HexenDemonActive,                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_ALTSHADOW | MF_NOBLOOD,   // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_MCROSS | MF2_PUSHWALL | MF2_BLASTED // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
 	},
 
 	{
@@ -14155,7 +14155,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		3,                                                                    // damage
 		SfxId::HexenEttinActive,                                               // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_ALTSHADOW | MF_NOBLOOD,   // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_MCROSS | MF2_PUSHWALL | MF2_BLASTED // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
 	},
 
 	{
@@ -14183,7 +14183,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                    // damage
 		SfxId::HexenCentaurActive,                                             // activesound
 		MF_SOLID | MF_SHOOTABLE | MF_COUNTKILL | MF_ALTSHADOW | MF_NOBLOOD,   // flags
-		MF2_FOOTCLIP | MF2_PASSMOBJ | MF2_MCROSS | MF2_PUSHWALL | MF2_BLASTED // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
 	},
 
 	{
@@ -14211,7 +14211,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                      // damage
 		SfxId::None,                                               // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE | MF_DROPOFF, // flags
-		MF2_NOTELEPORT                                          // flags2
+		MobjFlag2::NoTeleport                                          // flags2
 	},
 
 	{
@@ -14239,7 +14239,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                          // damage
 		SfxId::None,                                   // activesound
 		MF_NOBLOCKMAP | MF_NOSECTOR | MF_NOGRAVITY, // flags
-		MF2_DONTDRAW                                // flags2
+		MobjFlag2::DontDraw                                // flags2
 	},
 
 	{
@@ -14267,6 +14267,6 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                         // damage
 		SfxId::None,                                  // activesound
 		MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE, // flags
-		MF2_PASSMOBJ | MF2_NOTELEPORT              // flags2
+		MobjFlag2::PassMobj | MobjFlag2::NoTeleport              // flags2
 	}
 };

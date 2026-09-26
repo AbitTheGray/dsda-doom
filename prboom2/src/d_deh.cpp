@@ -1242,25 +1242,25 @@ static const struct deh_flag_s deh_mobjflags_standard[] = {
 };
 
 static const struct deh_flag_s deh_mobjflags_mbf21[] = {
-	{"LOGRAV", MF2_LOGRAV},                 // low gravity
-	{"SHORTMRANGE", MF2_SHORTMRANGE},       // short missile range
-	{"DMGIGNORED", MF2_DMGIGNORED},         // other things ignore its attacks
-	{"NORADIUSDMG", MF2_NORADIUSDMG},       // doesn't take splash damage
-	{"FORCERADIUSDMG", MF2_FORCERADIUSDMG}, // causes splash damage even if target immune
-	{"HIGHERMPROB", MF2_HIGHERMPROB},       // higher missile attack probability
-	{"RANGEHALF", MF2_RANGEHALF},           // use half distance for missile attack probability
-	{"NOTHRESHOLD", MF2_NOTHRESHOLD},       // no targeting threshold
-	{"LONGMELEE", MF2_LONGMELEE},           // long melee range
-	{"BOSS", MF2_BOSS},                     // full volume see / death sound + splash immunity
-	{"MAP07BOSS1", MF2_MAP07BOSS1},         // Tag 666 "boss" on doom 2 map 7
-	{"MAP07BOSS2", MF2_MAP07BOSS2},         // Tag 667 "boss" on doom 2 map 7
-	{"E1M8BOSS", MF2_E1M8BOSS},             // E1M8 boss
-	{"E2M8BOSS", MF2_E2M8BOSS},             // E2M8 boss
-	{"E3M8BOSS", MF2_E3M8BOSS},             // E3M8 boss
-	{"E4M6BOSS", MF2_E4M6BOSS},             // E4M6 boss
-	{"E4M8BOSS", MF2_E4M8BOSS},             // E4M8 boss
-	{"RIP", MF2_RIP},                       // projectile rips through targets
-	{"FULLVOLSOUNDS", MF2_FULLVOLSOUNDS},   // full volume see / death sound
+	{"LOGRAV", std::to_underlying(MobjFlag2::LoGrav)},                 // low gravity
+	{"SHORTMRANGE", std::to_underlying(MobjFlag2::ShortMRange)},       // short missile range
+	{"DMGIGNORED", std::to_underlying(MobjFlag2::DmgIgnored)},         // other things ignore its attacks
+	{"NORADIUSDMG", std::to_underlying(MobjFlag2::NoRadiusDmg)},       // doesn't take splash damage
+	{"FORCERADIUSDMG", std::to_underlying(MobjFlag2::ForceRadiusDmg)}, // causes splash damage even if target immune
+	{"HIGHERMPROB", std::to_underlying(MobjFlag2::HigherMProb)},       // higher missile attack probability
+	{"RANGEHALF", std::to_underlying(MobjFlag2::RangeHalf)},           // use half distance for missile attack probability
+	{"NOTHRESHOLD", std::to_underlying(MobjFlag2::NoThreshold)},       // no targeting threshold
+	{"LONGMELEE", std::to_underlying(MobjFlag2::LongMelee)},           // long melee range
+	{"BOSS", std::to_underlying(MobjFlag2::Boss)},                     // full volume see / death sound + splash immunity
+	{"MAP07BOSS1", std::to_underlying(MobjFlag2::Map07Boss1)},         // Tag 666 "boss" on doom 2 map 7
+	{"MAP07BOSS2", std::to_underlying(MobjFlag2::Map07Boss2)},         // Tag 667 "boss" on doom 2 map 7
+	{"E1M8BOSS", std::to_underlying(MobjFlag2::E1M8Boss)},             // E1M8 boss
+	{"E2M8BOSS", std::to_underlying(MobjFlag2::E2M8Boss)},             // E2M8 boss
+	{"E3M8BOSS", std::to_underlying(MobjFlag2::E3M8Boss)},             // E3M8 boss
+	{"E4M6BOSS", std::to_underlying(MobjFlag2::E4M6Boss)},             // E4M6 boss
+	{"E4M8BOSS", std::to_underlying(MobjFlag2::E4M8Boss)},             // E4M8 boss
+	{"RIP", std::to_underlying(MobjFlag2::Rip)},                       // projectile rips through targets
+	{"FULLVOLSOUNDS", std::to_underlying(MobjFlag2::FullVolSounds)},   // full volume see / death sound
 	{nullptr}
 };
 
@@ -1560,9 +1560,9 @@ static uint64_t deh_stringToFlags(char* strval, const struct deh_flag_s* flags)
 	return value;
 }
 
-uint64_t deh_stringToMBF21MobjFlags(char* strval)
+MobjFlag2 deh_stringToMBF21MobjFlags(char* strval)
 {
-	return deh_stringToFlags(strval, deh_mobjflags_mbf21);
+	return static_cast<MobjFlag2>(deh_stringToFlags(strval, deh_mobjflags_mbf21));
 }
 
 uint64_t deh_stringToMobjFlags(char* strval)
@@ -2126,10 +2126,10 @@ static void deh_procThing(DEHFILE* fpin, char* line)
 				}
 				else
 				{
-					value = deh_stringToMBF21MobjFlags(strval);
+					value = std::to_underlying(deh_stringToMBF21MobjFlags(strval));
 				}
 
-				deh_mobjinfo.info->flags2 = value;
+				deh_mobjinfo.info->flags2 = static_cast<MobjFlag2>(value);
 			}
 			else if(deh_strcasecmp(key, "Bits"))
 			{

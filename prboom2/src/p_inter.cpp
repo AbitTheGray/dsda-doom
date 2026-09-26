@@ -403,10 +403,10 @@ dboolean P_GivePower(player_t* player, PowerType power)
 		case PowerType::Invulnerability:
 			if(hexen)
 			{
-				player->mo->flags2 |= MF2_INVULNERABLE;
+				player->mo->flags2 |= MobjFlag2::Invulnerable;
 				if(player->pclass == PClass::Mage)
 				{
-					player->mo->flags2 |= MF2_REFLECTIVE;
+					player->mo->flags2 |= MobjFlag2::Reflective;
 				}
 			}
 			break;
@@ -421,7 +421,7 @@ dboolean P_GivePower(player_t* player, PowerType power)
 			P_GiveBody(player, 100);
 			break;
 		case PowerType::Flight:
-			player->mo->flags2 |= MF2_FLY;
+			player->mo->flags2 |= MobjFlag2::Fly;
 			player->mo->flags |= MF_NOGRAVITY;
 			if(player->mo->z <= player->mo->floorz)
 			{
@@ -791,7 +791,7 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 	if(special->flags & MF_COUNTITEM)
 		player->itemcount++;
 
-	if(special->flags2 & MF2_COUNTSECRET)
+	if((special->flags2 & MobjFlag2::CountSecret) != MobjFlag2{})
 		P_PlayerCollectSecret(player);
 
 	P_RemoveMobj(special);
@@ -828,7 +828,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 	target->height >>= 2;
 
 	// heretic
-	target->flags2 &= ~MF2_PASSMOBJ;
+	target->flags2 -= MobjFlag2::PassMobj;
 
 	if(
 		mbf21 || (
@@ -965,7 +965,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 		target->flags &= ~MF_SOLID;
 
 		// heretic
-		target->flags2 &= ~MF2_FLY;
+		target->flags2 -= MobjFlag2::Fly;
 		target->player->powers[std::to_underlying(PowerType::Flight)] = 0;
 		target->player->powers[std::to_underlying(PowerType::WeaponLevel2)] = 0;
 
@@ -973,7 +973,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 		P_DropWeapon(target->player);
 
 		// heretic
-		if(target->flags2 & MF2_FIREDAMAGE)
+		if((target->flags2 & MobjFlag2::FireDamage) != MobjFlag2{})
 		{
 			// Player flame death
 			switch(target->player->pclass)
@@ -999,7 +999,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 		}
 
 		// hexen
-		if(target->flags2 & MF2_ICEDAMAGE)
+		if((target->flags2 & MobjFlag2::IceDamage) != MobjFlag2{})
 		{
 			// Player ice death
 			target->flags &= ~(7 << MF_TRANSSHIFT); //no translation
@@ -1029,7 +1029,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 
 	if(hexen)
 	{
-		if(target->flags2 & MF2_FIREDAMAGE)
+		if((target->flags2 & MobjFlag2::FireDamage) != MobjFlag2{})
 		{
 			if(target->type == MobjType::HexenFighterBoss
 				|| target->type == MobjType::HexenClericBoss
@@ -1061,7 +1061,7 @@ static void P_KillMobj(mobj_t* source, mobj_t* target)
 				return;
 			}
 		}
-		if(target->flags2 & MF2_ICEDAMAGE)
+		if((target->flags2 & MobjFlag2::IceDamage) != MobjFlag2{})
 		{
 			target->flags |= MF_ICECORPSE;
 			switch(target->type)
@@ -1220,7 +1220,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 	if(target->health <= 0)
 	{
 		// hexen
-		if(inflictor && inflictor->flags2 & MF2_ICEDAMAGE)
+		if(inflictor && (inflictor->flags2 & MobjFlag2::IceDamage) != MobjFlag2{})
 		{
 			return;
 		}
@@ -1235,7 +1235,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 	// hexen has a different order of checks
 	if(hexen)
 	{
-		if((target->flags2 & MF2_INVULNERABLE) && damage < 10000)
+		if((target->flags2 & MobjFlag2::Invulnerable) != MobjFlag2{} && damage < 10000)
 		{
 			// mobj is invulnerable
 			if(target->player)
@@ -1274,7 +1274,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		target->momx = target->momy = target->momz = 0;
 	}
 
-	if(target->flags2 & MF2_DORMANT)
+	if((target->flags2 & MobjFlag2::Dormant) != MobjFlag2{})
 	{
 		// Invulnerable, and won't wake up
 		return;
@@ -1311,7 +1311,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 				}
 				break;
 			case MobjType::HereticMacefx4: // Death ball
-				if((target->flags2 & MF2_BOSS) || target->type == MobjType::HereticHead)
+				if((target->flags2 & MobjFlag2::Boss) != MobjFlag2{} || target->type == MobjType::HereticHead)
 				{
 					// Don't allow cheap boss kills
 					break;
@@ -1343,7 +1343,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 			case MobjType::HereticRainplr2:
 			case MobjType::HereticRainplr3:
 			case MobjType::HereticRainplr4:
-				if(target->flags2 & MF2_BOSS)
+				if((target->flags2 & MobjFlag2::Boss) != MobjFlag2{})
 				{
 					// Decrease damage for bosses
 					damage = (P_Random(RandomClass::Heretic) & 7) + 1;
@@ -1396,7 +1396,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 				if((target->flags & MF_COUNTKILL) &&
 					(target->type != MobjType::HexenSerpent) &&
 					(target->type != MobjType::HexenSerpentleader) &&
-					(!(target->flags2 & MF2_BOSS)))
+					((target->flags2 & MobjFlag2::Boss) == MobjFlag2{}))
 				{
 					P_TeleportOther(target);
 				}
@@ -1487,7 +1487,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 			source->player &&
 			(hexen || weaponinfo[std::to_underlying(source->player->readyweapon)].flags & WPF_NOTHRUST)
 		) &&
-		!(inflictor->flags2 & MF2_NODMGTHRUST)
+		(inflictor->flags2 & MobjFlag2::NoDmgThrust) == MobjFlag2{}
 	)
 	{
 		unsigned ang = R_PointToAngle2(inflictor->x, inflictor->y,
@@ -1654,11 +1654,11 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 			if(player && inflictor && !player->chickenTics)
 			{
 				// Check for flame death
-				if((inflictor->flags2 & MF2_FIREDAMAGE)
+				if((inflictor->flags2 & MobjFlag2::FireDamage) != MobjFlag2{}
 					|| ((inflictor->type == MobjType::HereticPhoenixfx1)
 						&& (target->health > -50) && (damage > 25)))
 				{
-					target->flags2 |= MF2_FIREDAMAGE;
+					target->flags2 |= MobjFlag2::FireDamage;
 				}
 			}
 		}
@@ -1667,24 +1667,24 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 			if(inflictor)
 			{
 				// check for special fire damage or ice damage deaths
-				if(inflictor->flags2 & MF2_FIREDAMAGE)
+				if((inflictor->flags2 & MobjFlag2::FireDamage) != MobjFlag2{})
 				{
 					if(player && !player->morphTics)
 					{
 						// Check for flame death
 						if(target->health > -50 && damage > 25)
 						{
-							target->flags2 |= MF2_FIREDAMAGE;
+							target->flags2 |= MobjFlag2::FireDamage;
 						}
 					}
 					else
 					{
-						target->flags2 |= MF2_FIREDAMAGE;
+						target->flags2 |= MobjFlag2::FireDamage;
 					}
 				}
-				else if(inflictor->flags2 & MF2_ICEDAMAGE)
+				else if((inflictor->flags2 & MobjFlag2::IceDamage) != MobjFlag2{})
 				{
-					target->flags2 |= MF2_ICEDAMAGE;
+					target->flags2 |= MobjFlag2::IceDamage;
 				}
 			}
 			if(source && (source->type == MobjType::HexenMinotaur))
@@ -1792,12 +1792,12 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 	if(
 		source &&
 		(source != target || compatibility_level == CompLevel::Doom12) &&
-		!(source->flags2 & MF2_DMGIGNORED) &&
-		(!target->threshold || target->flags2 & MF2_NOTHRESHOLD) &&
+		(source->flags2 & MobjFlag2::DmgIgnored) == MobjFlag2{} &&
+		(!target->threshold || (target->flags2 & MobjFlag2::NoThreshold) != MobjFlag2{}) &&
 		((source->flags ^ target->flags) & MF_FRIEND || monster_infighting || !mbf_features) &&
 		!(
 			raven && (
-				source->flags2 & MF2_BOSS ||
+				(source->flags2 & MobjFlag2::Boss) != MobjFlag2{} ||
 				(target->type == MobjType::HereticSorcerer2 && source->type == MobjType::HereticWizard) ||
 				target->type == MobjType::HexenBishop ||
 				target->type == MobjType::HexenMinotaur ||
@@ -1859,7 +1859,7 @@ extern "C" void A_RestoreSpecialThing1(mobj_t* thing)
 		// Do random mace placement
 		P_RepositionMace(thing);
 	}
-	thing->flags2 &= ~MF2_DONTDRAW;
+	thing->flags2 -= MobjFlag2::DontDraw;
 	S_StartMobjSound(thing, g_sfx_respawn);
 }
 
@@ -2370,7 +2370,7 @@ dboolean Heretic_P_GiveWeapon(player_t* player, WeaponType weapon)
 void P_HideSpecialThing(mobj_t* thing)
 {
 	thing->flags &= ~MF_SPECIAL;
-	thing->flags2 |= MF2_DONTDRAW;
+	thing->flags2 |= MobjFlag2::DontDraw;
 	P_SetMobjState(thing, static_cast<StateId>(g_hide_state));
 }
 
@@ -2406,7 +2406,7 @@ void P_TouchWhirlwind(mobj_t* target)
 	target->angle += P_SubRandom() << 20;
 	target->momx += P_SubRandom() << 10;
 	target->momy += P_SubRandom() << 10;
-	if(leveltime & 16 && !(target->flags2 & MF2_BOSS))
+	if(leveltime & 16 && (target->flags2 & MobjFlag2::Boss) == MobjFlag2{})
 	{
 		randVal = P_Random(RandomClass::Heretic);
 		if(randVal > 160)
@@ -2436,7 +2436,7 @@ dboolean P_ChickenMorphPlayer(player_t* player)
 	fixed_t y;
 	fixed_t z;
 	angle_t angle;
-	int oldFlags2;
+	MobjFlag2 oldFlags2;
 
 	if(player->chickenTics)
 	{
@@ -2471,9 +2471,9 @@ dboolean P_ChickenMorphPlayer(player_t* player)
 	player->armorpoints[std::to_underlying(ArmorType::Armor)] = player->armortype = 0;
 	player->powers[std::to_underlying(PowerType::Invisibility)] = 0;
 	player->powers[std::to_underlying(PowerType::WeaponLevel2)] = 0;
-	if(oldFlags2 & MF2_FLY)
+	if((oldFlags2 & MobjFlag2::Fly) != MobjFlag2{})
 	{
-		chicken->flags2 |= MF2_FLY;
+		chicken->flags2 |= MobjFlag2::Fly;
 	}
 	player->chickenTics = CHICKENTICS;
 	P_ActivateBeak(player);
@@ -2718,7 +2718,7 @@ void P_PoisonDamage(player_t* player, mobj_t* source, int damage,
 	{
 		return;
 	}
-	if(target->flags2 & MF2_INVULNERABLE && damage < 10000)
+	if((target->flags2 & MobjFlag2::Invulnerable) != MobjFlag2{} && damage < 10000)
 	{
 		// mobj is invulnerable
 		return;
@@ -2756,14 +2756,14 @@ void P_PoisonDamage(player_t* player, mobj_t* source, int damage,
 		if(inflictor && !player->morphTics)
 		{
 			// Check for flame death
-			if((inflictor->flags2 & MF2_FIREDAMAGE)
+			if((inflictor->flags2 & MobjFlag2::FireDamage) != MobjFlag2{}
 				&& (target->health > -50) && (damage > 25))
 			{
-				target->flags2 |= MF2_FIREDAMAGE;
+				target->flags2 |= MobjFlag2::FireDamage;
 			}
-			if(inflictor->flags2 & MF2_ICEDAMAGE)
+			if((inflictor->flags2 & MobjFlag2::IceDamage) != MobjFlag2{})
 			{
-				target->flags2 |= MF2_ICEDAMAGE;
+				target->flags2 |= MobjFlag2::IceDamage;
 			}
 		}
 		P_KillMobj(source, target);
@@ -3561,7 +3561,7 @@ dboolean P_MorphPlayer(player_t* player)
 	fixed_t y;
 	fixed_t z;
 	angle_t angle;
-	int oldFlags2;
+	MobjFlag2 oldFlags2;
 
 	if(player->powers[std::to_underlying(PowerType::Invulnerability)])
 	{
@@ -3590,9 +3590,9 @@ dboolean P_MorphPlayer(player_t* player)
 	player->mo = beastMo;
 	memset(&player->armorpoints[0], 0, std::to_underlying(ArmorType::Count) * sizeof(int));
 	player->pclass = PClass::Pig;
-	if(oldFlags2 & MF2_FLY)
+	if((oldFlags2 & MobjFlag2::Fly) != MobjFlag2{})
 	{
-		beastMo->flags2 |= MF2_FLY;
+		beastMo->flags2 |= MobjFlag2::Fly;
 	}
 	player->morphTics = std::to_underlying(PowerDuration::Morphtics);
 	P_ActivateMorphWeapon(player);
@@ -3612,7 +3612,7 @@ static dboolean P_MorphMonster(mobj_t* actor)
 		return (false);
 	if(!(actor->flags & MF_COUNTKILL))
 		return false;
-	if(actor->flags2 & MF2_BOSS)
+	if((actor->flags2 & MobjFlag2::Boss) != MobjFlag2{})
 		return false;
 	moType = actor->type;
 	switch(moType)

@@ -11,6 +11,11 @@ bare string literals). Once those areas are rewritten, the struct and the
 `enum struct` should live in `prboom2/src/dsda/` so the writer and the spec's
 parser share one definition. Keeping the duplicates until then.
 
+## Remove undefined behavior
+
+UBSan has been run before, and only enough UB was fixed to make the test demos sync (see the signed-overflow entry in `Compatibility.md`).
+Other instances of the same kinds remain throughout the code and should be removed.
+
 ## The mobj flags are still `#define`s, not `enum struct`
 
 Noted 2026-09-24, after every C-style enum in `prboom2/src` had been converted.

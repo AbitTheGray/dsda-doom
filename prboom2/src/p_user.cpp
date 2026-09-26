@@ -224,7 +224,7 @@ void P_CalcHeight(player_t* player)
 			player->bob = MAXBOB;
 	}
 
-	if(player->mo->flags2 & MF2_FLY && !onground)
+	if((player->mo->flags2 & MobjFlag2::Fly) != MobjFlag2{} && !onground)
 	{
 		player->bob = FRACUNIT / 2;
 	}
@@ -290,7 +290,7 @@ void P_CalcHeight(player_t* player)
 	{
 		if(player->mo->floorclip)
 			player->viewz -= player->mo->floorclip;
-		else if(player->mo->flags2 & MF2_FEETARECLIPPED)
+		else if((player->mo->flags2 & MobjFlag2::FeetAreClipped) != MobjFlag2{})
 			player->viewz -= FOOTCLIPSIZE;
 	}
 
@@ -345,7 +345,7 @@ void P_MovePlayer(player_t* player)
 		R_SmoothPlaying_Add(cmd->angleturn << 16);
 	}
 
-	onground = (mo->z <= mo->floorz || mo->flags2 & MF2_ONMOBJ);
+	onground = (mo->z <= mo->floorz || (mo->flags2 & MobjFlag2::OnMobj) != MobjFlag2{});
 
 	if((player->mo->flags & MF_FLY) && player == &players[consoleplayer] && upmove != 0)
 	{
@@ -461,7 +461,7 @@ void P_DeathThink(player_t* player)
 			}
 		}
 	}
-	else if(!(player->mo->flags2 & MF2_ICEDAMAGE))
+	else if((player->mo->flags2 & MobjFlag2::IceDamage) == MobjFlag2{})
 	{
 		if(player->viewheight > 6 * FRACUNIT)
 			player->viewheight -= FRACUNIT;
@@ -589,7 +589,7 @@ void P_PlayerEndFlight(player_t* player)
 		player->centering = true;
 	}
 
-	player->mo->flags2 &= ~MF2_FLY;
+	player->mo->flags2 -= MobjFlag2::Fly;
 	player->mo->flags &= ~MF_NOGRAVITY;
 }
 
@@ -710,7 +710,7 @@ void P_PlayerThink(player_t* player)
 					speedMo->floorclip = pmo->floorclip;
 					if(player == &players[consoleplayer])
 					{
-						speedMo->flags2 |= MF2_DONTDRAW;
+						speedMo->flags2 |= MobjFlag2::DontDraw;
 					}
 				}
 			}
@@ -778,7 +778,7 @@ void P_PlayerThink(player_t* player)
 				{
 					player->mo->momz = 9 * FRACUNIT;
 				}
-				player->mo->flags2 &= ~MF2_ONMOBJ;
+				player->mo->flags2 -= MobjFlag2::OnMobj;
 				player->jumpTics = 18;
 			}
 			else if(cmd->arti & AFLAG_SUICIDE)
@@ -822,7 +822,7 @@ void P_PlayerThink(player_t* player)
 		if(cmd->ex.actions & XC_JUMP && onground && !player->jumpTics)
 		{
 			player->mo->momz = g_jump * FRACUNIT;
-			player->mo->flags2 &= ~MF2_ONMOBJ;
+			player->mo->flags2 -= MobjFlag2::OnMobj;
 			player->jumpTics = 18;
 		}
 	}
@@ -940,17 +940,17 @@ void P_PlayerThink(player_t* player)
 		if(player->pclass == PClass::Cleric)
 		{
 			if(!(leveltime & 7) && player->mo->flags & MF_SHADOW
-				&& !(player->mo->flags2 & MF2_DONTDRAW))
+				&& (player->mo->flags2 & MobjFlag2::DontDraw) == MobjFlag2{})
 			{
 				player->mo->flags &= ~MF_SHADOW;
 				if(!(player->mo->flags & MF_ALTSHADOW))
 				{
-					player->mo->flags2 |= MF2_DONTDRAW | MF2_NONSHOOTABLE;
+					player->mo->flags2 |= MobjFlag2::DontDraw | MobjFlag2::NonShootable;
 				}
 			}
 			if(!(leveltime & 31))
 			{
-				if(player->mo->flags2 & MF2_DONTDRAW)
+				if((player->mo->flags2 & MobjFlag2::DontDraw) != MobjFlag2{})
 				{
 					if(!(player->mo->flags & MF_SHADOW))
 					{
@@ -958,8 +958,7 @@ void P_PlayerThink(player_t* player)
 					}
 					else
 					{
-						player->mo->flags2 &=
-							~(MF2_DONTDRAW | MF2_NONSHOOTABLE);
+						player->mo->flags2 -= (MobjFlag2::DontDraw | MobjFlag2::NonShootable);
 					}
 				}
 				else
@@ -972,10 +971,10 @@ void P_PlayerThink(player_t* player)
 
 		if(!(--player->powers[std::to_underlying(PowerType::Invulnerability)]))
 		{
-			player->mo->flags2 &= ~(MF2_INVULNERABLE | MF2_REFLECTIVE);
+			player->mo->flags2 -= (MobjFlag2::Invulnerable | MobjFlag2::Reflective);
 			if(player->pclass == PClass::Cleric)
 			{
-				player->mo->flags2 &= ~(MF2_DONTDRAW | MF2_NONSHOOTABLE);
+				player->mo->flags2 -= (MobjFlag2::DontDraw | MobjFlag2::NonShootable);
 				player->mo->flags &= ~(MF_SHADOW | MF_ALTSHADOW);
 			}
 		}
@@ -1146,7 +1145,7 @@ dboolean P_UndoPlayerChicken(player_t* player)
 	int playerNum;
 	WeaponType weapon;
 	int oldFlags;
-	int oldFlags2;
+	int oldFlags2; // not MobjFlag2: upstream truncates to int, see below
 
 	pmo = player->mo;
 	x = pmo->x;
@@ -1155,7 +1154,9 @@ dboolean P_UndoPlayerChicken(player_t* player)
 	angle = pmo->angle;
 	weapon = static_cast<WeaponType>(pmo->special1.i);
 	oldFlags = pmo->flags;
-	oldFlags2 = pmo->flags2;
+	// Truncates on purpose, as upstream: flags2 is 64 bits but upstream keeps it in an int,
+	// so bits 32-63 are lost if a failed unmorph writes it back below.
+	oldFlags2 = static_cast<int>(std::to_underlying(pmo->flags2));
 	P_SetMobjState(pmo, StateId::HereticFreetargmobj);
 	mo = P_SpawnMobj(x, y, z, static_cast<MobjType>(g_mt_player));
 	if(P_TestMobjLocation(mo) == false)
@@ -1168,7 +1169,8 @@ dboolean P_UndoPlayerChicken(player_t* player)
 		mo->special1.i = std::to_underlying(weapon);
 		mo->player = player;
 		mo->flags = oldFlags;
-		mo->flags2 = oldFlags2;
+		// The truncated copy: the original bits 32-63 are gone, replaced by copies of bit 31
+		mo->flags2 = static_cast<MobjFlag2>(static_cast<uint64_t>(oldFlags2));
 		player->mo = mo;
 		player->chickenTics = 2 * TICRATE;
 		return (false);
@@ -1182,9 +1184,9 @@ dboolean P_UndoPlayerChicken(player_t* player)
 	mo->angle = angle;
 	mo->player = player;
 	mo->reactiontime = 18;
-	if(oldFlags2 & MF2_FLY)
+	if(oldFlags2 & std::to_underlying(MobjFlag2::Fly))
 	{
-		mo->flags2 |= MF2_FLY;
+		mo->flags2 |= MobjFlag2::Fly;
 		mo->flags |= MF_NOGRAVITY;
 	}
 	player->chickenTics = 0;
@@ -1425,10 +1427,11 @@ dboolean P_UseArtifact(player_t* player, ArtiType arti)
 			//   (player->mo->flags2 & (MF2_FEETARECLIPPED != 0)),
 			// Which simplifies to:
 			//   (player->mo->flags2 & 1),
+			// Bit 0 is MobjFlag2::LoGrav.
 			mo = P_SpawnMobj(player->mo->x + 24 * finecosine[angle],
 				player->mo->y + 24 * finesine[angle],
 				player->mo->z -
-				15 * FRACUNIT * (player->mo->flags2 & 1),
+				15 * FRACUNIT * std::to_underlying(player->mo->flags2 & MobjFlag2::LoGrav),
 				MobjType::HereticFirebomb);
 			P_SetTarget(&mo->target, player->mo);
 			break;
@@ -1470,14 +1473,14 @@ void Raven_P_MovePlayer(player_t* player)
 	}
 
 	onground = (player->mo->z <= player->mo->floorz
-		|| (player->mo->flags2 & MF2_ONMOBJ));
+		|| (player->mo->flags2 & MobjFlag2::OnMobj) != MobjFlag2{});
 
 	if(player->chickenTics)
 	{
 		// Chicken speed
-		if(cmd->forwardmove && (onground || player->mo->flags2 & MF2_FLY))
+		if(cmd->forwardmove && (onground || (player->mo->flags2 & MobjFlag2::Fly) != MobjFlag2{}))
 			P_ForwardThrust(player, player->mo->angle, cmd->forwardmove * 2500);
-		if(cmd->sidemove && (onground || player->mo->flags2 & MF2_FLY))
+		if(cmd->sidemove && (onground || (player->mo->flags2 & MobjFlag2::Fly) != MobjFlag2{}))
 			P_Thrust(player, player->mo->angle - ANG90, cmd->sidemove * 2500);
 	}
 	else
@@ -1485,7 +1488,7 @@ void Raven_P_MovePlayer(player_t* player)
 		// Normal speed
 		if(cmd->forwardmove)
 		{
-			if(onground || player->mo->flags2 & MF2_FLY)
+			if(onground || (player->mo->flags2 & MobjFlag2::Fly) != MobjFlag2{})
 				P_ForwardThrust(player, player->mo->angle, cmd->forwardmove * 2048);
 			else if(hexen)
 				P_ForwardThrust(player, player->mo->angle, map_aircontrol);
@@ -1493,7 +1496,7 @@ void Raven_P_MovePlayer(player_t* player)
 
 		if(cmd->sidemove)
 		{
-			if(onground || player->mo->flags2 & MF2_FLY)
+			if(onground || (player->mo->flags2 & MobjFlag2::Fly) != MobjFlag2{})
 				P_Thrust(player, player->mo->angle - ANG90, cmd->sidemove * 2048);
 			else if(hexen)
 				P_Thrust(player, player->mo->angle, map_aircontrol);
@@ -1564,9 +1567,9 @@ void Raven_P_MovePlayer(player_t* player)
 		if(fly != TOCENTER)
 		{
 			player->flyheight = fly * 2;
-			if(!(player->mo->flags2 & MF2_FLY))
+			if((player->mo->flags2 & MobjFlag2::Fly) == MobjFlag2{})
 			{
-				player->mo->flags2 |= MF2_FLY;
+				player->mo->flags2 |= MobjFlag2::Fly;
 				player->mo->flags |= MF_NOGRAVITY;
 				if(hexen && player->mo->momz <= -39 * FRACUNIT)
 				{
@@ -1577,7 +1580,7 @@ void Raven_P_MovePlayer(player_t* player)
 		}
 		else
 		{
-			player->mo->flags2 &= ~MF2_FLY;
+			player->mo->flags2 -= MobjFlag2::Fly;
 			player->mo->flags &= ~MF_NOGRAVITY;
 		}
 	}
@@ -1585,7 +1588,7 @@ void Raven_P_MovePlayer(player_t* player)
 	{
 		P_PlayerUseArtifact(player, static_cast<ArtiType>(g_arti_fly));
 	}
-	if(player->mo->flags2 & MF2_FLY)
+	if((player->mo->flags2 & MobjFlag2::Fly) != MobjFlag2{})
 	{
 		player->mo->momz = player->flyheight * FRACUNIT;
 		if(player->flyheight)
@@ -1636,10 +1639,10 @@ void P_ChickenPlayerThink(player_t* player)
 
 void ResetBlasted(mobj_t* mo)
 {
-	mo->flags2 &= ~MF2_BLASTED;
+	mo->flags2 -= MobjFlag2::Blasted;
 	if(!(mo->flags & MF_ICECORPSE))
 	{
-		mo->flags2 &= ~MF2_SLIDE;
+		mo->flags2 -= MobjFlag2::Slide;
 	}
 }
 
@@ -1661,8 +1664,8 @@ void P_BlastMobj(mobj_t* source, mobj_t* victim, fixed_t strength)
 		}
 		else
 		{
-			victim->flags2 |= MF2_SLIDE;
-			victim->flags2 |= MF2_BLASTED;
+			victim->flags2 |= MobjFlag2::Slide;
+			victim->flags2 |= MobjFlag2::Blasted;
 		}
 	}
 	else // full strength blast from artifact
@@ -1723,8 +1726,8 @@ void P_BlastMobj(mobj_t* source, mobj_t* victim, fixed_t strength)
 		}
 		else
 		{
-			victim->flags2 |= MF2_SLIDE;
-			victim->flags2 |= MF2_BLASTED;
+			victim->flags2 |= MobjFlag2::Slide;
+			victim->flags2 |= MobjFlag2::Blasted;
 		}
 	}
 }
@@ -1748,7 +1751,7 @@ void P_BlastRadius(player_t* player)
 			continue;
 		}
 		mo = (mobj_t*)think;
-		if((mo == pmo) || (mo->flags2 & MF2_BOSS))
+		if((mo == pmo) || (mo->flags2 & MobjFlag2::Boss) != MobjFlag2{})
 		{
 			// Not a valid monster
 			continue;
@@ -1769,11 +1772,11 @@ void P_BlastRadius(player_t* player)
 			// Must be monster, player, or missile
 			continue;
 		}
-		if(mo->flags2 & MF2_DORMANT)
+		if((mo->flags2 & MobjFlag2::Dormant) != MobjFlag2{})
 		{
 			continue; // no dormant creatures
 		}
-		if((mo->type == MobjType::HexenWraithb) && (mo->flags2 & MF2_DONTDRAW))
+		if((mo->type == MobjType::HexenWraithb) && (mo->flags2 & MobjFlag2::DontDraw) != MobjFlag2{})
 		{
 			continue; // no underground wraiths
 		}
@@ -1836,7 +1839,7 @@ dboolean P_UndoPlayerMorph(player_t* player)
 	int playerNum;
 	WeaponType weapon;
 	int oldFlags;
-	int oldFlags2;
+	int oldFlags2; // not MobjFlag2: upstream truncates to int, see below
 	MobjType oldBeast;
 
 	pmo = player->mo;
@@ -1846,7 +1849,9 @@ dboolean P_UndoPlayerMorph(player_t* player)
 	angle = pmo->angle;
 	weapon = static_cast<WeaponType>(pmo->special1.i);
 	oldFlags = pmo->flags;
-	oldFlags2 = pmo->flags2;
+	// Truncates on purpose, as upstream: flags2 is 64 bits but upstream keeps it in an int,
+	// so bits 32-63 are lost if a failed unmorph writes it back below.
+	oldFlags2 = static_cast<int>(std::to_underlying(pmo->flags2));
 	oldBeast = pmo->type;
 	P_SetMobjState(pmo, StateId::HexenFreetargmobj);
 	playerNum = P_GetPlayerNum(player);
@@ -1876,7 +1881,8 @@ dboolean P_UndoPlayerMorph(player_t* player)
 		mo->special1.i = std::to_underlying(weapon);
 		mo->player = player;
 		mo->flags = oldFlags;
-		mo->flags2 = oldFlags2;
+		// The truncated copy: the original bits 32-63 are gone, replaced by copies of bit 31
+		mo->flags2 = static_cast<MobjFlag2>(static_cast<uint64_t>(oldFlags2));
 		player->mo = mo;
 		player->morphTics = 2 * TICRATE;
 		return (false);
@@ -1902,9 +1908,9 @@ dboolean P_UndoPlayerMorph(player_t* player)
 	mo->angle = angle;
 	mo->player = player;
 	mo->reactiontime = 18;
-	if(oldFlags2 & MF2_FLY)
+	if(oldFlags2 & std::to_underlying(MobjFlag2::Fly))
 	{
-		mo->flags2 |= MF2_FLY;
+		mo->flags2 |= MobjFlag2::Fly;
 		mo->flags |= MF_NOGRAVITY;
 	}
 	player->morphTics = 0;
