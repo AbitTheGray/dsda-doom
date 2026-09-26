@@ -105,6 +105,8 @@ enum struct TextColorIndex : int32_t
 	StbarAmmoWarning,
 	StbarAmmoOk,
 	StbarAmmoFull,
+
+	Count,
 };
 
 void dsda_LoadTextColor();
