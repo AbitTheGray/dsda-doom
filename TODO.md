@@ -53,4 +53,4 @@ The written files must not change:
 - print flags as `{:d}`, because `std::format` writes a `bool` as `true`/`false`;
 - `M_OpenFile` converts the UTF-8 name to wide on Windows; open streams from a `std::filesystem::path` built with `std::u8string` so non-ASCII paths keep working.
 
-`dsda_WriteAnalysis` in `dsda/analysis.cpp` is a small first candidate.
+`dsda_WriteAnalysis` in `dsda/analysis.cpp` is already converted and shows the pattern.

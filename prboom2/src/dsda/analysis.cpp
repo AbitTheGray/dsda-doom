@@ -3,10 +3,14 @@
 // DESCRIPTION:
 //	DSDA Analysis
 
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <ostream>
+#include <string>
 #include <utility>
 
 #include "doomstat.hpp"
-#include "m_file.hpp"
 
 #include "dsda/excmd.hpp"
 #include "dsda/exdemo.hpp"
@@ -70,11 +74,13 @@ void dsda_WriteAnalysis()
 {
 	if(!dsda_analysis) return;
 
-	FILE* fstream = M_OpenFile("analysis.txt", "w");
+	// Text mode, as upstream's "w": `\n` stays `\n`, except on Windows where it becomes `\r\n`.
+	const std::filesystem::path path = u8"analysis.txt";
+	std::ofstream file(path);
 
-	if(fstream == nullptr)
+	if(!file)
 	{
-		fprintf(stderr, "Unable to open analysis.txt for writing!\n");
+		std::println(std::cerr, "Unable to open analysis.txt for writing!");
 		return;
 	}
 
@@ -106,31 +112,28 @@ void dsda_WriteAnalysis()
 		.signature = dsda_IsExDemoSigned(),
 	};
 
-	// A `bool` passed to `%d` is promoted to `int`, so the flags print as 0 or 1.
-	fprintf(fstream, "skill %d\n", analysis.skill);
-	fprintf(fstream, "nomonsters %d\n", analysis.noMonsters);
-	fprintf(fstream, "respawn %d\n", analysis.respawn);
-	fprintf(fstream, "fast %d\n", analysis.fast);
-	fprintf(fstream, "pacifist %d\n", analysis.pacifist);
-	fprintf(fstream, "stroller %d\n", analysis.stroller);
-	fprintf(fstream, "reality %d\n", analysis.reality);
-	fprintf(fstream, "almost_reality %d\n", analysis.almostReality);
-	fprintf(fstream, "reborn %d\n", analysis.reborn);
-	fprintf(fstream, "100k %d\n", analysis.hundredKills);
-	fprintf(fstream, "100s %d\n", analysis.hundredSecrets);
-	fprintf(fstream, "missed_monsters %d\n", analysis.missedMonsters);
-	fprintf(fstream, "missed_secrets %d\n", analysis.missedSecrets);
-	fprintf(fstream, "weapon_collector %d\n", analysis.weaponCollector);
-	fprintf(fstream, "tyson_weapons %d\n", analysis.tysonWeapons);
-	fprintf(fstream, "turbo %d\n", analysis.turbo);
-	fprintf(fstream, "solo_net %d\n", analysis.soloNet);
-	fprintf(fstream, "coop_spawns %d\n", analysis.coopSpawns);
-	fprintf(fstream, "category %s\n", analysis.category.c_str());
-	fprintf(fstream, "signature %d\n", std::to_underlying(analysis.signature));
-
-	fclose(fstream);
-
-	return;
+	// `{:d}` prints a `bool` as 0 or 1, as upstream's `%d` did, not as `true`/`false`.
+	std::println(file, "skill {}", analysis.skill);
+	std::println(file, "nomonsters {:d}", analysis.noMonsters);
+	std::println(file, "respawn {:d}", analysis.respawn);
+	std::println(file, "fast {:d}", analysis.fast);
+	std::println(file, "pacifist {:d}", analysis.pacifist);
+	std::println(file, "stroller {:d}", analysis.stroller);
+	std::println(file, "reality {:d}", analysis.reality);
+	std::println(file, "almost_reality {:d}", analysis.almostReality);
+	std::println(file, "reborn {:d}", analysis.reborn);
+	std::println(file, "100k {:d}", analysis.hundredKills);
+	std::println(file, "100s {:d}", analysis.hundredSecrets);
+	std::println(file, "missed_monsters {}", analysis.missedMonsters);
+	std::println(file, "missed_secrets {}", analysis.missedSecrets);
+	std::println(file, "weapon_collector {:d}", analysis.weaponCollector);
+	std::println(file, "tyson_weapons {:d}", analysis.tysonWeapons);
+	std::println(file, "turbo {:d}", analysis.turbo);
+	std::println(file, "solo_net {:d}", analysis.soloNet);
+	std::println(file, "coop_spawns {:d}", analysis.coopSpawns);
+	std::println(file, "category {}", analysis.category);
+	// `int8_t` is a `signed char`, which `std::format` prints as a number, like `%d`.
+	std::println(file, "signature {}", std::to_underlying(analysis.signature));
 }
 
 #define SKILL4 3
