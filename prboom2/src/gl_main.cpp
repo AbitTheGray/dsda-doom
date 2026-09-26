@@ -6,6 +6,10 @@
 #include "config.h"
 #endif
 
+#include <array>
+
+#include "cpp/EnumArray.hpp"
+
 #include "gl_opengl.hpp"
 
 #include "z_zone.hpp"
@@ -2102,10 +2106,10 @@ static void gld_AddHealthBar(mobj_t* thing, GLSprite* sprite)
 	}
 }
 
-static GLfloat health_bar_rgb[3][3] = {
-	[std::to_underlying(HealthBarColor::Null)] = {0.0f, 0.0f, 0.0f},
-	[std::to_underlying(HealthBarColor::Red)] = {1.0f, 0.0f, 0.0f},
-	[std::to_underlying(HealthBarColor::Yellow)] = {1.0f, 1.0f, 0.0f},
+static constinit EnumArray<std::array<GLfloat, 3>, EnumCount<HealthBarColor>> health_bar_rgb = {
+	{At(HealthBarColor::Null), {0.0f, 0.0f, 0.0f}},
+	{At(HealthBarColor::Red), {1.0f, 0.0f, 0.0f}},
+	{At(HealthBarColor::Yellow), {1.0f, 1.0f, 0.0f}},
 };
 
 static void gld_DrawHealthBars()
@@ -2125,9 +2129,9 @@ static void gld_DrawHealthBars()
 			if(hbar->color != color)
 			{
 				color = hbar->color;
-				glColor4f(health_bar_rgb[std::to_underlying(color)][0],
-					health_bar_rgb[std::to_underlying(color)][1],
-					health_bar_rgb[std::to_underlying(color)][2], 1.0f);
+				glColor4f(health_bar_rgb[color][0],
+					health_bar_rgb[color][1],
+					health_bar_rgb[color][2], 1.0f);
 			}
 
 			glVertex3f(hbar->x1, hbar->y, hbar->z1);

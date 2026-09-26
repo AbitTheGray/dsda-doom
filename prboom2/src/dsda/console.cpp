@@ -3,6 +3,7 @@
 // DESCRIPTION:
 //	DSDA Console
 
+#include <algorithm>
 #include <utility>
 
 #include "d_deh.hpp"
@@ -1057,42 +1058,41 @@ static dboolean console_BruteForceStart(const char* command, const char* args)
 			}
 			else if(sscanf(conditions[i], " have %3[a-zA-Z]", attr_s) == 1)
 			{
-				int attr_i;
+				const auto item = std::ranges::find_if(dsda_bf_item_names.Keys(), [&](const BruteForceItem key)
+				{
+					return !strcmp(attr_s, dsda_bf_item_names[key]);
+				});
 
-				for(attr_i = 0; attr_i < std::to_underlying(BruteForceItem::Max); ++attr_i)
-					if(!strcmp(attr_s, dsda_bf_item_names[attr_i]))
-						break;
-
-				if(attr_i == std::to_underlying(BruteForceItem::Max))
+				if(item == dsda_bf_item_names.Keys().end())
 					return false;
 
-				dsda_AddMiscBruteForceCondition(BruteForceAttribute::HaveItem, attr_i);
+				dsda_AddMiscBruteForceCondition(BruteForceAttribute::HaveItem, std::to_underlying(*item));
 			}
 			else if(sscanf(conditions[i], " lack %3[a-zA-Z]", attr_s) == 1)
 			{
-				int attr_i;
+				const auto item = std::ranges::find_if(dsda_bf_item_names.Keys(), [&](const BruteForceItem key)
+				{
+					return !strcmp(attr_s, dsda_bf_item_names[key]);
+				});
 
-				for(attr_i = 0; attr_i < std::to_underlying(BruteForceItem::Max); ++attr_i)
-					if(!strcmp(attr_s, dsda_bf_item_names[attr_i]))
-						break;
-
-				if(attr_i == std::to_underlying(BruteForceItem::Max))
+				if(item == dsda_bf_item_names.Keys().end())
 					return false;
 
-				dsda_AddMiscBruteForceCondition(BruteForceAttribute::LackItem, attr_i);
+				dsda_AddMiscBruteForceCondition(BruteForceAttribute::LackItem, std::to_underlying(*item));
 			}
 			else if(sscanf(conditions[i], " %3[a-zA-Z] %4[a-zA-Z><!=] %i", attr_s, oper_s, &value) == 3)
 			{
-				int attr_i, oper_i;
+				int oper_i;
 
 				if(oper_s[0] == '=' && !oper_s[1])
 					oper_s[1] = '=';
 
-				for(attr_i = 0; attr_i < std::to_underlying(BruteForceAttribute::AttributeMax); ++attr_i)
-					if(!strcmp(attr_s, dsda_bf_attribute_names[attr_i]))
-						break;
+				const auto attribute = std::ranges::find_if(dsda_bf_attribute_names.Keys(), [&](const BruteForceAttribute key)
+				{
+					return !strcmp(attr_s, dsda_bf_attribute_names[key]);
+				});
 
-				if(attr_i == std::to_underlying(BruteForceAttribute::AttributeMax))
+				if(attribute == dsda_bf_attribute_names.Keys().end())
 					return false;
 
 				for(oper_i = std::to_underlying(BruteForceLimit::TrioZero); oper_i < std::to_underlying(BruteForceLimit::TrioMax); ++oper_i)
@@ -1101,28 +1101,30 @@ static dboolean console_BruteForceStart(const char* command, const char* args)
 
 				if(oper_i != std::to_underlying(BruteForceLimit::TrioMax))
 				{
-					dsda_SetBruteForceTarget(static_cast<BruteForceAttribute>(attr_i), static_cast<BruteForceLimit>(oper_i), value, true);
+					dsda_SetBruteForceTarget(*attribute, static_cast<BruteForceLimit>(oper_i), value, true);
 					continue;
 				}
 
-				for(oper_i = 0; oper_i < std::to_underlying(BruteForceOperator::Max); ++oper_i)
-					if(!strcmp(oper_s, dsda_bf_operator_names[oper_i]))
-						break;
+				const auto operator_ = std::ranges::find_if(dsda_bf_operator_names.Keys(), [&](const BruteForceOperator key)
+				{
+					return !strcmp(oper_s, dsda_bf_operator_names[key]);
+				});
 
-				if(oper_i == std::to_underlying(BruteForceOperator::Max))
+				if(operator_ == dsda_bf_operator_names.Keys().end())
 					return false;
 
-				dsda_AddBruteForceCondition(static_cast<BruteForceAttribute>(attr_i), static_cast<BruteForceOperator>(oper_i), value);
+				dsda_AddBruteForceCondition(*attribute, *operator_, value);
 			}
 			else if(sscanf(conditions[i], " %3s %4s", attr_s, oper_s) == 2)
 			{
-				int attr_i, oper_i;
+				int oper_i;
 
-				for(attr_i = 0; attr_i < std::to_underlying(BruteForceAttribute::AttributeMax); ++attr_i)
-					if(!strcmp(attr_s, dsda_bf_attribute_names[attr_i]))
-						break;
+				const auto attribute = std::ranges::find_if(dsda_bf_attribute_names.Keys(), [&](const BruteForceAttribute key)
+				{
+					return !strcmp(attr_s, dsda_bf_attribute_names[key]);
+				});
 
-				if(attr_i == std::to_underlying(BruteForceAttribute::AttributeMax))
+				if(attribute == dsda_bf_attribute_names.Keys().end())
 					return false;
 
 				for(oper_i = std::to_underlying(BruteForceLimit::DuoZero); oper_i < std::to_underlying(BruteForceLimit::DuoMax); ++oper_i)
@@ -1132,7 +1134,7 @@ static dboolean console_BruteForceStart(const char* command, const char* args)
 				if(oper_i == std::to_underlying(BruteForceLimit::DuoMax))
 					return false;
 
-				dsda_SetBruteForceTarget(static_cast<BruteForceAttribute>(attr_i), static_cast<BruteForceLimit>(oper_i), 0, false);
+				dsda_SetBruteForceTarget(*attribute, static_cast<BruteForceLimit>(oper_i), 0, false);
 			}
 			else
 			{
@@ -1291,27 +1293,27 @@ static dboolean console_ChangeConfig(const char* command, const char* args, dboo
 
 	if(sscanf(args, "%s %s", name, value_string))
 	{
-		int id;
+		ConfigId id;
 
 		id = dsda_ConfigIDByName(name);
-		if(id)
+		if(id != ConfigId::None)
 		{
 			ConfigType config_type;
 
-			config_type = dsda_ConfigType(static_cast<ConfigId>(id));
+			config_type = dsda_ConfigType(id);
 			if(config_type == ConfigType::Int)
 			{
 				int value_int;
 
 				if(sscanf(value_string, "%d", &value_int))
 				{
-					dsda_UpdateIntConfig(static_cast<ConfigId>(id), value_int, persist);
+					dsda_UpdateIntConfig(id, value_int, persist);
 					return true;
 				}
 			}
 			else
 			{
-				dsda_UpdateStringConfig(static_cast<ConfigId>(id), value_string, persist);
+				dsda_UpdateStringConfig(id, value_string, persist);
 				return true;
 			}
 		}
@@ -1336,17 +1338,17 @@ static dboolean console_ToggleConfig(const char* command, const char* args, dboo
 
 	if(sscanf(args, "%s", name))
 	{
-		int id;
+		ConfigId id;
 
 		id = dsda_ConfigIDByName(name);
-		if(id)
+		if(id != ConfigId::None)
 		{
 			ConfigType config_type;
 
-			config_type = dsda_ConfigType(static_cast<ConfigId>(id));
+			config_type = dsda_ConfigType(id);
 			if(config_type == ConfigType::Int)
 			{
-				dsda_ToggleConfig(static_cast<ConfigId>(id), persist);
+				dsda_ToggleConfig(id, persist);
 				return true;
 			}
 		}

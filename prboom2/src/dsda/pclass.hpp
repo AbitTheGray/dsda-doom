@@ -13,6 +13,8 @@ enum struct StateId : int32_t;
 #include "m_fixed.hpp"
 #include "doomdef.hpp"
 
+#include "cpp/EnumArray.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -36,7 +38,7 @@ typedef struct dsda_pclass_s
 	StateId attack_end_state;
 } dsda_pclass_t;
 
-extern dsda_pclass_t pclass[std::to_underlying(PClass::Count)];
+extern EnumArray<dsda_pclass_t, EnumCount<PClass>> pclass;
 
 #ifdef __cplusplus
 }

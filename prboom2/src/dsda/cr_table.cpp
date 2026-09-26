@@ -5,6 +5,8 @@
 
 #include <utility>
 
+#include "cpp/EnumArray.hpp"
+
 #include "doomdef.hpp"
 #include "lprintf.hpp"
 #include "w_wad.hpp"
@@ -22,22 +24,22 @@ typedef struct
 } cr_range_t;
 
 // Default values - overridden by DSDACR lump
-cr_range_t cr_range[std::to_underlying(ColorRange::HudLimit)] = {
-	[std::to_underlying(ColorRange::Default)] = {0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF},
-	[std::to_underlying(ColorRange::Brick)] = {0x47, 0x00, 0x00, 0xFF, 0xB8, 0xB8},
-	[std::to_underlying(ColorRange::Tan)] = {0x33, 0x2B, 0x13, 0xFF, 0xEB, 0xDF},
-	[std::to_underlying(ColorRange::Gray)] = {0x27, 0x27, 0x27, 0xEF, 0xEF, 0xEF},
-	[std::to_underlying(ColorRange::Green)] = {0x0B, 0x17, 0x07, 0x77, 0xFF, 0x6F},
-	[std::to_underlying(ColorRange::Brown)] = {0x53, 0x3F, 0x2F, 0xBF, 0xA7, 0x8F},
-	[std::to_underlying(ColorRange::Gold)] = {0x73, 0x2B, 0x00, 0xFF, 0xFF, 0x73},
-	[std::to_underlying(ColorRange::Red)] = {0x3F, 0x00, 0x00, 0xFF, 0x00, 0x00},
-	[std::to_underlying(ColorRange::Blue)] = {0x00, 0x00, 0x27, 0x00, 0x00, 0xFF},
-	[std::to_underlying(ColorRange::Orange)] = {0x20, 0x00, 0x00, 0xFF, 0x80, 0x00},
-	[std::to_underlying(ColorRange::Yellow)] = {0x77, 0x77, 0x00, 0xFF, 0xFF, 0x00},
-	[std::to_underlying(ColorRange::Lightblue)] = {0x00, 0x00, 0x73, 0xB4, 0xB4, 0xFF},
-	[std::to_underlying(ColorRange::Black)] = {0x13, 0x13, 0x13, 0x50, 0x50, 0x50},
-	[std::to_underlying(ColorRange::Purple)] = {0x23, 0x00, 0x23, 0xCF, 0x00, 0xCF},
-	[std::to_underlying(ColorRange::White)] = {0x24, 0x24, 0x24, 0xFF, 0xFF, 0xFF},
+constinit EnumArray<cr_range_t, ColorRange::HudLimit> cr_range = {
+	{At(ColorRange::Default), {0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF}},
+	{At(ColorRange::Brick), {0x47, 0x00, 0x00, 0xFF, 0xB8, 0xB8}},
+	{At(ColorRange::Tan), {0x33, 0x2B, 0x13, 0xFF, 0xEB, 0xDF}},
+	{At(ColorRange::Gray), {0x27, 0x27, 0x27, 0xEF, 0xEF, 0xEF}},
+	{At(ColorRange::Green), {0x0B, 0x17, 0x07, 0x77, 0xFF, 0x6F}},
+	{At(ColorRange::Brown), {0x53, 0x3F, 0x2F, 0xBF, 0xA7, 0x8F}},
+	{At(ColorRange::Gold), {0x73, 0x2B, 0x00, 0xFF, 0xFF, 0x73}},
+	{At(ColorRange::Red), {0x3F, 0x00, 0x00, 0xFF, 0x00, 0x00}},
+	{At(ColorRange::Blue), {0x00, 0x00, 0x27, 0x00, 0x00, 0xFF}},
+	{At(ColorRange::Orange), {0x20, 0x00, 0x00, 0xFF, 0x80, 0x00}},
+	{At(ColorRange::Yellow), {0x77, 0x77, 0x00, 0xFF, 0xFF, 0x00}},
+	{At(ColorRange::Lightblue), {0x00, 0x00, 0x73, 0xB4, 0xB4, 0xFF}},
+	{At(ColorRange::Black), {0x13, 0x13, 0x13, 0x50, 0x50, 0x50}},
+	{At(ColorRange::Purple), {0x23, 0x00, 0x23, 0xCF, 0x00, 0xCF}},
+	{At(ColorRange::White), {0x24, 0x24, 0x24, 0xFF, 0xFF, 0xFF}},
 };
 
 static char ref_lump_doom[9] = "STCFN065";
@@ -145,12 +147,13 @@ static void dsda_LoadCRLump()
 			r1 > 255 || g1 > 255 || b1 > 255 || r2 > 255 || g2 > 255 || b2 > 255)
 			I_Error("DSDACR index %d has color out of range (0-255)", i);
 
-		cr_range[i].r1 = r1;
-		cr_range[i].g1 = g1;
-		cr_range[i].b1 = b1;
-		cr_range[i].r2 = r2;
-		cr_range[i].g2 = g2;
-		cr_range[i].b2 = b2;
+		cr_range_t& range = cr_range[static_cast<ColorRange>(i)];
+		range.r1 = r1;
+		range.g1 = g1;
+		range.b1 = b1;
+		range.r2 = r2;
+		range.g2 = g2;
+		range.b2 = b2;
 	}
 
 	Z_Free(lines);
@@ -255,18 +258,19 @@ byte* dsda_GenerateCRTable()
 
 		for(dark_i = 0; dark_i < 2; ++dark_i)
 		{
-			for(cr_i = 0; cr_i < std::to_underlying(ColorRange::HudLimit); ++cr_i)
+			for(const ColorRange color : cr_range.Keys())
 			{
+				const cr_range_t& range = cr_range[color];
 				int target_r, target_g, target_b;
 				int best_i = 0;
 				int best_dist = INT_MAX;
 
-				target_r = cr_range[cr_i].r1 +
-					(int)(length * (cr_range[cr_i].r2 - cr_range[cr_i].r1));
-				target_g = cr_range[cr_i].g1 +
-					(int)(length * (cr_range[cr_i].g2 - cr_range[cr_i].g1));
-				target_b = cr_range[cr_i].b1 +
-					(int)(length * (cr_range[cr_i].b2 - cr_range[cr_i].b1));
+				target_r = range.r1 +
+					(int)(length * (range.r2 - range.r1));
+				target_g = range.g1 +
+					(int)(length * (range.g2 - range.g1));
+				target_b = range.b1 +
+					(int)(length * (range.b2 - range.b1));
 
 				if(dark_i)
 				{
@@ -307,7 +311,7 @@ byte* dsda_GenerateCRTable()
 					}
 				}
 
-				buffer[(dark_i ? std::to_underlying(ColorRange::Darken) * 256 : 0) + cr_i * 256 + orig_i] = best_i;
+				buffer[(dark_i ? std::to_underlying(ColorRange::Darken) * 256 : 0) + std::to_underlying(color) * 256 + orig_i] = best_i;
 			}
 		}
 

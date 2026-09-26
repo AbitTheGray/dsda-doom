@@ -87,7 +87,7 @@ static int HEIGHTUNIT = (1 << 12);
 static int invhgtbits = 4;
 
 /* cph - allow crappy fake contrast to be disabled */
-FakeContrastMode fake_contrast_mode;
+int fake_contrast_mode;
 
 //
 // R_FixWiggle()
@@ -211,14 +211,14 @@ const int fake_contrast_value = 16;
 
 static dboolean R_FakeContrast(seg_t* seg)
 {
-	return fake_contrast_mode != FakeContrastMode::Off &&
+	return static_cast<FakeContrastMode>(fake_contrast_mode) != FakeContrastMode::Off &&
 		// TODO: possible "even fake contrast" mapinfo flag
 		seg && !(seg->sidedef->flags & SF_NOFAKECONTRAST) && !hexen;
 }
 
 static dboolean R_SmoothLighting(seg_t* seg)
 {
-	return fake_contrast_mode == FakeContrastMode::Smooth ||
+	return static_cast<FakeContrastMode>(fake_contrast_mode) == FakeContrastMode::Smooth ||
 		// TODO: possible "smooth fake contrast" mapinfo flag
 		seg->sidedef->flags & SF_SMOOTHLIGHTING;
 }

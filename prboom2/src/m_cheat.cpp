@@ -374,7 +374,7 @@ static void cheat_fa()
 	{
 		for(i = 0; i < std::to_underlying(ArmorType::Count); i++)
 		{
-			plyr->armorpoints[i] = pclass[std::to_underlying(plyr->pclass)].armor_increment[i];
+			plyr->armorpoints[i] = pclass[plyr->pclass].armor_increment[i];
 		}
 		for(i = 0; i < std::to_underlying(WeaponType::HexenCount); i++)
 		{

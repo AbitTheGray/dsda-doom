@@ -197,6 +197,7 @@ enum struct HealthBarColor : int32_t
 	Null,
 	Red,
 	Yellow,
+	Count,
 };
 
 typedef struct

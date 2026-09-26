@@ -40,7 +40,7 @@ enum struct OverrunList : int32_t
 };
 
 extern int overflows_enabled;
-extern overrun_param_t overflows[];
+extern overrun_param_t overflows[std::to_underlying(OverrunList::Max)];
 extern const char* overflow_cfgname[std::to_underlying(OverrunList::Max)];
 
 #define EMULATE(overflow) (overflows_enabled && (overflows[std::to_underlying(overflow)].footer ? overflows[std::to_underlying(overflow)].footer_emulate : overflows[std::to_underlying(overflow)].emulate))

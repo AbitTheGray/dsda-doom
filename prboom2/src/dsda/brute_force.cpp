@@ -7,6 +7,8 @@
 
 #include <math.h>
 
+#include "cpp/EnumArray.hpp"
+
 #include "d_player.hpp"
 #include "d_ticcmd.hpp"
 #include "doomstat.hpp"
@@ -76,24 +78,24 @@ static dsda_key_frame_t nomo_key_frame;
 static bf_target_t bf_target;
 static ticcmd_t bf_result[MAX_BF_DEPTH];
 
-const char* dsda_bf_attribute_names[std::to_underlying(BruteForceAttribute::AttributeMax)] = {
-	[std::to_underlying(BruteForceAttribute::X)] = "x",
-	[std::to_underlying(BruteForceAttribute::Y)] = "y",
-	[std::to_underlying(BruteForceAttribute::Z)] = "z",
-	[std::to_underlying(BruteForceAttribute::Momx)] = "vx",
-	[std::to_underlying(BruteForceAttribute::Momy)] = "vy",
-	[std::to_underlying(BruteForceAttribute::Speed)] = "spd",
-	[std::to_underlying(BruteForceAttribute::Damage)] = "dmg",
-	[std::to_underlying(BruteForceAttribute::Rng)] = "rng",
-	[std::to_underlying(BruteForceAttribute::Arm)] = "arm",
-	[std::to_underlying(BruteForceAttribute::Hp)] = "hp",
-	[std::to_underlying(BruteForceAttribute::Ammo0)] = "am0",
-	[std::to_underlying(BruteForceAttribute::Ammo1)] = "am1",
-	[std::to_underlying(BruteForceAttribute::Ammo2)] = "am2",
-	[std::to_underlying(BruteForceAttribute::Ammo3)] = "am3",
-	[std::to_underlying(BruteForceAttribute::Ammo4)] = "am4",
-	[std::to_underlying(BruteForceAttribute::Ammo5)] = "am5",
-	[std::to_underlying(BruteForceAttribute::Bmapwidth)] = "bmw",
+constinit EnumArray<const char*, BruteForceAttribute::AttributeMax> dsda_bf_attribute_names = {
+	{At(BruteForceAttribute::X), "x"},
+	{At(BruteForceAttribute::Y), "y"},
+	{At(BruteForceAttribute::Z), "z"},
+	{At(BruteForceAttribute::Momx), "vx"},
+	{At(BruteForceAttribute::Momy), "vy"},
+	{At(BruteForceAttribute::Speed), "spd"},
+	{At(BruteForceAttribute::Damage), "dmg"},
+	{At(BruteForceAttribute::Rng), "rng"},
+	{At(BruteForceAttribute::Arm), "arm"},
+	{At(BruteForceAttribute::Hp), "hp"},
+	{At(BruteForceAttribute::Ammo0), "am0"},
+	{At(BruteForceAttribute::Ammo1), "am1"},
+	{At(BruteForceAttribute::Ammo2), "am2"},
+	{At(BruteForceAttribute::Ammo3), "am3"},
+	{At(BruteForceAttribute::Ammo4), "am4"},
+	{At(BruteForceAttribute::Ammo5), "am5"},
+	{At(BruteForceAttribute::Bmapwidth), "bmw"},
 };
 
 const char* dsda_bf_misc_names[std::to_underlying(BruteForceAttribute::MiscMax)] = {
@@ -102,13 +104,13 @@ const char* dsda_bf_misc_names[std::to_underlying(BruteForceAttribute::MiscMax)]
 	"have item",
 };
 
-const char* dsda_bf_operator_names[std::to_underlying(BruteForceOperator::Max)] = {
-	[std::to_underlying(BruteForceOperator::LessThan)] = "<",
-	[std::to_underlying(BruteForceOperator::LessThanOrEqualTo)] = "<=",
-	[std::to_underlying(BruteForceOperator::GreaterThan)] = ">",
-	[std::to_underlying(BruteForceOperator::GreaterThanOrEqualTo)] = ">=",
-	[std::to_underlying(BruteForceOperator::EqualTo)] = "==",
-	[std::to_underlying(BruteForceOperator::NotEqualTo)] = "!="
+constinit EnumArray<const char*, BruteForceOperator::Max> dsda_bf_operator_names = {
+	{At(BruteForceOperator::LessThan), "<"},
+	{At(BruteForceOperator::LessThanOrEqualTo), "<="},
+	{At(BruteForceOperator::GreaterThan), ">"},
+	{At(BruteForceOperator::GreaterThanOrEqualTo), ">="},
+	{At(BruteForceOperator::EqualTo), "=="},
+	{At(BruteForceOperator::NotEqualTo), "!="}
 };
 
 const char* dsda_bf_limit_names[std::to_underlying(BruteForceLimit::Count)] = {
@@ -117,43 +119,43 @@ const char* dsda_bf_limit_names[std::to_underlying(BruteForceLimit::Count)] = {
 	"min",
 };
 
-const char* dsda_bf_item_names[std::to_underlying(BruteForceItem::Max)] = {
-	[std::to_underlying(BruteForceItem::RedKeyCard)] = "rkc",
-	[std::to_underlying(BruteForceItem::YellowKeyCard)] = "ykc",
-	[std::to_underlying(BruteForceItem::BlueKeyCard)] = "bkc",
-	[std::to_underlying(BruteForceItem::RedSkullKey)] = "rsk",
-	[std::to_underlying(BruteForceItem::YellowSkullKey)] = "ysk",
-	[std::to_underlying(BruteForceItem::BlueSkullKey)] = "bsk",
+constinit EnumArray<const char*, BruteForceItem::Max> dsda_bf_item_names = {
+	{At(BruteForceItem::RedKeyCard), "rkc"},
+	{At(BruteForceItem::YellowKeyCard), "ykc"},
+	{At(BruteForceItem::BlueKeyCard), "bkc"},
+	{At(BruteForceItem::RedSkullKey), "rsk"},
+	{At(BruteForceItem::YellowSkullKey), "ysk"},
+	{At(BruteForceItem::BlueSkullKey), "bsk"},
 
-	[std::to_underlying(BruteForceItem::Fist)] = "f",
-	[std::to_underlying(BruteForceItem::Pistol)] = "p",
-	[std::to_underlying(BruteForceItem::Shotgun)] = "sg",
-	[std::to_underlying(BruteForceItem::Chaingun)] = "cg",
-	[std::to_underlying(BruteForceItem::RocketLauncher)] = "rl",
-	[std::to_underlying(BruteForceItem::PlasmaGun)] = "pg",
-	[std::to_underlying(BruteForceItem::Bfg)] = "bfg",
-	[std::to_underlying(BruteForceItem::Chainsaw)] = "cs",
-	[std::to_underlying(BruteForceItem::SuperShotgun)] = "ssg",
+	{At(BruteForceItem::Fist), "f"},
+	{At(BruteForceItem::Pistol), "p"},
+	{At(BruteForceItem::Shotgun), "sg"},
+	{At(BruteForceItem::Chaingun), "cg"},
+	{At(BruteForceItem::RocketLauncher), "rl"},
+	{At(BruteForceItem::PlasmaGun), "pg"},
+	{At(BruteForceItem::Bfg), "bfg"},
+	{At(BruteForceItem::Chainsaw), "cs"},
+	{At(BruteForceItem::SuperShotgun), "ssg"},
 };
 
-static dboolean fixed_point_attribute[std::to_underlying(BruteForceAttribute::AttributeMax)] = {
-	[std::to_underlying(BruteForceAttribute::X)] = true,
-	[std::to_underlying(BruteForceAttribute::Y)] = true,
-	[std::to_underlying(BruteForceAttribute::Z)] = true,
-	[std::to_underlying(BruteForceAttribute::Momx)] = true,
-	[std::to_underlying(BruteForceAttribute::Momy)] = true,
-	[std::to_underlying(BruteForceAttribute::Speed)] = true,
-	[std::to_underlying(BruteForceAttribute::Damage)] = true,
-	[std::to_underlying(BruteForceAttribute::Rng)] = false,
-	[std::to_underlying(BruteForceAttribute::Arm)] = false,
-	[std::to_underlying(BruteForceAttribute::Hp)] = false,
-	[std::to_underlying(BruteForceAttribute::Ammo0)] = false,
-	[std::to_underlying(BruteForceAttribute::Ammo1)] = false,
-	[std::to_underlying(BruteForceAttribute::Ammo2)] = false,
-	[std::to_underlying(BruteForceAttribute::Ammo3)] = false,
-	[std::to_underlying(BruteForceAttribute::Ammo4)] = false,
-	[std::to_underlying(BruteForceAttribute::Ammo5)] = false,
-	[std::to_underlying(BruteForceAttribute::Bmapwidth)] = false,
+static constinit EnumArray<dboolean, BruteForceAttribute::AttributeMax> fixed_point_attribute = {
+	{At(BruteForceAttribute::X), true},
+	{At(BruteForceAttribute::Y), true},
+	{At(BruteForceAttribute::Z), true},
+	{At(BruteForceAttribute::Momx), true},
+	{At(BruteForceAttribute::Momy), true},
+	{At(BruteForceAttribute::Speed), true},
+	{At(BruteForceAttribute::Damage), true},
+	{At(BruteForceAttribute::Rng), false},
+	{At(BruteForceAttribute::Arm), false},
+	{At(BruteForceAttribute::Hp), false},
+	{At(BruteForceAttribute::Ammo0), false},
+	{At(BruteForceAttribute::Ammo1), false},
+	{At(BruteForceAttribute::Ammo2), false},
+	{At(BruteForceAttribute::Ammo3), false},
+	{At(BruteForceAttribute::Ammo4), false},
+	{At(BruteForceAttribute::Ammo5), false},
+	{At(BruteForceAttribute::Bmapwidth), false},
 };
 
 static dboolean dsda_AdvanceBFRange(bf_range_t* range)
@@ -420,12 +422,12 @@ static void dsda_BFUpdateBestResult(fixed_t value)
 
 	dsda_CopyBFResult(bf_target.best_bf, bf_target.best_depth);
 
-	if(fixed_point_attribute[std::to_underlying(bf_target.attribute)])
+	if(fixed_point_attribute[bf_target.attribute])
 		dsda_FixedToString(str, value);
 	else
 		snprintf(str, FIXED_STRING_LENGTH, "%i", value);
 
-	lprintf(OutputLevels::Info, "New best: %s = %s\n", dsda_bf_attribute_names[std::to_underlying(bf_target.attribute)], str);
+	lprintf(OutputLevels::Info, "New best: %s = %s\n", dsda_bf_attribute_names[bf_target.attribute], str);
 
 	for(i = 0; i < bf_target.best_depth; ++i)
 	{
@@ -533,14 +535,14 @@ void dsda_AddBruteForceCondition(
 	bf_condition[bf_condition_count].operator_ = operator_;
 	bf_condition[bf_condition_count].value = value;
 
-	if(fixed_point_attribute[std::to_underlying(attribute)])
+	if(fixed_point_attribute[attribute])
 		bf_condition[bf_condition_count].value <<= FRACBITS;
 
 	++bf_condition_count;
 
 	lprintf(OutputLevels::Info, "Added brute force condition: %s %s %d\n",
-		dsda_bf_attribute_names[std::to_underlying(attribute)],
-		dsda_bf_operator_names[std::to_underlying(operator_)],
+		dsda_bf_attribute_names[attribute],
+		dsda_bf_operator_names[operator_],
 		value);
 }
 
@@ -556,16 +558,16 @@ void dsda_SetBruteForceTarget(BruteForceAttribute attribute,
 	if(has_value)
 	{
 		lprintf(OutputLevels::Info, "Set brute force target: %s %s %d\n",
-			dsda_bf_attribute_names[std::to_underlying(attribute)],
+			dsda_bf_attribute_names[attribute],
 			dsda_bf_limit_names[std::to_underlying(limit)],
 			value);
 
-		if(fixed_point_attribute[std::to_underlying(attribute)])
+		if(fixed_point_attribute[attribute])
 			bf_target.value <<= FRACBITS;
 	}
 	else
 		lprintf(OutputLevels::Info, "Set brute force target: %s %s\n",
-			dsda_bf_attribute_names[std::to_underlying(attribute)],
+			dsda_bf_attribute_names[attribute],
 			dsda_bf_limit_names[std::to_underlying(limit)]);
 }
 

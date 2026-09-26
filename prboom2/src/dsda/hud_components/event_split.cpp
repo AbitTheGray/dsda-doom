@@ -3,7 +3,7 @@
 // DESCRIPTION:
 //	DSDA Event Split HUD Component
 
-#include <utility>
+#include "cpp/EnumArray.hpp"
 
 #include "base.hpp"
 
@@ -16,12 +16,12 @@ typedef struct
 	int delay;
 } dsda_split_state_t;
 
-static dsda_split_state_t dsda_split_state[std::to_underlying(SplitClass::Count)] = {
-	[std::to_underlying(SplitClass::BlueKey)] = {"Blue Key", 0, 0},
-	[std::to_underlying(SplitClass::YellowKey)] = {"Yellow Key", 0, 0},
-	[std::to_underlying(SplitClass::RedKey)] = {"Red Key", 0, 0},
-	[std::to_underlying(SplitClass::Use)] = {"Use", 2, 0},
-	[std::to_underlying(SplitClass::Secret)] = {"Secret", 0, 0},
+static constinit EnumArray<dsda_split_state_t, EnumCount<SplitClass>> dsda_split_state = {
+	{At(SplitClass::BlueKey), {"Blue Key", 0, 0}},
+	{At(SplitClass::YellowKey), {"Yellow Key", 0, 0}},
+	{At(SplitClass::RedKey), {"Red Key", 0, 0}},
+	{At(SplitClass::Use), {"Use", 2, 0}},
+	{At(SplitClass::Secret), {"Secret", 0, 0}},
 };
 
 typedef struct
@@ -50,7 +50,7 @@ void dsda_AddSplit(SplitClass split_class, int lifetime)
 	if(!local)
 		return;
 
-	split_state = &dsda_split_state[std::to_underlying(split_class)];
+	split_state = &dsda_split_state[split_class];
 
 	if(split_state->delay > 0)
 	{
@@ -76,16 +76,14 @@ void dsda_AddSplit(SplitClass split_class, int lifetime)
 
 void dsda_UpdateEventSplitHC(void* data)
 {
-	int i;
-
 	local = (local_component_t*)data;
 
 	if(ticks > 0)
 		--ticks;
 
-	for(i = 0; i < std::to_underlying(SplitClass::Count); ++i)
-		if(dsda_split_state[i].delay > 0)
-			--dsda_split_state[i].delay;
+	for(dsda_split_state_t& split_state : dsda_split_state)
+		if(split_state.delay > 0)
+			--split_state.delay;
 }
 
 void dsda_DrawEventSplitHC(void* data)

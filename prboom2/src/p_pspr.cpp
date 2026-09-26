@@ -7,6 +7,8 @@
 
 #include <utility>
 
+#include "cpp/EnumArray.hpp"
+
 #include "doomstat.hpp"
 #include "r_main.hpp"
 #include "p_map.hpp"
@@ -156,7 +158,7 @@ static void P_BringUpWeapon(player_t* player)
 		}
 		else
 		{
-			newstate = static_cast<StateId>(hexen_weaponinfo[std::to_underlying(player->pendingweapon)][std::to_underlying(player->pclass)].upstate);
+			newstate = static_cast<StateId>(hexen_weaponinfo[player->pendingweapon][player->pclass].upstate);
 		}
 	}
 	else if(player->powers[std::to_underlying(PowerType::WeaponLevel2)])
@@ -461,7 +463,7 @@ static void P_FireWeapon(player_t* player)
 
 	dsda_WatchWeaponFire(player->readyweapon);
 
-	P_SetMobjState(player->mo, static_cast<StateId>(pclass[std::to_underlying(player->pclass)].fire_weapon_state));
+	P_SetMobjState(player->mo, static_cast<StateId>(pclass[player->pclass].fire_weapon_state));
 
 	if(heretic)
 	{
@@ -485,8 +487,8 @@ static void P_FireWeapon(player_t* player)
 		else
 		{
 			newstate = static_cast<StateId>(player->refire
-				? hexen_weaponinfo[std::to_underlying(player->readyweapon)][std::to_underlying(player->pclass)].holdatkstate
-				: hexen_weaponinfo[std::to_underlying(player->readyweapon)][std::to_underlying(player->pclass)].atkstate);
+				? hexen_weaponinfo[player->readyweapon][player->pclass].holdatkstate
+				: hexen_weaponinfo[player->readyweapon][player->pclass].atkstate);
 		}
 	}
 	else
@@ -523,7 +525,7 @@ void P_DropWeapon(player_t* player)
 	}
 	else if(player->pclass != PClass::Null)
 	{
-		newstate = static_cast<StateId>(hexen_weaponinfo[std::to_underlying(player->readyweapon)][std::to_underlying(player->pclass)].downstate);
+		newstate = static_cast<StateId>(hexen_weaponinfo[player->readyweapon][player->pclass].downstate);
 	}
 	else
 	{
@@ -552,9 +554,9 @@ extern "C" void A_WeaponReady(player_t* player, pspdef_t* psp)
 	}
 
 	// get out of attack state
-	if(player->mo->state >= &states[std::to_underlying(pclass[std::to_underlying(player->pclass)].attack_state)]
-		&& player->mo->state <= &states[std::to_underlying(pclass[std::to_underlying(player->pclass)].attack_end_state)])
-		P_SetMobjState(player->mo, static_cast<StateId>(pclass[std::to_underlying(player->pclass)].normal_state));
+	if(player->mo->state >= &states[std::to_underlying(pclass[player->pclass].attack_state)]
+		&& player->mo->state <= &states[std::to_underlying(pclass[player->pclass].attack_end_state)])
+		P_SetMobjState(player->mo, static_cast<StateId>(pclass[player->pclass].normal_state));
 
 	if(heretic)
 	{
@@ -582,7 +584,7 @@ extern "C" void A_WeaponReady(player_t* player, pspdef_t* psp)
 		if(player->powers[std::to_underlying(PowerType::WeaponLevel2)])
 			newstate = static_cast<StateId>(wpnlev2info[std::to_underlying(player->readyweapon)].downstate);
 		else if(player->pclass != PClass::Null)
-			newstate = static_cast<StateId>(hexen_weaponinfo[std::to_underlying(player->readyweapon)][std::to_underlying(player->pclass)].downstate);
+			newstate = static_cast<StateId>(hexen_weaponinfo[player->readyweapon][player->pclass].downstate);
 		else
 			newstate = static_cast<StateId>(weaponinfo[std::to_underlying(player->readyweapon)].downstate);
 		P_SetPsprite(player, PspNum::Weapon, static_cast<StateId>(newstate));
@@ -741,7 +743,7 @@ extern "C" void A_Raise(player_t* player, pspdef_t* psp)
 		}
 		else
 		{
-			newstate = static_cast<StateId>(hexen_weaponinfo[std::to_underlying(player->readyweapon)][std::to_underlying(player->pclass)].readystate);
+			newstate = static_cast<StateId>(hexen_weaponinfo[player->readyweapon][player->pclass].readystate);
 		}
 	}
 	else
@@ -2577,11 +2579,11 @@ void P_CloseWeapons()
 
 extern fixed_t FloatBobOffsets[64];
 
-static int WeaponManaUse[std::to_underlying(PClass::Count)][std::to_underlying(WeaponType::HexenCount)] = {
-	[std::to_underlying(PClass::Fighter)] = {0, 2, 3, 14},
-	{0, 1, 4, 18},
-	{0, 3, 5, 15},
-	{0, 0, 0, 0}
+static constinit EnumArray<EnumArray<int, WeaponType::HexenCount>, EnumCount<PClass>> WeaponManaUse = {
+	{At(PClass::Fighter), {0, 2, 3, 14}},
+	{At(PClass::Cleric), {0, 1, 4, 18}},
+	{At(PClass::Mage), {0, 3, 5, 15}},
+	{At(PClass::Pig), {0, 0, 0, 0}}
 };
 
 void P_SetPspriteNF(player_t* player, PspNum position, StateId stnum)
@@ -2629,7 +2631,7 @@ void P_PostMorphWeapon(player_t* player, WeaponType weapon)
 	player->readyweapon = weapon;
 	player->psprites[std::to_underlying(PspNum::Weapon)].sy = WEAPONBOTTOM;
 	P_SetPsprite(player, PspNum::Weapon,
-		static_cast<StateId>(hexen_weaponinfo[std::to_underlying(weapon)][std::to_underlying(player->pclass)].upstate));
+		static_cast<StateId>(hexen_weaponinfo[weapon][player->pclass].upstate));
 }
 
 static dboolean P_CheckMana(player_t* player)
@@ -2637,8 +2639,8 @@ static dboolean P_CheckMana(player_t* player)
 	manatype_t mana;
 	int count;
 
-	mana = hexen_weaponinfo[std::to_underlying(player->readyweapon)][std::to_underlying(player->pclass)].ammo;
-	count = WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+	mana = hexen_weaponinfo[player->readyweapon][player->pclass].ammo;
+	count = WeaponManaUse[player->pclass][player->readyweapon];
 	if(mana == AmmoType::ManaBoth)
 	{
 		if(player->ammo[std::to_underlying(AmmoType::Mana1)] >= count && player->ammo[std::to_underlying(AmmoType::Mana2)] >= count)
@@ -2653,21 +2655,21 @@ static dboolean P_CheckMana(player_t* player)
 
 	// out of mana, pick a weapon to change to
 	if(player->weaponowned[std::to_underlying(WeaponType::Third)]
-		&& player->ammo[std::to_underlying(AmmoType::Mana2)] >= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(WeaponType::Third)])
+		&& player->ammo[std::to_underlying(AmmoType::Mana2)] >= WeaponManaUse[player->pclass][WeaponType::Third])
 	{
 		player->pendingweapon = WeaponType::Third;
 	}
 	else if(player->weaponowned[std::to_underlying(WeaponType::Second)]
 		&& player->ammo[std::to_underlying(AmmoType::Mana1)] >=
-		WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(WeaponType::Second)])
+		WeaponManaUse[player->pclass][WeaponType::Second])
 	{
 		player->pendingweapon = WeaponType::Second;
 	}
 	else if(player->weaponowned[std::to_underlying(WeaponType::Fourth)]
 		&& player->ammo[std::to_underlying(AmmoType::Mana1)] >=
-		WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(WeaponType::Fourth)]
+		WeaponManaUse[player->pclass][WeaponType::Fourth]
 		&& player->ammo[std::to_underlying(AmmoType::Mana2)] >=
-		WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(WeaponType::Fourth)])
+		WeaponManaUse[player->pclass][WeaponType::Fourth])
 	{
 		player->pendingweapon = WeaponType::Fourth;
 	}
@@ -2677,7 +2679,7 @@ static dboolean P_CheckMana(player_t* player)
 	}
 
 	P_SetPsprite(player, PspNum::Weapon,
-		static_cast<StateId>(hexen_weaponinfo[std::to_underlying(player->readyweapon)][std::to_underlying(player->pclass)].downstate));
+		static_cast<StateId>(hexen_weaponinfo[player->readyweapon][player->pclass].downstate));
 	return (false);
 }
 
@@ -2784,7 +2786,7 @@ extern "C" void A_FHammerAttack(player_t* player, pspdef_t* psp)
 		pmo->special1.i = true;
 	}
 hammerdone:
-	if(player->ammo[std::to_underlying(AmmoType::Mana2)] < WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)])
+	if(player->ammo[std::to_underlying(AmmoType::Mana2)] < WeaponManaUse[player->pclass][player->readyweapon])
 	{
 		// Don't spawn a hammer if the player doesn't have enough mana
 		pmo->special1.i = false;
@@ -2800,7 +2802,7 @@ extern "C" void A_FHammerThrow(player_t* player, pspdef_t* psp)
 	{
 		return;
 	}
-	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[player->pclass][player->readyweapon];
 	mo = P_SpawnPlayerMissile(player->mo, MobjType::HexenHammerMissile);
 	if(mo)
 	{
@@ -2812,8 +2814,8 @@ extern "C" void A_FSwordAttack(player_t* player, pspdef_t* psp)
 {
 	mobj_t* pmo;
 
-	player->ammo[std::to_underlying(AmmoType::Mana1)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
-	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+	player->ammo[std::to_underlying(AmmoType::Mana1)] -= WeaponManaUse[player->pclass][player->readyweapon];
+	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[player->pclass][player->readyweapon];
 	pmo = player->mo;
 	P_SPMAngleXYZ(pmo, pmo->x, pmo->y, pmo->z - 10 * FRACUNIT,
 		MobjType::HexenFswordMissile, pmo->angle + ANG45 / 4);
@@ -3008,7 +3010,7 @@ extern "C" void A_MLightningAttack2(mobj_t* actor)
 extern "C" void A_MLightningAttack(player_t* player, pspdef_t* psp)
 {
 	A_MLightningAttack2(player->mo);
-	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[player->pclass][player->readyweapon];
 }
 
 extern "C" void A_ZapMimic(mobj_t* actor)
@@ -3072,8 +3074,8 @@ extern "C" void A_MStaffAttack(player_t* player, pspdef_t* psp)
 	angle_t angle;
 	mobj_t* pmo;
 
-	player->ammo[std::to_underlying(AmmoType::Mana1)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
-	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+	player->ammo[std::to_underlying(AmmoType::Mana1)] -= WeaponManaUse[player->pclass][player->readyweapon];
+	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[player->pclass][player->readyweapon];
 	pmo = player->mo;
 	angle = pmo->angle;
 
@@ -3303,7 +3305,7 @@ axedone:
 	if(useMana == 2)
 	{
 		player->ammo[std::to_underlying(AmmoType::Mana1)] -=
-			WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+			WeaponManaUse[player->pclass][player->readyweapon];
 		if(player->ammo[std::to_underlying(AmmoType::Mana1)] <= 0)
 		{
 			P_SetPsprite(player, PspNum::Weapon, StateId::HexenFaxeatk5);
@@ -3382,7 +3384,7 @@ extern "C" void A_CStaffCheck(player_t* player, pspdef_t* psp)
 				P_SetPsprite(player, PspNum::Weapon, StateId::HexenCstaffatk21);
 			}
 			player->ammo[std::to_underlying(AmmoType::Mana1)] -=
-				WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+				WeaponManaUse[player->pclass][player->readyweapon];
 			break;
 		}
 		angle = pmo->angle - i * (ANG45 / 16);
@@ -3400,7 +3402,7 @@ extern "C" void A_CStaffCheck(player_t* player, pspdef_t* psp)
 				P_SetPsprite(player, PspNum::Weapon, StateId::HexenCstaffatk21);
 			}
 			player->ammo[std::to_underlying(AmmoType::Mana1)] -=
-				WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+				WeaponManaUse[player->pclass][player->readyweapon];
 			break;
 		}
 	}
@@ -3412,7 +3414,7 @@ extern "C" void A_CStaffAttack(player_t* player, pspdef_t* psp)
 	mobj_t* mo;
 	mobj_t* pmo;
 
-	player->ammo[std::to_underlying(AmmoType::Mana1)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+	player->ammo[std::to_underlying(AmmoType::Mana1)] -= WeaponManaUse[player->pclass][player->readyweapon];
 	pmo = player->mo;
 	mo = P_SPMAngle(pmo, MobjType::HexenCstaffMissile, pmo->angle - (ANG45 / 15));
 	if(mo)
@@ -3472,7 +3474,7 @@ extern "C" void A_CFlameAttack(player_t* player, pspdef_t* psp)
 		mo->special1.i = 2;
 	}
 
-	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[player->pclass][player->readyweapon];
 	S_StartMobjSound(player->mo, SfxId::HexenClericFlameFire);
 }
 
@@ -3613,8 +3615,8 @@ extern "C" void A_CHolyAttack2(mobj_t* actor)
 
 extern "C" void A_CHolyAttack(player_t* player, pspdef_t* psp)
 {
-	player->ammo[std::to_underlying(AmmoType::Mana1)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
-	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+	player->ammo[std::to_underlying(AmmoType::Mana1)] -= WeaponManaUse[player->pclass][player->readyweapon];
+	player->ammo[std::to_underlying(AmmoType::Mana2)] -= WeaponManaUse[player->pclass][player->readyweapon];
 	P_SpawnPlayerMissile(player->mo, MobjType::HexenHolyMissile);
 	if(player == &players[consoleplayer])
 	{
@@ -3898,7 +3900,7 @@ extern "C" void A_FireConePL1(player_t* player, pspdef_t* psp)
 	int conedone = false;
 
 	pmo = player->mo;
-	player->ammo[std::to_underlying(AmmoType::Mana1)] -= WeaponManaUse[std::to_underlying(player->pclass)][std::to_underlying(player->readyweapon)];
+	player->ammo[std::to_underlying(AmmoType::Mana1)] -= WeaponManaUse[player->pclass][player->readyweapon];
 	S_StartMobjSound(pmo, SfxId::HexenMageShardsFire);
 
 	damage = 90 + (P_Random(RandomClass::Hexen) & 15);

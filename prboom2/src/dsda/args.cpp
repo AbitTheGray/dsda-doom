@@ -3,10 +3,13 @@
 // DESCRIPTION:
 //	DSDA (Command Line) Args
 
+#include <algorithm>
 #include <utility>
 
 #include <stdio.h>
 #include <string.h>
+
+#include "cpp/EnumArray.hpp"
 
 #include "lprintf.hpp"
 #include "z_zone.hpp"
@@ -44,647 +47,647 @@ typedef struct
 #define AT_LEAST_ONE_NONNEGATIVE_INT 0, INT_MAX, 1, INT_MAX
 #define EXACT_ARRAY_LENGTH(x) 0, 0, x, x
 
-static arg_config_t arg_config[std::to_underlying(ArgId::Count)] = {
-	[std::to_underlying(ArgId::Help)] = {
+static constinit EnumArray<arg_config_t, EnumCount<ArgId>> arg_config = {
+	{At(ArgId::Help), {
 		"-help", "--help", nullptr,
 		"prints out command line argument information",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Iwad)] = {
+	}},
+	{At(ArgId::Iwad), {
 		"-iwad", nullptr, nullptr,
 		"loads the given iwad file",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::File)] = {
+	}},
+	{At(ArgId::File), {
 		"-file", nullptr, nullptr,
 		"loads additional wad files",
 		ArgType::StringArray, AT_LEAST_ONE_STRING,
-	},
-	[std::to_underlying(ArgId::Deh)] = {
+	}},
+	{At(ArgId::Deh), {
 		"-deh", "-bex", nullptr,
 		"loads additional deh files",
 		ArgType::StringArray, AT_LEAST_ONE_STRING,
-	},
-	[std::to_underlying(ArgId::Loadgame)] = {
+	}},
+	{At(ArgId::Loadgame), {
 		"-loadgame", nullptr, nullptr,
 		"loads the given savegame slot",
 		ArgType::Int, 0, 118,
-	},
-	[std::to_underlying(ArgId::Playdemo)] = {
+	}},
+	{At(ArgId::Playdemo), {
 		"-playdemo", nullptr, nullptr,
 		"plays the given demo file",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Playlump)] = {
+	}},
+	{At(ArgId::Playlump), {
 		"-playlump", nullptr, nullptr,
 		"plays the given internal demo lump (e.g., DEMO1)",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Timedemo)] = {
+	}},
+	{At(ArgId::Timedemo), {
 		"-timedemo", nullptr, nullptr,
 		"plays the given demo file as fast as possible, timing the process",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Fastdemo)] = {
+	}},
+	{At(ArgId::Fastdemo), {
 		"-fastdemo", nullptr, nullptr,
 		"plays the given demo file as fast as possible, skipping some frames",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Record)] = {
+	}},
+	{At(ArgId::Record), {
 		"-record", nullptr, nullptr,
 		"records a demo to the given file",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Recordfromto)] = {
+	}},
+	{At(ArgId::Recordfromto), {
 		"-recordfromto", nullptr, nullptr,
 		"plays back the first file while writing to the second",
 		ArgType::StringArray, EXACT_ARRAY_LENGTH(2),
-	},
-	[std::to_underlying(ArgId::FromKeyFrame)] = {
+	}},
+	{At(ArgId::FromKeyFrame), {
 		"-from_key_frame", nullptr, nullptr,
 		"restores state and demo buffer from a key frame file",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Warp)] = {
+	}},
+	{At(ArgId::Warp), {
 		"-warp", nullptr, nullptr,
 		"warp to the given episode and / or map",
 		ArgType::IntArray, 0, 99, 0, 2,
-	},
-	[std::to_underlying(ArgId::Skill)] = {
+	}},
+	{At(ArgId::Skill), {
 		"-skill", nullptr, nullptr,
 		"sets the skill level",
 		ArgType::Int, 1, 255,
-	},
-	[std::to_underlying(ArgId::Uv)] = {
+	}},
+	{At(ArgId::Uv), {
 		"-uv", nullptr, nullptr,
 		"sets the skill level to 4",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Nm)] = {
+	}},
+	{At(ArgId::Nm), {
 		"-nm", nullptr, nullptr,
 		"sets the skill level to 5",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Episode)] = {
+	}},
+	{At(ArgId::Episode), {
 		"-episode", nullptr, nullptr,
 		"warp to the first map in the given episode",
 		ArgType::Int, 0, 9,
-	},
-	[std::to_underlying(ArgId::Complevel)] = {
+	}},
+	{At(ArgId::Complevel), {
 		"-complevel", "-cl", nullptr,
 		"sets the compatibility level",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Fast)] = {
+	}},
+	{At(ArgId::Fast), {
 		"-fast", nullptr, nullptr,
 		"turns on fast monsters",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Respawn)] = {
+	}},
+	{At(ArgId::Respawn), {
 		"-respawn", nullptr, nullptr,
 		"turns on monster respawning",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Nomonsters)] = {
+	}},
+	{At(ArgId::Nomonsters), {
 		"-nomonsters", "-nomo", nullptr,
 		"turns off monster spawning",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Longtics)] = {
+	}},
+	{At(ArgId::Longtics), {
 		"-longtics", nullptr, nullptr,
 		"enables high precision turn angles (in supported formats)",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Shorttics)] = {
+	}},
+	{At(ArgId::Shorttics), {
 		"-shorttics", nullptr, nullptr,
 		"restricts turn angles to lower precision",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Heretic)] = {
+	}},
+	{At(ArgId::Heretic), {
 		"-heretic", nullptr, nullptr,
 		"sets the game to heretic",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Hexen)] = {
+	}},
+	{At(ArgId::Hexen), {
 		"-hexen", nullptr, nullptr,
 		"sets the game to hexen",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Class)] = {
+	}},
+	{At(ArgId::Class), {
 		"-class", nullptr, nullptr,
 		"sets the player class in hexen",
 		ArgType::Int, 0, 2,
-	},
-	[std::to_underlying(ArgId::Randclass)] = {
+	}},
+	{At(ArgId::Randclass), {
 		"-randclass", nullptr, nullptr,
 		"sets a random player class in hexen deathmatch",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Dsdademo)] = {
+	}},
+	{At(ArgId::Dsdademo), {
 		"-dsdademo", nullptr, nullptr,
 		"turns on extended demo format (for testing)",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::SoloNet)] = {
+	}},
+	{At(ArgId::SoloNet), {
 		"-solo-net", nullptr, nullptr,
 		"play a net game with one player",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::CoopSpawns)] = {
+	}},
+	{At(ArgId::CoopSpawns), {
 		"-coop_spawns", nullptr, nullptr,
 		"play single player with coop thing spawns",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::PistolStart)] = {
+	}},
+	{At(ArgId::PistolStart), {
 		"-pistolstart", "-wandstart", nullptr,
 		"automatically pistol start each map",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ChainEpisodes)] = {
+	}},
+	{At(ArgId::ChainEpisodes), {
 		"-chain_episodes", nullptr, nullptr,
 		"completing one episode leads to the next without interruption",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Stroller)] = {
+	}},
+	{At(ArgId::Stroller), {
 		"-stroller", nullptr, nullptr,
 		"applies stroller category limitations",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Turbo)] = {
+	}},
+	{At(ArgId::Turbo), {
 		"-turbo", nullptr, "255",
 		"sets player speed percent",
 		ArgType::Int, 10, 255,
-	},
-	[std::to_underlying(ArgId::GameSpeed)] = {
+	}},
+	{At(ArgId::GameSpeed), {
 		"-game_speed", nullptr, nullptr,
 		"sets game speed percent",
 		ArgType::Int, 10, 10000,
-	},
-	[std::to_underlying(ArgId::Tas)] = {
+	}},
+	{At(ArgId::Tas), {
 		"-tas", nullptr, nullptr,
 		"lifts strict mode restrictions",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Build)] = {
+	}},
+	{At(ArgId::Build), {
 		"-build", nullptr, nullptr,
 		"starts in build mode",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::QuitAfterBruteForce)] = {
+	}},
+	{At(ArgId::QuitAfterBruteForce), {
 		"-quit_after_brute_force", nullptr, nullptr,
 		"quits the game when brute force ends",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::FirstInput)] = {
+	}},
+	{At(ArgId::FirstInput), {
 		"-first_input", nullptr, nullptr,
 		"builds the first frame F S T",
 		ArgType::IntArray, -128, 127, 3, 3
-	},
-	[std::to_underlying(ArgId::Command)] = {
+	}},
+	{At(ArgId::Command), {
 		"-command", nullptr, nullptr,
 		"runs a console command",
 		ArgType::String
-	},
-	[std::to_underlying(ArgId::Skipsec)] = {
+	}},
+	{At(ArgId::Skipsec), {
 		"-skipsec", nullptr, nullptr,
 		"skip to the given time (mm:ss or ss) - negative times seek from the end",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Skiptic)] = {
+	}},
+	{At(ArgId::Skiptic), {
 		"-skiptic", nullptr, nullptr,
 		"skip to the given tic - negative tics seek from the end",
 		ArgType::Int, INT_MIN, INT_MAX,
-	},
-	[std::to_underlying(ArgId::TrackPacifist)] = {
+	}},
+	{At(ArgId::TrackPacifist), {
 		"-track_pacifist", nullptr, nullptr,
 		"tracks pacifist category restrictions",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Track100k)] = {
+	}},
+	{At(ArgId::Track100k), {
 		"-track_100k", nullptr, nullptr,
 		"tracks when 100% kills is reached",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::TrackReality)] = {
+	}},
+	{At(ArgId::TrackReality), {
 		"-track_reality", nullptr, nullptr,
 		"tracks reality and almost reality categories restrictions",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::TimeKeys)] = {
+	}},
+	{At(ArgId::TimeKeys), {
 		"-time_keys", nullptr, "105",
 		"announces the time when keys are picked up",
 		ArgType::Int, 0, 350
-	},
-	[std::to_underlying(ArgId::TimeUse)] = {
+	}},
+	{At(ArgId::TimeUse), {
 		"-time_use", nullptr, "105",
 		"announces the time when the use command is activated",
 		ArgType::Int, 0, 350
-	},
-	[std::to_underlying(ArgId::TimeSecrets)] = {
+	}},
+	{At(ArgId::TimeSecrets), {
 		"-time_secrets", nullptr, "105",
 		"announces the time when a secret is collected",
 		ArgType::Int, 0, 350
-	},
-	[std::to_underlying(ArgId::TimeAll)] = {
+	}},
+	{At(ArgId::TimeAll), {
 		"-time_all", nullptr, "105",
 		"announces the time when any -time_* event happens",
 		ArgType::Int, 0, 350
-	},
-	[std::to_underlying(ArgId::TrackPlayer)] = {
+	}},
+	{At(ArgId::TrackPlayer), {
 		"-track_player", nullptr, nullptr,
 		"adds player info to the tracker",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::TrackLine)] = {
+	}},
+	{At(ArgId::TrackLine), {
 		"-track_line", nullptr, nullptr,
 		"adds at least one line to the tracker",
 		ArgType::IntArray, AT_LEAST_ONE_NONNEGATIVE_INT,
-	},
-	[std::to_underlying(ArgId::TrackLineDistance)] = {
+	}},
+	{At(ArgId::TrackLineDistance), {
 		"-track_line_distance", nullptr, nullptr,
 		"adds at least one line distance to the tracker",
 		ArgType::IntArray, AT_LEAST_ONE_NONNEGATIVE_INT,
-	},
-	[std::to_underlying(ArgId::TrackSector)] = {
+	}},
+	{At(ArgId::TrackSector), {
 		"-track_sector", nullptr, nullptr,
 		"adds at least one sector to the tracker",
 		ArgType::IntArray, AT_LEAST_ONE_NONNEGATIVE_INT,
-	},
-	[std::to_underlying(ArgId::TrackMobj)] = {
+	}},
+	{At(ArgId::TrackMobj), {
 		"-track_mobj", nullptr, nullptr,
 		"adds at least one mobj to the tracker",
 		ArgType::IntArray, AT_LEAST_ONE_NONNEGATIVE_INT,
-	},
-	[std::to_underlying(ArgId::Assign)] = {
+	}},
+	{At(ArgId::Assign), {
 		"-assign", nullptr, nullptr,
 		"temporarily assign config variables",
 		ArgType::StringArray, AT_LEAST_ONE_STRING,
-	},
-	[std::to_underlying(ArgId::Update)] = {
+	}},
+	{At(ArgId::Update), {
 		"-update", nullptr, nullptr,
 		"permanently update config variables",
 		ArgType::StringArray, AT_LEAST_ONE_STRING,
-	},
-	[std::to_underlying(ArgId::Analysis)] = {
+	}},
+	{At(ArgId::Analysis), {
 		"-analysis", nullptr, nullptr,
 		"writes various data to analysis.txt",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Levelstat)] = {
+	}},
+	{At(ArgId::Levelstat), {
 		"-levelstat", nullptr, nullptr,
 		"writes level stats to levelstat.txt",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ExportTextFile)] = {
+	}},
+	{At(ArgId::ExportTextFile), {
 		"-export_text_file", nullptr, nullptr,
 		"export a dsda-format text file template",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::TrackPlayback)] = {
+	}},
+	{At(ArgId::TrackPlayback), {
 		"-track_playback", nullptr, nullptr,
 		"treat demo playback as an attempt for the given split file base",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::ExportGhost)] = {
+	}},
+	{At(ArgId::ExportGhost), {
 		"-export_ghost", nullptr, nullptr,
 		"exports a ghost file",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::ImportGhost)] = {
+	}},
+	{At(ArgId::ImportGhost), {
 		"-import_ghost", nullptr, nullptr,
 		"imports at least one ghost file",
 		ArgType::StringArray, AT_LEAST_ONE_STRING,
-	},
-	[std::to_underlying(ArgId::Consoleplayer)] = {
+	}},
+	{At(ArgId::Consoleplayer), {
 		"-consoleplayer", nullptr, nullptr,
 		"sets the console player (for coop playback)",
 		ArgType::Int, 0, 7,
-	},
-	[std::to_underlying(ArgId::Spechit)] = {
+	}},
+	{At(ArgId::Spechit), {
 		"-spechit", nullptr, nullptr,
 		"sets a magic spechit base address for certain overrun demos",
 		ArgType::Int, INT_MIN, INT_MAX,
-	},
-	[std::to_underlying(ArgId::Setmem)] = {
+	}},
+	{At(ArgId::Setmem), {
 		"-setmem", nullptr, nullptr,
 		"sets a magic block of memory for certain overrun demos",
 		ArgType::StringArray, 0, 0, 1, 10,
-	},
-	[std::to_underlying(ArgId::Data)] = {
+	}},
+	{At(ArgId::Data), {
 		"-data", nullptr, nullptr,
 		"sets the data directory",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Save)] = {
+	}},
+	{At(ArgId::Save), {
 		"-save", nullptr, nullptr,
 		"sets the save directory",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Config)] = {
+	}},
+	{At(ArgId::Config), {
 		"-config", nullptr, nullptr,
 		"sets the config file",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Hud)] = {
+	}},
+	{At(ArgId::Hud), {
 		"-hud", nullptr, nullptr,
 		"sets the hud config file",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Shotdir)] = {
+	}},
+	{At(ArgId::Shotdir), {
 		"-shotdir", nullptr, nullptr,
 		"sets the screenshot directory",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Movie)] = {
+	}},
+	{At(ArgId::Movie), {
 		"-movie", nullptr, nullptr,
 		"sets the target final level for movie demos (for automatic exit detection)",
 		ArgType::Int, 0, 99,
-	},
-	[std::to_underlying(ArgId::Viddump)] = {
+	}},
+	{At(ArgId::Viddump), {
 		"-viddump", nullptr, nullptr,
 		"dumps a video to the chosen file name",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Dehout)] = {
+	}},
+	{At(ArgId::Dehout), {
 		"-dehout", "-bexout", nullptr,
 		"sets dehacked log file",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Verbose)] = {
+	}},
+	{At(ArgId::Verbose), {
 		"-verbose", nullptr, nullptr,
 		"enable all logging",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Quiet)] = {
+	}},
+	{At(ArgId::Quiet), {
 		"-quiet", nullptr, nullptr,
 		"disable all logging",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::V)] = {
+	}},
+	{At(ArgId::V), {
 		"-v", nullptr, nullptr,
 		"print the version and exit",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Resetgamma)] = {
+	}},
+	{At(ArgId::Resetgamma), {
 		"-resetgamma", nullptr, nullptr,
 		"reset gamma and exit",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceOldZdoomNodes)] = {
+	}},
+	{At(ArgId::ForceOldZdoomNodes), {
 		"-force_old_zdoom_nodes", nullptr, nullptr,
 		"force extended (non-gl) zdoom nodes",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Sigsegv)] = {
+	}},
+	{At(ArgId::Sigsegv), {
 		"-sigsegv", nullptr, nullptr,
 		"disable the SIGSEGV signal handler",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Deathmatch)] = {
+	}},
+	{At(ArgId::Deathmatch), {
 		"-deathmatch", nullptr, nullptr,
 		"turn on deathmatch mode",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Altdeath)] = {
+	}},
+	{At(ArgId::Altdeath), {
 		"-altdeath", nullptr, nullptr,
 		"turn on altdeath mode",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Timer)] = {
+	}},
+	{At(ArgId::Timer), {
 		"-timer", nullptr, nullptr,
 		"sets the level time limit (in minutes) for deathmatch",
 		ArgType::Int, 1, INT_MAX,
-	},
-	[std::to_underlying(ArgId::Frags)] = {
+	}},
+	{At(ArgId::Frags), {
 		"-frags", nullptr, "10",
 		"sets the level frag limit for deathmatch",
 		ArgType::Int, 1, INT_MAX,
-	},
-	[std::to_underlying(ArgId::Nosound)] = {
+	}},
+	{At(ArgId::Nosound), {
 		"-nosound", nullptr, nullptr,
 		"turn off sound",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Nomusic)] = {
+	}},
+	{At(ArgId::Nomusic), {
 		"-nomusic", nullptr, nullptr,
 		"turn off music",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Nosfx)] = {
+	}},
+	{At(ArgId::Nosfx), {
 		"-nosfx", nullptr, nullptr,
 		"turn off sfx",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Nodraw)] = {
+	}},
+	{At(ArgId::Nodraw), {
 		"-nodraw", nullptr, nullptr,
 		"turn off drawing",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Nodeh)] = {
+	}},
+	{At(ArgId::Nodeh), {
 		"-nodeh", nullptr, nullptr,
 		"skip dehacked lumps inside wads",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Nomapinfo)] = {
+	}},
+	{At(ArgId::Nomapinfo), {
 		"-nomapinfo", nullptr, nullptr,
 		"skip *MAPINFO lumps",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Noautoload)] = {
+	}},
+	{At(ArgId::Noautoload), {
 		"-noautoload", "-noload", nullptr,
 		"ignore autoload files",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Nocheats)] = {
+	}},
+	{At(ArgId::Nocheats), {
 		"-nocheats", nullptr, nullptr,
 		"ignore dehacked cheats",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Nojoy)] = {
+	}},
+	{At(ArgId::Nojoy), {
 		"-nojoy", nullptr, nullptr,
 		"disable joystick input",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Nomouse)] = {
+	}},
+	{At(ArgId::Nomouse), {
 		"-nomouse", nullptr, nullptr,
 		"disable mouse input",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::NoMessageBox)] = {
+	}},
+	{At(ArgId::NoMessageBox), {
 		"-no_message_box", nullptr, nullptr,
 		"disable message boxes",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Fullscreen)] = {
+	}},
+	{At(ArgId::Fullscreen), {
 		"-fullscreen", nullptr, nullptr,
 		"temporarily turns on fullscreen mode",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Window)] = {
+	}},
+	{At(ArgId::Window), {
 		"-window", nullptr, nullptr,
 		"temporarily turns on windowed mode",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Width)] = {
+	}},
+	{At(ArgId::Width), {
 		"-width", nullptr, nullptr,
 		"temporarily sets the resolution width",
 		ArgType::Int, 320, INT_MAX,
-	},
-	[std::to_underlying(ArgId::Height)] = {
+	}},
+	{At(ArgId::Height), {
 		"-height", nullptr, nullptr,
 		"temporarily sets the resolution height",
 		ArgType::Int, 200, INT_MAX,
-	},
-	[std::to_underlying(ArgId::Geometry)] = {
+	}},
+	{At(ArgId::Geometry), {
 		"-geometry", "-geom", nullptr,
 		"temporarily sets the resolution and, optionally, the window mode WxH[w|f]",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Vidmode)] = {
+	}},
+	{At(ArgId::Vidmode), {
 		"-vidmode", nullptr, nullptr,
 		"temporarily sets the graphics renderer (sw or gl)",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Aspect)] = {
+	}},
+	{At(ArgId::Aspect), {
 		"-aspect", nullptr, nullptr,
 		"sets the fov aspect ratio WxH",
 		ArgType::String, 0, 21,
-	},
-	[std::to_underlying(ArgId::Emulate)] = {
+	}},
+	{At(ArgId::Emulate), {
 		"-emulate", nullptr, nullptr,
 		"emulates errors from a version of prboom+ (a.b.c.d)",
 		ArgType::String,
-	},
-	[std::to_underlying(ArgId::Doom95)] = {
+	}},
+	{At(ArgId::Doom95), {
 		"-doom95", nullptr, nullptr,
 		"use doom95's adjacent sector limit",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::Blockmap)] = {
+	}},
+	{At(ArgId::Blockmap), {
 		"-blockmap", nullptr, nullptr,
 		"rebuild the blockmap (ignore BLOCKMAP lump)",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceMonsterAvoidHazards)] = {
+	}},
+	{At(ArgId::ForceMonsterAvoidHazards), {
 		"-force_monster_avoid_hazards", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceRemoveSlimeTrails)] = {
+	}},
+	{At(ArgId::ForceRemoveSlimeTrails), {
 		"-force_remove_slime_trails", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceNoDropoff)] = {
+	}},
+	{At(ArgId::ForceNoDropoff), {
 		"-force_no_dropoff", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceTruncatedSectorSpecials)] = {
+	}},
+	{At(ArgId::ForceTruncatedSectorSpecials), {
 		"-force_truncated_sector_specials", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceBoomBrainawake)] = {
+	}},
+	{At(ArgId::ForceBoomBrainawake), {
 		"-force_boom_brainawake", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForcePrboomFriction)] = {
+	}},
+	{At(ArgId::ForcePrboomFriction), {
 		"-force_prboom_friction", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::RejectPadWithFf)] = {
+	}},
+	{At(ArgId::RejectPadWithFf), {
 		"-reject_pad_with_ff", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceLxdoomDemoCompatibility)] = {
+	}},
+	{At(ArgId::ForceLxdoomDemoCompatibility), {
 		"-force_lxdoom_demo_compatibility", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::AllowSsgDirect)] = {
+	}},
+	{At(ArgId::AllowSsgDirect), {
 		"-allow_ssg_direct", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::TreatNoClippingThingsAsNotBlocking)] = {
+	}},
+	{At(ArgId::TreatNoClippingThingsAsNotBlocking), {
 		"-treat_no_clipping_things_as_not_blocking", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceIncorrectProcessingOfRespawnFrameEntry)] = {
+	}},
+	{At(ArgId::ForceIncorrectProcessingOfRespawnFrameEntry), {
 		"-force_incorrect_processing_of_respawn_frame_entry", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceCorrectCodeFor3KeysDoorsInMbf)] = {
+	}},
+	{At(ArgId::ForceCorrectCodeFor3KeysDoorsInMbf), {
 		"-force_correct_code_for_3_keys_doors_in_mbf", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::UninitializeCrushFieldForStairs)] = {
+	}},
+	{At(ArgId::UninitializeCrushFieldForStairs), {
 		"-uninitialize_crush_field_for_stairs", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceBoomFindnexthighestfloor)] = {
+	}},
+	{At(ArgId::ForceBoomFindnexthighestfloor), {
 		"-force_boom_findnexthighestfloor", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::AllowSkyTransferInBoom)] = {
+	}},
+	{At(ArgId::AllowSkyTransferInBoom), {
 		"-allow_sky_transfer_in_boom", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ApplyGreenArmorClassToArmorBonuses)] = {
+	}},
+	{At(ArgId::ApplyGreenArmorClassToArmorBonuses), {
 		"-apply_green_armor_class_to_armor_bonuses", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ApplyBlueArmorClassToMegasphere)] = {
+	}},
+	{At(ArgId::ApplyBlueArmorClassToMegasphere), {
 		"-apply_blue_armor_class_to_megasphere", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ForceIncorrectBobbingInBoom)] = {
+	}},
+	{At(ArgId::ForceIncorrectBobbingInBoom), {
 		"-force_incorrect_bobbing_in_boom", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::BoomDehParser)] = {
+	}},
+	{At(ArgId::BoomDehParser), {
 		"-boom_deh_parser", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::MbfRemoveThinkerInKillmobj)] = {
+	}},
+	{At(ArgId::MbfRemoveThinkerInKillmobj), {
 		"-mbf_remove_thinker_in_killmobj", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::DoNotInheritFriendlynessFlagOnSpawn)] = {
+	}},
+	{At(ArgId::DoNotInheritFriendlynessFlagOnSpawn), {
 		"-do_not_inherit_friendlyness_flag_on_spawn", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::DoNotUseMisc12FrameParametersInAMushroom)] = {
+	}},
+	{At(ArgId::DoNotUseMisc12FrameParametersInAMushroom), {
 		"-do_not_use_misc12_frame_parameters_in_a_mushroom", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ApplyMbfCodepointersToAnyComplevel)] = {
+	}},
+	{At(ArgId::ApplyMbfCodepointersToAnyComplevel), {
 		"-apply_mbf_codepointers_to_any_complevel", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
-	[std::to_underlying(ArgId::ResetMonsterspawnerParamsAfterLoading)] = {
+	}},
+	{At(ArgId::ResetMonsterspawnerParamsAfterLoading), {
 		"-reset_monsterspawner_params_after_loading", nullptr, nullptr,
 		"sets a special flag to compensate for sync errors in certain demos",
 		ArgType::Null,
-	},
+	}},
 };
 
 static dsda_arg_t arg_value[std::to_underlying(ArgId::Count)];
@@ -828,9 +831,7 @@ static void dsda_ParseArg(arg_config_t* config, dsda_arg_t* arg, int argv_i)
 
 void dsda_ParseCommandLineArgs(int argc, char** argv)
 {
-	int i;
 	int argv_i;
-	arg_config_t* config;
 
 	dsda_argc = argc;
 	dsda_argv = argv;
@@ -844,25 +845,22 @@ void dsda_ParseCommandLineArgs(int argc, char** argv)
 
 		if(dsda_argv[argv_i][0] == '-' && !is_integer)
 		{
-			for(i = 0; i < std::to_underlying(ArgId::Count); ++i)
+			const auto id = std::ranges::find_if(arg_config.Keys(), [&](const ArgId key)
 			{
-				config = &arg_config[i];
+				const arg_config_t& config = arg_config[key];
+				return !strcasecmp(config.name, dsda_argv[argv_i]) ||
+					(config.alias && !strcasecmp(config.alias, dsda_argv[argv_i]));
+			});
 
-				if(
-					!strcasecmp(config->name, dsda_argv[argv_i]) ||
-					(config->alias && !strcasecmp(config->alias, dsda_argv[argv_i]))
-				)
-				{
-					if(arg_value[i].found)
-						lprintf(OutputLevels::Warn, "Warning: ignoring duplicate argument %s\n", config->name);
-					else
-						dsda_ParseArg(config, &arg_value[i], argv_i);
-					break;
-				}
-			}
-
-			if(i == std::to_underlying(ArgId::Count))
+			if(id == arg_config.Keys().end())
 				I_Error("Unknown command line option %s\n", dsda_argv[argv_i]);
+
+			arg_config_t* config = &arg_config[*id];
+
+			if(arg_value[std::to_underlying(*id)].found)
+				lprintf(OutputLevels::Warn, "Warning: ignoring duplicate argument %s\n", config->name);
+			else
+				dsda_ParseArg(config, &arg_value[std::to_underlying(*id)], argv_i);
 		}
 	}
 
@@ -877,7 +875,7 @@ void dsda_UpdateIntArg(ArgId id, const char* param)
 {
 	arg_value[std::to_underlying(id)].count = 1;
 	arg_value[std::to_underlying(id)].found = true;
-	dsda_ParseIntArg(&arg_config[std::to_underlying(id)], &arg_value[std::to_underlying(id)].value.v_int, param);
+	dsda_ParseIntArg(&arg_config[id], &arg_value[std::to_underlying(id)].value.v_int, param);
 }
 
 void dsda_UpdateStringArg(ArgId id, const char* param)
@@ -885,12 +883,12 @@ void dsda_UpdateStringArg(ArgId id, const char* param)
 	param = Z_Strdup(param);
 	arg_value[std::to_underlying(id)].count = 1;
 	arg_value[std::to_underlying(id)].found = true;
-	dsda_ParseStringArg(&arg_config[std::to_underlying(id)], &arg_value[std::to_underlying(id)].value.v_string, param);
+	dsda_ParseStringArg(&arg_config[id], &arg_value[std::to_underlying(id)].value.v_string, param);
 }
 
 void dsda_AppendStringArg(ArgId id, const char* param)
 {
-	if(arg_config[std::to_underlying(id)].type == ArgType::String)
+	if(arg_config[id].type == ArgType::String)
 		return dsda_UpdateStringArg(id, param);
 
 	param = Z_Strdup(param);
@@ -901,12 +899,12 @@ void dsda_AppendStringArg(ArgId id, const char* param)
 		static_cast<const char **>(Z_Realloc(arg_value[std::to_underlying(id)].value.v_string_array, arg_value[std::to_underlying(id)].count * sizeof(char*)));
 
 	dsda_ParseStringArg(
-		&arg_config[std::to_underlying(id)],
+		&arg_config[id],
 		&arg_value[std::to_underlying(id)].value.v_string_array[arg_value[std::to_underlying(id)].count - 1],
 		param
 	);
 
-	dsda_ValidateArrayArg(&arg_config[std::to_underlying(id)], &arg_value[std::to_underlying(id)]);
+	dsda_ValidateArrayArg(&arg_config[id], &arg_value[std::to_underlying(id)]);
 }
 
 dsda_arg_t* dsda_Arg(ArgId id)
@@ -934,15 +932,11 @@ int dsda_SimpleIntArg(ArgId id)
 
 void dsda_PrintArgHelp()
 {
-	int i;
-
 	lprintf(OutputLevels::Info, "\nCommand Line Arguments:\n\n");
 
-	for(i = 0; i < std::to_underlying(ArgId::Count); ++i)
+	for(const arg_config_t& config_entry : arg_config)
 	{
-		arg_config_t* config;
-
-		config = &arg_config[i];
+		const arg_config_t* config = &config_entry;
 
 		lprintf(OutputLevels::Info, "  %s", config->name);
 		if(config->alias)

@@ -1517,9 +1517,9 @@ void Raven_P_MovePlayer(player_t* player)
 		}
 		else
 		{
-			if(player->mo->state == &states[std::to_underlying(pclass[std::to_underlying(player->pclass)].normal_state)])
+			if(player->mo->state == &states[std::to_underlying(pclass[player->pclass].normal_state)])
 			{
-				P_SetMobjState(player->mo, static_cast<StateId>(pclass[std::to_underlying(player->pclass)].run_state));
+				P_SetMobjState(player->mo, static_cast<StateId>(pclass[player->pclass].run_state));
 			}
 		}
 	}

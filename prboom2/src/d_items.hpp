@@ -10,6 +10,8 @@
 
 #include "doomdef.hpp"
 
+#include "cpp/EnumArray.hpp"
+
 enum struct StateId : int32_t;
 
 #ifdef __cplusplus
@@ -56,7 +58,7 @@ extern weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)];
 
 // hexen
 
-extern weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::to_underlying(PClass::Count)];
+extern EnumArray<EnumArray<weaponinfo_t, EnumCount<PClass>>, WeaponType::HexenCount> hexen_weaponinfo;
 
 // dynamically selected in global.c
 

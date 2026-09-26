@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -68,6 +69,13 @@ public:
 
 	[[nodiscard]] static constexpr std::size_t size() noexcept { return Size; }
 
+	/// Every enum value below `Count`, in order: `for(Enum key : array.Keys())`.
+	/// A static array, so a search like `std::ranges::find_if(array.Keys(), ...)` returns a usable iterator.
+	[[nodiscard]] static constexpr const std::array<Enum, Size>& Keys() noexcept
+	{
+		return keys;
+	}
+
 	[[nodiscard]] constexpr T* data() noexcept { return values.data(); }
 	[[nodiscard]] constexpr const T* data() const noexcept { return values.data(); }
 
@@ -77,6 +85,14 @@ public:
 	[[nodiscard]] constexpr auto end() const noexcept { return values.end(); }
 
 private:
+	static constexpr std::array<Enum, Size> keys = []
+	{
+		std::array<Enum, Size> result{};
+		for(std::size_t index = 0; index < Size; ++index)
+			result[index] = static_cast<Enum>(index);
+		return result;
+	}();
+
 	std::array<T, Size> values{};
 };
 
@@ -103,4 +119,17 @@ static_assert([]
 	EnumArray<int32_t, Shape::Triangle> a;
 	a[Shape::Square] = 4;
 	return a.size() == 2 && a[Shape::Circle] == 0 && a[Shape::Square] == 4;
+}());
+static_assert([]
+{
+	enum struct Color : uint8_t
+	{
+		Red,
+		Green,
+		Blue,
+		Count,
+	};
+	const EnumArray<const char*, EnumCount<Color>> names = {"red", "green", "blue"};
+	const auto found = std::ranges::find_if(names.Keys(), [&](const Color key) { return names[key][0] == 'g'; });
+	return *found == Color::Green && std::ranges::distance(names.Keys()) == 3;
 }());

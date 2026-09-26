@@ -449,7 +449,7 @@ void dsda_WatchCommand()
 		if(!playeringame[i]) continue;
 
 		cmd = &players[i].cmd;
-		player_class = &pclass[std::to_underlying(players[i].pclass)];
+		player_class = &pclass[players[i].pclass];
 
 		if((cmd->buttons & ButtonCode::Use) != ButtonCode{} && dsda_time_use)
 			dsda_AddSplit(SplitClass::Use, dsda_time_use);

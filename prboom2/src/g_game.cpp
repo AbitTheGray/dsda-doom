@@ -316,7 +316,7 @@ void G_SetSpeed(dboolean reset)
 	dsda_pclass_t* player_class;
 	static dsda_pclass_t* last_player_class = nullptr;
 
-	player_class = &pclass[std::to_underlying(players[consoleplayer].pclass)];
+	player_class = &pclass[players[consoleplayer].pclass];
 
 	if(last_player_class == player_class && !reset)
 		return;
@@ -494,7 +494,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 	WeaponType newweapon; // phares
 	dboolean strict_input;
 
-	dsda_pclass_t* player_class = &pclass[std::to_underlying(players[consoleplayer].pclass)];
+	dsda_pclass_t* player_class = &pclass[players[consoleplayer].pclass];
 
 	strict_input = dsda_StrictMode();
 

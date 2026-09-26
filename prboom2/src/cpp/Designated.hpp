@@ -64,6 +64,17 @@ struct DesignatedEntry
 	{
 	}
 
+	/// A plain value written as its own braced list: `{190, 213, 226}` instead of `{{190, 213, 226}}`.
+	/// The elements go straight to `T{...}`, so a braced list nested inside it (`{"a", {1, 2}}`) cannot be deduced and needs `At`.
+	template<typename... Args>
+	requires (sizeof...(Args) >= 1)
+		&& (!std::same_as<std::remove_cvref_t<Args>, DesignatedEntry> && ...)
+		&& requires(Args&&... a_args) { T{std::forward<Args>(a_args)...}; }
+	constexpr DesignatedEntry(Args&&... a_args)
+		: value{std::forward<Args>(a_args)...}
+	{
+	}
+
 	template<typename K>
 	requires std::same_as<K, Key> || (std::integral<Key> && std::integral<K>)
 	constexpr DesignatedEntry(
@@ -140,4 +151,19 @@ static_assert([]
 {
 	const DesignatedVector<int32_t> v = {3, 1, {At(5), 0}, 2};
 	return v.size() == 7 && v[0] == 3 && v[1] == 1 && v[4] == 0 && v[5] == 0 && v[6] == 2;
+}());
+static_assert([]
+{
+	const DesignatedArray<std::array<int32_t, 3>, 3> a = {{At(1), {1, 2, 3}}, {4, 5, 6}};
+	return a[0][0] == 0 && a[1][2] == 3 && a[2][0] == 4 && a[2][2] == 6;
+}());
+static_assert([]
+{
+	struct Pair
+	{
+		const char* name;
+		int32_t value;
+	};
+	const DesignatedArray<Pair, 2> a = {{"one", 1}, {"two", 2}};
+	return a[0].value == 1 && a[1].value == 2 && a[1].name[0] == 't';
 }());

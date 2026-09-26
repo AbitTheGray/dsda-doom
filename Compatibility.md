@@ -30,3 +30,11 @@ game, as upstream.
 
 Code: `IsReadableOrWarn` in `prboom2/src/d_main.cpp`, called from
 `LoadWADsAtPath` and `LoadZIPsAtPath`.
+
+## Game controller button names are bounds-checked
+
+Upstream checks the button number against `sizeof(button_names)`, the table's size in bytes rather than its number of entries.
+A button number from 23 up to the byte size read past the table; it now gets the name `misc`, like any unknown button.
+Only the name shown in the menu is affected, not input or demos.
+
+Code: `dsda_GameControllerButtonName` in `prboom2/src/dsda/game_controller.cpp`.

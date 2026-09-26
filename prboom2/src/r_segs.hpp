@@ -26,7 +26,7 @@ enum struct FakeContrastMode : int32_t
 	Smooth
 };
 
-extern FakeContrastMode fake_contrast_mode;
+extern int fake_contrast_mode; // a FakeContrastMode; int because the config binds it as int*
 
 #ifdef __cplusplus
 }

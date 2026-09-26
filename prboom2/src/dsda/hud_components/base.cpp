@@ -85,7 +85,7 @@ void dsda_InitPatchHC(dsda_patch_component_t* component, int x_offset, int y_off
 
 int dsda_HexenArmor(player_t* player)
 {
-	int temp = pclass[std::to_underlying(player->pclass)].auto_armor_save
+	int temp = pclass[player->pclass].auto_armor_save
 		+ player->armorpoints[std::to_underlying(ArmorType::Armor)]
 		+ player->armorpoints[std::to_underlying(ArmorType::Shield)]
 		+ player->armorpoints[std::to_underlying(ArmorType::Helmet)]

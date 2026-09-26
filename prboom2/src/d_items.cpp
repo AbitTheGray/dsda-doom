@@ -426,10 +426,10 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 
 // hexen
 
-weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::to_underlying(PClass::Count)] = {
-	{
+constinit EnumArray<EnumArray<weaponinfo_t, EnumCount<PClass>>, WeaponType::HexenCount> hexen_weaponinfo = {
+	{At(WeaponType::First), {
 		// First Weapons
-		[std::to_underlying(PClass::Fighter)] = {
+		{At(PClass::Fighter), {
 			// Fighter First Weapon - Punch
 			AmmoType::ManaNone,           // mana
 			StateId::HexenPunchup,     // upstate
@@ -441,7 +441,7 @@ weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::t
 			0,                   // ammopershot
 			0,                   // intflags
 			WPF_NOFLAG
-		},
+		}},
 		{
 			// Cleric First Weapon - Mace
 			AmmoType::ManaNone,          // mana
@@ -481,10 +481,10 @@ weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::t
 			0,                  // intflags
 			WPF_NOFLAG
 		}
-	},
-	{
+	}},
+	{At(WeaponType::Second), {
 		// Second Weapons
-		[std::to_underlying(PClass::Fighter)] = {
+		{At(PClass::Fighter), {
 			// Fighter - Axe
 			AmmoType::ManaNone,         // mana
 			StateId::HexenFaxeup,    // upstate
@@ -496,7 +496,7 @@ weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::t
 			2,                 // ammopershot
 			0,                 // intflags
 			WPF_NOFLAG
-		},
+		}},
 		{
 			// Cleric - Serpent Staff
 			AmmoType::Mana1,              // mana
@@ -536,10 +536,10 @@ weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::t
 			0,                  // intflags
 			WPF_NOFLAG
 		}
-	},
-	{
+	}},
+	{At(WeaponType::Third), {
 		// Third Weapons
-		[std::to_underlying(PClass::Fighter)] = {
+		{At(PClass::Fighter), {
 			// Fighter - Hammer
 			AmmoType::ManaNone,            // mana
 			StateId::HexenFhammerup,    // upstate
@@ -551,7 +551,7 @@ weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::t
 			3,                    // ammopershot
 			0,                    // intflags
 			WPF_NOFLAG
-		},
+		}},
 		{
 			// Cleric - Flame Strike
 			AmmoType::Mana2,               // mana
@@ -591,10 +591,10 @@ weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::t
 			0,                  // intflags
 			WPF_NOFLAG
 		}
-	},
-	{
+	}},
+	{At(WeaponType::Fourth), {
 		// Fourth Weapons
-		[std::to_underlying(PClass::Fighter)] = {
+		{At(PClass::Fighter), {
 			// Fighter - Rune Sword
 			AmmoType::ManaBoth,           // mana
 			StateId::HexenFswordup,    // upstate
@@ -606,7 +606,7 @@ weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::t
 			14,                  // ammopershot
 			0,                   // intflags
 			WPF_NOFLAG
-		},
+		}},
 		{
 			// Cleric - Holy Symbol
 			AmmoType::ManaBoth,          // mana
@@ -646,5 +646,5 @@ weaponinfo_t hexen_weaponinfo[std::to_underlying(WeaponType::HexenCount)][std::t
 			0,                  // intflags
 			WPF_NOFLAG
 		}
-	}
+	}}
 };

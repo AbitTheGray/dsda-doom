@@ -487,7 +487,7 @@ static void dsda_InitHexen()
 	dsda_InitializeStates(hexen_states, std::to_underlying(StateId::HexenCount));
 	dsda_InitializeSprites(hexen_sprnames, std::to_underlying(SpriteId::HexenCount));
 	dsda_InitializeSFX(hexen_S_sfx, std::to_underlying(SfxId::HexenCount));
-	dsda_InitializeMusic(hexen_S_music, std::to_underlying(MusicId::HexenCount));
+	dsda_InitializeMusic(hexen_S_music.data(), std::to_underlying(MusicId::HexenCount));
 
 	demostates = hexen_demostates;
 

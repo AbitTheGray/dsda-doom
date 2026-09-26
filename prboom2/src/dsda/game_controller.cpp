@@ -7,6 +7,8 @@
 
 #include "SDL.h"
 
+#include "cpp/EnumArray.hpp"
+
 #include "d_event.hpp"
 #include "d_main.hpp"
 #include "lprintf.hpp"
@@ -35,38 +37,44 @@ static axis_t right_trigger = {SDL_CONTROLLER_AXIS_TRIGGERRIGHT};
 
 static int swap_analogs;
 
-static const char* button_names[] = {
-	[std::to_underlying(GameControllerButton::A)] = "pad a",
-	[std::to_underlying(GameControllerButton::B)] = "pad b",
-	[std::to_underlying(GameControllerButton::X)] = "pad x",
-	[std::to_underlying(GameControllerButton::Y)] = "pad y",
-	[std::to_underlying(GameControllerButton::Back)] = "pad back",
-	[std::to_underlying(GameControllerButton::Guide)] = "pad guide",
-	[std::to_underlying(GameControllerButton::Start)] = "pad start",
-	[std::to_underlying(GameControllerButton::Leftstick)] = "lstick",
-	[std::to_underlying(GameControllerButton::Rightstick)] = "rstick",
-	[std::to_underlying(GameControllerButton::Leftshoulder)] = "pad l",
-	[std::to_underlying(GameControllerButton::Rightshoulder)] = "pad r",
-	[std::to_underlying(GameControllerButton::DpadUp)] = "dpad u",
-	[std::to_underlying(GameControllerButton::DpadDown)] = "dpad d",
-	[std::to_underlying(GameControllerButton::DpadLeft)] = "dpad l",
-	[std::to_underlying(GameControllerButton::DpadRight)] = "dpad r",
-	[std::to_underlying(GameControllerButton::Misc1)] = "misc 1",
-	[std::to_underlying(GameControllerButton::Paddle1)] = "paddle 1",
-	[std::to_underlying(GameControllerButton::Paddle2)] = "paddle 2",
-	[std::to_underlying(GameControllerButton::Paddle3)] = "paddle 3",
-	[std::to_underlying(GameControllerButton::Paddle4)] = "paddle 4",
-	[std::to_underlying(GameControllerButton::Touchpad)] = "touchpad",
-	[std::to_underlying(GameControllerButton::Triggerleft)] = "pad lt",
-	[std::to_underlying(GameControllerButton::Triggerright)] = "pad rt",
+static constinit EnumArray<const char*, GameControllerButton::Max> button_names = {
+	{At(GameControllerButton::A), "pad a"},
+	{At(GameControllerButton::B), "pad b"},
+	{At(GameControllerButton::X), "pad x"},
+	{At(GameControllerButton::Y), "pad y"},
+	{At(GameControllerButton::Back), "pad back"},
+	{At(GameControllerButton::Guide), "pad guide"},
+	{At(GameControllerButton::Start), "pad start"},
+	{At(GameControllerButton::Leftstick), "lstick"},
+	{At(GameControllerButton::Rightstick), "rstick"},
+	{At(GameControllerButton::Leftshoulder), "pad l"},
+	{At(GameControllerButton::Rightshoulder), "pad r"},
+	{At(GameControllerButton::DpadUp), "dpad u"},
+	{At(GameControllerButton::DpadDown), "dpad d"},
+	{At(GameControllerButton::DpadLeft), "dpad l"},
+	{At(GameControllerButton::DpadRight), "dpad r"},
+	{At(GameControllerButton::Misc1), "misc 1"},
+	{At(GameControllerButton::Paddle1), "paddle 1"},
+	{At(GameControllerButton::Paddle2), "paddle 2"},
+	{At(GameControllerButton::Paddle3), "paddle 3"},
+	{At(GameControllerButton::Paddle4), "paddle 4"},
+	{At(GameControllerButton::Touchpad), "touchpad"},
+	{At(GameControllerButton::Triggerleft), "pad lt"},
+	{At(GameControllerButton::Triggerright), "pad rt"},
 };
 
 const char* dsda_GameControllerButtonName(int button)
 {
-	if(button >= sizeof(button_names) || !button_names[button])
+	// Upstream compares against sizeof(button_names), the size in bytes (see Compatibility.md)
+	if(button < 0 || std::cmp_greater_equal(button, button_names.size()))
 		return "misc";
 
-	return button_names[button];
+	const GameControllerButton key = static_cast<GameControllerButton>(button);
+
+	if(!button_names[key])
+		return "misc";
+
+	return button_names[key];
 }
 
 static float dsda_AxisValue(axis_t* axis)

@@ -2,7 +2,10 @@
 
 // SB_bar.c
 
+#include <array>
 #include <utility>
+
+#include "cpp/EnumArray.hpp"
 
 #include "doomstat.hpp"
 #include "m_cheat.hpp"
@@ -1219,7 +1222,7 @@ void DrawKeyBar()
 		}
 		oldkeys = CPlayer->ravenkeys;
 	}
-	temp = pclass[std::to_underlying(CPlayer->pclass)].auto_armor_save +
+	temp = pclass[CPlayer->pclass].auto_armor_save +
 		CPlayer->armorpoints[std::to_underlying(ArmorType::Armor)] +
 		CPlayer->armorpoints[std::to_underlying(ArmorType::Shield)] +
 		CPlayer->armorpoints[std::to_underlying(ArmorType::Helmet)] +
@@ -1232,11 +1235,11 @@ void DrawKeyBar()
 			{
 				continue;
 			}
-			if(CPlayer->armorpoints[i] <= (pclass[std::to_underlying(CPlayer->pclass)].armor_increment[i] >> 2))
+			if(CPlayer->armorpoints[i] <= (pclass[CPlayer->pclass].armor_increment[i] >> 2))
 			{
 				V_DrawTLNumPatch(150 + 31 * i, 164, W_GetNumForName("armslot1") + i);
 			}
-			else if(CPlayer->armorpoints[i] <= (pclass[std::to_underlying(CPlayer->pclass)].armor_increment[i] >> 1))
+			else if(CPlayer->armorpoints[i] <= (pclass[CPlayer->pclass].armor_increment[i] >> 1))
 			{
 				V_DrawAltTLNumPatch(150 + 31 * i, 164, W_GetNumForName("armslot1") + i);
 			}
@@ -1250,11 +1253,11 @@ void DrawKeyBar()
 	}
 }
 
-static int PieceX[std::to_underlying(PClass::Count)][3] = {
-	[std::to_underlying(PClass::Fighter)] = {190, 225, 234},
-	{190, 213, 226},
-	{190, 205, 224},
-	{0, 0, 0} // Pig is never used
+static constinit EnumArray<std::array<int, 3>, EnumCount<PClass>> PieceX = {
+	{At(PClass::Fighter), {190, 225, 234}},
+	{At(PClass::Cleric), {190, 213, 226}},
+	{At(PClass::Mage), {190, 205, 224}},
+	{At(PClass::Pig), {0, 0, 0}} // Pig is never used
 };
 
 static void DrawWeaponPieces()
@@ -1267,15 +1270,15 @@ static void DrawWeaponPieces()
 	V_DrawNumPatch(190, 162, 0, LumpWEAPONSLOT, ColorRange::Default, PatchTranslation::Stretch);
 	if(CPlayer->pieces & WPIECE1)
 	{
-		V_DrawNumPatch(PieceX[std::to_underlying(PlayerClass[consoleplayer])][0], 162, 0, LumpPIECE1, ColorRange::Default, PatchTranslation::Stretch);
+		V_DrawNumPatch(PieceX[PlayerClass[consoleplayer]][0], 162, 0, LumpPIECE1, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	if(CPlayer->pieces & WPIECE2)
 	{
-		V_DrawNumPatch(PieceX[std::to_underlying(PlayerClass[consoleplayer])][1], 162, 0, LumpPIECE2, ColorRange::Default, PatchTranslation::Stretch);
+		V_DrawNumPatch(PieceX[PlayerClass[consoleplayer]][1], 162, 0, LumpPIECE2, ColorRange::Default, PatchTranslation::Stretch);
 	}
 	if(CPlayer->pieces & WPIECE3)
 	{
-		V_DrawNumPatch(PieceX[std::to_underlying(PlayerClass[consoleplayer])][2], 162, 0, LumpPIECE3, ColorRange::Default, PatchTranslation::Stretch);
+		V_DrawNumPatch(PieceX[PlayerClass[consoleplayer]][2], 162, 0, LumpPIECE3, ColorRange::Default, PatchTranslation::Stretch);
 	}
 }
 
@@ -1448,7 +1451,7 @@ static void Hexen_DrawMainBar()
 		oldweapon = std::to_underlying(CPlayer->readyweapon);
 	}
 	// Armor
-	temp = pclass[std::to_underlying(CPlayer->pclass)].auto_armor_save +
+	temp = pclass[CPlayer->pclass].auto_armor_save +
 		CPlayer->armorpoints[std::to_underlying(ArmorType::Armor)] +
 		CPlayer->armorpoints[std::to_underlying(ArmorType::Shield)] +
 		CPlayer->armorpoints[std::to_underlying(ArmorType::Helmet)] +

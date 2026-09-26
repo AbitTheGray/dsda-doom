@@ -87,6 +87,8 @@ enum struct FeatureFlag : int32_t
 	// 68
 
 	// 127
+
+	Count = 128, // FEATURE_SIZE
 };
 
 #define BITMASK(b) (1 << ((b) % 8))
@@ -98,6 +100,7 @@ enum struct FeatureFlag : int32_t
 
 #define FEATURE_SIZE 128
 #define FEATURE_SLOTS BITNSLOTS(FEATURE_SIZE)
+static_assert(std::to_underlying(FeatureFlag::Count) == FEATURE_SIZE);
 
 void dsda_TrackFeature(FeatureFlag feature);
 void dsda_ResetFeatures();

@@ -7,6 +7,8 @@
 
 #include <utility>
 
+#include "cpp/EnumArray.hpp"
+
 #include "doomtype.hpp"
 
 #ifdef __cplusplus
@@ -89,9 +91,9 @@ enum struct BruteForceLimit : int32_t
 	Count = DuoMax
 };
 
-extern const char* dsda_bf_attribute_names[std::to_underlying(BruteForceAttribute::AttributeMax)];
-extern const char* dsda_bf_operator_names[std::to_underlying(BruteForceOperator::Max)];
-extern const char* dsda_bf_item_names[std::to_underlying(BruteForceItem::Max)];
+extern EnumArray<const char*, BruteForceAttribute::AttributeMax> dsda_bf_attribute_names;
+extern EnumArray<const char*, BruteForceOperator::Max> dsda_bf_operator_names;
+extern EnumArray<const char*, BruteForceItem::Max> dsda_bf_item_names;
 extern const char* dsda_bf_limit_names[std::to_underlying(BruteForceLimit::Count)];
 
 dboolean dsda_BruteForce();

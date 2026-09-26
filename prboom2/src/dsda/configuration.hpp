@@ -324,7 +324,7 @@ int dsda_IntConfig(ConfigId id);
 int dsda_TransientIntConfig(ConfigId id);
 const char* dsda_StringConfig(ConfigId id);
 char* dsda_ConfigSummary(const char* name);
-int dsda_ConfigIDByName(const char* name);
+ConfigId dsda_ConfigIDByName(const char* name);
 ConfigType dsda_ConfigType(ConfigId id);
 
 #ifdef __cplusplus

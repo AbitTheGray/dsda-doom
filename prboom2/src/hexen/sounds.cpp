@@ -6,12 +6,12 @@
 #include "sounds.hpp"
 
 // Hexen map music is set dynamically in SNDINFO
-musicinfo_t hexen_S_music[std::to_underlying(MusicId::HexenCount)] = {
-	[std::to_underlying(MusicId::HexenHexen)] = {"HEXEN", 0},
-	[std::to_underlying(MusicId::HexenHub)] = {"HUB", 0},
-	[std::to_underlying(MusicId::HexenHall)] = {"HALL", 0},
-	[std::to_underlying(MusicId::HexenOrb)] = {"ORB", 0},
-	[std::to_underlying(MusicId::HexenChess)] = {"CHESS", 0},
+constinit EnumArray<musicinfo_t, MusicId::HexenCount> hexen_S_music = {
+	{At(MusicId::HexenHexen), {"HEXEN", 0}},
+	{At(MusicId::HexenHub), {"HUB", 0}},
+	{At(MusicId::HexenHall), {"HALL", 0}},
+	{At(MusicId::HexenOrb), {"ORB", 0}},
+	{At(MusicId::HexenChess), {"CHESS", 0}},
 };
 
 sfxinfo_t hexen_S_sfx[] = {

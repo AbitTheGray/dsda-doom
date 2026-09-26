@@ -1551,7 +1551,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		{
 			int i;
 			int saved;
-			fixed_t savedPercent = pclass[std::to_underlying(player->pclass)].auto_armor_save
+			fixed_t savedPercent = pclass[player->pclass].auto_armor_save
 				+ player->armorpoints[std::to_underlying(ArmorType::Armor)]
 				+ player->armorpoints[std::to_underlying(ArmorType::Shield)]
 				+ player->armorpoints[std::to_underlying(ArmorType::Helmet)]
@@ -1568,7 +1568,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 					if(player->armorpoints[i])
 					{
 						player->armorpoints[i] -= FixedDiv(
-							FixedMul(damage << FRACBITS, pclass[std::to_underlying(player->pclass)].armor_increment[i]),
+							FixedMul(damage << FRACBITS, pclass[player->pclass].armor_increment[i]),
 							300 * FRACUNIT
 						);
 						if(player->armorpoints[i] < 2 * FRACUNIT)
@@ -2817,7 +2817,7 @@ dboolean Hexen_P_GiveArmor(player_t* player, ArmorType armortype, int amount)
 
 	if(amount == -1)
 	{
-		hits = pclass[std::to_underlying(player->pclass)].armor_increment[std::to_underlying(armortype)];
+		hits = pclass[player->pclass].armor_increment[std::to_underlying(armortype)];
 		if(player->armorpoints[std::to_underlying(armortype)] >= hits)
 		{
 			return false;
@@ -2834,8 +2834,8 @@ dboolean Hexen_P_GiveArmor(player_t* player, ArmorType armortype, int amount)
 			+ player->armorpoints[std::to_underlying(ArmorType::Shield)]
 			+ player->armorpoints[std::to_underlying(ArmorType::Helmet)]
 			+ player->armorpoints[std::to_underlying(ArmorType::Amulet)]
-			+ pclass[std::to_underlying(player->pclass)].auto_armor_save;
-		if(totalArmor < pclass[std::to_underlying(player->pclass)].armor_max)
+			+ pclass[player->pclass].auto_armor_save;
+		if(totalArmor < pclass[player->pclass].armor_max)
 		{
 			player->armorpoints[std::to_underlying(armortype)] += hits;
 		}

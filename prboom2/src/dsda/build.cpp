@@ -41,12 +41,12 @@ static build_cmd_queue_t cmd_queue;
 
 static signed char forward50()
 {
-	return dsda_Flag(ArgId::Stroller) ? pclass[std::to_underlying(players[consoleplayer].pclass)].forwardmove[0] : pclass[std::to_underlying(players[consoleplayer].pclass)].forwardmove[1];
+	return dsda_Flag(ArgId::Stroller) ? pclass[players[consoleplayer].pclass].forwardmove[0] : pclass[players[consoleplayer].pclass].forwardmove[1];
 }
 
 static signed char strafe40()
 {
-	return pclass[std::to_underlying(players[consoleplayer].pclass)].sidemove[1];
+	return pclass[players[consoleplayer].pclass].sidemove[1];
 }
 
 static signed char strafe50()
