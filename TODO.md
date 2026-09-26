@@ -1,6 +1,11 @@
 # TODO
 
-Things noted for later. Nothing here is being worked on right now.
+The final goal is to separate the gameplay part from the window. We want to be able to run the game headless, to render it into a video stream (using `ffmpeg`) without a window...
+For that, we need to eliminate global-scope variables and everything `extern`.
+We should end up with a library and an executable projects.
+
+Things below are noted for later.
+Nothing here is being worked on right now.
 
 ## Move the spec's report types into the game
 
