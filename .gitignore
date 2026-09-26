@@ -34,3 +34,6 @@ CMakePresets.json
 
 # clangd
 /.cache/
+
+# All hidden on Linux
+.*
