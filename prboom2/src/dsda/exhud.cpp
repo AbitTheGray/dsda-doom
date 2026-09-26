@@ -3,9 +3,12 @@
 // DESCRIPTION:
 //	DSDA Extended HUD
 
+#include <algorithm>
 #include <utility>
 
 #include <stdio.h>
+
+#include "cpp/EnumArray.hpp"
 
 #include "am_map.hpp"
 #include "doomstat.hpp"
@@ -32,11 +35,11 @@ typedef struct
 	void (*update)(void* data);
 	void (*draw)(void* data);
 	const char* name;
-	const PatchTranslation default_vpt;
-	const dboolean strict;
-	const dboolean off_by_default;
-	const dboolean intermission;
-	const dboolean not_level;
+	PatchTranslation default_vpt;
+	dboolean strict;
+	dboolean off_by_default;
+	dboolean intermission;
+	dboolean not_level;
 	dboolean on;
 	dboolean initialized;
 	void* data;
@@ -350,12 +353,11 @@ enum struct HudVariant : int32_t
 	Null,
 };
 
-static dsda_hud_container_t containers[] = {
-	[std::to_underlying(HudVariant::Ex)] = {"ex", true, true},
-	[std::to_underlying(HudVariant::Off)] = {"off", true, true},
-	[std::to_underlying(HudVariant::Full)] = {"full", false, true},
-	[std::to_underlying(HudVariant::Map)] = {"map", true, false},
-	[std::to_underlying(HudVariant::Null)] = {nullptr}
+static constinit EnumArray<dsda_hud_container_t, HudVariant, HudVariant::Null> containers = {
+	{At(HudVariant::Ex), {"ex", true, true}},
+	{At(HudVariant::Off), {"off", true, true}},
+	{At(HudVariant::Full), {"full", false, true}},
+	{At(HudVariant::Map), {"map", true, false}},
 };
 
 static dsda_hud_container_t* container;
@@ -523,20 +525,22 @@ static void dsda_ParseHUDConfigs(char** hud_config)
 
 		if(sscanf(line, target_format, hud_variant))
 		{
-			for(container = containers; container->name; container++)
-				if(!strncmp(container->name, hud_variant, sizeof(hud_variant)))
-				{
-					if(container->loaded)
-						break;
+			const auto match = std::ranges::find_if(containers, [&](const dsda_hud_container_t& entry)
+			{
+				return !strncmp(entry.name, hud_variant, sizeof(hud_variant));
+			});
 
-					container->loaded = true;
-					components = container->components;
-					memcpy(components, components_template, sizeof(components_template));
+			// Upstream leaves `container` on its null terminator when nothing matches; every reader checks for nullptr instead
+			container = match == containers.end() ? nullptr : &*match;
 
-					line_i = dsda_ParseHUDConfig(hud_config, line_i);
+			if(container && !container->loaded)
+			{
+				container->loaded = true;
+				components = container->components;
+				memcpy(components, components_template, sizeof(components_template));
 
-					break;
-				}
+				line_i = dsda_ParseHUDConfig(hud_config, line_i);
+			}
 		}
 	}
 }
@@ -607,7 +611,7 @@ static void dsda_ResetActiveHUD()
 
 static void dsda_UpdateActiveHUD()
 {
-	container = R_FullView() ? &containers[std::to_underlying(HudVariant::Full)] : dsda_IntConfig(ConfigId::Exhud) ? &containers[std::to_underlying(HudVariant::Ex)] : &containers[std::to_underlying(HudVariant::Off)];
+	container = R_FullView() ? &containers[HudVariant::Full] : dsda_IntConfig(ConfigId::Exhud) ? &containers[HudVariant::Ex] : &containers[HudVariant::Off];
 
 	if(container->loaded)
 		components = container->components;
@@ -682,8 +686,8 @@ void dsda_UpdateExHud()
 {
 	if(automap_stbar)
 	{
-		if(containers[std::to_underlying(HudVariant::Map)].loaded)
-			dsda_UpdateComponents(containers[std::to_underlying(HudVariant::Map)].components);
+		if(containers[HudVariant::Map].loaded)
+			dsda_UpdateComponents(containers[HudVariant::Map].components);
 
 		return;
 	}
@@ -715,8 +719,8 @@ void dsda_DrawExHud()
 
 	if(automap_stbar)
 	{
-		if(containers[std::to_underlying(HudVariant::Map)].loaded)
-			dsda_DrawComponents(containers[std::to_underlying(HudVariant::Map)].components);
+		if(containers[HudVariant::Map].loaded)
+			dsda_DrawComponents(containers[HudVariant::Map].components);
 	}
 	else if(dsda_HUDActive())
 		dsda_DrawComponents(components);
@@ -775,7 +779,7 @@ static void dsda_BasicMapRefresh(dboolean (*show_component)(), ExHudComponentId 
 		return;
 
 	old_components = components;
-	components = containers[std::to_underlying(HudVariant::Map)].components;
+	components = containers[HudVariant::Map].components;
 
 	if(show_component())
 		dsda_TurnComponentOn(id);
