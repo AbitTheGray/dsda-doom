@@ -199,8 +199,8 @@ PUREFUNC int R_CompatiblePointOnSegSide(fixed_t x, fixed_t y, const seg_t* line)
 {
 	fixed_t lx = line->v1->x;
 	fixed_t ly = line->v1->y;
-	fixed_t ldx = line->v2->x - lx;
-	fixed_t ldy = line->v2->y - ly;
+	fixed_t ldx = static_cast<fixed_t>(static_cast<uint32_t>(line->v2->x) - static_cast<uint32_t>(lx));
+	fixed_t ldy = static_cast<fixed_t>(static_cast<uint32_t>(line->v2->y) - static_cast<uint32_t>(ly));
 
 	if(!ldx)
 		return x <= lx ? ldy > 0 : ldy < 0;
@@ -208,8 +208,8 @@ PUREFUNC int R_CompatiblePointOnSegSide(fixed_t x, fixed_t y, const seg_t* line)
 	if(!ldy)
 		return y <= ly ? ldx < 0 : ldx > 0;
 
-	x -= lx;
-	y -= ly;
+	x = static_cast<fixed_t>(static_cast<uint32_t>(x) - static_cast<uint32_t>(lx));
+	y = static_cast<fixed_t>(static_cast<uint32_t>(y) - static_cast<uint32_t>(ly));
 
 	// Try to quickly decide by looking at sign bits.
 	if((ldy ^ ldx ^ x ^ y) < 0)
@@ -221,8 +221,8 @@ PUREFUNC int R_ZDoomPointOnSegSide(fixed_t x, fixed_t y, const seg_t* line)
 {
 	fixed_t lx = line->v1->x;
 	fixed_t ly = line->v1->y;
-	fixed_t ldx = line->v2->x - lx;
-	fixed_t ldy = line->v2->y - ly;
+	fixed_t ldx = static_cast<fixed_t>(static_cast<uint32_t>(line->v2->x) - static_cast<uint32_t>(lx));
+	fixed_t ldy = static_cast<fixed_t>(static_cast<uint32_t>(line->v2->y) - static_cast<uint32_t>(ly));
 
 	if(!ldx)
 		return x <= lx ? ldy > 0 : ldy < 0;
@@ -230,8 +230,8 @@ PUREFUNC int R_ZDoomPointOnSegSide(fixed_t x, fixed_t y, const seg_t* line)
 	if(!ldy)
 		return y <= ly ? ldx < 0 : ldx > 0;
 
-	x -= lx;
-	y -= ly;
+	x = static_cast<fixed_t>(static_cast<uint32_t>(x) - static_cast<uint32_t>(lx));
+	y = static_cast<fixed_t>(static_cast<uint32_t>(y) - static_cast<uint32_t>(ly));
 
 	// Try to quickly decide by looking at sign bits.
 	if((ldy ^ ldx ^ x ^ y) < 0)
