@@ -231,8 +231,8 @@ static void dsda_PrintBFProgress()
 	percent = 100 * bf_volume / bf_volume_max;
 	elapsed_time = dsda_ElapsedTimeMS(DsdaTimer::BruteForce);
 
-	lprintf(OutputLevels::Info, "  %lld / %lld sequences tested (%d%%) in %.2f seconds!\n",
-		bf_volume, bf_volume_max, percent, (float)elapsed_time / 1000);
+	Log::Info("  {} / {} sequences tested ({}%) in {:.2f} seconds!\n",
+		bf_volume, bf_volume_max, percent, static_cast<float>(elapsed_time) / 1000);
 }
 
 #define BF_FAILURE 0
@@ -250,7 +250,7 @@ static void dsda_EndBF(int result)
 {
 	brute_force_ended = true;
 
-	lprintf(OutputLevels::Info, "Brute force complete (%s)!\n", bf_result_text[result]);
+	Log::Info("Brute force complete ({})!\n", bf_result_text[result]);
 	dsda_PrintBFProgress();
 
 	if(bf_nomonsters)
@@ -427,15 +427,15 @@ static void dsda_BFUpdateBestResult(fixed_t value)
 	else
 		snprintf(str, FIXED_STRING_LENGTH, "%i", value);
 
-	lprintf(OutputLevels::Info, "New best: %s = %s\n", dsda_bf_attribute_names[bf_target.attribute], str);
+	Log::Info("New best: {} = {}\n", dsda_bf_attribute_names[bf_target.attribute], std::string_view(str));
 
 	for(i = 0; i < bf_target.best_depth; ++i)
 	{
 		dsda_PrintCommandMovement(cmd_str, &bf_result[i]);
-		lprintf(OutputLevels::Info, "    %s\n", cmd_str);
+		Log::Info("    {}\n", std::string_view(cmd_str));
 	}
 
-	lprintf(OutputLevels::Info, "\n");
+	Log::Info("\n");
 }
 
 static dboolean dsda_BFNewBestResult(fixed_t value)
@@ -517,7 +517,7 @@ void dsda_AddMiscBruteForceCondition(BruteForceAttribute attribute, fixed_t valu
 
 	++bf_condition_count;
 
-	lprintf(OutputLevels::Info, "Added brute force condition: %s %d\n",
+	Log::Info("Added brute force condition: {} {}\n",
 		dsda_bf_misc_names[std::to_underlying(attribute)],
 		value);
 }
@@ -540,7 +540,7 @@ void dsda_AddBruteForceCondition(
 
 	++bf_condition_count;
 
-	lprintf(OutputLevels::Info, "Added brute force condition: %s %s %d\n",
+	Log::Info("Added brute force condition: {} {} {}\n",
 		dsda_bf_attribute_names[attribute],
 		dsda_bf_operator_names[operator_],
 		value);
@@ -557,7 +557,7 @@ void dsda_SetBruteForceTarget(BruteForceAttribute attribute,
 
 	if(has_value)
 	{
-		lprintf(OutputLevels::Info, "Set brute force target: %s %s %d\n",
+		Log::Info("Set brute force target: {} {} {}\n",
 			dsda_bf_attribute_names[attribute],
 			dsda_bf_limit_names[std::to_underlying(limit)],
 			value);
@@ -566,7 +566,7 @@ void dsda_SetBruteForceTarget(BruteForceAttribute attribute,
 			bf_target.value <<= FRACBITS;
 	}
 	else
-		lprintf(OutputLevels::Info, "Set brute force target: %s %s\n",
+		Log::Info("Set brute force target: {} {}\n",
 			dsda_bf_attribute_names[attribute],
 			dsda_bf_limit_names[std::to_underlying(limit)]);
 }
@@ -647,7 +647,7 @@ dboolean dsda_StartBruteForce(int depth)
 
 	if(!dsda_BuildMode())
 	{
-		lprintf(OutputLevels::Warn, "You cannot start brute force outside of build mode!\n");
+		Log::Warn("You cannot start brute force outside of build mode!\n");
 		return false;
 	}
 
@@ -656,7 +656,7 @@ dboolean dsda_StartBruteForce(int depth)
 
 	dsda_TrackFeature(FeatureFlag::Bruteforce);
 
-	lprintf(OutputLevels::Info, "Brute force starting:\n");
+	Log::Info("Brute force starting:\n");
 
 	bf_depth = depth;
 	bf_logictic = true_logictic;
@@ -665,7 +665,7 @@ dboolean dsda_StartBruteForce(int depth)
 
 	for(i = 0; i < bf_depth; ++i)
 	{
-		lprintf(OutputLevels::Info, "  %d: F %d:%d S %d:%d T %d:%d B %d\n", i,
+		Log::Info("  {}: F {}:{} S {}:{} T {}:{} B {}\n", i,
 			brute_force[i].forwardmove.min, brute_force[i].forwardmove.max,
 			brute_force[i].sidemove.min, brute_force[i].sidemove.max,
 			brute_force[i].angleturn.min, brute_force[i].angleturn.max,
@@ -680,13 +680,13 @@ dboolean dsda_StartBruteForce(int depth)
 		brute_force[i].angleturn.i = brute_force[i].angleturn.min;
 	}
 
-	lprintf(OutputLevels::Info, "Testing %lld sequences with depth %d\n\n", bf_volume_max, bf_depth);
+	Log::Info("Testing {} sequences with depth {}\n\n", bf_volume_max, bf_depth);
 
 	bf_mode = true;
 
 	if(bf_nomonsters)
 	{
-		lprintf(OutputLevels::Info, "Warning: ignoring monsters! The result may desync with monsters!\n");
+		Log::Info("Warning: ignoring monsters! The result may desync with monsters!\n");
 		dsda_StoreKeyFrame(&nomo_key_frame, true, false);
 		P_RemoveMonsters();
 	}

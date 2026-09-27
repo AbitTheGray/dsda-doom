@@ -697,20 +697,20 @@ static void dsda_ParseIntArg(arg_config_t* config, int* value, const char* param
 	if(sscanf(param, "%d", value) != 1)
 	{
 		if(config->type == ArgType::Int)
-			I_Error("%s requires an integer argument", config->name);
+			Log::Fatal("{} requires an integer argument", config->name);
 		else
-			I_Error("%s requires integer arguments", config->name);
+			Log::Fatal("{} requires integer arguments", config->name);
 	}
 	if(*value < config->lower_limit)
-		I_Error("%s argument too low (min is %d)", config->name, config->lower_limit);
+		Log::Fatal("{} argument too low (min is {})", config->name, config->lower_limit);
 	if(*value > config->upper_limit)
-		I_Error("%s argument too high (max is %d)", config->name, config->upper_limit);
+		Log::Fatal("{} argument too high (max is {})", config->name, config->upper_limit);
 }
 
 static void dsda_ParseStringArg(arg_config_t* config, const char** value, const char* param)
 {
 	if(config->upper_limit && strlen(param) > config->upper_limit)
-		I_Error("%s argument too long (max is %d)", config->name, config->upper_limit);
+		Log::Fatal("{} argument too long (max is {})", config->name, config->upper_limit);
 
 	*value = param;
 }
@@ -720,16 +720,16 @@ static void dsda_ValidateArrayArg(arg_config_t* config, dsda_arg_t* arg)
 	if(config->min_count == config->max_count)
 	{
 		if(arg->count != config->min_count)
-			I_Error("%s requires exactly %d arguments", config->name, config->min_count);
+			Log::Fatal("{} requires exactly {} arguments", config->name, config->min_count);
 	}
 	else
 	{
 		if(arg->count < config->min_count || arg->count > config->max_count)
 		{
 			if(config->max_count == INT_MAX)
-				I_Error("%s requires at least %d argument(s)", config->name, config->min_count);
+				Log::Fatal("{} requires at least {} argument(s)", config->name, config->min_count);
 			else
-				I_Error("%s requires %d to %d argument(s)", config->name, config->min_count, config->max_count);
+				Log::Fatal("{} requires {} to {} argument(s)", config->name, config->min_count, config->max_count);
 		}
 	}
 }
@@ -750,7 +750,7 @@ static void dsda_ParseArg(arg_config_t* config, dsda_arg_t* arg, int argv_i)
 		{
 			// only valid integers should be interpreted as arguments
 			if(!is_integer)
-				I_Error("%s does not accept string arguments", config->name);
+				Log::Fatal("{} does not accept string arguments", config->name);
 		}
 	}
 
@@ -760,7 +760,7 @@ static void dsda_ParseArg(arg_config_t* config, dsda_arg_t* arg, int argv_i)
 	{
 		case ArgType::Null:
 			if(arg->count)
-				I_Error("%s does not take an argument", config->name);
+				Log::Fatal("{} does not take an argument", config->name);
 
 			break;
 		case ArgType::Int:
@@ -773,10 +773,10 @@ static void dsda_ParseArg(arg_config_t* config, dsda_arg_t* arg, int argv_i)
 					break;
 				}
 
-				I_Error("%s requires an integer argument", config->name);
+				Log::Fatal("{} requires an integer argument", config->name);
 			}
 			if(arg->count > 1)
-				I_Error("%s takes only one argument", config->name);
+				Log::Fatal("{} takes only one argument", config->name);
 
 			dsda_ParseIntArg(config, &arg->value.v_int, dsda_argv[argv_i + 1]);
 
@@ -791,10 +791,10 @@ static void dsda_ParseArg(arg_config_t* config, dsda_arg_t* arg, int argv_i)
 					break;
 				}
 
-				I_Error("%s requires a string argument", config->name);
+				Log::Fatal("{} requires a string argument", config->name);
 			}
 			if(arg->count > 1)
-				I_Error("%s takes only one argument", config->name);
+				Log::Fatal("{} takes only one argument", config->name);
 
 			dsda_ParseStringArg(config, &arg->value.v_string, dsda_argv[argv_i + 1]);
 
@@ -853,12 +853,12 @@ void dsda_ParseCommandLineArgs(int argc, char** argv)
 			});
 
 			if(id == arg_config.Keys().end())
-				I_Error("Unknown command line option %s\n", dsda_argv[argv_i]);
+				Log::Fatal("Unknown command line option {}\n", dsda_argv[argv_i]);
 
 			arg_config_t* config = &arg_config[*id];
 
 			if(arg_value[std::to_underlying(*id)].found)
-				lprintf(OutputLevels::Warn, "Warning: ignoring duplicate argument %s\n", config->name);
+				Log::Warn("Warning: ignoring duplicate argument {}\n", config->name);
 			else
 				dsda_ParseArg(config, &arg_value[std::to_underlying(*id)], argv_i);
 		}
@@ -932,19 +932,19 @@ int dsda_SimpleIntArg(ArgId id)
 
 void dsda_PrintArgHelp()
 {
-	lprintf(OutputLevels::Info, "\nCommand Line Arguments:\n\n");
+	Log::Info("\nCommand Line Arguments:\n\n");
 
 	for(const arg_config_t& config_entry : arg_config)
 	{
 		const arg_config_t* config = &config_entry;
 
-		lprintf(OutputLevels::Info, "  %s", config->name);
+		Log::Info("  {}", config->name);
 		if(config->alias)
-			lprintf(OutputLevels::Info, " / %s", config->alias);
-		lprintf(OutputLevels::Info, ":\n");
-		lprintf(OutputLevels::Info, "    %s\n", config->description);
+			Log::Info(" / {}", config->alias);
+		Log::Info(":\n");
+		Log::Info("    {}\n", config->description);
 		if(config->default_value)
-			lprintf(OutputLevels::Info, "    Default: %s\n", config->default_value);
-		lprintf(OutputLevels::Info, "\n");
+			Log::Info("    Default: {}\n", config->default_value);
+		Log::Info("\n");
 	}
 }

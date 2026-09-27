@@ -211,15 +211,11 @@ static void dsda_EnsureDemoBufferSpace(size_t length)
 		(byte*)Z_Realloc(dsda_demo_write_buffer, dsda_demo_write_buffer_length);
 
 	if(dsda_demo_write_buffer == nullptr)
-		I_Error("dsda_EnsureDemoBufferSpace: out of memory!");
+		Log::Fatal("dsda_EnsureDemoBufferSpace: out of memory!");
 
 	dsda_demo_write_buffer_p = dsda_demo_write_buffer + offset;
 
-	lprintf(
-		OutputLevels::Info,
-		"dsda_EnsureDemoBufferSpace: expanding demo buffer %d\n",
-		dsda_demo_write_buffer_length
-	);
+	Log::Info("dsda_EnsureDemoBufferSpace: expanding demo buffer {}\n", dsda_demo_write_buffer_length);
 }
 
 dboolean dsda_CopyPendingCmd(ticcmd_t* cmd, int delta)
@@ -288,15 +284,15 @@ void dsda_InitDemoRecording()
 	static dboolean demo_key_frame_initialized;
 
 	if(compatibility_level_unspecified)
-		I_Error("You must specify a compatibility level when recording a demo!\n"
+		Log::Fatal("You must specify a compatibility level when recording a demo!\n"
 			"Example: dsda-doom -iwad DOOM -complevel 3 -skill 4 -record demo");
 
 	if(!dsda_Flag(ArgId::Skill) && !dsda_Flag(ArgId::Recordfromto))
-		I_Error("You must specify a skill level when recording a demo!\n"
+		Log::Fatal("You must specify a skill level when recording a demo!\n"
 			"Example: dsda-doom -iwad DOOM -complevel 3 -skill 4 -record demo");
 
 	if(dsda_Flag(ArgId::PistolStart))
-		I_Error("The -pistolstart option is not allowed when recording a demo!");
+		Log::Fatal("The -pistolstart option is not allowed when recording a demo!");
 
 	demorecording = true;
 
@@ -325,7 +321,7 @@ void dsda_InitDemoRecording()
 
 	dsda_demo_write_buffer = static_cast<byte *>(Z_Malloc(INITIAL_DEMO_BUFFER_SIZE));
 	if(dsda_demo_write_buffer == nullptr)
-		I_Error("dsda_InitDemo: unable to initialize demo buffer!");
+		Log::Fatal("dsda_InitDemo: unable to initialize demo buffer!");
 
 	dsda_demo_write_buffer_p = dsda_demo_write_buffer;
 
@@ -344,7 +340,7 @@ static void dsda_SetDemoBufferOffset(int offset)
 
 	// Cannot load forward (demo buffer would desync)
 	if(offset > current_offset)
-		I_Error("dsda_SetDemoBufferOffset: Impossible time traveling detected.");
+		Log::Fatal("dsda_SetDemoBufferOffset: Impossible time traveling detected.");
 
 	if(current_offset > largest_real_offset)
 		largest_real_offset = current_offset;
@@ -522,14 +518,14 @@ static int dsda_ExportDemoToFile(const char* demo_name)
 		fallback_file = dsda_FallbackDemoName();
 
 		if(!M_WriteFile(fallback_file, dsda_demo_write_buffer, length))
-			I_Error("dsda_WriteDemoToFile: Failed to write demo file.");
+			Log::Fatal("dsda_WriteDemoToFile: Failed to write demo file.");
 		else
-			I_Error("Bad demo file location: wrote to %s instead!", fallback_file);
+			Log::Fatal("Bad demo file location: wrote to {} instead!", fallback_file);
 
 		Z_Free(fallback_file);
 	}
 
-	lprintf(OutputLevels::Info, "Wrote demo: %s\n", demo_name);
+	Log::Info("Wrote demo: {}\n", demo_name);
 
 	return end_marker_location;
 }
@@ -639,7 +635,7 @@ void dsda_ExportDemo(const char* name)
 	Z_Free(base_name);
 	Z_Free(demo_name);
 
-	lprintf(OutputLevels::Info, "Demo recording exported\n");
+	Log::Info("Demo recording exported\n");
 }
 
 int dsda_DemoDataSize(byte complete)
@@ -770,30 +766,30 @@ static const byte* dsda_ReadUMAPINFODemoHeader(const byte* demo_p, const byte* h
 		return nullptr;
 
 	if(strncmp((const char*)demo_p, "PR+UM", 5) != 0)
-		I_Error("G_ReadDemoHeader: Unknown demo format");
+		Log::Fatal("G_ReadDemoHeader: Unknown demo format");
 
 	demo_p += 6;
 
 	// the defunct format had only version 1
 	if(*demo_p++ != 1)
-		I_Error("G_ReadDemoHeader: Unknown demo format");
+		Log::Fatal("G_ReadDemoHeader: Unknown demo format");
 
 	// the defunct format had only one extension (in two bytes)
 	if(*demo_p++ != 1 || *demo_p++ != 0)
-		I_Error("G_ReadDemoHeader: Unknown demo format");
+		Log::Fatal("G_ReadDemoHeader: Unknown demo format");
 
 	if(demo_p - header_p + 1 > size)
 		return nullptr;
 
 	// the defunct extension had length 8
 	if(*demo_p++ != 8)
-		I_Error("G_ReadDemoHeader: Unknown demo format");
+		Log::Fatal("G_ReadDemoHeader: Unknown demo format");
 
 	if(demo_p - header_p + 8 > size)
 		return nullptr;
 
 	if(strncmp((const char*)demo_p, "UMAPINFO", 8))
-		I_Error("G_ReadDemoHeader: Unknown demo format");
+		Log::Fatal("G_ReadDemoHeader: Unknown demo format");
 
 	demo_p += 8;
 
@@ -854,7 +850,7 @@ void dsda_ApplyDSDADemoFormat(byte** demo_p)
 	if(map_format.zdoom)
 	{
 		if(!mbf21)
-			I_Error("You must use complevel 21 when recording in advanced formats.");
+			Log::Fatal("You must use complevel 21 when recording in advanced formats.");
 
 		use_dsda_format = true;
 	}
