@@ -11,6 +11,13 @@ The fix is somewhat simple (use unsigned `angle_t` and convert it to signed only
 
 There are other similar Undefined Behaviors throughout the code. We fixed just enough to have working demo (and a little on top of it), not all instances.
 
+`R_CompatiblePointOnSide` and `R_ZDoomPointOnSide` (`prboom2/src/r_main.cpp`) had the same kind of bug.
+`x - node->x` overflows once the two points are 32768 map units apart, and clang used that UB to keep the difference in 64 bits for the multiplication, while vanilla wrapped it to 32 bits.
+Upstream works around it by making the parameters `volatile` (only under clang); that is deprecated in C++20.
+We do the subtraction in `uint32_t` instead, which wraps exactly as vanilla did, so the results should match upstream's.
+Verified with `competn/doom/movie/e2fa3655.zip` (`fp2-3655.lmp`), which desyncs in E2M3 without either fix.
+The other demo upstream names, `dmn01m909.lmp` for `dmnsns.wad`, was not found.
+
 ## Unreadable autoload files are skipped
 
 A `.wad`, `.lmp` or `.zip` found in an autoload directory that cannot be read, a

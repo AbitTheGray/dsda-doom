@@ -762,7 +762,7 @@ dboolean P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
 	return true; // everything was traversed
 }
 
-amlinetrace_t amlinetraces[NUMAMLINETRACES] = {0};
+amlinetrace_t amlinetraces[NUMAMLINETRACES] = {};
 unsigned int cur_amlinetrace = 0;
 
 //

@@ -153,13 +153,7 @@ int extralight; // bumped light from gun blasts
 // killough 5/2/98: reformatted
 //
 
-// Workaround for optimization bug in clang
-// fixes desync in competn/doom/fp2-3655.lmp and in dmnsns.wad dmn01m909.lmp
-#if defined(__clang__)
-PUREFUNC int R_CompatiblePointOnSide(volatile fixed_t x, volatile fixed_t y, const node_t* node)
-#else
 PUREFUNC int R_CompatiblePointOnSide(fixed_t x, fixed_t y, const node_t* node)
-#endif
 {
 	if(!node->dx)
 		return x <= node->x ? node->dy > 0 : node->dy < 0;
@@ -167,8 +161,11 @@ PUREFUNC int R_CompatiblePointOnSide(fixed_t x, fixed_t y, const node_t* node)
 	if(!node->dy)
 		return y <= node->y ? node->dx < 0 : node->dx > 0;
 
-	x -= node->x;
-	y -= node->y;
+	// Wrap to 32 bits, as vanilla's subtraction did. Signed overflow is UB, and
+	// clang used that to keep the difference in 64 bits for `FixedMul`, which
+	// desyncs competn/doom/fp2-3655.lmp once the points are 32768 units apart.
+	x = static_cast<fixed_t>(static_cast<uint32_t>(x) - static_cast<uint32_t>(node->x));
+	y = static_cast<fixed_t>(static_cast<uint32_t>(y) - static_cast<uint32_t>(node->y));
 
 	// Try to quickly decide by looking at sign bits.
 	if((node->dy ^ node->dx ^ x ^ y) < 0)
@@ -176,11 +173,7 @@ PUREFUNC int R_CompatiblePointOnSide(fixed_t x, fixed_t y, const node_t* node)
 	return FixedMul(y, node->dx >> FRACBITS) >= FixedMul(node->dy >> FRACBITS, x);
 }
 
-#if defined(__clang__)
-PUREFUNC int R_ZDoomPointOnSide(volatile fixed_t x, volatile fixed_t y, const node_t* node)
-#else
 PUREFUNC int R_ZDoomPointOnSide(fixed_t x, fixed_t y, const node_t* node)
-#endif
 {
 	if(!node->dx)
 		return x <= node->x ? node->dy > 0 : node->dy < 0;
@@ -188,8 +181,9 @@ PUREFUNC int R_ZDoomPointOnSide(fixed_t x, fixed_t y, const node_t* node)
 	if(!node->dy)
 		return y <= node->y ? node->dx < 0 : node->dx > 0;
 
-	x -= node->x;
-	y -= node->y;
+	// Wrap to 32 bits; see R_CompatiblePointOnSide.
+	x = static_cast<fixed_t>(static_cast<uint32_t>(x) - static_cast<uint32_t>(node->x));
+	y = static_cast<fixed_t>(static_cast<uint32_t>(y) - static_cast<uint32_t>(node->y));
 
 	// Try to quickly decide by looking at sign bits.
 	if((node->dy ^ node->dx ^ x ^ y) < 0)
