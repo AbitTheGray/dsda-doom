@@ -145,7 +145,7 @@ static void glsl_ShaderLookup(const char* name, GLchar const** text, GLint* len)
 	int lump = W_CheckNumForName2(name, LumpNamespace::Prboom);
 
 	if(lump == LUMP_NOT_FOUND)
-		I_Error("Could not find shader source: %s\n", name);
+		Log::Fatal("Could not find shader source: {}\n", name);
 
 	*text = static_cast<GLchar const*>(W_LumpByNum(lump));
 	*len = W_LumpLength(lump);
@@ -221,7 +221,7 @@ static void glsl_ShaderSrcProcess(shader_source_t* src, const GLchar* text,
 			// Parse include name
 			if(!dsda_SplitStringViewAfterChar(&line, '"', nullptr, &cur) ||
 				!dsda_SplitStringViewBeforeChar(&cur, '"', &cur, nullptr))
-				I_Error("Invalid include syntax: %.*s\n", (int)line.size, line.string);
+				Log::Fatal("Invalid include syntax: {}\n", std::string_view(line.string, line.size));
 
 			// Trim off extension if present
 			dsda_SplitStringViewBeforeChar(&cur, '.', &cur, nullptr);
@@ -279,11 +279,11 @@ static shader_t* glsl_ShaderLoad(const shader_info_t* info,
 	GLEXT_glGetObjectParameterivARB(shader->hVertProg,
 		GL_OBJECT_COMPILE_STATUS_ARB, &status);
 	if(status)
-		lprintf(OutputLevels::Debug, "ShaderLoad: Shader \"%s\" (vertex) compiled OK: %s\n",
-			info->name, buffer);
+		Log::Debug("ShaderLoad: Shader \"{}\" (vertex) compiled OK: {}\n",
+			info->name, std::string_view(buffer));
 	else
-		I_Error("ShaderLoad: Error compiling shader \"%s\" (vertex): %s\n",
-			info->name, buffer);
+		Log::Fatal("ShaderLoad: Error compiling shader \"{}\" (vertex): {}\n",
+			info->name, std::string_view(buffer));
 
 	shader->hFragProg = GLEXT_glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 	glsl_ShaderSrcLoad(&src, info->name, nullptr, userdefs);
@@ -295,11 +295,11 @@ static shader_t* glsl_ShaderLoad(const shader_info_t* info,
 	GLEXT_glGetObjectParameterivARB(shader->hFragProg,
 		GL_OBJECT_COMPILE_STATUS_ARB, &status);
 	if(status)
-		lprintf(OutputLevels::Debug, "ShaderLoad: Shader \"%s\" (fragment) compiled OK: %s\n",
-			info->name, buffer);
+		Log::Debug("ShaderLoad: Shader \"{}\" (fragment) compiled OK: {}\n",
+			info->name, std::string_view(buffer));
 	else
-		I_Error("ShaderLoad: Error compiling shader \"%s\" (fragment): %s\n",
-			info->name, buffer);
+		Log::Fatal("ShaderLoad: Error compiling shader \"{}\" (fragment): {}\n",
+			info->name, std::string_view(buffer));
 
 	shader->hShader = GLEXT_glCreateProgramObjectARB();
 	GLEXT_glAttachObjectARB(shader->hShader, shader->hVertProg);
@@ -310,11 +310,11 @@ static shader_t* glsl_ShaderLoad(const shader_info_t* info,
 		&status);
 
 	if(status)
-		lprintf(OutputLevels::Debug, "ShaderLoad: Shader \"%s\" linked OK: %s\n", info->name,
-			buffer);
+		Log::Debug("ShaderLoad: Shader \"{}\" linked OK: {}\n", info->name,
+			std::string_view(buffer));
 	else
-		I_Error("ShaderLoad: Error linking shader \"%s\": %s\n", info->name,
-			buffer);
+		Log::Fatal("ShaderLoad: Error linking shader \"{}\": {}\n", info->name,
+			std::string_view(buffer));
 
 	GLEXT_glUseProgramObjectARB(shader->hShader);
 
@@ -323,11 +323,11 @@ static shader_t* glsl_ShaderLoad(const shader_info_t* info,
 		int idx;
 
 		if(i >= MAX_UNIFORMS)
-			I_Error("ShaderLoad: Too many uniforms in shader \"%s\"\n", info->name);
+			Log::Fatal("ShaderLoad: Too many uniforms in shader \"{}\"\n", info->name);
 
 		idx = GLEXT_glGetUniformLocationARB(shader->hShader, unif->name);
 		if(idx == -1)
-			I_Error("ShaderLoad: No such uniform \"%s\" in shader \"%s\"\n",
+			Log::Fatal("ShaderLoad: No such uniform \"{}\" in shader \"{}\"\n",
 				unif->name, info->name);
 		shader->indices[i] = idx;
 
@@ -347,7 +347,7 @@ static shader_t* glsl_ShaderLoad(const shader_info_t* info,
 			case ShaderUniformType::Tex2D:
 				t = std::to_underlying(unif->type) - std::to_underlying(ShaderUniformType::Tex0D);
 				if(shader->texds[t] != -1)
-					I_Error("ShaderLoad: Duplicate texture dimension uniform: %i\n", i);
+					Log::Fatal("ShaderLoad: Duplicate texture dimension uniform: {}\n", i);
 				shader->texds[t] = idx;
 				break;
 			default:
@@ -367,7 +367,7 @@ static unsigned int sp = 0;
 static shader_frame_t* glsl_ShaderFramePush()
 {
 	if(sp == MAX_STACK - 1)
-		I_Error("ShaderFramePush: Max shader stack depth exceeded\n");
+		Log::Fatal("ShaderFramePush: Max shader stack depth exceeded\n");
 
 	return &stack[sp++];
 }
@@ -444,7 +444,7 @@ static void glsl_ShaderPush(shader_t* shader, ...)
 					val->f[1] = va_arg(ap, double);
 					break;
 				default:
-					I_Error("ShaderPush: Can't dynamically set texture uniform type");
+					Log::Fatal("ShaderPush: Can't dynamically set texture uniform type");
 			}
 		}
 
@@ -457,10 +457,10 @@ static void glsl_ShaderPush(shader_t* shader, ...)
 static void glsl_ShaderPop(shader_t* shader)
 {
 	if(sp == 0)
-		I_Error("ShaderPop: Pop of empty shader stack\n");
+		Log::Fatal("ShaderPop: Pop of empty shader stack\n");
 
 	if(stack[sp - 1].shader != shader)
-		I_Error("ShaderPop: Pop of incorrect shader (\"%s\" != \"%s\"\n",
+		Log::Fatal("ShaderPop: Pop of incorrect shader (\"{}\" != \"{}\"\n",
 			shader->info->name, stack[sp - 1].shader->info->name);
 
 	if(--sp != 0)
@@ -478,11 +478,11 @@ static void glsl_ShaderUniform(shader_t* shader, int num, ...)
 	shader_uniform_value_t* val;
 
 	if(sp == 0)
-		I_Error("ShaderUniform: Can't modify shader uniform with empty stack\n");
+		Log::Fatal("ShaderUniform: Can't modify shader uniform with empty stack\n");
 
 	frame = &stack[sp - 1];
 	if(frame->shader != shader)
-		I_Error("ShaderUniform: Can't modify shader uniform for inactive shader\n");
+		Log::Fatal("ShaderUniform: Can't modify shader uniform for inactive shader\n");
 
 	val = &frame->unifs[num];
 
@@ -504,7 +504,7 @@ static void glsl_ShaderUniform(shader_t* shader, int num, ...)
 			GLEXT_glUniform2fARB(idx, val->f[0], val->f[1]);
 			break;
 		default:
-			I_Error("ShaderUniform: Can't dynamically set texture uniform type");
+			Log::Fatal("ShaderUniform: Can't dynamically set texture uniform type");
 	}
 
 	va_end(ap);

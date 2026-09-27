@@ -141,7 +141,7 @@ static Uint8* ConvertAudioFormat(void** data, SDL_AudioSpec* sample, Uint32* len
 		sample->format, sample->channels, sample->freq,
 		AUDIO_S16, 1, snd_samplerate) < 0)
 	{
-		lprintf(OutputLevels::Warn, "SDL_BuildAudioCVT: %s\n", SDL_GetError());
+		Log::Warn("SDL_BuildAudioCVT: {}\n", SDL_GetError());
 		return nullptr;
 	}
 
@@ -152,7 +152,7 @@ static Uint8* ConvertAudioFormat(void** data, SDL_AudioSpec* sample, Uint32* len
 	if(SDL_ConvertAudio(&cvt) < 0)
 	{
 		Z_Free(cvt.buf);
-		lprintf(OutputLevels::Warn, "SDL_ConvertAudio: %s\n", SDL_GetError());
+		Log::Warn("SDL_ConvertAudio: {}\n", SDL_GetError());
 		return nullptr;
 	}
 
@@ -210,7 +210,7 @@ static snd_data_t* GetSndData(SfxId sfxid, const unsigned char* data, size_t len
 
 		if(Load_SNDFile(data, &sample, &sampledata, &samplelen) == nullptr)
 		{
-			lprintf(OutputLevels::Warn, "Can't open sfx file: %s\n", S_sfx[std::to_underlying(sfxid)].name);
+			Log::Warn("Can't open sfx file: {}\n", S_sfx[std::to_underlying(sfxid)].name);
 			return nullptr;
 		}
 
@@ -421,7 +421,7 @@ static void updateSoundParams(int handle, sfx_params_t* params)
 
 #ifdef RANGECHECK
 	if((handle < 0) || (handle >= MAX_CHANNELS))
-		I_Error("I_UpdateSoundParams: handle out of range");
+		Log::Fatal("I_UpdateSoundParams: handle out of range");
 #endif
 
 	channelinfo[slot].loop = params->loop;
@@ -451,13 +451,13 @@ static void updateSoundParams(int handle, sfx_params_t* params)
 	if(rightvol < 0 || rightvol > 127)
 	{
 		rightvol = rightvol < 0 ? 0 : 127;
-		lprintf(OutputLevels::Warn, "rightvol out of bounds\n");
+		Log::Warn("rightvol out of bounds\n");
 	}
 
 	if(leftvol < 0 || leftvol > 127)
 	{
 		leftvol = leftvol < 0 ? 0 : 127;
-		lprintf(OutputLevels::Warn, "leftvol out of bounds\n");
+		Log::Warn("leftvol out of bounds\n");
 	}
 
 	// Get the proper lookup table piece
@@ -555,7 +555,7 @@ int I_StartSound(SfxId id, int channel, sfx_params_t* params)
 
 	if((channel < 0) || (channel >= MAX_CHANNELS))
 #ifdef RANGECHECK
-	I_Error("I_StartSound: handle out of range");
+	Log::Fatal("I_StartSound: handle out of range");
 #else
 		return -1;
 #endif
@@ -627,7 +627,7 @@ void I_StopSound(int handle)
 {
 #ifdef RANGECHECK
 	if((handle < 0) || (handle >= MAX_CHANNELS))
-		I_Error("I_StopSound: handle out of range");
+		Log::Fatal("I_StopSound: handle out of range");
 #endif
 
 	SDL_LockMutex(sfxmutex);
@@ -640,7 +640,7 @@ dboolean I_SoundIsPlaying(int handle)
 {
 #ifdef RANGECHECK
 	if((handle < 0) || (handle >= MAX_CHANNELS))
-		I_Error("I_SoundIsPlaying: handle out of range");
+		Log::Fatal("I_SoundIsPlaying: handle out of range");
 #endif
 
 	return channelinfo[handle].data != nullptr;
@@ -853,14 +853,14 @@ void I_InitSound()
 
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO))
 	{
-		lprintf(OutputLevels::Warn, "Couldn't initialize SDL audio (%s))\n", SDL_GetError());
+		Log::Warn("Couldn't initialize SDL audio ({}))\n", SDL_GetError());
 		nosfxparm = true;
 		nomusicparm = true;
 		return;
 	}
 
 	// Secure and configure sound device first.
-	lprintf(OutputLevels::Debug, "I_InitSound: ");
+	Log::Debug("I_InitSound: ");
 
 	audio_rate = snd_samplerate;
 	audio_channels = 2;
@@ -869,7 +869,7 @@ void I_InitSound()
 	if(Mix_OpenAudioDevice(audio_rate, MIX_DEFAULT_FORMAT, audio_channels, audio_buffers,
 		nullptr, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE) < 0)
 	{
-		lprintf(OutputLevels::Debug, "couldn't open audio with desired format (%s)\n", SDL_GetError());
+		Log::Debug("couldn't open audio with desired format ({})\n", SDL_GetError());
 		nosfxparm = true;
 		nomusicparm = true;
 		return;
@@ -882,7 +882,7 @@ void I_InitSound()
 
 	Mix_SetPostMix(I_UpdateSound, nullptr);
 
-	lprintf(OutputLevels::Debug, " configured audio device with %d samples/slice\n", audio_buffers);
+	Log::Debug(" configured audio device with {} samples/slice\n", audio_buffers);
 
 	I_AtExit(I_ShutdownSound, true, "I_ShutdownSound", ExitPriority::Normal);
 
@@ -891,7 +891,7 @@ void I_InitSound()
 	if(!nomusicparm)
 		I_InitMusic();
 
-	lprintf(OutputLevels::Debug, "I_InitSound: sound module ready\n");
+	Log::Debug("I_InitSound: sound module ready\n");
 	SDL_PauseAudio(0);
 }
 
@@ -1241,7 +1241,7 @@ int I_RegisterSong(const void* data, size_t len)
 			rwops_stream = nullptr;
 		}
 
-		lprintf(OutputLevels::Error, "Error loading song: %s\n", Mix_GetError());
+		Log::Error("Error loading song: {}\n", Mix_GetError());
 	}
 
 	return (0);
@@ -1369,16 +1369,16 @@ static int RegisterSongEx(const void* data, size_t len, int try_mus2mid)
 							current_player = i;
 							music_handle = temp_handle;
 							SDL_UnlockMutex(musmutex);
-							lprintf(OutputLevels::Debug, "RegisterSongEx: Using player %s\n", music_players[i]->name());
+							Log::Debug("RegisterSongEx: Using player {}\n", music_players[i]->name());
 							return 1;
 						}
 					}
 					else
-						lprintf(OutputLevels::Debug, "RegisterSongEx: Music player %s on preferred list but it failed to init\n", music_players[i]->name());
+						Log::Debug("RegisterSongEx: Music player {} on preferred list but it failed to init\n", music_players[i]->name());
 				}
 			}
 			if(!found)
-				lprintf(OutputLevels::Debug, "RegisterSongEx: Couldn't find preferred music player %s in list\n  (typo or support not included at compile time)\n", music_player_order[j]);
+				Log::Debug("RegisterSongEx: Couldn't find preferred music player {} in list\n  (typo or support not included at compile time)\n", std::string_view(music_player_order[j]));
 		}
 		// load failed
 	}
@@ -1436,7 +1436,7 @@ static int RegisterSongEx(const void* data, size_t len, int try_mus2mid)
 		}
 	}
 
-	lprintf(OutputLevels::Error, "RegisterSongEx: Failed\n");
+	Log::Error("RegisterSongEx: Failed\n");
 	return 0;
 }
 
