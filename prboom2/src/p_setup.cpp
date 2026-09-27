@@ -278,52 +278,52 @@ static void P_GetNodesVersion()
 		if(CheckForIdentifier(level_components.znodes, "XGLN", 4))
 		{
 			nodesVersion = NodesVersion::ZDoomXgln;
-			lprintf(OutputLevels::Debug, "P_GetNodesVersion: using XGLN zdoom nodes\n");
+			Log::Debug("P_GetNodesVersion: using XGLN zdoom nodes\n");
 		}
 		else if(CheckForIdentifier(level_components.znodes, "ZGLN", 4))
 		{
 			nodesVersion = NodesVersion::ZDoomZgln;
-			lprintf(OutputLevels::Debug, "P_GetNodesVersion: using ZGLN zdoom nodes\n");
+			Log::Debug("P_GetNodesVersion: using ZGLN zdoom nodes\n");
 		}
 		else if(CheckForIdentifier(level_components.znodes, "ZGL2", 4))
 		{
 			nodesVersion = NodesVersion::ZDoomZgl2;
-			lprintf(OutputLevels::Debug, "P_GetNodesVersion: using ZGL2 zdoom nodes\n");
+			Log::Debug("P_GetNodesVersion: using ZGL2 zdoom nodes\n");
 		}
 		else if(CheckForIdentifier(level_components.znodes, "XGL2", 4))
 		{
 			nodesVersion = NodesVersion::ZDoomXgl2;
-			lprintf(OutputLevels::Debug, "P_GetNodesVersion: using XGL2 zdoom nodes\n");
+			Log::Debug("P_GetNodesVersion: using XGL2 zdoom nodes\n");
 		}
 		else if(CheckForIdentifier(level_components.znodes, "ZGL3", 4))
 		{
 			nodesVersion = NodesVersion::ZDoomZgl3;
-			lprintf(OutputLevels::Debug, "P_GetNodesVersion: using ZGL3 zdoom nodes\n");
+			Log::Debug("P_GetNodesVersion: using ZGL3 zdoom nodes\n");
 		}
 		else if(CheckForIdentifier(level_components.znodes, "XGL3", 4))
 		{
 			nodesVersion = NodesVersion::ZDoomXgl3;
-			lprintf(OutputLevels::Debug, "P_GetNodesVersion: using XGL3 zdoom nodes\n");
+			Log::Debug("P_GetNodesVersion: using XGL3 zdoom nodes\n");
 		}
 		else if(CheckForIdentifier(level_components.nodes, "XNOD", 4))
 		{
 			nodesVersion = NodesVersion::ZDoomXnod;
-			lprintf(OutputLevels::Debug, "P_GetNodesVersion: using XNOD zdoom nodes\n");
+			Log::Debug("P_GetNodesVersion: using XNOD zdoom nodes\n");
 		}
 		else if(CheckForIdentifier(level_components.nodes, "ZNOD", 4))
 		{
 			nodesVersion = NodesVersion::ZDoomZnod;
-			lprintf(OutputLevels::Debug, "P_GetNodesVersion: using ZNOD zdoom nodes\n");
+			Log::Debug("P_GetNodesVersion: using ZNOD zdoom nodes\n");
 		}
 		else if(CheckForIdentifier(level_components.nodes, "xNd4\0\0\0\0", 8))
 		{
 			// http://www.sbsoftware.com/files/DeePBSPV4specs.txt
 			nodesVersion = NodesVersion::DeepBspV4;
-			lprintf(OutputLevels::Debug, "P_GetNodesVersion: using v4 DeePBSP nodes\n");
+			Log::Debug("P_GetNodesVersion: using v4 DeePBSP nodes\n");
 		}
 		else
 		{
-			lprintf(OutputLevels::Debug, "P_GetNodesVersion: using normal BSP nodes\n");
+			Log::Debug("P_GetNodesVersion: using normal BSP nodes\n");
 		}
 	}
 }
@@ -433,7 +433,7 @@ static void P_LoadSegs(int lump)
 	data = (const mapseg_t*)W_LumpByNum(lump); // cph - wad lump handling updated
 
 	if((!data) || (!numsegs))
-		I_Error("P_LoadSegs: no segs in level");
+		Log::Fatal("P_LoadSegs: no segs in level");
 
 	for(i = 0; i < numsegs; i++)
 	{
@@ -464,8 +464,8 @@ static void P_LoadSegs(int lump)
 		//e6y: check for wrong indexes
 		if((unsigned)linedef >= (unsigned)numlines)
 		{
-			I_Error("P_LoadSegs: seg %d references a non-existent linedef %d",
-				i, (unsigned)linedef);
+			Log::Fatal("P_LoadSegs: seg {} references a non-existent linedef {}",
+				i, linedef);
 		}
 
 		ldef = &lines[linedef];
@@ -475,15 +475,15 @@ static void P_LoadSegs(int lump)
 		//e6y: fix wrong side index
 		if(side != 0 && side != 1)
 		{
-			lprintf(OutputLevels::Debug, "P_LoadSegs: seg %d contains wrong side index %d. Replaced with 1.\n", i, side);
+			Log::Debug("P_LoadSegs: seg {} contains wrong side index {}. Replaced with 1.\n", i, side);
 			side = 1;
 		}
 
 		//e6y: check for wrong indexes
 		if((unsigned)ldef->sidenum[side] >= (unsigned)numsides)
 		{
-			I_Error("P_LoadSegs: linedef %d for seg %d references a non-existent sidedef %d",
-				linedef, i, (unsigned)ldef->sidenum[side]);
+			Log::Fatal("P_LoadSegs: linedef {} for seg {} references a non-existent sidedef {}",
+				linedef, i, ldef->sidenum[side]);
 		}
 
 		li->sidedef = &sides[ldef->sidenum[side]];
@@ -496,7 +496,7 @@ static void P_LoadSegs(int lump)
 		else
 		{
 			li->frontsector = nullptr;
-			lprintf(OutputLevels::Debug, "P_LoadSegs: front of seg %i has no sidedef\n", i);
+			Log::Debug("P_LoadSegs: front of seg {} has no sidedef\n", i);
 		}
 
 		if(ldef->flags & ML_TWOSIDED)
@@ -524,19 +524,19 @@ static void P_LoadSegs(int lump)
 		// http://www.doomworld.com/idgames/index.php?id=12647
 		if(v1 >= numvertexes || v2 >= numvertexes)
 		{
-			char str[200] =
-				"P_LoadSegs: compatibility loss - seg %d references a non-existent vertex %d\n";
+			static constexpr std::string_view message =
+				"P_LoadSegs: compatibility loss - seg {} references a non-existent vertex {}\n";
 
 			if(demorecording)
 			{
-				I_Error(strcat(str, "Demo recording on levels with invalid nodes is not allowed"),
-					i, (v1 >= numvertexes ? v1 : v2));
+				Log::Fatal("{}Demo recording on levels with invalid nodes is not allowed",
+					std::format(message, i, (v1 >= numvertexes ? v1 : v2)));
 			}
 
 			if(v1 >= numvertexes)
-				lprintf(OutputLevels::Warn, str, i, v1);
+				Log::Warn(message, i, v1);
 			if(v2 >= numvertexes)
-				lprintf(OutputLevels::Warn, str, i, v2);
+				Log::Warn(message, i, v2);
 
 			if(li->sidedef == &sides[li->linedef->sidenum[0]])
 			{
@@ -572,7 +572,7 @@ static void P_LoadSegs_V4(int lump)
 	data = (const mapseg_v4_t*)W_LumpByNum(lump);
 
 	if((!data) || (!numsegs))
-		I_Error("P_LoadSegs_V4: no segs in level");
+		Log::Fatal("P_LoadSegs_V4: no segs in level");
 
 	for(i = 0; i < numsegs; i++)
 	{
@@ -594,8 +594,8 @@ static void P_LoadSegs_V4(int lump)
 		//e6y: check for wrong indexes
 		if((unsigned)linedef >= (unsigned)numlines)
 		{
-			I_Error("P_LoadSegs_V4: seg %d references a non-existent linedef %d",
-				i, (unsigned)linedef);
+			Log::Fatal("P_LoadSegs_V4: seg {} references a non-existent linedef {}",
+				i, linedef);
 		}
 
 		ldef = &lines[linedef];
@@ -605,15 +605,15 @@ static void P_LoadSegs_V4(int lump)
 		//e6y: fix wrong side index
 		if(side != 0 && side != 1)
 		{
-			lprintf(OutputLevels::Debug, "P_LoadSegs_V4: seg %d contains wrong side index %d. Replaced with 1.\n", i, side);
+			Log::Debug("P_LoadSegs_V4: seg {} contains wrong side index {}. Replaced with 1.\n", i, side);
 			side = 1;
 		}
 
 		//e6y: check for wrong indexes
 		if((unsigned)ldef->sidenum[side] >= (unsigned)numsides)
 		{
-			I_Error("P_LoadSegs_V4: linedef %d for seg %d references a non-existent sidedef %d",
-				linedef, i, (unsigned)ldef->sidenum[side]);
+			Log::Fatal("P_LoadSegs_V4: linedef {} for seg {} references a non-existent sidedef {}",
+				linedef, i, ldef->sidenum[side]);
 		}
 
 		li->sidedef = &sides[ldef->sidenum[side]];
@@ -628,7 +628,7 @@ static void P_LoadSegs_V4(int lump)
 		else
 		{
 			li->frontsector = nullptr;
-			lprintf(OutputLevels::Debug, "P_LoadSegs_V4: front of seg %i has no sidedef\n", i);
+			Log::Debug("P_LoadSegs_V4: front of seg {} has no sidedef\n", i);
 		}
 
 		if(ldef->flags & ML_TWOSIDED && ldef->sidenum[side ^ 1] != NO_INDEX)
@@ -642,19 +642,19 @@ static void P_LoadSegs_V4(int lump)
 		// http://www.doomworld.com/idgames/index.php?id=12647
 		if(v1 >= numvertexes || v2 >= numvertexes)
 		{
-			char str[200] =
-				"P_LoadSegs_V4: compatibility loss - seg %d references a non-existent vertex %d\n";
+			static constexpr std::string_view message =
+				"P_LoadSegs_V4: compatibility loss - seg {} references a non-existent vertex {}\n";
 
 			if(demorecording)
 			{
-				I_Error(strcat(str, "Demo recording on levels with invalid nodes is not allowed"),
-					i, (v1 >= numvertexes ? v1 : v2));
+				Log::Fatal("{}Demo recording on levels with invalid nodes is not allowed",
+					std::format(message, i, (v1 >= numvertexes ? v1 : v2)));
 			}
 
 			if(v1 >= numvertexes)
-				lprintf(OutputLevels::Warn, str, i, v1);
+				Log::Warn(message, i, v1);
 			if(v2 >= numvertexes)
-				lprintf(OutputLevels::Warn, str, i, v2);
+				Log::Warn(message, i, v2);
 
 			if(li->sidedef == &sides[li->linedef->sidenum[0]])
 			{
@@ -696,7 +696,7 @@ static void P_LoadSubsectors(int lump)
 	data = (const mapsubsector_t*)W_LumpByNum(lump);
 
 	if((!data) || (!numsubsectors))
-		I_Error("P_LoadSubsectors: no subsectors in level");
+		Log::Fatal("P_LoadSubsectors: no subsectors in level");
 
 	for(i = 0; i < numsubsectors; i++)
 	{
@@ -717,7 +717,7 @@ static void P_LoadSubsectors_V4(int lump)
 	data = (const mapsubsector_v4_t*)W_LumpByNum(lump);
 
 	if((!data) || (!numsubsectors))
-		I_Error("P_LoadSubsectors_V4: no subsectors in level");
+		Log::Fatal("P_LoadSubsectors_V4: no subsectors in level");
 
 	for(i = 0; i < numsubsectors; i++)
 	{
@@ -866,7 +866,7 @@ static void P_LoadUDMFSectors(int lump)
 			ss->colormap = R_ColormapNumForName(ms->colormap);
 			if(ss->colormap < 0)
 			{
-				lprintf(OutputLevels::Warn, "Unknown colormap %s in sector %d.\n", ms->colormap, i);
+				Log::Warn("Unknown colormap {} in sector {}.\n", ms->colormap, i);
 				ss->colormap = 0;
 			}
 		}
@@ -955,10 +955,9 @@ static void P_LoadNodes(int lump)
 	{
 		// allow trivial maps
 		if(numsubsectors == 1)
-			lprintf(OutputLevels::Info,
-				"P_LoadNodes: trivial map (no nodes, one subsector)\n");
+			Log::Info("P_LoadNodes: trivial map (no nodes, one subsector)\n");
 		else
-			I_Error("P_LoadNodes: no nodes in level");
+			Log::Fatal("P_LoadNodes: no nodes in level");
 	}
 
 	for(i = 0; i < numnodes; i++)
@@ -991,7 +990,7 @@ static void P_LoadNodes(int lump)
 				// haleyjd 11/06/10: check for invalid subsector reference
 				if(no->children[j] >= numsubsectors)
 				{
-					lprintf(OutputLevels::Error, "P_LoadNodes: BSP tree references invalid subsector %d.\n", no->children[j]);
+					Log::Error("P_LoadNodes: BSP tree references invalid subsector {}.\n", no->children[j]);
 					no->children[j] = 0;
 				}
 
@@ -1020,9 +1019,9 @@ static void P_LoadNodes_V4(int lump)
 	{
 		// allow trivial maps
 		if(numsubsectors == 1)
-			lprintf(OutputLevels::Info, "P_LoadNodes_V4: trivial map (no nodes, one subsector)\n");
+			Log::Info("P_LoadNodes_V4: trivial map (no nodes, one subsector)\n");
 		else
-			I_Error("P_LoadNodes_V4: no nodes in level");
+			Log::Fatal("P_LoadNodes_V4: no nodes in level");
 	}
 
 	for(i = 0; i < numnodes; i++)
@@ -1054,7 +1053,7 @@ static void CheckZNodesOverflow(int* size, int count)
 
 	if((*size) < 0)
 	{
-		I_Error("P_LoadZNodes: incorrect nodes");
+		Log::Fatal("P_LoadZNodes: incorrect nodes");
 	}
 }
 
@@ -1084,7 +1083,7 @@ static byte* P_DecompressData(const byte** data, int* len)
 	zstream->avail_out = outlen;
 
 	if(inflateInit(zstream) != Z_OK)
-		I_Error("P_DecompressData: Error during decompression initialization!");
+		Log::Fatal("P_DecompressData: Error during decompression initialization!");
 
 	// resize if output buffer runs full
 	while((err = inflate(zstream, Z_SYNC_FLUSH)) == Z_OK)
@@ -1097,13 +1096,13 @@ static byte* P_DecompressData(const byte** data, int* len)
 	}
 
 	if(err != Z_STREAM_END)
-		I_Error("P_DecompressData: Error during decompression!");
+		Log::Fatal("P_DecompressData: Error during decompression!");
 
 	*data = output;
 	*len = zstream->total_out;
 
 	if(inflateEnd(zstream) != Z_OK)
-		I_Error("P_DecompressData: Error during decompression shut-down!");
+		Log::Fatal("P_DecompressData: Error during decompression shut-down!");
 
 	Z_Free(zstream);
 
@@ -1132,8 +1131,8 @@ static void P_LoadZSegs(const byte* data)
 		//e6y: check for wrong indexes
 		if((unsigned int)linedef >= (unsigned int)numlines)
 		{
-			I_Error("P_LoadZSegs: seg %d references a non-existent linedef %d",
-				i, (unsigned)linedef);
+			Log::Fatal("P_LoadZSegs: seg {} references a non-existent linedef {}",
+				i, static_cast<int32_t>(linedef));
 		}
 
 		ldef = &lines[linedef];
@@ -1143,15 +1142,15 @@ static void P_LoadZSegs(const byte* data)
 		//e6y: fix wrong side index
 		if(side != 0 && side != 1)
 		{
-			lprintf(OutputLevels::Debug, "P_LoadZSegs: seg %d contains wrong side index %d. Replaced with 1.\n", i, side);
+			Log::Debug("P_LoadZSegs: seg {} contains wrong side index {}. Replaced with 1.\n", i, side);
 			side = 1;
 		}
 
 		//e6y: check for wrong indexes
 		if((unsigned)ldef->sidenum[side] >= (unsigned)numsides)
 		{
-			I_Error("P_LoadZSegs: linedef %d for seg %d references a non-existent sidedef %d",
-				linedef, i, (unsigned)ldef->sidenum[side]);
+			Log::Fatal("P_LoadZSegs: linedef {} for seg {} references a non-existent sidedef {}",
+				static_cast<int32_t>(linedef), i, ldef->sidenum[side]);
 		}
 
 		li->sidedef = &sides[ldef->sidenum[side]];
@@ -1166,7 +1165,7 @@ static void P_LoadZSegs(const byte* data)
 		else
 		{
 			li->frontsector = nullptr;
-			lprintf(OutputLevels::Debug, "P_LoadZSegs: front of seg %i has no sidedef\n", i);
+			Log::Debug("P_LoadZSegs: front of seg {} has no sidedef\n", i);
 		}
 
 		if((ldef->flags & ML_TWOSIDED) && (ldef->sidenum[side ^ 1] != NO_INDEX))
@@ -1239,8 +1238,8 @@ static void P_LoadGLZSegs(const byte* data, int type)
 
 				if((unsigned int)line >= (unsigned int)numlines)
 				{
-					I_Error("P_LoadGLZSegs: seg %d, %d references a non-existent linedef %d",
-						i, j, (unsigned int)line);
+					Log::Fatal("P_LoadGLZSegs: seg {}, {} references a non-existent linedef {}",
+						i, j, static_cast<int32_t>(line));
 				}
 
 				ldef = &lines[line];
@@ -1248,14 +1247,14 @@ static void P_LoadGLZSegs(const byte* data, int type)
 
 				if(side != 0 && side != 1)
 				{
-					I_Error("P_LoadGLZSegs: seg %d, %d references a non-existent side %d",
-						i, j, (unsigned int)side);
+					Log::Fatal("P_LoadGLZSegs: seg {}, {} references a non-existent side {}",
+						i, j, side);
 				}
 
 				if((unsigned)ldef->sidenum[side] >= (unsigned)numsides)
 				{
-					I_Error("P_LoadGLZSegs: linedef %d for seg %d, %d references a non-existent sidedef %d",
-						line, i, j, (unsigned)ldef->sidenum[side]);
+					Log::Fatal("P_LoadGLZSegs: linedef {} for seg {}, {} references a non-existent sidedef {}",
+						static_cast<int32_t>(line), i, j, ldef->sidenum[side]);
 				}
 
 				seg->sidedef = &sides[ldef->sidenum[side]];
@@ -1270,7 +1269,7 @@ static void P_LoadGLZSegs(const byte* data, int type)
 				else
 				{
 					seg->frontsector = nullptr;
-					lprintf(OutputLevels::Debug, "P_LoadGLZSegs: front of seg %d, %d has no sidedef\n", i, j);
+					Log::Debug("P_LoadGLZSegs: front of seg {}, {} has no sidedef\n", i, j);
 				}
 
 				if((ldef->flags & ML_TWOSIDED) && (ldef->sidenum[side ^ 1] != NO_INDEX))
@@ -1379,7 +1378,7 @@ static void P_LoadZNodes(int lump, int glnodes)
 
 			if(orgVerts + newVerts < numvertexes)
 			{
-				lprintf(OutputLevels::Warn, "Warning: inconsistent nodes detected\n");
+				Log::Warn("Warning: inconsistent nodes detected\n");
 				inconsistent_nodes = true;
 			}
 
@@ -1403,7 +1402,7 @@ static void P_LoadZNodes(int lump, int glnodes)
 
 	numsubsectors = numSubs;
 	if(numsubsectors <= 0)
-		I_Error("P_LoadZNodes: no subsectors in level");
+		Log::Fatal("P_LoadZNodes: no subsectors in level");
 	subsectors = static_cast<decltype(subsectors)>(calloc_IfSameLevel(subsectors, numsubsectors, sizeof(subsector_t)));
 
 	CheckZNodesOverflow(&len, numSubs * sizeof(mapsubsector_znod_t));
@@ -1430,7 +1429,7 @@ static void P_LoadZNodes(int lump, int glnodes)
 	// segs used by subsectors.
 	if(numSegs != currSeg)
 	{
-		I_Error("P_LoadZNodes: Incorrect number of segs in nodes.");
+		Log::Fatal("P_LoadZNodes: Incorrect number of segs in nodes.");
 	}
 
 	numsegs = numSegs;
@@ -1618,7 +1617,7 @@ static void P_LoadThings(int lump)
 	mobjlist = static_cast<mobj_t**>(Z_Malloc(numthings * sizeof(mobjlist[0])));
 
 	if(!data || !numthings)
-		I_Error("P_LoadThings: no things in level");
+		Log::Fatal("P_LoadThings: no things in level");
 
 	for(i = 0; i < numthings; i++)
 	{
@@ -1727,7 +1726,7 @@ static void P_LoadUDMFThings(int lump)
 
 			if(mt.special_args[0] < 0)
 			{
-				lprintf(OutputLevels::Warn, "Unknown colormap in thing %d action.\n", i);
+				Log::Warn("Unknown colormap in thing {} action.\n", i);
 				mt.special = 0;
 			}
 		}
@@ -1741,7 +1740,7 @@ static void P_LoadUDMFThings(int lump)
 
 			if(mt.special_args[0] == LUMP_NOT_FOUND)
 			{
-				lprintf(OutputLevels::Warn, "Unknown song lump in thing %d action.\n", i);
+				Log::Warn("Unknown song lump in thing {} action.\n", i);
 				mt.special = 0;
 			}
 		}
@@ -1984,7 +1983,7 @@ static void P_CalculateLineDefProperties(line_t* ld)
 			if(ld->sidenum[j] != NO_INDEX && ld->sidenum[j] >= numsides)
 			{
 				ld->sidenum[j] = NO_INDEX;
-				lprintf(OutputLevels::Debug, "P_LoadLineDefs: linedef %d"
+				Log::Debug("P_LoadLineDefs: linedef {}"
 					" has out-of-range sidedef number\n", ld->iLineID);
 			}
 		}
@@ -2008,7 +2007,7 @@ static void P_CalculateLineDefProperties(line_t* ld)
 			}
 
 			// cph - print a warning about the bug
-			lprintf(OutputLevels::Debug, "P_LoadLineDefs: linedef %d"
+			Log::Debug("P_LoadLineDefs: linedef {}"
 				" has two-sided flag set, but no second sidedef\n", ld->iLineID);
 		}
 	}
@@ -2135,7 +2134,7 @@ static void P_LoadUDMFLineDefs(int lump)
 
 			if(ld->special_args[0] < 0)
 			{
-				lprintf(OutputLevels::Warn, "Unknown colormap in line %d action.\n", i);
+				Log::Warn("Unknown colormap in line {} action.\n", i);
 				ld->special = 0;
 			}
 		}
@@ -2149,7 +2148,7 @@ static void P_LoadUDMFLineDefs(int lump)
 
 			if(ld->special_args[0] == LUMP_NOT_FOUND)
 			{
-				lprintf(OutputLevels::Warn, "Unknown song lump in line %d action.\n", i);
+				Log::Warn("Unknown song lump in line {} action.\n", i);
 				ld->special = 0;
 			}
 		}
@@ -2480,7 +2479,7 @@ static void P_LoadSideDefs(int lump)
 			unsigned short sector_num = LittleShort(msd->sector);
 			if(sector_num >= numsectors)
 			{
-				lprintf(OutputLevels::Debug, "P_LoadSideDefs: sidedef %i has out-of-range sector num %u\n", i, sector_num);
+				Log::Debug("P_LoadSideDefs: sidedef {} has out-of-range sector num {}\n", i, sector_num);
 				sector_num = 0;
 			}
 			sd->sector = sec = &sectors[sector_num];
@@ -2540,7 +2539,7 @@ static void P_LoadUDMFSideDefs(int lump)
 		sd->flags = msd->flags;
 
 		if(msd->sector >= numsectors)
-			I_Error("Invalid level data: sidedef %d's sector index is out of range", i);
+			Log::Fatal("Invalid level data: sidedef {}'s sector index is out of range", i);
 
 		sd->sector = &sectors[msd->sector];
 
@@ -2920,7 +2919,7 @@ static dboolean P_VerifyBlockMap(int count)
 			// check that block offset is in bounds
 			if(blockoffset >= maxoffs)
 			{
-				lprintf(OutputLevels::Error, "P_VerifyBlockMap: block offset overflow\n");
+				Log::Error("P_VerifyBlockMap: block offset overflow\n");
 				return false;
 			}
 
@@ -2929,7 +2928,7 @@ static dboolean P_VerifyBlockMap(int count)
 			// check that list offset is in bounds
 			if(offset < 4 || offset >= count)
 			{
-				lprintf(OutputLevels::Error, "P_VerifyBlockMap: list offset overflow\n");
+				Log::Error("P_VerifyBlockMap: list offset overflow\n");
 				return false;
 			}
 
@@ -2944,7 +2943,7 @@ static dboolean P_VerifyBlockMap(int count)
 				// we have overflowed the lump?
 				if(tmplist >= maxoffs)
 				{
-					lprintf(OutputLevels::Error, "P_VerifyBlockMap: open blocklist\n");
+					Log::Error("P_VerifyBlockMap: open blocklist\n");
 					return false;
 				}
 				if(*tmplist == -1) // found -1
@@ -2956,7 +2955,7 @@ static dboolean P_VerifyBlockMap(int count)
 			{
 				if(*tmplist < 0 || *tmplist >= numlines)
 				{
-					lprintf(OutputLevels::Error, "P_VerifyBlockMap: index >= numlines\n");
+					Log::Error("P_VerifyBlockMap: index >= numlines\n");
 					return false;
 				}
 			}
@@ -3022,8 +3021,8 @@ static void P_LoadBlockMap(int lump)
 		// http://www.doomworld.com/idgames/index.php?id=12935
 		if(!P_VerifyBlockMap(count))
 		{
-			lprintf(OutputLevels::Info, "P_LoadBlockMap: erroneous BLOCKMAP lump may cause crashes.\n");
-			lprintf(OutputLevels::Info, "P_LoadBlockMap: use \"-blockmap\" command line switch for rebuilding\n");
+			Log::Info("P_LoadBlockMap: erroneous BLOCKMAP lump may cause crashes.\n");
+			Log::Info("P_LoadBlockMap: use \"-blockmap\" command line switch for rebuilding\n");
 		}
 	}
 
@@ -3041,8 +3040,7 @@ static void P_LoadBlockMap(int lump)
 	blockmapyneg = (bmapheight > 255 ? bmapheight - 512 : -257);
 	if(blockmapxneg != -257 || blockmapyneg != -257)
 	{
-		lprintf(OutputLevels::Warn,
-			"P_LoadBlockMap: This map uses a large blockmap which may cause no-clipping bugs. "
+		Log::Warn("P_LoadBlockMap: This map uses a large blockmap which may cause no-clipping bugs. "
 			"Toggle the \"Fix clipping problems in large levels\" option "
 			"in the \"Compatibility with common mapping errors\" menu in order to activate a fix. "
 			"That fix won't be applied during demo playback or recording.\n");
@@ -3091,7 +3089,7 @@ static int P_GroupLines()
 			seg++;
 		}
 		if(subsectors[i].sector == nullptr)
-			I_Error("P_GroupLines: Subsector a part of no sector!\n");
+			Log::Fatal("P_GroupLines: Subsector a part of no sector!\n");
 	}
 
 	// count number of lines in each sector
@@ -3420,7 +3418,7 @@ static void P_VerifyLevelComponents(int lumpnum)
 	{
 		if(!P_CheckLumpsForSameSource(lumpnum, lumpnum + i))
 		{
-			I_Error("P_SetupLevel: Level wad structure is incomplete. There is no %s lump.", ml_labels[i]);
+			Log::Fatal("P_SetupLevel: Level wad structure is incomplete. There is no {} lump.", ml_labels[i]);
 		}
 	}
 }
@@ -3436,7 +3434,7 @@ static void P_UpdateMapFormat()
 		if(has_behavior && !hexen)
 		{
 			if(heretic)
-				I_Error("Hexen format maps are not supported in Heretic yet");
+				Log::Fatal("Hexen format maps are not supported in Heretic yet");
 
 			dsda_ApplyZDoomMapFormat();
 		}
@@ -3503,7 +3501,7 @@ static void P_UpdateUDMFLevelComponents(int lumpnum)
 	}
 
 	if(level_components.znodes == LUMP_NOT_FOUND)
-		I_Error("P_SetupLevel: Level wad structure is incomplete. There is no ZNODES lump.");
+		Log::Fatal("P_SetupLevel: Level wad structure is incomplete. There is no ZNODES lump.");
 }
 
 extern "C" void PO_LoadThings(int lump);
@@ -3895,7 +3893,7 @@ void P_SetupLevel(int episode, int map, int skill)
 	{
 		for(i = 0; i < g_maxplayers; i++)
 			if(playeringame[i] && !players[i].mo)
-				I_Error("P_SetupLevel: missing player %d start\n", i + 1);
+				Log::Fatal("P_SetupLevel: missing player {} start\n", i + 1);
 	}
 
 	players[consoleplayer].viewz = players[consoleplayer].mo->z +

@@ -46,7 +46,7 @@ Where a C API needs a zero-terminated string, the caller makes a `std::string` f
 ## Convert logging to `Log::`
 
 `Log::Print`, `Info`, `Warn`, `Error`, `Debug` and `Fatal` (`lprintf.hpp`) format with `std::format`.
-About 289 `lprintf` and 240 `I_Error` calls are still `printf`-style; convert them in batches (build and run the spec suite after each), then remove the old functions.
+About 249 `lprintf` and 210 `I_Error` calls are still `printf`-style; convert them in batches (build and run the spec suite after each), then remove the old functions.
 `I_Warn` (2 calls: `Warn` level plus a message box) needs a `Log::` counterpart first.
 
 Conversion traps:
