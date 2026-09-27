@@ -373,8 +373,8 @@ static void V_DrawMemPatch(int x, int y, int scrn, const rpatch_t* patch,
 		if(y < 0 || y + patch->height > ((flags & PatchTranslation::Stretch) != PatchTranslation{} ? 200 : SCREENHEIGHT))
 		{
 			// killough 1/19/98: improved error message:
-			lprintf(OutputLevels::Warn, "V_DrawMemPatch8: Patch (%d,%d)-(%d,%d) exceeds LFB in vertical direction (horizontal is clipped)\n"
-				"Bad V_DrawMemPatch8 (flags=%u)", x, y, x + patch->width, y + patch->height, flags);
+			Log::Warn("V_DrawMemPatch8: Patch ({},{})-({},{}) exceeds LFB in vertical direction (horizontal is clipped)\n"
+				"Bad V_DrawMemPatch8 (flags={})", x, y, x + patch->width, y + patch->height, std::to_underlying(flags));
 			return;
 		}
 
@@ -884,7 +884,7 @@ void V_InitMode(VideoMode mode)
 	switch(mode)
 	{
 		case VideoMode::Software:
-			lprintf(OutputLevels::Debug, "V_InitMode: using software video mode\n");
+			Log::Debug("V_InitMode: using software video mode\n");
 			V_BeginUIDraw = NULL_BeginUIDraw; // [XA] no-op in software
 			V_EndUIDraw = NULL_EndUIDraw;     // [XA] ditto for the other begin/ends
 			V_BeginAutomapDraw = NULL_BeginAutomapDraw;
@@ -906,7 +906,7 @@ void V_InitMode(VideoMode mode)
 			current_videomode = VideoMode::Software;
 			break;
 		case VideoMode::OpenGl:
-			lprintf(OutputLevels::Debug, "V_InitMode: using OpenGL video mode\n");
+			Log::Debug("V_InitMode: using OpenGL video mode\n");
 			V_BeginUIDraw = WRAP_gld_BeginUIDraw;
 			V_EndUIDraw = WRAP_gld_EndUIDraw;
 			V_BeginAutomapDraw = WRAP_gld_BeginAutomapDraw;
@@ -1046,7 +1046,7 @@ static void WRAP_V_DrawLine(fline_t* fl, int color)
 	)
 	{
 		//jff 8/3/98 use logical output routine
-		lprintf(OutputLevels::Debug, "fuck %d \r", fuck++);
+		Log::Debug("fuck {} \r", fuck++);
 		return;
 	}
 #endif
@@ -1382,7 +1382,7 @@ static void swap(unsigned int* num1, unsigned int* num2)
 // Set global variables for video scaling.
 void SetRatio(int width, int height)
 {
-	lprintf(OutputLevels::Debug, "SetRatio: width/height parameters %dx%d\n", width, height);
+	Log::Debug("SetRatio: width/height parameters {}x{}\n", width, height);
 
 	ratio_multiplier = width;
 	ratio_scale = height;
@@ -1390,19 +1390,19 @@ void SetRatio(int width, int height)
 
 	// The terms storage aspect ratio, pixel aspect ratio, and display aspect
 	// ratio came from Wikipedia.  SAR x PAR = DAR
-	lprintf(OutputLevels::Debug, "SetRatio: storage aspect ratio %u:%u\n", ratio_multiplier, ratio_scale);
+	Log::Debug("SetRatio: storage aspect ratio {}:{}\n", ratio_multiplier, ratio_scale);
 	if(height == 200 || height == 400 || !dsda_IntConfig(ConfigId::AspectRatioCorrection))
 	{
-		lprintf(OutputLevels::Debug, "SetRatio: recognized VGA mode with pixel aspect ratio 5:6\n");
+		Log::Debug("SetRatio: recognized VGA mode with pixel aspect ratio 5:6\n");
 		ratio_multiplier = width * 5;
 		ratio_scale = height * 6;
 		ReduceFraction(&ratio_multiplier, &ratio_scale);
 	}
 	else
 	{
-		lprintf(OutputLevels::Debug, "SetRatio: assuming square pixels\n");
+		Log::Debug("SetRatio: assuming square pixels\n");
 	}
-	lprintf(OutputLevels::Debug, "SetRatio: display aspect ratio %u:%u\n", ratio_multiplier, ratio_scale);
+	Log::Debug("SetRatio: display aspect ratio {}:{}\n", ratio_multiplier, ratio_scale);
 
 	// If user wants to force aspect ratio, let them.
 	{
@@ -1432,20 +1432,20 @@ void SetRatio(int width, int height)
 				new_scale = 4;
 				break;
 			default:
-				lprintf(OutputLevels::Error, "SetRatio: render_aspect has invalid value %d\n", render_aspect);
+				Log::Error("SetRatio: render_aspect has invalid value {}\n", render_aspect);
 		}
 
 		if(ratio_multiplier != new_multiplier || ratio_scale != new_scale)
 		{
-			lprintf(OutputLevels::Debug, "SetRatio: overruled by user configuration setting\n");
+			Log::Debug("SetRatio: overruled by user configuration setting\n");
 			ratio_multiplier = new_multiplier;
 			ratio_scale = new_scale;
-			lprintf(OutputLevels::Debug, "SetRatio: revised display aspect ratio %u:%u\n", ratio_multiplier, ratio_scale);
+			Log::Debug("SetRatio: revised display aspect ratio {}:{}\n", ratio_multiplier, ratio_scale);
 		}
 	}
 
 	gl_ratio = RMUL * ratio_multiplier / ratio_scale;
-	lprintf(OutputLevels::Debug, "SetRatio: gl_ratio %f\n", gl_ratio);
+	Log::Debug("SetRatio: gl_ratio {:f}\n", gl_ratio);
 
 	// Calculate modified multiplier following the pattern of the old
 	// BaseRatioSizes table in PrBoom-Plus 2.5.1.3.
@@ -1461,14 +1461,14 @@ void SetRatio(int width, int height)
 		float ratio_percentage = (ratio_quotient - 1) * 100.0;
 		psprite_offset = (int)(ratio_percentage * FRACUNIT);
 
-		lprintf(OutputLevels::Debug, "SetRatio: tallscreen aspect recognized; flipping multiplier\n");
+		Log::Debug("SetRatio: tallscreen aspect recognized; flipping multiplier\n");
 		swap(&ratio_multiplier, &ratio_scale);
 	}
 	else
 	{
 		psprite_offset = 0;
 	}
-	lprintf(OutputLevels::Debug, "SetRatio: multiplier %u/%u\n", ratio_multiplier, ratio_scale);
+	Log::Debug("SetRatio: multiplier {}/{}\n", ratio_multiplier, ratio_scale);
 
 	// The rest is carried over from CheckRatio in PrBoom-Plus 2.5.1.3.
 	if(tallscreen)
@@ -1716,7 +1716,7 @@ void V_DrawAltTLNumPatch(int x, int y, int lump)
 //      || y < 0
 //      || y + SHORT(patch->height) > ORIGHEIGHT)
 //     {
-//         I_Error("Bad V_DrawShadowedPatch");
+//         Log::Fatal("Bad V_DrawShadowedPatch");
 //     }
 //
 //     col = 0;
@@ -1768,7 +1768,7 @@ void V_DrawAltTLNumPatch(int x, int y, int lump)
 //      || y < 0
 //      || y + SHORT(patch->height) > ORIGHEIGHT)
 //     {
-//         I_Error("Bad V_DrawTLPatch");
+//         Log::Fatal("Bad V_DrawTLPatch");
 //     }
 //
 //     col = 0;

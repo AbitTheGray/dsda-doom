@@ -117,12 +117,12 @@ void gld_InitOpenGL()
 
 	gl_ext_texture_filter_anisotropic = isExtensionSupported("GL_EXT_texture_filter_anisotropic") != nullptr;
 	if(gl_ext_texture_filter_anisotropic)
-		lprintf(OutputLevels::Debug, "using GL_EXT_texture_filter_anisotropic\n");
+		Log::Debug("using GL_EXT_texture_filter_anisotropic\n");
 
 	// Any textures sizes are allowed
 	gl_arb_texture_non_power_of_two = isExtensionSupported("GL_ARB_texture_non_power_of_two") != nullptr;
 	if(!gl_arb_texture_non_power_of_two)
-		I_Error("gld_InitOpenGL: OpenGL driver does not support GL_ARB_texture_non_power_of_two");
+		Log::Fatal("gld_InitOpenGL: OpenGL driver does not support GL_ARB_texture_non_power_of_two");
 
 	//
 	// ARB_multitexture command function pointers
@@ -141,7 +141,7 @@ void gld_InitOpenGL()
 			gl_arb_multitexture = false;
 	}
 	if(!gl_arb_multitexture)
-		I_Error("gld_InitOpenGL: OpenGL driver does not support GL_ARB_multitexture");
+		Log::Fatal("gld_InitOpenGL: OpenGL driver does not support GL_ARB_multitexture");
 
 	//
 	// ARB_texture_compression
@@ -156,7 +156,7 @@ void gld_InitOpenGL()
 			gl_arb_texture_compression = false;
 	}
 	if(gl_arb_texture_compression)
-		lprintf(OutputLevels::Debug, "using GL_ARB_texture_compression\n");
+		Log::Debug("using GL_ARB_texture_compression\n");
 
 	//
 	// EXT_framebuffer_object
@@ -184,11 +184,11 @@ void gld_InitOpenGL()
 			gl_ext_framebuffer_object = false;
 	}
 	if(gl_ext_framebuffer_object)
-		lprintf(OutputLevels::Debug, "using GL_EXT_framebuffer_object\n");
+		Log::Debug("using GL_EXT_framebuffer_object\n");
 
 	gl_ext_packed_depth_stencil = isExtensionSupported("GL_EXT_packed_depth_stencil") != nullptr;
 	if(gl_ext_packed_depth_stencil)
-		lprintf(OutputLevels::Debug, "using GL_EXT_packed_depth_stencil\n");
+		Log::Debug("using GL_EXT_packed_depth_stencil\n");
 
 	//
 	// Blending
@@ -203,7 +203,7 @@ void gld_InitOpenGL()
 			gl_ext_blend_color = false;
 	}
 	if(gl_ext_blend_color)
-		lprintf(OutputLevels::Debug, "using GL_EXT_blend_color\n");
+		Log::Debug("using GL_EXT_blend_color\n");
 
 	// VBO
 	if(dsda_IntConfig(ConfigId::GlUsevbo))
@@ -221,7 +221,7 @@ void gld_InitOpenGL()
 				gl_ext_arb_vertex_buffer_object = false;
 		}
 		if(gl_ext_arb_vertex_buffer_object)
-			lprintf(OutputLevels::Debug, "using GL_ARB_vertex_buffer_object\n");
+			Log::Debug("using GL_ARB_vertex_buffer_object\n");
 	}
 
 	gl_arb_pixel_buffer_object = isExtensionSupported("GL_ARB_pixel_buffer_object") != nullptr;
@@ -243,7 +243,7 @@ void gld_InitOpenGL()
 			gl_arb_pixel_buffer_object = false;
 	}
 	if(gl_arb_pixel_buffer_object)
-		lprintf(OutputLevels::Debug, "using GL_ARB_pixel_buffer_object\n");
+		Log::Debug("using GL_ARB_pixel_buffer_object\n");
 
 	//
 	// Stencil support
@@ -301,16 +301,16 @@ void gld_InitOpenGL()
 
 	if(!gl_arb_shader_objects)
 	{
-		I_Error("gld_InitOpenGL: Insufficient support for shader objects");
+		Log::Fatal("gld_InitOpenGL: Insufficient support for shader objects");
 	}
 
-	lprintf(OutputLevels::Debug, "using GL_ARB_shader_objects\n");
-	lprintf(OutputLevels::Debug, "using GL_ARB_vertex_shader\n");
-	lprintf(OutputLevels::Debug, "using GL_ARB_fragment_shader\n");
-	lprintf(OutputLevels::Debug, "using GL_ARB_shading_language_100\n");
+	Log::Debug("using GL_ARB_shader_objects\n");
+	Log::Debug("using GL_ARB_vertex_shader\n");
+	Log::Debug("using GL_ARB_fragment_shader\n");
+	Log::Debug("using GL_ARB_shading_language_100\n");
 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &gl_max_texture_size);
-	lprintf(OutputLevels::Debug, "GL_MAX_TEXTURE_SIZE=%i\n", gl_max_texture_size);
+	Log::Debug("GL_MAX_TEXTURE_SIZE={}\n", gl_max_texture_size);
 
 	//init states manager
 	gld_EnableMultisample(true);
@@ -358,7 +358,7 @@ void gld_EnableTexture2D(GLenum texture, int enable)
 
 #ifdef RANGECHECK
 	if(arb < 0 || arb > 31)
-		I_Error("gld_EnableTexture2D: wronge ARB texture unit %d", arb);
+		Log::Fatal("gld_EnableTexture2D: wronge ARB texture unit {}", arb);
 #endif
 
 	if(enable)
@@ -405,7 +405,7 @@ void gld_EnableClientCoordArray(GLenum texture, int enable)
 
 #ifdef RANGECHECK
 	if(arb < 0 || arb > 31)
-		I_Error("gld_EnableTexture2D: wronge ARB texture unit %d", arb);
+		Log::Fatal("gld_EnableTexture2D: wronge ARB texture unit {}", arb);
 #endif
 
 	if(enable)

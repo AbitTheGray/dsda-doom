@@ -2024,7 +2024,7 @@ static dboolean G_CheckSpot(int playernum, mapthing_t* mthing)
 				case 3072:
 				case 4096:
 				case 0: break; /* correct angles set above */
-				default: I_Error("G_CheckSpot: unexpected angle %d\n", an);
+				default: Log::Fatal("G_CheckSpot: unexpected angle {}\n", an);
 			}
 
 		mo = P_SpawnMobj(x + 20 * xa, y + 20 * ya, sec->floorheight, MobjType::Tfog);
@@ -2046,7 +2046,7 @@ void G_DeathMatchSpawnPlayer(int playernum)
 	int j, selections = deathmatch_p - deathmatchstarts;
 
 	if(selections < g_maxplayers)
-		I_Error("G_DeathMatchSpawnPlayer: Only %i deathmatch spots, %d required",
+		Log::Fatal("G_DeathMatchSpawnPlayer: Only {} deathmatch spots, {} required",
 			selections, g_maxplayers);
 
 	for(j = 0; j < 20; j++)
@@ -2483,7 +2483,7 @@ void G_DoLoadGame()
 
 	length = M_ReadFile(name, &savebuffer);
 	if(length <= 0)
-		I_Error("Couldn't read file %s: %s", name, "(Unknown Error)");
+		Log::Fatal("Couldn't read file {}: {}", name, "(Unknown Error)");
 	Z_Free(name);
 	save_p = savebuffer + SAVESTRINGSIZE;
 
@@ -2525,7 +2525,7 @@ void G_DoLoadGame()
 	dsda_UnArchiveAll();
 
 	if(*save_p != 0xe6)
-		I_Error("G_DoLoadGame: Bad savegame");
+		Log::Fatal("G_DoLoadGame: Bad savegame");
 
 	G_AfterLoad();
 
@@ -2724,7 +2724,7 @@ void G_Compatibility()
 	unsigned int i;
 
 	if(sizeof(levels) / sizeof(*levels) != std::to_underlying(CompOption::MbfCompTotal))
-		I_Error("G_Compatibility: consistency error");
+		Log::Fatal("G_Compatibility: consistency error");
 
 	for(i = 0; i < sizeof(levels) / sizeof(*levels); i++)
 		if(compatibility_level < levels[i].opt)
@@ -3284,7 +3284,7 @@ byte* G_WriteOptions(byte* demo_p)
 		*demo_p++ = 0;
 
 	if(demo_p != target)
-		I_Error("G_WriteOptions: dsda_GameOptionSize is too small");
+		Log::Fatal("G_WriteOptions: dsda_GameOptionSize is too small");
 
 	return target;
 }
@@ -3418,7 +3418,7 @@ void G_BeginRecording()
 					longtics = 1;
 					shorttics = !dsda_Flag(ArgId::Longtics);
 					break;
-				default: I_Error("G_BeginRecording: PrBoom compatibility level unrecognised?");
+				default: Log::Fatal("G_BeginRecording: PrBoom compatibility level unrecognised?");
 			}
 			*demo_p++ = v;
 		}
@@ -3469,7 +3469,7 @@ void G_BeginRecording()
 				break;
 			case CompLevel::Boom202: v = 202, c = 0;
 				break;
-			default: I_Error("G_BeginRecording: Boom compatibility level unrecognised?");
+			default: Log::Fatal("G_BeginRecording: Boom compatibility level unrecognised?");
 		}
 		*demo_p++ = v;
 
@@ -3612,7 +3612,7 @@ static dboolean CheckForOverrun(const byte* start_p, const byte* current_p, size
 	if(pos + size > maxsize)
 	{
 		if(failonerror)
-			I_Error("G_ReadDemoHeader: wrong demo header\n");
+			Log::Fatal("G_ReadDemoHeader: wrong demo header\n");
 		else
 			return true;
 	}
@@ -3656,7 +3656,7 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 		{
 			if(failonerror)
 			{
-				I_Error("G_ReadDemoHeader: wrong demo header\n");
+				Log::Fatal("G_ReadDemoHeader: wrong demo header\n");
 			}
 			else
 			{
@@ -3684,7 +3684,7 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 		(demover >= 200 && demover <= 214) ||
 		(demover == 221)))
 	{
-		I_Error("G_ReadDemoHeader: Unknown demo format %d.", demover);
+		Log::Fatal("G_ReadDemoHeader: Unknown demo format {}.", demover);
 	}
 
 	if(demover < 200) // Autodetect old demos
@@ -3780,7 +3780,7 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 					(map > 9 && !hexen) ||
 					(size >= 6 && (*(header_p + 4) == 2 || *(header_p + 6) == 2) && !hexen))
 				{
-					I_Error("Unrecognised demo format.");
+					Log::Fatal("Unrecognised demo format.");
 				}
 			}
 		}
@@ -4032,7 +4032,7 @@ void G_DoPlayDemo()
 		if(dsda_Flag(ArgId::TrackPlayback))
 			dsda_ResetSplits();
 
-		lprintf(OutputLevels::Info, "Playing demo:\n  Name: %s\n  Compatibility: %s\n",
+		Log::Info("Playing demo:\n  Name: {}\n  Compatibility: {}\n",
 			defdemoname, comp_lev_str[std::to_underlying(compatibility_level)]);
 
 		gameaction = GameAction::Nothing;
@@ -4076,9 +4076,9 @@ dboolean G_CheckDemoStatus()
 
 		M_SaveDefaults();
 
-		lprintf(OutputLevels::Info, "Timed %u gametics in %u realtics = %-.1f frames per second\n",
-			(unsigned)gametic, realtics,
-			(unsigned)gametic * (double)TICRATE / realtics);
+		Log::Info("Timed {} gametics in {} realtics = {:.1f} frames per second\n",
+			static_cast<uint32_t>(gametic), realtics,
+			static_cast<uint32_t>(gametic) * static_cast<double>(TICRATE) / realtics);
 
 		if(dsda_IntConfig(ConfigId::DemoEndQuit))
 			I_SafeExit(0);
