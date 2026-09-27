@@ -592,7 +592,7 @@ static void I_UploadNewPalette(int pal, int force)
 
 #ifdef RANGECHECK
 	if((size_t)pal >= num_pals)
-		I_Error("I_UploadNewPalette: Palette number out of range (%d>=%d)",
+		Log::Fatal("I_UploadNewPalette: Palette number out of range ({}>={})",
 			pal, num_pals);
 #endif
 
@@ -659,7 +659,7 @@ void I_FinishUpdate()
 
 		if(SDL_LockSurface(screen) < 0)
 		{
-			lprintf(OutputLevels::Info, "I_FinishUpdate: %s\n", SDL_GetError());
+			Log::Info("I_FinishUpdate: {}\n", SDL_GetError());
 			return;
 		}
 
@@ -749,7 +749,7 @@ void I_PreInitGraphics()
 	p = SDL_Init(flags);
 	if(p < 0)
 	{
-		I_Error("Could not initialize SDL [%s]", SDL_GetError());
+		Log::Fatal("Could not initialize SDL [{}]", SDL_GetError());
 	}
 
 	// No longer call `I_ShutdownSDL()` here cuz we need window/renderer info for ENDOOM later on
@@ -1026,13 +1026,13 @@ void I_CalculateRes(int width, int height)
 			count1 = I_TestCPUCacheMisses(pitch1, SCREENHEIGHT, mintime);
 			count2 = I_TestCPUCacheMisses(pitch2, SCREENHEIGHT, mintime);
 
-			lprintf(OutputLevels::Debug, "I_CalculateRes: trying to optimize screen pitch\n");
-			lprintf(OutputLevels::Debug, " test case for pitch=%d is processed %d times for %d msec\n", pitch1, count1, mintime);
-			lprintf(OutputLevels::Debug, " test case for pitch=%d is processed %d times for %d msec\n", pitch2, count2, mintime);
+			Log::Debug("I_CalculateRes: trying to optimize screen pitch\n");
+			Log::Debug(" test case for pitch={} is processed {} times for {} msec\n", pitch1, count1, mintime);
+			Log::Debug(" test case for pitch={} is processed {} times for {} msec\n", pitch2, count2, mintime);
 
 			SCREENPITCH = (count2 > count1 ? pitch2 : pitch1);
 
-			lprintf(OutputLevels::Debug, " optimized screen pitch is %d\n", SCREENPITCH);
+			Log::Debug(" optimized screen pitch is {}\n", SCREENPITCH);
 		}
 	}
 }
@@ -1165,7 +1165,7 @@ void I_InitScreenResolution()
 
 	I_InitBuffersRes();
 
-	lprintf(OutputLevels::Debug, "I_InitScreenResolution: Using resolution %dx%d\n", SCREENWIDTH, SCREENHEIGHT);
+	Log::Debug("I_InitScreenResolution: Using resolution {}x{}\n", SCREENWIDTH, SCREENHEIGHT);
 }
 
 //
@@ -1210,7 +1210,7 @@ void I_InitGraphics()
 		firsttime = 0;
 
 		I_AtExit(I_ShutdownGraphics, true, "I_ShutdownGraphics", ExitPriority::Normal);
-		lprintf(OutputLevels::Debug, "I_InitGraphics: %dx%d\n", SCREENWIDTH, SCREENHEIGHT);
+		Log::Debug("I_InitGraphics: {}x{}\n", SCREENWIDTH, SCREENHEIGHT);
 
 		/* Set the video mode */
 		I_UpdateVideoMode();
@@ -1369,7 +1369,7 @@ void I_UpdateVideoMode()
 
 		if(screen == nullptr)
 		{
-			I_Error("Couldn't set %dx%d video mode [%s]", SCREENWIDTH, SCREENHEIGHT, SDL_GetError());
+			Log::Fatal("Couldn't set {}x{} video mode [{}]", SCREENWIDTH, SCREENHEIGHT, SDL_GetError());
 		}
 	}
 
@@ -1410,7 +1410,7 @@ void I_UpdateVideoMode()
 
 	if(V_IsSoftwareMode())
 	{
-		lprintf(OutputLevels::Debug, "I_UpdateVideoMode: 0x%x, %s, %s\n", init_flags, screen && screen->pixels ? "SDL buffer" : "own buffer", screen && SDL_MUSTLOCK(screen) ? "lock-and-copy" : "direct access");
+		Log::Debug("I_UpdateVideoMode: 0x{:x}, {}, {}\n", static_cast<uint32_t>(init_flags), screen && screen->pixels ? "SDL buffer" : "own buffer", screen && SDL_MUSTLOCK(screen) ? "lock-and-copy" : "direct access");
 
 		// Get the info needed to render to the display
 		if(!SDL_MUSTLOCK(screen))
@@ -1439,35 +1439,35 @@ void I_UpdateVideoMode()
 	if(V_IsOpenGLMode())
 	{
 		int temp;
-		lprintf(OutputLevels::Debug, "SDL OpenGL PixelFormat:\n");
+		Log::Debug("SDL OpenGL PixelFormat:\n");
 		SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_RED_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_RED_SIZE: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_GREEN_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_GREEN_SIZE: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_BLUE_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_BLUE_SIZE: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_STENCIL_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_STENCIL_SIZE: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_ACCUM_RED_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_ACCUM_RED_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_ACCUM_RED_SIZE: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_ACCUM_GREEN_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_ACCUM_GREEN_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_ACCUM_GREEN_SIZE: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_ACCUM_BLUE_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_ACCUM_BLUE_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_ACCUM_BLUE_SIZE: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_ACCUM_ALPHA_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_ACCUM_ALPHA_SIZE: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_DOUBLEBUFFER: %i\n", temp);
+		Log::Debug("    SDL_GL_DOUBLEBUFFER: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_BUFFER_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_BUFFER_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_BUFFER_SIZE: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_DEPTH_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_DEPTH_SIZE: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_MULTISAMPLESAMPLES: %i\n", temp);
+		Log::Debug("    SDL_GL_MULTISAMPLESAMPLES: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_MULTISAMPLEBUFFERS: %i\n", temp);
+		Log::Debug("    SDL_GL_MULTISAMPLEBUFFERS: {}\n", temp);
 		SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &temp);
-		lprintf(OutputLevels::Debug, "    SDL_GL_STENCIL_SIZE: %i\n", temp);
+		Log::Debug("    SDL_GL_STENCIL_SIZE: {}\n", temp);
 
 		gld_Init(SCREENWIDTH, SCREENHEIGHT);
 	}

@@ -979,7 +979,7 @@ void CheckIWAD(const char* iwadname, GameMode* gmode, dboolean* hassec)
 
 				if(strncmp(header.identification, "IWAD", 4)) // missing IWAD tag in header
 				{
-					lprintf(OutputLevels::Warn, "CheckIWAD: IWAD tag %s not present\n", iwadname);
+					Log::Warn("CheckIWAD: IWAD tag {} not present\n", iwadname);
 				}
 
 				// read IWAD directory
@@ -991,7 +991,7 @@ void CheckIWAD(const char* iwadname, GameMode* gmode, dboolean* hassec)
 					fread(fileinfo, sizeof(filelump_t), length, fp) != length)
 				{
 					fclose(fp);
-					I_Error("CheckIWAD: failed to read directory %s", iwadname);
+					Log::Fatal("CheckIWAD: failed to read directory {}", iwadname);
 				}
 
 				// scan directory for levelname lumps
@@ -1037,7 +1037,7 @@ void CheckIWAD(const char* iwadname, GameMode* gmode, dboolean* hassec)
 			fclose(fp);
 		}
 		else // error from open call
-			I_Error("CheckIWAD: Can't open IWAD %s", iwadname);
+			Log::Fatal("CheckIWAD: Can't open IWAD {}", iwadname);
 
 		// unity iwad has dmenupic and a large titlepic
 		if(dmenupic && !large_titlepic)
@@ -1064,7 +1064,7 @@ void CheckIWAD(const char* iwadname, GameMode* gmode, dboolean* hassec)
 			*gmode = GameMode::Shareware;
 	}
 	else // error from access call
-		I_Error("CheckIWAD: IWAD %s not readable", iwadname);
+		Log::Fatal("CheckIWAD: IWAD {} not readable", iwadname);
 }
 
 //
@@ -1078,7 +1078,7 @@ void AddIWAD(const char* iwad)
 		return;
 
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "IWAD found: %s\n", iwad); //jff 4/20/98 print only if found
+	Log::Debug("IWAD found: {}\n", iwad); //jff 4/20/98 print only if found
 	CheckIWAD(iwad, &gamemode, &haswolflevels);
 
 	/* jff 8/23/98 set gamemission global appropriately in all cases
@@ -1146,7 +1146,7 @@ void AddIWAD(const char* iwad)
 	}
 	if(gamemode == GameMode::Indetermined)
 		//jff 9/3/98 use logical output routine
-		lprintf(OutputLevels::Warn, "Unknown Game Version, may not work\n");
+		Log::Warn("Unknown Game Version, may not work\n");
 
 	// Set up TC game logic
 	tc_game = (gamemission > GameMission::PackNerve);
@@ -1341,7 +1341,7 @@ const char* IWADBaseName()
 	}
 
 	if(i == numwadfiles)
-		I_Error("IWADBaseName: IWAD not found\n");
+		Log::Fatal("IWADBaseName: IWAD not found\n");
 
 	return dsda_BaseName(wadfiles[i].name);
 }
@@ -1401,7 +1401,7 @@ static bool IsReadableOrWarn(const char* filename)
 	if(M_ReadAccess(filename))
 		return true;
 
-	lprintf(OutputLevels::Warn, "Skipping unreadable %s\n", filename);
+	Log::Warn("Skipping unreadable {}\n", filename);
 	return false;
 }
 
@@ -1774,13 +1774,12 @@ static void EvaluateDoomVerStr()
 	}
 
 	/* cphipps - the main display. This shows the copyright and game type */
-	lprintf(OutputLevels::Info,
-		"%s is released under the GNU General Public license v2.0.\n"
+	Log::Info("{} is released under the GNU General Public license v2.0.\n"
 		"You are welcome to redistribute it under certain conditions.\n"
 		"It comes with ABSOLUTELY NO WARRANTY. See the file COPYING for details.\n\n",
 		PROJECT_NAME);
 
-	lprintf(OutputLevels::Info, "Playing: %s\n", doomverstr);
+	Log::Info("Playing: {}\n", doomverstr);
 }
 
 static void dsda_Loadfiles()
@@ -1830,7 +1829,7 @@ static void dsda_Loadfiles()
 			}
 			else
 			{
-				I_Error("File type \"%s\" is not supported", dsda_FileExtension(file_name));
+				Log::Fatal("File type \"{}\" is not supported", dsda_FileExtension(file_name));
 			}
 
 			Z_Free(file);
@@ -1949,9 +1948,9 @@ static void IdentifyVersion()
 	}
 	else
 	{
-		I_Error("IdentifyVersion: IWAD not found\n\n"
+		Log::Fatal("IdentifyVersion: IWAD not found\n\n"
 			"Make sure your IWADs are in a folder that dsda-doom searches on\n"
-			"For example: %s", I_ConfigDir());
+			"For example: {}", I_ConfigDir());
 	}
 }
 
@@ -2030,7 +2029,7 @@ static void D_DoomMainSetup()
 	{
 		int time = arg->value.v_int;
 		//jff 9/3/98 use logical output routine
-		lprintf(OutputLevels::Info, "Levels will end after %d minute%s.\n", time, time > 1 ? "s" : "");
+		Log::Info("Levels will end after {} minute{}.\n", time, time > 1 ? "s" : "");
 	}
 
 	//jff 1/22/98 add command line parms to disable sound and music
@@ -2053,7 +2052,7 @@ static void D_DoomMainSetup()
 	gld_InitCommandLine();
 
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "V_Init: allocate screens.\n");
+	Log::Debug("V_Init: allocate screens.\n");
 	V_Init();
 
 	//e6y: Calculate the screen resolution and init all buffers
@@ -2088,29 +2087,29 @@ static void D_DoomMainSetup()
 	D_InitFakeNetGame();
 
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "W_Init: Init WADfiles.\n");
+	Log::Debug("W_Init: Init WADfiles.\n");
 	W_Init(); // CPhipps - handling of wadfiles init changed
 
 	if(hexen)
 	{
 		if(!W_LumpNameExists("MAP05"))
 		{
-			I_Error("The Hexen IWAD shareware is not supported.");
+			Log::Fatal("The Hexen IWAD shareware is not supported.");
 			gamemode = GameMode::Shareware;
 			g_maxplayers = 4;
 		}
 		else if(!W_LumpNameExists("CLUS1MSG"))
 		{
-			I_Error("The Hexen v1.0 IWAD is not supported.");
+			Log::Fatal("The Hexen v1.0 IWAD is not supported.");
 		}
 	}
 
-	lprintf(OutputLevels::Debug, "G_ReloadDefaults: Checking OPTIONS.\n");
+	Log::Debug("G_ReloadDefaults: Checking OPTIONS.\n");
 	dsda_ParseOptionsLump();
 
 	if(iwadlump != nullptr)
 	{
-		lprintf(OutputLevels::Info, "Detected %s lump: %s\n", iwadver ? iwadver : "GAMEINFO", iwadlump);
+		Log::Info("Detected {} lump: {}\n", iwadver ? iwadver : "GAMEINFO", iwadlump);
 		Z_Free(iwadlump);
 
 		if(iwadver)
@@ -2207,15 +2206,15 @@ static void D_DoomMainSetup()
 	dsda_AppendZDoomMobjInfo();
 	dsda_ApplyBinaryMapFormat();
 
-	lprintf(OutputLevels::Debug, "dsda_InitWadStats: Setting up wad stats.\n");
+	Log::Debug("dsda_InitWadStats: Setting up wad stats.\n");
 	dsda_InitWadStats();
 
-	lprintf(OutputLevels::Info, "\n"); // Separator after file loading
+	Log::Info("\n"); // Separator after file loading
 
 	V_InitColorTranslation(); //jff 4/24/98 load color translation lumps
 
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "M_Init: Init miscellaneous info.\n");
+	Log::Debug("M_Init: Init miscellaneous info.\n");
 	M_Init();
 
 	dsda_LoadSndInfo();
@@ -2226,7 +2225,7 @@ static void D_DoomMainSetup()
 	}
 
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "R_Init: Init DOOM refresh daemon - ");
+	Log::Debug("R_Init: Init DOOM refresh daemon - ");
 	R_Init();
 
 	dsda_LoadWadPreferences();
@@ -2235,7 +2234,7 @@ static void D_DoomMainSetup()
 	dsda_InitGameModifiers(); // Set game modifiers based off args / persistent cfgs
 
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "\nP_Init: Init Playloop state.\n");
+	Log::Debug("\nP_Init: Init Playloop state.\n");
 	P_Init();
 
 	// Must be after P_Init
@@ -2245,15 +2244,15 @@ static void D_DoomMainSetup()
 	dsda_HandleSkip();
 
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "I_Init: Setting up machine state.\n");
+	Log::Debug("I_Init: Setting up machine state.\n");
 	I_Init();
 
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "S_Init: Setting up sound.\n");
+	Log::Debug("S_Init: Setting up sound.\n");
 	S_Init();
 
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "dsda_InitFont: Loading the hud fonts.\n");
+	Log::Debug("dsda_InitFont: Loading the hud fonts.\n");
 	dsda_InitFont();
 
 	if(!(dsda_Flag(ArgId::Nodraw) && dsda_Flag(ArgId::Nosound)))
@@ -2267,7 +2266,7 @@ static void D_DoomMainSetup()
 	}
 
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "ST_Init: Init status bar.\n");
+	Log::Debug("ST_Init: Init status bar.\n");
 	ST_Init();
 
 	// start the appropriate game based on parms
@@ -2306,7 +2305,7 @@ static void D_DoomMainSetup()
 	// do not try to interpolate during timedemo
 	M_ChangeUncappedFrameRate();
 
-	lprintf(OutputLevels::Debug, "\n"); // Separator after setup
+	Log::Debug("\n"); // Separator after setup
 }
 
 //
