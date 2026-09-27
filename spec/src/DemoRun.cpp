@@ -103,6 +103,13 @@ DemoRun::DemoRun(const DemoOptions& options)
 	// numbers these tests compare. Every demo here names the WADs it needs.
 	m_command += " -noautoload";
 
+	// The config file and the wad stats (`dsda_doom_data`) are the developer's
+	// too, and every run rewrites them on exit. Parallel runs would also race on
+	// them, so each run gets its own, starting from the defaults.
+	m_command += std::format(
+		" -config {} -data {}", Quote(m_directory.Path() / "dsda-doom.cfg"), Quote(m_directory.Path())
+	);
+
 	if(!options.extra.empty())
 		m_command += std::format(" {}", options.extra);
 

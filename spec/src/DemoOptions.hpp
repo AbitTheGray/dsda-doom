@@ -9,7 +9,7 @@
 
 struct DemoOptions
 {
-	// File name inside `spec/support/lmps`, e.g. "30uv1755.lmp".
+	// File name inside `spec/support/lmps`, e.g. "30uv1755.lmp", or an absolute path.
 	std::string_view lmp;
 	// File name inside `spec/support/wads`.
 	std::string_view iwad = "DOOM2.WAD";

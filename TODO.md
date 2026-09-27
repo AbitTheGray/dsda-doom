@@ -67,3 +67,30 @@ Candidates found by scanning for 3+ adjacent numeric `#define`s with a shared pr
 - **Plain enumerations:** `MCMD_` (`dsda/mapinfo/hexen.cpp`), `PRB_MB_` (`e6y.hpp`), `GLDWF_`, `SKY_` (`gl_intern.hpp`), `WGLSTATE_` (`p_floor.cpp`), `LIGHT_SEQUENCE*` (`p_spec.hpp`), `SIL_` (`r_defs.hpp`), `KEYD_` (`doomdef.hpp`).
 
 The scan misses two-entry groups like the old `SKILL4`/`SKILL5`, so expect a few more.
+
+## Old PKZIP compression methods in zip loading
+
+The game unpacks zips given to `-file` through libzip (`dsda_UnzipFile` in `dsda/zipfile.cpp`), and libzip reads neither of two methods that 1990s zips still use:
+- **"Shrink" (method 1):** LZW with codes growing from 9 to 13 bits and a "partial clear" that frees the entries nothing else extends. 54 files in the idgames mirror and the Compet-N archive use it, 10 of them WADs.
+- **"Implode" (method 6):** a 4 or 8 KB sliding window with Shannon-Fano coded literals, lengths and distances. 782 files use it, WADs and demos among them.
+
+Such a zip cannot be loaded today: `-file levels/doom/p-r/pggm.zip` stops with `dsda_WriteZippedFilesToDest: Failed to open zipped file PGGM.WAD.`
+The game should decode both itself for the members libzip reports as unsupported (`zip_compression_method_supported`).
+`spec/support/pkzip.py` is a working reference: it decodes all 836 of those files with matching CRC-32s, the two shrunk WADs `JACKINBX.WAD` and `PGGM.WAD` byte for byte as Info-ZIP's `unzip` does.
+The trap it documents: a shrink entry is only (the code it extends, one byte) and its string must be rebuilt from that chain when used, because a partial clear can free a code that later entries still extend.
+The spec suite's archive test has the same gap (it reads demos through libzip too) and skips those demos for now.
+
+Approach - keep libzip for the container and decode only these members ourselves:
+1. Ask libzip whether it can unpack a member: `zip_compression_method_supported(method, 0)`.
+2. If not, open it with `zip_fopen_index(..., ZIP_FL_COMPRESSED)`, which hands over the raw compressed bytes.
+3. Unshrink or explode them, then compare the result with the CRC-32 from `zip_stat`; a mismatch is an error, never silently wrong data.
+
+Why not the alternatives:
+- **Adding the methods to libzip:** it has no public API to register decompressors, so it would mean a fork (breaking the system and vcpkg packages we build against) or an upstream contribution we cannot count on.
+- **Another library:** libarchive recognises methods 1 and 6 but does not decompress them, and neither does minizip-ng; 7-Zip does, but it is a large LGPL C++ codebase, not a library.
+
+The decoders: a C++ port of `spec/support/pkzip.py` (about 250 lines), taking a `std::span` of bytes and returning `std::expected<std::vector<std::byte>, ...>` - corrupt data is an expected outcome here, not an exceptional one.
+Hans Wennborg's write-up (https://www.hanshq.net/zip2.html) and its C code, hwzip, are a good second reference and also cover "Reduce" (methods 2-5), which neither archive uses; check hwzip's license before copying any of it.
+
+Build it as one component that both the game (`dsda/zipfile.cpp`) and the spec suite (`ArchiveTest`) use, so one implementation closes both gaps.
+Test it with spec unit tests that decode known files and compare CRC-32s - the two shrunk WADs above and all four implode variants (4 or 8 KB window, with or without a literal tree) - skipped when the idgames mirror is absent; the archive test then replays the demos it skips today.

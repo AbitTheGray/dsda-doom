@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 
+#include "ArchiveTest.hpp"
 #include "HereticTest.hpp"
 #include "SpecEnvironment.hpp"
 
@@ -14,10 +15,11 @@ int32_t main(int32_t argc, char** argv)
 {
 	::testing::InitGoogleTest(&argc, argv);
 
-	// Both happen before the tests run, so `--gtest_list_tests` sees the
-	// generated Heretic cases and CMake can discover them.
+	// These happen before the tests run, so `--gtest_list_tests` sees the
+	// generated Heretic and archive cases and CMake can discover them.
 	Spec::RegisterEnvironment();
 	RegisterHereticDemos();
+	RegisterArchiveDemos();
 
 	return RUN_ALL_TESTS();
 }

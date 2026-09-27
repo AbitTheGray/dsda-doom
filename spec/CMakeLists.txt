@@ -6,10 +6,13 @@
 include(GoogleTest)
 
 find_package(GTest CONFIG REQUIRED)
+# Reads the archive indexes (`support/archive/*.json`); only the suite needs it, not the game.
+find_package(nlohmann_json CONFIG REQUIRED)
 
 add_executable(dsda-spec
     "src/Analysis.cpp"
     "src/AnalysisTest.cpp"
+    "src/ArchiveTest.cpp"
     "src/Category.cpp"
     "src/CategoryTest.cpp"
     "src/DemoRun.cpp"
@@ -41,7 +44,8 @@ target_compile_definitions(dsda-spec PRIVATE
     "SPEC_DATA_DIRECTORY=\"${CMAKE_CURRENT_SOURCE_DIR}\""
 )
 
-target_link_libraries(dsda-spec PRIVATE GTest::gtest)
+# libzip is found by the game's own CMake; the archive test reads demos straight from their zips.
+target_link_libraries(dsda-spec PRIVATE GTest::gtest nlohmann_json::nlohmann_json libzip::zip)
 
 # The suite runs the game, so it has to be built first.
 add_dependencies(dsda-spec dsda-doom)
@@ -52,7 +56,7 @@ add_dependencies(dsda-spec dsda-doom)
 # The Heretic archive is more than a thousand demos and was excluded by default
 # in the previous suite; here it is a separate label instead.
 gtest_discover_tests(dsda-spec
-    TEST_FILTER "-HereticDemo.*"
+    TEST_FILTER "-HereticDemo.*:Competn2005.*:Sda2005.*"
     PROPERTIES LABELS "spec"
     DISCOVERY_MODE PRE_TEST
 )
@@ -62,3 +66,22 @@ gtest_discover_tests(dsda-spec
     PROPERTIES LABELS "heretic"
     DISCOVERY_MODE PRE_TEST
 )
+
+# The Compet-N and SDA archives (`support/archive/competn-2005.json`, `support/archive/sda-2005.json`).
+# They hold over 20 000 demos, and discovering those one by one takes CTest
+# minutes after every build, so each archive runs as a fixed number of GTest
+# shards instead; CTest runs the shards in parallel, and GTest still reports
+# every demo by name. An archive that is not unpacked has no tests, so its
+# shards pass empty.
+set(SPEC_ARCHIVE_SHARDS 32)
+math(EXPR spec_last_shard "${SPEC_ARCHIVE_SHARDS} - 1")
+
+foreach(suite IN ITEMS Competn2005 Sda2005)
+    foreach(shard RANGE ${spec_last_shard})
+        add_test(NAME "${suite}.Shard${shard}" COMMAND dsda-spec "--gtest_filter=${suite}.*")
+        set_tests_properties("${suite}.Shard${shard}" PROPERTIES
+            LABELS "archive"
+            ENVIRONMENT "GTEST_TOTAL_SHARDS=${SPEC_ARCHIVE_SHARDS};GTEST_SHARD_INDEX=${shard}"
+        )
+    endforeach()
+endforeach()

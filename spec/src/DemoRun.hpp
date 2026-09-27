@@ -5,9 +5,10 @@
 //
 //	The game writes `levelstat.txt` and `analysis.txt` into the working
 //	directory under fixed names, so every run gets a private temporary
-//	directory. Its configuration, save games and autoload WADs live elsewhere,
-//	in the developer's home directory (`I_ConfigDir` in
-//	`prboom2/src/SDL/i_system.c`), which is why the run passes `-noautoload`.
+//	directory. Its configuration, wad stats and autoload WADs would otherwise
+//	come from the developer's home directory (`I_ConfigDir` in
+//	`prboom2/src/SDL/i_system.c`), which is why the run passes `-noautoload`
+//	and points `-config` and `-data` into that private directory.
 
 #pragma once
 
@@ -62,6 +63,9 @@ public:
 
 	/** The cumulative time of the last finished level, e.g. "17:55". */
 	[[nodiscard]] std::string TotalTime() const;
+
+	/** `levelstat.txt` as the game wrote it; empty when it wrote none. */
+	[[nodiscard]] const std::string& LevelstatText() const noexcept { return m_levelstat; }
 
 	[[nodiscard]] Analysis GetAnalysis() const;
 
