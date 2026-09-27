@@ -9,21 +9,16 @@ Nothing here is being worked on right now.
 
 ## Move the spec's report types into the game
 
-The report struct is already shared (`dsda/analysis_report.hpp`), but
-`spec/src/Category.hpp` still mirrors the game by hand: the game has no enum behind
-the category (`dsda_DetectCategory` returns bare string literals), and its tracker
-state is loose `extern` globals in `dsda/analysis.hpp`. The output of
-`analysis.txt` (and the category in the text file) must not change. Two steps:
+The report struct (`dsda/analysis_report.hpp`) and the category enum with its
+names (`dsda/analysis_category.hpp`) are already shared; the spec keeps only the
+parsers. What is left is the tracker state, still loose `extern` globals in
+`dsda/analysis.hpp`. The output of `analysis.txt` (and the category in the text
+file) must not change.
 
-1. **Shared category enum.** Move `Category` and its `to_string` into the game.
-   `dsda_DetectCategory` returns the enum; its two callers (`dsda_WriteAnalysis`,
-   `text_file.cpp`) print it with `to_string`. Its side effects on the tracker
-   (clearing `almost_reality`, `stroller`, `weapon_collector`; setting `nomo`,
-   `respawn`, `fast`) must stay.
-2. **Tracker globals into structs.** The 27 `extern`s in `dsda/analysis.hpp` are
-   the running state, not the report. Group them by how they are reset, so each
-   reset becomes `= {}` without resetting anything new: the run stats
-   (`dsda_ResetAnalysis`), the per-map kill tracking (`kills_on_map`,
+**Tracker globals into structs.** The 27 `extern`s in `dsda/analysis.hpp` are
+the running state, not the report. Group them by how they are reset, so each
+reset becomes `= {}` without resetting anything new: the run stats
+(`dsda_ResetAnalysis`), the per-map kill tracking (`kills_on_map`,
    `100k_on_map`, `100k_note_shown`) and the other note flags.
 
 ## Tables left on C designators

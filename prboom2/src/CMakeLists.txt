@@ -17,6 +17,7 @@ set(COMMON_SRC
     dsda/ambient.hpp
     dsda/analysis.cpp
     dsda/analysis.hpp
+    dsda/analysis_category.hpp
     dsda/analysis_report.hpp
     dsda/args.cpp
     dsda/args.hpp

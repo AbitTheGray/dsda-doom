@@ -175,7 +175,7 @@ void dsda_ExportTextFile()
 	}
 
 	fprintf(file, "Skill:     %i\n", gameskill + 1);
-	fprintf(file, "Category:  %s\n", dsda_DetectCategory());
+	fprintf(file, "Category:  %s\n", to_string(dsda_DetectCategory()).c_str());
 	fprintf(file, "Exe:       %s -complevel %i\n", PROJECT_STRING, compatibility_level);
 	fprintf(file, "\n");
 

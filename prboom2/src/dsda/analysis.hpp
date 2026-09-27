@@ -7,6 +7,8 @@
 
 #include "doomtype.hpp"
 
+#include "dsda/analysis_category.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -44,7 +46,7 @@ extern dboolean dsda_almost_reality_note_shown;
 
 void dsda_ResetAnalysis();
 void dsda_WriteAnalysis();
-const char* dsda_DetectCategory();
+Category dsda_DetectCategory();
 
 #ifdef __cplusplus
 }

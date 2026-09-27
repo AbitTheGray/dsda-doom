@@ -17,6 +17,7 @@
 #include "dsda/settings.hpp"
 
 #include "analysis.hpp"
+#include "analysis_category.hpp"
 #include "analysis_report.hpp"
 
 int dsda_analysis;
@@ -87,7 +88,7 @@ void dsda_WriteAnalysis()
 	// Detect the category first - it sets `dsda_nomo`, `dsda_respawn` and
 	// `dsda_fast`, and clears `dsda_almost_reality`, `dsda_stroller` and
 	// `dsda_weapon_collector`, all of which are read below.
-	const std::string category = dsda_DetectCategory();
+	const std::string category = to_string(dsda_DetectCategory());
 
 	const Analysis analysis {
 		.skill = gameskill + 1,
@@ -142,7 +143,7 @@ void dsda_WriteAnalysis()
 constexpr int32_t k_Skill_UltraViolence = 3;
 constexpr int32_t k_Skill_Nightmare = 4;
 
-const char* dsda_DetectCategory()
+Category dsda_DetectCategory()
 {
 	dboolean satisfies_max;
 	dboolean satisfies_respawn;
@@ -175,51 +176,51 @@ const char* dsda_DetectCategory()
 	);
 	satisfies_100s = dsda_any_secrets && dsda_100s;
 
-	if(dsda_ExCmdDemo()) return "Other";
-	if(dsda_turbo) return "Other";
-	if(coop_spawns) return "Other";
-	if(solo_net) return "Other";
-	if(dsda_reborn) return "Other";
+	if(dsda_ExCmdDemo()) return Category::Other;
+	if(dsda_turbo) return Category::Other;
+	if(coop_spawns) return Category::Other;
+	if(solo_net) return Category::Other;
+	if(dsda_reborn) return Category::Other;
 
 	if(gameskill == k_Skill_UltraViolence)
 	{
 		if(dsda_nomo && !dsda_respawn && !dsda_fast)
 		{
-			if(satisfies_100s) return "NoMo 100S";
+			if(satisfies_100s) return Category::NoMo100S;
 
-			return "NoMo";
+			return Category::NoMo;
 		}
 
 		if(dsda_respawn && !dsda_nomo && !dsda_fast)
 		{
-			if(satisfies_respawn) return "UV Respawn";
+			if(satisfies_respawn) return Category::UvRespawn;
 
-			return "Other";
+			return Category::Other;
 		}
 
 		if(dsda_fast && !dsda_nomo && !dsda_respawn)
 		{
-			if(satisfies_max) return "UV Fast";
+			if(satisfies_max) return Category::UvFast;
 
-			return "Other";
+			return Category::Other;
 		}
 
-		if(dsda_nomo || dsda_respawn || dsda_fast) return "Other";
+		if(dsda_nomo || dsda_respawn || dsda_fast) return Category::Other;
 
-		if(satisfies_max) return "UV Max";
-		if(satisfies_tyson) return "UV Tyson";
-		if(dsda_any_monsters && dsda_stroller) return "Stroller";
-		if(dsda_any_monsters && dsda_pacifist) return "Pacifist";
+		if(satisfies_max) return Category::UvMax;
+		if(satisfies_tyson) return Category::UvTyson;
+		if(dsda_any_monsters && dsda_stroller) return Category::Stroller;
+		if(dsda_any_monsters && dsda_pacifist) return Category::Pacifist;
 
-		return "UV Speed";
+		return Category::UvSpeed;
 	}
 	else if(gameskill == k_Skill_Nightmare)
 	{
-		if(nomonsters) return "Other";
-		if(satisfies_100s) return "NM 100S";
+		if(nomonsters) return Category::Other;
+		if(satisfies_100s) return Category::Nm100S;
 
-		return "NM Speed";
+		return Category::NmSpeed;
 	}
 
-	return "Other";
+	return Category::Other;
 }
