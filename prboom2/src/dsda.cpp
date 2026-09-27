@@ -206,30 +206,30 @@ void dsda_DisplayNotifications()
 		dsda_shown_attempt = dsda_session_attempts;
 	}
 
-	if(!dsda_pacifist && dsda_track_pacifist && !dsda_pacifist_note_shown)
+	if(!dsda_run_stats.pacifist && dsda_track_pacifist && !dsda_analysis_notes.pacifistShown)
 	{
-		dsda_pacifist_note_shown = true;
+		dsda_analysis_notes.pacifistShown = true;
 		dsda_DisplayNotification("Not pacifist!");
 	}
 
-	if(dsda_100k_on_map && dsda_track_100k && !dsda_100k_note_shown)
+	if(dsda_map_tracking.hundredKills && dsda_track_100k && !dsda_map_tracking.hundredKillsNoteShown)
 	{
 		dsda_TrackFeature(FeatureFlag::Track100k);
 
-		dsda_100k_note_shown = true;
+		dsda_map_tracking.hundredKillsNoteShown = true;
 		dsda_DisplayNotification("100K achieved!");
 	}
 
-	if(!dsda_reality && dsda_track_reality && !dsda_almost_reality_note_shown)
+	if(!dsda_run_stats.reality && dsda_track_reality && !dsda_analysis_notes.almostRealityShown)
 	{
-		if(!dsda_almost_reality && !dsda_almost_reality_note_shown)
+		if(!dsda_run_stats.almostReality && !dsda_analysis_notes.almostRealityShown)
 		{
-			dsda_almost_reality_note_shown = true;
+			dsda_analysis_notes.almostRealityShown = true;
 			dsda_DisplayNotification("Not reality / almost reality!");
 		}
-		else if(!dsda_reality_note_shown)
+		else if(!dsda_analysis_notes.realityShown)
 		{
-			dsda_reality_note_shown = true;
+			dsda_analysis_notes.realityShown = true;
 			dsda_DisplayNotification("Almost reality!");
 		}
 	}
@@ -259,7 +259,7 @@ extern "C" void dsda_DisplayNotification(const char* msg)
 
 void dsda_WatchReborn(int playernum)
 {
-	dsda_reborn = true;
+	dsda_run_stats.reborn = true;
 }
 
 void dsda_WatchCard(Card card)
@@ -308,17 +308,17 @@ void dsda_WatchDamage(mobj_t* target, mobj_t* inflictor, mobj_t* source, int dam
 		if(target->type == MobjType::Barrel || (heretic && target->type == MobjType::HereticPod))
 			target->intflags |= MobjIntFlag::PlayerDamagedBarrel;
 		else if(!target->player)
-			dsda_pacifist = false;
+			dsda_run_stats.pacifist = false;
 	}
 
 	if(target->player)
 	{
-		dsda_reality = false;
+		dsda_run_stats.reality = false;
 
 		// "almost reality" means allowing nukage damage
 		// we cannot differentiate between crushers and nukage in this scope
 		// we account for crushers in dsda_WatchCrush instead
-		if(inflictor) dsda_almost_reality = false;
+		if(inflictor) dsda_run_stats.almostReality = false;
 	}
 }
 
@@ -326,9 +326,9 @@ void dsda_WatchDeath(mobj_t* thing)
 {
 	if((thing->flags & MobjFlag::CountKill) != MobjFlag{})
 	{
-		++dsda_kills_on_map;
+		++dsda_map_tracking.kills;
 
-		if(dsda_kills_on_map >= totalkills) dsda_100k_on_map = true;
+		if(dsda_map_tracking.kills >= totalkills) dsda_map_tracking.hundredKills = true;
 	}
 }
 
@@ -378,7 +378,7 @@ void dsda_WatchCrush(mobj_t* thing, int damage)
 	)
 		return;
 
-	dsda_almost_reality = false;
+	dsda_run_stats.almostReality = false;
 }
 
 void dsda_WatchSpawn(mobj_t* spawned)
@@ -388,9 +388,9 @@ void dsda_WatchSpawn(mobj_t* spawned)
 		|| spawned->type == MobjType::Skull
 		|| spawned->type == MobjType::Bossbrain
 	)
-		dsda_any_monsters = true;
+		dsda_run_stats.anyMonsters = true;
 
-	if(!dsda_any_weapons) dsda_any_weapons = dsda_IsWeapon(spawned);
+	if(!dsda_run_stats.anyWeapons) dsda_run_stats.anyWeapons = dsda_IsWeapon(spawned);
 
 	if(((spawned->flags ^ MobjFlag::CountKill) & (MobjFlag::Friend | MobjFlag::CountKill)) == MobjFlag{})
 		++dsda_max_kill_requirement;
@@ -455,13 +455,13 @@ void dsda_WatchCommand()
 			dsda_AddSplit(SplitClass::Use, dsda_time_use);
 
 		if(cmd->sidemove != 0 || abs(cmd->forwardmove) > player_class->stroller_threshold)
-			dsda_stroller = false;
+			dsda_run_stats.stroller = false;
 
 		if(
 			abs(cmd->sidemove) > player_class->turbo_threshold ||
 			abs(cmd->forwardmove) > player_class->turbo_threshold
 		)
-			dsda_turbo = true;
+			dsda_run_stats.turbo = true;
 	}
 
 	dsda_AddCommandToCommandDisplay(&players[displayplayer].cmd);
@@ -492,9 +492,7 @@ void dsda_WatchLedgeImpact(mobj_t* thing, int target_z)
 
 void dsda_WatchBeforeLevelSetup()
 {
-	dsda_100k_on_map = false;
-	dsda_kills_on_map = 0;
-	dsda_100k_note_shown = false;
+	dsda_map_tracking = {};
 	dsda_max_kill_requirement = 0;
 }
 
@@ -540,12 +538,12 @@ void dsda_WatchLevelCompletion()
 
 		if(dsda_IsWeapon(mobj))
 		{
-			++dsda_missed_weapons;
-			dsda_weapon_collector = false;
+			++dsda_run_stats.missedWeapons;
+			dsda_run_stats.weaponCollector = false;
 		}
 	}
 
-	dsda_missed_monsters += missed_monsters;
+	dsda_run_stats.missedMonsters += missed_monsters;
 
 	for(i = 0; i < g_maxplayers; ++i)
 	{
@@ -555,12 +553,12 @@ void dsda_WatchLevelCompletion()
 		secret_count += players[i].secretcount;
 	}
 
-	dsda_missed_secrets += (totalsecret - secret_count);
+	dsda_run_stats.missedSecrets += (totalsecret - secret_count);
 
-	if(kill_count < totalkills) dsda_100k = false;
-	if(secret_count < totalsecret) dsda_100s = false;
-	if(totalkills > 0) dsda_any_counted_monsters = true;
-	if(totalsecret > 0) dsda_any_secrets = true;
+	if(kill_count < totalkills) dsda_run_stats.hundredKills = false;
+	if(secret_count < totalsecret) dsda_run_stats.hundredSecrets = false;
+	if(totalkills > 0) dsda_run_stats.anyCountedMonsters = true;
+	if(totalsecret > 0) dsda_run_stats.anySecrets = true;
 
 	dsda_last_leveltime = leveltime;
 	dsda_last_gamemap = gamemap;
@@ -591,7 +589,7 @@ void dsda_WatchWeaponFire(WeaponType weapon)
 {
 	if(weapon == WeaponType::Fist || weapon == WeaponType::Pistol || weapon == WeaponType::Chainsaw) return;
 
-	dsda_tyson_weapons = false;
+	dsda_run_stats.tysonWeapons = false;
 }
 
 void dsda_WatchSecret()
@@ -604,9 +602,7 @@ static void dsda_ResetTracking()
 {
 	dsda_ResetAnalysis();
 
-	dsda_pacifist_note_shown = false;
-	dsda_reality_note_shown = false;
-	dsda_almost_reality_note_shown = false;
+	dsda_analysis_notes = {};
 }
 
 void dsda_WatchDeferredInitNew(int skill, int episode, int map)

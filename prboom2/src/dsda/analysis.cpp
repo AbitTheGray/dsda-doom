@@ -22,53 +22,18 @@
 
 int dsda_analysis;
 
-dboolean dsda_pacifist = true;
-dboolean dsda_reality = true;
-dboolean dsda_almost_reality = true;
-dboolean dsda_reborn = false;
-int dsda_missed_monsters = 0;
-int dsda_missed_secrets = 0;
-int dsda_missed_weapons = 0;
-dboolean dsda_tyson_weapons = true;
-dboolean dsda_100k = true;
-dboolean dsda_100s = true;
-dboolean dsda_any_counted_monsters = false;
-dboolean dsda_any_monsters = false;
-dboolean dsda_any_secrets = false;
-dboolean dsda_any_weapons = false;
-dboolean dsda_stroller = true;
-dboolean dsda_nomo = false;
-dboolean dsda_respawn = false;
-dboolean dsda_fast = false;
-dboolean dsda_turbo = false;
-dboolean dsda_weapon_collector = true;
+AnalysisRunStats dsda_run_stats;
+AnalysisMapTracking dsda_map_tracking;
+AnalysisNotes dsda_analysis_notes;
 
-int dsda_kills_on_map = 0;
-dboolean dsda_100k_on_map = false;
-dboolean dsda_100k_note_shown = false;
-dboolean dsda_pacifist_note_shown = false;
-dboolean dsda_reality_note_shown = false;
-dboolean dsda_almost_reality_note_shown = false;
+// Set by `dsda_DetectCategory` from the command line every time it runs, so nothing resets them.
+static bool dsda_nomo = false;
+static bool dsda_respawn = false;
+static bool dsda_fast = false;
 
 void dsda_ResetAnalysis()
 {
-	dsda_pacifist = true;
-	dsda_reality = true;
-	dsda_almost_reality = true;
-	dsda_reborn = false;
-	dsda_missed_monsters = 0;
-	dsda_missed_secrets = 0;
-	dsda_missed_weapons = 0;
-	dsda_tyson_weapons = true;
-	dsda_100k = true;
-	dsda_100s = true;
-	dsda_any_counted_monsters = false;
-	dsda_any_monsters = false;
-	dsda_any_secrets = false;
-	dsda_any_weapons = false;
-	dsda_stroller = true;
-	dsda_turbo = false;
-	dsda_weapon_collector = true;
+	dsda_run_stats = {};
 }
 
 void dsda_WriteAnalysis()
@@ -86,27 +51,27 @@ void dsda_WriteAnalysis()
 	}
 
 	// Detect the category first - it sets `dsda_nomo`, `dsda_respawn` and
-	// `dsda_fast`, and clears `dsda_almost_reality`, `dsda_stroller` and
-	// `dsda_weapon_collector`, all of which are read below.
+	// `dsda_fast`, and clears `almostReality`, `stroller` and `weaponCollector`
+	// in `dsda_run_stats`, all of which are read below.
 	const std::string category = to_string(dsda_DetectCategory());
 
 	const Analysis analysis {
 		.skill = gameskill + 1,
-		.noMonsters = dsda_nomo != 0,
-		.respawn = dsda_respawn != 0,
-		.fast = dsda_fast != 0,
-		.pacifist = dsda_pacifist != 0,
-		.stroller = dsda_stroller != 0,
-		.reality = dsda_reality != 0,
-		.almostReality = dsda_almost_reality != 0,
-		.reborn = dsda_reborn != 0,
-		.hundredKills = dsda_100k != 0,
-		.hundredSecrets = dsda_100s != 0,
-		.missedMonsters = dsda_missed_monsters,
-		.missedSecrets = dsda_missed_secrets,
-		.weaponCollector = dsda_weapon_collector != 0,
-		.tysonWeapons = dsda_tyson_weapons != 0,
-		.turbo = dsda_turbo != 0,
+		.noMonsters = dsda_nomo,
+		.respawn = dsda_respawn,
+		.fast = dsda_fast,
+		.pacifist = dsda_run_stats.pacifist,
+		.stroller = dsda_run_stats.stroller,
+		.reality = dsda_run_stats.reality,
+		.almostReality = dsda_run_stats.almostReality,
+		.reborn = dsda_run_stats.reborn,
+		.hundredKills = dsda_run_stats.hundredKills,
+		.hundredSecrets = dsda_run_stats.hundredSecrets,
+		.missedMonsters = dsda_run_stats.missedMonsters,
+		.missedSecrets = dsda_run_stats.missedSecrets,
+		.weaponCollector = dsda_run_stats.weaponCollector,
+		.tysonWeapons = dsda_run_stats.tysonWeapons,
+		.turbo = dsda_run_stats.turbo,
 		.soloNet = solo_net != 0,
 		.coopSpawns = coop_spawns != 0,
 		.category = category,
@@ -150,37 +115,37 @@ Category dsda_DetectCategory()
 	dboolean satisfies_tyson;
 	dboolean satisfies_100s;
 
-	if(dsda_reality) dsda_almost_reality = false;
-	if(!dsda_pacifist) dsda_stroller = false;
-	if(!dsda_any_weapons) dsda_weapon_collector = false;
+	if(dsda_run_stats.reality) dsda_run_stats.almostReality = false;
+	if(!dsda_run_stats.pacifist) dsda_run_stats.stroller = false;
+	if(!dsda_run_stats.anyWeapons) dsda_run_stats.weaponCollector = false;
 
 	dsda_nomo = nomonsters > 0;
 	dsda_respawn = respawnparm > 0;
 	dsda_fast = fastparm > 0;
 
 	satisfies_max = (
-		dsda_missed_monsters == 0
-		&& dsda_100s
-		&& (dsda_any_secrets || dsda_any_counted_monsters)
+		dsda_run_stats.missedMonsters == 0
+		&& dsda_run_stats.hundredSecrets
+		&& (dsda_run_stats.anySecrets || dsda_run_stats.anyCountedMonsters)
 	);
 	satisfies_respawn = (
-		dsda_100s
-		&& dsda_100k
-		&& dsda_any_monsters
-		&& (dsda_any_secrets || dsda_any_counted_monsters)
+		dsda_run_stats.hundredSecrets
+		&& dsda_run_stats.hundredKills
+		&& dsda_run_stats.anyMonsters
+		&& (dsda_run_stats.anySecrets || dsda_run_stats.anyCountedMonsters)
 	);
 	satisfies_tyson = (
-		dsda_missed_monsters == 0
-		&& dsda_tyson_weapons
-		&& dsda_any_counted_monsters
+		dsda_run_stats.missedMonsters == 0
+		&& dsda_run_stats.tysonWeapons
+		&& dsda_run_stats.anyCountedMonsters
 	);
-	satisfies_100s = dsda_any_secrets && dsda_100s;
+	satisfies_100s = dsda_run_stats.anySecrets && dsda_run_stats.hundredSecrets;
 
 	if(dsda_ExCmdDemo()) return Category::Other;
-	if(dsda_turbo) return Category::Other;
+	if(dsda_run_stats.turbo) return Category::Other;
 	if(coop_spawns) return Category::Other;
 	if(solo_net) return Category::Other;
-	if(dsda_reborn) return Category::Other;
+	if(dsda_run_stats.reborn) return Category::Other;
 
 	if(gameskill == k_Skill_UltraViolence)
 	{
@@ -209,8 +174,8 @@ Category dsda_DetectCategory()
 
 		if(satisfies_max) return Category::UvMax;
 		if(satisfies_tyson) return Category::UvTyson;
-		if(dsda_any_monsters && dsda_stroller) return Category::Stroller;
-		if(dsda_any_monsters && dsda_pacifist) return Category::Pacifist;
+		if(dsda_run_stats.anyMonsters && dsda_run_stats.stroller) return Category::Stroller;
+		if(dsda_run_stats.anyMonsters && dsda_run_stats.pacifist) return Category::Pacifist;
 
 		return Category::UvSpeed;
 	}

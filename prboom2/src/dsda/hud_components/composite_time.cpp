@@ -5,6 +5,8 @@
 
 #include "base.hpp"
 
+#include "dsda/analysis.hpp"
+
 #include "composite_time.hpp"
 
 typedef struct
@@ -17,8 +19,6 @@ static local_component_t* local;
 
 static void dsda_UpdateComponentText(char* str, size_t max_size)
 {
-	extern dboolean dsda_reborn;
-
 	int total_time;
 	int length;
 
@@ -48,7 +48,7 @@ static void dsda_UpdateComponentText(char* str, size_t max_size)
 			(float)(leveltime % (60 * TICRATE)) / TICRATE
 		);
 
-	if(dsda_reborn && (demorecording || demoplayback))
+	if(dsda_run_stats.reborn && (demorecording || demoplayback))
 	{
 		int demo_tic = dsda_DemoTic();
 

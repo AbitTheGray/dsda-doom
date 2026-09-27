@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "doomtype.hpp"
 
 #include "dsda/analysis_category.hpp"
@@ -16,34 +18,6 @@ extern "C"
 
 extern int dsda_analysis;
 
-extern dboolean dsda_pacifist;
-extern dboolean dsda_reality;
-extern dboolean dsda_almost_reality;
-extern dboolean dsda_reborn;
-extern int dsda_missed_monsters;
-extern int dsda_missed_secrets;
-extern int dsda_missed_weapons;
-extern dboolean dsda_tyson_weapons;
-extern dboolean dsda_100k;
-extern dboolean dsda_100s;
-extern dboolean dsda_any_counted_monsters;
-extern dboolean dsda_any_monsters;
-extern dboolean dsda_any_secrets;
-extern dboolean dsda_any_weapons;
-extern dboolean dsda_stroller;
-extern dboolean dsda_nomo;
-extern dboolean dsda_respawn;
-extern dboolean dsda_fast;
-extern dboolean dsda_turbo;
-extern dboolean dsda_weapon_collector;
-
-extern int dsda_kills_on_map;
-extern dboolean dsda_100k_on_map;
-extern dboolean dsda_100k_note_shown;
-extern dboolean dsda_pacifist_note_shown;
-extern dboolean dsda_reality_note_shown;
-extern dboolean dsda_almost_reality_note_shown;
-
 void dsda_ResetAnalysis();
 void dsda_WriteAnalysis();
 Category dsda_DetectCategory();
@@ -51,3 +25,48 @@ Category dsda_DetectCategory();
 #ifdef __cplusplus
 }
 #endif
+
+/// What the run has done so far, for the category and `analysis.txt`.
+/// `dsda_ResetAnalysis` starts it over.
+struct AnalysisRunStats
+{
+	bool pacifist = true;
+	bool reality = true;
+	bool almostReality = true;
+	bool reborn = false;
+	int32_t missedMonsters = 0;
+	int32_t missedSecrets = 0;
+	int32_t missedWeapons = 0;
+	bool tysonWeapons = true;
+	bool hundredKills = true;
+	bool hundredSecrets = true;
+	bool anyCountedMonsters = false;
+	bool anyMonsters = false;
+	bool anySecrets = false;
+	bool anyWeapons = false;
+	bool stroller = true;
+	bool turbo = false;
+	bool weaponCollector = true;
+};
+
+/// Kills on the current map, for the "100K achieved!" note.
+/// Starts over before every level setup.
+struct AnalysisMapTracking
+{
+	int32_t kills = 0;
+	bool hundredKills = false;
+	bool hundredKillsNoteShown = false;
+};
+
+/// Which of the run's notes have been shown.
+/// Starts over together with the run stats.
+struct AnalysisNotes
+{
+	bool pacifistShown = false;
+	bool realityShown = false;
+	bool almostRealityShown = false;
+};
+
+extern AnalysisRunStats dsda_run_stats;
+extern AnalysisMapTracking dsda_map_tracking;
+extern AnalysisNotes dsda_analysis_notes;

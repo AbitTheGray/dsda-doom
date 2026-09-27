@@ -7,20 +7,6 @@ We should end up with a library and an executable projects.
 Things below are noted for later.
 Nothing here is being worked on right now.
 
-## Move the spec's report types into the game
-
-The report struct (`dsda/analysis_report.hpp`) and the category enum with its
-names (`dsda/analysis_category.hpp`) are already shared; the spec keeps only the
-parsers. What is left is the tracker state, still loose `extern` globals in
-`dsda/analysis.hpp`. The output of `analysis.txt` (and the category in the text
-file) must not change.
-
-**Tracker globals into structs.** The 27 `extern`s in `dsda/analysis.hpp` are
-the running state, not the report. Group them by how they are reset, so each
-reset becomes `= {}` without resetting anything new: the run stats
-(`dsda_ResetAnalysis`), the per-map kill tracking (`kills_on_map`,
-   `100k_on_map`, `100k_note_shown`) and the other note flags.
-
 ## Tables left on C designators
 
 These still use clang's C99 designator extension (`[x] = ...`), because `EnumArray` / `DesignatedArray` do not fit them yet.
@@ -40,15 +26,13 @@ Other instances of the same kinds remain throughout the code and should be remov
 
 ## C file IO to C++ streams
 
-About 15 source files still use C's `FILE*` (`M_OpenFile`/`fopen`, `fprintf`, `fclose`).
+13 source files still use C's `FILE*` (`M_OpenFile`/`fopen`, `fprintf`, `fclose`).
 Replace them with `std::ofstream` / `std::ifstream`, which close themselves (RAII), and format the text with `std::format` instead of `printf`-style strings.
 
 The written files must not change:
 - keep each file's mode: `"wb"` becomes `std::ios::binary` (e.g. `levelstat.txt` writes `\r\n` on every platform), `"w"` stays text;
 - print flags as `{:d}`, because `std::format` writes a `bool` as `true`/`false`;
 - `M_OpenFile` converts the UTF-8 name to wide on Windows; open streams from a `std::filesystem::path` built with `std::u8string` so non-ASCII paths keep working.
-
-`dsda_WriteAnalysis` in `dsda/analysis.cpp` is already converted and shows the pattern.
 
 ## `dsda_StringConfig` storage and return type
 
