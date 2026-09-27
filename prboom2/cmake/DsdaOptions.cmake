@@ -20,6 +20,7 @@ option(ENABLE_PACKAGING "Enable creating CPack packages" ${dsda_is_top_project})
 option(STRICT_FIND "Fail configuration if an optional dependency is not found" OFF)
 option(SIMPLECHECKS "Enable checks which only impose significant overhead if a posible error is detected" ON)
 option(RANGECHECK "Enable internal range checking" OFF)
+option(LIMIT_LOG_MESSAGES "Cut messages of the Log:: functions at 2047 characters, as lprintf does" OFF)
 option(BUILD_SPEC "Build the demo regression suite in spec/ (needs GoogleTest and the WADs)" ON)
 
 option(CMAKE_FIND_PACKAGE_PREFER_CONFIG "Search for package config before using Find modules" ON)

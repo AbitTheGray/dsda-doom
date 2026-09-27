@@ -43,11 +43,22 @@ Most of its 22 callers need a zero-terminated string: `sscanf` (resolutions in `
 Plan: store the value as a `std::string` (replacing the union), return a `std::string_view` that is valid until that config is updated, and convert the callers step by step.
 Where a C API needs a zero-terminated string, the caller makes a `std::string` from the view; these are read at startup or when a setting changes, so the copies are cheap.
 
-## `std::format`-based logging
+## Convert logging to `Log::`
 
-`lprintf`, `I_Error` and `I_Warn` take `printf`-style formats only, so a `std::string_view` has to go through `"%.*s"` with its size cast to `int32_t` (see `G_DoCompleted` and `G_DoSaveGame` in `g_game.cpp`).
-A `std::format`-based variant would let callers pass views and typed values directly.
-The output must stay identical where something parses it, e.g. `FINISHED: <map>` for lmpwatch.
+`Log::Print`, `Info`, `Warn`, `Error`, `Debug` and `Fatal` (`lprintf.hpp`) format with `std::format`.
+About 350 `lprintf` and 310 `I_Error` calls are still `printf`-style; convert them in batches (build and run the spec suite after each), then remove the old functions.
+`I_Warn` (2 calls: `Warn` level plus a message box) needs a `Log::` counterpart first.
+
+Conversion traps:
+- `%.8s` becomes `{:.8}`, `%02d` becomes `{:02}`;
+- `%p` needs the pointer cast to `void*`;
+- a `bool` needs `{:d}`, and a `char` printed with `%d` needs converting to a number;
+- an `enum struct` needs `std::to_underlying` (passing one to `%i` through `...` is UB today, e.g. `compatibility_level` in `m_cheat.cpp`);
+- output that something parses must stay identical, e.g. `FINISHED: <map>` for lmpwatch.
+
+`lprintf` still cuts a message at 2047 characters; `Log::` does so only when the build enables `LIMIT_LOG_MESSAGES`.
+
+`doom_printf` (on-screen messages, about 50 calls, defined in `g_game.cpp`) is `printf`-style as well and gets the same treatment; it hands its text to `dsda_AddMessage`.
 
 ## Enums still written as `#define`
 

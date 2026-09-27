@@ -32,3 +32,5 @@
 #cmakedefine SIMPLECHECKS
 
 #cmakedefine RANGECHECK
+
+#cmakedefine LIMIT_LOG_MESSAGES

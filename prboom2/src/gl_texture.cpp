@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #ifdef HAVE_CONFIG_H
-#include <string_view>
 #include <utility>
 
 #include "config.h"
@@ -1606,11 +1605,7 @@ void gld_Precache()
 	gld_InitFBO();
 
 	// e6y: some statistics
-	{
-		const std::string_view map = dsda_MapLumpName(gameepisode, gamemap);
-
-		lprintf(OutputLevels::Debug, "gld_Precache: %.*s done in %d ms\n", static_cast<int32_t>(map.size()), map.data(), SDL_GetTicks() - tics);
-	}
+	Log::Debug("gld_Precache: {} done in {} ms\n", dsda_MapLumpName(gameepisode, gamemap), SDL_GetTicks() - tics);
 }
 
 void gld_CleanMemory()

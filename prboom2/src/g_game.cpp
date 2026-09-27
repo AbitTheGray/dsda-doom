@@ -2220,10 +2220,7 @@ void G_DoCompleted()
 	// lmpwatch.pl engine-side demo testing support
 	// print "FINISHED: <mapname>" when the player exits the current map
 	if(nodrawers && (demoplayback || timingdemo))
-	{
-		const std::string_view map_lump = dsda_MapLumpName(gameepisode, gamemap);
-		lprintf(OutputLevels::Info, "FINISHED: %.*s\n", static_cast<int32_t>(map_lump.size()), map_lump.data());
-	}
+		Log::Info("FINISHED: {}\n", dsda_MapLumpName(gameepisode, gamemap));
 
 	// TODO: tenuous "no intermission" mapinfo flag
 	// umapinfo already partially handles it, but not in a friendly way
@@ -2562,7 +2559,6 @@ static void G_DoSaveGame(dboolean via_cmd)
 	char* description;
 	int saveversion;
 	uint64_t checksum;
-	int time, ttime;
 
 	gameaction = GameAction::Nothing; // cph - cancel savegame at top of this function,
 	// in case later problems cause a premature exit
@@ -2608,12 +2604,15 @@ static void G_DoSaveGame(dboolean via_cmd)
 
 	/* Print some information about the save game */
 	const std::string_view maplump = dsda_MapLumpName(gameepisode, gamemap);
-	time = leveltime / TICRATE;
-	ttime = (totalleveltimes + leveltime) / TICRATE;
+	const int time = leveltime / TICRATE;
+	const int ttime = (totalleveltimes + leveltime) / TICRATE;
 
-	lprintf(OutputLevels::Info, "G_DoSaveGame: [%d] %.*s (%s), Skill %d, Level Time %02d:%02d:%02d, Total Time %02d:%02d:%02d\n",
-		savegameslot + 1, static_cast<int32_t>(maplump.size()), maplump.data(), W_GetLumpInfoByNum(W_GetNumForName(maplump))->wadfile->name, gameskill + 1,
-		time / 3600, (time % 3600) / 60, time % 60, ttime / 3600, (ttime % 3600) / 60, ttime % 60);
+	Log::Info("G_DoSaveGame: [{}] {} ({}), Skill {}, Level Time {:02}:{:02}:{:02}, Total Time {:02}:{:02}:{:02}\n",
+		savegameslot + 1, maplump, W_GetLumpInfoByNum(W_GetNumForName(maplump))->wadfile->name,
+		gameskill + 1,
+		time / 3600, (time % 3600) / 60, time % 60,
+		ttime / 3600, (ttime % 3600) / 60, ttime % 60
+	);
 
 	P_FreeSaveBuffer();
 

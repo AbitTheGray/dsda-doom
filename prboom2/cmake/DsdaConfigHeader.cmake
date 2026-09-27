@@ -40,6 +40,7 @@ function(dsda_internal_check_variables)
     WORDS_BIGENDIAN
     SIMPLECHECKS
     RANGECHECK
+    LIMIT_LOG_MESSAGES
   )
   foreach(var IN LISTS expected_vars)
     if(NOT DEFINED ${var})

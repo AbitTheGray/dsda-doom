@@ -8,6 +8,11 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+
+#include <format>
+#include <string_view>
+#include <utility>
+
 #include "doomtype.hpp"
 
 #ifdef __cplusplus
@@ -42,3 +47,57 @@ void I_Warn(const char* error, ...) __attribute__((format(printf,1,2)));
 #ifdef __cplusplus
 }
 #endif
+
+/**
+ * Console output formatted with `std::format`, e.g. `Log::Info("FINISHED: {}\n", map)`.
+ * Like `lprintf`, no newline is added, so a line can be printed in parts.
+ * A message is never cut, unless the build enables `LIMIT_LOG_MESSAGES`, which cuts it where `lprintf` does.
+ */
+namespace Log
+{
+	namespace Detail
+	{
+		void Print(OutputLevels level, std::string_view text);
+		[[noreturn]] void Fatal(std::string_view text);
+	}
+
+	template<typename... Args>
+	void Print(const OutputLevels level, const std::format_string<Args...> format, Args&&... args)
+	{
+		Detail::Print(level, std::format(format, std::forward<Args>(args)...));
+	}
+
+	template<typename... Args>
+	void Info(const std::format_string<Args...> format, Args&&... args)
+	{
+		Print(OutputLevels::Info, format, std::forward<Args>(args)...);
+	}
+
+	template<typename... Args>
+	void Warn(const std::format_string<Args...> format, Args&&... args)
+	{
+		Print(OutputLevels::Warn, format, std::forward<Args>(args)...);
+	}
+
+	template<typename... Args>
+	void Error(const std::format_string<Args...> format, Args&&... args)
+	{
+		Print(OutputLevels::Error, format, std::forward<Args>(args)...);
+	}
+
+	template<typename... Args>
+	void Debug(const std::format_string<Args...> format, Args&&... args)
+	{
+		Print(OutputLevels::Debug, format, std::forward<Args>(args)...);
+	}
+
+	/**
+	 * Print an error, show it in a message box on Windows, and exit the game, as `I_Error` does.
+	 * A newline is added.
+	 */
+	template<typename... Args>
+	[[noreturn]] void Fatal(const std::format_string<Args...> format, Args&&... args)
+	{
+		Detail::Fatal(std::format(format, std::forward<Args>(args)...));
+	}
+}
