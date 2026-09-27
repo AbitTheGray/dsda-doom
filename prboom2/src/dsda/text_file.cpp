@@ -5,7 +5,10 @@
 
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 #include <format>
+#include <fstream>
+#include <ostream>
 #include <print>
 #include <string>
 #include <string_view>
@@ -13,7 +16,6 @@
 
 #include "doomstat.hpp"
 #include "lprintf.hpp"
-#include "m_file.hpp"
 #include "e6y.hpp"
 
 #include "dsda.hpp"
@@ -110,7 +112,6 @@ void dsda_ExportTextFile()
 	const char* iwad = nullptr;
 	const char* pwad = nullptr;
 	const char* dsda_player_name;
-	FILE* file;
 
 	if(!dsda_Flag(ArgId::ExportTextFile))
 		return;
@@ -119,7 +120,10 @@ void dsda_ExportTextFile()
 	if(name.empty())
 		return;
 
-	file = M_OpenFile(name.c_str(), "wb");
+	// The name is UTF-8; a path from `std::u8string` keeps non-ASCII names working on Windows, as `M_OpenFile` did.
+	const std::filesystem::path path = std::u8string(name.begin(), name.end());
+	// Binary, as upstream's "wb": `\n` stays `\n` on every platform.
+	std::ofstream file(path, std::ios::binary);
 	if(!file)
 		I_Error("Unable to export text file!");
 
@@ -169,6 +173,4 @@ void dsda_ExportTextFile()
 	std::println(file, "Author:    {}", dsda_player_name);
 	std::println(file, "");
 	std::println(file, "Comments:");
-
-	fclose(file);
 }
