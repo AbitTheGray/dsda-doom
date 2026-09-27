@@ -83,7 +83,7 @@ void dsda_ExecutePlaybackOptions()
 	if(playlump_arg)
 	{
 		if(W_CheckNumForName(playback_name) == LUMP_NOT_FOUND)
-			I_Error("Unable to find required internal demo lump \"%s\"", playback_name);
+			Log::Fatal("Unable to find required internal demo lump \"{}\"", playback_name);
 	}
 
 	if(playdemo_arg)

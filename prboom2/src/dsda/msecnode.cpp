@@ -101,7 +101,7 @@ void dsda_ArchiveMSecNodes()
 
 			if(!dsda_IsMSecNodeMobj(th))
 			{
-				lprintf(OutputLevels::Warn, "Orphan mobj in msecnode list - undefined behaviour may occur!\n");
+				Log::Warn("Orphan mobj in msecnode list - undefined behaviour may occur!\n");
 				msecnode = msecnode->m_snext;
 				continue;
 			}
@@ -152,7 +152,7 @@ static void dsda_UnArchiveMSecNodeMobj(msecnode_t* msecnode, mobj_t** mobj_p, in
 	if(mobj)
 		msecnode->m_thing = mobj;
 	else
-		I_Error("dsda_UnArchiveMSecNodeMobj: mobj does not exist!\n");
+		Log::Fatal("dsda_UnArchiveMSecNodeMobj: mobj does not exist!\n");
 }
 
 void dsda_UnArchiveMSecNodes(mobj_t** mobj_p, int mobj_count)
@@ -265,7 +265,7 @@ void dsda_UnArchiveMSecNodes(mobj_t** mobj_p, int mobj_count)
 			}
 
 			if(!found)
-				I_Error("dsda_UnArchiveMSecNodes: mobj missing in sector msecnodes!\n");
+				Log::Fatal("dsda_UnArchiveMSecNodes: mobj missing in sector msecnodes!\n");
 
 			// Rewrite the m_tnext chain with the new msecnodes
 			msecnode->m_tprev = msecnode_prev;

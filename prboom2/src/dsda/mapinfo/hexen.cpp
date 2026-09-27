@@ -133,7 +133,7 @@ int dsda_HexenFirstMap(int* episode, int* map)
 	*map = P_TranslateMap(1);
 
 	if(*map == -1)
-		I_Error("Unable to detect default first map");
+		Log::Fatal("Unable to detect default first map");
 
 	return true;
 }
@@ -165,7 +165,7 @@ int dsda_HexenResolveWarp(int* args, int arg_count, int* episode, int* map)
 		*map = P_TranslateMap(1);
 
 	if(*map == -1)
-		I_Error("-warp: Invalid map number.\n");
+		Log::Fatal("-warp: Invalid map number.\n");
 
 	return true;
 }

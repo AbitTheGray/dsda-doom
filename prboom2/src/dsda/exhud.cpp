@@ -440,7 +440,7 @@ static int dsda_ParseHUDConfig(char** hud_config, int line_i)
 
 		count = sscanf(line, "%63s %63[^\n\r]", command, args);
 		if(count != 2)
-			I_Error("Invalid hud definition \"%s\"", line);
+			Log::Fatal("Invalid hud definition \"{}\"", line);
 
 		// The start of another definition
 		if(!strncmp(command, "doom", sizeof(command)) ||
@@ -465,11 +465,11 @@ static int dsda_ParseHUDConfig(char** hud_config, int line_i)
 					&component_args[2], &component_args[3],
 					&component_args[4], &component_args[5]);
 				if(count < 3)
-					I_Error("Invalid hud component args \"%s\"", line);
+					Log::Fatal("Invalid hud component args \"{}\"", line);
 
 				vpt = dsda_AlignmentToVPT(alignment);
 				if(vpt < 0)
-					I_Error("Invalid hud component alignment \"%s\"", line);
+					Log::Fatal("Invalid hud component alignment \"{}\"", line);
 
 				dsda_InitializeComponent(static_cast<ExHudComponentId>(i), x, y, static_cast<PatchTranslation>(vpt), component_args, count - 3);
 			}
@@ -483,16 +483,16 @@ static int dsda_ParseHUDConfig(char** hud_config, int line_i)
 			found = true;
 
 			if(!container->allow_offset)
-				I_Error("The %s config does not support add_offset", container->name);
+				Log::Fatal("The {} config does not support add_offset", container->name);
 
 			count = sscanf(args, "%d %15s", &offset, alignment);
 			if(count != 2)
-				I_Error("Invalid hud offset \"%s\"", line);
+				Log::Fatal("Invalid hud offset \"{}\"", line);
 
 			vpt = dsda_AlignmentToVPT(alignment);
 			if(vpt < 0)
 			{
-				I_Error("Invalid hud offset alignment \"%s\"", line);
+				Log::Fatal("Invalid hud offset alignment \"{}\"", line);
 				vpt = 0; // TODO: remove after I_Error marked noreturn
 			}
 
@@ -503,7 +503,7 @@ static int dsda_ParseHUDConfig(char** hud_config, int line_i)
 		}
 
 		if(!found)
-			I_Error("Invalid hud component \"%s\"", line);
+			Log::Fatal("Invalid hud component \"{}\"", line);
 	}
 
 	// roll back the line that wasn't part of this config

@@ -235,7 +235,7 @@ void dsda_ExportKeyFrame(byte* buffer, int length)
 		snprintf(name, sizeof(name), "backup-%010d-%lld.kf", timestamp, (long long)time(nullptr));
 
 	if(!M_WriteFile(name, buffer, length))
-		I_Error("dsda_ExportKeyFrame: Failed to write key frame.");
+		Log::Fatal("dsda_ExportKeyFrame: Failed to write key frame.");
 }
 
 // Stripped down version of G_DoSaveGame

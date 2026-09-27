@@ -35,15 +35,15 @@ static void dsda_WriteContentToFile(zip_file_t* input_file, FILE* dest_file, zip
 		chunk_size = MIN(data_size, CHUNK_SIZE);
 		bytes_read = zip_fread(input_file, buffer, chunk_size);
 		if(bytes_read == -1)
-			I_Error("dsda_WriteContentToFile: Unable to read data from archive.");
+			Log::Fatal("dsda_WriteContentToFile: Unable to read data from archive.");
 
 		if(fwrite(buffer, sizeof(char), bytes_read, dest_file) != bytes_read)
-			I_Error("dsda_WriteContentToFile: Failed to write data to file.");
+			Log::Fatal("dsda_WriteContentToFile: Failed to write data to file.");
 
 		data_size -= bytes_read;
 		total_bytes_read += bytes_read;
 		if(total_bytes_read >= UNZIPPED_BYTES_LIMIT)
-			I_Error("dsda_WriteContentToFile: Too much data to decompress.");
+			Log::Fatal("dsda_WriteContentToFile: Too much data to decompress.");
 	}
 }
 
@@ -69,15 +69,15 @@ static void dsda_WriteZippedFilesToDest(zip_t* archive, const char* destination_
 
 		zip_stat_index(archive, i, ZIP_FL_UNCHANGED, &stat);
 		if((stat.valid & ZIP_STAT_SIZE) == 0)
-			I_Error("dsda_WriteZippedFilesToDest: Failed to read size of zipped file %s.", file_name);
+			Log::Fatal("dsda_WriteZippedFilesToDest: Failed to read size of zipped file {}.", file_name);
 
 		zipped_file = zip_fopen_index(archive, i, ZIP_FL_UNCHANGED);
 		if(zipped_file == nullptr)
-			I_Error("dsda_WriteZippedFilesToDest: Failed to open zipped file %s.", file_name);
+			Log::Fatal("dsda_WriteZippedFilesToDest: Failed to open zipped file {}.", file_name);
 
 		dest_file = M_OpenFile(full_path.string, "wb");
 		if(dest_file == nullptr)
-			I_Error("dsda_WriteZippedFilesToDest: Failed to open destination file %s.", full_path.string);
+			Log::Fatal("dsda_WriteZippedFilesToDest: Failed to open destination file {}.", full_path.string);
 
 		dsda_WriteContentToFile(zipped_file, dest_file, stat.size);
 
@@ -98,7 +98,7 @@ static void dsda_UnzipFileToDestination(const char* zipped_file_name, const char
 	{
 		zip_error_t error;
 		zip_error_init_with_code(&error, error_code);
-		I_Error("dsda_UnzipFileToDestination: Unable to open %s: %s.\n", zipped_file_name, zip_error_strerror(&error));
+		Log::Fatal("dsda_UnzipFileToDestination: Unable to open {}: {}.\n", zipped_file_name, zip_error_strerror(&error));
 	}
 
 	dsda_WriteZippedFilesToDest(archive_handle, destination_directory);
@@ -114,7 +114,7 @@ const char* dsda_UnzipFile(const char* zipped_file_name)
 	dsda_StringPrintF(&temporary_directory, "%s/%u-%s", I_GetTempDir(), file_counter, dsda_BaseName(zipped_file_name));
 	if(M_IsDir(temporary_directory.string))
 		if(!M_RemoveFilesAtPath(temporary_directory.string))
-			I_Error("dsda_UnzipFile: unable to clear tempdir %s\n", temporary_directory.string);
+			Log::Fatal("dsda_UnzipFile: unable to clear tempdir {}\n", temporary_directory.string);
 	M_MakeDir(temporary_directory.string, true);
 
 	dsda_UnzipFileToDestination(zipped_file_name, temporary_directory.string);

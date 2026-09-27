@@ -65,8 +65,7 @@ void dsda_AddLineToHealthGroup(line_t* line)
 
 	group = dsda_HealthGroup(line->healthgroup);
 	if(group->health && group->health != line->health)
-		lprintf(OutputLevels::Warn, "Line %d health does not match group %d!\n",
-			line->iLineID, line->healthgroup);
+		Log::Warn("Line {} health does not match group {}!\n", line->iLineID, line->healthgroup);
 
 	group->health = line->health;
 	group->line_ids =

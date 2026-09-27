@@ -6,6 +6,7 @@
 #include <string>
 #include <cstring>
 #include <unordered_map>
+#include <utility>
 
 #include "m_random.hpp"
 #include "lprintf.hpp"
@@ -169,7 +170,7 @@ static void dsda_ParseAmbient(Scanner& scanner)
 
 	if(!amb_sfx.min_tics && !amb_sfx.max_tics)
 	{
-		lprintf(OutputLevels::Warn, "Ambient sound %d has invalid parameters\n", id);
+		Log::Warn("Ambient sound {} has invalid parameters\n", id);
 		Z_Free(amb_sfx.sound_name);
 		return;
 	}
@@ -204,7 +205,7 @@ static void dsda_ParseSndInfoLine(Scanner& scanner)
 
 		if(!scanner.CheckString())
 		{
-			lprintf(OutputLevels::Warn, "Invalid SNDINFO: name \"%s\" expects string sound lump\n", name.c_str());
+			Log::Warn("Invalid SNDINFO: name \"{}\" expects string sound lump\n", name);
 
 			scanner.GetNextToken();
 			scanner.SkipLine();
@@ -213,7 +214,7 @@ static void dsda_ParseSndInfoLine(Scanner& scanner)
 
 		if(!W_LumpNameExists(scanner.string))
 		{
-			lprintf(OutputLevels::Warn, "Sound lump \"%s\" does not exist\n", scanner.string);
+			Log::Warn("Sound lump \"{}\" does not exist\n", scanner.string);
 			return;
 		}
 
@@ -235,7 +236,7 @@ static void dsda_ResolveAmbientSounds()
 		new_sfx->name = named_sfx.second.lump_name;
 		named_sfx.second.sfx_id = static_cast<SfxId>(id);
 
-		lprintf(OutputLevels::Debug, "Named sound: %s -> %s %d\n", named_sfx.first.c_str(), new_sfx->name, id);
+		Log::Debug("Named sound: {} -> {} {}\n", named_sfx.first, new_sfx->name, id);
 	}
 
 	for(auto& amb_sfx : id_to_ambient_sfx)
@@ -243,15 +244,16 @@ static void dsda_ResolveAmbientSounds()
 		amb_sfx.second.sfx_id = name_to_sfx[amb_sfx.second.sound_name].sfx_id;
 
 		if(amb_sfx.second.sfx_id == SfxId::None)
-			lprintf(OutputLevels::Warn, "Sound \"%s\" does not exist\n", amb_sfx.second.sound_name);
+			Log::Warn("Sound \"{}\" does not exist\n", amb_sfx.second.sound_name);
 
-		lprintf(OutputLevels::Debug, "Ambient sound: %d att: %f, vol: %f, t: %d %d, sfx: %d\n",
+		Log::Debug("Ambient sound: {} att: {:f}, vol: {:f}, t: {} {}, sfx: {}\n",
 			amb_sfx.first,
 			amb_sfx.second.attenuation,
 			amb_sfx.second.volume,
 			amb_sfx.second.min_tics,
 			amb_sfx.second.max_tics,
-			amb_sfx.second.sfx_id);
+			std::to_underlying(amb_sfx.second.sfx_id)
+		);
 	}
 }
 

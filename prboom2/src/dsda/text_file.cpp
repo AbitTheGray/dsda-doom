@@ -122,7 +122,7 @@ void dsda_ExportTextFile()
 	// Binary, as upstream's "wb": `\n` stays `\n` on every platform.
 	std::ofstream file(path, std::ios::binary);
 	if(!file)
-		I_Error("Unable to export text file!");
+		Log::Fatal("Unable to export text file!");
 
 	std::println(file, "Doom Speed Demo Archive");
 	std::println(file, "https://dsdarchive.com/");

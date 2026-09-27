@@ -267,7 +267,7 @@ char* dsda_SaveGameName(int slot, dboolean via_cmd)
 	const char* save_type;
 
 	if(slot > 9999 || slot < 0)
-		I_Error("dsda_SaveGameName: bad save slot %d", slot);
+		Log::Fatal("dsda_SaveGameName: bad save slot {}", slot);
 
 	save_dir = dsda_SaveDir();
 

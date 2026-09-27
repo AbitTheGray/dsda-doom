@@ -434,17 +434,17 @@ void dsda_TerminalEndoom()
 			character = ' ';
 
 		if(output_format == OutputFormat::Utf8)
-			lprintf(OutputLevels::Info, "\033[3%sm\033[4%sm\033[%sm%s\033[0m",
+			Log::Info("\033[3{}m\033[4{}m\033[{}m{}\033[0m",
 				foreground, background, blink, cp437_to_utf8[character]);
 		else
-			lprintf(OutputLevels::Info, "\033[3%sm\033[4%sm\033[%sm%c\033[0m",
-				foreground, background, blink, character);
+			Log::Info("\033[3{}m\033[4{}m\033[{}m{}\033[0m",
+				foreground, background, blink, static_cast<char>(character));
 
 		if((i + 1) % 80 == 0)
-			lprintf(OutputLevels::Info, "\n");
+			Log::Info("\n");
 	}
 
-	lprintf(OutputLevels::Info, "\n");
+	Log::Info("\n");
 
 	Z_Free(endoom);
 	endoom = nullptr;
@@ -471,7 +471,7 @@ void dsda_WindowEndoom()
 
 	if(!TXT_Init())
 	{
-		lprintf(OutputLevels::Error, "Failed to initialize libtextscreen");
+		Log::Error("Failed to initialize libtextscreen");
 		return;
 	}
 

@@ -20,7 +20,7 @@ size_t num_episodes;
 static void dsda_DetermineEpisodeMap(dsda_episode_t* episode)
 {
 	if(!dsda_NameToMap(episode->map_lump, &episode->start_episode, &episode->start_map))
-		I_Error("Cannot evaluate start map for episode %s", episode->name ? episode->name : episode->pic_name ? episode->pic_name : "UNKNOWN");
+		Log::Fatal("Cannot evaluate start map for episode {}", episode->name ? episode->name : (episode->pic_name ? episode->pic_name : "UNKNOWN"));
 }
 
 void dsda_AddOriginalEpisodes()

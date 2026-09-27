@@ -365,7 +365,7 @@ void dsda_ApplyLevelCompatibility(int lump)
 
 	dsda_GetLevelCheckSum(lump, &cksum);
 
-	lprintf(OutputLevels::Debug, "Level checksum: %s\n", cksum.string);
+	Log::Debug("Level checksum: {}\n", std::string_view(cksum.string));
 
 	if(cksum.string[0] >= 'a')
 		i = cksum.string[0] - 'a' + 10;
@@ -383,13 +383,13 @@ void dsda_ApplyLevelCompatibility(int lump)
 			for(option = (*level_compatibility)->options; *option != CompOption::End; option++)
 			{
 				comp[std::to_underlying(*option)] = 1;
-				lprintf(OutputLevels::Info, "Automatically setting comp option %d on\n", std::to_underlying(*option));
+				Log::Info("Automatically setting comp option {} on\n", std::to_underlying(*option));
 			}
 
 			for(option++; *option != CompOption::End; option++)
 			{
 				comp[std::to_underlying(*option)] = 0;
-				lprintf(OutputLevels::Info, "Automatically setting comp option %d off\n", std::to_underlying(*option));
+				Log::Info("Automatically setting comp option {} off\n", std::to_underlying(*option));
 			}
 
 			return;

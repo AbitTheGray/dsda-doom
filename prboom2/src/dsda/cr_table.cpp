@@ -114,8 +114,7 @@ static void dsda_CalculateFontBounds(const byte* playpal)
 
 	cr_font.multiplier = 1.0 / (cr_font.light_upper_bound - cr_font.light_lower_bound);
 
-	lprintf(OutputLevels::Debug, "Font Bounds: %lf:%lf x%lf\n",
-		cr_font.light_lower_bound, cr_font.light_upper_bound, cr_font.multiplier);
+	Log::Debug("Font Bounds: {:f}:{:f} x{:f}\n", cr_font.light_lower_bound, cr_font.light_upper_bound, cr_font.multiplier);
 }
 
 static void dsda_LoadCRLump()
@@ -138,14 +137,14 @@ static void dsda_LoadCRLump()
 		line = lines[line_i];
 
 		if(sscanf(line, "%d %i %i %i %i %i %i", &i, &r1, &g1, &b1, &r2, &g2, &b2) != 7)
-			I_Error("DSDACR lump has unknown format!");
+			Log::Fatal("DSDACR lump has unknown format!");
 
 		if(i < 1 || i >= std::to_underlying(ColorRange::HudLimit))
-			I_Error("DSDACR index %d is out of bounds!", i);
+			Log::Fatal("DSDACR index {} is out of bounds!", i);
 
 		if(r1 < 0 || g1 < 0 || b1 < 0 || r2 < 0 || g2 < 0 || b2 < 0 ||
 			r1 > 255 || g1 > 255 || b1 > 255 || r2 > 255 || g2 > 255 || b2 > 255)
-			I_Error("DSDACR index %d has color out of range (0-255)", i);
+			Log::Fatal("DSDACR index {} has color out of range (0-255)", i);
 
 		cr_range_t& range = cr_range[static_cast<ColorRange>(i)];
 		range.r1 = r1;

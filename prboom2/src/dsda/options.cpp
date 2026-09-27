@@ -295,7 +295,7 @@ void dsda_ParseOptionsLump()
 				else
 					dsda_UpdateIntConfig((ConfigId)option_list[i].config_key, value, false);
 
-				lprintf(OutputLevels::Info, "dsda_LumpOptions: %s = %d\n", key, value);
+				Log::Info("dsda_LumpOptions: {} = {}\n", std::string_view(key), value);
 
 				break;
 			}
@@ -407,7 +407,7 @@ byte* dsda_WriteOptions21(byte* demo_p)
 		*demo_p++ = comp[mbf21_comp_translation[i]] != 0;
 
 	if(demo_p != target)
-		I_Error("dsda_WriteOptions21: dsda_GameOptionSize is too small");
+		Log::Fatal("dsda_WriteOptions21: dsda_GameOptionSize is too small");
 
 	return demo_p;
 }
@@ -453,7 +453,7 @@ const byte* dsda_ReadOptions21(const byte* demo_p)
 	count = *demo_p++;
 
 	if(count > MBF21_COMP_TOTAL)
-		I_Error("Encountered unknown mbf21 compatibility options!");
+		Log::Fatal("Encountered unknown mbf21 compatibility options!");
 
 	for(i = 0; i < count; i++)
 		comp[mbf21_comp_translation[i]] = *demo_p++;

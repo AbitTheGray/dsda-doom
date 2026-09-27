@@ -75,7 +75,7 @@ void dsda_PrintElapsedTime(DsdaTimer timer, const char* message)
 	unsigned long long result;
 
 	result = dsda_ElapsedTime(timer);
-	lprintf(OutputLevels::Info, "%s: %lf\n", message, (double)result / 1000);
+	Log::Info("{}: {:f}\n", message, static_cast<double>(result) / 1000);
 }
 
 static void dsda_Throttle(DsdaTimer timer, unsigned long long target_time)

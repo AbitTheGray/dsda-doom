@@ -153,7 +153,7 @@ void dsda_LoadTextColor()
 		int color_range_value;
 
 		if(sscanf(line, "%32s %d", key, &color_range_value) != 2)
-			I_Error("DSDATC lump has unknown format! (%s)", line);
+			Log::Fatal("DSDATC lump has unknown format! ({})", line);
 
 		const auto color = std::ranges::find_if(dsda_text_colors, [&](const dsda_text_color_t& entry)
 		{
@@ -161,7 +161,7 @@ void dsda_LoadTextColor()
 		});
 
 		if(color == dsda_text_colors.end())
-			I_Error("DSDATC lump has unknown key %s!", key);
+			Log::Fatal("DSDATC lump has unknown key {}!", std::string_view(key));
 
 		color->color_range = static_cast<ColorRange>(color_range_value);
 	}

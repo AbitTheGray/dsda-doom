@@ -46,7 +46,7 @@ Where a C API needs a zero-terminated string, the caller makes a `std::string` f
 ## Convert logging to `Log::`
 
 `Log::Print`, `Info`, `Warn`, `Error`, `Debug` and `Fatal` (`lprintf.hpp`) format with `std::format`.
-About 350 `lprintf` and 310 `I_Error` calls are still `printf`-style; convert them in batches (build and run the spec suite after each), then remove the old functions.
+About 315 `lprintf` and 270 `I_Error` calls are still `printf`-style; convert them in batches (build and run the spec suite after each), then remove the old functions.
 `I_Warn` (2 calls: `Warn` level plus a message box) needs a `Log::` counterpart first.
 
 Conversion traps:
@@ -99,3 +99,9 @@ Hans Wennborg's write-up (https://www.hanshq.net/zip2.html) and its C code, hwzi
 
 Build it as one component that both the game (`dsda/zipfile.cpp`) and the spec suite (`ArchiveTest`) use, so one implementation closes both gaps.
 Test it with spec unit tests that decode known files and compare CRC-32s - the two shrunk WADs above and all four implode variants (4 or 8 KB window, with or without a literal tree) - skipped when the idgames mirror is absent; the archive test then replays the demos it skips today.
+
+## Explain archive-listed vs measured times
+
+In `spec/support/archive/*.json`, the time upstream `measured` differs from the listed `time` for 985 Compet-N and 1500 SDA demos (433 and 1151 of them measured `00:00`, i.e. no level finished).
+The suite compares against `measured`, so nothing fails, but the differences are unexplained.
+Sort them into causes - a wrong PWAD version, a demo that does not finish a level on purpose or desyncs, a zip whose one listed time covers several demos (e.g. SDA's `0-a/10lvls.zip`), a different way of counting time (e.g. Compet-N's `doom/built/ep2-0428.zip`: listed 4:28, measured 5:02) - and record the cause per demo, so the real desyncs stand out.

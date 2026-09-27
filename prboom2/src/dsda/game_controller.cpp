@@ -214,15 +214,13 @@ void dsda_InitGameController()
 
 	if(use_game_controller > num_joysticks)
 	{
-		lprintf(OutputLevels::Warn, "dsda_InitGameController: invalid joystick %d\n",
-			use_game_controller);
+		Log::Warn("dsda_InitGameController: invalid joystick {}\n", use_game_controller);
 		return;
 	}
 
 	if(!SDL_IsGameController(use_game_controller - 1))
 	{
-		lprintf(OutputLevels::Warn, "dsda_InitGameController: unsupported joystick %d\n",
-			use_game_controller);
+		Log::Warn("dsda_InitGameController: unsupported joystick {}\n", use_game_controller);
 		return;
 	}
 
@@ -230,10 +228,12 @@ void dsda_InitGameController()
 
 	if(!game_controller)
 	{
-		lprintf(OutputLevels::Error, "dsda_InitGameController: error opening game controller %d\n",
+		Log::Error("dsda_InitGameController: error opening game controller {}\n",
 			use_game_controller);
 		return;
 	}
 
-	lprintf(OutputLevels::Debug, "Opened game controller %s\n", SDL_GameControllerName(game_controller));
+	// SDL has no name for some controllers; print that as `printf` did.
+	const char* const controller_name = SDL_GameControllerName(game_controller);
+	Log::Debug("Opened game controller {}\n", controller_name ? controller_name : "(null)");
 }

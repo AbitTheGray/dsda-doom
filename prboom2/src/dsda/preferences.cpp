@@ -47,14 +47,14 @@ void dsda_LoadWadPreferences()
 
 		value = 1;
 		if(!sscanf(line, "%32s %d", key, &value))
-			I_Error("DSDAPREF lump has unknown format! (%s)", line);
+			Log::Fatal("DSDAPREF lump has unknown format! ({})", line);
 
 		if(!strcasecmp(key, "prefer_opengl"))
 			wad_preferences.opengl = !!value;
 		else if(!strcasecmp(key, "prefer_software"))
 			wad_preferences.software = !!value;
 		else
-			lprintf(OutputLevels::Warn, "Unknown DSDAPREF key: %s\n", key);
+			Log::Warn("Unknown DSDAPREF key: {}\n", std::string_view(key));
 	}
 
 	Z_Free(lines);

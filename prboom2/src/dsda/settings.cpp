@@ -87,7 +87,7 @@ static int dsda_WadCompatibilityLevel()
 			const char* data = (const char*)W_LumpByNum(num);
 
 			complvl = dsda_ComplvlStrToNum(data, length);
-			lprintf(OutputLevels::Info, "Detected COMPLVL lump: %i\n", complvl);
+			Log::Info("Detected COMPLVL lump: {}\n", complvl);
 		}
 	}
 
@@ -126,7 +126,7 @@ CompLevel dsda_CompatibilityLevel()
 				return static_cast<CompLevel>(level);
 			}
 		}
-		I_Error("-complevel value of \"%s\" did not match any known complevel.", arg_val);
+		Log::Fatal("-complevel value of \"{}\" did not match any known complevel.", arg_val);
 	}
 
 	if(!demoplayback)

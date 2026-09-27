@@ -47,7 +47,7 @@ char* dsda_DetectDirectory(const char* env_key, ArgId arg_id)
 			result = Z_Strdup(arg->value.v_string);
 		}
 		else
-			lprintf(OutputLevels::Error, "Error: path %s does not exist. Using %s\n",
+			Log::Error("Error: path {} does not exist. Using {}\n",
 				arg->value.v_string, default_directory);
 	}
 
@@ -126,7 +126,7 @@ static void dsda_InitWadDataDir()
 
 	dsda_wad_data_dir = str.string;
 
-	lprintf(OutputLevels::Info, "Using data file directory: %s\n", dsda_wad_data_dir);
+	Log::Info("Using data file directory: {}\n", dsda_wad_data_dir);
 }
 
 char* dsda_DataDir()

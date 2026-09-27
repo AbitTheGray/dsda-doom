@@ -1504,11 +1504,11 @@ static void dsda_ParseConfigArg(ArgId arg_id, dboolean persist)
 			pair = Z_Strdup(arg->value.v_string_array[i]);
 			key_value = dsda_SplitString(pair, "=");
 			if(!key_value[0] || !key_value[1])
-				I_Error("Invalid config variable assignment \"%s\" (use key=value)", pair);
+				Log::Fatal("Invalid config variable assignment \"{}\" (use key=value)", pair);
 
 			id = dsda_ConfigIDByName(key_value[0]);
 			if(id == ConfigId::None)
-				I_Error("Unknown config variable \"%s\"", key_value[0]);
+				Log::Fatal("Unknown config variable \"{}\"", key_value[0]);
 
 			conf = &dsda_config[id];
 			if(conf->type == ConfigType::Int)
@@ -1520,13 +1520,11 @@ static void dsda_ParseConfigArg(ArgId arg_id, dboolean persist)
 				value = strtol(key_value[1], &str_end, 0);
 				if(errno != 0)
 				{
-					I_Error("Config variable \"%s\" requires an integer value (was \"%s\", err \"%s\")",
-						key_value[0], key_value[1], strerror(errno));
+					Log::Fatal("Config variable \"{}\" requires an integer value (was \"{}\", err \"{}\")", key_value[0], key_value[1], strerror(errno));
 				}
 				if(*str_end != '\0')
 				{
-					I_Error("Value for config variable \"%s\" was not converted into an integer in its entirety (was \"%s\")",
-						key_value[0], key_value[1]);
+					Log::Fatal("Value for config variable \"{}\" was not converted into an integer in its entirety (was \"{}\")", key_value[0], key_value[1]);
 				}
 
 				dsda_InitIntConfig(conf, value, persist);

@@ -554,7 +554,7 @@ void dsda_ApplyZDoomMapFormat()
 	map_format = zdoom_map_format;
 
 	if(!mbf21)
-		I_Error("You must use complevel 21 when playing doom-in-hexen format maps.");
+		Log::Fatal("You must use complevel 21 when playing doom-in-hexen format maps.");
 
 	dsda_ApplyHighPrecision();
 	dsda_MigrateMobjInfo();

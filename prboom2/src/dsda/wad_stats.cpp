@@ -168,7 +168,7 @@ static void dsda_LoadWadStats()
 				sscanf(lines[1], "%d", &wad_stats.total_kills) != 1
 			)
 			{
-				lprintf(OutputLevels::Warn, "Encountered invalid wad stats: %s", path);
+				Log::Warn("Encountered invalid wad stats: {}", path);
 				M_remove(path);
 			}
 			else
@@ -231,7 +231,7 @@ void dsda_SaveWadStats()
 	file = M_OpenFile(path, "wb");
 	if(!file)
 	{
-		lprintf(OutputLevels::Warn, "dsda_SaveWadStats: Failed to save wad stats file \"%s\".\n", path);
+		Log::Warn("dsda_SaveWadStats: Failed to save wad stats file \"{}\".\n", path);
 		return;
 	}
 

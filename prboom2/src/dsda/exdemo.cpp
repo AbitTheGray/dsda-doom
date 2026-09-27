@@ -621,7 +621,7 @@ void dsda_LoadExDemo(const char* filename)
 		header = ReadPWADTable(exdemo.footer, exdemo.footer_size);
 
 		if(!header)
-			lprintf(OutputLevels::Error, "LoadExDemo: demo footer is corrupted\n");
+			Log::Error("LoadExDemo: demo footer is corrupted\n");
 		else
 		{
 			DemoEx_GetFeatures(header);

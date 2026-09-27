@@ -1204,13 +1204,13 @@ static dboolean console_ScriptRunLine(const char* line)
 	{
 		if(strlen(line) >= CONSOLE_ENTRY_SIZE)
 		{
-			lprintf(OutputLevels::Error, "Script line too long: \"%s\" (limit %d)\n", line, CONSOLE_ENTRY_SIZE);
+			Log::Error("Script line too long: \"{}\" (limit {})\n", line, CONSOLE_ENTRY_SIZE);
 			return false;
 		}
 
 		if(!dsda_ExecuteConsole(line, false))
 		{
-			lprintf(OutputLevels::Error, "Script line failed: \"%s\"\n", line);
+			Log::Error("Script line failed: \"{}\"\n", line);
 			return false;
 		}
 	}
@@ -1247,7 +1247,7 @@ static dboolean console_ScriptRun(const char* command, const char* args)
 			}
 			else
 			{
-				lprintf(OutputLevels::Error, "Unable to read script file (%s)\n", filename);
+				Log::Error("Unable to read script file ({})\n", filename);
 				ret = false;
 			}
 
@@ -1255,7 +1255,7 @@ static dboolean console_ScriptRun(const char* command, const char* args)
 		}
 		else
 		{
-			lprintf(OutputLevels::Error, "Cannot find script file (%s)\n", name);
+			Log::Error("Cannot find script file ({})\n", std::string_view(name));
 			ret = false;
 		}
 
@@ -1277,7 +1277,7 @@ static dboolean console_Check(const char* command, const char* args)
 
 		if(summary)
 		{
-			lprintf(OutputLevels::Info, "%s\n", summary);
+			Log::Info("{}\n", summary);
 			Z_Free(summary);
 			return true;
 		}
@@ -2917,7 +2917,7 @@ void dsda_InterpretConsoleCommands(const char* str, dboolean noise, dboolean rai
 	lines = dsda_SplitString(entry, ";");
 	for(line = 0; lines[line]; ++line)
 		if(!dsda_ExecuteConsole(lines[line], noise) && raise_errors)
-			I_Error("Console command failed: %s", lines[line]);
+			Log::Fatal("Console command failed: {}", lines[line]);
 
 	Z_Free(lines);
 	Z_Free(entry);
