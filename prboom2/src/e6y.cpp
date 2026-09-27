@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "doomdef.hpp"
+#include "cpp/Util.hpp"
 #include "dsda/demo.hpp"
 #include "r_patch.hpp"
 #include "st_stuff.hpp"
@@ -441,7 +442,7 @@ void e6y_G_DoCompleted()
 
 	memset(&stats[numlevels], 0, sizeof(timetable_t));
 
-	snprintf(stats[numlevels].map, sizeof(stats[numlevels].map), "%s", dsda_MapLumpName(gameepisode, gamemap));
+	FormatTo(stats[numlevels].map, "{}", dsda_MapLumpName(gameepisode, gamemap));
 
 	if(secretexit)
 	{

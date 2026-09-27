@@ -55,6 +55,8 @@
 #include "f_finale.hpp"
 #include "e6y.hpp"//e6y
 
+#include "cpp/Util.hpp"
+
 #include "dsda/episode.hpp"
 #include "dsda/exhud.hpp"
 #include "dsda/features.hpp"
@@ -1129,7 +1131,7 @@ extern "C" void M_AutoSave()
 	int slot;
 	char target_name[SAVESTRINGSIZE];
 
-	snprintf(target_name, SAVESTRINGSIZE, "auto-%s", dsda_MapLumpName(gameepisode, gamemap));
+	FormatTo(target_name, "auto-{}", dsda_MapLumpName(gameepisode, gamemap));
 
 	slot = M_AutoSaveSlot(target_name);
 	G_SaveGame(slot, target_name);
@@ -1215,8 +1217,7 @@ static void M_SaveSelect(int choice)
 	if(!strcmp(savegamestrings[choice], s_EMPTYSTRING) || // Ty 03/27/98 - externalized
 		IsMapName(savegamestrings[choice]))
 	{
-		snprintf(savegamestrings[choice], SAVESTRINGSIZE, "%s", dsda_MapLumpName(gameepisode, gamemap));
-		savegamestrings[choice][SAVESTRINGSIZE - 1] = 0;
+		FormatTo(savegamestrings[choice], "{}", dsda_MapLumpName(gameepisode, gamemap));
 	}
 	saveCharIndex = strlen(savegamestrings[choice]);
 }
@@ -6133,7 +6134,7 @@ static dboolean M_SaveResponder(int ch, int action, event_t* ev)
 		{
 			if(saveCharIndex > 0)
 			{
-				if(!strcmp(savegamestrings[saveSlot], dsda_MapLumpName(gameepisode, gamemap)))
+				if(dsda_MapLumpName(gameepisode, gamemap) == savegamestrings[saveSlot])
 				{
 					saveCharIndex = 0;
 				}

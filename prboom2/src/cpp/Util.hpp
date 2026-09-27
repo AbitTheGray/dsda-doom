@@ -9,6 +9,7 @@
 #include <format>
 #include <functional>
 #include <limits>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <type_traits>
@@ -81,6 +82,23 @@ static_assert(PositiveModulo(3, 4) == 3);
 static_assert(PositiveModulo(-1, 4) == 3);
 static_assert(PositiveModulo(4, 4) == 0);
 static_assert(PositiveModulo(-4, 4) == 0);
+
+/**
+ * `std::format` into a fixed-size C string buffer, as `snprintf` does:
+ * the text is cut to fit, and the buffer is always zero-terminated.
+ * @pre `buffer` is not empty
+ */
+template<typename... Args>
+inline void FormatTo(const std::span<char> buffer, const std::format_string<Args...> format, Args&&... args)
+{
+	assert(!buffer.empty());
+
+	// Leave room for the terminating zero.
+	const auto maximumLength = static_cast<std::ptrdiff_t>(buffer.size() - 1);
+	const auto result = std::format_to_n(buffer.data(), maximumLength, format, std::forward<Args>(args)...);
+
+	*result.out = '\0';
+}
 
 #define NOT_IMPLEMENTED { throw std::runtime_error("Not Implemented"); }
 

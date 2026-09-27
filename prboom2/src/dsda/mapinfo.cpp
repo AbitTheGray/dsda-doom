@@ -372,7 +372,7 @@ int dsda_BossAction(mobj_t* mo)
 	return false;
 }
 
-const char* dsda_MapLumpName(int episode, int map)
+std::string_view dsda_MapLumpName(int episode, int map)
 {
 	const char* name;
 

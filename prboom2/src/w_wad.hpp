@@ -10,6 +10,8 @@
 
 #include <stddef.h>
 
+#include <string_view>
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -178,3 +180,19 @@ int W_LumpNumInPortWad(int lump);
 #ifdef __cplusplus
 }
 #endif
+
+// `std::string_view` versions of the name lookups.
+// They use the same part of the name as the `const char*` ones: at most 8 characters, up to the first zero.
+int W_FindNumFromName2(std::string_view name, LumpNamespace ns, int lump);
+int W_GetNumForName(std::string_view name);
+int W_LumpNameExists(std::string_view name);
+
+inline int W_CheckNumForName2(const std::string_view name, const LumpNamespace ns)
+{
+	return W_FindNumFromName2(name, ns, LUMP_NOT_FOUND);
+}
+
+inline int W_CheckNumForName(const std::string_view name)
+{
+	return W_CheckNumForName2(name, LumpNamespace::Global);
+}

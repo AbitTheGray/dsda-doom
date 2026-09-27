@@ -16,6 +16,9 @@
 #include <io.h>
 #endif
 
+#include <array>
+#include <string_view>
+
 #include "doomstat.hpp"
 #include "d_net.hpp"
 #include "doomtype.hpp"
@@ -627,6 +630,29 @@ int W_PWADLumpNumExists2(int lump)
 int W_LumpNameExists(const char* name)
 {
 	return W_CheckNumForName(name) != LUMP_NOT_FOUND;
+}
+
+// The part of `name` the `const char*` lookups read: at most 8 characters, up to the first zero, terminated.
+static std::array<char, 9> W_TerminatedLumpName(const std::string_view name)
+{
+	std::array<char, 9> terminated {};
+	name.substr(0, 8).copy(terminated.data(), 8);
+	return terminated;
+}
+
+int W_FindNumFromName2(const std::string_view name, const LumpNamespace ns, const int lump)
+{
+	return W_FindNumFromName2(W_TerminatedLumpName(name).data(), ns, lump);
+}
+
+int W_GetNumForName(const std::string_view name)
+{
+	return W_GetNumForName(W_TerminatedLumpName(name).data());
+}
+
+int W_LumpNameExists(const std::string_view name)
+{
+	return W_LumpNameExists(W_TerminatedLumpName(name).data());
 }
 
 int W_LumpNameExists2(const char* name, LumpNamespace ns)

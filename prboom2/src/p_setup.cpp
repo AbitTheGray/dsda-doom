@@ -37,6 +37,8 @@
 #include "e6y.hpp"//e6y
 
 #include "dsda.hpp"
+#include "cpp/Util.hpp"
+
 #include "dsda/args.hpp"
 #include "dsda/compatibility.hpp"
 #include "dsda/destructible.hpp"
@@ -3686,7 +3688,7 @@ void P_SetupLevel(int episode, int map, int skill)
 	}
 
 	// find map name
-	snprintf(lumpname, sizeof(lumpname), "%s", dsda_MapLumpName(episode, map));
+	FormatTo(lumpname, "{}", dsda_MapLumpName(episode, map));
 	lumpnum = W_GetNumForName(lumpname);
 
 	// Must process musinfo to get default track before calling S_Start

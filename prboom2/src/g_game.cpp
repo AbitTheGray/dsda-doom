@@ -13,6 +13,7 @@
 #include <stdlib.h>
 
 #include <array>
+#include <string_view>
 #include <utility>
 #ifdef _MSC_VER
 #include <io.h>
@@ -2219,7 +2220,10 @@ void G_DoCompleted()
 	// lmpwatch.pl engine-side demo testing support
 	// print "FINISHED: <mapname>" when the player exits the current map
 	if(nodrawers && (demoplayback || timingdemo))
-		lprintf(OutputLevels::Info, "FINISHED: %s\n", dsda_MapLumpName(gameepisode, gamemap));
+	{
+		const std::string_view map_lump = dsda_MapLumpName(gameepisode, gamemap);
+		lprintf(OutputLevels::Info, "FINISHED: %.*s\n", static_cast<int32_t>(map_lump.size()), map_lump.data());
+	}
 
 	// TODO: tenuous "no intermission" mapinfo flag
 	// umapinfo already partially handles it, but not in a friendly way
@@ -2299,7 +2303,7 @@ extern dboolean setsizeneeded;
  * of savegame compatibility warnings, and options lookups.
  */
 
-static uint64_t G_UpdateSignature(uint64_t s, const char* name)
+static uint64_t G_UpdateSignature(uint64_t s, std::string_view name)
 {
 	int i, lump = W_CheckNumForName(name);
 	if(lump != LUMP_NOT_FOUND && (i = lump + 10) < numlumps)
@@ -2558,7 +2562,6 @@ static void G_DoSaveGame(dboolean via_cmd)
 	char* description;
 	int saveversion;
 	uint64_t checksum;
-	const char* maplump;
 	int time, ttime;
 
 	gameaction = GameAction::Nothing; // cph - cancel savegame at top of this function,
@@ -2604,12 +2607,12 @@ static void G_DoSaveGame(dboolean via_cmd)
 		: "Game save failed!"); // CPhipps - not externalised
 
 	/* Print some information about the save game */
-	maplump = dsda_MapLumpName(gameepisode, gamemap);
+	const std::string_view maplump = dsda_MapLumpName(gameepisode, gamemap);
 	time = leveltime / TICRATE;
 	ttime = (totalleveltimes + leveltime) / TICRATE;
 
-	lprintf(OutputLevels::Info, "G_DoSaveGame: [%d] %s (%s), Skill %d, Level Time %02d:%02d:%02d, Total Time %02d:%02d:%02d\n",
-		savegameslot + 1, maplump, W_GetLumpInfoByNum(W_GetNumForName(maplump))->wadfile->name, gameskill + 1,
+	lprintf(OutputLevels::Info, "G_DoSaveGame: [%d] %.*s (%s), Skill %d, Level Time %02d:%02d:%02d, Total Time %02d:%02d:%02d\n",
+		savegameslot + 1, static_cast<int32_t>(maplump.size()), maplump.data(), W_GetLumpInfoByNum(W_GetNumForName(maplump))->wadfile->name, gameskill + 1,
 		time / 3600, (time % 3600) / 60, time % 60, ttime / 3600, (ttime % 3600) / 60, ttime % 60);
 
 	P_FreeSaveBuffer();

@@ -50,6 +50,21 @@ The written files must not change:
 
 `dsda_WriteAnalysis` in `dsda/analysis.cpp` is already converted and shows the pattern.
 
+## `dsda_StringConfig` storage and return type
+
+`dsda_StringConfig` still returns `const char*`.
+The value is a `char*` in the `dsda_config_value_t` union, managed by hand (`Z_Strdup`/`Z_Free`) and replaced by `dsda_UpdateStringConfig` and `dsda_HackStringConfig`.
+Most of its 22 callers need a zero-terminated string: `sscanf` (resolutions in `SDL/i_video.cpp`), `strcasecmp` (`MUSIC/portmidiplayer.cpp`, `SDL/i_sound.cpp`), `strncpy`/`M_CopyText`/`Z_Strdup` (menu, console), `M_remove`/`M_CheckWritableDir`, `parsecommand` (capture), and the FluidSynth, PortMidi and SDL settings; several keep the pointer in a `const char*` global.
+
+Plan: store the value as a `std::string` (replacing the union), return a `std::string_view` that is valid until that config is updated, and convert the callers step by step.
+Where a C API needs a zero-terminated string, the caller makes a `std::string` from the view; these are read at startup or when a setting changes, so the copies are cheap.
+
+## `std::format`-based logging
+
+`lprintf`, `I_Error` and `I_Warn` take `printf`-style formats only, so a `std::string_view` has to go through `"%.*s"` with its size cast to `int32_t` (see `G_DoCompleted` and `G_DoSaveGame` in `g_game.cpp`).
+A `std::format`-based variant would let callers pass views and typed values directly.
+The output must stay identical where something parses it, e.g. `FINISHED: <map>` for lmpwatch.
+
 ## Enums still written as `#define`
 
 Groups of `#define`s that are really an enum or a set of flags, to become `enum struct`s (see the enum rules in `CLAUDE.md`).

@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include "p_mobj.hpp"
 #include "dsda/utility.hpp"
 
@@ -46,7 +48,6 @@ void dsda_StartFinale();
 int dsda_FTicker();
 int dsda_FDrawer();
 int dsda_BossAction(mobj_t* mo);
-const char* dsda_MapLumpName(int episode, int map);
 const char* dsda_MapAuthor();
 void dsda_HUTitle(dsda_string_t* str);
 int dsda_SkyTexture();
@@ -69,3 +70,7 @@ void dsda_InitSky();
 #ifdef __cplusplus
 }
 #endif
+
+/// The name of the map's lump, e.g. "MAP01" or "E1M1".
+/// The view points into a buffer that the next call overwrites, so it is valid only until then.
+std::string_view dsda_MapLumpName(int episode, int map);
