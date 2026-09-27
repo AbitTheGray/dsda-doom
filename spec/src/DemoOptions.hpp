@@ -17,4 +17,8 @@ struct DemoOptions
 	std::string_view pwad;
 	// Extra arguments appended verbatim, e.g. "-heretic".
 	std::string_view extra;
+	// Also write the text file (`-export_text_file`) besides `levelstat.txt` and `analysis.txt`.
+	bool textFile = true;
+	// Print the reports the game wrote into the test output.
+	bool printReports = true;
 };

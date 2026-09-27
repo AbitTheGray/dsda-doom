@@ -3,6 +3,9 @@
 // DESCRIPTION:
 //	DSDA Text File
 
+#include <format>
+#include <print>
+#include <string>
 #include <utility>
 
 #include "doomstat.hpp"
@@ -43,7 +46,8 @@ static char* dsda_TextFileName()
 	}
 	else
 	{
-		name = static_cast<char*>(Z_Calloc(name_length + 4, 1));
+		// The name, ".txt" and the terminating zero.
+		name = static_cast<char*>(Z_Calloc(name_length + 5, 1));
 		strcat(name, playdemo);
 	}
 
@@ -92,30 +96,20 @@ static const char* dsda_Movie()
 	return nullptr;
 }
 
-static char* dsda_TextFileTime()
+static std::string dsda_TextFileTime()
 {
-	char* text_file_time;
-
-	text_file_time = static_cast<char*>(Z_Malloc(16));
-
 	if(dsda_IL())
-		snprintf(
-			text_file_time,
-			16,
-			"%d:%05.2f",
+		return std::format(
+			"{}:{:05.2f}",
 			dsda_last_leveltime / TICRATE / 60,
-			(float)(dsda_last_leveltime % (60 * TICRATE)) / TICRATE
-		);
-	else
-		snprintf(
-			text_file_time,
-			16,
-			"%d:%02d",
-			totalleveltimes / TICRATE / 60,
-			(totalleveltimes / TICRATE) % 60
+			static_cast<float>(dsda_last_leveltime % (60 * TICRATE)) / TICRATE
 		);
 
-	return text_file_time;
+	return std::format(
+		"{}:{:02}",
+		totalleveltimes / TICRATE / 60,
+		(totalleveltimes / TICRATE) % 60
+	);
 }
 
 void dsda_ExportTextFile()
@@ -149,16 +143,16 @@ void dsda_ExportTextFile()
 	if(arg->found)
 		pwad = PathFindFileName(arg->value.v_string_array[0]);
 
-	fprintf(file, "Doom Speed Demo Archive\n");
-	fprintf(file, "https://dsdarchive.com/\n");
-	fprintf(file, "\n");
+	std::println(file, "Doom Speed Demo Archive");
+	std::println(file, "https://dsdarchive.com/");
+	std::println(file, "");
 	if(iwad)
-		fprintf(file, "Iwad:      %s\n", iwad);
+		std::println(file, "Iwad:      {}", iwad);
 	if(pwad)
-		fprintf(file, "Pwad:      %s\n", pwad);
+		std::println(file, "Pwad:      {}", pwad);
 
 	if(dsda_IL())
-		fprintf(file, "Map:       %s\n", dsda_MapLumpName(gameepisode, dsda_startmap));
+		std::println(file, "Map:       {}", dsda_MapLumpName(gameepisode, dsda_startmap));
 	else
 	{
 		const char* movie;
@@ -166,29 +160,27 @@ void dsda_ExportTextFile()
 		movie = dsda_Movie();
 
 		if(movie)
-			fprintf(file, "Movie:     %s\n", movie);
+			std::println(file, "Movie:     {}", movie);
 		else
 		{
-			fprintf(file, "Movie:     %s", dsda_MapLumpName(gameepisode, dsda_startmap));
-			fprintf(file, " - %s\n", dsda_MapLumpName(gameepisode, dsda_last_gamemap));
+			std::print(file, "Movie:     {}", dsda_MapLumpName(gameepisode, dsda_startmap));
+			std::println(file, " - {}", dsda_MapLumpName(gameepisode, dsda_last_gamemap));
 		}
 	}
 
-	fprintf(file, "Skill:     %i\n", gameskill + 1);
-	fprintf(file, "Category:  %s\n", to_string(dsda_DetectCategory()).c_str());
-	fprintf(file, "Exe:       %s -complevel %i\n", PROJECT_STRING, compatibility_level);
-	fprintf(file, "\n");
+	std::println(file, "Skill:     {}", gameskill + 1);
+	std::println(file, "Category:  {}", dsda_DetectCategory());
+	std::println(file, "Exe:       {} -complevel {}", PROJECT_STRING, std::to_underlying(compatibility_level));
+	std::println(file, "");
 
-	name = dsda_TextFileTime();
-	fprintf(file, "Time:      %s\n", name);
-	Z_Free(name);
+	std::println(file, "Time:      {}", dsda_TextFileTime());
 
 	dsda_player_name = dsda_StringConfig(ConfigId::PlayerName);
 
-	fprintf(file, "\n");
-	fprintf(file, "Author:    %s\n", dsda_player_name);
-	fprintf(file, "\n");
-	fprintf(file, "Comments:\n");
+	std::println(file, "");
+	std::println(file, "Author:    {}", dsda_player_name);
+	std::println(file, "");
+	std::println(file, "Comments:");
 
 	fclose(file);
 }

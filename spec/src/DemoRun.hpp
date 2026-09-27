@@ -5,8 +5,10 @@
 //
 //	The game writes `levelstat.txt` and `analysis.txt` into the working
 //	directory under fixed names, so every run gets a private temporary
-//	directory. Its configuration, wad stats and autoload WADs would otherwise
-//	come from the developer's home directory (`I_ConfigDir` in
+//	directory. The text file goes next to the demo instead, so a run that asks
+//	for it plays a copy of the demo from that directory.
+//
+//	The game's configuration, wad stats and autoload WADs would otherwise come from the developer's home directory (`I_ConfigDir` in
 //	`prboom2/src/SDL/i_system.c`), which is why the run passes `-noautoload`
 //	and points `-config` and `-data` into that private directory.
 
@@ -84,5 +86,8 @@ private:
 	std::string m_output;
 	std::string m_levelstat;
 	std::string m_analysis;
+	// Empty when the run did not ask for the text file.
+	std::string m_textFileName;
+	std::string m_textFile;
 	int32_t m_exitCode = 0;
 };

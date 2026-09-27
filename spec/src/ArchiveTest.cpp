@@ -270,6 +270,8 @@ namespace
 				.iwad = *m_demo.iwad,
 				.pwad = {},
 				.extra = extra,
+				.textFile = false,
+				.printReports = false,
 			};
 			SPEC_REQUIRE_INPUTS(options);
 

@@ -6,6 +6,7 @@
 #include <atomic>
 #include <cstdlib>
 #include <format>
+#include <print>
 #include <random>
 #include <stdexcept>
 
@@ -61,6 +62,15 @@ namespace
 
 		return std::format("{}:\n{}\n", name, Tail(contents));
 	}
+
+	/** One report in full, for the test output. */
+	void PrintReport(const std::string_view name, const std::string& contents)
+	{
+		if(contents.empty())
+			std::println("{}: not written", name);
+		else
+			std::println("{}:\n{}", name, contents);
+	}
 }
 
 TemporaryDirectory::TemporaryDirectory()
@@ -95,8 +105,27 @@ DemoRun::DemoRun(const DemoOptions& options)
 	if(!options.pwad.empty())
 		m_command += std::format(" -file {}", Quote(Spec::WadPath(options.pwad)));
 
-	m_command += std::format(" -fastdemo {}", Quote(Spec::LmpPath(options.lmp)));
+	std::filesystem::path lmp = Spec::LmpPath(options.lmp);
+
+	// The game writes the text file next to the demo (`dsda_TextFileName`),
+	// which would be inside `spec/support/lmps`, so it plays a private copy.
+	if(options.textFile)
+	{
+		const std::filesystem::path copy = m_directory.Path() / lmp.filename();
+		std::filesystem::copy_file(lmp, copy);
+		lmp = copy;
+
+		// The game swaps a `.lmp` extension for `.txt`; every demo here has one.
+		std::filesystem::path textFile = lmp.filename();
+		textFile.replace_extension(".txt");
+		m_textFileName = textFile.string();
+	}
+
+	m_command += std::format(" -fastdemo {}", Quote(lmp));
 	m_command += " -nosound -nomusic -nodraw -levelstat -analysis";
+
+	if(options.textFile)
+		m_command += " -export_text_file";
 
 	// The autoload directories are the developer's own (`I_ConfigDir`), so
 	// whatever is in them would be merged into every run and change the very
@@ -125,14 +154,28 @@ DemoRun::DemoRun(const DemoOptions& options)
 	m_output = Spec::ReadFile(m_directory.Path() / k_logName).value_or(std::string {});
 	m_levelstat = Spec::ReadFile(m_directory.Path() / k_levelstatName).value_or(std::string {});
 	m_analysis = Spec::ReadFile(m_directory.Path() / k_analysisName).value_or(std::string {});
+
+	if(options.textFile)
+		m_textFile = Spec::ReadFile(m_directory.Path() / m_textFileName).value_or(std::string {});
+
+	if(options.printReports)
+	{
+		PrintReport(k_levelstatName, m_levelstat);
+		PrintReport(k_analysisName, m_analysis);
+
+		if(options.textFile)
+			PrintReport(m_textFileName, m_textFile);
+	}
 }
 
 void DemoRun::Fail(const std::string_view what) const
 {
+	const std::string textFile = m_textFileName.empty() ? std::string {} : Report(m_textFileName, m_textFile);
+
 	throw std::runtime_error(std::format(
-		"{}\ncommand: {}\nexit code: {}\n{}{}game output:\n{}",
+		"{}\ncommand: {}\nexit code: {}\n{}{}{}game output:\n{}",
 		what, m_command, m_exitCode,
-		Report(k_levelstatName, m_levelstat), Report(k_analysisName, m_analysis),
+		Report(k_levelstatName, m_levelstat), Report(k_analysisName, m_analysis), textFile,
 		Tail(m_output)
 	));
 }
