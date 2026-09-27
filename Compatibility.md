@@ -46,11 +46,11 @@ Only the name shown in the menu is affected, not input or demos.
 
 Code: `dsda_GameControllerButtonName` in `prboom2/src/dsda/game_controller.cpp`.
 
-## Text file name buffer holds its terminating zero
+## Text file name no longer overruns its buffer
 
 With `-export_text_file`, a demo whose name does not end in `.lmp` gets `.txt` appended (`demo.foo` becomes `demo.foo.txt`).
 Upstream allocates the name's length plus 4 bytes for it, one short of the terminating zero, so `strcat` writes one byte past the buffer.
-The buffer now has room for it. The file name and its contents are unchanged; only the heap write past the end is gone.
+The name is now built as a `std::string`, so there is no buffer to overrun. The file name and its contents are unchanged; only the heap write past the end is gone.
 Demos ending in `.lmp` (in any case) never took this path.
 
 Code: `dsda_TextFileName` in `prboom2/src/dsda/text_file.cpp`.

@@ -3,9 +3,12 @@
 // DESCRIPTION:
 //	DSDA Text File
 
+#include <algorithm>
+#include <cctype>
 #include <format>
 #include <print>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "doomstat.hpp"
@@ -24,38 +27,27 @@
 
 extern int dsda_last_leveltime, dsda_last_gamemap, dsda_startmap;
 
-static char* dsda_TextFileName()
+// The demo's name with a `.lmp` extension (in any case) swapped for `.txt`, or `.txt` appended to any other name.
+// Empty when no demo is played back.
+static std::string dsda_TextFileName()
 {
-	int name_length;
-	char* name;
-	char* playdemo;
-	const char* playback_name;
-
-	playback_name = dsda_PlaybackName();
+	const char* const playback_name = dsda_PlaybackName();
 
 	if(!playback_name)
-		return nullptr;
+		return {};
 
-	playdemo = Z_Strdup(playback_name);
-	name_length = strlen(playdemo);
+	constexpr std::string_view k_demoExtension = ".lmp";
+	std::string_view name = playback_name;
 
-	if(name_length > 4 && !stricmp(playdemo + name_length - 4, ".lmp"))
-	{
-		name = Z_Strdup(playdemo);
-		name[name_length - 4] = '\0';
-	}
-	else
-	{
-		// The name, ".txt" and the terminating zero.
-		name = static_cast<char*>(Z_Calloc(name_length + 5, 1));
-		strcat(name, playdemo);
-	}
+	const auto lower = [](const char c) { return std::tolower(static_cast<unsigned char>(c)); };
 
-	strcat(name, ".txt");
+	if(
+		name.size() > k_demoExtension.size()
+		&& std::ranges::equal(name.substr(name.size() - k_demoExtension.size()), k_demoExtension, {}, lower, lower)
+	)
+		name.remove_suffix(k_demoExtension.size());
 
-	Z_Free(playdemo);
-
-	return name;
+	return std::format("{}.txt", name);
 }
 
 static int dsda_IL()
@@ -115,7 +107,6 @@ static std::string dsda_TextFileTime()
 void dsda_ExportTextFile()
 {
 	dsda_arg_t* arg;
-	char* name;
 	const char* iwad = nullptr;
 	const char* pwad = nullptr;
 	const char* dsda_player_name;
@@ -124,14 +115,11 @@ void dsda_ExportTextFile()
 	if(!dsda_Flag(ArgId::ExportTextFile))
 		return;
 
-	name = dsda_TextFileName();
-
-	if(!name)
+	const std::string name = dsda_TextFileName();
+	if(name.empty())
 		return;
 
-	file = M_OpenFile(name, "wb");
-	Z_Free(name);
-
+	file = M_OpenFile(name.c_str(), "wb");
 	if(!file)
 		I_Error("Unable to export text file!");
 
