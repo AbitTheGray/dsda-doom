@@ -59,7 +59,8 @@ static int dsda_IL()
 	return dsda_startmap == dsda_last_gamemap;
 }
 
-static const char* dsda_Movie()
+// The name of a whole-episode or whole-game movie; empty for any other run.
+static std::string_view dsda_Movie()
 {
 	if(gamemode == GameMode::Commercial)
 	{
@@ -87,7 +88,7 @@ static const char* dsda_Movie()
 		}
 	}
 
-	return nullptr;
+	return {};
 }
 
 static std::string dsda_TextFileTime()
@@ -108,11 +109,6 @@ static std::string dsda_TextFileTime()
 
 void dsda_ExportTextFile()
 {
-	dsda_arg_t* arg;
-	const char* iwad = nullptr;
-	const char* pwad = nullptr;
-	const char* dsda_player_name;
-
 	if(!dsda_Flag(ArgId::ExportTextFile))
 		return;
 
@@ -127,31 +123,19 @@ void dsda_ExportTextFile()
 	if(!file)
 		I_Error("Unable to export text file!");
 
-	arg = dsda_Arg(ArgId::Iwad);
-	if(arg->found)
-		iwad = PathFindFileName(arg->value.v_string);
-
-	arg = dsda_Arg(ArgId::File);
-	if(arg->found)
-		pwad = PathFindFileName(arg->value.v_string_array[0]);
-
 	std::println(file, "Doom Speed Demo Archive");
 	std::println(file, "https://dsdarchive.com/");
 	std::println(file, "");
-	if(iwad)
-		std::println(file, "Iwad:      {}", iwad);
-	if(pwad)
-		std::println(file, "Pwad:      {}", pwad);
+	if(const dsda_arg_t* const iwad = dsda_Arg(ArgId::Iwad); iwad->found)
+		std::println(file, "Iwad:      {}", PathFindFileName(iwad->value.v_string));
+	if(const dsda_arg_t* const pwad = dsda_Arg(ArgId::File); pwad->found)
+		std::println(file, "Pwad:      {}", PathFindFileName(pwad->value.v_string_array[0]));
 
 	if(dsda_IL())
 		std::println(file, "Map:       {}", dsda_MapLumpName(gameepisode, dsda_startmap));
 	else
 	{
-		const char* movie;
-
-		movie = dsda_Movie();
-
-		if(movie)
+		if(const std::string_view movie = dsda_Movie(); !movie.empty())
 			std::println(file, "Movie:     {}", movie);
 		else
 		{
@@ -167,10 +151,8 @@ void dsda_ExportTextFile()
 
 	std::println(file, "Time:      {}", dsda_TextFileTime());
 
-	dsda_player_name = dsda_StringConfig(ConfigId::PlayerName);
-
 	std::println(file, "");
-	std::println(file, "Author:    {}", dsda_player_name);
+	std::println(file, "Author:    {}", dsda_StringConfig(ConfigId::PlayerName));
 	std::println(file, "");
 	std::println(file, "Comments:");
 }
