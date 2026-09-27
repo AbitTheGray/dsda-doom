@@ -181,6 +181,18 @@ int W_LumpNumInPortWad(int lump);
 }
 #endif
 
+/// A lump name as a view: at most 8 characters, up to the first zero.
+/// Names from WAD and map data can fill all 8 characters without a terminating zero; nothing past them is read.
+inline std::string_view W_LumpNameView(const char* const name)
+{
+	std::size_t length = 0;
+
+	while(length < 8 && name[length] != '\0')
+		++length;
+
+	return {name, length};
+}
+
 // `std::string_view` versions of the name lookups.
 // They use the same part of the name as the `const char*` ones: at most 8 characters, up to the first zero.
 int W_FindNumFromName2(std::string_view name, LumpNamespace ns, int lump);

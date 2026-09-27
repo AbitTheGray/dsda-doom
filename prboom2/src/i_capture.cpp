@@ -477,40 +477,40 @@ void I_CapturePrep(const char* fn)
 
 	if(!parsecommand(soundpipe.command, cap_soundcommand, sizeof(soundpipe.command)))
 	{
-		lprintf(OutputLevels::Error, "I_CapturePrep: malformed command %s\n", cap_soundcommand);
+		Log::Error("I_CapturePrep: malformed command {}\n", cap_soundcommand);
 		capturing_video = 0;
 		return;
 	}
 	if(!parsecommand(videopipe.command, cap_videocommand, sizeof(videopipe.command)))
 	{
-		lprintf(OutputLevels::Error, "I_CapturePrep: malformed command %s\n", cap_videocommand);
+		Log::Error("I_CapturePrep: malformed command {}\n", cap_videocommand);
 		capturing_video = 0;
 		return;
 	}
 	if(!parsecommand(muxpipe.command, cap_muxcommand, sizeof(muxpipe.command)))
 	{
-		lprintf(OutputLevels::Error, "I_CapturePrep: malformed command %s\n", cap_muxcommand);
+		Log::Error("I_CapturePrep: malformed command {}\n", cap_muxcommand);
 		capturing_video = 0;
 		return;
 	}
 
-	lprintf(OutputLevels::Info, "I_CapturePrep: opening pipe \"%s\"\n", soundpipe.command);
+	Log::Info("I_CapturePrep: opening pipe \"{}\"\n", std::string_view(soundpipe.command));
 	if(!my_popen3(&soundpipe))
 	{
-		lprintf(OutputLevels::Error, "I_CapturePrep: sound pipe failed\n");
+		Log::Error("I_CapturePrep: sound pipe failed\n");
 		capturing_video = 0;
 		return;
 	}
-	lprintf(OutputLevels::Info, "I_CapturePrep: opening pipe \"%s\"\n", videopipe.command);
+	Log::Info("I_CapturePrep: opening pipe \"{}\"\n", std::string_view(videopipe.command));
 	if(!my_popen3(&videopipe))
 	{
-		lprintf(OutputLevels::Error, "I_CapturePrep: video pipe failed\n");
+		Log::Error("I_CapturePrep: video pipe failed\n");
 		my_pclose3(&soundpipe);
 		capturing_video = 0;
 		return;
 	}
 	I_SetSoundCap();
-	lprintf(OutputLevels::Info, "I_CapturePrep: video capture started\n");
+	Log::Info("I_CapturePrep: video capture started\n");
 	capturing_video = 1;
 
 	// start reader threads
@@ -553,14 +553,14 @@ void I_CaptureFrame()
 	if(snd)
 	{
 		if(fwrite(snd, nsampreq * 4, 1, soundpipe.f_stdin) != 1)
-			lprintf(OutputLevels::Warn, "I_CaptureFrame: error writing soundpipe.\n");
+			Log::Warn("I_CaptureFrame: error writing soundpipe.\n");
 		//Z_Free (snd); // static buffer
 	}
 	vid = I_GrabScreen();
 	if(vid)
 	{
 		if(fwrite(vid, renderW * renderH * 3, 1, videopipe.f_stdin) != 1)
-			lprintf(OutputLevels::Warn, "I_CaptureFrame: error writing videopipe.\n");
+			Log::Warn("I_CaptureFrame: error writing videopipe.\n");
 		//Z_Free (vid); // static buffer
 	}
 }
@@ -590,11 +590,11 @@ void I_CaptureFinish()
 
 	// muxing and temp file cleanup
 
-	lprintf(OutputLevels::Info, "I_CaptureFinish: opening pipe \"%s\"\n", muxpipe.command);
+	Log::Info("I_CaptureFinish: opening pipe \"{}\"\n", std::string_view(muxpipe.command));
 
 	if(!my_popen3(&muxpipe))
 	{
-		lprintf(OutputLevels::Error, "I_CaptureFinish: finalize pipe failed\n");
+		Log::Error("I_CaptureFinish: finalize pipe failed\n");
 		return;
 	}
 

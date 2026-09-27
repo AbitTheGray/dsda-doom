@@ -116,7 +116,7 @@ static int R_FilterValidPatch(int lump_num, const char* name)
 	{
 		if(R_IsPNGLump(lump_num))
 		{
-			lprintf(OutputLevels::Warn, "Warning: patch %s is in an unsupported format (PNG)\n", name);
+			Log::Warn("Warning: patch {} is in an unsupported format (PNG)\n", name);
 			lump_num = W_CheckNumForName2("TNT1A0", LumpNamespace::Sprites);
 		}
 	}
@@ -215,7 +215,7 @@ static void R_InitTextures()
 		offset = LittleLong(*directory);
 
 		if(offset > maxoff)
-			I_Error("R_InitTextures: Bad texture directory");
+			Log::Fatal("R_InitTextures: Bad texture directory");
 
 		mtexture = (const maptexture_t*)((const byte*)maptex + offset);
 
@@ -273,8 +273,8 @@ static void R_InitTextures()
 			// Check if patch is in PNAMES bounds
 			if(patchindex < 0 || patchindex >= nummappatches)
 			{
-				lprintf(OutputLevels::Warn, "\nR_InitTextures: Texture %.8s references patch index %d outside PNAMES table (%d entries)",
-					texture->name, patchindex, nummappatches);
+				Log::Warn("\nR_InitTextures: Texture {} references patch index {} outside PNAMES table ({} entries)",
+					W_LumpNameView(texture->name), patchindex, nummappatches);
 				continue;
 			}
 
@@ -284,8 +284,8 @@ static void R_InitTextures()
 			if(patch->patch == -1)
 			{
 				//jff 8/3/98 use logical output routine
-				lprintf(OutputLevels::Error, "\nR_InitTextures: Missing patch %d in texture %.8s",
-					patchindex, texture->name); // killough 4/17/98
+				Log::Error("\nR_InitTextures: Missing patch {} in texture {}",
+					patchindex, W_LumpNameView(texture->name)); // killough 4/17/98
 				++errors;
 			}
 
@@ -307,7 +307,7 @@ static void R_InitTextures()
 
 		info = W_GetLumpInfoByNum(names_lump);
 
-		I_Error("Texture errors: %d!\n%s seems to be incompatible with %s.\nAre you using the right IWAD?",
+		Log::Fatal("Texture errors: {}!\n{} seems to be incompatible with {}.\nAre you using the right IWAD?",
 			errors, dsda_BaseName(info->wadfile->name), doomverstr);
 	}
 
@@ -421,11 +421,11 @@ int R_ColormapNumForName(const char* name)
 
 void R_InitData()
 {
-	lprintf(OutputLevels::Debug, "Textures ");
+	Log::Debug("Textures ");
 	R_InitTextures();
-	lprintf(OutputLevels::Debug, "Flats ");
+	Log::Debug("Flats ");
 	R_InitFlats();
-	lprintf(OutputLevels::Debug, "Sprites ");
+	Log::Debug("Sprites ");
 	R_InitSpriteLumps();
 	R_InitColormaps(); // killough 3/20/98
 }
@@ -445,11 +445,11 @@ int R_FlatNumForName(const char* name) // killough -- const added
 		// e6y
 		// Ability to play wads with wrong flat names
 		// Unknown flats will be replaced with "NO TEXTURE" preset from dsda-doom.wad
-		lprintf(OutputLevels::Debug, "R_FlatNumForName: %.8s not found\n", name);
+		Log::Debug("R_FlatNumForName: {} not found\n", W_LumpNameView(name));
 		i = W_CheckNumForName2("-N0_TEX-", LumpNamespace::Flats);
 		if(i == LUMP_NOT_FOUND)
 		{
-			I_Error("R_FlatNumForName: -N0_TEX- not found");
+			Log::Fatal("R_FlatNumForName: -N0_TEX- not found");
 		}
 	}
 	return i - firstflat;
@@ -496,8 +496,8 @@ int PUREFUNC R_TextureNumForName(const char* name) // const added -- killough
 		lump = W_GetNumForName("TEXTURE1");
 		info = W_GetLumpInfoByNum(lump);
 
-		I_Error("Texture not found: %.8s!\n%s seems to be incompatible with %s.\nAre you using the right IWAD?",
-			name, dsda_BaseName(info->wadfile->name), doomverstr);
+		Log::Fatal("Texture not found: {}!\n{} seems to be incompatible with {}.\nAre you using the right IWAD?",
+			W_LumpNameView(name), dsda_BaseName(info->wadfile->name), doomverstr);
 	}
 	return i;
 }
@@ -511,7 +511,7 @@ int PUREFUNC R_SafeTextureNumForName(const char* name, int snum)
 	if(i == -1)
 	{
 		i = NO_TEXTURE; // e6y - return "no texture"
-		lprintf(OutputLevels::Debug, "bad texture '%.8s' in sidedef %d\n", name, snum);
+		Log::Debug("bad texture '{}' in sidedef {}\n", W_LumpNameView(name), snum);
 	}
 	return i;
 }

@@ -84,7 +84,7 @@ void W_InitCache()
 	// set up caching
 	lump_data = static_cast<void**>(Z_Calloc(numlumps, sizeof *lump_data));
 	if(!lump_data)
-		I_Error("W_Init: Couldn't allocate lump data");
+		Log::Fatal("W_Init: Couldn't allocate lump data");
 
 	mapped_wad = static_cast<decltype(mapped_wad)>(Z_Calloc(numwadfiles, sizeof(mmap_info_t)));
 	memset(mapped_wad, 0, sizeof(mmap_info_t) * numwadfiles);
@@ -98,7 +98,7 @@ void W_InitCache()
 				continue;
 #ifdef RANGECHECK
 if ((wad_index<0)||((size_t)wad_index>=numwadfiles))
-I_Error("W_InitCache: wad_index out of range");
+Log::Fatal("W_InitCache: wad_index out of range");
 #endif
 if (!mapped_wad[wad_index].data)
       {
@@ -108,7 +108,7 @@ if (!mapped_wad[wad_index].data)
           nullptr, OPEN_EXISTING, 0, nullptr);
         Z_Free(wname);
         if (mapped_wad[wad_index].hnd==INVALID_HANDLE_VALUE)
-          I_Error("W_InitCache: CreateFile for memory mapping failed (LastError %li)",GetLastError());
+          Log::Fatal("W_InitCache: CreateFile for memory mapping failed (LastError {})",GetLastError());
         mapped_wad[wad_index].hnd_map =
           CreateFileMapping(
             mapped_wad[wad_index].hnd,
@@ -119,7 +119,7 @@ if (!mapped_wad[wad_index].data)
             NULL
           );
         if (mapped_wad[wad_index].hnd_map==nullptr)
-          I_Error("W_InitCache: CreateFileMapping for memory mapping failed (LastError %li)",GetLastError());
+          Log::Fatal("W_InitCache: CreateFileMapping for memory mapping failed (LastError {})",GetLastError());
         mapped_wad[wad_index].data =
           MapViewOfFile(
             mapped_wad[wad_index].hnd_map,
@@ -129,7 +129,7 @@ if (!mapped_wad[wad_index].data)
             0
           );
         if (mapped_wad[wad_index].data==nullptr)
-          I_Error("W_InitCache: MapViewOfFile for memory mapping failed (LastError %li)",GetLastError());
+          Log::Fatal("W_InitCache: MapViewOfFile for memory mapping failed (LastError {})",GetLastError());
       }
     }
   }
@@ -140,9 +140,9 @@ const void* W_LumpByNum(int lump)
 	int wad_index = (int)(lumpinfo[lump].wadfile - wadfiles);
 #ifdef RANGECHECK
 if ((wad_index<0)||((size_t)wad_index>=numwadfiles))
-I_Error("W_LumpByNum: wad_index out of range");
+Log::Fatal("W_LumpByNum: wad_index out of range");
   if ((unsigned)lump>= (unsigned)numlumps)
-I_Error("W_LumpByNum: %i >= numlumps", lump);
+Log::Fatal("W_LumpByNum: {} >= numlumps", lump);
 #endif
 if (!lumpinfo[lump].wadfile)
     return nullptr;
@@ -159,7 +159,7 @@ void W_InitCache()
 	// set up caching
 	lump_data = static_cast<void**>(Z_Calloc(numlumps, sizeof *lump_data));
 	if(!lump_data)
-		I_Error("W_Init: Couldn't allocate lump data");
+		Log::Fatal("W_Init: Couldn't allocate lump data");
 
 	{
 		int i;
@@ -177,7 +177,7 @@ void W_InitCache()
 				int fd = lumpinfo[i].wadfile->handle;
 				if(!mapped_wad[fd])
 					if((mapped_wad[fd] = mmap(nullptr, I_Filelength(fd),PROT_READ,MAP_SHARED, fd, 0)) == MAP_FAILED)
-						I_Error("W_InitCache: failed to mmap");
+						Log::Fatal("W_InitCache: failed to mmap");
 			}
 		}
 	}
@@ -198,7 +198,7 @@ void W_DoneCache()
 				if(fd > 0 && mapped_wad[fd])
 				{
 					if(munmap(mapped_wad[fd], I_Filelength(fd)))
-						I_Error("W_DoneCache: failed to munmap");
+						Log::Fatal("W_DoneCache: failed to munmap");
 					mapped_wad[fd] = nullptr;
 				}
 			}
@@ -211,7 +211,7 @@ const void* W_LumpByNum(int lump)
 {
 #ifdef RANGECHECK
 	if((unsigned)lump >= (unsigned)numlumps)
-		I_Error("W_LumpByNum: %i >= numlumps", lump);
+		Log::Fatal("W_LumpByNum: {} >= numlumps", lump);
 #endif
 	if(!lumpinfo[lump].wadfile)
 		return nullptr;

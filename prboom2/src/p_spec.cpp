@@ -229,15 +229,15 @@ void P_InitPicAnims()
 		if(lastanim->speed < 65536 && lastanim->numpics != 1)
 		{
 			if(lastanim->numpics < 2)
-				I_Error("P_InitPicAnims: bad cycle from %s to %s",
-					animdefs[i].startname,
-					animdefs[i].endname);
+				Log::Fatal("P_InitPicAnims: bad cycle from {} to {}",
+					std::string_view(animdefs[i].startname),
+					std::string_view(animdefs[i].endname));
 		}
 
 		if(lastanim->speed == 0)
-			I_Error("P_InitPicAnims: %s to %s animation cannot have speed 0",
-				animdefs[i].startname,
-				animdefs[i].endname);
+			Log::Fatal("P_InitPicAnims: {} to {} animation cannot have speed 0",
+				std::string_view(animdefs[i].startname),
+				std::string_view(animdefs[i].endname));
 
 		lastanim++;
 	}
@@ -472,13 +472,13 @@ fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
 					// 20 & 21 are common and not "warning" worthy
 					if(h > MAX_ADJOINING_SECTORS + 1)
 					{
-						lprintf(OutputLevels::Warn, "P_FindNextHighestFloor: Overflow of heightlist[%d] array is detected.\n", MAX_ADJOINING_SECTORS);
-						lprintf(OutputLevels::Warn, " Sector %d, line %d, heightlist index %d: ", sec->iSectorID, sec->lines[i]->iLineID, h);
+						Log::Warn("P_FindNextHighestFloor: Overflow of heightlist[{}] array is detected.\n", MAX_ADJOINING_SECTORS);
+						Log::Warn(" Sector {}, line {}, heightlist index {}: ", sec->iSectorID, sec->lines[i]->iLineID, h);
 
 						if(h <= MAX_ADJOINING_SECTORS + 6)
-							lprintf(OutputLevels::Warn, "cannot be emulated - unpredictable behaviour.\n");
+							Log::Warn("cannot be emulated - unpredictable behaviour.\n");
 						else
-							lprintf(OutputLevels::Warn, "cannot be emulated - crash with high probability.\n");
+							Log::Warn("cannot be emulated - crash with high probability.\n");
 					}
 				}
 				heightlist[h++] = other->floorheight;
@@ -487,7 +487,7 @@ fixed_t P_FindNextHighestFloor(sector_t* sec, int currentheight)
 			// Check for overflow. Warning.
 			if(compatibility_level >= CompLevel::Dosdoom && h >= MAX_ADJOINING_SECTORS)
 			{
-				lprintf(OutputLevels::Warn, "Sector with more than 20 adjoining sectors\n");
+				Log::Warn("Sector with more than 20 adjoining sectors\n");
 				break;
 			}
 		}
@@ -3794,7 +3794,7 @@ extern "C" void P_SpawnCompatibleScroller(line_t* l, int i)
 		case 1025:
 		case 1026:
 			if(l->special_args[0] == 0)
-				I_Error("Line %d is missing a tag!", i);
+				Log::Fatal("Line {} is missing a tag!", i);
 
 			if(special > 1024)
 				control = sides[*l->sidenum].sector->iSectorID;
@@ -4839,7 +4839,7 @@ void P_AddAmbientSfx(int sequence)
 {
 	if(AmbSfxCount == MAX_AMBIENT_SFX)
 	{
-		I_Error("Too many ambient sound sequences");
+		Log::Fatal("Too many ambient sound sequences");
 	}
 	LevelAmbientSfx[AmbSfxCount++] = AmbientSfx[sequence];
 }
@@ -4911,7 +4911,7 @@ void P_AmbientSound()
 				done = true;
 				break;
 			default:
-				I_Error("P_AmbientSound: Unknown afxcmd %d", cmd);
+				Log::Fatal("P_AmbientSound: Unknown afxcmd {}", std::to_underlying(cmd));
 				break;
 		}
 	}
@@ -5284,8 +5284,8 @@ extern "C" void P_PlayerInHereticSector(player_t* player, sector_t* sector)
 			break;
 
 		default:
-			I_Error("P_PlayerInSpecialSector: "
-				"unknown special %i", sector->special);
+			Log::Fatal("P_PlayerInSpecialSector: "
+				"unknown special {}", sector->special);
 	}
 }
 
@@ -5741,8 +5741,8 @@ extern "C" void P_PlayerInHexenSector(player_t* player, sector_t* sector)
 			// Used in (R_plane):R_Drawplanes
 			break;
 		default:
-			I_Error("P_PlayerInSpecialSector: "
-				"unknown special %i", sector->special);
+			Log::Fatal("P_PlayerInSpecialSector: "
+				"unknown special {}", sector->special);
 	}
 }
 
@@ -8120,8 +8120,8 @@ static void Hexen_P_SpawnSpecials()
 				{
 					if(TaggedLineCount == MAX_TAGGED_LINES)
 					{
-						I_Error("P_SpawnSpecials: MAX_TAGGED_LINES "
-							"(%d) exceeded.", MAX_TAGGED_LINES);
+						Log::Fatal("P_SpawnSpecials: MAX_TAGGED_LINES "
+							"({}) exceeded.", MAX_TAGGED_LINES);
 					}
 					TaggedLines[TaggedLineCount].line = &lines[i];
 					TaggedLines[TaggedLineCount++].lineTag = lines[i].special_args[0];
