@@ -132,13 +132,13 @@ static void W_AddFile(wadfile_info_t* wadfile)
 	if(wadfile->handle == -1)
 	{
 		if(!dsda_HasFileExt(wadfile->name, ".lmp"))
-			I_Error("W_AddFile: couldn't open %s", wadfile->name);
+			Log::Fatal("W_AddFile: couldn't open {}", wadfile->name);
 		return;
 	}
 
 	//jff 8/3/98 use logical output routine
 	if(MainLumpCache)
-		lprintf(OutputLevels::Info, " adding %s\n", wadfile->name);
+		Log::Info(" adding {}\n", wadfile->name);
 	startlump = numlumps;
 
 	// mark lumps from internal resource
@@ -170,7 +170,7 @@ static void W_AddFile(wadfile_info_t* wadfile)
 		I_Read(wadfile->handle, &header, sizeof(header));
 		if(strncmp(header.identification, "IWAD", 4) &&
 			strncmp(header.identification, "PWAD", 4))
-			I_Error("W_AddFile: Wad file %s doesn't have IWAD or PWAD id", wadfile->name);
+			Log::Fatal("W_AddFile: Wad file {} doesn't have IWAD or PWAD id", wadfile->name);
 		header.numlumps = LittleLong(header.numlumps);
 		header.infotableofs = LittleLong(header.infotableofs);
 		length = header.numlumps * sizeof(filelump_t);
@@ -403,14 +403,14 @@ int W_GetNumForName(const char* name) // killough -- const added
 {
 	int i = W_CheckNumForName(name);
 	if(i == LUMP_NOT_FOUND)
-		I_Error("W_GetNumForName: %.8s not found", name);
+		Log::Fatal("W_GetNumForName: {} not found", W_LumpNameView(name));
 	return i;
 }
 
 const lumpinfo_t* W_GetLumpInfoByNum(int lump)
 {
 	if(lump < 0 || lump >= numlumps)
-		I_Error("W_GetLumpInfoByNum: lump num %d out of range", lump);
+		Log::Fatal("W_GetLumpInfoByNum: lump num {} out of range", lump);
 
 	return &lumpinfo[lump];
 }
@@ -481,7 +481,7 @@ void W_Init()
 	if(!numlumps)
 	{
 		if(!MainLumpCache) return;
-		I_Error("W_Init: No files found");
+		Log::Fatal("W_Init: No files found");
 	}
 
 	//jff 1/23/98
@@ -499,7 +499,7 @@ void W_Init()
 	W_HashLumps();
 
 	/* cph 2001/07/07 - separated cache setup */
-	lprintf(OutputLevels::Debug, "W_InitCache\n");
+	Log::Debug("W_InitCache\n");
 	W_InitCache();
 
 	V_FreePlaypal();
@@ -512,7 +512,7 @@ void W_Init()
 int W_LumpLength(int lump)
 {
 	if(lump >= numlumps)
-		I_Error("W_LumpLength: %i >= numlumps", lump);
+		Log::Fatal("W_LumpLength: {} >= numlumps", lump);
 	return lumpinfo[lump].size;
 }
 
@@ -538,7 +538,7 @@ void W_ReadLump(int lump, void* dest)
 
 #ifdef RANGECHECK
 	if(lump >= numlumps)
-		I_Error("W_ReadLump: %i >= numlumps", lump);
+		Log::Fatal("W_ReadLump: {} >= numlumps", lump);
 #endif
 
 	{

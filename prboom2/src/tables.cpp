@@ -68,37 +68,37 @@ void R_LoadTrigTables()
 	{
 		lump = W_CheckNumForName2("SINETABL", LumpNamespace::Prboom);
 		if(lump == LUMP_NOT_FOUND)
-			I_Error("Failed to locate trig tables");
+			Log::Fatal("Failed to locate trig tables");
 		if(W_LumpLength(lump) != sizeof(finesine))
-			I_Error("R_LoadTrigTables: Invalid SINETABL");
+			Log::Fatal("R_LoadTrigTables: Invalid SINETABL");
 		W_ReadLump(lump, (unsigned char*)finesine);
 	}
 	{
 		lump = W_CheckNumForName2("TANGTABL", LumpNamespace::Prboom);
 		if(lump == LUMP_NOT_FOUND)
-			I_Error("Failed to locate trig tables");
+			Log::Fatal("Failed to locate trig tables");
 		if(W_LumpLength(lump) != sizeof(finetangent))
-			I_Error("R_LoadTrigTables: Invalid TANGTABL");
+			Log::Fatal("R_LoadTrigTables: Invalid TANGTABL");
 		W_ReadLump(lump, (unsigned char*)finetangent);
 	}
 	{
 		lump = W_CheckNumForName2("TANTOANG", LumpNamespace::Prboom);
 		if(lump == LUMP_NOT_FOUND)
-			I_Error("Failed to locate trig tables");
+			Log::Fatal("Failed to locate trig tables");
 		if(W_LumpLength(lump) != sizeof(tantoangle))
-			I_Error("R_LoadTrigTables: Invalid TANTOANG");
+			Log::Fatal("R_LoadTrigTables: Invalid TANTOANG");
 		W_ReadLump(lump, (unsigned char*)tantoangle);
 	}
 	// Endianness correction - might still be non-portable, but is fast where possible
 	{
 		size_t n;
-		lprintf(OutputLevels::Debug, "Endianness...");
+		Log::Debug("Endianness...");
 
 		// This test doesn't assume the endianness of the tables, but deduces them from
 		// en entry. I hope this is portable.
 		if((10 < finesine[1]) && (finesine[1] < 100))
 		{
-			lprintf(OutputLevels::Debug, "ok.");
+			Log::Debug("ok.");
 			return; // Endianness is correct
 		}
 
@@ -109,6 +109,6 @@ void R_LoadTrigTables()
 		CORRECT_TABLE_ENDIAN(finesine);
 		CORRECT_TABLE_ENDIAN(finetangent);
 		CORRECT_TABLE_ENDIAN(tantoangle);
-		lprintf(OutputLevels::Debug, "corrected.");
+		Log::Debug("corrected.");
 	}
 }

@@ -101,9 +101,9 @@ static void I_SignalHandler(int s)
 
 	I_SigString(buf, sizeof(buf), s);
 
-	I_Error("The game has crashed!\n"
-		"Please report the following information: %s (0x%04x)",
-		buf, signal_context);
+	Log::Fatal("The game has crashed!\n"
+		"Please report the following information: {} (0x{:04x})",
+		std::string_view(buf), std::to_underlying(signal_context));
 }
 
 static void I_IntHandler(int s)
@@ -114,7 +114,7 @@ static void I_IntHandler(int s)
 static void PrintVer()
 {
 	char vbuf[200];
-	lprintf(OutputLevels::Info, "%s\n", I_GetVersionString(vbuf, 200));
+	Log::Info("{}\n", I_GetVersionString(vbuf, 200));
 }
 
 // Schedule a function to be called when the program exits.
@@ -153,7 +153,7 @@ void I_SafeExit(int rc)
 {
 	atexit_listentry_t* entry;
 
-	lprintf(OutputLevels::Debug, "\n"); // Separator after game loop
+	Log::Debug("\n"); // Separator after game loop
 
 	// Run through all exit functions
 	for(; exit_priority < std::to_underlying(ExitPriority::Max); ++exit_priority)
@@ -164,7 +164,7 @@ void I_SafeExit(int rc)
 
 			if(rc == 0 || entry->run_on_error)
 			{
-				lprintf(OutputLevels::Debug, "Exit Sequence[%d]: %s (%d)\n", exit_priority, entry->name, rc);
+				Log::Debug("Exit Sequence[{}]: {} ({})\n", exit_priority, entry->name, rc);
 				entry->func();
 			}
 		}
@@ -230,11 +230,11 @@ void I_SetProcessPriority()
 
 		if(errbuf == nullptr)
 		{
-			lprintf(OutputLevels::Info, "I_SetProcessPriority: priority for the process is %d\n", process_priority);
+			Log::Info("I_SetProcessPriority: priority for the process is {}\n", process_priority);
 		}
 		else
 		{
-			lprintf(OutputLevels::Error, "I_SetProcessPriority: failed to set priority for the process (%s)\n", errbuf);
+			Log::Error("I_SetProcessPriority: failed to set priority for the process ({})\n", errbuf);
 		}
 	}
 }
@@ -266,9 +266,9 @@ int main(int argc, char** argv)
 	// e6y: was moved from D_DoomMainSetup
 	// init subsystems
 	//jff 9/3/98 use logical output routine
-	lprintf(OutputLevels::Debug, "M_LoadDefaults: Load system defaults.\n");
+	Log::Debug("M_LoadDefaults: Load system defaults.\n");
 	M_LoadDefaults(); // load before initing other systems
-	lprintf(OutputLevels::Debug, "\n");
+	Log::Debug("\n");
 
 	// Print date and time in the Load/Save Game menus in the current locale
 	setlocale(LC_TIME, "");

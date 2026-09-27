@@ -139,7 +139,7 @@ static void R_InstallSpriteLump(int lump, unsigned frame,
 	}
 
 	if(frame >= MAX_SPRITE_FRAMES || rotation > 16)
-		I_Error("R_InstallSpriteLump: Bad frame characters in lump %i", lump);
+		Log::Fatal("R_InstallSpriteLump: Bad frame characters in lump {}", lump);
 
 	if((int)frame > maxframe)
 		maxframe = frame;
@@ -339,9 +339,9 @@ static void R_InitSpriteDefs(const char* const * namelist)
 							for(rot = 0; rot < 16; rot++)
 							{
 								if(sprtemp[frame].lump[rot] == -1)
-									I_Error("R_InitSprites: Sprite %.8s frame %c "
+									Log::Fatal("R_InitSprites: Sprite {} frame {} "
 										"is missing rotations",
-										namelist[i], frame + 'A');
+										W_LumpNameView(namelist[i]), static_cast<char>(frame + 'A'));
 							}
 							break;
 					}
@@ -708,19 +708,19 @@ static void R_ProjectSprite(mobj_t* thing, int lightlevel)
 	// decide which patch to use for sprite relative to player
 #ifdef RANGECHECK
 	if((unsigned)thing->sprite >= (unsigned)num_sprites)
-		I_Error("R_ProjectSprite: Invalid sprite number %i", thing->sprite);
+		Log::Fatal("R_ProjectSprite: Invalid sprite number {}", std::to_underlying(thing->sprite));
 #endif
 
 	sprdef = &sprites[std::to_underlying(thing->sprite)];
 
 #ifdef RANGECHECK
 	if((thing->frame & FF_FRAMEMASK) >= sprdef->numframes)
-		I_Error("R_ProjectSprite: Invalid sprite frame %i : %i", thing->sprite,
+		Log::Fatal("R_ProjectSprite: Invalid sprite frame {} : {}", std::to_underlying(thing->sprite),
 			thing->frame);
 #endif
 
 	if(!sprdef->spriteframes)
-		I_Error("R_ProjectSprite: Missing spriteframes %i : %i", thing->sprite,
+		Log::Fatal("R_ProjectSprite: Missing spriteframes {} : {}", std::to_underlying(thing->sprite),
 			thing->frame);
 
 	sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
@@ -1032,15 +1032,15 @@ static void R_DrawPSprite(pspdef_t* psp)
 
 #ifdef RANGECHECK
 	if((unsigned)psp->state->sprite >= (unsigned)num_sprites)
-		I_Error("R_ProjectSprite: Invalid sprite number %i", psp->state->sprite);
+		Log::Fatal("R_ProjectSprite: Invalid sprite number {}", std::to_underlying(psp->state->sprite));
 #endif
 
 	sprdef = &sprites[std::to_underlying(psp->state->sprite)];
 
 #ifdef RANGECHECK
 	if((psp->state->frame & FF_FRAMEMASK) >= sprdef->numframes)
-		I_Error("R_ProjectSprite: Invalid sprite frame %i : %li",
-			psp->state->sprite, psp->state->frame);
+		Log::Fatal("R_ProjectSprite: Invalid sprite frame {} : {}",
+			std::to_underlying(psp->state->sprite), psp->state->frame);
 #endif
 
 	sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];

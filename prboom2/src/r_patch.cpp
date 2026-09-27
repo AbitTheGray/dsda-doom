@@ -378,13 +378,13 @@ static void createPatch(int id)
 
 #ifdef RANGECHECK
 	if(id >= numlumps)
-		I_Error("createPatch: %i >= numlumps", id);
+		Log::Fatal("createPatch: {} >= numlumps", id);
 #endif
 
 	if(!R_IsPatchLump(patchNum))
 	{
-		I_Error("createPatch: Unknown patch format %s.",
-			(patchNum < numlumps ? lumpinfo[patchNum].name : nullptr));
+		Log::Fatal("createPatch: Unknown patch format {}.",
+			(patchNum < numlumps ? std::string_view(lumpinfo[patchNum].name) : "(null)"));
 	}
 
 	oldPatch = (const patch_t*)W_LumpByNum(patchNum);
@@ -560,7 +560,7 @@ static void removePostFromColumn(rcolumn_t* column, int post)
 	int i;
 #ifdef RANGECHECK
 	if(post >= column->numPosts)
-		I_Error("removePostFromColumn: invalid post index");
+		Log::Fatal("removePostFromColumn: invalid post index");
 #endif
 	if(post < column->numPosts)
 		for(i = post; i < (column->numPosts - 1); i++)
@@ -597,7 +597,7 @@ static void createTextureCompositePatch(int id)
 
 #ifdef RANGECHECK
 	if(id >= numtextures)
-		I_Error("createTextureCompositePatch: %i >= numtextures", id);
+		Log::Fatal("createTextureCompositePatch: {} >= numtextures", id);
 #endif
 
 	composite_patch = &texture_composites[id];
@@ -844,11 +844,11 @@ static void createTextureCompositePatch(int id)
 const rpatch_t* R_PatchByNum(int id)
 {
 	if(!patches)
-		I_Error("R_PatchByNum: Patches not initialized");
+		Log::Fatal("R_PatchByNum: Patches not initialized");
 
 #ifdef RANGECHECK
 	if(id >= numlumps)
-		I_Error("createPatch: %i >= numlumps", id);
+		Log::Fatal("createPatch: {} >= numlumps", id);
 #endif
 
 	if(!patches[id].data)
@@ -861,11 +861,11 @@ const rpatch_t* R_PatchByNum(int id)
 const rpatch_t* R_TextureCompositePatchByNum(int id)
 {
 	if(!texture_composites)
-		I_Error("R_TextureCompositePatchByNum: Composite patches not initialized");
+		Log::Fatal("R_TextureCompositePatchByNum: Composite patches not initialized");
 
 #ifdef RANGECHECK
 	if(id >= numtextures)
-		I_Error("createTextureCompositePatch: %i >= numtextures", id);
+		Log::Fatal("createTextureCompositePatch: {} >= numtextures", id);
 #endif
 
 	if(!texture_composites[id].data)

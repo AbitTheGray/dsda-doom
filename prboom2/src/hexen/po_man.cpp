@@ -167,7 +167,7 @@ dboolean EV_RotateZDoomPoly(line_t* line, int polyNum, int speed,
 	}
 	else
 	{
-		I_Error("EV_RotatePoly:  Invalid polyobj num: %d\n", polyNum);
+		Log::Fatal("EV_RotatePoly:  Invalid polyobj num: {}\n", polyNum);
 	}
 	pe = static_cast<polyevent_t*>(Z_MallocLevel(sizeof(polyevent_t)));
 	P_AddThinker(&pe->thinker);
@@ -227,7 +227,7 @@ dboolean EV_RotateZDoomPoly(line_t* line, int polyNum, int speed,
 		}
 		else
 		{
-			I_Error("EV_RotatePoly:  Invalid polyobj num: %d\n", polyNum);
+			Log::Fatal("EV_RotatePoly:  Invalid polyobj num: {}\n", polyNum);
 		}
 		direction = -direction;
 		pe->speed = (speed * direction * (ANG90 / 64)) >> 3;
@@ -323,7 +323,7 @@ dboolean EV_MovePolyTo(line_t* line, int polyNum, fixed_t speed,
 	}
 	else
 	{
-		I_Error("EV_MovePoly:  Invalid polyobj num: %d\n", polyNum);
+		Log::Fatal("EV_MovePoly:  Invalid polyobj num: {}\n", polyNum);
 	}
 
 	dist = P_AproxDistance(x - poly->startSpot.x, y - poly->startSpot.y);
@@ -350,7 +350,7 @@ dboolean EV_MoveZDoomPoly(line_t* line, int polyNum, int speed,
 	}
 	else
 	{
-		I_Error("EV_MovePoly:  Invalid polyobj num: %d\n", polyNum);
+		Log::Fatal("EV_MovePoly:  Invalid polyobj num: {}\n", polyNum);
 	}
 
 	if(timesEight)
@@ -520,7 +520,7 @@ dboolean EV_OpenZDoomPolyDoor(line_t* line, int polyNum, int speed,
 	}
 	else
 	{
-		I_Error("EV_OpenPolyDoor:  Invalid polyobj num: %d\n", polyNum);
+		Log::Fatal("EV_OpenPolyDoor:  Invalid polyobj num: {}\n", polyNum);
 	}
 	pd = static_cast<polydoor_t*>(Z_MallocLevel(sizeof(polydoor_t)));
 	memset(pd, 0, sizeof(polydoor_t));
@@ -785,7 +785,7 @@ dboolean PO_MovePolyobj(int num, int x, int y)
 
 	if(!(po = GetPolyobj(num)))
 	{
-		I_Error("PO_MovePolyobj:  Invalid polyobj number: %d\n", num);
+		Log::Fatal("PO_MovePolyobj:  Invalid polyobj number: {}\n", num);
 	}
 
 	UnLinkPolyobj(po);
@@ -902,7 +902,7 @@ dboolean PO_RotatePolyobj(int num, angle_t angle)
 
 	if(!(po = GetPolyobj(num)))
 	{
-		I_Error("PO_RotatePolyobj:  Invalid polyobj number: %d\n", num);
+		Log::Fatal("PO_RotatePolyobj:  Invalid polyobj number: {}\n", num);
 	}
 	an = (po->angle + angle) >> ANGLETOFINESHIFT;
 
@@ -1214,7 +1214,7 @@ static void IterFindPolySegs(int x, int y, seg_t** segList)
 			return;
 		}
 	}
-	I_Error("IterFindPolySegs:  Non-closed Polyobj located.\n");
+	Log::Fatal("IterFindPolySegs:  Non-closed Polyobj located.\n");
 }
 
 static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
@@ -1233,7 +1233,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 		{
 			if(polyobjs[index].segs)
 			{
-				I_Error("SpawnPolyobj:  Polyobj %d already spawned.\n", tag);
+				Log::Fatal("SpawnPolyobj:  Polyobj {} already spawned.\n", tag);
 			}
 			segs[i].linedef->special = 0;
 			segs[i].linedef->special_args[0] = 0;
@@ -1275,8 +1275,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 				{
 					if(!segs[i].linedef->special_args[1])
 					{
-						I_Error
-						("SpawnPolyobj:  Explicit line missing order number (probably %d) in poly %d.\n",
+						Log::Fatal("SpawnPolyobj:  Explicit line missing order number (probably {}) in poly {}.\n",
 							j + 1, tag);
 					}
 					if(segs[i].linedef->special_args[1] == j)
@@ -1286,8 +1285,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 						psIndex++;
 						if(psIndex > PO_MAXPOLYSEGS)
 						{
-							I_Error
-								("SpawnPolyobj:  psIndex > PO_MAXPOLYSEGS\n");
+							Log::Fatal("SpawnPolyobj:  psIndex > PO_MAXPOLYSEGS\n");
 						}
 					}
 				}
@@ -1317,8 +1315,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 						segs[i].linedef->special == PO_LINE_EXPLICIT &&
 						segs[i].linedef->special_args[0] == tag)
 					{
-						I_Error
-						("SpawnPolyobj:  Missing explicit line %d for poly %d\n",
+						Log::Fatal("SpawnPolyobj:  Missing explicit line {} for poly {}\n",
 							j, tag);
 					}
 				}
@@ -1340,7 +1337,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 
 		if(!polyobjs[index].segs)
 		{
-			I_Error("SpawnPolyobj: Missing start / explicit line for poly %d\n", tag);
+			Log::Fatal("SpawnPolyobj: Missing start / explicit line for poly {}\n", tag);
 		}
 
 		// Next, change the polyobjs first line to point to a mirror
@@ -1374,13 +1371,12 @@ static void TranslateToStartSpot(int tag, int originX, int originY)
 	if(!po)
 	{
 		// didn't match the tag with a polyobj tag
-		I_Error("TranslateToStartSpot:  Unable to match polyobj tag: %d\n",
+		Log::Fatal("TranslateToStartSpot:  Unable to match polyobj tag: {}\n",
 			tag);
 	}
 	if(po->segs == nullptr)
 	{
-		I_Error
-		("TranslateToStartSpot:  Anchor point located without a StartSpot point: %d\n",
+		Log::Fatal("TranslateToStartSpot:  Anchor point located without a StartSpot point: {}\n",
 			tag);
 	}
 	po->originalPts = static_cast<decltype(po->originalPts)>(Z_MallocLevel(po->numsegs * sizeof(vertex_t)));
@@ -1432,8 +1428,7 @@ static void TranslateToStartSpot(int tag, int originX, int originY)
 	sub = R_PointInSubsector(avg.x << FRACBITS, avg.y << FRACBITS);
 	if(sub->poly != nullptr)
 	{
-		I_Error
-			("PO_TranslateToStartSpot:  Multiple polyobjs in a single subsector.\n");
+		Log::Fatal("PO_TranslateToStartSpot:  Multiple polyobjs in a single subsector.\n");
 	}
 	po->subsector = sub;
 	sub->poly = po;
@@ -1563,8 +1558,7 @@ void PO_Init(int lump)
 	{
 		if(!polyobjs[i].originalPts)
 		{
-			I_Error
-			("PO_Init:  StartSpot located without an Anchor point: %d\n",
+			Log::Fatal("PO_Init:  StartSpot located without an Anchor point: {}\n",
 				polyobjs[i].tag);
 		}
 	}
