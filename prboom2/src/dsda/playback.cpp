@@ -70,8 +70,11 @@ dboolean dsda_JumpToLogicTicFrom(int tic, int from_tic)
 	return true;
 }
 
-const char* dsda_PlaybackName()
+std::optional<std::string_view> dsda_PlaybackName()
 {
+	if(!playback_name)
+		return std::nullopt;
+
 	return playback_name;
 }
 

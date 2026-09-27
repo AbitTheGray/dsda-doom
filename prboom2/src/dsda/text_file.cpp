@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <optional>
 #include <ostream>
 #include <print>
 #include <string>
@@ -33,13 +34,13 @@ extern int dsda_last_leveltime, dsda_last_gamemap, dsda_startmap;
 // Empty when no demo is played back.
 static std::string dsda_TextFileName()
 {
-	const char* const playback_name = dsda_PlaybackName();
+	const std::optional<std::string_view> playback_name = dsda_PlaybackName();
 
 	if(!playback_name)
 		return {};
 
 	constexpr std::string_view k_demoExtension = ".lmp";
-	std::string_view name = playback_name;
+	std::string_view name = *playback_name;
 
 	const auto lower = [](const char c) { return std::tolower(static_cast<unsigned char>(c)); };
 
