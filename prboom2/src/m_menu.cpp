@@ -121,7 +121,13 @@ static MenuActive messageLastMenuActive;
 
 static dboolean messageNeedsInput; // timed message = no input from user
 
-static void (*messageRoutine)(int response);
+enum struct Confirmation : int32_t
+{
+	Null = -1,
+	No   = 0,
+	Yes  = 1,
+};
+static void (*messageRoutine)(Confirmation response);
 
 static void M_DrawBackground(const char* flat, int scrn)
 {
@@ -214,7 +220,7 @@ static int M_StringWidth(const char* string);
 static int M_StringHeight(const char* string);
 static void M_DrawTitle(int y, const char* text, ColorRange cm);
 static dboolean M_MenuHasMissingRequiredLumps(const menu_t* menu);
-static void M_StartMessage(const char* string, void (*routine)(int response), dboolean input);
+static void M_StartMessage(const char* string, void (*routine)(Confirmation response), dboolean input);
 static void M_StopMessage();
 
 extern "C" void M_ChangeMenu(menu_t* menu, MenuActive mnact);
@@ -677,12 +683,10 @@ static void M_FinishGameSelection()
 }
 
 // CPhipps - static
-static void M_VerifySkill(dboolean affirmative)
+static void M_VerifySkill(const Confirmation response)
 {
-	if(!affirmative)
-		return;
-
-	M_FinishGameSelection();
+	if(response != Confirmation::No)
+		M_FinishGameSelection();
 }
 
 extern "C" void M_ChooseSkill(int choice)
@@ -918,9 +922,9 @@ void M_LoadSelect(int choice)
 
 static char* forced_loadgame_message;
 
-static void M_VerifyForcedLoadGame(dboolean affirmative)
+static void M_VerifyForcedLoadGame(const Confirmation response)
 {
-	if(affirmative)
+	if(response != Confirmation::No)
 		G_ForcedLoadGame();
 	Z_Free(forced_loadgame_message); // free the message Z_Strdup()'ed below
 	M_ClearMenus();
@@ -1288,9 +1292,9 @@ SfxId quitsounds2[8] =
 	SfxId::Sgtatk
 };
 
-static void M_QuitResponse(dboolean affirmative)
+static void M_QuitResponse(const Confirmation response)
 {
-	if(!affirmative)
+	if(response == Confirmation::No)
 		return;
 
 	if(!netgame // killough 12/98
@@ -1334,7 +1338,7 @@ extern "C" void M_QuitDOOM(int choice)
 		snprintf(endstring, sizeof(endstring), "%s\n\n%s", *endmsg[gametic % (NUM_QUITMESSAGES - 1) + 1], s_DOSY);
 
 	if(dsda_SkipQuitPrompt())
-		M_QuitResponse(true);
+		M_QuitResponse(Confirmation::Yes);
 	else
 		M_StartMessage(endstring, M_QuitResponse,true);
 }
@@ -1536,9 +1540,9 @@ static void M_QuickLoad()
 // M_EndGame
 //
 
-static void M_EndGameResponse(dboolean affirmative)
+static void M_EndGameResponse(const Confirmation confirmation)
 {
-	if(!affirmative)
+	if(confirmation == Confirmation::No)
 		return;
 
 	// killough 5/26/98: make endgame quit if recording or playing back demo
@@ -5896,13 +5900,6 @@ static dboolean M_InactiveMenuResponder(const std::optional<KeyCode> ch, const s
 	return false;
 }
 
-enum struct Confirmation : int32_t
-{
-	Null = -1,
-	No   = 0,
-	Yes  = 1,
-};
-
 static Confirmation M_EventToConfirmation(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	if(ch == KeyCode::Y || action == MenuAction::Enter)
@@ -6213,10 +6210,10 @@ static dboolean M_MessageResponder(const std::optional<KeyCode> ch, const std::o
 			return true;
 	}
 
-	M_ChangeMenu(NULL, messageLastMenuActive);
+	M_ChangeMenu(nullptr, messageLastMenuActive);
 	messageToPrint = 0;
 	if(messageRoutine)
-		messageRoutine(std::to_underlying(confirmation));
+		messageRoutine(confirmation);
 
 	M_ChangeMenu(nullptr, static_cast<MenuActive>(MenuActive::Inactive));
 	S_StartOptionalSound(g_sfx_mnucls, g_sfx_swtchx, true);
@@ -6697,7 +6694,7 @@ void M_Ticker()
 // Message Routines
 //
 
-static void M_StartMessage(const char* string, void (*routine)(int response), dboolean input)
+static void M_StartMessage(const char* string, void (*const routine)(Confirmation response), const dboolean input)
 {
 	messageLastMenuActive = menuactive;
 	messageToPrint = 1;
