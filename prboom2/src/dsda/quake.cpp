@@ -37,7 +37,7 @@ void dsda_UpdateQuake(quake_t* quake)
 		mobj_t* mo;
 		fixed_t dist;
 
-		if(!playeringame[i] || players[i].cheats & CF_NOCLIP)
+		if(!playeringame[i] || (players[i].cheats & CheatFlag::NoClip) != CheatFlag{})
 			continue;
 
 		mo = players[i].mo;

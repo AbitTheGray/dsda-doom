@@ -13,6 +13,18 @@
 #include "p_pspr.hpp"
 #include "p_mobj.hpp"
 #include "d_ticcmd.hpp"
+#include "cpp/Util.hpp"
+
+// Cheats a player has on (`player_t::cheats`).
+enum struct CheatFlag : uint32_t
+{
+	NoClip = Bit<uint32_t>(0u),       // no clipping
+	GodMode = Bit<uint32_t>(1u),      // immune to damage
+	InfiniteAmmo = Bit<uint32_t>(2u), // infinite ammo
+	NoTarget = Bit<uint32_t>(3u),     // monsters don't target
+	Fly = Bit<uint32_t>(4u),          // flying player
+};
+ENUM_FLAGS_FUNC(CheatFlag)
 
 #ifdef __cplusplus
 extern "C"
@@ -43,12 +55,6 @@ enum struct PlayerState : int32_t
 	// Ready to restart/respawn???
 	Reborn
 };
-
-#define CF_NOCLIP        0x01 // no clipping
-#define CF_GODMODE       0x02 // immune to damage
-#define CF_INFINITE_AMMO 0x04 // infinite ammo
-#define CF_NOTARGET      0x08 // monsters don't target
-#define CF_FLY           0x10 // flying player
 
 // heretic
 typedef struct
@@ -162,7 +168,7 @@ typedef struct player_s
 	int usedown;
 
 	// See CF flags above.
-	int cheats;
+	CheatFlag cheats;
 
 	// Refired shots are less accurate.
 	int refire;

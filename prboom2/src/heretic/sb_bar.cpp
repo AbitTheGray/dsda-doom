@@ -547,7 +547,7 @@ void SB_Drawer(dboolean statusbaron, dboolean refresh)
 		if(heretic)
 		{
 			V_DrawNumPatchFS(0, 158, 0, LumpBARBACK, ColorRange::Default, PatchTranslation::Stretch);
-			if(players[consoleplayer].cheats & CF_GODMODE)
+			if((players[consoleplayer].cheats & CheatFlag::GodMode) != CheatFlag{})
 			{
 				V_DrawNamePatch(16, 167, 0, "GOD1", ColorRange::Default, PatchTranslation::Stretch);
 				V_DrawNamePatch(287, 167, 0, "GOD2", ColorRange::Default, PatchTranslation::Stretch);

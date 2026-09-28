@@ -1890,7 +1890,7 @@ void G_PlayerReborn(int player)
 
 	// killough 3/10/98,3/21/98: preserve cheats across idclev
 	{
-		int cheats = p->cheats;
+		const CheatFlag cheats = p->cheats;
 		memset(p, 0, sizeof(*p));
 		p->cheats = cheats;
 	}
@@ -3949,7 +3949,7 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 	}
 
 	for(i = 0; i < g_maxplayers; i++) // killough 4/24/98
-		players[i].cheats = 0;
+		players[i].cheats = {};
 
 	// e6y
 	// additional params

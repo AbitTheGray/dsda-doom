@@ -374,8 +374,8 @@ void dsda_WatchCrush(mobj_t* thing, int damage)
 
 	// invincible
 	if(
-		(damage < 1000 || (!comp[std::to_underlying(CompOption::God)] && (player->cheats & CF_GODMODE)))
-		&& (player->cheats & CF_GODMODE || player->powers[std::to_underlying(PowerType::Invulnerability)])
+		(damage < 1000 || (!comp[std::to_underlying(CompOption::God)] && ((player->cheats & CheatFlag::GodMode) != CheatFlag{})))
+		&& ((player->cheats & CheatFlag::GodMode) != CheatFlag{} || player->powers[std::to_underlying(PowerType::Invulnerability)])
 	)
 		return;
 

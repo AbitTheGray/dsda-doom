@@ -618,7 +618,7 @@ void P_PlayerThink(player_t* player)
 	}
 
 	// killough 2/8/98, 3/21/98:
-	if(player->cheats & CF_NOCLIP)
+	if((player->cheats & CheatFlag::NoClip) != CheatFlag{})
 		player->mo->flags |= MobjFlag::NoClip;
 	else
 		player->mo->flags -= MobjFlag::NoClip;

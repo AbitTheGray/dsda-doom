@@ -2712,7 +2712,7 @@ static void P_ApplySectorDamage(player_t* player, int damage, int leak)
 static void P_ApplySectorDamageEndLevel(player_t* player)
 {
 	if(comp[std::to_underlying(CompOption::God)])
-		player->cheats &= ~CF_GODMODE;
+		player->cheats -= CheatFlag::GodMode;
 
 	if(!(leveltime & 0x1f))
 		P_DamageMobj(player->mo, nullptr, nullptr, 20);
@@ -2827,7 +2827,7 @@ extern "C" void P_PlayerInZDoomSector(player_t* player, sector_t* sector)
 	{
 		if(sector->flags & SECF_ENDGODMODE)
 		{
-			player->cheats &= ~CF_GODMODE;
+			player->cheats -= CheatFlag::GodMode;
 		}
 
 		if(

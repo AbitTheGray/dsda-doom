@@ -115,7 +115,7 @@ static void P_RecursiveSound(sector_t* sec, int soundblocks, mobj_t* soundtarget
 //
 void P_NoiseAlert(mobj_t* target, mobj_t* emitter)
 {
-	if(target != nullptr && target->player && (target->player->cheats & CF_NOTARGET))
+	if(target != nullptr && target->player && ((target->player->cheats & CheatFlag::NoTarget) != CheatFlag{}))
 		return;
 
 	validcount++;
@@ -942,7 +942,7 @@ static dboolean P_LookForPlayers(mobj_t* actor, dboolean allaround)
 
 		player = &players[actor->lastlook];
 
-		if(player->cheats & CF_NOTARGET)
+		if((player->cheats & CheatFlag::NoTarget) != CheatFlag{})
 			continue; // no target
 
 		if(player->health <= 0)
@@ -1153,7 +1153,7 @@ extern "C" void A_Look(mobj_t* actor)
 	mobj_t* targ = actor->subsector->sector->soundtarget;
 	actor->threshold = 0; // any shot will wake up
 
-	if(targ && targ->player && (targ->player->cheats & CF_NOTARGET))
+	if(targ && targ->player && ((targ->player->cheats & CheatFlag::NoTarget) != CheatFlag{}))
 		return;
 
 	/* killough 7/18/98:
@@ -5208,7 +5208,7 @@ dboolean Raven_P_LookForPlayers(mobj_t* actor, dboolean allaround)
 
 		player = &players[actor->lastlook];
 
-		if(players->cheats & CF_NOTARGET)
+		if((players->cheats & CheatFlag::NoTarget) != CheatFlag{})
 			continue; // no target
 
 		if(player->health <= 0)

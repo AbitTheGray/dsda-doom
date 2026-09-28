@@ -400,7 +400,7 @@ dboolean P_CheckAmmo(player_t* player)
 	// Some do not need ammunition anyway.
 	// Return if current ammunition sufficient.
 
-	if(player->cheats & CF_INFINITE_AMMO || ammo == AmmoType::NoAmmo || player->ammo[std::to_underlying(ammo)] >= count)
+	if((player->cheats & CheatFlag::InfiniteAmmo) != CheatFlag{} || ammo == AmmoType::NoAmmo || player->ammo[std::to_underlying(ammo)] >= count)
 		return true;
 
 	// Out of ammo, pick a weapon to change to.
@@ -438,7 +438,7 @@ void P_SubtractAmmo(struct player_s* player, int vanilla_amount)
 	int amount;
 	AmmoType ammotype = weaponinfo[std::to_underlying(player->readyweapon)].ammo;
 
-	if(player->cheats & CF_INFINITE_AMMO || (mbf21 && ammotype == AmmoType::NoAmmo))
+	if((player->cheats & CheatFlag::InfiniteAmmo) != CheatFlag{} || (mbf21 && ammotype == AmmoType::NoAmmo))
 		return; // [XA] hmm... I guess vanilla/boom will go out of bounds then?
 
 	if(mbf21 && (weaponinfo[std::to_underlying(player->readyweapon)].intflags & WeaponIntFlag::EnableAps) != WeaponIntFlag{})
@@ -1118,7 +1118,7 @@ extern "C" void A_FireCGun(player_t* player, pspdef_t* psp)
 	CHECK_WEAPON_CODEPOINTER("A_FireCGun", player);
 
 	has_ammo = player->ammo[std::to_underlying(weaponinfo[std::to_underlying(player->readyweapon)].ammo)] ||
-		player->cheats & CF_INFINITE_AMMO;
+		(player->cheats & CheatFlag::InfiniteAmmo) != CheatFlag{};
 
 	if(has_ammo || comp[std::to_underlying(CompOption::Sound)])
 		S_StartMobjSound(player->mo, SfxId::Pistol);
@@ -1421,7 +1421,7 @@ extern "C" void A_ConsumeAmmo(player_t* player, pspdef_t* psp)
 
 	// don't do dumb things, kids
 	type = weaponinfo[std::to_underlying(player->readyweapon)].ammo;
-	if(player->cheats & CF_INFINITE_AMMO || !psp->state || type == AmmoType::NoAmmo)
+	if((player->cheats & CheatFlag::InfiniteAmmo) != CheatFlag{} || !psp->state || type == AmmoType::NoAmmo)
 		return;
 
 	// use the weapon's ammo-per-shot amount if zero.

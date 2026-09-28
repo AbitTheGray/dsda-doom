@@ -1260,7 +1260,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		}
 		if(target->player)
 		{
-			if(damage < 1000 && ((target->player->cheats & CF_GODMODE)
+			if(damage < 1000 && (((target->player->cheats & CheatFlag::GodMode) != CheatFlag{})
 				|| target->player->powers[std::to_underlying(PowerType::Invulnerability)]))
 			{
 				return;
@@ -1542,8 +1542,8 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 
 		if(
 			!hexen &&
-			(damage < 1000 || (!comp[std::to_underlying(CompOption::God)] && (player->cheats & CF_GODMODE))) &&
-			(player->cheats & CF_GODMODE || player->powers[std::to_underlying(PowerType::Invulnerability)])
+			(damage < 1000 || (!comp[std::to_underlying(CompOption::God)] && ((player->cheats & CheatFlag::GodMode) != CheatFlag{}))) &&
+			((player->cheats & CheatFlag::GodMode) != CheatFlag{} || player->powers[std::to_underlying(PowerType::Invulnerability)])
 		)
 			return;
 
@@ -2727,7 +2727,7 @@ void P_PoisonDamage(player_t* player, mobj_t* source, int damage,
 	{
 		damage = FixedMul(damage, skill_info.damage_factor);
 	}
-	if(damage < 1000 && ((player->cheats & CF_GODMODE)
+	if(damage < 1000 && (((player->cheats & CheatFlag::GodMode) != CheatFlag{})
 		|| player->powers[std::to_underlying(PowerType::Invulnerability)]))
 	{
 		return;
@@ -3664,7 +3664,7 @@ static dboolean P_MorphMonster(mobj_t* actor)
 
 void P_PoisonPlayer(player_t* player, mobj_t* poisoner, int poison)
 {
-	if((player->cheats & CF_GODMODE) || player->powers[std::to_underlying(PowerType::Invulnerability)])
+	if(((player->cheats & CheatFlag::GodMode) != CheatFlag{}) || player->powers[std::to_underlying(PowerType::Invulnerability)])
 	{
 		return;
 	}

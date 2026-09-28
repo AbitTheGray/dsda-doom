@@ -3899,7 +3899,7 @@ void P_SetupLevel(int episode, int map, int skill)
 	players[consoleplayer].viewz = players[consoleplayer].mo->z +
 		players[consoleplayer].viewheight;
 
-	if(players[consoleplayer].cheats & CF_FLY)
+	if((players[consoleplayer].cheats & CheatFlag::Fly) != CheatFlag{})
 	{
 		players[consoleplayer].mo->flags |= (MobjFlag::NoGravity | MobjFlag::Fly);
 	}

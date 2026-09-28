@@ -320,8 +320,8 @@ void M_CheatGod()
 		P_MapEnd();
 	}
 
-	plyr->cheats ^= CF_GODMODE;
-	if(plyr->cheats & CF_GODMODE)
+	plyr->cheats = plyr->cheats ^ CheatFlag::GodMode;
+	if((plyr->cheats & CheatFlag::GodMode) != CheatFlag{})
 	{
 		if(plyr->mo)
 			plyr->mo->health = god_health; // Ty 03/09/98 - deh
@@ -350,7 +350,7 @@ static void cheat_god()
 // CPhipps - new health and armour cheat codes
 static void cheat_health()
 {
-	if(!(plyr->cheats & CF_GODMODE))
+	if((plyr->cheats & CheatFlag::GodMode) == CheatFlag{})
 	{
 		if(plyr->mo)
 			plyr->mo->health = mega_health;
@@ -435,7 +435,8 @@ static void cheat_kfa()
 
 void M_CheatNoClip()
 {
-	dsda_AddMessage((plyr->cheats ^= CF_NOCLIP) & CF_NOCLIP ? s_STSTR_NCON : s_STSTR_NCOFF);
+	plyr->cheats = plyr->cheats ^ CheatFlag::NoClip;
+	dsda_AddMessage((plyr->cheats & CheatFlag::NoClip) != CheatFlag{} ? s_STSTR_NCON : s_STSTR_NCOFF);
 }
 
 static void cheat_noclip()
@@ -891,8 +892,8 @@ static void cheat_pitch()
 
 static void cheat_notarget()
 {
-	plyr->cheats ^= CF_NOTARGET;
-	if(plyr->cheats & CF_NOTARGET)
+	plyr->cheats = plyr->cheats ^ CheatFlag::NoTarget;
+	if((plyr->cheats & CheatFlag::NoTarget) != CheatFlag{})
 		dsda_AddMessage("Notarget Mode ON");
 	else
 		dsda_AddMessage("Notarget Mode OFF");
@@ -925,8 +926,8 @@ static void cheat_fly()
 		}
 		else
 		{
-			plyr->cheats ^= CF_FLY;
-			if(plyr->cheats & CF_FLY)
+			plyr->cheats = plyr->cheats ^ CheatFlag::Fly;
+			if((plyr->cheats & CheatFlag::Fly) != CheatFlag{})
 			{
 				plyr->mo->flags |= MobjFlag::NoGravity;
 				plyr->mo->flags |= MobjFlag::Fly;

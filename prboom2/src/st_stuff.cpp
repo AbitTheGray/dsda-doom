@@ -620,7 +620,7 @@ static void ST_updateFaceWidget()
 	if(priority < 5)
 	{
 		// invulnerability
-		if((plyr->cheats & CF_GODMODE)
+		if(((plyr->cheats & CheatFlag::GodMode) != CheatFlag{})
 			|| plyr->powers[std::to_underlying(PowerType::Invulnerability)])
 		{
 			priority = 4;

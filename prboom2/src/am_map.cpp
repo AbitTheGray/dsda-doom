@@ -2313,7 +2313,7 @@ static void AM_DrawNiceThings()
 		// for all sectors
 		for(i = 0; i < numsectors; i++)
 		{
-			if(!(players[displayplayer].cheats & CF_NOCLIP) &&
+			if((players[displayplayer].cheats & CheatFlag::NoClip) == CheatFlag{} &&
 				(sectors[i].bbox[std::to_underlying(BoxEdge::Left)] > am_frame.bbox[std::to_underlying(BoxEdge::Right)] ||
 					sectors[i].bbox[std::to_underlying(BoxEdge::Right)] < am_frame.bbox[std::to_underlying(BoxEdge::Left)] ||
 					sectors[i].bbox[std::to_underlying(BoxEdge::Bottom)] > am_frame.bbox[std::to_underlying(BoxEdge::Top)] ||
@@ -2417,7 +2417,7 @@ static void AM_drawThings()
 		int pass;
 		int enemies = 0;
 
-		if(!(players[displayplayer].cheats & CF_NOCLIP) &&
+		if((players[displayplayer].cheats & CheatFlag::NoClip) == CheatFlag{} &&
 			(sectors[i].bbox[std::to_underlying(BoxEdge::Left)] > am_frame.bbox[std::to_underlying(BoxEdge::Right)] ||
 				sectors[i].bbox[std::to_underlying(BoxEdge::Right)] < am_frame.bbox[std::to_underlying(BoxEdge::Left)] ||
 				sectors[i].bbox[std::to_underlying(BoxEdge::Bottom)] > am_frame.bbox[std::to_underlying(BoxEdge::Top)] ||
