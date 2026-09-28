@@ -39,7 +39,7 @@ static void R_FLUSHWHOLE_FUNCNAME()
 #ifdef RANGECHECK
 	if((unsigned)x >= video.width || yl < 0 || yh >= video.height)
 	{
-		I_Error("R_DrawFuzzColumn: %i to %i at %i", yl, yh, x);
+		Log::Fatal("R_DrawFuzzColumn: {} to {} at {}", yl, yh, x);
 	}
 #endif
 

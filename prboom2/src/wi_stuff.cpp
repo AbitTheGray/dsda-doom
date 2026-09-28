@@ -669,7 +669,7 @@ WI_drawOnLnode // draw stuff at a location by episode/map#
 	{
 		// DEBUG
 		//jff 8/3/98 use logical output routine
-		lprintf(OutputLevels::Debug, "Could not place patch on level %d\n", n + 1);
+		Log::Debug("Could not place patch on level {}\n", n + 1);
 	}
 }
 

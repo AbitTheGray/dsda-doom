@@ -126,7 +126,7 @@ static void InitStats()
 				msgSize = W_LumpLength(msgLump);
 				if(msgSize >= MAX_INTRMSN_MESSAGE_SIZE)
 				{
-					I_Error("Cluster message too long (%s)", msgLumpName);
+					Log::Fatal("Cluster message too long ({})", msgLumpName);
 				}
 				memcpy(ClusterMessage, W_LumpByNum(msgLump), msgSize);
 				ClusterMessage[msgSize] = '\0'; // Append terminator

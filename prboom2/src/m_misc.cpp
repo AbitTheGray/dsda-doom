@@ -692,7 +692,7 @@ void M_LoadDefaults()
 		snprintf(defaultfile, len + 1, "%s/dsda-doom.cfg", configdir);
 	}
 
-	lprintf(OutputLevels::Debug, " default file: %s\n", defaultfile);
+	Log::Debug(" default file: {}\n", defaultfile);
 
 	// read the file in, overriding any set defaults
 

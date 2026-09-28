@@ -1872,8 +1872,8 @@ dboolean P_UndoPlayerMorph(player_t* player)
 			mo = P_SpawnMobj(x, y, z, MobjType::HexenPlayerMage);
 			break;
 		default:
-			I_Error("P_UndoPlayerMorph:  Unknown player class %d\n",
-				player->pclass);
+			Log::Fatal("P_UndoPlayerMorph:  Unknown player class {}\n",
+				std::to_underlying(player->pclass));
 			return false;
 	}
 	if(P_TestMobjLocation(mo) == false)

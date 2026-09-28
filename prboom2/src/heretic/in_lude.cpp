@@ -628,7 +628,7 @@ void IN_Drawer()
 			}
 			break;
 		default:
-			I_Error("IN_lude:  Intermission state out of range.\n");
+			Log::Fatal("IN_lude:  Intermission state out of range.\n");
 			break;
 	}
 }

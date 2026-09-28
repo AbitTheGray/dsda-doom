@@ -72,10 +72,10 @@ extern "C" void T_CompatiblePlatRaise(plat_t* plat)
 					// For these types vanilla did not initialize plat->low in EV_DoPlat,
 					// so they may descend to any depth, or not at all.
 					// See https://sourceforge.net/p/prboom-plus/bugs/211/ .
-					lprintf(OutputLevels::Warn, "T_PlatRaise: raise-and-change type has reversed "
+					Log::Warn("T_PlatRaise: raise-and-change type has reversed "
 						"direction in compatibility mode - may lead to desync\n"
-						" gametic: %d sector: %d complevel: %d\n",
-						gametic, plat->sector->iSectorID, compatibility_level);
+						" gametic: {} sector: {} complevel: {}\n",
+						gametic, plat->sector->iSectorID, std::to_underlying(compatibility_level));
 				}
 			}
 			else // else handle reaching end of up stroke

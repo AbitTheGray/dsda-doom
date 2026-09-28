@@ -27,7 +27,7 @@ void W_InitCache()
 	// set up caching
 	lump_data = static_cast<void**>(calloc(sizeof *lump_data, numlumps));
 	if(!lump_data)
-		I_Error("W_Init: Couldn't allocate lump data");
+		Log::Fatal("W_Init: Couldn't allocate lump data");
 }
 
 void W_DoneCache()
@@ -44,7 +44,7 @@ const void* W_LumpByNum(int lump)
 {
 #ifdef RANGECHECK
 	if((unsigned)lump >= (unsigned)numlumps)
-		I_Error("W_LumpByNum: %i >= numlumps", lump);
+		Log::Fatal("W_LumpByNum: {} >= numlumps", lump);
 #endif
 
 	// read the lump in

@@ -153,7 +153,7 @@ static void R_MapPlane(int y, int x1, int x2, draw_span_vars_t* dsvars)
 
 #ifdef RANGECHECK
 	if(x2 < x1 || x1 < 0 || x2 >= viewwidth || (unsigned)y > (unsigned)viewheight)
-		I_Error("R_MapPlane: %i, %i at %i", x1, x2, y);
+		Log::Fatal("R_MapPlane: {}, {} at {}", x1, x2, y);
 #endif
 
 	// [RH]Instead of using the xtoviewangle array, I calculated the fractional values

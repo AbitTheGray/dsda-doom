@@ -800,7 +800,7 @@ dboolean EV_HexenTeleport(int tid, mobj_t* thing, dboolean fog)
 	}
 	if(mo == nullptr)
 	{
-		I_Error("Can't find teleport mapspot\n");
+		Log::Fatal("Can't find teleport mapspot\n");
 	}
 	return P_Teleport(thing, mo->x, mo->y, mo->angle, fog);
 }

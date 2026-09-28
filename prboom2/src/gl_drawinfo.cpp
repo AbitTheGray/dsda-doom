@@ -104,7 +104,7 @@ void gld_AddDrawItem(GLDrawItemType itemtype, void* itemdata)
 	itemsize = itemsizes[std::to_underlying(itemtype)];
 	if(itemsize == 0)
 	{
-		I_Error("gld_AddDrawItem: unknown GLDrawItemType %d", itemtype);
+		Log::Fatal("gld_AddDrawItem: unknown GLDrawItemType {}", std::to_underlying(itemtype));
 	}
 
 	if(gld_drawinfo.maxsize == 0)

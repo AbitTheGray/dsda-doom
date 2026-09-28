@@ -264,7 +264,7 @@ void STlib_updateMultIcon
 
 #ifdef RANGECHECK
 			if(y - ST_Y < 0)
-				I_Error("STlib_updateMultIcon: y - ST_Y < 0");
+				Log::Fatal("STlib_updateMultIcon: y - ST_Y < 0");
 #endif
 
 			V_CopyRect(BG, FG, x, y, w, h, PatchTranslation::Stretch | PatchTranslation::AlignBottom);

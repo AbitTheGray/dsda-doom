@@ -718,7 +718,7 @@ int EV_VerticalDoor
 				}
 				else
 				{
-					lprintf(OutputLevels::Debug, "EV_VerticalDoor: unknown thinker.function in thinker corruption emulation");
+					Log::Debug("EV_VerticalDoor: unknown thinker.function in thinker corruption emulation");
 				}
 
 				return 1;

@@ -286,7 +286,7 @@ static char* GetFinaleText(int sequence)
 	msgSize = W_LumpLength(msgLump);
 	if(msgSize >= MAX_INTRMSN_MESSAGE_SIZE)
 	{
-		I_Error("Finale message too long (%s)", msgLumpName);
+		Log::Fatal("Finale message too long ({})", msgLumpName);
 	}
 
 	memcpy(ClusterMessage, W_LumpByNum(msgLump), msgSize);

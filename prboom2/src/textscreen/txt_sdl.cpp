@@ -412,7 +412,7 @@ int GL_TXT_Init()
 	screenbuffer = SDL_CreateRGBSurface(0, screen_image_w, screen_image_h, 8, 0, 0, 0, 0);
 	if(!screenbuffer)
 	{
-		lprintf(OutputLevels::Error, "Failed to create software screenbuffer!\n");
+		Log::Error("Failed to create software screenbuffer!\n");
 		return 0;
 	}
 

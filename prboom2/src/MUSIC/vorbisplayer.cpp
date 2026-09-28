@@ -355,7 +355,7 @@ static void vorb_render_ex(void* dest, unsigned nsamp)
 			localerrors++;
 			if(localerrors == 10)
 			{
-				lprintf(OutputLevels::Warn, "vorb_render: many errors.  aborting\n");
+				Log::Warn("vorb_render: many errors.  aborting\n");
 				vorb_playing = 0;
 				memset(sout, 0, nsamp * 4);
 				return;
@@ -385,7 +385,7 @@ static void vorb_render_ex(void* dest, unsigned nsamp)
 		else if(numread < 0)
 		{
 			// unrecoverable errror
-			lprintf(OutputLevels::Warn, "vorb_render: unrecoverable error\n");
+			Log::Warn("vorb_render: unrecoverable error\n");
 			vorb_playing = 0;
 			memset(sout, 0, nsamp * 4);
 			return;

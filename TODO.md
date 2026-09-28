@@ -46,8 +46,9 @@ Where a C API needs a zero-terminated string, the caller makes a `std::string` f
 ## Convert logging to `Log::`
 
 `Log::Print`, `Info`, `Warn`, `Error`, `Debug` and `Fatal` (`lprintf.hpp`) format with `std::format`.
-About 15 `lprintf` and 17 `I_Error` calls are still `printf`-style; convert them in batches (build and run the spec suite after each), then remove the old functions.
-`I_Warn` (1 call, in `dsda/split_tracker.cpp`: `Warn` level plus a message box) needs a `Log::` counterpart first.
+Every `lprintf` and `I_Error` call is converted. Left to do:
+1. `I_Warn` (1 call, in `dsda/split_tracker.cpp`: `Warn` level plus a message box) needs a `Log::` counterpart.
+2. Then remove `lprintf`, `I_Error` and `I_Warn` from `lprintf.hpp` and `lprintf.cpp`; `I_Error` and `I_Warn` still format through `lprintf` inside `lprintf.cpp`.
 
 Conversion traps:
 - `%02d` becomes `{:02}`; `%.8s` on a lump name becomes `{}` with `W_LumpNameView(name)`, because such names may fill 8 bytes without a terminating zero and `{:.8}` would still measure the whole string;

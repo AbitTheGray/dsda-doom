@@ -823,7 +823,7 @@ static void R_Subsector(int num)
 
 #ifdef RANGECHECK
 	if(num >= numsubsectors)
-		I_Error("R_Subsector: ss %i with numss = %i", num, numsubsectors);
+		Log::Fatal("R_Subsector: ss {} with numss = {}", num, numsubsectors);
 #endif
 
 	sub = &subsectors[num];

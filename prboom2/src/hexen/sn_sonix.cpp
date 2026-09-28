@@ -129,7 +129,7 @@ static void VerifySequencePtr(int* base, int* ptr)
 {
 	if(ptr - base > SS_TEMPBUFFER_SIZE)
 	{
-		I_Error("VerifySequencePtr:  tempPtr >= %d\n", SS_TEMPBUFFER_SIZE);
+		Log::Fatal("VerifySequencePtr:  tempPtr >= {}\n", SS_TEMPBUFFER_SIZE);
 	}
 }
 
@@ -180,7 +180,7 @@ void SN_InitSequenceScript()
 			}
 			if(i == SS_MAX_SCRIPTS)
 			{
-				I_Error("Number of SS Scripts >= SS_MAX_SCRIPTS");
+				Log::Fatal("Number of SS Scripts >= SS_MAX_SCRIPTS");
 			}
 			for(j = 0; j < std::to_underlying(SoundSequence::Numseq); j++)
 			{

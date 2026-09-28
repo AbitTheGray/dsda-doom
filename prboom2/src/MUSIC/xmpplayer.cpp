@@ -60,7 +60,7 @@ static int xmp_init(int samplerate)
 
 	if(!context)
 	{
-		lprintf(OutputLevels::Warn, "xmp_init: failed to create context.\n");
+		Log::Warn("xmp_init: failed to create context.\n");
 		return 0;
 	}
 
@@ -99,7 +99,7 @@ static void xmp_play(const void* handle, int looping)
 {
 	if(xmp_start_player(context, xmp_samplerate, 0) < 0)
 	{
-		lprintf(OutputLevels::Warn, "xmp_play: failed to start player.\n");
+		Log::Warn("xmp_play: failed to start player.\n");
 		xmp_playing = 0;
 		return;
 	}

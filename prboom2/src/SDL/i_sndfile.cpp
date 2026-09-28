@@ -66,7 +66,7 @@ void* Load_SNDFile(const void* data, SDL_AudioSpec* sample, void** sampledata,
 
 	if(!sndfile)
 	{
-		lprintf(OutputLevels::Warn, "sf_open_virtual: %s\n", sf_strerror(sndfile));
+		Log::Warn("sf_open_virtual: {}\n", sf_strerror(sndfile));
 		mem_fclose(sfdata);
 		return nullptr;
 	}
@@ -115,7 +115,7 @@ void* Load_SNDFile(const void* data, SDL_AudioSpec* sample, void** sampledata,
 
 	if(num_frames < sfinfo.frames)
 	{
-		lprintf(OutputLevels::Warn, "sf_readf: %s\n", sf_strerror(sndfile));
+		Log::Warn("sf_readf: {}\n", sf_strerror(sndfile));
 		sf_close(sndfile);
 		mem_fclose(sfdata);
 		Z_Free(local_sampledata);

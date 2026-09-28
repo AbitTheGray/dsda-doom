@@ -67,7 +67,7 @@ static void R_DRAWCOLUMN_FUNCNAME(draw_column_vars_t* dcvars)
 	if(dcvars->x >= SCREENWIDTH
 		|| dcvars->yl < 0
 		|| dcvars->yh >= SCREENHEIGHT)
-		I_Error("R_DrawColumn: %i to %i at %i", dcvars->yl, dcvars->yh, dcvars->x);
+		Log::Fatal("R_DrawColumn: {} to {} at {}", dcvars->yl, dcvars->yh, dcvars->x);
 #endif
 
 #if (!(R_DRAWCOLUMN_PIPELINE & RDC_FUZZ))

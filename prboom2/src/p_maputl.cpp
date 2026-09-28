@@ -502,7 +502,7 @@ dboolean P_BlockLinesIterator(int x, int y, dboolean func(line_t*))
 		line_t* ld;
 #ifdef RANGECHECK
 		if(*list < 0 || *list >= numlines)
-			I_Error("P_BlockLinesIterator: index >= numlines");
+			Log::Fatal("P_BlockLinesIterator: index >= numlines");
 #endif
 		ld = &lines[*list];
 		if(ld->validcount == validcount)
@@ -579,7 +579,7 @@ dboolean P_BlockLinesIterator2(int x, int y, dboolean func(line_t*))
 		line_t* ld;
 #ifdef RANGECHECK
 		if(*list < 0 || *list >= numlines)
-			I_Error("P_BlockLinesIterator2: index >= numlines");
+			Log::Fatal("P_BlockLinesIterator2: index >= numlines");
 #endif
 		ld = &lines[*list];
 		if(ld->validcount2 == validcount2)

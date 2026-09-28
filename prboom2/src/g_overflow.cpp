@@ -299,8 +299,8 @@ void SpechitOverrun(spechit_overrun_param_t* params)
 						break;
 
 					default:
-						lprintf(OutputLevels::Error, "SpechitOverrun: Warning: unable to emulate"
-							" an overrun where numspechit=%i\n",
+						Log::Error("SpechitOverrun: Warning: unable to emulate"
+							" an overrun where numspechit={}\n",
 							numspechit);
 						break;
 				}
@@ -378,7 +378,7 @@ void RejectOverrun(unsigned int length, const byte** rejectmatrix, int totalline
 		}
 
 		if(length)
-			lprintf(OutputLevels::Warn, "P_LoadReject: REJECT too short (%u<%u) - padded\n", length, required);
+			Log::Warn("P_LoadReject: REJECT too short ({}<{}) - padded\n", length, required);
 	}
 }
 

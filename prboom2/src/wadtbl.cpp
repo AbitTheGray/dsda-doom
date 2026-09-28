@@ -42,7 +42,7 @@ void AddPWADTableLump(wadtbl_t* wadtbl, const char* name, const byte* data, size
 
 	if(!wadtbl || (name && strlen(name) > 8))
 	{
-		I_Error("W_AddLump: wrong parameters.");
+		Log::Fatal("W_AddLump: wrong parameters.");
 		return;
 	}
 
