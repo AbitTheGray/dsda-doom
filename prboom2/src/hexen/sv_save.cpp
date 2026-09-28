@@ -586,7 +586,7 @@ static void StreamIn_floormove_t(floormove_t* str)
 
 	// newspecial_t newspecial;
 	str->newspecial.special = SV_ReadWord();
-	str->newspecial.flags = SV_ReadLong();
+	str->newspecial.flags = static_cast<SectorFlag>(SV_ReadLong());
 	str->newspecial.damage.amount = SV_ReadWord();
 	str->newspecial.damage.leakrate = SV_ReadByte();
 	str->newspecial.damage.interval = SV_ReadByte();
@@ -641,7 +641,7 @@ static void StreamOut_floormove_t(floormove_t* str)
 
 	// newspecial_t newspecial;
 	SV_WriteWord(str->newspecial.special);
-	SV_WriteLong(str->newspecial.flags);
+	SV_WriteLong(std::to_underlying(str->newspecial.flags));
 	SV_WriteWord(str->newspecial.damage.amount);
 	SV_WriteByte(str->newspecial.damage.leakrate);
 	SV_WriteByte(str->newspecial.damage.interval);

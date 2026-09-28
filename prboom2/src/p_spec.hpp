@@ -822,7 +822,7 @@ typedef struct
 typedef struct
 {
 	short special;
-	unsigned int flags;
+	SectorFlag flags;
 	damage_t damage;
 } newspecial_t;
 

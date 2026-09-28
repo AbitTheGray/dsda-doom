@@ -625,7 +625,7 @@ static void R_HandleGLFakeFlats(sector_t* sector)
 		{
 			// if the sector has bottomtextures, then the floorheight will be set to the
 			// highest surounding floorheight
-			if((frontsector->flags & NO_BOTTOMTEXTURES) || (!floorplane))
+			if(((frontsector->flags & SectorFlag::NoBottomTextures) != SectorFlag{}) || (!floorplane))
 			{
 				tmpsec = GetBestFake(frontsector, 0, validcount);
 
@@ -640,7 +640,7 @@ static void R_HandleGLFakeFlats(sector_t* sector)
 			}
 
 			// the same for ceilings. they will be set to the lowest ceilingheight
-			if((frontsector->flags & NO_TOPTEXTURES) || (!ceilingplane))
+			if(((frontsector->flags & SectorFlag::NoTopTextures) != SectorFlag{}) || (!ceilingplane))
 			{
 				tmpsec = GetBestFake(frontsector, 1, validcount);
 
@@ -674,7 +674,7 @@ static void R_HandleGLFakeFlats(sector_t* sector)
 		* a future patch by refactoring this into the renderer and tagging
 		* visible candidate sectors during drawing.
 		*/
-		if(frontsector->flags & MISSING_BOTTOMTEXTURES)
+		if((frontsector->flags & SectorFlag::MissingBottomTextures) != SectorFlag{})
 		{
 			tmpsec = nullptr;
 
@@ -703,7 +703,7 @@ static void R_HandleGLFakeFlats(sector_t* sector)
 			}
 		}
 
-		if(frontsector->flags & MISSING_TOPTEXTURES)
+		if((frontsector->flags & SectorFlag::MissingTopTextures) != SectorFlag{})
 		{
 			tmpsec = nullptr;
 

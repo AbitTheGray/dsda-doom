@@ -854,7 +854,7 @@ static void P_LoadUDMFSectors(int lump)
 		if(ms->movefactor)
 		{
 			ss->movefactor = dsda_StringToFixed(ms->movefactor);
-			ss->flags |= SECF_FRICTION;
+			ss->flags |= SectorFlag::Friction;
 		}
 
 		ss->damage.amount = ms->damageamount;
@@ -894,25 +894,25 @@ static void P_LoadUDMFSectors(int lump)
 				i, ms->thrustgroup + (ms->thrustlocation << THRUST_LOCATION_SHIFT));
 
 		if((ms->flags & UdmfSectorFlag::DamageHazard) != UdmfSectorFlag{})
-			ss->flags |= SECF_HAZARD;
+			ss->flags |= SectorFlag::Hazard;
 
 		if((ms->flags & UdmfSectorFlag::DamageTerrainEffect) != UdmfSectorFlag{})
-			ss->flags |= SECF_DMGTERRAINFX;
+			ss->flags |= SectorFlag::DamageTerrainEffect;
 
 		if((ms->flags & UdmfSectorFlag::NoAttack) != UdmfSectorFlag{})
-			ss->flags |= SECF_NOATTACK;
+			ss->flags |= SectorFlag::NoAttack;
 
 		if((ms->flags & UdmfSectorFlag::Silent) != UdmfSectorFlag{})
-			ss->flags |= SECF_SILENT;
+			ss->flags |= SectorFlag::Silent;
 
 		if((ms->flags & UdmfSectorFlag::LightFloorAbsolute) != UdmfSectorFlag{})
-			ss->flags |= SECF_LIGHTFLOORABSOLUTE;
+			ss->flags |= SectorFlag::LightFloorAbsolute;
 
 		if((ms->flags & UdmfSectorFlag::LightCeilingAbsolute) != UdmfSectorFlag{})
-			ss->flags |= SECF_LIGHTCEILINGABSOLUTE;
+			ss->flags |= SectorFlag::LightCeilingAbsolute;
 
 		if((ms->flags & UdmfSectorFlag::Hidden) != UdmfSectorFlag{})
-			ss->flags |= SECF_HIDDEN;
+			ss->flags |= SectorFlag::Hidden;
 
 		if(ss->tag > 0)
 			dsda_AddSectorID(ss->tag, i);

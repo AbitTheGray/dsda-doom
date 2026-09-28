@@ -61,7 +61,7 @@ Done so far: `MTF_*` (now `MapThingFlag`), `UDMF_TF_*` (`UdmfThingFlag`), and `S
 Convert a few groups per batch, then build and run the spec suite.
 
 Candidates found by scanning for 3+ adjacent numeric `#define`s with a shared prefix; check each one, some may turn out to be plain constants:
-- **Flags:** `ML_` (`doomdata.hpp`), `SCROLL_` (`dsda/scroll.hpp`: two flag sets and the untracked `THRUST_` group share `scroll_t::flags`, which is part of the savegame layout, so one enum cannot type that field), `NO_`, `MISSING_` and `SECF_` (`r_defs.hpp`: one set of bits sharing `sector_t::flags`, 78 uses), `RDC_` (`r_draw.cpp`: only used in `#if` inside `r_drawcolumn.inl`/`r_drawflush.inl`, which `r_draw.cpp` includes once per pipeline - it needs those files turned into templates with `if constexpr`, not just an enum), `S_` menu item flags (`m_menu.cpp`, ~1800 uses).
+- **Flags:** `ML_` (`doomdata.hpp`), `SCROLL_` (`dsda/scroll.hpp`: two flag sets and the untracked `THRUST_` group share `scroll_t::flags`, which is part of the savegame layout, so one enum cannot type that field), `RDC_` (`r_draw.cpp`: only used in `#if` inside `r_drawcolumn.inl`/`r_drawflush.inl`, which `r_draw.cpp` includes once per pipeline - it needs those files turned into templates with `if constexpr`, not just an enum), `S_` menu item flags (`m_menu.cpp`, ~1800 uses).
 - **Flags with a packed field** (need extractor functions): `HML_`/`ZML_` (`doomdata.hpp`, the `SPAC` bits), `AFLAG_` (`doomdef.hpp`), `ZDOOM_*_MASK` and the `DAMAGE_`/`SECRET_`/`FRICTION_`/`PUSH_` mask-and-shift pairs (`p_spec.hpp`).
 - **Plain enumerations:** `PRB_MB_` (`e6y.hpp`), `KEYD_` (`doomdef.hpp`).
 

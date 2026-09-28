@@ -354,7 +354,7 @@ void gld_MapDrawSubsectors(player_t* plr, int fx, int fy, fixed_t mx, fixed_t my
 			sub->sector->bbox[std::to_underlying(BoxEdge::Right)] < am_frame.bbox[std::to_underlying(BoxEdge::Left)] ||
 			sub->sector->bbox[std::to_underlying(BoxEdge::Bottom)] > am_frame.bbox[std::to_underlying(BoxEdge::Top)] ||
 			sub->sector->bbox[std::to_underlying(BoxEdge::Top)] < am_frame.bbox[std::to_underlying(BoxEdge::Bottom)] ||
-			sub->sector->flags & SECF_HIDDEN)
+			(sub->sector->flags & SectorFlag::Hidden) != SectorFlag{})
 		{
 			continue;
 		}
@@ -1472,7 +1472,7 @@ void gld_AddWall(seg_t* seg)
 				if(!temptex && gl_use_stencil && backsector &&
 					(seg->linedef->r_flags & LineRenderFlag::Isolated) == LineRenderFlag{} &&
 					/*frontsector->ceilingpic != skyflatnum && */backsector->ceilingpic != skyflatnum &&
-					!(backsector->flags & NULL_SECTOR) &&
+					(backsector->flags & SectorFlag::Null) == SectorFlag{} &&
 					backsector->floorheight < backsector->ceilingheight)
 				{
 					wall.ytop = ((float)(ceiling_height) / (float)MAP_SCALE);
@@ -1678,7 +1678,7 @@ void gld_AddWall(seg_t* seg)
 			if(!temptex && gl_use_stencil && backsector &&
 				(seg->linedef->r_flags & LineRenderFlag::Isolated) == LineRenderFlag{} &&
 				/*frontsector->floorpic != skyflatnum && */backsector->floorpic != skyflatnum &&
-				!(backsector->flags & NULL_SECTOR) &&
+				(backsector->flags & SectorFlag::Null) == SectorFlag{} &&
 				backsector->floorheight < backsector->ceilingheight)
 			{
 				wall.ytop = ((float)(ceiling_height) / (float)MAP_SCALE);

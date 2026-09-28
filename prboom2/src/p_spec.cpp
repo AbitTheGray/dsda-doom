@@ -12,6 +12,7 @@
  *     Wind/Current
  */
 
+#include <array>
 #include <utility>
 
 #include "doomstat.hpp"
@@ -1239,7 +1240,7 @@ dboolean PUREFUNC P_LightingActive(const sector_t* sec)
 short P_FloorLightLevel(const sector_t* sec)
 {
 	return sec->lightlevel_floor + (
-		(sec->flags & SECF_LIGHTFLOORABSOLUTE)
+		((sec->flags & SectorFlag::LightFloorAbsolute) != SectorFlag{})
 		? 0
 		: (
 			sec->floorlightsec == -1
@@ -1252,7 +1253,7 @@ short P_FloorLightLevel(const sector_t* sec)
 short P_CeilingLightLevel(const sector_t* sec)
 {
 	return sec->lightlevel_ceiling + (
-		(sec->flags & SECF_LIGHTCEILINGABSOLUTE)
+		((sec->flags & SectorFlag::LightCeilingAbsolute) != SectorFlag{})
 		? 0
 		: (
 			sec->ceilinglightsec == -1
@@ -1370,15 +1371,15 @@ int P_CheckTag(line_t* line)
 
 static const damage_t no_damage = {0};
 
-static void P_TransferSectorFlags(unsigned int* dest, unsigned int source)
+static void P_TransferSectorFlags(SectorFlag* dest, const SectorFlag source)
 {
-	*dest &= ~SECF_TRANSFERMASK;
-	*dest |= source & SECF_TRANSFERMASK;
+	*dest -= SectorFlag::TransferMask;
+	*dest |= source & SectorFlag::TransferMask;
 }
 
-static void P_ResetSectorTransferFlags(unsigned int* flags)
+static void P_ResetSectorTransferFlags(SectorFlag* flags)
 {
-	*flags &= ~SECF_TRANSFERMASK;
+	*flags -= SectorFlag::TransferMask;
 }
 
 void P_CopySectorSpecial(sector_t* dest, sector_t* source)
@@ -1424,13 +1425,13 @@ void P_ClearNonGeneralizedSectorSpecial(sector_t* sector)
 
 dboolean P_IsSpecialSector(sector_t* sector)
 {
-	return sector->special || sector->flags & SECF_SECRET || sector->damage.amount;
+	return sector->special || (sector->flags & SectorFlag::Secret) != SectorFlag{} || sector->damage.amount;
 }
 
 static void P_AddSectorSecret(sector_t* sector)
 {
 	totalsecret++;
-	sector->flags |= SECF_SECRET | SECF_WASSECRET;
+	sector->flags |= SectorFlag::Secret | SectorFlag::WasSecret;
 }
 
 void P_AddMobjSecret(mobj_t* mobj)
@@ -1456,7 +1457,7 @@ void P_PlayerCollectSecret(player_t* player)
 
 static void P_CollectSecretCommon(sector_t* sector, player_t* player)
 {
-	sector->flags &= ~SECF_SECRET;
+	sector->flags -= SectorFlag::Secret;
 
 	P_PlayerCollectSecret(player);
 
@@ -1495,7 +1496,7 @@ static void P_CollectSecretZDoom(sector_t* sector, player_t* player)
 //
 dboolean PUREFUNC P_IsSecret(const sector_t* sec)
 {
-	return (sec->flags & SECF_SECRET) != 0;
+	return (sec->flags & SectorFlag::Secret) != SectorFlag{};
 }
 
 //
@@ -1531,7 +1532,7 @@ dboolean PUREFUNC P_IsDeathExit(const sector_t* sec)
 //
 dboolean PUREFUNC P_WasSecret(const sector_t* sec)
 {
-	return (sec->flags & SECF_WASSECRET) != 0;
+	return (sec->flags & SectorFlag::WasSecret) != SectorFlag{};
 }
 
 dboolean PUREFUNC P_RevealedSecret(const sector_t* sec)
@@ -2801,7 +2802,7 @@ extern "C" void P_PlayerInCompatibleSector(player_t* player, sector_t* sector)
 		}
 	}
 
-	if(sector->flags & SECF_SECRET)
+	if((sector->flags & SectorFlag::Secret) != SectorFlag{})
 	{
 		P_CollectSecretBoom(sector, player);
 	}
@@ -2825,18 +2826,18 @@ extern "C" void P_PlayerInZDoomSector(player_t* player, sector_t* sector)
 
 	if(sector->damage.amount > 0)
 	{
-		if(sector->flags & SECF_ENDGODMODE)
+		if((sector->flags & SectorFlag::EndGodMode) != SectorFlag{})
 		{
 			player->cheats -= CheatFlag::GodMode;
 		}
 
 		if(
-			sector->flags & SECF_DMGUNBLOCKABLE ||
+			(sector->flags & SectorFlag::DamageUnblockable) != SectorFlag{} ||
 			!player->powers[std::to_underlying(PowerType::IronFeet)] ||
 			(sector->damage.leakrate && P_Random(RandomClass::Slimehurt) < sector->damage.leakrate)
 		)
 		{
-			if(sector->flags & SECF_HAZARD)
+			if((sector->flags & SectorFlag::Hazard) != SectorFlag{})
 			{
 				player->hazardcount += sector->damage.amount;
 				player->hazardinterval = sector->damage.interval;
@@ -2847,12 +2848,12 @@ extern "C" void P_PlayerInZDoomSector(player_t* player, sector_t* sector)
 				{
 					P_DamageMobj(player->mo, nullptr, nullptr, sector->damage.amount);
 
-					if(sector->flags & SECF_ENDLEVEL && player->health <= 10)
+					if((sector->flags & SectorFlag::EndLevel) != SectorFlag{} && player->health <= 10)
 					{
 						G_ExitLevel(0);
 					}
 
-					if(sector->flags & SECF_DMGTERRAINFX)
+					if((sector->flags & SectorFlag::DamageTerrainEffect) != SectorFlag{})
 					{
 						// MAP_FORMAT_TODO: damage special effects
 					}
@@ -2957,7 +2958,7 @@ extern "C" void P_PlayerInZDoomSector(player_t* player, sector_t* sector)
 			break;
 	}
 
-	if(sector->flags & SECF_SECRET)
+	if((sector->flags & SectorFlag::Secret) != SectorFlag{})
 	{
 		P_CollectSecretZDoom(sector, player);
 	}
@@ -3158,10 +3159,10 @@ extern "C" void P_SpawnCompatibleSectorSpecial(sector_t* sector, int i)
 		P_AddSectorSecret(sector);
 
 	if(sector->special & FRICTION_MASK)
-		sector->flags |= SECF_FRICTION;
+		sector->flags |= SectorFlag::Friction;
 
 	if(sector->special & PUSH_MASK)
-		sector->flags |= SECF_PUSH;
+		sector->flags |= SectorFlag::Push;
 
 	switch((demo_compatibility && !prboom_comp[std::to_underlying(PrboomComp::TruncatedSectorSpecials)].state) ? sector->special : sector->special & 31)
 	{
@@ -3275,7 +3276,7 @@ void P_SpawnZDoomLights(sector_t* sector)
 }
 
 void P_SetupSectorDamage(sector_t* sector, short amount,
-	byte interval, byte leakrate, unsigned int flags)
+	byte interval, byte leakrate, const SectorFlag flags)
 {
 	// Only set if damage is not yet initialized.
 	if(sector->damage.amount)
@@ -3284,7 +3285,7 @@ void P_SetupSectorDamage(sector_t* sector, short amount,
 	sector->damage.amount = amount;
 	sector->damage.interval = interval;
 	sector->damage.leakrate = leakrate;
-	sector->flags = (sector->flags & ~SECF_DAMAGEFLAGS) | (flags & SECF_DAMAGEFLAGS);
+	sector->flags = (sector->flags - SectorFlag::DamageFlags) | (flags & SectorFlag::DamageFlags);
 }
 
 static void P_SpawnZDoomGeneralizedSpecials(sector_t* sector)
@@ -3296,13 +3297,13 @@ static void P_SpawnZDoomGeneralizedSpecials(sector_t* sector)
 		case 0:
 			break;
 		case 1:
-			P_SetupSectorDamage(sector, 5, 32, 0, 0);
+			P_SetupSectorDamage(sector, 5, 32, 0, SectorFlag{});
 			break;
 		case 2:
-			P_SetupSectorDamage(sector, 10, 32, 0, 0);
+			P_SetupSectorDamage(sector, 10, 32, 0, SectorFlag{});
 			break;
 		case 3:
-			P_SetupSectorDamage(sector, 20, 32, 5, 0);
+			P_SetupSectorDamage(sector, 20, 32, 5, SectorFlag{});
 			break;
 	}
 
@@ -3310,10 +3311,10 @@ static void P_SpawnZDoomGeneralizedSpecials(sector_t* sector)
 		P_AddSectorSecret(sector);
 
 	if(sector->special & ZDOOM_FRICTION_MASK)
-		sector->flags |= SECF_FRICTION;
+		sector->flags |= SectorFlag::Friction;
 
 	if(sector->special & ZDOOM_PUSH_MASK)
-		sector->flags |= SECF_PUSH;
+		sector->flags |= SectorFlag::Push;
 }
 
 extern "C" void P_SpawnZDoomSectorSpecial(sector_t* sector, int i)
@@ -3328,52 +3329,52 @@ extern "C" void P_SpawnZDoomSectorSpecial(sector_t* sector, int i)
 	{
 		case ZDoomSectorSpecial::DScrollEastLavaDamage:
 			dsda_AddFloorScroller(-4, 0, sector - sectors, 0);
-			P_SetupSectorDamage(sector, 5, 32, 0, SECF_DMGTERRAINFX | SECF_DMGUNBLOCKABLE);
+			P_SetupSectorDamage(sector, 5, 32, 0, SectorFlag::DamageTerrainEffect | SectorFlag::DamageUnblockable);
 			break;
 		case ZDoomSectorSpecial::SLightStrobeHurt:
 		case ZDoomSectorSpecial::DDamageNukage:
-			P_SetupSectorDamage(sector, 5, 32, 0, 0);
+			P_SetupSectorDamage(sector, 5, 32, 0, SectorFlag{});
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::DDamageHellslime:
-			P_SetupSectorDamage(sector, 10, 32, 0, 0);
+			P_SetupSectorDamage(sector, 10, 32, 0, SectorFlag{});
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::DLightStrobeHurt:
 		case ZDoomSectorSpecial::DDamageSuperHellslime:
-			P_SetupSectorDamage(sector, 20, 32, 5, 0);
+			P_SetupSectorDamage(sector, 20, 32, 5, SectorFlag{});
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::DDamageEnd:
-			P_SetupSectorDamage(sector, 20, 32, 0, SECF_ENDGODMODE | SECF_ENDLEVEL | SECF_DMGUNBLOCKABLE);
+			P_SetupSectorDamage(sector, 20, 32, 0, SectorFlag::EndGodMode | SectorFlag::EndLevel | SectorFlag::DamageUnblockable);
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::DamageInstantDeath:
-			P_SetupSectorDamage(sector, 10000, 1, 0, SECF_DMGUNBLOCKABLE);
+			P_SetupSectorDamage(sector, 10000, 1, 0, SectorFlag::DamageUnblockable);
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::HDamageSludge:
-			P_SetupSectorDamage(sector, 4, 32, 0, 0);
+			P_SetupSectorDamage(sector, 4, 32, 0, SectorFlag{});
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::DDamageLavaWimpy:
-			P_SetupSectorDamage(sector, 5, 32, 0, SECF_DMGTERRAINFX | SECF_DMGUNBLOCKABLE);
+			P_SetupSectorDamage(sector, 5, 32, 0, SectorFlag::DamageTerrainEffect | SectorFlag::DamageUnblockable);
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::DDamageLavaHefty:
-			P_SetupSectorDamage(sector, 8, 32, 0, SECF_DMGTERRAINFX | SECF_DMGUNBLOCKABLE);
+			P_SetupSectorDamage(sector, 8, 32, 0, SectorFlag::DamageTerrainEffect | SectorFlag::DamageUnblockable);
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::SDamageHellslime:
-			P_SetupSectorDamage(sector, 2, 32, 0, SECF_HAZARD);
+			P_SetupSectorDamage(sector, 2, 32, 0, SectorFlag::Hazard);
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::SDamageSuperHellslime:
-			P_SetupSectorDamage(sector, 4, 32, 0, SECF_HAZARD);
+			P_SetupSectorDamage(sector, 4, 32, 0, SectorFlag::Hazard);
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::SectorHeal:
-			P_SetupSectorDamage(sector, -1, 32, 0, 0);
+			P_SetupSectorDamage(sector, -1, 32, 0, SectorFlag{});
 			sector->special = 0;
 			break;
 		case ZDoomSectorSpecial::DSectorDoorCloseIn30:
@@ -3387,10 +3388,10 @@ extern "C" void P_SpawnZDoomSectorSpecial(sector_t* sector, int i)
 		case ZDoomSectorSpecial::DFrictionLow:
 			sector->friction = FRICTION_LOW;
 			sector->movefactor = 0x269;
-			sector->flags |= SECF_FRICTION;
+			sector->flags |= SectorFlag::Friction;
 			break;
 		case ZDoomSectorSpecial::SectorHidden:
-			sector->flags |= SECF_HIDDEN;
+			sector->flags |= SectorFlag::Hidden;
 			sector->special = 0;
 			break;
 		default:
@@ -3550,7 +3551,7 @@ extern "C" void P_SpawnZDoomExtra(line_t* l, int i)
 				case ZDoomStaticInit::Damage:
 				{
 					damage_t damage;
-					unsigned int flags = 0;
+					SectorFlag flags = {};
 
 					damage.amount = P_AproxDistance(l->dx, l->dy) >> FRACBITS;
 					if(damage.amount < 20)
@@ -3565,7 +3566,7 @@ extern "C" void P_SpawnZDoomExtra(line_t* l, int i)
 					}
 					else
 					{
-						flags |= SECF_DMGUNBLOCKABLE;
+						flags |= SectorFlag::DamageUnblockable;
 						damage.leakrate = 0;
 						damage.interval = 1;
 					}
@@ -4058,7 +4059,7 @@ void T_Friction(friction_t* f)
 	// Be sure the special sector type is still turned on. If so, proceed.
 	// Else, bail out; the sector type has been changed on us.
 
-	if(!(sec->flags & SECF_FRICTION))
+	if((sec->flags & SectorFlag::Friction) == SectorFlag{})
 		return;
 
 	// Assign the friction value to players on the floor, non-floating,
@@ -4159,7 +4160,7 @@ void P_ResolveFrictionFactor(fixed_t friction_factor, sector_t* sec)
 	if(sec->movefactor < 32)
 		sec->movefactor = 32;
 
-	sec->flags |= SECF_FRICTION;
+	sec->flags |= SectorFlag::Friction;
 }
 
 static void P_ApplySectorFriction(int tag, int value, int use_thinker)
@@ -4409,7 +4410,7 @@ void T_Pusher(pusher_t* p)
 	// Be sure the special sector type is still turned on. If so, proceed.
 	// Else, bail out; the sector type has been changed on us.
 
-	if(!(sec->flags & SECF_PUSH))
+	if((sec->flags & SectorFlag::Push) == SectorFlag{})
 		return;
 
 	// For constant pushers (wind/current) there are 3 situations:
@@ -6539,34 +6540,34 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			{
 				int i;
 				const int* id_p;
-				static const int flags[] =
+				// The flag of each bit in args[1] (set) and args[2] (clear).
+				static constexpr std::array<SectorFlag, 12> flags =
 				{
-					SECF_SILENT,
-					0,
-					0,
-					0,
-					SECF_FRICTION,
-					SECF_PUSH,
-					0,
-					0,
-					SECF_ENDGODMODE,
-					SECF_ENDLEVEL,
-					SECF_HAZARD,
-					SECF_NOATTACK,
-					-1
+					SectorFlag::Silent,
+					SectorFlag{},
+					SectorFlag{},
+					SectorFlag{},
+					SectorFlag::Friction,
+					SectorFlag::Push,
+					SectorFlag{},
+					SectorFlag{},
+					SectorFlag::EndGodMode,
+					SectorFlag::EndLevel,
+					SectorFlag::Hazard,
+					SectorFlag::NoAttack,
 				};
 
-				int setflags = 0;
-				int clearflags = 0;
+				SectorFlag setflags = {};
+				SectorFlag clearflags = {};
 
-				for(i = 0; flags[i] != -1; i++, args[1] >>= 1, args[2] >>= 1)
+				for(i = 0; i < std::ssize(flags); i++, args[1] >>= 1, args[2] >>= 1)
 				{
 					if(args[1] & 1) setflags |= flags[i];
 					if(args[2] & 1) clearflags |= flags[i];
 				}
 
 				FIND_SECTORS(id_p, args[0])
-					sectors[*id_p].flags = (sectors[*id_p].flags & ~clearflags) | setflags;
+					sectors[*id_p].flags = (sectors[*id_p].flags - clearflags) | setflags;
 
 				buttonSuccess = 1;
 			}
@@ -6850,9 +6851,9 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				sectors[*id_p].damage.interval = args[3];
 				sectors[*id_p].damage.leakrate = args[4];
 				if(unblockable)
-					sectors[*id_p].flags |= SECF_DMGUNBLOCKABLE;
+					sectors[*id_p].flags |= SectorFlag::DamageUnblockable;
 				else
-					sectors[*id_p].flags &= ~SECF_DMGUNBLOCKABLE;
+					sectors[*id_p].flags -= SectorFlag::DamageUnblockable;
 			}
 		}
 			buttonSuccess = 1;

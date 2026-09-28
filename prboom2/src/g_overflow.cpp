@@ -528,7 +528,7 @@ sector_t* GetSectorAtNullAddress()
 		if(!null_sector_is_initialized)
 		{
 			memset(&null_sector, 0, sizeof(null_sector));
-			null_sector.flags = NULL_SECTOR;
+			null_sector.flags = SectorFlag::Null;
 			GetMemoryValue(0, &null_sector.floorheight, 4);
 			GetMemoryValue(4, &null_sector.ceilingheight, 4);
 			null_sector_is_initialized = true;

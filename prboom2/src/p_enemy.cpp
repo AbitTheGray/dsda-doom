@@ -153,7 +153,7 @@ static dboolean P_CheckMeleeRange(mobj_t* actor)
 {
 	int range;
 
-	if(actor->subsector->sector->flags & SECF_NOATTACK)
+	if((actor->subsector->sector->flags & SectorFlag::NoAttack) != SectorFlag{})
 		return false;
 
 	range = actor->info->meleerange;
@@ -189,7 +189,7 @@ static dboolean P_CheckMissileRange(mobj_t* actor)
 {
 	fixed_t dist;
 
-	if(actor->subsector->sector->flags & SECF_NOATTACK)
+	if((actor->subsector->sector->flags & SectorFlag::NoAttack) != SectorFlag{})
 		return false;
 
 	if(!P_CheckSight(actor, actor->target))

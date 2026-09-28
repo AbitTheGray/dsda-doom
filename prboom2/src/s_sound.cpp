@@ -412,7 +412,7 @@ void S_StartSoundAtVolume(void* origin_p, SfxId sfx_id, int volume, dboolean imp
 
 void S_StartSectorSound(sector_t* sector, SfxId sfx_id)
 {
-	if(sector->flags & SECF_SILENT)
+	if((sector->flags & SectorFlag::Silent) != SectorFlag{})
 		return;
 
 	S_StartSound((mobj_t*)&sector->soundorg, sfx_id);
@@ -420,7 +420,7 @@ void S_StartSectorSound(sector_t* sector, SfxId sfx_id)
 
 void S_LoopSectorSound(sector_t* sector, SfxId sfx_id, int timeout)
 {
-	if(sector->flags & SECF_SILENT)
+	if((sector->flags & SectorFlag::Silent) != SectorFlag{})
 		return;
 
 	S_LoopSound((mobj_t*)&sector->soundorg, sfx_id, timeout);
@@ -428,7 +428,7 @@ void S_LoopSectorSound(sector_t* sector, SfxId sfx_id, int timeout)
 
 void S_StartMobjSound(mobj_t* mobj, SfxId sfx_id)
 {
-	if(mobj && mobj->subsector && mobj->subsector->sector->flags & SECF_SILENT)
+	if(mobj && mobj->subsector && (mobj->subsector->sector->flags & SectorFlag::Silent) != SectorFlag{})
 		return;
 
 	S_StartSound(mobj, sfx_id);
@@ -436,7 +436,7 @@ void S_StartMobjSound(mobj_t* mobj, SfxId sfx_id)
 
 void S_LoopMobjSound(mobj_t* mobj, SfxId sfx_id, int timeout)
 {
-	if(mobj && mobj->subsector && mobj->subsector->sector->flags & SECF_SILENT)
+	if(mobj && mobj->subsector && (mobj->subsector->sector->flags & SectorFlag::Silent) != SectorFlag{})
 		return;
 
 	S_LoopSound(mobj, sfx_id, timeout);
@@ -466,7 +466,7 @@ void S_StartOptionalSound(SfxId sfx_id, SfxId fallback_sfx_id, dboolean importan
 
 void S_StartLineSound(line_t* line, degenmobj_t* soundorg, SfxId sfx_id)
 {
-	if(line && line->frontsector && line->frontsector->flags & SECF_SILENT)
+	if(line && line->frontsector && (line->frontsector->flags & SectorFlag::Silent) != SectorFlag{})
 		return;
 
 	S_StartSound((mobj_t*)soundorg, sfx_id);

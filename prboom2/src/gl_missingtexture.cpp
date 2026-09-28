@@ -64,7 +64,7 @@ static void gld_PrepareSectorSpecialEffects()
 	for(num = 0; num < numsectors; num++)
 	{
 		// the following is for specialeffects. see r_bsp.c in R_Subsector
-		sectors[num].flags |= (NO_TOPTEXTURES | NO_BOTTOMTEXTURES);
+		sectors[num].flags |= (SectorFlag::NoTopTextures | SectorFlag::NoBottomTextures);
 
 		for(i = 0; i < sectors[num].linecount; i++)
 		{
@@ -78,8 +78,8 @@ static void gld_PrepareSectorSpecialEffects()
 
 			if(!side0 || !side1 || side0->sector == side1->sector)
 			{
-				sectors[num].flags &= ~NO_TOPTEXTURES;
-				sectors[num].flags &= ~NO_BOTTOMTEXTURES;
+				sectors[num].flags -= SectorFlag::NoTopTextures;
+				sectors[num].flags -= SectorFlag::NoBottomTextures;
 				continue;
 			}
 
@@ -95,13 +95,13 @@ static void gld_PrepareSectorSpecialEffects()
 			}
 
 			if(front->toptexture != NO_TEXTURE)
-				sectors[num].flags &= ~NO_TOPTEXTURES;
+				sectors[num].flags -= SectorFlag::NoTopTextures;
 			if(front->bottomtexture != NO_TEXTURE)
-				sectors[num].flags &= ~NO_BOTTOMTEXTURES;
+				sectors[num].flags -= SectorFlag::NoBottomTextures;
 			if(back->toptexture != NO_TEXTURE)
-				sectors[num].flags &= ~NO_TOPTEXTURES;
+				sectors[num].flags -= SectorFlag::NoTopTextures;
 			if(back->bottomtexture != NO_TEXTURE)
-				sectors[num].flags &= ~NO_BOTTOMTEXTURES;
+				sectors[num].flags -= SectorFlag::NoBottomTextures;
 
 			needs_front_lower =
 				back->sector->floorpic != skyflatnum &&
@@ -113,23 +113,23 @@ static void gld_PrepareSectorSpecialEffects()
 			/* now mark the sectors if they require flat bleed-through */
 			if(needs_front_upper && front->toptexture == NO_TEXTURE)
 			{
-				back->sector->flags |= MISSING_TOPTEXTURES;
+				back->sector->flags |= SectorFlag::MissingTopTextures;
 				gld_RegisterBleedthroughSector(front->sector, back->sector, BleedType::Ceiling);
-				front->sector->flags |= MISSING_TOPTEXTURES;
+				front->sector->flags |= SectorFlag::MissingTopTextures;
 				gld_RegisterBleedthroughSector(back->sector, front->sector, BleedType::Ceiling | BleedType::Occlude);
 			}
 			if(needs_front_lower && front->bottomtexture == NO_TEXTURE)
 			{
-				back->sector->flags |= MISSING_BOTTOMTEXTURES;
+				back->sector->flags |= SectorFlag::MissingBottomTextures;
 				gld_RegisterBleedthroughSector(front->sector, back->sector, BleedType::None);
-				front->sector->flags |= MISSING_BOTTOMTEXTURES;
+				front->sector->flags |= SectorFlag::MissingBottomTextures;
 				gld_RegisterBleedthroughSector(back->sector, front->sector, BleedType::Occlude);
 			}
 		}
 #ifdef PRBOOM_DEBUG
-		if(sectors[num].flags & NO_TOPTEXTURES)
+		if((sectors[num].flags & SectorFlag::NoTopTextures) != SectorFlag{})
 			Log::Info("Sector {} has no toptextures\n", num);
-		if(sectors[num].flags & NO_BOTTOMTEXTURES)
+		if((sectors[num].flags & SectorFlag::NoBottomTextures) != SectorFlag{})
 			Log::Info("Sector {} has no bottomtextures\n", num);
 #endif
 	}
@@ -217,7 +217,7 @@ static void gld_PreprocessFakeSector(int ceiling, sector_t* sector, int groupid)
 		}
 
 		if(sec && sec->fakegroup[ceiling] == -1 &&
-			(sec->flags & (ceiling ? NO_TOPTEXTURES : NO_BOTTOMTEXTURES)))
+			(sec->flags & (ceiling ? SectorFlag::NoTopTextures : SectorFlag::NoBottomTextures)) != SectorFlag{})
 		{
 			gld_PreprocessFakeSector(ceiling, sec, groupid);
 		}
@@ -236,7 +236,7 @@ void gld_PreprocessFakeSectors()
 
 	if(gl_use_stencil)
 	{
-		// precalculate NO_TOPTEXTURES and NO_BOTTOMTEXTURES flags
+		// precalculate SectorFlag::NoTopTextures and SectorFlag::NoBottomTextures flags
 		gld_PrepareSectorSpecialEffects();
 		return;
 	}
@@ -268,20 +268,20 @@ void gld_PreprocessFakeSectors()
 		sectors[i].fakegroup[1] = -1;
 	}
 
-	// precalculate NO_TOPTEXTURES and NO_BOTTOMTEXTURES flags
+	// precalculate SectorFlag::NoTopTextures and SectorFlag::NoBottomTextures flags
 	gld_PrepareSectorSpecialEffects();
 
 	groupid = 0;
 
 	for(ceiling = 0; ceiling <= 1; ceiling++)
 	{
-		unsigned int no_texture_flag = (ceiling ? NO_TOPTEXTURES : NO_BOTTOMTEXTURES);
+		const SectorFlag no_texture_flag = (ceiling ? SectorFlag::NoTopTextures : SectorFlag::NoBottomTextures);
 
 		do
 		{
 			for(i = 0; i < numsectors; i++)
 			{
-				if(!(sectors[i].flags & no_texture_flag)
+				if((sectors[i].flags & no_texture_flag) == SectorFlag{}
 					&& (sectors[i].fakegroup[ceiling] == -1))
 				{
 					gld_PreprocessFakeSector(ceiling, &sectors[i], groupid);
@@ -289,7 +289,7 @@ void gld_PreprocessFakeSectors()
 					fakeplanes[groupid].list = static_cast<decltype(fakeplanes[groupid].list)>(Z_Malloc(fakeplanes[groupid].count * sizeof(sector_t*)));
 					for(j = 0, k = 0; k < fakeplanes[groupid].count; k++)
 					{
-						if(!(sectors2[k]->flags & no_texture_flag))
+						if((sectors2[k]->flags & no_texture_flag) == SectorFlag{})
 						{
 							fakeplanes[groupid].list[j++] = sectors2[k];
 						}
@@ -327,7 +327,7 @@ sector_t* GetBestFake(sector_t* sector, int ceiling, int validcount)
 			fixed_t min_height = INT_MAX;
 			for(i = 0; i < fakeplanes[groupid].count; i++)
 			{
-				if(!(fakeplanes[groupid].list[i]->flags & NO_TOPTEXTURES) &&
+				if((fakeplanes[groupid].list[i]->flags & SectorFlag::NoTopTextures) == SectorFlag{} &&
 					fakeplanes[groupid].list[i]->ceilingheight < min_height)
 				{
 					min_height = fakeplanes[groupid].list[i]->ceilingheight;
@@ -340,7 +340,7 @@ sector_t* GetBestFake(sector_t* sector, int ceiling, int validcount)
 			fixed_t max_height = INT_MIN;
 			for(i = 0; i < fakeplanes[groupid].count; i++)
 			{
-				if(!(fakeplanes[groupid].list[i]->flags & NO_BOTTOMTEXTURES) &&
+				if((fakeplanes[groupid].list[i]->flags & SectorFlag::NoBottomTextures) == SectorFlag{} &&
 					fakeplanes[groupid].list[i]->floorheight > max_height)
 				{
 					max_height = fakeplanes[groupid].list[i]->floorheight;

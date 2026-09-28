@@ -52,6 +52,34 @@ enum struct LineRenderFlag : uint8_t
 };
 ENUM_FLAGS_FUNC(LineRenderFlag)
 
+// sector_t::flags (and the flags a sector special carries along)
+enum struct SectorFlag : uint32_t
+{
+	NoTopTextures = Bit<uint32_t>(0u),
+	NoBottomTextures = Bit<uint32_t>(1u),
+	Closed = Bit<uint32_t>(2u),
+	Null = Bit<uint32_t>(3u),
+	MissingTopTextures = Bit<uint32_t>(4u),
+	MissingBottomTextures = Bit<uint32_t>(5u),
+	Secret = Bit<uint32_t>(6u),
+	WasSecret = Bit<uint32_t>(7u),
+	Hidden = Bit<uint32_t>(8u),
+	EndGodMode = Bit<uint32_t>(9u),
+	EndLevel = Bit<uint32_t>(10u),
+	DamageTerrainEffect = Bit<uint32_t>(11u),
+	Hazard = Bit<uint32_t>(12u),
+	DamageUnblockable = Bit<uint32_t>(13u),
+	Friction = Bit<uint32_t>(14u),
+	Push = Bit<uint32_t>(15u),
+	NoAttack = Bit<uint32_t>(16u),
+	Silent = Bit<uint32_t>(17u),
+	LightFloorAbsolute = Bit<uint32_t>(18u),
+	LightCeilingAbsolute = Bit<uint32_t>(19u),
+	DamageFlags = EndGodMode | EndLevel | DamageTerrainEffect | Hazard | DamageUnblockable,
+	TransferMask = Secret | WasSecret | DamageFlags | Friction | Push,
+};
+ENUM_FLAGS_FUNC(SectorFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -103,28 +131,6 @@ typedef struct
 // Stores things/mobjs.
 //
 
-#define NO_TOPTEXTURES             0x00000001
-#define NO_BOTTOMTEXTURES          0x00000002
-#define SECTOR_IS_CLOSED           0x00000004
-#define NULL_SECTOR                0x00000008
-#define MISSING_TOPTEXTURES        0x00000010
-#define MISSING_BOTTOMTEXTURES     0x00000020
-#define SECF_SECRET                0x00000040
-#define SECF_WASSECRET             0x00000080
-#define SECF_HIDDEN                0x00000100
-#define SECF_ENDGODMODE            0x00000200
-#define SECF_ENDLEVEL              0x00000400
-#define SECF_DMGTERRAINFX          0x00000800
-#define SECF_HAZARD                0x00001000
-#define SECF_DMGUNBLOCKABLE        0x00002000
-#define SECF_FRICTION              0x00004000
-#define SECF_PUSH                  0x00008000
-#define SECF_NOATTACK              0x00010000
-#define SECF_SILENT                0x00020000
-#define SECF_LIGHTFLOORABSOLUTE    0x00040000
-#define SECF_LIGHTCEILINGABSOLUTE  0x00080000
-#define SECF_DAMAGEFLAGS (SECF_ENDGODMODE|SECF_ENDLEVEL|SECF_DMGTERRAINFX|SECF_HAZARD|SECF_DMGUNBLOCKABLE)
-#define SECF_TRANSFERMASK (SECF_SECRET|SECF_WASSECRET|SECF_DAMAGEFLAGS|SECF_FRICTION|SECF_PUSH)
 
 typedef struct
 {
@@ -136,7 +142,7 @@ typedef struct
 typedef struct sector_s
 {
 	int iSectorID;      // proff 04/05/2000: needed for OpenGL and used in debugmode by the HUD to draw sectornum
-	unsigned int flags; //e6y: instead of .no_toptextures and .no_bottomtextures
+	SectorFlag flags; //e6y: instead of .no_toptextures and .no_bottomtextures
 	fixed_t floorheight;
 	fixed_t ceilingheight;
 	byte soundtraversed;  // 0 = untraversed, 1,2 = sndlines-1

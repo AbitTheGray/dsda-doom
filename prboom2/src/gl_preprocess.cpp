@@ -61,7 +61,7 @@ static void gld_TurnOffSubsectorTriangulation()
 
 static dboolean gld_TriangulateSubsector(subsector_t* ssec)
 {
-	return !(ssec->sector->flags & SECTOR_IS_CLOSED) ||
+	return (ssec->sector->flags & SectorFlag::Closed) == SectorFlag{} ||
 		triangulate_subsectors;
 }
 
@@ -916,11 +916,11 @@ static void gld_PreprocessSectors()
 			Log::Error("sector {} is not closed! {} lines in sector\n", i, sectors[i].linecount);
 #endif
 			if(levelinfo) fprintf(levelinfo, "sector %i is not closed! %i lines in sector\n", i, sectors[i].linecount);
-			sectors[i].flags &= ~SECTOR_IS_CLOSED;
+			sectors[i].flags -= SectorFlag::Closed;
 		}
 		else
 		{
-			sectors[i].flags |= SECTOR_IS_CLOSED;
+			sectors[i].flags |= SectorFlag::Closed;
 			for(j = 0; j < numvertexes; j++)
 			{
 				if((vertexcheck[j] == 1) || (vertexcheck[j] == 2))
@@ -929,7 +929,7 @@ static void gld_PreprocessSectors()
 					Log::Error("sector {} is not closed at vertex {} ! {} lines in sector\n", i, j, sectors[i].linecount);
 #endif
 					if(levelinfo) fprintf(levelinfo, "sector %i is not closed at vertex %i ! %i lines in sector\n", i, j, sectors[i].linecount);
-					sectors[i].flags &= ~SECTOR_IS_CLOSED;
+					sectors[i].flags -= SectorFlag::Closed;
 				}
 			}
 		}
@@ -946,7 +946,7 @@ static void gld_PreprocessSectors()
 		}
 
 		// figgi -- adapted for glnodes
-		if(sectors[i].flags & SECTOR_IS_CLOSED)
+		if((sectors[i].flags & SectorFlag::Closed) != SectorFlag{})
 			gld_PrecalculateSector(i);
 	}
 	Z_Free(vertexcheck);
