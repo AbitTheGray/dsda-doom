@@ -85,59 +85,6 @@
 #include "heretic/sb_bar.hpp"
 #include "heretic/dstrings.hpp"
 
-/****************************
- *
- *  The following #defines are for the m_flags field of each item on every
- *  Setup Screen. They can be OR'ed together where appropriate
- */
-
-#define S_HILITE   0x00000001 // Cursor is sitting on this item
-#define S_SELECT   0x00000002 // We're changing this item
-#define S_TITLE    0x00000004 // Title item
-#define S_YESNO    0x00000008 // Yes or No item
-#define S_CRITEM   0x00000010 // Message color
-#define S_COLOR    0x00000020 // Automap color
-#define S_LABEL    0x00000040
-#define S_TC_SEL   0x00000080
-#define S_PREV     0x00000100 // Previous menu exists
-#define S_NEXT     0x00000200 // Next menu exists
-#define S_INPUT    0x00000400 // Composite input binding
-#define S_WEAP     0x00000800 // Weapon #
-#define S_NUM      0x00001000 // Numerical item
-#define S_SKIP     0x00002000 // Cursor can't land here
-#define S_KEEP     0x00004000 // Don't swap key out
-#define S_END      0x00008000 // Last item in list (dummy)
-#define S_LEVWARN  0x00010000 // killough 8/30/98: Always warn about pending change
-#define S_NOSELECT 0x00020000
-#define S_CENTER   0x00040000
-#define S_FILE     0x00080000 // killough 10/98: Filenames
-#define S_LEFTJUST 0x00100000 // killough 10/98: items which are left-justified
-#define S_CREDIT   0x00200000 // killough 10/98: credit
-#define S_THERMO   0x00400000 // Slider for choosing a value
-#define S_CHOICE   0x00800000 // this item has several values
-#define S_NAME     0x01000000
-#define S_RESET_Y  0x02000000
-#define S_STR      0x04000000 // need to refactor things...
-#define S_NOCLEAR  0x08000000
-#define S_DISABLED 0x10000000 // disabled / darken options
-// #define S_      0x20000000
-// #define S_      0x40000000
-// #define S_      0x80000000
-
-/* S_SHOWDESC  = the set of items whose description should be displayed
- * S_SHOWSET   = the set of items whose setting should be displayed
- * S_STRING    = the set of items whose settings are strings -- killough 10/98:
- * S_HASDEFPTR = the set of items whose var field points to default array
- */
-
-#define S_SHOWDESC (S_LABEL|S_TITLE|S_YESNO|S_CRITEM|S_COLOR|S_PREV|S_NEXT|S_INPUT|S_WEAP|S_NUM|S_FILE|S_CREDIT|S_CHOICE|S_THERMO|S_NAME)
-
-#define S_SHOWSET  (S_YESNO|S_CRITEM|S_COLOR|S_INPUT|S_WEAP|S_NUM|S_FILE|S_CHOICE|S_THERMO|S_NAME)
-
-#define S_STRING (S_FILE|S_NAME)
-
-#define S_HASDEFPTR (S_STRING|S_YESNO|S_NUM|S_WEAP|S_COLOR|S_CRITEM|S_CHOICE)
-
 /////////////////////////////
 //
 // booleans for setup screens
@@ -1718,7 +1665,7 @@ static void M_SetSetupPageContext(const char** labels, int visible_tabs,
 	setup_page_context.pages = pages;
 }
 
-// save the setup menu's itemon value in the S_END element's x coordinate
+// save the setup menu's itemon value in the SetupFlag::End element's x coordinate
 
 static int M_GetSetupMenuItemOn()
 {
@@ -1726,7 +1673,7 @@ static int M_GetSetupMenuItemOn()
 
 	if(menu)
 	{
-		while(!(menu->m_flags & S_END))
+		while((menu->m_flags & SetupFlag::End) == SetupFlag{})
 			menu++;
 
 		return menu->m_x;
@@ -1741,7 +1688,7 @@ static void M_SetSetupMenuItemOn(const int x)
 
 	if(menu)
 	{
-		while(!(menu->m_flags & S_END))
+		while((menu->m_flags & SetupFlag::End) == SetupFlag{})
 			menu++;
 
 		menu->m_x = x;
@@ -1753,10 +1700,10 @@ static void M_UpdateSetupMenu(setup_menu_t* new_setup_menu)
 	menu_mouse_setup_scroll = KEYBOARD_NAV;
 	current_setup_menu = new_setup_menu;
 	set_menu_itemon = M_GetSetupMenuItemOn();
-	if(current_setup_menu[set_menu_itemon].m_flags & S_NOSELECT)
+	if((current_setup_menu[set_menu_itemon].m_flags & SetupFlag::NoSelect) != SetupFlag{})
 		return;
-	while(current_setup_menu[set_menu_itemon++].m_flags & S_SKIP);
-	current_setup_menu[--set_menu_itemon].m_flags |= S_HILITE;
+	while((current_setup_menu[set_menu_itemon++].m_flags & SetupFlag::Skip) != SetupFlag{});
+	current_setup_menu[--set_menu_itemon].m_flags |= SetupFlag::Highlight;
 }
 
 /////////////////////////////
@@ -1909,9 +1856,9 @@ static dboolean M_ItemDisabled(const setup_menu_t* s)
 
 static dboolean M_ItemSelected(const setup_menu_t* s)
 {
-	int flags = s->m_flags;
+	const SetupFlag flags = s->m_flags;
 
-	if(s == current_setup_menu + set_menu_itemon && whichSkull && !(flags & S_NOSELECT))
+	if(s == current_setup_menu + set_menu_itemon && whichSkull && (flags & SetupFlag::NoSelect) == SetupFlag{})
 		return true;
 
 	return false;
@@ -1972,14 +1919,14 @@ static void M_BlinkingArrowRight(const setup_menu_t* s, char* text, size_t text_
 //
 //
 
-static ColorRange GetItemColor(int flags)
+static ColorRange GetItemColor(const SetupFlag flags)
 {
-	return (flags & S_TITLE && flags & S_DISABLED) ? static_cast<ColorRange>(std::to_underlying(cr_title) + std::to_underlying(ColorRange::Darken)) : flags & S_DISABLED ? static_cast<ColorRange>(std::to_underlying(cr_label) + std::to_underlying(ColorRange::Darken)) : flags & (S_SELECT | S_TC_SEL) ? cr_label_edit : flags & S_HILITE ? cr_label_highlight : flags & (S_TITLE | S_NEXT | S_PREV) ? cr_title : cr_label; // killough 10/98
+	return ((flags & SetupFlag::Title) != SetupFlag{} && (flags & SetupFlag::Disabled) != SetupFlag{}) ? static_cast<ColorRange>(std::to_underlying(cr_title) + std::to_underlying(ColorRange::Darken)) : (flags & SetupFlag::Disabled) != SetupFlag{} ? static_cast<ColorRange>(std::to_underlying(cr_label) + std::to_underlying(ColorRange::Darken)) : (flags & (SetupFlag::Select | SetupFlag::SelectedColor)) != SetupFlag{} ? cr_label_edit : (flags & SetupFlag::Highlight) != SetupFlag{} ? cr_label_highlight : (flags & (SetupFlag::Title | SetupFlag::Next | SetupFlag::Prev)) != SetupFlag{} ? cr_title : cr_label; // killough 10/98
 }
 
-static ColorRange GetOptionColor(int flags)
+static ColorRange GetOptionColor(const SetupFlag flags)
 {
-	return flags & S_DISABLED ? static_cast<ColorRange>(std::to_underlying(cr_value) + std::to_underlying(ColorRange::Darken)) : flags & S_SELECT ? cr_value_edit : flags & S_HILITE ? cr_value_highlight : cr_value;
+	return (flags & SetupFlag::Disabled) != SetupFlag{} ? static_cast<ColorRange>(std::to_underlying(cr_value) + std::to_underlying(ColorRange::Darken)) : (flags & SetupFlag::Select) != SetupFlag{} ? cr_value_edit : (flags & SetupFlag::Highlight) != SetupFlag{} ? cr_value_highlight : cr_value;
 }
 
 /////////////////////////////
@@ -1995,12 +1942,12 @@ static ColorRange GetOptionColor(int flags)
 static void M_DrawItem(const setup_menu_t* s, int y)
 {
 	int x = s->m_x;
-	int flags = s->m_flags;
+	SetupFlag flags = s->m_flags;
 	char *p, *t;
 	ColorRange color;
 
 	if(M_ItemDisabled(s))
-		flags |= S_DISABLED;
+		flags |= SetupFlag::Disabled;
 
 	color = GetItemColor(flags);
 
@@ -2015,9 +1962,9 @@ static void M_DrawItem(const setup_menu_t* s, int y)
 		int w = M_GetPixelWidth(p);
 		int offset = 0;
 
-		if(flags & S_CENTER)
+		if((flags & SetupFlag::Center) != SetupFlag{})
 			offset = x - (BASE_WIDTH - w) / 2;
-		else if(!(flags & S_LEFTJUST))
+		else if((flags & SetupFlag::LeftJustify) == SetupFlag{})
 			offset = w + 4;
 
 		M_DrawString(x - offset, y, color, p);
@@ -2099,19 +2046,19 @@ static dboolean M_SetupSettingText(const setup_menu_t* s,
 	char* text, size_t text_size,
 	dboolean update_entry_index)
 {
-	int flags = s->m_flags;
+	const SetupFlag flags = s->m_flags;
 
 	if(!text_size)
 		return false;
 
 	text[0] = '\0';
 
-	if(flags & S_YESNO)
+	if((flags & SetupFlag::YesNo) != SetupFlag{})
 		M_CopyText(text, text_size,
 			dsda_IntConfig(s->config_id) ? "YES" : "NO");
-	else if(flags & (S_NUM | S_WEAP | S_CRITEM))
+	else if((flags & (SetupFlag::Number | SetupFlag::Weapon | SetupFlag::TextColor)) != SetupFlag{})
 	{
-		if((flags & (S_HILITE | S_SELECT)) && setup_gather)
+		if((flags & (SetupFlag::Highlight | SetupFlag::Select)) != SetupFlag{} && setup_gather)
 		{
 			gather_buffer[gather_count] = 0;
 			M_CopyText(text, text_size, gather_buffer);
@@ -2119,27 +2066,27 @@ static dboolean M_SetupSettingText(const setup_menu_t* s,
 		else
 			snprintf(text, text_size, "%d", dsda_IntConfig(s->config_id));
 	}
-	else if(flags & S_INPUT)
+	else if((flags & SetupFlag::Input) != SetupFlag{})
 		M_SetupInputText(s, text, text_size);
-	else if(flags & S_STRING)
+	else if((flags & SetupFlag::String) != SetupFlag{})
 	{
-		dboolean editing = setup_select && (flags & (S_HILITE | S_SELECT));
+		dboolean editing = setup_select && (flags & (SetupFlag::Highlight | SetupFlag::Select)) != SetupFlag{};
 
 		M_CopyText(text, text_size,
 			editing ? entry_string_index : dsda_StringConfig(s->config_id));
 		if(editing)
 			M_TrimSetupString(text, update_entry_index);
 	}
-	else if(flags & S_CHOICE)
+	else if((flags & SetupFlag::Choice) != SetupFlag{})
 	{
-		if(flags & S_STR)
+		if((flags & SetupFlag::StringChoice) != SetupFlag{})
 		{
 			M_CopyText(text, text_size,
-				setup_select && (flags & (S_HILITE | S_SELECT)) ? entry_string_index : dsda_StringConfig(s->config_id));
+				setup_select && (flags & (SetupFlag::Highlight | SetupFlag::Select)) != SetupFlag{} ? entry_string_index : dsda_StringConfig(s->config_id));
 		}
 		else
 		{
-			int value = setup_select && (flags & (S_HILITE | S_SELECT)) ? choice_value : dsda_IntConfig(s->config_id);
+			int value = setup_select && (flags & (SetupFlag::Highlight | SetupFlag::Select)) != SetupFlag{} ? choice_value : dsda_IntConfig(s->config_id);
 
 			if(s->selectstrings == nullptr)
 				snprintf(text, text_size, "%d", value);
@@ -2147,7 +2094,7 @@ static dboolean M_SetupSettingText(const setup_menu_t* s,
 				M_CopyText(text, text_size, s->selectstrings[value]);
 		}
 	}
-	else if(flags & S_THERMO)
+	else if((flags & SetupFlag::Thermo) != SetupFlag{})
 		snprintf(text, text_size, "%d", dsda_IntConfig(s->config_id));
 	else
 		return false;
@@ -2157,16 +2104,16 @@ static dboolean M_SetupSettingText(const setup_menu_t* s,
 	return text[0] != '\0';
 }
 
-static ColorRange M_SetupSettingColor(const setup_menu_t* s, int flags)
+static ColorRange M_SetupSettingColor(const setup_menu_t* s, const SetupFlag flags)
 {
 	ColorRange color = GetOptionColor(flags);
-	dboolean editing = setup_gather && (flags & (S_HILITE | S_SELECT));
+	dboolean editing = setup_gather && (flags & (SetupFlag::Highlight | SetupFlag::Select)) != SetupFlag{};
 
-	if((flags & S_CRITEM) && !editing)
+	if((flags & SetupFlag::TextColor) != SetupFlag{} && !editing)
 	{
 		color = static_cast<ColorRange>(dsda_IntConfig(s->config_id));
 
-		if(flags & S_DISABLED)
+		if((flags & SetupFlag::Disabled) != SetupFlag{})
 			color = static_cast<ColorRange>(std::to_underlying(color) + std::to_underlying(ColorRange::Darken));
 	}
 
@@ -2201,12 +2148,13 @@ static void M_DrawSetupStringCursor(int x, int y, char* text)
 
 static void M_DrawSetting(const setup_menu_t* s, int y)
 {
-	int x = s->m_x, flags = s->m_flags;
+	int x = s->m_x;
+	SetupFlag flags = s->m_flags;
 	ColorRange color;
 	char text[MENU_BUFFER_SIZE];
 
 	if(M_ItemDisabled(s))
-		flags |= S_DISABLED;
+		flags |= SetupFlag::Disabled;
 
 	// Determine color of the text. This may or may not be used later,
 	// depending on whether the item is a text string or not.
@@ -2215,7 +2163,7 @@ static void M_DrawSetting(const setup_menu_t* s, int y)
 
 	// Is the item a paint chip?
 
-	if(flags & S_COLOR) // Automap paint chip
+	if((flags & SetupFlag::Color) != SetupFlag{}) // Automap paint chip
 	{
 		int ch;
 
@@ -2239,7 +2187,7 @@ static void M_DrawSetting(const setup_menu_t* s, int y)
 		return;
 	}
 
-	if(flags & S_THERMO)
+	if((flags & SetupFlag::Thermo) != SetupFlag{})
 	{
 		M_DrawThermoSmall(x, y, 8, 16, dsda_IntConfig(s->config_id), s);
 
@@ -2250,7 +2198,7 @@ static void M_DrawSetting(const setup_menu_t* s, int y)
 	if(!M_SetupSettingText(s, text, sizeof(text), true))
 		return;
 
-	if((flags & S_STRING) && setup_select && (flags & (S_HILITE | S_SELECT)))
+	if((flags & SetupFlag::String) != SetupFlag{} && setup_select && (flags & (SetupFlag::Highlight | SetupFlag::Select)) != SetupFlag{})
 		M_DrawSetupStringCursor(x, y, text);
 
 	M_CopyText(menu_buffer, sizeof(menu_buffer), text);
@@ -2283,15 +2231,15 @@ static void M_GetSetupMenuLayout(const setup_menu_t* base_src, int base_y,
 	int buffer_i = 0;
 	const setup_menu_t* src;
 
-	for(src = base_src; !(src->m_flags & S_END); src++)
+	for(src = base_src; (src->m_flags & SetupFlag::End) == SetupFlag{}; src++)
 	{
 		if(src == &current_setup_menu[set_menu_itemon])
 			current_i = i;
 
-		if(src->m_flags & (S_NEXT | S_PREV))
+		if((src->m_flags & (SetupFlag::Next | SetupFlag::Prev)) != SetupFlag{})
 			continue;
 
-		if(src->m_flags & S_RESET_Y)
+		if((src->m_flags & SetupFlag::ResetY) != SetupFlag{})
 		{
 			i = 0;
 		}
@@ -2330,11 +2278,11 @@ static void M_GetSetupMenuLayout(const setup_menu_t* base_src, int base_y,
 
 static dboolean M_GetSetupItemPosition(const setup_menu_t* item, int base_y, const setup_menu_layout_t* layout, int* index, int* carry_y, int* desc_y, int* set_y)
 {
-	if(item->m_flags & (S_NEXT | S_PREV))
+	if((item->m_flags & (SetupFlag::Next | SetupFlag::Prev)) != SetupFlag{})
 	{
 		*desc_y = 190 - layout->line_height - 2;
 	}
-	else if(item->m_flags & S_RESET_Y)
+	else if((item->m_flags & SetupFlag::ResetY) != SetupFlag{})
 	{
 		*index = 0;
 		return false;
@@ -2353,7 +2301,7 @@ static dboolean M_GetSetupItemPosition(const setup_menu_t* item, int base_y, con
 	}
 
 	*set_y = *desc_y;
-	if(item->m_flags & S_THERMO)
+	if((item->m_flags & SetupFlag::Thermo) != SetupFlag{})
 	{
 		*carry_y += 6;
 		*desc_y += 3;
@@ -2386,7 +2334,7 @@ static void M_DrawSetupMenuScrollbar(int base_y,
 static void M_DrawScreenItems(const setup_menu_t* base_src, int base_y)
 {
 	int i = 0;
-	int carry_y = 0; // Bigger elements (like S_THERMO) needs a bigger offset that carries over for all settings
+	int carry_y = 0; // Bigger elements (like SetupFlag::Thermo) needs a bigger offset that carries over for all settings
 	setup_menu_layout_t layout;
 	const setup_menu_t* src;
 
@@ -2394,7 +2342,7 @@ static void M_DrawScreenItems(const setup_menu_t* base_src, int base_y)
 	M_DrawSetupMenuScrollbar(base_y, &layout);
 
 	i = 0;
-	for(src = base_src; !(src->m_flags & S_END); src++)
+	for(src = base_src; (src->m_flags & SetupFlag::End) == SetupFlag{}; src++)
 	{
 		int desc_y;
 		int set_y;
@@ -2403,11 +2351,11 @@ static void M_DrawScreenItems(const setup_menu_t* base_src, int base_y)
 			continue;
 
 		// See if we're to draw the item description (left-hand part)
-		if(src->m_flags & S_SHOWDESC)
+		if((src->m_flags & SetupFlag::ShowDesc) != SetupFlag{})
 			M_DrawItem(src, desc_y);
 
 		// See if we're to draw the setting (right-hand part)
-		if(src->m_flags & S_SHOWSET)
+		if((src->m_flags & SetupFlag::ShowSet) != SetupFlag{})
 			M_DrawSetting(src, set_y);
 	}
 }
@@ -2557,43 +2505,43 @@ static void M_DrawInstructionString(ColorRange cr, const char* str)
 
 static void M_DrawInstructions()
 {
-	int flags = current_setup_menu[set_menu_itemon].m_flags;
+	const SetupFlag flags = current_setup_menu[set_menu_itemon].m_flags;
 
 	// There are different instruction messages depending on whether you
 	// are changing an item or just sitting on it.
 
 	if(setup_select)
 	{
-		switch(flags & (S_INPUT | S_YESNO | S_WEAP | S_NUM | S_COLOR | S_CRITEM | S_FILE | S_CHOICE | S_THERMO | S_NAME))
+		switch(flags & (SetupFlag::Input | SetupFlag::YesNo | SetupFlag::Weapon | SetupFlag::Number | SetupFlag::Color | SetupFlag::TextColor | SetupFlag::File | SetupFlag::Choice | SetupFlag::Thermo | SetupFlag::Name))
 		{
-			case S_INPUT:
+			case SetupFlag::Input:
 				M_DrawInstructionString(cr_info_edit, "Press key or button for this action");
 				break;
-			case S_YESNO:
+			case SetupFlag::YesNo:
 				M_DrawInstructionString(cr_info_edit, "Press ENTER key to toggle");
 				break;
-			case S_WEAP:
+			case SetupFlag::Weapon:
 				M_DrawInstructionString(cr_info_edit, "Enter weapon number");
 				break;
-			case S_NUM:
+			case SetupFlag::Number:
 				M_DrawInstructionString(cr_info_edit, "Enter value. Press ENTER when finished.");
 				break;
-			case S_COLOR:
+			case SetupFlag::Color:
 				M_DrawInstructionString(cr_info_edit, "Select color and press enter");
 				break;
-			case S_CRITEM:
+			case SetupFlag::TextColor:
 				M_DrawInstructionString(cr_info_edit, "Enter value");
 				break;
-			case S_FILE:
+			case SetupFlag::File:
 				M_DrawInstructionString(cr_info_edit, "Type/edit filename and Press ENTER");
 				break;
-			case S_CHOICE:
+			case SetupFlag::Choice:
 				M_DrawInstructionString(cr_info_edit, "Press left or right to choose");
 				break;
-			case S_THERMO:
+			case SetupFlag::Thermo:
 				M_DrawInstructionString(cr_info_edit, "Press left or right to choose");
 				break;
-			case S_NAME:
+			case SetupFlag::Name:
 				M_DrawInstructionString(cr_info_edit, "Type / edit author and Press ENTER");
 				break;
 			default:
@@ -2602,19 +2550,19 @@ static void M_DrawInstructions()
 	}
 	else
 	{
-		if(flags & S_INPUT)
+		if((flags & SetupFlag::Input) != SetupFlag{})
 			M_DrawInstructionString(cr_info_highlight, "Press Enter to Change, Del to Clear");
 		else
 			M_DrawInstructionString(cr_info_highlight, "Press Enter to Change");
 	}
 }
 
-#define TITLE(page_name, offset_x) { page_name, S_SKIP | S_TITLE, SetupGroup::Null, offset_x}
-#define NEXT_PAGE(page) { "", S_SKIP | S_NEXT, SetupGroup::Null, 318, .menu = page }
-#define PREV_PAGE(page) { "", S_SKIP | S_PREV | S_LEFTJUST, SetupGroup::Null, 2, .menu = page }
-#define FINAL_ENTRY { 0, S_SKIP | S_END, SetupGroup::Null }
-#define EMPTY_LINE { 0, S_SKIP, SetupGroup::Null }
-#define NEW_COLUMN { 0, S_SKIP | S_RESET_Y, SetupGroup::Null }
+#define TITLE(page_name, offset_x) { page_name, SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null, offset_x}
+#define NEXT_PAGE(page) { "", SetupFlag::Skip | SetupFlag::Next, SetupGroup::Null, 318, .menu = page }
+#define PREV_PAGE(page) { "", SetupFlag::Skip | SetupFlag::Prev | SetupFlag::LeftJustify, SetupGroup::Null, 2, .menu = page }
+#define FINAL_ENTRY { 0, SetupFlag::Skip | SetupFlag::End, SetupGroup::Null }
+#define EMPTY_LINE { 0, SetupFlag::Skip, SetupGroup::Null }
+#define NEW_COLUMN { 0, SetupFlag::Skip | SetupFlag::ResetY, SetupGroup::Null }
 
 static void M_ClearSetupMenuState()
 {
@@ -2719,22 +2667,22 @@ setup_menu_t* keys_settings[] =
 
 setup_menu_t keys_movement_settings[] = // Key Binding screen strings
 {
-	{"INPUT PROFILE", S_NUM, SetupGroup::Conf, KB_X, ConfigId::InputProfile},
+	{"INPUT PROFILE", SetupFlag::Number, SetupGroup::Conf, KB_X, ConfigId::InputProfile},
 	EMPTY_LINE,
-	{"FORWARD",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Forward},
-	{"BACKWARD",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Backward},
-	{"TURN LEFT",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Turnleft},
-	{"TURN RIGHT",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Turnright},
-	{"RUN",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Speed},
-	{"STRAFE LEFT",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Strafeleft},
-	{"STRAFE RIGHT",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Straferight},
-	{"STRAFE",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Strafe},
-	{"180 TURN",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Reverse},
+	{"FORWARD",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Forward},
+	{"BACKWARD",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Backward},
+	{"TURN LEFT",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Turnleft},
+	{"TURN RIGHT",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Turnright},
+	{"RUN",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Speed},
+	{"STRAFE LEFT",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Strafeleft},
+	{"STRAFE RIGHT",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Straferight},
+	{"STRAFE",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Strafe},
+	{"180 TURN",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Reverse},
 	EMPTY_LINE,
-	{"TOGGLES",S_SKIP | S_TITLE, SetupGroup::Null,KB_X},
-	{"AUTORUN",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Autorun},
-	{"FREE LOOK",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Mlook},
-	{"VERTMOUSE",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Novert},
+	{"TOGGLES",SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null,KB_X},
+	{"AUTORUN",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Autorun},
+	{"FREE LOOK",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Mlook},
+	{"VERTMOUSE",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Novert},
 
 	NEXT_PAGE(keys_weapons_settings),
 	FINAL_ENTRY
@@ -2742,22 +2690,22 @@ setup_menu_t keys_movement_settings[] = // Key Binding screen strings
 
 setup_menu_t keys_weapons_settings[] = // Key Binding screen strings
 {
-	{"FIRE",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Fire},
-	{"USE",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Use},
+	{"FIRE",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Fire},
+	{"USE",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Use},
 	EMPTY_LINE,
-	{"FIST",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Weapon1},
-	{"PISTOL",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Weapon2},
-	{"SHOTGUN",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Weapon3},
-	{"CHAINGUN",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Weapon4},
-	{"ROCKET",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Weapon5},
-	{"PLASMA",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Weapon6},
-	{"BFG", S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Weapon7},
-	{"CHAINSAW",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Weapon8},
-	{"SSG",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Weapon9},
+	{"FIST",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Weapon1},
+	{"PISTOL",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Weapon2},
+	{"SHOTGUN",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Weapon3},
+	{"CHAINGUN",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Weapon4},
+	{"ROCKET",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Weapon5},
+	{"PLASMA",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Weapon6},
+	{"BFG", SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Weapon7},
+	{"CHAINSAW",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Weapon8},
+	{"SSG",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Weapon9},
 	EMPTY_LINE,
-	{"NEXT",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Nextweapon},
-	{"PREVIOUS",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Prevweapon},
-	{"BEST",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Toggleweapon},
+	{"NEXT",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Nextweapon},
+	{"PREVIOUS",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Prevweapon},
+	{"BEST",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Toggleweapon},
 
 	PREV_PAGE(keys_movement_settings),
 	NEXT_PAGE(keys_automap_settings),
@@ -2766,23 +2714,23 @@ setup_menu_t keys_weapons_settings[] = // Key Binding screen strings
 
 setup_menu_t keys_automap_settings[] = // Key Binding screen strings
 {
-	{"TOGGLE AUTOMAP",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Map},
+	{"TOGGLE AUTOMAP",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Map},
 	EMPTY_LINE,
-	{"FOLLOW",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapFollow},
-	{"ZOOM IN",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapZoomin},
-	{"ZOOM OUT",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapZoomout},
-	{"SHIFT UP",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapUp},
-	{"SHIFT DOWN",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapDown},
-	{"SHIFT LEFT",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapLeft},
-	{"SHIFT RIGHT",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapRight},
-	{"MARK PLACE",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapMark},
-	{"CLEAR MARKS",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapClear},
-	{"FULL/ZOOM",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapGobig},
-	{"GRID",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapGrid},
-	{"ROTATE",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapRotate},
-	{"OVERLAY",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapOverlay},
-	{"TEXTURED",S_INPUT, SetupGroup::Map,KB_X, {}, InputId::MapTextured},
-	{"HIGHLIGHT BY TAG", S_INPUT, SetupGroup::Map, KB_X, {}, InputId::MapHighlightByTag},
+	{"FOLLOW",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapFollow},
+	{"ZOOM IN",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapZoomin},
+	{"ZOOM OUT",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapZoomout},
+	{"SHIFT UP",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapUp},
+	{"SHIFT DOWN",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapDown},
+	{"SHIFT LEFT",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapLeft},
+	{"SHIFT RIGHT",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapRight},
+	{"MARK PLACE",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapMark},
+	{"CLEAR MARKS",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapClear},
+	{"FULL/ZOOM",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapGobig},
+	{"GRID",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapGrid},
+	{"ROTATE",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapRotate},
+	{"OVERLAY",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapOverlay},
+	{"TEXTURED",SetupFlag::Input, SetupGroup::Map,KB_X, {}, InputId::MapTextured},
+	{"HIGHLIGHT BY TAG", SetupFlag::Input, SetupGroup::Map, KB_X, {}, InputId::MapHighlightByTag},
 
 	PREV_PAGE(keys_weapons_settings),
 	NEXT_PAGE(keys_game_settings),
@@ -2791,32 +2739,32 @@ setup_menu_t keys_automap_settings[] = // Key Binding screen strings
 
 setup_menu_t keys_game_settings[] = // Key Binding screen strings
 {
-	{"SAVE",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Savegame},
-	{"LOAD",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Loadgame},
-	{"QUICKSAVE",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Quicksave},
-	{"QUICKLOAD",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Quickload},
-	{"LEVEL TABLE",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::LevelTable},
-	{"CONSOLE",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Console},
-	{"END GAME",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Endgame},
-	{"QUIT",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Quit},
+	{"SAVE",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Savegame},
+	{"LOAD",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Loadgame},
+	{"QUICKSAVE",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Quicksave},
+	{"QUICKLOAD",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Quickload},
+	{"LEVEL TABLE",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::LevelTable},
+	{"CONSOLE",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Console},
+	{"END GAME",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Endgame},
+	{"QUIT",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Quit},
 	EMPTY_LINE,
-	{"SCREEN",S_SKIP | S_TITLE, SetupGroup::Null,KB_X},
+	{"SCREEN",SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null,KB_X},
 
 	// phares 4/13/98:
 	// key_escape can no longer be rebound. This keeps the
 	// player from getting themselves in a bind where they can't remember how
 	// to get to the menus
-	// {"MENU"        ,S_SKIP|S_KEEP|S_INPUT ,m_scrn,0   ,{},dsda_input_escape},
-	{"HELP",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Help},
-	{"PAUSE",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Pause},
-	{"VOLUME",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Soundvolume},
-	{"HUD",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Hud},
-	{"GAMMA FIX",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Gamma},
-	{"SPY",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Spy},
-	{"LARGER VIEW",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Zoomin},
-	{"SMALLER VIEW",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Zoomout},
-	{"SCREENSHOT",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Screenshot},
-	{"REPEAT MESSAGE",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::RepeatMessage},
+	// {"MENU"        ,SetupFlag::Skip|SetupFlag::Keep|SetupFlag::Input ,m_scrn,0   ,{},dsda_input_escape},
+	{"HELP",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Help},
+	{"PAUSE",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Pause},
+	{"VOLUME",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Soundvolume},
+	{"HUD",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Hud},
+	{"GAMMA FIX",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Gamma},
+	{"SPY",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Spy},
+	{"LARGER VIEW",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Zoomin},
+	{"SMALLER VIEW",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Zoomout},
+	{"SCREENSHOT",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Screenshot},
+	{"REPEAT MESSAGE",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::RepeatMessage},
 
 	PREV_PAGE(keys_automap_settings),
 	NEXT_PAGE(keys_misc_settings),
@@ -2827,24 +2775,24 @@ setup_menu_t keys_game_settings[] = // Key Binding screen strings
 
 setup_menu_t keys_misc_settings[] =
 {
-	{"Restart Map/Demo",S_INPUT, SetupGroup::Screen,MS_X, {}, InputId::Restart},
-	{"Next Level",S_INPUT, SetupGroup::Screen,MS_X, {}, InputId::Nextlevel},
-	{"Previous Level",S_INPUT, SetupGroup::Screen,MS_X, {}, InputId::Prevlevel},
-	{"Rewind", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Rewind},
-	{"Store Quick Key Frame", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::StoreQuickKeyFrame},
-	{"Restore Quick Key Frame", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::RestoreQuickKeyFrame},
-	{"Fake Archvile Jump", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Avj},
+	{"Restart Map/Demo",SetupFlag::Input, SetupGroup::Screen,MS_X, {}, InputId::Restart},
+	{"Next Level",SetupFlag::Input, SetupGroup::Screen,MS_X, {}, InputId::Nextlevel},
+	{"Previous Level",SetupFlag::Input, SetupGroup::Screen,MS_X, {}, InputId::Prevlevel},
+	{"Rewind", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Rewind},
+	{"Store Quick Key Frame", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::StoreQuickKeyFrame},
+	{"Restore Quick Key Frame", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::RestoreQuickKeyFrame},
+	{"Fake Archvile Jump", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Avj},
 	EMPTY_LINE,
-	{"GAME SPEED",S_SKIP | S_TITLE, SetupGroup::Null,MS_X},
-	{"SPEED UP",S_INPUT, SetupGroup::Screen,MS_X, {}, InputId::SpeedUp},
-	{"SPEED DOWN",S_INPUT, SetupGroup::Screen,MS_X, {}, InputId::SpeedDown},
-	{"RESET TO DEFAULT",S_INPUT, SetupGroup::Screen,MS_X, {}, InputId::SpeedDefault},
+	{"GAME SPEED",SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null,MS_X},
+	{"SPEED UP",SetupFlag::Input, SetupGroup::Screen,MS_X, {}, InputId::SpeedUp},
+	{"SPEED DOWN",SetupFlag::Input, SetupGroup::Screen,MS_X, {}, InputId::SpeedDown},
+	{"RESET TO DEFAULT",SetupFlag::Input, SetupGroup::Screen,MS_X, {}, InputId::SpeedDefault},
 	EMPTY_LINE,
-	{"Demos",S_SKIP | S_TITLE, SetupGroup::Null,MS_X},
-	{"START/STOP SKIPPING",S_INPUT, SetupGroup::Screen,MS_X, {}, InputId::DemoSkip},
-	{"END LEVEL",S_INPUT, SetupGroup::Screen,MS_X, {}, InputId::DemoEndlevel},
-	{"JOIN",S_INPUT, SetupGroup::Screen,MS_X, {}, InputId::JoinDemo},
-	{"CAMERA MODE",S_INPUT, SetupGroup::Screen,MS_X, {}, InputId::Walkcamera},
+	{"Demos",SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null,MS_X},
+	{"START/STOP SKIPPING",SetupFlag::Input, SetupGroup::Screen,MS_X, {}, InputId::DemoSkip},
+	{"END LEVEL",SetupFlag::Input, SetupGroup::Screen,MS_X, {}, InputId::DemoEndlevel},
+	{"JOIN",SetupFlag::Input, SetupGroup::Screen,MS_X, {}, InputId::JoinDemo},
+	{"CAMERA MODE",SetupFlag::Input, SetupGroup::Screen,MS_X, {}, InputId::Walkcamera},
 
 	PREV_PAGE(keys_game_settings),
 	NEXT_PAGE(keys_toggles_settings),
@@ -2852,21 +2800,21 @@ setup_menu_t keys_misc_settings[] =
 };
 
 setup_menu_t keys_toggles_settings[] = {
-	{"Command Display", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::CommandDisplay},
-	{"Coordinate Display", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::CoordinateDisplay},
-	{"Strict Mode", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::StrictMode},
-	{"Extended HUD", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Exhud},
-	{"SFX", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::MuteSfx},
-	{"Music", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::MuteMusic},
-	{"Messages",S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Messages},
-	{"Cheat Code Entry", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::CheatCodes},
-	{"Render Stats", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idrate},
-	{"FPS", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Fps},
-	{"Show Alive Monsters",S_INPUT, SetupGroup::Screen,KB_X, {}, InputId::Showalive},
+	{"Command Display", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::CommandDisplay},
+	{"Coordinate Display", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::CoordinateDisplay},
+	{"Strict Mode", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::StrictMode},
+	{"Extended HUD", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Exhud},
+	{"SFX", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::MuteSfx},
+	{"Music", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::MuteMusic},
+	{"Messages",SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Messages},
+	{"Cheat Code Entry", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::CheatCodes},
+	{"Render Stats", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idrate},
+	{"FPS", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Fps},
+	{"Show Alive Monsters",SetupFlag::Input, SetupGroup::Screen,KB_X, {}, InputId::Showalive},
 	EMPTY_LINE,
-	{"Cycle", S_SKIP | S_TITLE, SetupGroup::Null, KB_X},
-	{"Cycle Input Profile", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::CycleProfile},
-	{"Cycle Palette", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::CyclePalette},
+	{"Cycle", SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null, KB_X},
+	{"Cycle Input Profile", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::CycleProfile},
+	{"Cycle Palette", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::CyclePalette},
 
 	PREV_PAGE(keys_misc_settings),
 	NEXT_PAGE(keys_menus_settings),
@@ -2875,14 +2823,14 @@ setup_menu_t keys_toggles_settings[] = {
 
 setup_menu_t keys_menus_settings[] =
 {
-	{"NEXT ITEM",S_INPUT, SetupGroup::Menu,KB_X, {}, InputId::MenuDown},
-	{"PREV ITEM",S_INPUT, SetupGroup::Menu,KB_X, {}, InputId::MenuUp},
-	{"LEFT",S_INPUT, SetupGroup::Menu,KB_X, {}, InputId::MenuLeft},
-	{"RIGHT",S_INPUT, SetupGroup::Menu,KB_X, {}, InputId::MenuRight},
-	{"BACKSPACE",S_INPUT, SetupGroup::Menu,KB_X, {}, InputId::MenuBackspace},
-	{"SELECT ITEM", S_INPUT | S_NOCLEAR, SetupGroup::Menu, KB_X, {}, InputId::MenuEnter},
-	{"EXIT",S_INPUT, SetupGroup::Menu,KB_X, {}, InputId::MenuEscape},
-	{"CLEAR",S_INPUT, SetupGroup::Menu,KB_X, {}, InputId::MenuClear},
+	{"NEXT ITEM",SetupFlag::Input, SetupGroup::Menu,KB_X, {}, InputId::MenuDown},
+	{"PREV ITEM",SetupFlag::Input, SetupGroup::Menu,KB_X, {}, InputId::MenuUp},
+	{"LEFT",SetupFlag::Input, SetupGroup::Menu,KB_X, {}, InputId::MenuLeft},
+	{"RIGHT",SetupFlag::Input, SetupGroup::Menu,KB_X, {}, InputId::MenuRight},
+	{"BACKSPACE",SetupFlag::Input, SetupGroup::Menu,KB_X, {}, InputId::MenuBackspace},
+	{"SELECT ITEM", SetupFlag::Input | SetupFlag::NoClear, SetupGroup::Menu, KB_X, {}, InputId::MenuEnter},
+	{"EXIT",SetupFlag::Input, SetupGroup::Menu,KB_X, {}, InputId::MenuEscape},
+	{"CLEAR",SetupFlag::Input, SetupGroup::Menu,KB_X, {}, InputId::MenuClear},
 
 	PREV_PAGE(keys_toggles_settings),
 	NEXT_PAGE(keys_raven_settings),
@@ -2890,46 +2838,46 @@ setup_menu_t keys_menus_settings[] =
 };
 
 setup_menu_t keys_raven_settings[] = {
-	{"LOOK UP", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Lookup},
-	{"LOOK DOWN", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Lookdown},
-	{"LOOK CENTER", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Lookcenter},
-	{"FLY UP", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Flyup},
-	{"FLY DOWN", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Flydown},
-	{"FLY CENTER", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Flycenter},
-	{"JUMP", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Jump},
+	{"LOOK UP", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Lookup},
+	{"LOOK DOWN", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Lookdown},
+	{"LOOK CENTER", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Lookcenter},
+	{"FLY UP", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Flyup},
+	{"FLY DOWN", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Flydown},
+	{"FLY CENTER", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Flycenter},
+	{"JUMP", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Jump},
 	EMPTY_LINE,
-	{"INVENTORY LEFT", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Invleft},
-	{"INVENTORY RIGHT", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::Invright},
-	{"USE ARTIFACT", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::UseArtifact},
+	{"INVENTORY LEFT", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Invleft},
+	{"INVENTORY RIGHT", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::Invright},
+	{"USE ARTIFACT", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::UseArtifact},
 	EMPTY_LINE,
-	{"HERETIC INVENTORY", S_SKIP | S_TITLE, SetupGroup::Null, MS_X},
-	{"USE TOME OF POWER", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiTome},
-	{"USE QUARTZ FLASK", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiQuartz},
-	{"USE MYSTIC URN", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiUrn},
-	{"USE TIMEBOMB", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiBomb},
-	{"USE RING OF INVINCIBILITY", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiRing},
-	{"USE CHAOS DEVICE", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiChaosdevice},
-	{"USE SHADOWSPHERE", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiShadowsphere},
-	{"USE WINGS OF WRATH", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiWings},
-	{"USE TORCH", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiTorch},
-	{"USE MORPH OVUM", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiMorph},
+	{"HERETIC INVENTORY", SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null, MS_X},
+	{"USE TOME OF POWER", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiTome},
+	{"USE QUARTZ FLASK", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiQuartz},
+	{"USE MYSTIC URN", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiUrn},
+	{"USE TIMEBOMB", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiBomb},
+	{"USE RING OF INVINCIBILITY", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiRing},
+	{"USE CHAOS DEVICE", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiChaosdevice},
+	{"USE SHADOWSPHERE", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiShadowsphere},
+	{"USE WINGS OF WRATH", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiWings},
+	{"USE TORCH", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiTorch},
+	{"USE MORPH OVUM", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiMorph},
 	EMPTY_LINE,
-	{"HEXEN INVENTORY", S_SKIP | S_TITLE, SetupGroup::Null, MS_X},
-	{"USE ICON OF THE DEFENDER", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiRing},
-	{"USE QUARTZ FLASK", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiQuartz},
-	{"USE MYSTIC URN", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiUrn},
-	{"USE MYSTIC AMBIT INCANT", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiIncant},
-	{"USE DARK SERVANT", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiSummon},
-	{"USE TORCH", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiTorch},
-	{"USE PORKALATOR", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiMorph},
-	{"USE WINGS OF WRATH", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiWings},
-	{"USE DISC OF REPULSION", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiDisk},
-	{"USE FLECHETTE", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiFlechette},
-	{"USE BANISHMENT DEVICE", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiBanishment},
-	{"USE BOOTS OF SPEED", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiBoots},
-	{"USE KRATER OF MIGHT", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiKrater},
-	{"USE DRAGONSKIN BRACERS", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiBracers},
-	{"USE CHAOS DEVICE", S_INPUT, SetupGroup::Screen, MS_X, {}, InputId::ArtiChaosdevice},
+	{"HEXEN INVENTORY", SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null, MS_X},
+	{"USE ICON OF THE DEFENDER", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiRing},
+	{"USE QUARTZ FLASK", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiQuartz},
+	{"USE MYSTIC URN", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiUrn},
+	{"USE MYSTIC AMBIT INCANT", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiIncant},
+	{"USE DARK SERVANT", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiSummon},
+	{"USE TORCH", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiTorch},
+	{"USE PORKALATOR", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiMorph},
+	{"USE WINGS OF WRATH", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiWings},
+	{"USE DISC OF REPULSION", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiDisk},
+	{"USE FLECHETTE", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiFlechette},
+	{"USE BANISHMENT DEVICE", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiBanishment},
+	{"USE BOOTS OF SPEED", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiBoots},
+	{"USE KRATER OF MIGHT", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiKrater},
+	{"USE DRAGONSKIN BRACERS", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::HexenArtiBracers},
+	{"USE CHAOS DEVICE", SetupFlag::Input, SetupGroup::Screen, MS_X, {}, InputId::ArtiChaosdevice},
 
 	PREV_PAGE(keys_menus_settings),
 	NEXT_PAGE(keys_cheats_settings),
@@ -2938,25 +2886,25 @@ setup_menu_t keys_raven_settings[] = {
 
 setup_menu_t keys_cheats_settings[] =
 {
-	{"God Mode", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Iddqd},
-	{"Ammo & Keys", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idkfa},
-	{"Ammo", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idfa},
-	{"No Clipping", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idclip},
-	{"Health", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdh},
-	{"Armor", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdm},
-	{"Invulnerability", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdv},
-	{"Berserk", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idbeholds},
-	{"Partial Invisibility", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdi},
-	{"Radiation Suit", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdr},
-	{"Computer Area Map", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idbeholda},
-	{"Light Amplification", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdl},
-	{"Show Position", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Idmypos},
-	{"Reveal Map", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Iddt},
-	{"Reset Health", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Ponce},
-	{"Tome of Power", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Shazam},
-	{"Chicken", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Chicken},
-	{"No Target", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Notarget},
-	{"Freeze", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Freeze},
+	{"God Mode", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Iddqd},
+	{"Ammo & Keys", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idkfa},
+	{"Ammo", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idfa},
+	{"No Clipping", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idclip},
+	{"Health", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdh},
+	{"Armor", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdm},
+	{"Invulnerability", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdv},
+	{"Berserk", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idbeholds},
+	{"Partial Invisibility", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdi},
+	{"Radiation Suit", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdr},
+	{"Computer Area Map", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idbeholda},
+	{"Light Amplification", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idbeholdl},
+	{"Show Position", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Idmypos},
+	{"Reveal Map", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Iddt},
+	{"Reset Health", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Ponce},
+	{"Tome of Power", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Shazam},
+	{"Chicken", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Chicken},
+	{"No Target", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Notarget},
+	{"Freeze", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Freeze},
 
 	PREV_PAGE(keys_raven_settings),
 	NEXT_PAGE(keys_scripts_settings),
@@ -2964,16 +2912,16 @@ setup_menu_t keys_cheats_settings[] =
 };
 
 setup_menu_t keys_scripts_settings[] = {
-	{"Script 0", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Script0},
-	{"Script 1", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Script1},
-	{"Script 2", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Script2},
-	{"Script 3", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Script3},
-	{"Script 4", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Script4},
-	{"Script 5", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Script5},
-	{"Script 6", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Script6},
-	{"Script 7", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Script7},
-	{"Script 8", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Script8},
-	{"Script 9", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Script9},
+	{"Script 0", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Script0},
+	{"Script 1", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Script1},
+	{"Script 2", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Script2},
+	{"Script 3", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Script3},
+	{"Script 4", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Script4},
+	{"Script 5", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Script5},
+	{"Script 6", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Script6},
+	{"Script 7", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Script7},
+	{"Script 8", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Script8},
+	{"Script 9", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Script9},
 
 	PREV_PAGE(keys_cheats_settings),
 	NEXT_PAGE(keys_build_settings),
@@ -2981,36 +2929,36 @@ setup_menu_t keys_scripts_settings[] = {
 };
 
 setup_menu_t keys_build_settings[] = {
-	{"Toggle Build Mode", S_INPUT, SetupGroup::Screen, KB_X, {}, InputId::Build},
+	{"Toggle Build Mode", SetupFlag::Input, SetupGroup::Screen, KB_X, {}, InputId::Build},
 	EMPTY_LINE,
-	{"Advance Frame", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildAdvanceFrame},
-	{"Reverse Frame", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildReverseFrame},
-	{"Reset Command", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildResetCommand},
-	{"Toggle Source", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildSource},
+	{"Advance Frame", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildAdvanceFrame},
+	{"Reverse Frame", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildReverseFrame},
+	{"Reset Command", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildResetCommand},
+	{"Toggle Source", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildSource},
 	EMPTY_LINE,
-	{"Controls", S_SKIP | S_TITLE, SetupGroup::Null, KB_X},
-	{"Forward", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildForward},
-	{"Backward", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildBackward},
-	{"Fine Forward", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildFineForward},
-	{"Fine Backward", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildFineBackward},
-	{"Turn Left", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildTurnLeft},
-	{"Turn Right", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildTurnRight},
-	{"Strafe Left", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildStrafeLeft},
-	{"Strafe Right", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildStrafeRight},
-	{"Fine Strafe Left", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildFineStrafeLeft},
-	{"Fine Strafe Right", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildFineStrafeRight},
+	{"Controls", SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null, KB_X},
+	{"Forward", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildForward},
+	{"Backward", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildBackward},
+	{"Fine Forward", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildFineForward},
+	{"Fine Backward", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildFineBackward},
+	{"Turn Left", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildTurnLeft},
+	{"Turn Right", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildTurnRight},
+	{"Strafe Left", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildStrafeLeft},
+	{"Strafe Right", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildStrafeRight},
+	{"Fine Strafe Left", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildFineStrafeLeft},
+	{"Fine Strafe Right", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildFineStrafeRight},
 	EMPTY_LINE,
-	{"Use", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildUse},
-	{"Fire", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildFire},
-	{"Fist", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon1},
-	{"Pistol", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon2},
-	{"Shotgun", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon3},
-	{"Chaingun", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon4},
-	{"Rocket", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon5},
-	{"Plasma", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon6},
-	{"BFG", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon7},
-	{"Chainsaw", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon8},
-	{"SSG", S_INPUT, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon9},
+	{"Use", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildUse},
+	{"Fire", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildFire},
+	{"Fist", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon1},
+	{"Pistol", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon2},
+	{"Shotgun", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon3},
+	{"Chaingun", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon4},
+	{"Rocket", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon5},
+	{"Plasma", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon6},
+	{"BFG", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon7},
+	{"Chainsaw", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon8},
+	{"SSG", SetupFlag::Input, SetupGroup::Build, KB_X, {}, InputId::BuildWeapon9},
 
 	PREV_PAGE(keys_scripts_settings),
 	FINAL_ENTRY
@@ -3077,15 +3025,15 @@ setup_menu_t* weap_settings[] =
 
 setup_menu_t weap_priority_settings[] = // Weapons Settings screen
 {
-	{"1ST CHOICE WEAPON", S_WEAP, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice1},
-	{"2nd CHOICE WEAPON", S_WEAP, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice2},
-	{"3rd CHOICE WEAPON", S_WEAP, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice3},
-	{"4th CHOICE WEAPON", S_WEAP, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice4},
-	{"5th CHOICE WEAPON", S_WEAP, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice5},
-	{"6th CHOICE WEAPON", S_WEAP, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice6},
-	{"7th CHOICE WEAPON", S_WEAP, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice7},
-	{"8th CHOICE WEAPON", S_WEAP, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice8},
-	{"9th CHOICE WEAPON", S_WEAP, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice9},
+	{"1ST CHOICE WEAPON", SetupFlag::Weapon, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice1},
+	{"2nd CHOICE WEAPON", SetupFlag::Weapon, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice2},
+	{"3rd CHOICE WEAPON", SetupFlag::Weapon, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice3},
+	{"4th CHOICE WEAPON", SetupFlag::Weapon, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice4},
+	{"5th CHOICE WEAPON", SetupFlag::Weapon, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice5},
+	{"6th CHOICE WEAPON", SetupFlag::Weapon, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice6},
+	{"7th CHOICE WEAPON", SetupFlag::Weapon, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice7},
+	{"8th CHOICE WEAPON", SetupFlag::Weapon, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice8},
+	{"9th CHOICE WEAPON", SetupFlag::Weapon, SetupGroup::Conf, WP_X, ConfigId::WeaponChoice9},
 
 	FINAL_ENTRY
 };
@@ -3144,18 +3092,18 @@ setup_menu_t* demos_settings[] =
 
 setup_menu_t demos_options_settings[] = // Demos Settings screen
 {
-	{"Show Demo Attempts", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::ShowDemoAttempts},
-	{"Show Split Data", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::ShowSplitData},
-	{"Precise Intermission Time", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::ShowLevelSplits},
-	{"Quickstart Cache Tics", S_NUM, SetupGroup::Conf, DM_X, ConfigId::QuickstartCacheTics},
-	{"Text File Author", S_NAME, SetupGroup::Conf, DM_X, ConfigId::PlayerName},
+	{"Show Demo Attempts", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::ShowDemoAttempts},
+	{"Show Split Data", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::ShowSplitData},
+	{"Precise Intermission Time", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::ShowLevelSplits},
+	{"Quickstart Cache Tics", SetupFlag::Number, SetupGroup::Conf, DM_X, ConfigId::QuickstartCacheTics},
+	{"Text File Author", SetupFlag::Name, SetupGroup::Conf, DM_X, ConfigId::PlayerName},
 	EMPTY_LINE,
-	{"Playback Progress Bar", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::HudaddDemoprogressbar},
-	{"Playback Mouse Controls", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::PlaybackMouseControls},
-	{"Smooth Playback", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::DemoSmoothturns},
-	{"Smooth Playback Factor", S_NUM, SetupGroup::Conf, DM_X, ConfigId::DemoSmoothturnsfactor},
-	{"Cycle Ghost Colors", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::CycleGhostColors},
-	{"Organize Failed Demos", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::OrganizeFailedDemos},
+	{"Playback Progress Bar", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::HudaddDemoprogressbar},
+	{"Playback Mouse Controls", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::PlaybackMouseControls},
+	{"Smooth Playback", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::DemoSmoothturns},
+	{"Smooth Playback Factor", SetupFlag::Number, SetupGroup::Conf, DM_X, ConfigId::DemoSmoothturnsfactor},
+	{"Cycle Ghost Colors", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::CycleGhostColors},
+	{"Organize Failed Demos", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::OrganizeFailedDemos},
 
 	NEXT_PAGE(demos_tas_settings),
 	FINAL_ENTRY
@@ -3163,16 +3111,16 @@ setup_menu_t demos_options_settings[] = // Demos Settings screen
 
 setup_menu_t demos_tas_settings[] =
 {
-	{"Strict Mode", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::StrictMode},
+	{"Strict Mode", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::StrictMode},
 	EMPTY_LINE,
-	{"Wipe At Full Speed", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::WipeAtFullSpeed},
-	{"Show Command Display", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::CommandDisplay},
-	{"Command History", S_NUM, SetupGroup::Conf, DM_X, ConfigId::CommandHistorySize},
-	{"Hide Empty Commands", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::HideEmptyCommands},
-	{"Show Coordinate Display", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::CoordinateDisplay},
+	{"Wipe At Full Speed", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::WipeAtFullSpeed},
+	{"Show Command Display", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::CommandDisplay},
+	{"Command History", SetupFlag::Number, SetupGroup::Conf, DM_X, ConfigId::CommandHistorySize},
+	{"Hide Empty Commands", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::HideEmptyCommands},
+	{"Show Coordinate Display", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::CoordinateDisplay},
 	EMPTY_LINE,
-	{"Permanent Strafe50", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::MovementStrafe50},
-	{"Strafe50 On Turns", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::MovementStrafe50onturns},
+	{"Permanent Strafe50", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::MovementStrafe50},
+	{"Strafe50 On Turns", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::MovementStrafe50onturns},
 
 	PREV_PAGE(demos_options_settings),
 	FINAL_ENTRY
@@ -3245,19 +3193,19 @@ static const char* map_things_appearance_list[] =
 
 setup_menu_t auto_options_settings[] =
 {
-	{"Locked doors blink", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::MapBlinkingLocks},
-	{"Show Secrets only after entering", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::MapSecretAfter},
-	{"Grid cell size 8..256, -1 for auto", S_NUM, SetupGroup::Conf, AU_X, ConfigId::MapGridSize},
-	{"Pan speed (1..32)", S_NUM, SetupGroup::Conf, AU_X, ConfigId::MapPanSpeed},
-	{"Zoom speed (1..32)", S_NUM, SetupGroup::Conf, AU_X, ConfigId::MapScrollSpeed},
-	{"Use mouse wheel for zooming", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::MapWheelZoom},
-	{"Show Minimap", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::ShowMinimap},
+	{"Locked doors blink", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::MapBlinkingLocks},
+	{"Show Secrets only after entering", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::MapSecretAfter},
+	{"Grid cell size 8..256, -1 for auto", SetupFlag::Number, SetupGroup::Conf, AU_X, ConfigId::MapGridSize},
+	{"Pan speed (1..32)", SetupFlag::Number, SetupGroup::Conf, AU_X, ConfigId::MapPanSpeed},
+	{"Zoom speed (1..32)", SetupFlag::Number, SetupGroup::Conf, AU_X, ConfigId::MapScrollSpeed},
+	{"Use mouse wheel for zooming", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::MapWheelZoom},
+	{"Show Minimap", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::ShowMinimap},
 	EMPTY_LINE,
-	{"Components", S_SKIP | S_TITLE, SetupGroup::Null, AU_X},
-	{"Stat Totals", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::MapTotals},
-	{"Player Coordinates", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::MapCoordinates},
-	{"Level / Total Time", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::MapTime},
-	{"Level Title", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::MapTitle},
+	{"Components", SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null, AU_X},
+	{"Stat Totals", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::MapTotals},
+	{"Player Coordinates", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::MapCoordinates},
+	{"Level / Total Time", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::MapTime},
+	{"Level Title", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::MapTitle},
 
 	NEXT_PAGE(auto_appearance_settings),
 	FINAL_ENTRY
@@ -3267,19 +3215,19 @@ setup_menu_t auto_options_settings[] =
 
 setup_menu_t auto_appearance_settings[] =
 {
-	{"Enable textured display", S_YESNO, SetupGroup::Conf, AA_X, ConfigId::MapTextured},
-	{"Things appearance", S_CHOICE, SetupGroup::Conf, AA_X, ConfigId::MapThingsAppearance, InputId::Null, map_things_appearance_list},
-	{"Show Line Traces", S_YESNO, SetupGroup::Conf, AA_X, ConfigId::MapTraces},
+	{"Enable textured display", SetupFlag::YesNo, SetupGroup::Conf, AA_X, ConfigId::MapTextured},
+	{"Things appearance", SetupFlag::Choice, SetupGroup::Conf, AA_X, ConfigId::MapThingsAppearance, InputId::Null, map_things_appearance_list},
+	{"Show Line Traces", SetupFlag::YesNo, SetupGroup::Conf, AA_X, ConfigId::MapTraces},
 	EMPTY_LINE,
-	{"Translucency percentage", S_SKIP | S_TITLE, SetupGroup::Null, AA_X},
-	{"Textured automap", S_NUM, SetupGroup::Conf, AA_X, ConfigId::MapTexturedTrans},
-	{"Textured automap on overlay", S_NUM, SetupGroup::Conf, AA_X, ConfigId::MapTexturedOverlayTrans},
-	{"Lines on overlay", S_NUM, SetupGroup::Conf, AA_X, ConfigId::MapLinesOverlayTrans},
+	{"Translucency percentage", SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null, AA_X},
+	{"Textured automap", SetupFlag::Number, SetupGroup::Conf, AA_X, ConfigId::MapTexturedTrans},
+	{"Textured automap on overlay", SetupFlag::Number, SetupGroup::Conf, AA_X, ConfigId::MapTexturedOverlayTrans},
+	{"Lines on overlay", SetupFlag::Number, SetupGroup::Conf, AA_X, ConfigId::MapLinesOverlayTrans},
 	EMPTY_LINE,
-	{"Trail", S_SKIP | S_TITLE, SetupGroup::Null, AA_X},
-	{"Player Trail", S_YESNO, SetupGroup::Conf, AA_X, ConfigId::MapTrail},
-	{"Include Collisions", S_YESNO, SetupGroup::Conf, AA_X, ConfigId::MapTrailCollisions},
-	{"Player Trail Size", S_NUM, SetupGroup::Conf, AA_X, ConfigId::MapTrailSize},
+	{"Trail", SetupFlag::Skip | SetupFlag::Title, SetupGroup::Null, AA_X},
+	{"Player Trail", SetupFlag::YesNo, SetupGroup::Conf, AA_X, ConfigId::MapTrail},
+	{"Include Collisions", SetupFlag::YesNo, SetupGroup::Conf, AA_X, ConfigId::MapTrailCollisions},
+	{"Player Trail Size", SetupFlag::Number, SetupGroup::Conf, AA_X, ConfigId::MapTrailSize},
 
 	PREV_PAGE(auto_options_settings),
 	NEXT_PAGE(auto_colors_settings),
@@ -3288,40 +3236,40 @@ setup_menu_t auto_appearance_settings[] =
 
 setup_menu_t auto_colors_settings[] = // 2st AutoMap Settings screen
 {
-	{"background", S_COLOR, SetupGroup::Conf, AU_X, ConfigId::MapcolorBack},
-	{"grid lines", S_COLOR, SetupGroup::Conf, AU_X, ConfigId::MapcolorGrid},
-	{"normal 1s wall", S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorWall},
-	{"line at floor height change", S_COLOR, SetupGroup::Conf, AU_X, ConfigId::MapcolorFchg},
-	{"line at ceiling height change",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorCchg},
-	{"line at sector with floor = ceiling",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorClsd},
-	{"red key",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorRkey},
-	{"blue key",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorBkey},
-	{"yellow key",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorYkey},
-	{"red door",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorRdor},
-	{"blue door",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorBdor},
-	{"yellow door",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorYdor},
+	{"background", SetupFlag::Color, SetupGroup::Conf, AU_X, ConfigId::MapcolorBack},
+	{"grid lines", SetupFlag::Color, SetupGroup::Conf, AU_X, ConfigId::MapcolorGrid},
+	{"normal 1s wall", SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorWall},
+	{"line at floor height change", SetupFlag::Color, SetupGroup::Conf, AU_X, ConfigId::MapcolorFchg},
+	{"line at ceiling height change",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorCchg},
+	{"line at sector with floor = ceiling",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorClsd},
+	{"red key",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorRkey},
+	{"blue key",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorBkey},
+	{"yellow key",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorYkey},
+	{"red door",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorRdor},
+	{"blue door",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorBdor},
+	{"yellow door",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorYdor},
 	EMPTY_LINE,
-	{"teleporter line",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorTele},
-	{"secret sector boundary",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorSecr},
-	{"revealed secret sector boundary",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorRevsecr},
-	{"tag finder line",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorTagfinder},
+	{"teleporter line",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorTele},
+	{"secret sector boundary",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorSecr},
+	{"revealed secret sector boundary",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorRevsecr},
+	{"tag finder line",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorTagfinder},
 	//jff 4/23/98 add exit line to automap
-	{"exit line",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorExit},
-	{"alt secret exit line",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorExitsecr},
-	{"computer map unseen line",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorUnsn},
-	{"line w/no floor/ceiling changes",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorFlat},
-	{"general sprite",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorSprt},
-	{"pickup sprite",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorPickup},
-	{"countable enemy sprite",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorEnemy}, // cph 2006/06/30
-	{"countable item sprite",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorItem},   // mead 3/4/2003
-	{"crosshair",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorHair},
-	{"single player arrow",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorSngl},
-	{"your colour in multiplayer",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorMe},
+	{"exit line",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorExit},
+	{"alt secret exit line",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorExitsecr},
+	{"computer map unseen line",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorUnsn},
+	{"line w/no floor/ceiling changes",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorFlat},
+	{"general sprite",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorSprt},
+	{"pickup sprite",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorPickup},
+	{"countable enemy sprite",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorEnemy}, // cph 2006/06/30
+	{"countable item sprite",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorItem},   // mead 3/4/2003
+	{"crosshair",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorHair},
+	{"single player arrow",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorSngl},
+	{"your colour in multiplayer",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorMe},
 	EMPTY_LINE,
-	{"friends",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorFrnd}, // killough 8/8/98
+	{"friends",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorFrnd}, // killough 8/8/98
 	EMPTY_LINE,
-	{"player trail 1",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorTrail1},
-	{"player trail 2",S_COLOR, SetupGroup::Conf,AU_X, ConfigId::MapcolorTrail2},
+	{"player trail 1",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorTrail1},
+	{"player trail 2",SetupFlag::Color, SetupGroup::Conf,AU_X, ConfigId::MapcolorTrail2},
 
 	PREV_PAGE(auto_appearance_settings),
 	FINAL_ENTRY
@@ -3478,41 +3426,41 @@ static const char* fake_contrast_list[] =
 static const char* gl_fade_mode_list[] = {"Normal", "Smooth", "TrueColor", nullptr};
 
 setup_menu_t gen_video_settings[] = {
-	{"Video mode", S_CHOICE | S_STR, SetupGroup::Conf, G_X, ConfigId::Videomode, InputId::Null, videomodes},
-	{"Screen Resolution", S_CHOICE | S_STR, SetupGroup::Conf, G_X, ConfigId::ScreenResolution, InputId::Null, screen_resolutions_list},
-	{"Aspect Ratio", S_CHOICE, SetupGroup::Conf, G_X, ConfigId::RenderAspect, InputId::Null, render_aspects_list},
-	{"Fullscreen Video mode", S_YESNO, SetupGroup::Conf, G_X, ConfigId::UseFullscreen},
-	{"Exclusive Fullscreen", S_YESNO, SetupGroup::Conf, G_X, ConfigId::ExclusiveFullscreen},
+	{"Video mode", SetupFlag::Choice | SetupFlag::StringChoice, SetupGroup::Conf, G_X, ConfigId::Videomode, InputId::Null, videomodes},
+	{"Screen Resolution", SetupFlag::Choice | SetupFlag::StringChoice, SetupGroup::Conf, G_X, ConfigId::ScreenResolution, InputId::Null, screen_resolutions_list},
+	{"Aspect Ratio", SetupFlag::Choice, SetupGroup::Conf, G_X, ConfigId::RenderAspect, InputId::Null, render_aspects_list},
+	{"Fullscreen Video mode", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::UseFullscreen},
+	{"Exclusive Fullscreen", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::ExclusiveFullscreen},
 	EMPTY_LINE,
 	TITLE("FPS", G_X),
-	{"Vertical Sync", S_YESNO, SetupGroup::Conf, G_X, ConfigId::RenderVsync},
-	{"Uncapped FPS", S_YESNO, SetupGroup::Conf, G_X, ConfigId::UncappedFramerate},
-	{"FPS Limit", S_NUM, SetupGroup::Conf, G_X, ConfigId::FpsLimit},
-	{"Background FPS Limit", S_NUM, SetupGroup::Conf, G_X, ConfigId::BackgroundFpsLimit},
-	{"Show FPS", S_YESNO, SetupGroup::Conf, G_X, ConfigId::ShowFps},
+	{"Vertical Sync", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::RenderVsync},
+	{"Uncapped FPS", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::UncappedFramerate},
+	{"FPS Limit", SetupFlag::Number, SetupGroup::Conf, G_X, ConfigId::FpsLimit},
+	{"Background FPS Limit", SetupFlag::Number, SetupGroup::Conf, G_X, ConfigId::BackgroundFpsLimit},
+	{"Show FPS", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::ShowFps},
 	EMPTY_LINE,
-	{"Fake Contrast", S_CHOICE, SetupGroup::Conf, G_X, ConfigId::FakeContrastMode, InputId::Null, fake_contrast_list},
-	{"OpenGL Light Fade", S_CHOICE, SetupGroup::Conf, G_X, ConfigId::GlFadeMode, InputId::Null, gl_fade_mode_list},
+	{"Fake Contrast", SetupFlag::Choice, SetupGroup::Conf, G_X, ConfigId::FakeContrastMode, InputId::Null, fake_contrast_list},
+	{"OpenGL Light Fade", SetupFlag::Choice, SetupGroup::Conf, G_X, ConfigId::GlFadeMode, InputId::Null, gl_fade_mode_list},
 
 	NEXT_PAGE(gen_audio_settings),
 	FINAL_ENTRY
 };
 
 setup_menu_t gen_audio_settings[] = {
-	{"SFX Volume", S_THERMO, SetupGroup::Conf, G_X, ConfigId::SfxVolume},
-	{"Music Volume", S_THERMO, SetupGroup::Conf, G_X, ConfigId::MusicVolume},
+	{"SFX Volume", SetupFlag::Thermo, SetupGroup::Conf, G_X, ConfigId::SfxVolume},
+	{"Music Volume", SetupFlag::Thermo, SetupGroup::Conf, G_X, ConfigId::MusicVolume},
 	EMPTY_LINE,
-	{"Enable v1.1 Pitch Effects", S_YESNO, SetupGroup::Conf, G_X, ConfigId::PitchedSounds},
-	{"Disable Sound Cutoffs", S_YESNO, SetupGroup::Conf, G_X, ConfigId::FullSounds},
-	{"SFX For Movement Toggles", S_YESNO, SetupGroup::Conf, G_X, ConfigId::MovementToggleSfx},
-	{"Mute When Out of Focus", S_YESNO, SetupGroup::Conf, G_X, ConfigId::MuteUnfocusedWindow},
+	{"Enable v1.1 Pitch Effects", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::PitchedSounds},
+	{"Disable Sound Cutoffs", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::FullSounds},
+	{"SFX For Movement Toggles", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::MovementToggleSfx},
+	{"Mute When Out of Focus", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::MuteUnfocusedWindow},
 	EMPTY_LINE,
 	TITLE("Limits", G_X),
-	{"Number of Sound Channels", S_NUM, SetupGroup::Conf, G_X, ConfigId::SndChannels},
-	{"Parallel Same-Sound Limit", S_NUM, SetupGroup::Conf, G_X, ConfigId::ParallelSfxLimit},
-	{"Parallel Same-Sound Window", S_NUM, SetupGroup::Conf, G_X, ConfigId::ParallelSfxWindow},
+	{"Number of Sound Channels", SetupFlag::Number, SetupGroup::Conf, G_X, ConfigId::SndChannels},
+	{"Parallel Same-Sound Limit", SetupFlag::Number, SetupGroup::Conf, G_X, ConfigId::ParallelSfxLimit},
+	{"Parallel Same-Sound Window", SetupFlag::Number, SetupGroup::Conf, G_X, ConfigId::ParallelSfxWindow},
 	EMPTY_LINE,
-	{"Preferred MIDI player", S_CHOICE | S_STR, SetupGroup::Conf, G_X, ConfigId::SndMidiplayer, InputId::Null, midiplayers},
+	{"Preferred MIDI player", SetupFlag::Choice | SetupFlag::StringChoice, SetupGroup::Conf, G_X, ConfigId::SndMidiplayer, InputId::Null, midiplayers},
 
 	PREV_PAGE(gen_video_settings),
 	NEXT_PAGE(gen_mouse_settings),
@@ -3520,21 +3468,21 @@ setup_menu_t gen_audio_settings[] = {
 };
 
 setup_menu_t gen_mouse_settings[] = {
-	{"Enable Mouse", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::UseMouse},
+	{"Enable Mouse", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::UseMouse},
 	EMPTY_LINE,
-	{"Horizontal Sensitivity", S_NUM, SetupGroup::Conf, G2_X, ConfigId::MouseSensitivityHoriz},
-	{"Vertical Sensitivity", S_NUM, SetupGroup::Conf, G2_X, ConfigId::MouseSensitivityVert},
-	{"Free Look Sensitivity", S_NUM, SetupGroup::Conf, G2_X, ConfigId::MouseSensitivityMlook},
-	{"Acceleration", S_NUM, SetupGroup::Conf, G2_X, ConfigId::MouseAcceleration},
+	{"Horizontal Sensitivity", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::MouseSensitivityHoriz},
+	{"Vertical Sensitivity", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::MouseSensitivityVert},
+	{"Free Look Sensitivity", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::MouseSensitivityMlook},
+	{"Acceleration", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::MouseAcceleration},
 	EMPTY_LINE,
-	{"Enable Free Look", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::Freelook},
-	{"Invert Free Look", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::MovementMouseinvert},
+	{"Enable Free Look", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::Freelook},
+	{"Invert Free Look", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::MovementMouseinvert},
 	EMPTY_LINE,
-	{"Mouse Strafe Divisor", S_NUM, SetupGroup::Conf, G2_X, ConfigId::MovementMousestrafedivisor},
-	{"Dbl-Click As Use", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::MouseDoubleclickAsUse},
-	{"Vertical Mouse Movement", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::Vertmouse},
-	{"Carry Fractional Tics", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::MouseCarrytics},
-	{"Mouse Stutter Correction", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::MouseStutterCorrection},
+	{"Mouse Strafe Divisor", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::MovementMousestrafedivisor},
+	{"Dbl-Click As Use", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::MouseDoubleclickAsUse},
+	{"Vertical Mouse Movement", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::Vertmouse},
+	{"Carry Fractional Tics", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::MouseCarrytics},
+	{"Mouse Stutter Correction", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::MouseStutterCorrection},
 
 	PREV_PAGE(gen_audio_settings),
 	NEXT_PAGE(gen_controller_settings),
@@ -3542,22 +3490,22 @@ setup_menu_t gen_mouse_settings[] = {
 };
 
 setup_menu_t gen_controller_settings[] = {
-	{"Enable Controller", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::UseGameController},
+	{"Enable Controller", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::UseGameController},
 	EMPTY_LINE,
-	{"Left Horizontal Sensitivity", S_NUM, SetupGroup::Conf, G2_X, ConfigId::LeftAnalogSensitivityX},
-	{"Left Vertical Sensitivity", S_NUM, SetupGroup::Conf, G2_X, ConfigId::LeftAnalogSensitivityY},
-	{"Right Horizontal Sensitivity", S_NUM, SetupGroup::Conf, G2_X, ConfigId::RightAnalogSensitivityX},
-	{"Right Vertical Sensitivity", S_NUM, SetupGroup::Conf, G2_X, ConfigId::RightAnalogSensitivityY},
-	{"Acceleration", S_NUM, SetupGroup::Conf, G2_X, ConfigId::AnalogLookAcceleration},
+	{"Left Horizontal Sensitivity", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::LeftAnalogSensitivityX},
+	{"Left Vertical Sensitivity", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::LeftAnalogSensitivityY},
+	{"Right Horizontal Sensitivity", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::RightAnalogSensitivityX},
+	{"Right Vertical Sensitivity", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::RightAnalogSensitivityY},
+	{"Acceleration", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::AnalogLookAcceleration},
 	EMPTY_LINE,
-	{"Enable Free Look", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::Freelook},
-	{"Invert Free Look", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::InvertAnalogLook},
-	{"Swap Analogs", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::SwapAnalogs},
+	{"Enable Free Look", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::Freelook},
+	{"Invert Free Look", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::InvertAnalogLook},
+	{"Swap Analogs", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::SwapAnalogs},
 	EMPTY_LINE,
-	{"Left Analog Deadzone", S_NUM, SetupGroup::Conf, G2_X, ConfigId::LeftAnalogDeadzone},
-	{"Right Analog Deadzone", S_NUM, SetupGroup::Conf, G2_X, ConfigId::RightAnalogDeadzone},
-	{"Left Trigger Deadzone", S_NUM, SetupGroup::Conf, G2_X, ConfigId::LeftTriggerDeadzone},
-	{"Right Trigger Deadzone", S_NUM, SetupGroup::Conf, G2_X, ConfigId::RightTriggerDeadzone},
+	{"Left Analog Deadzone", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::LeftAnalogDeadzone},
+	{"Right Analog Deadzone", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::RightAnalogDeadzone},
+	{"Left Trigger Deadzone", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::LeftTriggerDeadzone},
+	{"Right Trigger Deadzone", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::RightTriggerDeadzone},
 
 	PREV_PAGE(gen_mouse_settings),
 	NEXT_PAGE(gen_misc_settings),
@@ -3567,21 +3515,21 @@ setup_menu_t gen_controller_settings[] = {
 static const char* endoom_list[] = {"Off", "On", "Smart", nullptr};
 
 setup_menu_t gen_misc_settings[] = {
-	{"Death Use Action", S_CHOICE, SetupGroup::Conf, G2_X, ConfigId::DeathUseAction, InputId::Null, death_use_strings},
-	{"Boom Weapon Auto Switch", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::SwitchWhenAmmoRunsOut},
-	{"Auto Switch Weapon on Pickup", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::SwitchWeaponOnPickup},
-	{"Enable Cheat Code Entry", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::CheatCodes},
-	{"Skip Quit Prompt", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::SkipQuitPrompt},
+	{"Death Use Action", SetupFlag::Choice, SetupGroup::Conf, G2_X, ConfigId::DeathUseAction, InputId::Null, death_use_strings},
+	{"Boom Weapon Auto Switch", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::SwitchWhenAmmoRunsOut},
+	{"Auto Switch Weapon on Pickup", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::SwitchWeaponOnPickup},
+	{"Enable Cheat Code Entry", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::CheatCodes},
+	{"Skip Quit Prompt", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::SkipQuitPrompt},
 	EMPTY_LINE,
-	{"Endoom Screen", S_CHOICE, SetupGroup::Conf, G2_X, ConfigId::ShowEndoom, InputId::Null, endoom_list},
+	{"Endoom Screen", SetupFlag::Choice, SetupGroup::Conf, G2_X, ConfigId::ShowEndoom, InputId::Null, endoom_list},
 	EMPTY_LINE,
 	TITLE("Rewind", G2_X),
-	{"Rewind Interval (s)", S_NUM, SetupGroup::Conf, G2_X, ConfigId::AutoKeyFrameInterval},
-	{"Rewind Depth", S_NUM, SetupGroup::Conf, G2_X, ConfigId::AutoKeyFrameDepth},
-	{"Rewind Timeout (ms)", S_NUM, SetupGroup::Conf, G2_X, ConfigId::AutoKeyFrameTimeout},
+	{"Rewind Interval (s)", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::AutoKeyFrameInterval},
+	{"Rewind Depth", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::AutoKeyFrameDepth},
+	{"Rewind Timeout (ms)", SetupFlag::Number, SetupGroup::Conf, G2_X, ConfigId::AutoKeyFrameTimeout},
 	EMPTY_LINE,
-	{"Autosave On Level Start", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::AutoSave},
-	{"Organize My Save Files", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::OrganizedSaves},
+	{"Autosave On Level Start", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::AutoSave},
+	{"Organize My Save Files", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::OrganizedSaves},
 
 	PREV_PAGE(gen_controller_settings),
 	FINAL_ENTRY
@@ -3668,23 +3616,23 @@ static const char* viewbob_list[] = {"Off", "25%", "50%", "75%", "100%", nullptr
 static const char* weaponbob_list[] = {"Off", "25%", "50%", "75%", "100%", nullptr};
 
 setup_menu_t display_options_settings[] = {
-	{"Hide Weapon", S_YESNO, SetupGroup::Conf, G_X, ConfigId::HideWeapon},
-	{"Wipe Screen Effect", S_YESNO, SetupGroup::Conf, G_X, ConfigId::RenderWipescreen},
-	{"View Bobbing", S_CHOICE, SetupGroup::Conf, G_X, ConfigId::Viewbob, InputId::Null, viewbob_list},
-	{"Weapon Bobbing", S_CHOICE, SetupGroup::Conf, G_X, ConfigId::Weaponbob, InputId::Null, weaponbob_list},
-	{"Weapon Attack Alignment", S_CHOICE, SetupGroup::Conf, G_X, ConfigId::WeaponAttackAlignment, InputId::Null, weapon_attack_alignment_strings},
-	{"Fix Shallow Floor View Bob Jolt", S_YESNO, SetupGroup::Conf, G_X, ConfigId::FixViewbobFloorJolt},
-	{"Linear Sky Scrolling", S_YESNO, SetupGroup::Conf, G_X, ConfigId::RenderLinearsky},
-	{"Quake Intensity", S_NUM, SetupGroup::Conf, G_X, ConfigId::QuakeIntensity},
-	{"OpenGL Show Health Bars", S_YESNO, SetupGroup::Conf, G_X, ConfigId::GlHealthBar},
-	{"Translucent Sprites", S_CHOICE, SetupGroup::Conf, G_X, ConfigId::TranslucentSprites, InputId::Null, translucent_list},
-	{"Translucent Ghosts", S_YESNO, SetupGroup::Conf, G_X, ConfigId::TranslucentGhosts},
+	{"Hide Weapon", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::HideWeapon},
+	{"Wipe Screen Effect", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::RenderWipescreen},
+	{"View Bobbing", SetupFlag::Choice, SetupGroup::Conf, G_X, ConfigId::Viewbob, InputId::Null, viewbob_list},
+	{"Weapon Bobbing", SetupFlag::Choice, SetupGroup::Conf, G_X, ConfigId::Weaponbob, InputId::Null, weaponbob_list},
+	{"Weapon Attack Alignment", SetupFlag::Choice, SetupGroup::Conf, G_X, ConfigId::WeaponAttackAlignment, InputId::Null, weapon_attack_alignment_strings},
+	{"Fix Shallow Floor View Bob Jolt", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::FixViewbobFloorJolt},
+	{"Linear Sky Scrolling", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::RenderLinearsky},
+	{"Quake Intensity", SetupFlag::Number, SetupGroup::Conf, G_X, ConfigId::QuakeIntensity},
+	{"OpenGL Show Health Bars", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::GlHealthBar},
+	{"Translucent Sprites", SetupFlag::Choice, SetupGroup::Conf, G_X, ConfigId::TranslucentSprites, InputId::Null, translucent_list},
+	{"Translucent Ghosts", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::TranslucentGhosts},
 	EMPTY_LINE,
-	{"Change Palette On Pain", S_YESNO, SetupGroup::Conf, G_X, ConfigId::PaletteOndamage},
-	{"Change Palette On Bonus", S_YESNO, SetupGroup::Conf, G_X, ConfigId::PaletteOnbonus},
-	{"Change Palette On Powers", S_YESNO, SetupGroup::Conf, G_X, ConfigId::PaletteOnpowers},
+	{"Change Palette On Pain", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::PaletteOndamage},
+	{"Change Palette On Bonus", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::PaletteOnbonus},
+	{"Change Palette On Powers", SetupFlag::YesNo, SetupGroup::Conf, G_X, ConfigId::PaletteOnpowers},
 	EMPTY_LINE,
-	{"Menu Background", S_CHOICE, SetupGroup::Conf, G_X, ConfigId::MenuBackground, InputId::Null, menu_background_list},
+	{"Menu Background", SetupFlag::Choice, SetupGroup::Conf, G_X, ConfigId::MenuBackground, InputId::Null, menu_background_list},
 
 	NEXT_PAGE(display_statbar_settings),
 	FINAL_ENTRY
@@ -3692,20 +3640,20 @@ setup_menu_t display_options_settings[] = {
 
 setup_menu_t display_statbar_settings[] = // Demos Settings screen
 {
-	{"Hide Status Bar Horns", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::HideHorns},
-	{"Single Key Display", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::StsTraditionalKeys},
-	{"Solid Color Background", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::StsSolidBgColor},
+	{"Hide Status Bar Horns", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::HideHorns},
+	{"Single Key Display", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::StsTraditionalKeys},
+	{"Solid Color Background", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::StsSolidBgColor},
 	EMPTY_LINE,
 	TITLE("Coloring", DM_X),
-	{"Gray %",S_YESNO, SetupGroup::Conf, DM_X, ConfigId::StsPctAlwaysGray},
-	{"Colored Numbers", S_YESNO, SetupGroup::Conf, DM_X, ConfigId::StsColoredNumbers},
-	{"Health Low/Ok", S_NUM, SetupGroup::Conf, DM_X, ConfigId::HudHealthRed},
-	{"Health Ok/Good", S_NUM, SetupGroup::Conf, DM_X, ConfigId::HudHealthYellow},
-	{"Health Good/Extra", S_NUM, SetupGroup::Conf, DM_X, ConfigId::HudHealthGreen},
-	{"Ammo Low/Ok", S_NUM, SetupGroup::Conf, DM_X, ConfigId::HudAmmoRed},
-	{"Ammo Ok/Good", S_NUM, SetupGroup::Conf, DM_X, ConfigId::HudAmmoYellow},
+	{"Gray %",SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::StsPctAlwaysGray},
+	{"Colored Numbers", SetupFlag::YesNo, SetupGroup::Conf, DM_X, ConfigId::StsColoredNumbers},
+	{"Health Low/Ok", SetupFlag::Number, SetupGroup::Conf, DM_X, ConfigId::HudHealthRed},
+	{"Health Ok/Good", SetupFlag::Number, SetupGroup::Conf, DM_X, ConfigId::HudHealthYellow},
+	{"Health Good/Extra", SetupFlag::Number, SetupGroup::Conf, DM_X, ConfigId::HudHealthGreen},
+	{"Ammo Low/Ok", SetupFlag::Number, SetupGroup::Conf, DM_X, ConfigId::HudAmmoRed},
+	{"Ammo Ok/Good", SetupFlag::Number, SetupGroup::Conf, DM_X, ConfigId::HudAmmoYellow},
 	EMPTY_LINE,
-	{"Appearance", S_CHOICE, SetupGroup::Conf, DM_X, ConfigId::RenderStretchHud, InputId::Null, render_stretch_list},
+	{"Appearance", SetupFlag::Choice, SetupGroup::Conf, DM_X, ConfigId::RenderStretchHud, InputId::Null, render_stretch_list},
 
 	PREV_PAGE(display_options_settings),
 	NEXT_PAGE(display_hud_settings),
@@ -3714,14 +3662,14 @@ setup_menu_t display_statbar_settings[] = // Demos Settings screen
 
 setup_menu_t display_hud_settings[] = // Demos Settings screen
 {
-	{"Use Extended Hud", S_YESNO, SetupGroup::Conf, D_X, ConfigId::Exhud},
-	{"Ex Hud Scale %", S_NUM, SetupGroup::Conf, D_X, ConfigId::ExTextScaleX},
-	{"Ex Hud Ratio %", S_NUM, SetupGroup::Conf, D_X, ConfigId::ExTextRatioY},
+	{"Use Extended Hud", SetupFlag::YesNo, SetupGroup::Conf, D_X, ConfigId::Exhud},
+	{"Ex Hud Scale %", SetupFlag::Number, SetupGroup::Conf, D_X, ConfigId::ExTextScaleX},
+	{"Ex Hud Ratio %", SetupFlag::Number, SetupGroup::Conf, D_X, ConfigId::ExTextRatioY},
 	EMPTY_LINE,
 	TITLE("Messages", D_X),
-	{"Show Messages", S_YESNO, SetupGroup::Conf, D_X, ConfigId::ShowMessages},
-	{"Report Revealed Secrets", S_YESNO, SetupGroup::Conf, D_X, ConfigId::HudaddSecretarea},
-	{"Announce Map On Entry", S_YESNO, SetupGroup::Conf, D_X, ConfigId::AnnounceMap},
+	{"Show Messages", SetupFlag::YesNo, SetupGroup::Conf, D_X, ConfigId::ShowMessages},
+	{"Report Revealed Secrets", SetupFlag::YesNo, SetupGroup::Conf, D_X, ConfigId::HudaddSecretarea},
+	{"Announce Map On Entry", SetupFlag::YesNo, SetupGroup::Conf, D_X, ConfigId::AnnounceMap},
 
 	PREV_PAGE(display_statbar_settings),
 	NEXT_PAGE(display_crosshair_settings),
@@ -3735,14 +3683,14 @@ static const char* crosshair_str[] =
 
 setup_menu_t display_crosshair_settings[] =
 {
-	{"Enable Crosshair", S_CHOICE, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshair, InputId::Null, crosshair_str},
+	{"Enable Crosshair", SetupFlag::Choice, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshair, InputId::Null, crosshair_str},
 	EMPTY_LINE,
-	{"Scale Crosshair", S_YESNO, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairScale},
-	{"Change Color By Player Health", S_YESNO, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairHealth},
-	{"Change Color On Target", S_YESNO, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairTarget},
-	{"Default Color", S_CRITEM, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairColor},
-	{"Target Color", S_CRITEM, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairTargetColor},
-	{"Lock Crosshair On Target", S_YESNO, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairLockTarget},
+	{"Scale Crosshair", SetupFlag::YesNo, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairScale},
+	{"Change Color By Player Health", SetupFlag::YesNo, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairHealth},
+	{"Change Color On Target", SetupFlag::YesNo, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairTarget},
+	{"Default Color", SetupFlag::TextColor, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairColor},
+	{"Target Color", SetupFlag::TextColor, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairTargetColor},
+	{"Lock Crosshair On Target", SetupFlag::YesNo, SetupGroup::Conf, HUD_X, ConfigId::HudaddCrosshairLockTarget},
 
 	PREV_PAGE(display_hud_settings),
 	FINAL_ENTRY
@@ -3783,37 +3731,37 @@ setup_menu_t* comp_settings[] =
 };
 
 setup_menu_t comp_options_settings[] = {
-	{"Default skill level", S_CHOICE, SetupGroup::Conf, G2_X, ConfigId::DefaultSkill, InputId::Null, gen_skillstrings},
-	{"Default compatibility level", S_CHOICE, SetupGroup::Conf, G2_X, ConfigId::DefaultComplevel, InputId::Null, &gen_compstrings[1]},
+	{"Default skill level", SetupFlag::Choice, SetupGroup::Conf, G2_X, ConfigId::DefaultSkill, InputId::Null, gen_skillstrings},
+	{"Default compatibility level", SetupFlag::Choice, SetupGroup::Conf, G2_X, ConfigId::DefaultComplevel, InputId::Null, &gen_compstrings[1]},
 	EMPTY_LINE,
-	{"Casual Play", S_SKIP | S_TITLE, SetupGroup::Conf, G2_X},
-	{"Pistol Start", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::PistolStart},
-	{"Respawn Monsters", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::RespawnMonsters},
-	{"Fast Monsters", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::FastMonsters},
-	{"No Monsters", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::NoMonsters},
-	{"Coop Spawns", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::CoopSpawns},
+	{"Casual Play", SetupFlag::Skip | SetupFlag::Title, SetupGroup::Conf, G2_X},
+	{"Pistol Start", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::PistolStart},
+	{"Respawn Monsters", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::RespawnMonsters},
+	{"Fast Monsters", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::FastMonsters},
+	{"No Monsters", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::NoMonsters},
+	{"Coop Spawns", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::CoopSpawns},
 	EMPTY_LINE,
-	{"Always Pistol Start", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::AlwaysPistolStart},
-	{"Allow Jumping", S_YESNO, SetupGroup::Conf, G2_X, ConfigId::AllowJumping},
+	{"Always Pistol Start", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::AlwaysPistolStart},
+	{"Allow Jumping", SetupFlag::YesNo, SetupGroup::Conf, G2_X, ConfigId::AllowJumping},
 
 	NEXT_PAGE(comp_emulation_settings),
 	FINAL_ENTRY
 };
 
 setup_menu_t comp_emulation_settings[] = {
-	{"WARN ON SPECHITS OVERFLOW", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::OverrunSpechitWarn},
-	{"TRY TO EMULATE IT", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::OverrunSpechitEmulate},
-	{"WARN ON REJECT OVERFLOW", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::OverrunRejectWarn},
-	{"TRY TO EMULATE IT", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::OverrunRejectEmulate},
-	{"WARN ON INTERCEPTS OVERFLOW", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::OverrunInterceptWarn},
-	{"TRY TO EMULATE IT", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::OverrunInterceptEmulate},
-	{"WARN ON PLAYERINGAME OVERFLOW", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::OverrunPlayeringameWarn},
-	{"TRY TO EMULATE IT", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::OverrunPlayeringameEmulate},
+	{"WARN ON SPECHITS OVERFLOW", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::OverrunSpechitWarn},
+	{"TRY TO EMULATE IT", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::OverrunSpechitEmulate},
+	{"WARN ON REJECT OVERFLOW", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::OverrunRejectWarn},
+	{"TRY TO EMULATE IT", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::OverrunRejectEmulate},
+	{"WARN ON INTERCEPTS OVERFLOW", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::OverrunInterceptWarn},
+	{"TRY TO EMULATE IT", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::OverrunInterceptEmulate},
+	{"WARN ON PLAYERINGAME OVERFLOW", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::OverrunPlayeringameWarn},
+	{"TRY TO EMULATE IT", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::OverrunPlayeringameEmulate},
 	EMPTY_LINE,
-	{"MAPPING ERROR FIXES", S_SKIP | S_TITLE, SetupGroup::Conf, AU_X},
-	{"USE PASSES THRU ALL SPECIAL LINES", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::ComperrPassuse},
-	{"WALK UNDER SOLID HANGING BODIES", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::ComperrHangsolid},
-	{"FIX CLIPPING IN LARGE LEVELS", S_YESNO, SetupGroup::Conf, AU_X, ConfigId::ComperrBlockmap},
+	{"MAPPING ERROR FIXES", SetupFlag::Skip | SetupFlag::Title, SetupGroup::Conf, AU_X},
+	{"USE PASSES THRU ALL SPECIAL LINES", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::ComperrPassuse},
+	{"WALK UNDER SOLID HANGING BODIES", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::ComperrHangsolid},
+	{"FIX CLIPPING IN LARGE LEVELS", SetupFlag::YesNo, SetupGroup::Conf, AU_X, ConfigId::ComperrBlockmap},
 
 	PREV_PAGE(comp_options_settings),
 	FINAL_ENTRY
@@ -3873,7 +3821,7 @@ static setup_menu_t empty_line_template = EMPTY_LINE;
   level_table_page[page][base_i] = new_column_template; \
   ++base_i; \
   level_table_page[page][base_i] = empty_line_template; \
-  level_table_page[page][base_i].m_flags |= S_TITLE; \
+  level_table_page[page][base_i].m_flags |= SetupFlag::Title; \
   level_table_page[page][base_i].m_text = Z_Strdup(heading); \
   level_table_page[page][base_i].m_x = x; \
   ++base_i; \
@@ -4003,10 +3951,10 @@ static void M_ResetLevelTable()
 			level_table_page[page] = static_cast<setup_menu_t*>(Z_Calloc(page_count[page], sizeof(*level_table_page[page])));
 		else
 		{
-			for(i = 0; !(level_table_page[page][i].m_flags & S_END); ++i)
+			for(i = 0; (level_table_page[page][i].m_flags & SetupFlag::End) == SetupFlag{}; ++i)
 			{
 				if(level_table_page[page][i].m_text &&
-					!(level_table_page[page][i].m_flags & (S_NEXT | S_PREV)))
+					(level_table_page[page][i].m_flags & (SetupFlag::Next | SetupFlag::Prev)) == SetupFlag{})
 					M_FreeMText(level_table_page[page][i].m_text);
 			}
 
@@ -4043,7 +3991,7 @@ static void M_BuildLevelTable()
 	LOOP_LEVEL_TABLE_COLUMN
 		dsda_StringPrintF(&m_text, "%s", map->lump);
 		entry->m_text = m_text.string;
-		entry->m_flags = S_TITLE | S_LEFTJUST;
+		entry->m_flags = SetupFlag::Title | SetupFlag::LeftJustify;
 		entry->m_x = column_x;
 	END_LOOP_LEVEL_TABLE_COLUMN
 
@@ -4051,7 +3999,7 @@ static void M_BuildLevelTable()
 	INSERT_LEVEL_TABLE_COLUMN("SKILL", column_x)
 
 	LOOP_LEVEL_TABLE_COLUMN
-		entry->m_flags = S_LABEL | S_SKIP;
+		entry->m_flags = SetupFlag::Label | SetupFlag::Skip;
 		entry->m_x = column_x;
 
 		if(map->best_skill)
@@ -4059,7 +4007,7 @@ static void M_BuildLevelTable()
 			dsda_StringPrintF(&m_text, "%d", map->best_skill);
 			entry->m_text = m_text.string;
 			if(map->best_skill == num_skills)
-				entry->m_flags |= S_TC_SEL;
+				entry->m_flags |= SetupFlag::SelectedColor;
 		}
 		else
 		{
@@ -4071,7 +4019,7 @@ static void M_BuildLevelTable()
 	INSERT_LEVEL_TABLE_COLUMN("K", column_x);
 
 	LOOP_LEVEL_TABLE_COLUMN
-		entry->m_flags = S_LABEL | S_SKIP;
+		entry->m_flags = SetupFlag::Label | SetupFlag::Skip;
 		entry->m_x = column_x;
 
 		if(map->best_skill)
@@ -4079,7 +4027,7 @@ static void M_BuildLevelTable()
 			dsda_StringPrintF(&m_text, "%d/%d", map->best_kills, map->max_kills);
 			entry->m_text = m_text.string;
 			if(map->best_kills >= map->max_kills)
-				entry->m_flags |= S_TC_SEL;
+				entry->m_flags |= SetupFlag::SelectedColor;
 		}
 		else
 		{
@@ -4091,7 +4039,7 @@ static void M_BuildLevelTable()
 	INSERT_LEVEL_TABLE_COLUMN("I", column_x);
 
 	LOOP_LEVEL_TABLE_COLUMN
-		entry->m_flags = S_LABEL | S_SKIP;
+		entry->m_flags = SetupFlag::Label | SetupFlag::Skip;
 		entry->m_x = column_x;
 
 		if(map->best_skill)
@@ -4099,7 +4047,7 @@ static void M_BuildLevelTable()
 			dsda_StringPrintF(&m_text, "%d/%d", map->best_items, map->max_items);
 			entry->m_text = m_text.string;
 			if(map->best_items >= map->max_items)
-				entry->m_flags |= S_TC_SEL;
+				entry->m_flags |= SetupFlag::SelectedColor;
 		}
 		else
 		{
@@ -4111,7 +4059,7 @@ static void M_BuildLevelTable()
 	INSERT_LEVEL_TABLE_COLUMN("S", column_x);
 
 	LOOP_LEVEL_TABLE_COLUMN
-		entry->m_flags = S_LABEL | S_SKIP;
+		entry->m_flags = SetupFlag::Label | SetupFlag::Skip;
 		entry->m_x = column_x;
 
 		if(map->best_skill)
@@ -4119,7 +4067,7 @@ static void M_BuildLevelTable()
 			dsda_StringPrintF(&m_text, "%d/%d", map->best_secrets, map->max_secrets);
 			entry->m_text = m_text.string;
 			if(map->best_secrets >= map->max_secrets)
-				entry->m_flags |= S_TC_SEL;
+				entry->m_flags |= SetupFlag::SelectedColor;
 		}
 		else
 		{
@@ -4137,7 +4085,7 @@ static void M_BuildLevelTable()
 	LOOP_LEVEL_TABLE_COLUMN
 		dsda_StringPrintF(&m_text, "%s", map->lump);
 		entry->m_text = m_text.string;
-		entry->m_flags = S_TITLE | S_LEFTJUST;
+		entry->m_flags = SetupFlag::Title | SetupFlag::LeftJustify;
 		entry->m_x = column_x;
 	END_LOOP_LEVEL_TABLE_COLUMN
 
@@ -4145,14 +4093,14 @@ static void M_BuildLevelTable()
 	INSERT_LEVEL_TABLE_COLUMN("TIME", column_x)
 
 	LOOP_LEVEL_TABLE_COLUMN
-		entry->m_flags = S_LABEL | S_SKIP;
+		entry->m_flags = SetupFlag::Label | SetupFlag::Skip;
 		entry->m_x = column_x;
 
 		if(map->best_time >= 0)
 		{
 			M_PrintTime(&m_text, map->best_time);
 			entry->m_text = m_text.string;
-			entry->m_flags |= S_TC_SEL;
+			entry->m_flags |= SetupFlag::SelectedColor;
 		}
 		else
 		{
@@ -4164,14 +4112,14 @@ static void M_BuildLevelTable()
 	INSERT_LEVEL_TABLE_COLUMN("MAX TIME", column_x)
 
 	LOOP_LEVEL_TABLE_COLUMN
-		entry->m_flags = S_LABEL | S_SKIP;
+		entry->m_flags = SetupFlag::Label | SetupFlag::Skip;
 		entry->m_x = column_x;
 
 		if(map->best_max_time >= 0)
 		{
 			M_PrintTime(&m_text, map->best_max_time);
 			entry->m_text = m_text.string;
-			entry->m_flags |= S_TC_SEL;
+			entry->m_flags |= SetupFlag::SelectedColor;
 		}
 		else
 		{
@@ -4183,14 +4131,14 @@ static void M_BuildLevelTable()
 	INSERT_LEVEL_TABLE_COLUMN("NM TIME", column_x)
 
 	LOOP_LEVEL_TABLE_COLUMN
-		entry->m_flags = S_LABEL | S_SKIP;
+		entry->m_flags = SetupFlag::Label | SetupFlag::Skip;
 		entry->m_x = column_x;
 
 		if(map->best_nm_time >= 0)
 		{
 			M_PrintTime(&m_text, map->best_nm_time);
 			entry->m_text = m_text.string;
-			entry->m_flags |= S_TC_SEL;
+			entry->m_flags |= SetupFlag::SelectedColor;
 		}
 		else
 		{
@@ -4212,13 +4160,13 @@ static void M_BuildLevelTable()
 
 	dsda_StringPrintF(&m_text, "Maps");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_TITLE | S_SKIP;
+	level_table_page[page][base_i].m_flags = SetupFlag::Title | SetupFlag::Skip;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
 	dsda_StringPrintF(&m_text, "Skill");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_TITLE | S_SKIP;
+	level_table_page[page][base_i].m_flags = SetupFlag::Title | SetupFlag::Skip;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4226,7 +4174,7 @@ static void M_BuildLevelTable()
 
 	dsda_StringPrintF(&m_text, "Kill Completion");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_TITLE | S_SKIP;
+	level_table_page[page][base_i].m_flags = SetupFlag::Title | SetupFlag::Skip;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4234,7 +4182,7 @@ static void M_BuildLevelTable()
 
 	dsda_StringPrintF(&m_text, "Item Completion");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_TITLE | S_SKIP;
+	level_table_page[page][base_i].m_flags = SetupFlag::Title | SetupFlag::Skip;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4242,7 +4190,7 @@ static void M_BuildLevelTable()
 
 	dsda_StringPrintF(&m_text, "Secret Completion");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_TITLE | S_SKIP;
+	level_table_page[page][base_i].m_flags = SetupFlag::Title | SetupFlag::Skip;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4250,7 +4198,7 @@ static void M_BuildLevelTable()
 
 	dsda_StringPrintF(&m_text, "Time");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_TITLE | S_SKIP;
+	level_table_page[page][base_i].m_flags = SetupFlag::Title | SetupFlag::Skip;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4258,7 +4206,7 @@ static void M_BuildLevelTable()
 
 	dsda_StringPrintF(&m_text, "Max Time");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_TITLE | S_SKIP;
+	level_table_page[page][base_i].m_flags = SetupFlag::Title | SetupFlag::Skip;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4266,7 +4214,7 @@ static void M_BuildLevelTable()
 
 	dsda_StringPrintF(&m_text, "Nightmare Time");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_TITLE | S_SKIP;
+	level_table_page[page][base_i].m_flags = SetupFlag::Title | SetupFlag::Skip;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4279,7 +4227,7 @@ static void M_BuildLevelTable()
 	dsda_StringPrintF(&m_text, "%d / %d",
 		wad_stats_summary.completed_count, wad_stats.map_count);
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_LABEL | S_SKIP | S_LEFTJUST;
+	level_table_page[page][base_i].m_flags = SetupFlag::Label | SetupFlag::Skip | SetupFlag::LeftJustify;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4288,7 +4236,7 @@ static void M_BuildLevelTable()
 	else
 		dsda_StringPrintF(&m_text, "-");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_LABEL | S_SKIP | S_LEFTJUST;
+	level_table_page[page][base_i].m_flags = SetupFlag::Label | SetupFlag::Skip | SetupFlag::LeftJustify;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4300,7 +4248,7 @@ static void M_BuildLevelTable()
 	else
 		dsda_StringCat(&m_text, "-");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_LABEL | S_SKIP | S_LEFTJUST;
+	level_table_page[page][base_i].m_flags = SetupFlag::Label | SetupFlag::Skip | SetupFlag::LeftJustify;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4312,7 +4260,7 @@ static void M_BuildLevelTable()
 	else
 		dsda_StringCat(&m_text, "-");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_LABEL | S_SKIP | S_LEFTJUST;
+	level_table_page[page][base_i].m_flags = SetupFlag::Label | SetupFlag::Skip | SetupFlag::LeftJustify;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4324,7 +4272,7 @@ static void M_BuildLevelTable()
 	else
 		dsda_StringCat(&m_text, "-");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_LABEL | S_SKIP | S_LEFTJUST;
+	level_table_page[page][base_i].m_flags = SetupFlag::Label | SetupFlag::Skip | SetupFlag::LeftJustify;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4335,7 +4283,7 @@ static void M_BuildLevelTable()
 	else
 		dsda_StringPrintF(&m_text, "- : --");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_LABEL | S_SKIP | S_LEFTJUST;
+	level_table_page[page][base_i].m_flags = SetupFlag::Label | SetupFlag::Skip | SetupFlag::LeftJustify;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4346,7 +4294,7 @@ static void M_BuildLevelTable()
 	else
 		dsda_StringPrintF(&m_text, "- : --");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_LABEL | S_SKIP | S_LEFTJUST;
+	level_table_page[page][base_i].m_flags = SetupFlag::Label | SetupFlag::Skip | SetupFlag::LeftJustify;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4357,7 +4305,7 @@ static void M_BuildLevelTable()
 	else
 		dsda_StringPrintF(&m_text, "- : --");
 	level_table_page[page][base_i].m_text = m_text.string;
-	level_table_page[page][base_i].m_flags = S_LABEL | S_SKIP | S_LEFTJUST;
+	level_table_page[page][base_i].m_flags = SetupFlag::Label | SetupFlag::Skip | SetupFlag::LeftJustify;
 	level_table_page[page][base_i].m_x = 162;
 	++base_i;
 
@@ -4402,8 +4350,8 @@ static dboolean shiftdown = false; // phares 4/10/98: SHIFT key down or not
 
 static void M_SelectDone(setup_menu_t* ptr)
 {
-	ptr->m_flags &= ~S_SELECT;
-	ptr->m_flags |= S_HILITE;
+	ptr->m_flags -= SetupFlag::Select;
+	ptr->m_flags |= SetupFlag::Highlight;
 	S_StartOptionalSound(g_sfx_mnusel, g_sfx_itemup, false);
 	setup_select = false;
 	colorbox_active = false;
@@ -4780,21 +4728,21 @@ static void M_DrawAd()
 #define CR_X2 50
 
 setup_menu_t cred_settings[] = {
-	{"Programmers",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X},
-	{"Florian 'Proff' Schulze",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
-	{"Colin Phipps",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
-	{"Neil Stevens",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
-	{"Andrey Budko",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
+	{"Programmers",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X},
+	{"Florian 'Proff' Schulze",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
+	{"Colin Phipps",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
+	{"Neil Stevens",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
+	{"Andrey Budko",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
 	EMPTY_LINE,
-	{"Additional Credit To",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X},
-	{"id Software for DOOM",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
-	{"TeamTNT for BOOM",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
-	{"Lee Killough for MBF",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
-	{"The DOSDoom-Team for DOSDOOM",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
-	{"Marisa Heit for ZDOOM",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
-	{"Michael 'Kodak' Ryssen for DOOMGL",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
-	{"Jess Haas for lSDLDoom",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
-	{"all others who helped (see AUTHORS file)",S_SKIP | S_CREDIT | S_LEFTJUST, SetupGroup::Null, CR_X2},
+	{"Additional Credit To",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X},
+	{"id Software for DOOM",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
+	{"TeamTNT for BOOM",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
+	{"Lee Killough for MBF",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
+	{"The DOSDoom-Team for DOSDOOM",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
+	{"Marisa Heit for ZDOOM",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
+	{"Michael 'Kodak' Ryssen for DOOMGL",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
+	{"Jess Haas for lSDLDoom",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
+	{"all others who helped (see AUTHORS file)",SetupFlag::Skip | SetupFlag::Credit | SetupFlag::LeftJustify, SetupGroup::Null, CR_X2},
 
 	FINAL_ENTRY
 };
@@ -4943,7 +4891,7 @@ static dboolean M_KeyBndResponder(const std::optional<KeyCode> ch, int action, e
 		setup_menu_t* ptr1 = current_setup_menu + set_menu_itemon;
 		setup_menu_t* ptr2 = nullptr;
 
-		const InputId s_input = (ptr1->m_flags & S_INPUT) ? ptr1->input : InputId::Null;
+		const InputId s_input = (ptr1->m_flags & SetupFlag::Input) != SetupFlag{} ? ptr1->input : InputId::Null;
 
 		if(ev->type == EventType::Joystick)
 		{
@@ -4966,10 +4914,10 @@ static dboolean M_KeyBndResponder(const std::optional<KeyCode> ch, int action, e
 				return true;
 
 			for(i = 0; keys_settings[i] && search; i++)
-				for(ptr2 = keys_settings[i]; !(ptr2->m_flags & S_END); ptr2++)
+				for(ptr2 = keys_settings[i]; (ptr2->m_flags & SetupFlag::End) == SetupFlag{}; ptr2++)
 					if(ptr2->m_group == group && ptr1 != ptr2)
 					{
-						if(ptr2->m_flags & S_INPUT)
+						if((ptr2->m_flags & SetupFlag::Input) != SetupFlag{})
 							if(dsda_InputMatchJoyB(ptr2->input, button))
 							{
 								dsda_InputRemoveJoyB(ptr2->input, button);
@@ -5002,10 +4950,10 @@ static dboolean M_KeyBndResponder(const std::optional<KeyCode> ch, int action, e
 				return true;
 
 			for(i = 0; keys_settings[i] && search; i++)
-				for(ptr2 = keys_settings[i]; !(ptr2->m_flags & S_END); ptr2++)
+				for(ptr2 = keys_settings[i]; (ptr2->m_flags & SetupFlag::End) == SetupFlag{}; ptr2++)
 					if(ptr2->m_group == group && ptr1 != ptr2)
 					{
-						if(ptr2->m_flags & S_INPUT)
+						if((ptr2->m_flags & SetupFlag::Input) != SetupFlag{})
 							if(dsda_InputMatchMouseB(ptr2->input, button))
 							{
 								dsda_InputRemoveMouseB(ptr2->input, button);
@@ -5030,19 +4978,19 @@ static dboolean M_KeyBndResponder(const std::optional<KeyCode> ch, int action, e
 			// that belong to the same group as the one you're changing.
 
 			// if you find that you're trying to swap with an action
-			// that has S_KEEP set, you can't bind ch; it's already
-			// bound to that S_KEEP action, and that action has to
+			// that has SetupFlag::Keep set, you can't bind ch; it's already
+			// bound to that SetupFlag::Keep action, and that action has to
 			// keep that key.
 
 			group = ptr1->m_group;
 			for(i = 0; keys_settings[i] && search; i++)
-				for(ptr2 = keys_settings[i]; !(ptr2->m_flags & S_END); ptr2++)
+				for(ptr2 = keys_settings[i]; (ptr2->m_flags & SetupFlag::End) == SetupFlag{}; ptr2++)
 					if(ptr2->m_group == group && ptr1 != ptr2)
 					{
-						if(ptr2->m_flags & (S_INPUT | S_KEEP))
+						if((ptr2->m_flags & (SetupFlag::Input | SetupFlag::Keep)) != SetupFlag{})
 							if(ch && dsda_InputMatchKey(ptr2->input, *ch))
 							{
-								if(ptr2->m_flags & S_KEEP)
+								if((ptr2->m_flags & SetupFlag::Keep) != SetupFlag{})
 									return true; // can't have it!
 
 								dsda_InputRemoveKey(ptr2->input, *ch);
@@ -5085,8 +5033,8 @@ static dboolean M_WeaponResponder(const std::optional<KeyCode> ch, int action, e
 			// you have to swap assignments.
 			ptr2 = weap_priority_settings;
 			old_value = dsda_IntConfig(ptr1->config_id);
-			for(; !(ptr2->m_flags & S_END); ptr2++)
-				if(ptr2->m_flags & S_WEAP && ptr1 != ptr2 &&
+			for(; (ptr2->m_flags & SetupFlag::End) == SetupFlag{}; ptr2++)
+				if((ptr2->m_flags & SetupFlag::Weapon) != SetupFlag{} && ptr1 != ptr2 &&
 					dsda_IntConfig(ptr2->config_id) == number)
 				{
 					dsda_UpdateIntConfig(ptr2->config_id, old_value, true);
@@ -5161,7 +5109,7 @@ static dboolean M_StringResponder(const std::optional<KeyCode> ch, int action, e
 	{
 		setup_menu_t* ptr1 = current_setup_menu + set_menu_itemon;
 
-		if(ptr1->m_flags & S_STRING) // creating/editing a string?
+		if((ptr1->m_flags & SetupFlag::String) != SetupFlag{}) // creating/editing a string?
 		{
 			if(action == MENU_BACKSPACE) // backspace and DEL
 			{
@@ -5266,7 +5214,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 			return true;
 		}
 
-		if(ptr1->m_flags & S_YESNO) // yes or no setting?
+		if((ptr1->m_flags & SetupFlag::YesNo) != SetupFlag{}) // yes or no setting?
 		{
 			if(action == MENU_ENTER)
 			{
@@ -5276,7 +5224,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 			return true;
 		}
 
-		if(ptr1->m_flags & (S_NUM | S_CRITEM)) // number?
+		if((ptr1->m_flags & (SetupFlag::Number | SetupFlag::TextColor)) != SetupFlag{}) // number?
 		{
 			if(setup_gather)
 			{
@@ -5326,11 +5274,11 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 			return true;
 		}
 
-		if(ptr1->m_flags & S_CHOICE) // selection of choices?
+		if((ptr1->m_flags & SetupFlag::Choice) != SetupFlag{}) // selection of choices?
 		{
 			if(action == MENU_LEFT)
 			{
-				if(ptr1->m_flags & S_STR)
+				if((ptr1->m_flags & SetupFlag::StringChoice) != SetupFlag{})
 				{
 					int old_value, value;
 
@@ -5363,7 +5311,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 			}
 			else if(action == MENU_RIGHT)
 			{
-				if(ptr1->m_flags & S_STR)
+				if((ptr1->m_flags & SetupFlag::StringChoice) != SetupFlag{})
 				{
 					int old_value, value;
 
@@ -5396,7 +5344,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 			}
 			else if(action == MENU_ENTER)
 			{
-				if(ptr1->m_flags & S_STR)
+				if((ptr1->m_flags & SetupFlag::StringChoice) != SetupFlag{})
 				{
 					dsda_UpdateStringConfig(ptr1->config_id, entry_string_index, true);
 				}
@@ -5409,7 +5357,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 			return true;
 		}
 
-		if(ptr1->m_flags & S_THERMO)
+		if((ptr1->m_flags & SetupFlag::Thermo) != SetupFlag{})
 		{
 			if(action == MENU_LEFT)
 			{
@@ -5445,12 +5393,12 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 
 	if(action == MENU_DOWN)
 	{
-		if(ptr1->m_flags & S_NOSELECT)
+		if((ptr1->m_flags & SetupFlag::NoSelect) != SetupFlag{})
 			return true;
 
-		ptr1->m_flags &= ~S_HILITE; // phares 4/17/98
+		ptr1->m_flags -= SetupFlag::Highlight; // phares 4/17/98
 		do
-			if(ptr1->m_flags & S_END)
+			if((ptr1->m_flags & SetupFlag::End) != SetupFlag{})
 			{
 				set_menu_itemon = 0;
 				ptr1 = current_setup_menu;
@@ -5460,35 +5408,35 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 				set_menu_itemon++;
 				ptr1++;
 			}
-		while(ptr1->m_flags & S_SKIP);
+		while((ptr1->m_flags & SetupFlag::Skip) != SetupFlag{});
 		M_SelectDone(ptr1); // phares 4/17/98
 		return true;
 	}
 
 	if(action == MENU_UP)
 	{
-		if(ptr1->m_flags & S_NOSELECT)
+		if((ptr1->m_flags & SetupFlag::NoSelect) != SetupFlag{})
 			return true;
 
-		ptr1->m_flags &= ~S_HILITE; // phares 4/17/98
+		ptr1->m_flags -= SetupFlag::Highlight; // phares 4/17/98
 		do
 		{
 			if(set_menu_itemon == 0)
 				do
 					set_menu_itemon++;
-				while(!((current_setup_menu + set_menu_itemon)->m_flags & S_END));
+				while(((current_setup_menu + set_menu_itemon)->m_flags & SetupFlag::End) == SetupFlag{});
 			set_menu_itemon--;
 		}
-		while((current_setup_menu + set_menu_itemon)->m_flags & S_SKIP);
+		while(((current_setup_menu + set_menu_itemon)->m_flags & SetupFlag::Skip) != SetupFlag{});
 		M_SelectDone(current_setup_menu + set_menu_itemon); // phares 4/17/98
 		return true;
 	}
 
 	if(action == MENU_CLEAR)
 	{
-		if(ptr1->m_flags & S_INPUT)
+		if((ptr1->m_flags & SetupFlag::Input) != SetupFlag{})
 		{
-			if(ptr1->m_flags & S_NOCLEAR)
+			if((ptr1->m_flags & SetupFlag::NoClear) != SetupFlag{})
 			{
 				S_StartOptionalSound(g_sfx_mnuerr, g_sfx_oof, true);
 			}
@@ -5504,7 +5452,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 
 	if(action == MENU_ENTER)
 	{
-		int flags = ptr1->m_flags;
+		const SetupFlag flags = ptr1->m_flags;
 
 		if(dsda_StrictMode() && dsda_IsStrictConfig(ptr1->config_id))
 			return true;
@@ -5515,12 +5463,12 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 		//
 		// killough 10/98: use friendlier char-based input buffer
 
-		if(flags & (S_NUM | S_CRITEM))
+		if((flags & (SetupFlag::Number | SetupFlag::TextColor)) != SetupFlag{})
 		{
 			setup_gather = true;
 			gather_count = 0;
 		}
-		else if(flags & S_COLOR)
+		else if((flags & SetupFlag::Color) != SetupFlag{})
 		{
 			int color = dsda_IntConfig(ptr1->config_id);
 
@@ -5531,16 +5479,16 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 			color_palette_y = color >> 4;
 			colorbox_active = true;
 		}
-		else if(flags & S_STRING)
+		else if((flags & SetupFlag::String) != SetupFlag{})
 		{
 			strncpy(entry_string_index, dsda_StringConfig(ptr1->config_id),
 				ENTRY_STRING_BFR_SIZE - 1);
 
 			entry_index = 0; // current cursor position in entry_string_index
 		}
-		else if(flags & S_CHOICE)
+		else if((flags & SetupFlag::Choice) != SetupFlag{})
 		{
-			if(flags & S_STR)
+			if((flags & SetupFlag::StringChoice) != SetupFlag{})
 			{
 				strncpy(entry_string_index, dsda_StringConfig(ptr1->config_id),
 					ENTRY_STRING_BFR_SIZE - 1);
@@ -5551,7 +5499,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 			}
 		}
 
-		ptr1->m_flags |= S_SELECT;
+		ptr1->m_flags |= SetupFlag::Select;
 		setup_select = true;
 		S_StartOptionalSound(g_sfx_mnusel, g_sfx_itemup, false);
 		return true;
@@ -5569,7 +5517,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 				itemOn = currentMenu->lastOn;
 				S_StartOptionalSound(g_sfx_mnuopn, g_sfx_swtchn, true);
 			}
-		ptr1->m_flags &= ~(S_HILITE | S_SELECT); // phares 4/19/98
+		ptr1->m_flags -= (SetupFlag::Highlight | SetupFlag::Select); // phares 4/19/98
 		S_StartOptionalSound(g_sfx_mnucls, g_sfx_swtchx, true);
 		return true;
 	}
@@ -5587,9 +5535,9 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 		do
 		{
 			ptr2++;
-			if(ptr2->m_flags & S_PREV)
+			if((ptr2->m_flags & SetupFlag::Prev) != SetupFlag{})
 			{
-				ptr1->m_flags &= ~S_HILITE;
+				ptr1->m_flags -= SetupFlag::Highlight;
 				M_SetSetupMenuItemOn(set_menu_itemon);
 				M_UpdateSetupMenu(ptr2->menu);
 				S_StartOptionalSound(g_sfx_mnumov, g_sfx_menu, true);
@@ -5598,7 +5546,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 				return true;
 			}
 		}
-		while(!(ptr2->m_flags & S_END));
+		while((ptr2->m_flags & SetupFlag::End) == SetupFlag{});
 	}
 
 	if(action == MENU_RIGHT)
@@ -5607,9 +5555,9 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 		do
 		{
 			ptr2++;
-			if(ptr2->m_flags & S_NEXT)
+			if((ptr2->m_flags & SetupFlag::Next) != SetupFlag{})
 			{
-				ptr1->m_flags &= ~S_HILITE;
+				ptr1->m_flags -= SetupFlag::Highlight;
 				M_SetSetupMenuItemOn(set_menu_itemon);
 				M_UpdateSetupMenu(ptr2->menu);
 				S_StartOptionalSound(g_sfx_mnumov, g_sfx_menu, true);
@@ -5618,7 +5566,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 				return true;
 			}
 		}
-		while(!(ptr2->m_flags & S_END));
+		while((ptr2->m_flags & SetupFlag::End) == SetupFlag{});
 	}
 
 	return false;
@@ -6814,7 +6762,7 @@ static void M_DrawThermo(int x, int y, int thermWidth, int thermRange, int therm
 
 static void M_DrawThermoSmall(int x, int y, int thermWidth, int thermRange, int thermDot, const setup_menu_t* setup_item)
 {
-	dboolean selected = setup_item->m_flags & S_HILITE;
+	dboolean selected = (setup_item->m_flags & SetupFlag::Highlight) != SetupFlag{};
 	ColorRange color = M_ItemDisabled(setup_item) ? ColorRange::Darken : M_HighlightColor(selected, ColorRange::Default);
 
 	M_DrawThermo(x, y, thermWidth, thermRange, thermDot, color);

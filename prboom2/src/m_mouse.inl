@@ -164,7 +164,7 @@ static dboolean M_MouseBindingCaptureActive()
 {
 	return setup_active && set_keybnd_active && setup_select &&
 		current_setup_menu &&
-		(current_setup_menu[set_menu_itemon].m_flags & S_INPUT);
+		(current_setup_menu[set_menu_itemon].m_flags & SetupFlag::Input) != SetupFlag{};
 }
 
 static dboolean M_MouseMainItemRect(const menuitem_t* item, int index,
@@ -494,9 +494,9 @@ static dboolean M_MouseSetupDescriptionAtPointer(const setup_menu_t* item,
 {
 	const char* line;
 	int x = item->m_x;
-	int flags = item->m_flags;
+	const SetupFlag flags = item->m_flags;
 
-	if(!(flags & S_SHOWDESC) || !item->m_text)
+	if((flags & SetupFlag::ShowDesc) == SetupFlag{} || !item->m_text)
 		return false;
 
 	for(line = item->m_text; *line; y += 8)
@@ -516,9 +516,9 @@ static dboolean M_MouseSetupDescriptionAtPointer(const setup_menu_t* item,
 		len = end ? (size_t)(end - line) : strlen(line);
 		width = M_MousePixelWidthN(line, len);
 
-		if(flags & S_CENTER)
+		if((flags & SetupFlag::Center) != SetupFlag{})
 			left = (BASE_WIDTH - width) / 2;
-		else if(!(flags & S_LEFTJUST))
+		else if((flags & SetupFlag::LeftJustify) == SetupFlag{})
 			left -= width + 4;
 
 		if(M_MouseSetupTextRangeAtPointer(line, len, left, y))
@@ -539,10 +539,10 @@ static dboolean M_MouseSetupSettingAtPointer(const setup_menu_t* item, int y)
 	menu_mouse_rect_t rect;
 	int width;
 
-	if(!(item->m_flags & S_SHOWSET))
+	if((item->m_flags & SetupFlag::ShowSet) == SetupFlag{})
 		return false;
 
-	if(item->m_flags & S_COLOR)
+	if((item->m_flags & SetupFlag::Color) != SetupFlag{})
 	{
 		rect.left = item->m_x;
 		rect.top = y - 1;
@@ -562,7 +562,7 @@ static dboolean M_MouseSetupSettingAtPointer(const setup_menu_t* item, int y)
 
 	width = M_MousePixelWidth(text);
 
-	if(item->m_flags & S_THERMO)
+	if((item->m_flags & SetupFlag::Thermo) != SetupFlag{})
 	{
 		rect.left = item->m_x;
 		rect.top = y;
@@ -591,8 +591,8 @@ static dboolean M_MouseSetupItemAtVisibleText(const setup_menu_t* item,
 
 static dboolean M_MouseSetupItemSelectable(const setup_menu_t* item)
 {
-	return !(item->m_flags & (S_SKIP | S_END | S_PREV | S_NEXT |
-		S_RESET_Y | S_NOSELECT));
+	return (item->m_flags & (SetupFlag::Skip | SetupFlag::End | SetupFlag::Prev | SetupFlag::Next |
+		SetupFlag::ResetY | SetupFlag::NoSelect)) == SetupFlag{};
 }
 
 #define MENU_LEVELTABLE_LEFT 8
@@ -658,7 +658,7 @@ static dboolean M_MouseSetupItemAtPointer(int* index)
 	M_GetSetupMenuLayout(current_setup_menu, DEFAULT_LIST_Y, &layout);
 
 	i = 0;
-	for(src = current_setup_menu; !(src->m_flags & S_END); src++)
+	for(src = current_setup_menu; (src->m_flags & SetupFlag::End) == SetupFlag{}; src++)
 	{
 		int desc_y;
 		int item_y;
@@ -812,7 +812,7 @@ static dboolean M_MouseSwitchSetupPage(setup_menu_t** pages, int target_page)
 		return true;
 
 	M_MouseClearTabHover();
-	current_setup_menu[set_menu_itemon].m_flags &= ~(S_HILITE | S_SELECT);
+	current_setup_menu[set_menu_itemon].m_flags -= (SetupFlag::Highlight | SetupFlag::Select);
 	M_SetSetupMenuItemOn(set_menu_itemon);
 
 	previous_page = current_page;
@@ -872,10 +872,10 @@ static void M_MouseSelectSetupItem(int index)
 	old_item = current_setup_menu + set_menu_itemon;
 	new_item = current_setup_menu + index;
 
-	old_item->m_flags &= ~(S_HILITE | S_SELECT);
+	old_item->m_flags -= (SetupFlag::Highlight | SetupFlag::Select);
 	set_menu_itemon = index;
 	M_SetSetupMenuItemOn(set_menu_itemon);
-	new_item->m_flags |= S_HILITE;
+	new_item->m_flags |= SetupFlag::Highlight;
 	setup_select = false;
 	setup_gather = false;
 	colorbox_active = false;
@@ -921,7 +921,7 @@ static dboolean M_MouseSetSetupThermo(int index)
 		return false;
 
 	item = current_setup_menu + index;
-	if(!(item->m_flags & S_THERMO))
+	if((item->m_flags & SetupFlag::Thermo) == SetupFlag{})
 		return false;
 
 	value = M_MouseThermoValue(menu_mouse_x, item->m_x, 8, 0, 15);
@@ -960,7 +960,7 @@ static dboolean M_MouseCycleSetupChoice(setup_menu_t* item)
 	int current;
 	int next;
 
-	if(!(item->m_flags & S_CHOICE) || !item->selectstrings)
+	if((item->m_flags & SetupFlag::Choice) == SetupFlag{} || !item->selectstrings)
 		return false;
 
 	if(M_ItemDisabled(item))
@@ -969,7 +969,7 @@ static dboolean M_MouseCycleSetupChoice(setup_menu_t* item)
 		return true;
 	}
 
-	if(item->m_flags & S_STR)
+	if((item->m_flags & SetupFlag::StringChoice) != SetupFlag{})
 	{
 		current = M_IndexInChoices(dsda_StringConfig(item->config_id),
 			item->selectstrings);
@@ -1002,7 +1002,7 @@ static dboolean M_MouseActivateSetupItem(event_t* ev)
 	{
 		item = current_setup_menu + set_menu_itemon;
 
-		if(item->m_flags & S_COLOR)
+		if((item->m_flags & SetupFlag::Color) != SetupFlag{})
 		{
 			if(!M_MouseColorChipAtPointer())
 				return true;
@@ -1010,7 +1010,7 @@ static dboolean M_MouseActivateSetupItem(event_t* ev)
 			return M_SetupResponder(std::nullopt, MENU_ENTER, ev);
 		}
 
-		if(item->m_flags & S_THERMO)
+		if((item->m_flags & SetupFlag::Thermo) != SetupFlag{})
 		{
 			if(!M_MouseSetupThermoAtPointer(item))
 				return true;
@@ -1019,7 +1019,7 @@ static dboolean M_MouseActivateSetupItem(event_t* ev)
 			return M_MouseSetSetupThermo(set_menu_itemon);
 		}
 
-		if(item->m_flags & S_CHOICE)
+		if((item->m_flags & SetupFlag::Choice) != SetupFlag{})
 			return true;
 
 		return M_SetupResponder(std::nullopt, MENU_ENTER, ev);
@@ -1031,7 +1031,7 @@ static dboolean M_MouseActivateSetupItem(event_t* ev)
 	M_MouseSelectSetupItem(index);
 	item = current_setup_menu + set_menu_itemon;
 
-	if(item->m_flags & S_THERMO)
+	if((item->m_flags & SetupFlag::Thermo) != SetupFlag{})
 	{
 		if(!M_MouseSetupThermoAtPointer(item))
 			return true;
@@ -1040,7 +1040,7 @@ static dboolean M_MouseActivateSetupItem(event_t* ev)
 		return M_MouseSetSetupThermo(set_menu_itemon);
 	}
 
-	if(item->m_flags & S_YESNO)
+	if((item->m_flags & SetupFlag::YesNo) != SetupFlag{})
 	{
 		if(!M_SetupResponder(std::nullopt, MENU_ENTER, ev))
 			return false;
@@ -1048,7 +1048,7 @@ static dboolean M_MouseActivateSetupItem(event_t* ev)
 		return M_SetupResponder(std::nullopt, MENU_ENTER, ev);
 	}
 
-	if(item->m_flags & S_CHOICE)
+	if((item->m_flags & SetupFlag::Choice) != SetupFlag{})
 		return M_MouseCycleSetupChoice(item);
 
 	return M_SetupResponder(std::nullopt, MENU_ENTER, ev);

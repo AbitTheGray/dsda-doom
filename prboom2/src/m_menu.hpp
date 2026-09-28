@@ -22,6 +22,51 @@ enum struct KeyCode : int32_t;
 #include "d_event.hpp"
 #include "dsda/configuration.hpp"
 
+// setup_menu_t::m_flags - what an item on a Setup Screen is and how it is shown.
+// They can be OR'ed together where appropriate.
+enum struct SetupFlag : uint32_t
+{
+	Highlight = Bit<uint32_t>(0u), // Cursor is sitting on this item
+	Select = Bit<uint32_t>(1u), // We're changing this item
+	Title = Bit<uint32_t>(2u), // Title item
+	YesNo = Bit<uint32_t>(3u), // Yes or No item
+	TextColor = Bit<uint32_t>(4u), // Message color
+	Color = Bit<uint32_t>(5u), // Automap color
+	Label = Bit<uint32_t>(6u),
+	SelectedColor = Bit<uint32_t>(7u), // Drawn in the edit color without being selected
+	Prev = Bit<uint32_t>(8u), // Previous menu exists
+	Next = Bit<uint32_t>(9u), // Next menu exists
+	Input = Bit<uint32_t>(10u), // Composite input binding
+	Weapon = Bit<uint32_t>(11u), // Weapon #
+	Number = Bit<uint32_t>(12u), // Numerical item
+	Skip = Bit<uint32_t>(13u), // Cursor can't land here
+	Keep = Bit<uint32_t>(14u), // Don't swap key out
+	End = Bit<uint32_t>(15u), // Last item in list (dummy)
+	LevelWarning = Bit<uint32_t>(16u), // killough 8/30/98: Always warn about pending change
+	NoSelect = Bit<uint32_t>(17u),
+	Center = Bit<uint32_t>(18u),
+	File = Bit<uint32_t>(19u), // killough 10/98: Filenames
+	LeftJustify = Bit<uint32_t>(20u), // killough 10/98: items which are left-justified
+	Credit = Bit<uint32_t>(21u), // killough 10/98: credit
+	Thermo = Bit<uint32_t>(22u), // Slider for choosing a value
+	Choice = Bit<uint32_t>(23u), // this item has several values
+	Name = Bit<uint32_t>(24u),
+	ResetY = Bit<uint32_t>(25u),
+	StringChoice = Bit<uint32_t>(26u), // A Choice stored as a string config (need to refactor things...)
+	NoClear = Bit<uint32_t>(27u),
+	Disabled = Bit<uint32_t>(28u), // disabled / darken options
+
+	// The set of items whose description should be displayed.
+	ShowDesc = Label | Title | YesNo | TextColor | Color | Prev | Next | Input | Weapon | Number | File | Credit | Choice | Thermo | Name,
+	// The set of items whose setting should be displayed.
+	ShowSet = YesNo | TextColor | Color | Input | Weapon | Number | File | Choice | Thermo | Name,
+	// The set of items whose settings are strings -- killough 10/98.
+	String = File | Name,
+	// The set of items whose var field points to default array.
+	HasDefPtr = String | YesNo | Number | Weapon | Color | TextColor | Choice,
+};
+ENUM_FLAGS_FUNC(SetupFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -129,7 +174,7 @@ enum struct SetupGroup : int32_t
 typedef struct setup_menu_s
 {
 	const char* m_text;  /* text to display */
-	int m_flags;         /* phares 4/17/98: flag bits S_* (defined above) */
+	SetupFlag m_flags;   /* phares 4/17/98: flag bits (SetupFlag) */
 	SetupGroup m_group; /* Group */
 	short m_x;           /* screen x position (left is 0) */
 	ConfigId config_id;

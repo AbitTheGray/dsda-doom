@@ -61,7 +61,7 @@ Done so far: `MTF_*` (now `MapThingFlag`), `UDMF_TF_*` (`UdmfThingFlag`), and `S
 Convert a few groups per batch, then build and run the spec suite.
 
 Candidates found by scanning for 3+ adjacent numeric `#define`s with a shared prefix; check each one, some may turn out to be plain constants:
-- **Flags:** `SCROLL_` (`dsda/scroll.hpp`: two flag sets and the untracked `THRUST_` group share `scroll_t::flags`, which is part of the savegame layout, so one enum cannot type that field), `RDC_` (`r_draw.cpp`: only used in `#if` inside `r_drawcolumn.inl`/`r_drawflush.inl`, which `r_draw.cpp` includes once per pipeline - it needs those files turned into templates with `if constexpr`, not just an enum), `S_` menu item flags (`m_menu.cpp`, ~1800 uses).
+- **Flags:** `SCROLL_` (`dsda/scroll.hpp`: two flag sets and the untracked `THRUST_` group share `scroll_t::flags`, which is part of the savegame layout, so one enum cannot type that field), `RDC_` (`r_draw.cpp`: only used in `#if` inside `r_drawcolumn.inl`/`r_drawflush.inl`, which `r_draw.cpp` includes once per pipeline - it needs those files turned into templates with `if constexpr`, not just an enum).
 - **Flags with a packed field** (need extractor functions): `AFLAG_` (`doomdef.hpp`: `ticcmd_t::arti` holds an artifact id, these two flags around it, or the sentinels `0xff`/`HexenCount`, and it is a demo byte, so it needs a design first).
 - **Plain enumerations:** `PRB_MB_` (`e6y.hpp`; really a packed Windows `MessageBox` type - a button set plus `DEFBUTTON` bits - and only `PRB_MB_OK` is used).
 
