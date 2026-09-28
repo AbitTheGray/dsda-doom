@@ -1877,7 +1877,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 39:
 			// TELEPORT! //jff 02/09/98 fix using up with wrong side crossing
-			if(map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_VANILLA) || demo_compatibility)
+			if(map_format.ev_teleport(0, line->special_args[0], line, side, thing, TeleportFlag::Vanilla) || demo_compatibility)
 				line->special = 0;
 			break;
 
@@ -1995,7 +1995,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 		case 125:
 			// TELEPORT MonsterONLY
 			if(!thing->player &&
-				(map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_VANILLA) || demo_compatibility))
+				(map_format.ev_teleport(0, line->special_args[0], line, side, thing, TeleportFlag::Vanilla) || demo_compatibility))
 				line->special = 0;
 			break;
 
@@ -2132,7 +2132,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 		case 97:
 			// TELEPORT!
-			map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_VANILLA);
+			map_format.ev_teleport(0, line->special_args[0], line, side, thing, TeleportFlag::Vanilla);
 			break;
 
 		case 98:
@@ -2163,7 +2163,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 		case 126:
 			// TELEPORT MonsterONLY.
 			if(!thing->player)
-				map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_VANILLA);
+				map_format.ev_teleport(0, line->special_args[0], line, side, thing, TeleportFlag::Vanilla);
 			break;
 
 		case 128:
@@ -2244,7 +2244,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 					case 207:
 						// killough 2/16/98: W1 silent teleporter (normal kind)
-						if(map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_SILENT))
+						if(map_format.ev_teleport(0, line->special_args[0], line, side, thing, TeleportFlag::Silent))
 							line->special = 0;
 						break;
 
@@ -2315,7 +2315,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 						break;
 
 					case 268: //jff 4/14/98 add monster-only silent
-						if(!thing->player && map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_SILENT))
+						if(!thing->player && map_format.ev_teleport(0, line->special_args[0], line, side, thing, TeleportFlag::Silent))
 							line->special = 0;
 						break;
 
@@ -2410,7 +2410,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 					case 208:
 						// killough 2/16/98: WR silent teleporter (normal kind)
-						map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_SILENT);
+						map_format.ev_teleport(0, line->special_args[0], line, side, thing, TeleportFlag::Silent);
 						break;
 
 					case 212: //jff 3/14/98 create instant toggle floor type
@@ -2477,7 +2477,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 
 					case 269: //jff 4/14/98 add monster-only silent
 						if(!thing->player)
-							map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_SILENT);
+							map_format.ev_teleport(0, line->special_args[0], line, side, thing, TeleportFlag::Silent);
 						break;
 
 						//jff 1/29/98 end of added WR linedef types
@@ -5053,7 +5053,7 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 			line->special = 0;
 			break;
 		case 39: // TELEPORT!
-			map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_VANILLA);
+			map_format.ev_teleport(0, line->special_args[0], line, side, thing, TeleportFlag::Vanilla);
 			line->special = 0;
 			break;
 		case 40: // RaiseCeilingLowerFloor
@@ -5180,7 +5180,7 @@ extern "C" void P_CrossHereticSpecialLine(line_t* line, int side, mobj_t* thing,
 			EV_DoFloor(line, FloorKind::RaiseToTexture);
 			break;
 		case 97: // TELEPORT!
-			map_format.ev_teleport(0, line->special_args[0], line, side, thing, TELF_VANILLA);
+			map_format.ev_teleport(0, line->special_args[0], line, side, thing, TeleportFlag::Vanilla);
 			break;
 		case 98: // Lower Floor (TURBO)
 			EV_DoFloor(line, FloorKind::TurboLower);
@@ -7210,7 +7210,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 				while((target = dsda_FindMobjFromThingID(args[0], &search)))
 				{
 					buttonSuccess |= map_format.ev_teleport(args[1], 0, nullptr, 0, target,
-						args[2] ? (TELF_DESTFOG | TELF_SOURCEFOG) : TELF_KEEPORIENTATION);
+						args[2] ? (TeleportFlag::DestFog | TeleportFlag::SourceFog) : TeleportFlag::KeepOrientation);
 				}
 			}
 			break;
@@ -7222,32 +7222,32 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			break;
 		case std::to_underlying(ZDoomLineSpecial::Teleport):
 		{
-			int flags = TELF_DESTFOG;
+			TeleportFlag flags = TeleportFlag::DestFog;
 
 			if(!args[2])
-				flags |= TELF_SOURCEFOG;
+				flags |= TeleportFlag::SourceFog;
 
 			buttonSuccess = map_format.ev_teleport(args[0], args[1], line, side, mo, flags);
 		}
 		break;
 		case std::to_underlying(ZDoomLineSpecial::TeleportNoFog):
 		{
-			int flags = 0;
+			TeleportFlag flags = {};
 
 			switch(args[1])
 			{
 				case 0:
-					flags |= TELF_KEEPORIENTATION;
+					flags |= TeleportFlag::KeepOrientation;
 					break;
 
 				case 2:
 					if(line)
-						flags |= TELF_KEEPORIENTATION | TELF_ROTATEBOOM;
+						flags |= TeleportFlag::KeepOrientation | TeleportFlag::RotateBoom;
 					break;
 
 				case 3:
 					if(line)
-						flags |= TELF_KEEPORIENTATION | TELF_ROTATEBOOMINVERSE;
+						flags |= TeleportFlag::KeepOrientation | TeleportFlag::RotateBoomInverse;
 					break;
 
 				default:
@@ -7255,17 +7255,17 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			}
 
 			if(args[3])
-				flags |= TELF_KEEPHEIGHT;
+				flags |= TeleportFlag::KeepHeight;
 
 			buttonSuccess = map_format.ev_teleport(args[0], args[2], line, side, mo, flags);
 		}
 		break;
 		case std::to_underlying(ZDoomLineSpecial::TeleportNoStop):
 		{
-			int flags = TELF_DESTFOG | TELF_KEEPVELOCITY;
+			TeleportFlag flags = TeleportFlag::DestFog | TeleportFlag::KeepVelocity;
 
 			if(!args[2])
-				flags |= TELF_SOURCEFOG;
+				flags |= TeleportFlag::SourceFog;
 
 			buttonSuccess = map_format.ev_teleport(args[0], args[1], line, side, mo, flags);
 		}
@@ -7273,7 +7273,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		case std::to_underlying(ZDoomLineSpecial::TeleportZombieChanger):
 			if(mo)
 			{
-				map_format.ev_teleport(args[0], args[1], line, side, mo, 0);
+				map_format.ev_teleport(args[0], args[1], line, side, mo, TeleportFlag{});
 				if(mo->health >= 0 && mo->info->painstate != StateId::Null)
 				{
 					P_SetMobjState(mo, mo->info->painstate);

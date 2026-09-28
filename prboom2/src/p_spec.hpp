@@ -19,6 +19,21 @@ enum struct StairFlag : uint8_t
 };
 ENUM_FLAGS_FUNC(StairFlag)
 
+// How a teleport treats the thing it moves.
+enum struct TeleportFlag : uint8_t
+{
+	DestFog = Bit<uint8_t>(0u),
+	SourceFog = Bit<uint8_t>(1u),
+	KeepOrientation = Bit<uint8_t>(2u),
+	KeepVelocity = Bit<uint8_t>(3u),
+	KeepHeight = Bit<uint8_t>(4u),
+	RotateBoom = Bit<uint8_t>(5u),
+	RotateBoomInverse = Bit<uint8_t>(6u),
+	Vanilla = SourceFog | DestFog,
+	Silent = KeepOrientation | RotateBoom | KeepHeight,
+};
+ENUM_FLAGS_FUNC(TeleportFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -1675,15 +1690,6 @@ int EV_TeleportInSector(int tag, short source_tid, short dest_tid,
 #define NO_CRUSH -1
 #define DOOM_CRUSH 10
 
-#define TELF_DESTFOG           0x01
-#define TELF_SOURCEFOG         0x02
-#define TELF_KEEPORIENTATION   0x04
-#define TELF_KEEPVELOCITY      0x08
-#define TELF_KEEPHEIGHT        0x10
-#define TELF_ROTATEBOOM        0x20
-#define TELF_ROTATEBOOMINVERSE 0x40
-#define TELF_VANILLA (TELF_SOURCEFOG|TELF_DESTFOG)
-#define TELF_SILENT (TELF_KEEPORIENTATION|TELF_ROTATEBOOM|TELF_KEEPHEIGHT)
 
 #ifdef __cplusplus
 }

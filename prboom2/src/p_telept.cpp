@@ -194,7 +194,7 @@ static mobj_t* P_TeleportDestination(short thing_id, int tag)
 //
 // killough 5/3/98: reformatted, cleaned up
 
-static int P_TeleportToDestination(mobj_t* destination, line_t* line, mobj_t* thing, int flags)
+static int P_TeleportToDestination(mobj_t* destination, line_t* line, mobj_t* thing, const TeleportFlag flags)
 {
 	fixed_t oldx = thing->x;
 	fixed_t oldy = thing->y;
@@ -210,11 +210,11 @@ static int P_TeleportToDestination(mobj_t* destination, line_t* line, mobj_t* th
 	// Rotate 90 degrees, so that walking perpendicularly across
 	// teleporter linedef causes thing to exit in the direction
 	// indicated by the exit thing.
-	if(flags & (TELF_ROTATEBOOM | TELF_ROTATEBOOMINVERSE) && line)
+	if((flags & (TeleportFlag::RotateBoom | TeleportFlag::RotateBoomInverse)) != TeleportFlag{} && line)
 	{
 		angle = R_PointToAngle2(0, 0, line->dx, line->dy) - destination->angle + ANG90;
 
-		if(flags & TELF_ROTATEBOOMINVERSE)
+		if((flags & TeleportFlag::RotateBoomInverse) != TeleportFlag{})
 			angle = angle + ANG180;
 
 		s = finesine[angle >> ANGLETOFINESHIFT];
@@ -228,7 +228,7 @@ static int P_TeleportToDestination(mobj_t* destination, line_t* line, mobj_t* th
 	if(!P_TeleportMove(thing, destination->x, destination->y, false)) /* killough 8/9/98 */
 		return 0;
 
-	if(flags & (TELF_ROTATEBOOM | TELF_ROTATEBOOMINVERSE))
+	if((flags & (TeleportFlag::RotateBoom | TeleportFlag::RotateBoomInverse)) != TeleportFlag{})
 	{
 		if(line)
 		{
@@ -240,26 +240,26 @@ static int P_TeleportToDestination(mobj_t* destination, line_t* line, mobj_t* th
 			thing->momy = FixedMul(momy, c) + FixedMul(momx, s);
 		}
 	}
-	else if(!(flags & TELF_KEEPORIENTATION))
+	else if((flags & TeleportFlag::KeepOrientation) == TeleportFlag{})
 	{
 		thing->angle = destination->angle;
 	}
 
 	if(P_UseTeleportDestinationHeight(destination))
 		thing->z = destination->z;
-	else if(flags & TELF_KEEPHEIGHT)
+	else if((flags & TeleportFlag::KeepHeight) != TeleportFlag{})
 		thing->z = thing->floorz + z;
 	else if(compatibility_level != CompLevel::Finaldoom)
 		thing->z = thing->floorz;
 	thing->PrevZ = thing->z;
 
-	if(flags & TELF_SOURCEFOG)
+	if((flags & TeleportFlag::SourceFog) != TeleportFlag{})
 	{
 		// spawn teleport fog and emit sound at source
 		S_StartMobjSound(P_SpawnMobj(oldx, oldy, oldz, MobjType::Tfog), SfxId::Telept);
 	}
 
-	if(flags & TELF_DESTFOG)
+	if((flags & TeleportFlag::DestFog) != TeleportFlag{})
 	{
 		// spawn teleport fog and emit sound at destination
 		S_StartMobjSound(
@@ -276,12 +276,12 @@ static int P_TeleportToDestination(mobj_t* destination, line_t* line, mobj_t* th
 	* cph - DEMOSYNC - BOOM had (player) here? */
 	if(
 		thing->player &&
-		((flags & TELF_DESTFOG) || !(flags & TELF_KEEPORIENTATION)) &&
-		!(flags & TELF_KEEPVELOCITY)
+		(((flags & TeleportFlag::DestFog) != TeleportFlag{}) || (flags & TeleportFlag::KeepOrientation) == TeleportFlag{}) &&
+		(flags & TeleportFlag::KeepVelocity) == TeleportFlag{}
 	)
 		thing->reactiontime = 18;
 
-	if(!(flags & TELF_KEEPORIENTATION) && !(flags & TELF_KEEPVELOCITY))
+	if((flags & TeleportFlag::KeepOrientation) == TeleportFlag{} && (flags & TeleportFlag::KeepVelocity) == TeleportFlag{})
 	{
 		thing->momx = thing->momy = thing->momz = 0;
 
@@ -293,7 +293,7 @@ static int P_TeleportToDestination(mobj_t* destination, line_t* line, mobj_t* th
 	if(player)
 	{
 		// This code was different between silent and non-silent functions.
-		if(flags & TELF_KEEPORIENTATION)
+		if((flags & TeleportFlag::KeepOrientation) != TeleportFlag{})
 		{
 			// Adjust player's view, in case there has been a height change
 			if(player)
@@ -339,11 +339,11 @@ int EV_TeleportGroup(short group_tid, mobj_t* thing, short source_tid, short des
 
 	if(source && dest)
 	{
-		int flags;
+		TeleportFlag flags;
 		angle_t an;
 		fixed_t dcos, dsin;
 
-		flags = fog ? (TELF_DESTFOG | TELF_SOURCEFOG) : TELF_KEEPORIENTATION;
+		flags = fog ? (TeleportFlag::DestFog | TeleportFlag::SourceFog) : TeleportFlag::KeepOrientation;
 
 		an = dest->angle - source->angle;
 		dcos = finecosine[an >> ANGLETOFINESHIFT];
@@ -369,7 +369,7 @@ int EV_TeleportGroup(short group_tid, mobj_t* thing, short source_tid, short des
 
 		if(result && move_source)
 		{
-			P_TeleportToDestination(dest, nullptr, source, TELF_KEEPORIENTATION);
+			P_TeleportToDestination(dest, nullptr, source, TeleportFlag::KeepOrientation);
 			source->angle = dest->angle;
 		}
 	}
@@ -394,11 +394,11 @@ int EV_TeleportInSector(int tag, short source_tid, short dest_tid,
 	if(source && dest)
 	{
 		const int* id_p;
-		int flags;
+		TeleportFlag flags;
 		angle_t an;
 		fixed_t dcos, dsin;
 
-		flags = fog ? (TELF_DESTFOG | TELF_SOURCEFOG) : TELF_KEEPORIENTATION;
+		flags = fog ? (TeleportFlag::DestFog | TeleportFlag::SourceFog) : TeleportFlag::KeepOrientation;
 
 		an = dest->angle - source->angle;
 		dcos = finecosine[an >> ANGLETOFINESHIFT];
@@ -434,7 +434,7 @@ int EV_TeleportInSector(int tag, short source_tid, short dest_tid,
 	return result;
 }
 
-extern "C" int EV_CompatibleTeleport(short thing_id, int tag, line_t* line, int side, mobj_t* thing, int flags)
+extern "C" int EV_CompatibleTeleport(short thing_id, int tag, line_t* line, int side, mobj_t* thing, const TeleportFlag flags)
 {
 	mobj_t* m;
 
@@ -712,7 +712,7 @@ dboolean P_Teleport(mobj_t* thing, fixed_t x, fixed_t y, angle_t angle, dboolean
 	return (true);
 }
 
-extern "C" int EV_HereticTeleport(short thing_id, int tag, line_t* line, int side, mobj_t* thing, int flags)
+extern "C" int EV_HereticTeleport(short thing_id, int tag, line_t* line, int side, mobj_t* thing, const TeleportFlag flags)
 {
 	int i;
 	mobj_t* m;
