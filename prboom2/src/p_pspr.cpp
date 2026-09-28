@@ -441,7 +441,7 @@ void P_SubtractAmmo(struct player_s* player, int vanilla_amount)
 	if(player->cheats & CF_INFINITE_AMMO || (mbf21 && ammotype == AmmoType::NoAmmo))
 		return; // [XA] hmm... I guess vanilla/boom will go out of bounds then?
 
-	if(mbf21 && (weaponinfo[std::to_underlying(player->readyweapon)].intflags & WIF_ENABLEAPS))
+	if(mbf21 && (weaponinfo[std::to_underlying(player->readyweapon)].intflags & WeaponIntFlag::EnableAps) != WeaponIntFlag{})
 		amount = weaponinfo[std::to_underlying(player->readyweapon)].ammopershot;
 	else
 		amount = vanilla_amount;

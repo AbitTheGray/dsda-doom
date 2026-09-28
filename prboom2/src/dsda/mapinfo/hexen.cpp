@@ -17,6 +17,8 @@
 #include "hexen/p_acs.hpp"
 #include "hexen/sv_save.hpp"
 
+#include "cpp/EnumArray.hpp"
+
 #include "dsda/map_format.hpp"
 #include "dsda/mapinfo.hpp"
 #include "dsda/messenger.hpp"
@@ -25,21 +27,29 @@
 #include "hexen.hpp"
 
 #define MAPINFO_SCRIPT_NAME "MAPINFO"
-#define MCMD_SKY1 1
-#define MCMD_SKY2 2
-#define MCMD_LIGHTNING 3
-#define MCMD_FADETABLE 4
-#define MCMD_DOUBLESKY 5
-#define MCMD_CLUSTER 6
-#define MCMD_WARPTRANS 7
-#define MCMD_NEXT 8
-#define MCMD_CDTRACK 9
-#define MCMD_CD_STARTTRACK 10
-#define MCMD_CD_END1TRACK 11
-#define MCMD_CD_END2TRACK 12
-#define MCMD_CD_END3TRACK 13
-#define MCMD_CD_INTERTRACK 14
-#define MCMD_CD_TITLETRACK 15
+// Commands of a map definition in Hexen's MAPINFO, in the order of `MapCmdNames`.
+// The values differ from upstream's `MCMD_*` (which started at 1 in another order);
+// they are only compared in the parser's `switch`, never stored or used as numbers.
+enum struct MapCmd : int32_t
+{
+	Sky1,
+	Sky2,
+	DoubleSky,
+	Lightning,
+	FadeTable,
+	Cluster,
+	WarpTrans,
+	Next,
+	CdTrack,
+	CdStartTrack,
+	CdEnd1Track,
+	CdEnd2Track,
+	CdEnd3Track,
+	CdInterTrack,
+	CdTitleTrack,
+	End, // the null entry that ends `MapCmdNames` for `SC_MustMatchString`
+	Count,
+};
 
 #define UNKNOWN_MAP_NAME "DEVELOPMENT MAP"
 #define DEFAULT_SKY_NAME "SKY1"
@@ -67,7 +77,8 @@ static mapInfo_t MapInfo[99];
 
 static mapInfo_t* CurrentMap = MapInfo;
 
-static const char* MapCmdNames[] = {
+// The MAPINFO keyword of each command.
+static constexpr EnumArray<const char*, MapCmd> MapCmdNames = {
 	"SKY1",
 	"SKY2",
 	"DOUBLESKY",
@@ -84,24 +95,6 @@ static const char* MapCmdNames[] = {
 	"CD_INTERMISSION_TRACK",
 	"CD_TITLE_TRACK",
 	nullptr
-};
-
-static int MapCmdIDs[] = {
-	MCMD_SKY1,
-	MCMD_SKY2,
-	MCMD_DOUBLESKY,
-	MCMD_LIGHTNING,
-	MCMD_FADETABLE,
-	MCMD_CLUSTER,
-	MCMD_WARPTRANS,
-	MCMD_NEXT,
-	MCMD_CDTRACK,
-	MCMD_CD_STARTTRACK,
-	MCMD_CD_END1TRACK,
-	MCMD_CD_END2TRACK,
-	MCMD_CD_END3TRACK,
-	MCMD_CD_INTERTRACK,
-	MCMD_CD_TITLETRACK
 };
 
 static int QualifyMap(int map)
@@ -417,7 +410,7 @@ void dsda_HexenLoadMapInfo()
 {
 	int map;
 	int mapMax;
-	int mcmdValue;
+	MapCmd mcmdValue;
 	mapInfo_t* info;
 	const char* default_sky_name = DEFAULT_SKY_NAME;
 
@@ -477,53 +470,53 @@ void dsda_HexenLoadMapInfo()
 				break;
 			}
 
-			mcmdValue = MapCmdIDs[SC_MustMatchString(MapCmdNames)];
+			mcmdValue = static_cast<MapCmd>(SC_MustMatchString(MapCmdNames.data()));
 			switch(mcmdValue)
 			{
-				case MCMD_CLUSTER:
+				case MapCmd::Cluster:
 					SC_MustGetNumber();
 					info->cluster = sc_Number;
 					break;
-				case MCMD_WARPTRANS:
+				case MapCmd::WarpTrans:
 					SC_MustGetNumber();
 					info->warpTrans = sc_Number;
 					break;
-				case MCMD_NEXT:
+				case MapCmd::Next:
 					SC_MustGetNumber();
 					info->nextMap = sc_Number;
 					break;
-				case MCMD_CDTRACK:
+				case MapCmd::CdTrack:
 					SC_MustGetNumber();
 					// not used
 					break;
-				case MCMD_SKY1:
+				case MapCmd::Sky1:
 					SC_MustGetString();
 					info->sky1Texture = R_TextureNumForName(sc_String);
 					SC_MustGetNumber();
 					info->sky1ScrollDelta = sc_Number << 8;
 					break;
-				case MCMD_SKY2:
+				case MapCmd::Sky2:
 					SC_MustGetString();
 					info->sky2Texture = R_TextureNumForName(sc_String);
 					SC_MustGetNumber();
 					info->sky2ScrollDelta = sc_Number << 8;
 					break;
-				case MCMD_DOUBLESKY:
+				case MapCmd::DoubleSky:
 					info->doubleSky = true;
 					break;
-				case MCMD_LIGHTNING:
+				case MapCmd::Lightning:
 					info->lightning = true;
 					break;
-				case MCMD_FADETABLE:
+				case MapCmd::FadeTable:
 					SC_MustGetString();
 					info->fadetable = W_GetNumForName(sc_String);
 					break;
-				case MCMD_CD_STARTTRACK:
-				case MCMD_CD_END1TRACK:
-				case MCMD_CD_END2TRACK:
-				case MCMD_CD_END3TRACK:
-				case MCMD_CD_INTERTRACK:
-				case MCMD_CD_TITLETRACK:
+				case MapCmd::CdStartTrack:
+				case MapCmd::CdEnd1Track:
+				case MapCmd::CdEnd2Track:
+				case MapCmd::CdEnd3Track:
+				case MapCmd::CdInterTrack:
+				case MapCmd::CdTitleTrack:
 					SC_MustGetNumber();
 					// not used
 					break;

@@ -1157,7 +1157,7 @@ static void gld_DrawWall(GLWall* wall)
 
 	// Do not repeat middle texture vertically
 	// to avoid visual glitches for textures with holes
-	if((wall->flag == GLDWF_M2S) && (wall->flag < GLDWF_SKY))
+	if((wall->flag == GLWallType::M2S) && (wall->flag < GLWallType::Sky))
 		flags = GLTextureFlag::ClampY;
 	else
 		flags = static_cast<GLTextureFlag>(0);
@@ -1169,7 +1169,7 @@ static void gld_DrawWall(GLWall* wall)
 		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 	}
 
-	if((wall->flag == GLDWF_TOPFLUD) || (wall->flag == GLDWF_BOTFLUD))
+	if((wall->flag == GLWallType::TopFlud) || (wall->flag == GLWallType::BotFlud))
 	{
 		gl_strip_coords_t c;
 
@@ -1344,7 +1344,7 @@ void gld_AddWall(seg_t* seg)
 		if(temptex && frontsector->ceilingheight > frontsector->floorheight)
 		{
 			wall.gltexture = temptex;
-			wall.flag = GLDWF_M1S;
+			wall.flag = GLWallType::M1S;
 			gld_CalculateWallY(&wall, &lineheight, frontsector->floorheight, frontsector->ceilingheight);
 			gld_CalculateWallU(&wall, seg, backseg, linelength, seg->sidedef->textureoffset_mid);
 			gld_CalculateWallV(&wall, seg, seg->linedef->flags & ML_DONTPEGBOTTOM, lineheight,
@@ -1479,7 +1479,7 @@ void gld_AddWall(seg_t* seg)
 					wall.ybottom = ((float)(floor_height) / (float)MAP_SCALE);
 					if(wall.ybottom >= zCamera)
 					{
-						wall.flag = GLDWF_TOPFLUD;
+						wall.flag = GLWallType::TopFlud;
 						temptex = gld_RegisterFlat(flattranslation[seg->backsector->ceilingpic], true, true);
 						if(temptex)
 						{
@@ -1491,7 +1491,7 @@ void gld_AddWall(seg_t* seg)
 				else if(temptex)
 				{
 					wall.gltexture = temptex;
-					wall.flag = GLDWF_TOP;
+					wall.flag = GLWallType::Top;
 					gld_CalculateWallY(&wall, &lineheight, floor_height, ceiling_height);
 					gld_CalculateWallU(&wall, seg, backseg, linelength, seg->sidedef->textureoffset_top);
 					gld_CalculateWallV(&wall, seg, !(seg->linedef->flags & ML_DONTPEGTOP), lineheight,
@@ -1623,7 +1623,7 @@ void gld_AddWall(seg_t* seg)
 			wall.ybottom = (float)bottom / (float)MAP_SCALE;
 
 			if(!wrapmidtex)
-				wall.flag = GLDWF_M2S;
+				wall.flag = GLWallType::M2S;
 
 			gld_CalculateWallU(&wall, seg, backseg, linelength, seg->sidedef->textureoffset_mid);
 
@@ -1685,7 +1685,7 @@ void gld_AddWall(seg_t* seg)
 				wall.ybottom = ((float)(floor_height) / (float)MAP_SCALE);
 				if(wall.ytop <= zCamera)
 				{
-					wall.flag = GLDWF_BOTFLUD;
+					wall.flag = GLWallType::BotFlud;
 					temptex = gld_RegisterFlat(flattranslation[seg->backsector->floorpic], true, true);
 					if(temptex)
 					{
@@ -1699,7 +1699,7 @@ void gld_AddWall(seg_t* seg)
 				fixed_t rowoffset = seg->sidedef->rowoffset;
 				fixed_t specific_rowoffset;
 				wall.gltexture = temptex;
-				wall.flag = GLDWF_BOT;
+				wall.flag = GLWallType::Bot;
 				if(fix_sky_bleed)
 				{
 					ceiling_height = MIN(frontsector->ceilingheight, backsector->ceilingheight);

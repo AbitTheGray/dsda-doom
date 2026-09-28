@@ -1377,6 +1377,28 @@ static const char* deh_misc[] = // CPhipps - static const*
 // Usage: Start block, then each line is:
 // FRAME nnn = PointerMnemonic
 
+// Which state fields of a codepointer hold thing (mobjinfo) indices.
+enum struct ThingIndexArg : uint16_t
+{
+	Misc1 = Bit<uint16_t>(0u),
+	Misc2 = Bit<uint16_t>(1u),
+	Args1 = Bit<uint16_t>(2u),
+	Args2 = Bit<uint16_t>(3u),
+	Args3 = Bit<uint16_t>(4u),
+	Args4 = Bit<uint16_t>(5u),
+	Args5 = Bit<uint16_t>(6u),
+	Args6 = Bit<uint16_t>(7u),
+	Args7 = Bit<uint16_t>(8u),
+	Args8 = Bit<uint16_t>(9u),
+};
+ENUM_FLAGS_FUNC(ThingIndexArg)
+
+// The flag of state argument `index` (from 0).
+[[nodiscard]] static constexpr ThingIndexArg ThingIndexArgOf(const int32_t index)
+{
+	return static_cast<ThingIndexArg>(std::to_underlying(ThingIndexArg::Args1) << index);
+}
+
 typedef struct
 {
 	actionf_t cptr;                  // actual pointer to the subroutine
@@ -1384,20 +1406,8 @@ typedef struct
 	// CPhipps - const*
 	short argcount;                  // [XA] number of mbf21 args this action uses, if any
 	long default_args[MAXSTATEARGS]; // default values for mbf21 args
-	short ti_flags;                  // thing index on these args
+	ThingIndexArg ti_flags;          // thing index on these args
 } deh_bexptr;
-
-#define TI_MISC1 0x0001
-#define TI_MISC2 0x0002
-#define TI_ARGSSHIFT 2
-#define TI_ARGS1 0x0004
-#define TI_ARGS2 0x0008
-#define TI_ARGS3 0x0010
-#define TI_ARGS4 0x0020
-#define TI_ARGS5 0x0040
-#define TI_ARGS6 0x0080
-#define TI_ARGS7 0x0100
-#define TI_ARGS8 0x0200
 
 // The action functions do not share a parameter list, so each entry needs a cast.
 #define DOOM_ACTION(a_function) reinterpret_cast<actionf_t>(a_function)
@@ -1481,7 +1491,7 @@ static const deh_bexptr deh_bexptrs[] = // CPhipps - static const
 	{DOOM_ACTION(A_Detonate), "A_Detonate"},             // killough 8/9/98
 	{DOOM_ACTION(A_Mushroom), "A_Mushroom"},             // killough 10/98
 	{DOOM_ACTION(A_Die), "A_Die"},                       // killough 11/98
-	{DOOM_ACTION(A_Spawn), "A_Spawn", 0, {0}, TI_MISC1}, // killough 11/98
+	{DOOM_ACTION(A_Spawn), "A_Spawn", 0, {0}, ThingIndexArg::Misc1}, // killough 11/98
 	{DOOM_ACTION(A_Turn), "A_Turn"},                     // killough 11/98
 	{DOOM_ACTION(A_Face), "A_Face"},                     // killough 11/98
 	{DOOM_ACTION(A_Scratch), "A_Scratch"},               // killough 11/98
@@ -1494,8 +1504,8 @@ static const deh_bexptr deh_bexptrs[] = // CPhipps - static const
 	{DOOM_ACTION(A_Stop), "A_Stop"},
 
 	// [XA] New mbf21 codepointers
-	{DOOM_ACTION(A_SpawnObject), "A_SpawnObject", 8, {0}, TI_ARGS1},
-	{DOOM_ACTION(A_MonsterProjectile), "A_MonsterProjectile", 5, {0}, TI_ARGS1},
+	{DOOM_ACTION(A_SpawnObject), "A_SpawnObject", 8, {0}, ThingIndexArg::Args1},
+	{DOOM_ACTION(A_MonsterProjectile), "A_MonsterProjectile", 5, {0}, ThingIndexArg::Args1},
 	{DOOM_ACTION(A_MonsterBulletAttack), "A_MonsterBulletAttack", 5, {0, 0, 1, 3, 5}},
 	{DOOM_ACTION(A_MonsterMeleeAttack), "A_MonsterMeleeAttack", 4, {3, 8, 0, 0}},
 	{DOOM_ACTION(A_RadiusDamage), "A_RadiusDamage", 2},
@@ -1512,7 +1522,7 @@ static const deh_bexptr deh_bexptrs[] = // CPhipps - static const
 	{DOOM_ACTION(A_JumpIfFlagsSet), "A_JumpIfFlagsSet", 3},
 	{DOOM_ACTION(A_AddFlags), "A_AddFlags", 2},
 	{DOOM_ACTION(A_RemoveFlags), "A_RemoveFlags", 2},
-	{DOOM_ACTION(A_WeaponProjectile), "A_WeaponProjectile", 5, {0}, TI_ARGS1},
+	{DOOM_ACTION(A_WeaponProjectile), "A_WeaponProjectile", 5, {0}, ThingIndexArg::Args1},
 	{DOOM_ACTION(A_WeaponBulletAttack), "A_WeaponBulletAttack", 5, {0, 0, 1, 5, 3}},
 	{DOOM_ACTION(A_WeaponMeleeAttack), "A_WeaponMeleeAttack", 5, {2, 10, 1 * FRACUNIT, 0, 0}},
 	{DOOM_ACTION(A_WeaponSound), "A_WeaponSound", 2},
@@ -2550,7 +2560,7 @@ static void deh_procWeapon(DEHFILE* fpin, char* line)
 		else if(!deh_strcasecmp(key, deh_weapon[6])) // Ammo per shot
 		{
 			weaponinfo[indexnum].ammopershot = (int)value;
-			weaponinfo[indexnum].intflags |= WIF_ENABLEAPS;
+			weaponinfo[indexnum].intflags |= WeaponIntFlag::EnableAps;
 		}
 		else if(!deh_strcasecmp(key, deh_weapon[7])) // MBF21 Bits
 		{
@@ -3438,7 +3448,7 @@ void PostProcessDeh()
 	// sanity-check bfgcells and bfg ammopershot
 	if(
 		bfgcells_modified &&
-		weaponinfo[std::to_underlying(WeaponType::Bfg)].intflags & WIF_ENABLEAPS &&
+		(weaponinfo[std::to_underlying(WeaponType::Bfg)].intflags & WeaponIntFlag::EnableAps) != WeaponIntFlag{} &&
 		bfgcells != weaponinfo[std::to_underlying(WeaponType::Bfg)].ammopershot
 	)
 		Log::Fatal("Mismatch between bfgcells and bfg ammo per shot modifications! Check your dehacked.");
@@ -3471,20 +3481,18 @@ void PostProcessDeh()
 					states[i].args[j] = bexptr_match->default_args[j];
 
 			// State arguments that refer to thing indices need to be translated
-			if(bexptr_match->ti_flags)
+			if(bexptr_match->ti_flags != ThingIndexArg{})
 			{
-				short args_i;
-				short ti_flags = bexptr_match->ti_flags;
+				const ThingIndexArg ti_flags = bexptr_match->ti_flags;
 
-				if(ti_flags & TI_MISC1)
+				if((ti_flags & ThingIndexArg::Misc1) != ThingIndexArg{})
 					states[i].misc1 = dsda_TranslateDehMobjIndex(states[i].misc1);
 
-				if(ti_flags & TI_MISC2)
+				if((ti_flags & ThingIndexArg::Misc2) != ThingIndexArg{})
 					states[i].misc2 = dsda_TranslateDehMobjIndex(states[i].misc2);
 
-				ti_flags >>= TI_ARGSSHIFT;
-				for(args_i = 0; args_i < MAXSTATEARGS; ++args_i)
-					if(ti_flags & (1 << args_i))
+				for(int32_t args_i = 0; args_i < MAXSTATEARGS; ++args_i)
+					if((ti_flags & ThingIndexArgOf(args_i)) != ThingIndexArg{})
 						states[i].args[args_i] = dsda_TranslateDehMobjIndex(states[i].args[args_i]);
 			}
 

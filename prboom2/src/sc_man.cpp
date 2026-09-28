@@ -367,7 +367,7 @@ dboolean SC_Check()
 //
 //==========================================================================
 
-int SC_MatchString(const char** strings)
+int SC_MatchString(const char* const* strings)
 {
 	int i;
 
@@ -387,7 +387,7 @@ int SC_MatchString(const char** strings)
 //
 //==========================================================================
 
-int SC_MustMatchString(const char** strings)
+int SC_MustMatchString(const char* const* strings)
 {
 	int i;
 

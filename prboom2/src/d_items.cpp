@@ -37,7 +37,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		static_cast<StateId>(-1), // upstream wrote MT_NULL here, not a state id //TODO Check correctness
 		StateId::Null,
 		1,
-		0,
+		WeaponIntFlag{},
 		WPF_FLEEMELEE | WPF_AUTOSWITCHFROM | WPF_NOAUTOSWITCHTO
 	},
 	{
@@ -50,7 +50,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		StateId::Pistolflash,
 		1,
-		0,
+		WeaponIntFlag{},
 		WPF_AUTOSWITCHFROM
 	},
 	{
@@ -63,7 +63,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		StateId::Sgunflash1,
 		1,
-		0,
+		WeaponIntFlag{},
 		WPF_NOFLAG
 	},
 	{
@@ -76,7 +76,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		StateId::Chainflash1,
 		1,
-		0,
+		WeaponIntFlag{},
 		WPF_NOFLAG
 	},
 	{
@@ -89,7 +89,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		StateId::Missileflash1,
 		1,
-		0,
+		WeaponIntFlag{},
 		WPF_NOAUTOFIRE
 	},
 	{
@@ -102,7 +102,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		StateId::Plasmaflash1,
 		1,
-		0,
+		WeaponIntFlag{},
 		WPF_NOFLAG
 	},
 	{
@@ -115,7 +115,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		StateId::Bfgflash1,
 		40,
-		0,
+		WeaponIntFlag{},
 		WPF_NOAUTOFIRE
 	},
 	{
@@ -128,7 +128,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		StateId::Null,
 		1,
-		0,
+		WeaponIntFlag{},
 		WPF_NOTHRUST | WPF_FLEEMELEE | WPF_NOAUTOSWITCHTO
 	},
 	{
@@ -141,7 +141,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		StateId::Dsgunflash1,
 		2,
-		0,
+		WeaponIntFlag{},
 		WPF_NOFLAG
 	},
 
@@ -162,7 +162,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		StateId::Null,
 		0,
-		0,
+		WeaponIntFlag{},
 		WPF_NOFLAG
 	},
 	{
@@ -175,7 +175,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		StateId::Null,
 		0,
-		0,
+		WeaponIntFlag{},
 		WPF_NOFLAG
 	},
 };
@@ -195,7 +195,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticStaffatk11, // holdatkstate
 		StateId::HereticNull,        // flashstate
 		0,                     // ammopershot
-		0,                     // intflags
+		WeaponIntFlag{},                     // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -208,7 +208,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticGoldwandatk11, // holdatkstate
 		StateId::HereticNull,           // flashstate
 		USE_GWND_AMMO_1,          // ammopershot
-		0,                        // intflags
+		WeaponIntFlag{},                        // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -221,7 +221,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticCrbowatk11, // holdatkstate
 		StateId::HereticNull,        // flashstate
 		USE_CBOW_AMMO_1,       // ammopershot
-		0,                     // intflags
+		WeaponIntFlag{},                     // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -234,7 +234,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticBlasteratk13, // holdatkstate
 		StateId::HereticNull,          // flashstate
 		USE_BLSR_AMMO_1,         // ammopershot
-		0,                       // intflags
+		WeaponIntFlag{},                       // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -247,7 +247,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticHornrodatk11, // holdatkstate
 		StateId::HereticNull,          // flashstate
 		USE_SKRD_AMMO_1,         // ammopershot
-		0,                       // intflags
+		WeaponIntFlag{},                       // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -260,7 +260,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticPhoenixatk11, // holdatkstate
 		StateId::HereticNull,          // flashstate
 		USE_PHRD_AMMO_1,         // ammopershot
-		0,                       // intflags
+		WeaponIntFlag{},                       // intflags
 		WPF_NOAUTOFIRE
 	},
 	{
@@ -273,7 +273,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticMaceatk12, // holdatkstate
 		StateId::HereticNull,       // flashstate
 		USE_MACE_AMMO_1,      // ammopershot
-		0,                    // intflags
+		WeaponIntFlag{},                    // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -286,7 +286,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticGauntletatk13, // holdatkstate
 		StateId::HereticNull,           // flashstate
 		0,                        // ammopershot
-		0,                        // intflags
+		WeaponIntFlag{},                        // intflags
 		WPF_NOTHRUST
 	},
 	{
@@ -299,7 +299,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticBeakatk11, // holdatkstate
 		StateId::HereticNull,       // flashstate
 		0,                    // ammopershot
-		0,                    // intflags
+		WeaponIntFlag{},                    // intflags
 		WPF_NOFLAG
 	}
 };
@@ -315,7 +315,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticStaffatk21,   // holdatkstate
 		StateId::HereticNull,          // flashstate
 		0,                       // ammopershot
-		0,                       // intflags
+		WeaponIntFlag{},                       // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -328,7 +328,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticGoldwandatk21, // holdatkstate
 		StateId::HereticNull,           // flashstate
 		USE_GWND_AMMO_2,          // ammopershot
-		0,                        // intflags
+		WeaponIntFlag{},                        // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -341,7 +341,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticCrbowatk21, // holdatkstate
 		StateId::HereticNull,        // flashstate
 		USE_CBOW_AMMO_2,       // ammopershot
-		0,                     // intflags
+		WeaponIntFlag{},                     // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -354,7 +354,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticBlasteratk23, // holdatkstate
 		StateId::HereticNull,          // flashstate
 		USE_BLSR_AMMO_2,         // ammopershot
-		0,                       // intflags
+		WeaponIntFlag{},                       // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -367,7 +367,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticHornrodatk21, // holdatkstate
 		StateId::HereticNull,          // flashstate
 		USE_SKRD_AMMO_2,         // ammopershot
-		0,                       // intflags
+		WeaponIntFlag{},                       // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -380,7 +380,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticPhoenixatk22, // holdatkstate
 		StateId::HereticNull,          // flashstate
 		USE_PHRD_AMMO_2,         // ammopershot
-		0,                       // intflags
+		WeaponIntFlag{},                       // intflags
 		WPF_NOAUTOFIRE
 	},
 	{
@@ -393,7 +393,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticMaceatk21, // holdatkstate
 		StateId::HereticNull,       // flashstate
 		USE_MACE_AMMO_2,      // ammopershot
-		0,                    // intflags
+		WeaponIntFlag{},                    // intflags
 		WPF_NOFLAG
 	},
 	{
@@ -406,7 +406,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticGauntletatk23,   // holdatkstate
 		StateId::HereticNull,             // flashstate
 		0,                          // ammopershot
-		0,                          // intflags
+		WeaponIntFlag{},                          // intflags
 		WPF_NOTHRUST
 	},
 	{
@@ -419,7 +419,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticBeakatk21, // holdatkstate
 		StateId::HereticNull,       // flashstate
 		0,                    // ammopershot
-		0,                    // intflags
+		WeaponIntFlag{},                    // intflags
 		WPF_NOFLAG
 	}
 };
@@ -439,7 +439,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenPunchatk11, // holdatkstate
 			StateId::HexenNull,        // flashstate
 			0,                   // ammopershot
-			0,                   // intflags
+			WeaponIntFlag{},                   // intflags
 			WPF_NOFLAG
 		}},
 		{
@@ -452,7 +452,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenCmaceatk1, // holdatkstate
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
-			0,                  // intflags
+			WeaponIntFlag{},                  // intflags
 			WPF_NOFLAG
 		},
 		{
@@ -465,7 +465,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenMwandatk1, // holdatkstate
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
-			0,                  // intflags
+			WeaponIntFlag{},                  // intflags
 			WPF_NOFLAG
 		},
 		{
@@ -478,7 +478,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenSnoutatk1,  // holdatkstate
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
-			0,                  // intflags
+			WeaponIntFlag{},                  // intflags
 			WPF_NOFLAG
 		}
 	}},
@@ -494,7 +494,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenFaxeatk1, // holdatkstate
 			StateId::HexenNull,      // flashstate
 			2,                 // ammopershot
-			0,                 // intflags
+			WeaponIntFlag{},                 // intflags
 			WPF_NOFLAG
 		}},
 		{
@@ -507,7 +507,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenCstaffatk1, // holdatkstate
 			StateId::HexenNull,        // flashstate
 			1,                   // ammopershot
-			0,                   // intflags
+			WeaponIntFlag{},                   // intflags
 			WPF_NOFLAG
 		},
 		{
@@ -520,7 +520,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenConeatk13, // holdatkstate
 			StateId::HexenNull,       // flashstate
 			3,                  // ammopershot
-			0,                  // intflags
+			WeaponIntFlag{},                  // intflags
 			WPF_NOFLAG
 		},
 		{
@@ -533,7 +533,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenSnoutatk1,  // holdatkstate
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
-			0,                  // intflags
+			WeaponIntFlag{},                  // intflags
 			WPF_NOFLAG
 		}
 	}},
@@ -549,7 +549,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenFhammeratk1, // holdatkstate
 			StateId::HexenNull,         // flashstate
 			3,                    // ammopershot
-			0,                    // intflags
+			WeaponIntFlag{},                    // intflags
 			WPF_NOFLAG
 		}},
 		{
@@ -562,7 +562,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenCflameatk1,  // holdatkstate
 			StateId::HexenNull,         // flashstate
 			4,                    // ammopershot
-			0,                    // intflags
+			WeaponIntFlag{},                    // intflags
 			WPF_NOFLAG
 		},
 		{
@@ -575,7 +575,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenMlightningatk1, // holdatkstate
 			StateId::HexenNull,            // flashstate
 			5,                       // ammopershot
-			0,                       // intflags
+			WeaponIntFlag{},                       // intflags
 			WPF_NOFLAG
 		},
 		{
@@ -588,7 +588,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenSnoutatk1,  // holdatkstate
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
-			0,                  // intflags
+			WeaponIntFlag{},                  // intflags
 			WPF_NOFLAG
 		}
 	}},
@@ -604,7 +604,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenFswordatk1, // holdatkstate
 			StateId::HexenNull,        // flashstate
 			14,                  // ammopershot
-			0,                   // intflags
+			WeaponIntFlag{},                   // intflags
 			WPF_NOFLAG
 		}},
 		{
@@ -617,7 +617,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenCholyatk1, // holdatkstate
 			StateId::HexenNull,       // flashstate
 			18,                 // ammopershot
-			0,                  // intflags
+			WeaponIntFlag{},                  // intflags
 			WPF_NOFLAG
 		},
 		{
@@ -630,7 +630,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenMstaffatk1, // holdatkstate
 			StateId::HexenNull,        // flashstate
 			15,                  // ammopershot
-			0,                   // intflags
+			WeaponIntFlag{},                   // intflags
 			WPF_NOFLAG
 		},
 		{
@@ -643,7 +643,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenSnoutatk1,  // holdatkstate
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
-			0,                  // intflags
+			WeaponIntFlag{},                  // intflags
 			WPF_NOFLAG
 		}
 	}}

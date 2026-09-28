@@ -61,9 +61,9 @@ Done so far: `MTF_*` (now `MapThingFlag`), `UDMF_TF_*` (`UdmfThingFlag`), and `S
 Convert a few groups per batch, then build and run the spec suite.
 
 Candidates found by scanning for 3+ adjacent numeric `#define`s with a shared prefix; check each one, some may turn out to be plain constants:
-- **Flags:** `ML_` (`doomdata.hpp`), `CF_` (`d_player.hpp`), `CF_` (`dsda/console.cpp`), `WIF_` (`d_items.hpp`), `SCROLL_` (`dsda/scroll.hpp`: two flag sets and the untracked `THRUST_` group share `scroll_t::flags`, which is part of the savegame layout, so one enum cannot type that field), `SI_` (`dsda/skill_info.hpp`), `UDMF_ML_`, `UDMF_SF_`, `UDMF_SECF_` (`dsda/udmf.hpp`), `STAIR_`, `TELF_` and the other groups after `NO_CRUSH` (`p_spec.hpp`), `NO_TOPTEXTURES`... (`r_defs.hpp`), `SF_`, `RF_` (`r_defs.hpp`), `RDC_` (`r_draw.cpp`), `TI_` (`d_deh.cpp`), `S_` menu item flags (`m_menu.cpp`, ~1800 uses).
+- **Flags:** `ML_` (`doomdata.hpp`), `CF_` (`d_player.hpp`), `CF_` (`dsda/console.cpp`), `SCROLL_` (`dsda/scroll.hpp`: two flag sets and the untracked `THRUST_` group share `scroll_t::flags`, which is part of the savegame layout, so one enum cannot type that field), `SI_` (`dsda/skill_info.hpp`), `UDMF_ML_`, `UDMF_SF_`, `UDMF_SECF_` (`dsda/udmf.hpp`), `STAIR_`, `TELF_` and the other groups after `NO_CRUSH` (`p_spec.hpp`), `NO_TOPTEXTURES`... (`r_defs.hpp`), `SF_`, `RF_` (`r_defs.hpp`), `RDC_` (`r_draw.cpp`), `S_` menu item flags (`m_menu.cpp`, ~1800 uses).
 - **Flags with a packed field** (need extractor functions): `HML_`/`ZML_` (`doomdata.hpp`, the `SPAC` bits), `AFLAG_` (`doomdef.hpp`), `ZDOOM_*_MASK` (`p_spec.hpp`).
-- **Plain enumerations:** `MCMD_` (`dsda/mapinfo/hexen.cpp`), `PRB_MB_` (`e6y.hpp`), `GLDWF_` (`gl_intern.hpp`), `KEYD_` (`doomdef.hpp`).
+- **Plain enumerations:** `PRB_MB_` (`e6y.hpp`), `KEYD_` (`doomdef.hpp`).
 
 The scan misses two-entry groups like the old `SKILL4`/`SKILL5`, so expect a few more.
 

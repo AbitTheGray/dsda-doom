@@ -11,6 +11,14 @@
 #include "doomdef.hpp"
 
 #include "cpp/EnumArray.hpp"
+#include "cpp/Util.hpp"
+
+// Internal weapon flags, set by DEHACKED.
+enum struct WeaponIntFlag : uint32_t
+{
+	EnableAps = Bit<uint32_t>(0u), // [XA] enable "ammo per shot" field for native Doom weapon codepointers
+};
+ENUM_FLAGS_FUNC(WeaponIntFlag)
 
 enum struct StateId : int32_t;
 
@@ -22,7 +30,6 @@ extern "C"
 //
 // Internal weapon flags
 //
-#define WIF_ENABLEAPS 0x00000001 // [XA] enable "ammo per shot" field for native Doom weapon codepointers
 
 // haleyjd 09/11/07: weapon flags
 //
@@ -45,7 +52,7 @@ typedef struct
 	StateId holdatkstate;
 	StateId flashstate;
 	int ammopershot;
-	int intflags;
+	WeaponIntFlag intflags;
 	int flags;
 } weaponinfo_t;
 

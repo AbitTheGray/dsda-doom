@@ -18,8 +18,8 @@ void SC_MustGetNumber();
 void SC_UnGet();
 dboolean SC_Check();
 dboolean SC_Compare(const char* text);
-int SC_MatchString(const char** strings);
-int SC_MustMatchString(const char** strings);
+int SC_MatchString(const char* const* strings);
+int SC_MustMatchString(const char* const* strings);
 void SC_ScriptError(const char* message);
 
 extern char* sc_String;

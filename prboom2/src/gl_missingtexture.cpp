@@ -442,7 +442,7 @@ void gld_SetupFloodedPlaneCoords(GLWall* wall, gl_strip_coords_t* c)
 	float k = 0.5f;
 	float ytop, ybottom, planez;
 
-	if(wall->flag == GLDWF_TOPFLUD)
+	if(wall->flag == GLWallType::TopFlud)
 	{
 		ytop = wall->ybottom;
 		ybottom = wall->ytop;

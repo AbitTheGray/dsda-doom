@@ -40,6 +40,19 @@ enum struct SkyCap : uint32_t
 };
 ENUM_FLAGS_FUNC(SkyCap)
 
+// Which part of a line a GL wall is.
+enum struct GLWallType : uint8_t
+{
+	Top = 1,
+	M1S = 2,
+	M2S = 3,
+	Bot = 4,
+	TopFlud = 5, //e6y: project the ceiling plane into the gap
+	BotFlud = 6, //e6y: project the floor plane into the gap
+	Sky = 7,
+	SkyFlip = 8,
+};
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -127,7 +140,7 @@ typedef struct
 	float yscale;
 	dboolean anchor_vb;
 	GLTexture* gltexture;
-	byte flag;
+	GLWallType flag;
 	seg_t* seg;
 } GLWall;
 
@@ -221,14 +234,6 @@ typedef struct
 extern GLSeg* gl_segs;
 extern GLSeg* gl_lines;
 
-#define GLDWF_TOP 1
-#define GLDWF_M1S 2
-#define GLDWF_M2S 3
-#define GLDWF_BOT 4
-#define GLDWF_TOPFLUD 5 //e6y: project the ceiling plane into the gap
-#define GLDWF_BOTFLUD 6 //e6y: project the floor plane into the gap
-#define GLDWF_SKY 7
-#define GLDWF_SKYFLIP 8
 
 typedef struct
 {

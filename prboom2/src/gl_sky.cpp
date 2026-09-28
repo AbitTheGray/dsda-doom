@@ -176,7 +176,7 @@ void gld_AddSkyTexture(GLWall* wall, int sky1, int sky2, const SkyCap skytype)
 			wall->skyyaw = (double)(viewangle + s->textureoffset) / (double)ANGLE_MAX;
 			wall->skypitch = skyYShift;
 			wall->skyoffset = (((float)s->rowoffset / (float)FRACUNIT - 28.0f) / wall->gltexture->buffer_height);
-			wall->flag = l->special == 272 ? GLDWF_SKY : GLDWF_SKYFLIP;
+			wall->flag = l->special == 272 ? GLWallType::Sky : GLWallType::SkyFlip;
 		}
 	}
 	else
@@ -190,7 +190,7 @@ void gld_AddSkyTexture(GLWall* wall, int sky1, int sky2, const SkyCap skytype)
 			wall->skypitch = skyYShift;
 			// Choose offset based on logic from r_sky.c
 			wall->skyoffset = skytexturemid / (float)FRACUNIT / h;
-			wall->flag = GLDWF_SKY;
+			wall->flag = GLWallType::Sky;
 		}
 	}
 
@@ -243,7 +243,7 @@ void gld_SkyTransform(GLWall* wall)
 	// Adjustment for tall screens
 	float ratio = tallscreen ? (float)ratio_multiplier / ratio_scale : 1.0f;
 	// X flip coefficient
-	float flipx = wall->flag == GLDWF_SKYFLIP ? -1.0 : 1.0;
+	float flipx = wall->flag == GLWallType::SkyFlip ? -1.0 : 1.0;
 	// Scale factors
 	float scalex = scale_correction / skyscale * flipx;
 	float scaley = scale_correction * ratio * (skystretch ? ((float)SKYSTRETCH_HEIGHT / h) : 1.0f) / skyscale;
@@ -543,7 +543,7 @@ static void SkyVertex(vbo_vertex_t* vbo, int r, int c)
 			vbo->v = ((rows - r) / (float)rows) * 1.f * yMult + yAdd;
 		}
 
-		if(SkyBox.wall.flag == GLDWF_SKYFLIP)
+		if(SkyBox.wall.flag == GLWallType::SkyFlip)
 			vbo->u = -vbo->u;
 	}
 
