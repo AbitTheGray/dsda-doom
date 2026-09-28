@@ -575,7 +575,7 @@ void dsda_ULoadMapInfo()
 	while((p = W_ListNumFromName("UMAPINFO", p)) >= 0)
 	{
 		const unsigned char* lump = (const unsigned char*)W_LumpByNum(p);
-		ParseUMapInfo(lump, W_LumpLength(p), I_Error);
+		ParseUMapInfo(lump, W_LumpLength(p), [](const std::string_view message) { Log::Fatal("{}", message); });
 	}
 }
 

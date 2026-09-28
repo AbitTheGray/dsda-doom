@@ -27,6 +27,8 @@
 
 #pragma once
 
+#include <functional>
+#include <string_view>
 #include <utility>
 
 #include <cstdlib>
@@ -100,7 +102,10 @@ public:
 	void Error(const char* mustget);
 	void ErrorF(const char* msg, ...);
 	void Unget() { needNext = true; }
-	static void SetErrorCallback(void (*cb)(const char*, ...)) { error = cb; }
+	/// Called with the finished message of a parse error; must not return.
+	using ErrorCallback = std::function<void(std::string_view message)>;
+
+	static void SetErrorCallback(ErrorCallback cb) { error = std::move(cb); }
 
 	static void Unescape(char* str);
 
@@ -141,5 +146,5 @@ private:
 
 	bool needNext; // If checkToken returns false this will be false.
 
-	static void (*error)(const char* message, ...);
+	static ErrorCallback error;
 };

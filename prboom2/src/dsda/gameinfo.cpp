@@ -46,7 +46,7 @@ void dsda_LoadGameInfo()
 
 	Scanner scanner((const char*)W_LumpByNum(lump), W_LumpLength(lump));
 
-	scanner.SetErrorCallback(I_Error);
+	scanner.SetErrorCallback([](const std::string_view message) { Log::Fatal("{}", message); });
 
 	while(scanner.TokensLeft())
 		dsda_ParseGameInfoLine(scanner);

@@ -43,12 +43,12 @@ Most of its 22 callers need a zero-terminated string: `sscanf` (resolutions in `
 Plan: store the value as a `std::string` (replacing the union), return a `std::string_view` that is valid until that config is updated, and convert the callers step by step.
 Where a C API needs a zero-terminated string, the caller makes a `std::string` from the view; these are read at startup or when a setting changes, so the copies are cheap.
 
-## Convert logging to `Log::`
+## `printf`-style formatting left
 
-`Log::Print`, `Info`, `Warn`, `Error`, `Debug` and `Fatal` (`lprintf.hpp`) format with `std::format`.
-Every call is converted (`I_Warn` became `Log::Alert`), and `lprintf` and `I_Warn` are removed.
-`I_Error` is left only as the `printf`-style error callback of `Scanner` (`scanner.hpp`), passed in by `dsda/gameinfo.cpp`, `dsda/ambient.cpp`, `ParseUMapInfo` (`umapinfo.hpp`) and `dsda_ParseUDMF` (`dsda/udmf.hpp`).
-To remove it: make the callback take the finished message (`std::string_view`), format `Scanner`'s 8 messages with `std::format` (its `%c` arguments are token values that need a `char`), move the two callback typedefs out of `extern "C"`, and pass a lambda that calls `Log::Fatal`.
+All logging goes through `Log::` (`lprintf.hpp`), formatted with `std::format`.
+Two `printf`-style entry points remain:
+- `doom_printf` (on-screen messages, about 50 calls, defined in `g_game.cpp`), which hands its text to `dsda_AddMessage`;
+- `Scanner::ErrorF` (`scanner.cpp`, 13 calls), which formats into a 1024-byte buffer before calling the error callback.
 
 Conversion traps:
 - `%02d` becomes `{:02}`; `%.8s` on a lump name becomes `{}` with `W_LumpNameView(name)`, because such names may fill 8 bytes without a terminating zero and `{:.8}` would still measure the whole string;
@@ -57,9 +57,16 @@ Conversion traps:
 - an `enum struct` needs `std::to_underlying` (passing one to `%i` through `...` is UB today, e.g. `compatibility_level` in `m_cheat.cpp`);
 - output that something parses must stay identical, e.g. `FINISHED: <map>` for lmpwatch.
 
-`I_Error` still cuts a message at 2047 characters; `Log::` does so only when the build enables `LIMIT_LOG_MESSAGES`.
+## Buffers as `std::span`
 
-`doom_printf` (on-screen messages, about 50 calls, defined in `g_game.cpp`) is `printf`-style as well and gets the same treatment; it hands its text to `dsda_AddMessage`.
+Functions that take a buffer as a pointer plus a separate length should take one `std::span` (or `std::string_view` for text), so the two cannot disagree and callers pass what they hold.
+- **Read-only data** (`std::span<const std::byte>` or `std::span<const unsigned char>`): `dsda_ParseUDMF` (`dsda/udmf.hpp`), `ParseUMapInfo` (`umapinfo.hpp`), `G_StartDemoPlayback`, `G_ReadDemoHeaderEx` (`g_game.hpp`), `dsda_AttachPlaybackStream` (`dsda/playback.hpp`), `dsda_WriteToDemo`, `dsda_WriteQueueToDemo`, `dsda_WriteTicToDemo`, `dsda_DemoMarkerPosition` (`dsda/demo.hpp`), `I_RegisterSong` (`i_sound.hpp`), `ReadPWADTable` (`wadtbl.hpp`).
+  Most callers pass `W_LumpByNum(lump)` with `W_LumpLength(lump)`; a helper returning a lump as a span would cover them.
+- **Text**: `Scanner(const char* data, int length = -1)` (`-1` means "measure it") and the DEHACKED key lookups `dsda_GetDehSFXIndex`, `dsda_GetDehMusicIndex` take `std::string_view`.
+- **Output buffers** (`std::span<char>`, written with `FormatTo` from `cpp/Util.hpp`): the HUD components' `(char* str, size_t max_size)` (`dsda/hud_components/*.hpp`) and `M_getcwd`.
+
+`memio.hpp` mirrors C's `fread`/`fwrite` on purpose and stays as it is.
+Mind the length types: several take `int`, the span's size is `size_t`.
 
 ## Enums still written as `#define`
 

@@ -185,7 +185,7 @@ void W_InitCache()
 
 void W_DoneCache()
 {
-	// W_InitCache has not run yet (an I_Error during W_Init)
+	// W_InitCache has not run yet (a Log::Fatal during W_Init)
 	if(!mapped_wad)
 		return;
 

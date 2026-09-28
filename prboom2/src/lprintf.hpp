@@ -36,10 +36,6 @@ void I_EnableVerboseLogging();
 void I_DisableAllLogging();
 void I_DisableMessageBoxes();
 
-/* killough 3/20/98: add const
- * killough 4/25/98: add gcc attributes
- * cphipps 01/11- moved from i_system.h */
-NORETURNC11 void I_Error(const char* error, ...) __attribute__((format(printf,1,2))) NORETURN;
 
 #ifdef __cplusplus
 }
@@ -90,7 +86,7 @@ namespace Log
 	}
 
 	/**
-	 * Print an error, show it in a message box on Windows, and exit the game, as `I_Error` does.
+	 * Print an error, show it in a message box on Windows, and exit the game, as upstream's `I_Error` did.
 	 * A newline is added.
 	 */
 	template<typename... Args>

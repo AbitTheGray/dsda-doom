@@ -79,7 +79,7 @@ int I_Filelength(int handle);
 
 // Schedule a function to be called when the program exits.
 // If run_if_error is true, the function is called if the exit
-// is due to an error (I_Error)
+// is due to an error (Log::Fatal)
 
 enum struct ExitPriority : int32_t
 {

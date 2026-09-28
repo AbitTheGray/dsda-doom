@@ -3372,7 +3372,7 @@ static dboolean P_CheckForUDMF(int lumpnum)
 	{
 		if(!strncasecmp(lumpinfo[textmap].name, "TEXTMAP", 8))
 		{
-			dsda_ParseUDMF(static_cast<const unsigned char*>(W_LumpByNum(textmap)), W_LumpLength(textmap), I_Error);
+			dsda_ParseUDMF(static_cast<const unsigned char*>(W_LumpByNum(textmap)), W_LumpLength(textmap), [](const std::string_view message) { Log::Fatal("{}", message); });
 			return true;
 		}
 	}

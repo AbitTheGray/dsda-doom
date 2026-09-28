@@ -25,6 +25,9 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include <format>
+#include <print>
+#include <string_view>
 #include <utility>
 
 #include <stdlib.h>
@@ -61,14 +64,11 @@ const char* const Scanner::TokenNames[std::to_underlying(TokenType::NumSpecialTo
 	"Right Shift"
 };
 
-static void __ScannerStandardError(const char* message, ...)
+static void ScannerStandardError(const std::string_view message)
 {
-	va_list list;
-	va_start(list, message);
-	vfprintf(stderr, message, list);
-	va_end(list);
+	std::print(stderr, "{}", message);
 }
-void (*Scanner::error)(const char*, ...) = __ScannerStandardError;
+Scanner::ErrorCallback Scanner::error = ScannerStandardError;
 
 Scanner::Scanner(const char* data, int length) : line(1), lineStart(0), logicalPosition(0), tokenLine(1), tokenLinePosition(0), scanPos(0), needNext(true)
 {
@@ -469,23 +469,23 @@ void Scanner::SkipLine()
 void Scanner::Error(TokenType token)
 {
 	if(token < TokenType::NumSpecialTokens && this->token >= TokenType::Identifier && this->token < TokenType::NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), TokenNames[std::to_underlying(token)], TokenNames[std::to_underlying(this->token)]);
+		error(std::format("{}:{}:Expected '{}' but got '{}' instead.", GetLine(), GetLinePos(), TokenNames[std::to_underlying(token)], TokenNames[std::to_underlying(this->token)]));
 	else if(token < TokenType::NumSpecialTokens && this->token >= TokenType::NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), TokenNames[std::to_underlying(token)], std::to_underlying(this->token));
+		error(std::format("{}:{}:Expected '{}' but got '{}' instead.", GetLine(), GetLinePos(), TokenNames[std::to_underlying(token)], static_cast<char>(std::to_underlying(this->token))));
 	else if(token < TokenType::NumSpecialTokens && this->token == TokenType::NoToken)
-		error("%d:%d:Expected '%s'", GetLine(), GetLinePos(), TokenNames[std::to_underlying(token)]);
+		error(std::format("{}:{}:Expected '{}'", GetLine(), GetLinePos(), TokenNames[std::to_underlying(token)]));
 	else if(token >= TokenType::NumSpecialTokens && this->token >= TokenType::Identifier && this->token < TokenType::NumSpecialTokens)
-		error("%d:%d:Expected '%c' but got '%s' instead.", GetLine(), GetLinePos(), std::to_underlying(token), TokenNames[std::to_underlying(this->token)]);
+		error(std::format("{}:{}:Expected '{}' but got '{}' instead.", GetLine(), GetLinePos(), static_cast<char>(std::to_underlying(token)), TokenNames[std::to_underlying(this->token)]));
 	else
-		error("%d:%d:Expected '%c' but got '%c' instead.", GetLine(), GetLinePos(), std::to_underlying(token), std::to_underlying(this->token));
+		error(std::format("{}:{}:Expected '{}' but got '{}' instead.", GetLine(), GetLinePos(), static_cast<char>(std::to_underlying(token)), static_cast<char>(std::to_underlying(this->token))));
 }
 
 void Scanner::Error(const char* mustget)
 {
 	if(token < TokenType::NumSpecialTokens && this->token < TokenType::NumSpecialTokens)
-		error("%d:%d:Expected '%s' but got '%s' instead.", GetLine(), GetLinePos(), mustget, TokenNames[std::to_underlying(this->token)]);
+		error(std::format("{}:{}:Expected '{}' but got '{}' instead.", GetLine(), GetLinePos(), mustget, TokenNames[std::to_underlying(this->token)]));
 	else
-		error("%d:%d:Expected '%s' but got '%c' instead.", GetLine(), GetLinePos(), mustget, std::to_underlying(this->token));
+		error(std::format("{}:{}:Expected '{}' but got '{}' instead.", GetLine(), GetLinePos(), mustget, static_cast<char>(std::to_underlying(this->token))));
 }
 
 void Scanner::ErrorF(const char* msg, ...)
@@ -495,7 +495,7 @@ void Scanner::ErrorF(const char* msg, ...)
 	va_start(ap, msg);
 	vsnprintf(buffer, 1024, msg, ap);
 	va_end(ap);
-	error("%d:%d:%s.", GetLine(), GetLinePos(), buffer);
+	error(std::format("{}:{}:{}.", GetLine(), GetLinePos(), std::string_view(buffer)));
 }
 
 void Scanner::MustGetToken(TokenType token)

@@ -119,7 +119,7 @@ static void PrintVer()
 
 // Schedule a function to be called when the program exits.
 // If run_if_error is true, the function is called if the exit
-// is due to an error (I_Error)
+// is due to an error (Log::Fatal)
 // Copyright(C) 2005-2014 Simon Howard
 
 typedef struct atexit_listentry_s atexit_listentry_t;

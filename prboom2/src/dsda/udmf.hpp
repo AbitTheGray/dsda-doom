@@ -7,6 +7,9 @@
 
 #include <inttypes.h>
 
+#include <functional>
+#include <string_view>
+
 #include "cpp/Util.hpp"
 
 // udmf_thing_t::flags
@@ -292,10 +295,12 @@ extern "C"
 
 	extern udmf_t udmf;
 
-	typedef void (*udmf_errorfunc)(const char* fmt, ...); // this must not return!
-
-	void dsda_ParseUDMF(const unsigned char* buffer, size_t length, udmf_errorfunc err);
 
 #ifdef __cplusplus
 }
 #endif
+
+/// Called with the finished message of a parse error; must not return.
+using udmf_errorfunc = std::function<void(std::string_view message)>;
+
+void dsda_ParseUDMF(const unsigned char* buffer, size_t length, udmf_errorfunc err);

@@ -23,6 +23,9 @@
 
 #include <stdint.h>
 
+#include <functional>
+#include <string_view>
+
 #include "cpp/Util.hpp"
 
 enum struct MobjType : int32_t;
@@ -92,14 +95,16 @@ extern "C"
 		struct MapEntry* maps;
 	};
 
-	typedef void (*umapinfo_errorfunc)(const char* fmt, ...); // this must not return!
-
 	extern struct MapList Maps;
 
-	int ParseUMapInfo(const unsigned char* buffer, size_t length, umapinfo_errorfunc err);
 	void FreeMapList();
 	struct MapProperty* FindProperty(struct MapEntry* map, const char* name);
 
 #ifdef __cplusplus
 }
 #endif
+
+/// Called with the finished message of a parse error; must not return.
+using umapinfo_errorfunc = std::function<void(std::string_view message)>;
+
+int ParseUMapInfo(const unsigned char* buffer, size_t length, umapinfo_errorfunc err);

@@ -93,30 +93,6 @@ static void ShowErrorBox([[maybe_unused]] const char* text)
 #endif
 }
 
-/*
- * I_Error
- *
- * cphipps - moved out of i_* headers, to minimise source files that depend on
- * the low-level headers. All this does is print the error, then call the
- * low-level safe exit function.
- * killough 3/20/98: add const
- */
-
-void I_Error(const char* error, ...)
-{
-	char errmsg[MAX_MESSAGE_SIZE];
-	va_list argptr;
-	va_start(argptr, error);
-	vsnprintf(errmsg, sizeof(errmsg), error, argptr);
-	va_end(argptr);
-
-	// As upstream's `lprintf("%s\n", errmsg)` printed it: its buffer held 2047 characters, the newline included.
-	const std::string line = std::string(errmsg) + "\n";
-	WriteText(OutputLevels::Error, std::string_view(line).substr(0, MAX_MESSAGE_SIZE - 1));
-	ShowErrorBox(errmsg);
-	I_SafeExit(-1);
-}
-
 // A `Log` message as it is printed: cut where upstream's `lprintf` cut if the build enables `LIMIT_LOG_MESSAGES`, otherwise whole.
 static std::string_view LimitMessage(const std::string_view text)
 {
