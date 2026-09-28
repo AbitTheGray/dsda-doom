@@ -213,14 +213,14 @@ static dboolean R_FakeContrast(seg_t* seg)
 {
 	return static_cast<FakeContrastMode>(fake_contrast_mode) != FakeContrastMode::Off &&
 		// TODO: possible "even fake contrast" mapinfo flag
-		seg && !(seg->sidedef->flags & SF_NOFAKECONTRAST) && !hexen;
+		seg && (seg->sidedef->flags & SideFlag::NoFakeContrast) == SideFlag{} && !hexen;
 }
 
 static dboolean R_SmoothLighting(seg_t* seg)
 {
 	return static_cast<FakeContrastMode>(fake_contrast_mode) == FakeContrastMode::Smooth ||
 		// TODO: possible "smooth fake contrast" mapinfo flag
-		seg->sidedef->flags & SF_SMOOTHLIGHTING;
+		(seg->sidedef->flags & SideFlag::SmoothLighting) != SideFlag{};
 }
 
 void R_AddContrast(seg_t* seg, int* base_lightlevel)
@@ -269,25 +269,25 @@ static void R_UpdateWallLights(int lightlevel)
 static int R_SideLightLevel(side_t* side, int base_lightlevel)
 {
 	return side->lightlevel +
-		((side->flags & SF_LIGHTABSOLUTE) ? 0 : base_lightlevel);
+		((side->flags & SideFlag::LightAbsolute) != SideFlag{} ? 0 : base_lightlevel);
 }
 
 int R_TopLightLevel(side_t* side, int base_lightlevel)
 {
 	return side->lightlevel_top +
-		((side->flags & SF_LIGHTABSOLUTETOP) ? 0 : R_SideLightLevel(side, base_lightlevel));
+		((side->flags & SideFlag::LightAbsoluteTop) != SideFlag{} ? 0 : R_SideLightLevel(side, base_lightlevel));
 }
 
 int R_MidLightLevel(side_t* side, int base_lightlevel)
 {
 	return side->lightlevel_mid +
-		((side->flags & SF_LIGHTABSOLUTEMID) ? 0 : R_SideLightLevel(side, base_lightlevel));
+		((side->flags & SideFlag::LightAbsoluteMid) != SideFlag{} ? 0 : R_SideLightLevel(side, base_lightlevel));
 }
 
 int R_BottomLightLevel(side_t* side, int base_lightlevel)
 {
 	return side->lightlevel_bottom +
-		((side->flags & SF_LIGHTABSOLUTEBOTTOM) ? 0 : R_SideLightLevel(side, base_lightlevel));
+		((side->flags & SideFlag::LightAbsoluteBottom) != SideFlag{} ? 0 : R_SideLightLevel(side, base_lightlevel));
 }
 
 static void R_ApplyTopLight(side_t* side)
@@ -866,7 +866,7 @@ void R_StoreWallRange(const int start, const int stop)
 			// from bleeding through deep water
 			|| frontsector->heightsec != -1
 
-			|| (sidedef->midtexture && (sidedef->flags & SF_CLIPMIDTEX || linedef->flags & ML_CLIPMIDTEX));
+			|| (sidedef->midtexture && ((sidedef->flags & SideFlag::ClipMidTex) != SideFlag{} || linedef->flags & ML_CLIPMIDTEX));
 
 		markceiling = worldhigh != worldtop
 			|| P_CeilingPlanesDiffer(frontsector, backsector)
@@ -876,7 +876,7 @@ void R_StoreWallRange(const int start, const int stop)
 			|| (frontsector->heightsec != -1 &&
 				frontsector->ceilingpic != skyflatnum)
 
-			|| (sidedef->midtexture && (sidedef->flags & SF_CLIPMIDTEX || linedef->flags & ML_CLIPMIDTEX));
+			|| (sidedef->midtexture && ((sidedef->flags & SideFlag::ClipMidTex) != SideFlag{} || linedef->flags & ML_CLIPMIDTEX));
 
 		if(backsector->ceilingheight <= frontsector->floorheight
 			|| backsector->floorheight >= frontsector->ceilingheight)

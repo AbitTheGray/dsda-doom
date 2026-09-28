@@ -185,183 +185,183 @@ static void dsda_ParseUDMFLineDef(Scanner& scanner)
 		}
 		else if(scanner.StringMatch("blocking"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_BLOCKING);
+			SCAN_FLAG(line.flags, UdmfLineFlag::Blocking);
 		}
 		else if(scanner.StringMatch("blockmonsters"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_BLOCKMONSTERS);
+			SCAN_FLAG(line.flags, UdmfLineFlag::BlockMonsters);
 		}
 		else if(scanner.StringMatch("twosided"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_TWOSIDED);
+			SCAN_FLAG(line.flags, UdmfLineFlag::TwoSided);
 		}
 		else if(scanner.StringMatch("dontpegtop"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_DONTPEGTOP);
+			SCAN_FLAG(line.flags, UdmfLineFlag::DontPegTop);
 		}
 		else if(scanner.StringMatch("dontpegbottom"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_DONTPEGBOTTOM);
+			SCAN_FLAG(line.flags, UdmfLineFlag::DontPegBottom);
 		}
 		else if(scanner.StringMatch("secret"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_SECRET);
+			SCAN_FLAG(line.flags, UdmfLineFlag::Secret);
 		}
 		else if(scanner.StringMatch("blocksound"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_SOUNDBLOCK);
+			SCAN_FLAG(line.flags, UdmfLineFlag::SoundBlock);
 		}
 		else if(scanner.StringMatch("dontdraw"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_DONTDRAW);
+			SCAN_FLAG(line.flags, UdmfLineFlag::DontDraw);
 		}
 		else if(scanner.StringMatch("mapped"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_MAPPED);
+			SCAN_FLAG(line.flags, UdmfLineFlag::Mapped);
 		}
 		else if(scanner.StringMatch("passuse"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_PASSUSE);
+			SCAN_FLAG(line.flags, UdmfLineFlag::PassUse);
 		}
 		else if(scanner.StringMatch("translucent"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_TRANSLUCENT);
+			SCAN_FLAG(line.flags, UdmfLineFlag::Translucent);
 		}
 		else if(scanner.StringMatch("jumpover"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_JUMPOVER);
+			SCAN_FLAG(line.flags, UdmfLineFlag::JumpOver);
 		}
 		else if(scanner.StringMatch("blockfloaters"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_BLOCKFLOATERS);
+			SCAN_FLAG(line.flags, UdmfLineFlag::BlockFloaters);
 		}
 		else if(scanner.StringMatch("playercross"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_PLAYERCROSS);
+			SCAN_FLAG(line.flags, UdmfLineFlag::PlayerCross);
 		}
 		else if(scanner.StringMatch("playeruse"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_PLAYERUSE);
+			SCAN_FLAG(line.flags, UdmfLineFlag::PlayerUse);
 		}
 		else if(scanner.StringMatch("monstercross"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_MONSTERCROSS);
+			SCAN_FLAG(line.flags, UdmfLineFlag::MonsterCross);
 		}
 		else if(scanner.StringMatch("monsteruse"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_MONSTERUSE);
+			SCAN_FLAG(line.flags, UdmfLineFlag::MonsterUse);
 		}
 		else if(scanner.StringMatch("impact"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_IMPACT);
+			SCAN_FLAG(line.flags, UdmfLineFlag::Impact);
 		}
 		else if(scanner.StringMatch("playerpush"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_PLAYERPUSH);
+			SCAN_FLAG(line.flags, UdmfLineFlag::PlayerPush);
 		}
 		else if(scanner.StringMatch("monsterpush"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_MONSTERPUSH);
+			SCAN_FLAG(line.flags, UdmfLineFlag::MonsterPush);
 		}
 		else if(scanner.StringMatch("missilecross"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_MISSILECROSS);
+			SCAN_FLAG(line.flags, UdmfLineFlag::MissileCross);
 		}
 		else if(scanner.StringMatch("repeatspecial"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_REPEATSPECIAL);
+			SCAN_FLAG(line.flags, UdmfLineFlag::RepeatSpecial);
 		}
 		else if(scanner.StringMatch("playeruseback"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_PLAYERUSEBACK);
+			SCAN_FLAG(line.flags, UdmfLineFlag::PlayerUseBack);
 		}
 		else if(scanner.StringMatch("anycross"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_ANYCROSS);
+			SCAN_FLAG(line.flags, UdmfLineFlag::AnyCross);
 		}
 		else if(scanner.StringMatch("monsteractivate"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_MONSTERACTIVATE);
+			SCAN_FLAG(line.flags, UdmfLineFlag::MonsterActivate);
 		}
 		else if(scanner.StringMatch("blockplayers"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_BLOCKPLAYERS);
+			SCAN_FLAG(line.flags, UdmfLineFlag::BlockPlayers);
 		}
 		else if(scanner.StringMatch("blockeverything"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_BLOCKEVERYTHING);
+			SCAN_FLAG(line.flags, UdmfLineFlag::BlockEverything);
 		}
 		else if(scanner.StringMatch("firstsideonly"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_FIRSTSIDEONLY);
+			SCAN_FLAG(line.flags, UdmfLineFlag::FirstSideOnly);
 		}
 		else if(scanner.StringMatch("zoneboundary"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_ZONEBOUNDARY);
+			SCAN_FLAG(line.flags, UdmfLineFlag::ZoneBoundary);
 		}
 		else if(scanner.StringMatch("clipmidtex"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_CLIPMIDTEX);
+			SCAN_FLAG(line.flags, UdmfLineFlag::ClipMidTex);
 		}
 		else if(scanner.StringMatch("wrapmidtex"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_WRAPMIDTEX);
+			SCAN_FLAG(line.flags, UdmfLineFlag::WrapMidTex);
 		}
 		else if(scanner.StringMatch("midtex3d"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_MIDTEX3D);
+			SCAN_FLAG(line.flags, UdmfLineFlag::MidTex3D);
 		}
 		else if(scanner.StringMatch("midtex3dimpassible"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_MIDTEX3DIMPASSIBLE);
+			SCAN_FLAG(line.flags, UdmfLineFlag::MidTex3DImpassible);
 		}
 		else if(scanner.StringMatch("checkswitchrange"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_CHECKSWITCHRANGE);
+			SCAN_FLAG(line.flags, UdmfLineFlag::CheckSwitchRange);
 		}
 		else if(scanner.StringMatch("blockprojectiles"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_BLOCKPROJECTILES);
+			SCAN_FLAG(line.flags, UdmfLineFlag::BlockProjectiles);
 		}
 		else if(scanner.StringMatch("blockuse"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_BLOCKUSE);
+			SCAN_FLAG(line.flags, UdmfLineFlag::BlockUse);
 		}
 		else if(scanner.StringMatch("blocksight"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_BLOCKSIGHT);
+			SCAN_FLAG(line.flags, UdmfLineFlag::BlockSight);
 		}
 		else if(scanner.StringMatch("blockhitscan"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_BLOCKHITSCAN);
+			SCAN_FLAG(line.flags, UdmfLineFlag::BlockHitscan);
 		}
 		else if(scanner.StringMatch("transparent"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_TRANSPARENT);
+			SCAN_FLAG(line.flags, UdmfLineFlag::Transparent);
 		}
 		else if(scanner.StringMatch("revealed"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_REVEALED);
+			SCAN_FLAG(line.flags, UdmfLineFlag::Revealed);
 		}
 		else if(scanner.StringMatch("noskywalls"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_NOSKYWALLS);
+			SCAN_FLAG(line.flags, UdmfLineFlag::NoSkyWalls);
 		}
 		else if(scanner.StringMatch("drawfullheight"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_DRAWFULLHEIGHT);
+			SCAN_FLAG(line.flags, UdmfLineFlag::DrawFullHeight);
 		}
 		else if(scanner.StringMatch("damagespecial"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_DAMAGESPECIAL);
+			SCAN_FLAG(line.flags, UdmfLineFlag::DamageSpecial);
 		}
 		else if(scanner.StringMatch("deathspecial"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_DEATHSPECIAL);
+			SCAN_FLAG(line.flags, UdmfLineFlag::DeathSpecial);
 		}
 		else if(scanner.StringMatch("blocklandmonsters"))
 		{
-			SCAN_FLAG(line.flags, UDMF_ML_BLOCKLANDMONSTERS);
+			SCAN_FLAG(line.flags, UdmfLineFlag::BlockLandMonsters);
 		}
 		else if(scanner.StringMatch("moreids"))
 		{
@@ -509,43 +509,43 @@ static void dsda_ParseUDMFSideDef(Scanner& scanner)
 		}
 		else if(scanner.StringMatch("lightabsolute"))
 		{
-			SCAN_FLAG(side.flags, UDMF_SF_LIGHTABSOLUTE);
+			SCAN_FLAG(side.flags, SideFlag::LightAbsolute);
 		}
 		else if(scanner.StringMatch("lightfog"))
 		{
-			SCAN_FLAG(side.flags, UDMF_SF_LIGHTFOG);
+			SCAN_FLAG(side.flags, SideFlag::LightFog);
 		}
 		else if(scanner.StringMatch("nofakecontrast"))
 		{
-			SCAN_FLAG(side.flags, UDMF_SF_NOFAKECONTRAST);
+			SCAN_FLAG(side.flags, SideFlag::NoFakeContrast);
 		}
 		else if(scanner.StringMatch("smoothlighting"))
 		{
-			SCAN_FLAG(side.flags, UDMF_SF_SMOOTHLIGHTING);
+			SCAN_FLAG(side.flags, SideFlag::SmoothLighting);
 		}
 		else if(scanner.StringMatch("clipmidtex"))
 		{
-			SCAN_FLAG(side.flags, UDMF_SF_CLIPMIDTEX);
+			SCAN_FLAG(side.flags, SideFlag::ClipMidTex);
 		}
 		else if(scanner.StringMatch("wrapmidtex"))
 		{
-			SCAN_FLAG(side.flags, UDMF_SF_WRAPMIDTEX);
+			SCAN_FLAG(side.flags, SideFlag::WrapMidTex);
 		}
 		else if(scanner.StringMatch("nodecals"))
 		{
-			SCAN_FLAG(side.flags, UDMF_SF_NODECALS);
+			SCAN_FLAG(side.flags, SideFlag::NoDecals);
 		}
 		else if(scanner.StringMatch("lightabsolute_top"))
 		{
-			SCAN_FLAG(side.flags, UDMF_SF_LIGHTABSOLUTETOP);
+			SCAN_FLAG(side.flags, SideFlag::LightAbsoluteTop);
 		}
 		else if(scanner.StringMatch("lightabsolute_mid"))
 		{
-			SCAN_FLAG(side.flags, UDMF_SF_LIGHTABSOLUTEMID);
+			SCAN_FLAG(side.flags, SideFlag::LightAbsoluteMid);
 		}
 		else if(scanner.StringMatch("lightabsolute_bottom"))
 		{
-			SCAN_FLAG(side.flags, UDMF_SF_LIGHTABSOLUTEBOTTOM);
+			SCAN_FLAG(side.flags, SideFlag::LightAbsoluteBottom);
 		}
 		else if(scanner.StringMatch("texturetop"))
 		{
@@ -745,47 +745,47 @@ static void dsda_ParseUDMFSector(Scanner& scanner)
 		}
 		else if(scanner.StringMatch("lightfloorabsolute"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_LIGHTFLOORABSOLUTE);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::LightFloorAbsolute);
 		}
 		else if(scanner.StringMatch("lightceilingabsolute"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_LIGHTCEILINGABSOLUTE);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::LightCeilingAbsolute);
 		}
 		else if(scanner.StringMatch("silent"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_SILENT);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::Silent);
 		}
 		else if(scanner.StringMatch("nofallingdamage"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_NOFALLINGDAMAGE);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::NoFallingDamage);
 		}
 		else if(scanner.StringMatch("dropactors"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_DROPACTORS);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::DropActors);
 		}
 		else if(scanner.StringMatch("norespawn"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_NORESPAWN);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::NoRespawn);
 		}
 		else if(scanner.StringMatch("hidden"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_HIDDEN);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::Hidden);
 		}
 		else if(scanner.StringMatch("waterzone"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_WATERZONE);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::WaterZone);
 		}
 		else if(scanner.StringMatch("damageterraineffect"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_DAMAGETERRAINEFFECT);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::DamageTerrainEffect);
 		}
 		else if(scanner.StringMatch("damagehazard"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_DAMAGEHAZARD);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::DamageHazard);
 		}
 		else if(scanner.StringMatch("noattack"))
 		{
-			SCAN_FLAG(sector.flags, UDMF_SECF_NOATTACK);
+			SCAN_FLAG(sector.flags, UdmfSectorFlag::NoAttack);
 		}
 		else if(scanner.StringMatch("texturefloor"))
 		{

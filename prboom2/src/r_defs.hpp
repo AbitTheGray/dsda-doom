@@ -24,6 +24,22 @@ enum struct Silhouette : uint8_t
 };
 ENUM_FLAGS_FUNC(Silhouette)
 
+// side_t::flags and udmf_side_t::flags (the UDMF loader copies one into the other)
+enum struct SideFlag : uint16_t
+{
+	LightAbsolute = Bit<uint16_t>(0u),
+	LightFog = Bit<uint16_t>(1u),
+	NoFakeContrast = Bit<uint16_t>(2u),
+	SmoothLighting = Bit<uint16_t>(3u),
+	ClipMidTex = Bit<uint16_t>(4u),
+	WrapMidTex = Bit<uint16_t>(5u),
+	NoDecals = Bit<uint16_t>(6u),
+	LightAbsoluteTop = Bit<uint16_t>(7u),
+	LightAbsoluteMid = Bit<uint16_t>(8u),
+	LightAbsoluteBottom = Bit<uint16_t>(9u),
+};
+ENUM_FLAGS_FUNC(SideFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -198,19 +214,6 @@ typedef struct sector_s
 
 //
 // The SideDef.
-//
-
-#define SF_LIGHTABSOLUTE       0x0001
-// #define SF_LIGHTFOG            0x0002
-#define SF_NOFAKECONTRAST      0x0004
-#define SF_SMOOTHLIGHTING      0x0008
-#define SF_CLIPMIDTEX          0x0010
-#define SF_WRAPMIDTEX          0x0020
-// #define SF_NODECALS            0x0040
-#define SF_LIGHTABSOLUTETOP    0x0080
-#define SF_LIGHTABSOLUTEMID    0x0100
-#define SF_LIGHTABSOLUTEBOTTOM 0x0200
-
 typedef struct
 {
 	fixed_t textureoffset; // add this to the calculated texture column
@@ -246,7 +249,7 @@ typedef struct
 	int lightlevel_top;
 	int lightlevel_mid;
 	int lightlevel_bottom;
-	unsigned short flags;
+	SideFlag flags;
 } side_t;
 
 //

@@ -11,6 +11,7 @@
 #include <string_view>
 
 #include "cpp/Util.hpp"
+#include "r_defs.hpp"
 
 // udmf_thing_t::flags
 enum struct UdmfThingFlag : uint32_t
@@ -37,6 +38,74 @@ enum struct UdmfThingFlag : uint32_t
 };
 ENUM_FLAGS_FUNC(UdmfThingFlag)
 
+// udmf_line_t::flags
+enum struct UdmfLineFlag : uint64_t
+{
+	Blocking = Bit<uint64_t>(0u),
+	BlockMonsters = Bit<uint64_t>(1u),
+	TwoSided = Bit<uint64_t>(2u),
+	DontPegTop = Bit<uint64_t>(3u),
+	DontPegBottom = Bit<uint64_t>(4u),
+	Secret = Bit<uint64_t>(5u),
+	SoundBlock = Bit<uint64_t>(6u),
+	DontDraw = Bit<uint64_t>(7u),
+	Mapped = Bit<uint64_t>(8u),
+	PassUse = Bit<uint64_t>(9u),
+	Translucent = Bit<uint64_t>(10u),
+	JumpOver = Bit<uint64_t>(11u),
+	BlockFloaters = Bit<uint64_t>(12u),
+	PlayerCross = Bit<uint64_t>(13u),
+	PlayerUse = Bit<uint64_t>(14u),
+	MonsterCross = Bit<uint64_t>(15u),
+	MonsterUse = Bit<uint64_t>(16u),
+	Impact = Bit<uint64_t>(17u),
+	PlayerPush = Bit<uint64_t>(18u),
+	MonsterPush = Bit<uint64_t>(19u),
+	MissileCross = Bit<uint64_t>(20u),
+	RepeatSpecial = Bit<uint64_t>(21u),
+	PlayerUseBack = Bit<uint64_t>(22u),
+	AnyCross = Bit<uint64_t>(23u),
+	MonsterActivate = Bit<uint64_t>(24u),
+	BlockPlayers = Bit<uint64_t>(25u),
+	BlockEverything = Bit<uint64_t>(26u),
+	FirstSideOnly = Bit<uint64_t>(27u),
+	ZoneBoundary = Bit<uint64_t>(28u),
+	ClipMidTex = Bit<uint64_t>(29u),
+	WrapMidTex = Bit<uint64_t>(30u),
+	MidTex3D = Bit<uint64_t>(31u),
+	MidTex3DImpassible = Bit<uint64_t>(32u),
+	CheckSwitchRange = Bit<uint64_t>(33u),
+	BlockProjectiles = Bit<uint64_t>(34u),
+	BlockUse = Bit<uint64_t>(35u),
+	BlockSight = Bit<uint64_t>(36u),
+	BlockHitscan = Bit<uint64_t>(37u),
+	Transparent = Bit<uint64_t>(38u),
+	Revealed = Bit<uint64_t>(39u),
+	NoSkyWalls = Bit<uint64_t>(40u),
+	DrawFullHeight = Bit<uint64_t>(41u),
+	DamageSpecial = Bit<uint64_t>(42u),
+	DeathSpecial = Bit<uint64_t>(43u),
+	BlockLandMonsters = Bit<uint64_t>(44u),
+};
+ENUM_FLAGS_FUNC(UdmfLineFlag)
+
+// udmf_sector_t::flags
+enum struct UdmfSectorFlag : uint16_t
+{
+	LightFloorAbsolute = Bit<uint16_t>(0u),
+	LightCeilingAbsolute = Bit<uint16_t>(1u),
+	Silent = Bit<uint16_t>(2u),
+	NoFallingDamage = Bit<uint16_t>(3u),
+	DropActors = Bit<uint16_t>(4u),
+	NoRespawn = Bit<uint16_t>(5u),
+	Hidden = Bit<uint16_t>(6u),
+	WaterZone = Bit<uint16_t>(7u),
+	DamageTerrainEffect = Bit<uint16_t>(8u),
+	DamageHazard = Bit<uint16_t>(9u),
+	NoAttack = Bit<uint16_t>(10u),
+};
+ENUM_FLAGS_FUNC(UdmfSectorFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -52,54 +121,6 @@ extern "C"
 	};
 
 	extern UdmfNamespace udmf_namespace;
-
-#define UDMF_ML_BLOCKING           0x0000000000000001ull
-#define UDMF_ML_BLOCKMONSTERS      0x0000000000000002ull
-#define UDMF_ML_TWOSIDED           0x0000000000000004ull
-#define UDMF_ML_DONTPEGTOP         0x0000000000000008ull
-#define UDMF_ML_DONTPEGBOTTOM      0x0000000000000010ull
-#define UDMF_ML_SECRET             0x0000000000000020ull
-#define UDMF_ML_SOUNDBLOCK         0x0000000000000040ull
-#define UDMF_ML_DONTDRAW           0x0000000000000080ull
-#define UDMF_ML_MAPPED             0x0000000000000100ull
-#define UDMF_ML_PASSUSE            0x0000000000000200ull
-#define UDMF_ML_TRANSLUCENT        0x0000000000000400ull
-#define UDMF_ML_JUMPOVER           0x0000000000000800ull
-#define UDMF_ML_BLOCKFLOATERS      0x0000000000001000ull
-#define UDMF_ML_PLAYERCROSS        0x0000000000002000ull
-#define UDMF_ML_PLAYERUSE          0x0000000000004000ull
-#define UDMF_ML_MONSTERCROSS       0x0000000000008000ull
-#define UDMF_ML_MONSTERUSE         0x0000000000010000ull
-#define UDMF_ML_IMPACT             0x0000000000020000ull
-#define UDMF_ML_PLAYERPUSH         0x0000000000040000ull
-#define UDMF_ML_MONSTERPUSH        0x0000000000080000ull
-#define UDMF_ML_MISSILECROSS       0x0000000000100000ull
-#define UDMF_ML_REPEATSPECIAL      0x0000000000200000ull
-#define UDMF_ML_PLAYERUSEBACK      0x0000000000400000ull
-#define UDMF_ML_ANYCROSS           0x0000000000800000ull
-#define UDMF_ML_MONSTERACTIVATE    0x0000000001000000ull
-#define UDMF_ML_BLOCKPLAYERS       0x0000000002000000ull
-#define UDMF_ML_BLOCKEVERYTHING    0x0000000004000000ull
-#define UDMF_ML_FIRSTSIDEONLY      0x0000000008000000ull
-#define UDMF_ML_ZONEBOUNDARY       0x0000000010000000ull
-#define UDMF_ML_CLIPMIDTEX         0x0000000020000000ull
-#define UDMF_ML_WRAPMIDTEX         0x0000000040000000ull
-#define UDMF_ML_MIDTEX3D           0x0000000080000000ull
-#define UDMF_ML_MIDTEX3DIMPASSIBLE 0x0000000100000000ull
-#define UDMF_ML_CHECKSWITCHRANGE   0x0000000200000000ull
-#define UDMF_ML_BLOCKPROJECTILES   0x0000000400000000ull
-#define UDMF_ML_BLOCKUSE           0x0000000800000000ull
-#define UDMF_ML_BLOCKSIGHT         0x0000001000000000ull
-#define UDMF_ML_BLOCKHITSCAN       0x0000002000000000ull
-#define UDMF_ML_TRANSPARENT        0x0000004000000000ull
-#define UDMF_ML_REVEALED           0x0000008000000000ull
-#define UDMF_ML_NOSKYWALLS         0x0000010000000000ull
-#define UDMF_ML_DRAWFULLHEIGHT     0x0000020000000000ull
-#define UDMF_ML_DAMAGESPECIAL      0x0000040000000000ull
-#define UDMF_ML_DEATHSPECIAL       0x0000080000000000ull
-#define UDMF_ML_BLOCKLANDMONSTERS  0x0000100000000000ull
-
-	typedef uint64_t udmf_line_flags_t;
 
 	typedef struct
 	{
@@ -121,21 +142,8 @@ extern "C"
 		int automapstyle;
 		int health;
 		int healthgroup;
-		udmf_line_flags_t flags;
+		UdmfLineFlag flags;
 	} udmf_line_t;
-
-#define UDMF_SF_LIGHTABSOLUTE       0x0001
-#define UDMF_SF_LIGHTFOG            0x0002
-#define UDMF_SF_NOFAKECONTRAST      0x0004
-#define UDMF_SF_SMOOTHLIGHTING      0x0008
-#define UDMF_SF_CLIPMIDTEX          0x0010
-#define UDMF_SF_WRAPMIDTEX          0x0020
-#define UDMF_SF_NODECALS            0x0040
-#define UDMF_SF_LIGHTABSOLUTETOP    0x0080
-#define UDMF_SF_LIGHTABSOLUTEMID    0x0100
-#define UDMF_SF_LIGHTABSOLUTEBOTTOM 0x0200
-
-	typedef uint16_t udmf_side_flags_t;
 
 	typedef struct
 	{
@@ -169,7 +177,7 @@ extern "C"
 		float yscrollmid;
 		float xscrollbottom;
 		float yscrollbottom;
-		udmf_side_flags_t flags;
+		SideFlag flags;
 	} udmf_side_t;
 
 	typedef struct
@@ -177,18 +185,6 @@ extern "C"
 		const char* x;
 		const char* y;
 	} udmf_vertex_t;
-
-#define UDMF_SECF_LIGHTFLOORABSOLUTE   0x0001
-#define UDMF_SECF_LIGHTCEILINGABSOLUTE 0x0002
-#define UDMF_SECF_SILENT               0x0004
-#define UDMF_SECF_NOFALLINGDAMAGE      0x0008
-#define UDMF_SECF_DROPACTORS           0x0010
-#define UDMF_SECF_NORESPAWN            0x0020
-#define UDMF_SECF_HIDDEN               0x0040
-#define UDMF_SECF_WATERZONE            0x0080
-#define UDMF_SECF_DAMAGETERRAINEFFECT  0x0100
-#define UDMF_SECF_DAMAGEHAZARD         0x0200
-#define UDMF_SECF_NOATTACK             0x0400
 
 #define UDMF_SCROLL_TEXTURE 0x01
 #define UDMF_SCROLL_STATIC  0x02
@@ -203,8 +199,6 @@ extern "C"
 #define UDMF_THRUST_AIRBORNE   0x20
 #define UDMF_THRUST_CEILING    0x40
 #define UDMF_THRUST_WINDTHRUST 0x80
-
-	typedef uint16_t udmf_sector_flags_t;
 
 	typedef struct
 	{
@@ -247,7 +241,7 @@ extern "C"
 		int thrustlocation;
 		char* frictionfactor;
 		char* movefactor;
-		udmf_sector_flags_t flags;
+		UdmfSectorFlag flags;
 	} udmf_sector_t;
 
 	typedef struct

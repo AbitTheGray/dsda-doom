@@ -893,25 +893,25 @@ static void P_LoadUDMFSectors(int lump)
 			dsda_AddThruster(dsda_StringToFixed(ms->xthrust), dsda_StringToFixed(ms->ythrust),
 				i, ms->thrustgroup + (ms->thrustlocation << THRUST_LOCATION_SHIFT));
 
-		if(ms->flags & UDMF_SECF_DAMAGEHAZARD)
+		if((ms->flags & UdmfSectorFlag::DamageHazard) != UdmfSectorFlag{})
 			ss->flags |= SECF_HAZARD;
 
-		if(ms->flags & UDMF_SECF_DAMAGETERRAINEFFECT)
+		if((ms->flags & UdmfSectorFlag::DamageTerrainEffect) != UdmfSectorFlag{})
 			ss->flags |= SECF_DMGTERRAINFX;
 
-		if(ms->flags & UDMF_SECF_NOATTACK)
+		if((ms->flags & UdmfSectorFlag::NoAttack) != UdmfSectorFlag{})
 			ss->flags |= SECF_NOATTACK;
 
-		if(ms->flags & UDMF_SECF_SILENT)
+		if((ms->flags & UdmfSectorFlag::Silent) != UdmfSectorFlag{})
 			ss->flags |= SECF_SILENT;
 
-		if(ms->flags & UDMF_SECF_LIGHTFLOORABSOLUTE)
+		if((ms->flags & UdmfSectorFlag::LightFloorAbsolute) != UdmfSectorFlag{})
 			ss->flags |= SECF_LIGHTFLOORABSOLUTE;
 
-		if(ms->flags & UDMF_SECF_LIGHTCEILINGABSOLUTE)
+		if((ms->flags & UdmfSectorFlag::LightCeilingAbsolute) != UdmfSectorFlag{})
 			ss->flags |= SECF_LIGHTCEILINGABSOLUTE;
 
-		if(ms->flags & UDMF_SECF_HIDDEN)
+		if((ms->flags & UdmfSectorFlag::Hidden) != UdmfSectorFlag{})
 			ss->flags |= SECF_HIDDEN;
 
 		if(ss->tag > 0)
@@ -2101,7 +2101,7 @@ static void P_LoadUDMFLineDefs(int lump)
 
 		ld->iLineID = i; // proff 04/05/2000: needed for OpenGL
 
-		ld->flags = (mld->flags & ML_BOOM);
+		ld->flags = (std::to_underlying(mld->flags) & ML_BOOM);
 		ld->special = mld->special;
 		ld->id = (mld->id >= 0 ? mld->id : 0);
 		ld->special_args[0] = mld->arg0;
@@ -2153,100 +2153,100 @@ static void P_LoadUDMFLineDefs(int lump)
 			}
 		}
 
-		if(mld->flags & UDMF_ML_PLAYERCROSS)
+		if((mld->flags & UdmfLineFlag::PlayerCross) != UdmfLineFlag{})
 			ld->activation |= SPAC_CROSS;
 
-		if(mld->flags & UDMF_ML_PLAYERUSE)
+		if((mld->flags & UdmfLineFlag::PlayerUse) != UdmfLineFlag{})
 			ld->activation |= SPAC_USE;
 
-		if(mld->flags & UDMF_ML_MONSTERCROSS)
+		if((mld->flags & UdmfLineFlag::MonsterCross) != UdmfLineFlag{})
 			ld->activation |= SPAC_MCROSS;
 
-		if(mld->flags & UDMF_ML_IMPACT)
+		if((mld->flags & UdmfLineFlag::Impact) != UdmfLineFlag{})
 			ld->activation |= SPAC_IMPACT;
 
-		if(mld->flags & UDMF_ML_PLAYERPUSH)
+		if((mld->flags & UdmfLineFlag::PlayerPush) != UdmfLineFlag{})
 			ld->activation |= SPAC_PUSH;
 
-		if(mld->flags & UDMF_ML_MISSILECROSS)
+		if((mld->flags & UdmfLineFlag::MissileCross) != UdmfLineFlag{})
 			ld->activation |= SPAC_PCROSS;
 
-		if(mld->flags & UDMF_ML_ANYCROSS)
+		if((mld->flags & UdmfLineFlag::AnyCross) != UdmfLineFlag{})
 			ld->activation |= SPAC_ANYCROSS | SPAC_CROSS | SPAC_MCROSS;
 
-		if(mld->flags & UDMF_ML_PLAYERUSEBACK)
+		if((mld->flags & UdmfLineFlag::PlayerUseBack) != UdmfLineFlag{})
 			ld->activation |= SPAC_USEBACK;
 
-		if(mld->flags & UDMF_ML_MONSTERPUSH)
+		if((mld->flags & UdmfLineFlag::MonsterPush) != UdmfLineFlag{})
 			ld->activation |= SPAC_MPUSH;
 
-		if(mld->flags & UDMF_ML_MONSTERUSE)
+		if((mld->flags & UdmfLineFlag::MonsterUse) != UdmfLineFlag{})
 			ld->activation |= SPAC_MUSE;
 
-		if(mld->flags & UDMF_ML_DAMAGESPECIAL)
+		if((mld->flags & UdmfLineFlag::DamageSpecial) != UdmfLineFlag{})
 			ld->activation |= SPAC_DAMAGE;
 
-		if(mld->flags & UDMF_ML_DEATHSPECIAL)
+		if((mld->flags & UdmfLineFlag::DeathSpecial) != UdmfLineFlag{})
 			ld->activation |= SPAC_DEATH;
 
-		if(mld->flags & UDMF_ML_REPEATSPECIAL)
+		if((mld->flags & UdmfLineFlag::RepeatSpecial) != UdmfLineFlag{})
 			ld->flags |= ML_REPEATSPECIAL;
 
-		if(mld->flags & UDMF_ML_MONSTERACTIVATE)
+		if((mld->flags & UdmfLineFlag::MonsterActivate) != UdmfLineFlag{})
 			ld->flags |= ML_MONSTERSCANACTIVATE;
 
-		if(mld->flags & UDMF_ML_BLOCKPLAYERS)
+		if((mld->flags & UdmfLineFlag::BlockPlayers) != UdmfLineFlag{})
 			ld->flags |= ML_BLOCKPLAYERS;
 
-		if(mld->flags & UDMF_ML_BLOCKEVERYTHING)
+		if((mld->flags & UdmfLineFlag::BlockEverything) != UdmfLineFlag{})
 			ld->flags |= ML_BLOCKING | ML_BLOCKEVERYTHING;
 
-		if(mld->flags & UDMF_ML_BLOCKLANDMONSTERS)
+		if((mld->flags & UdmfLineFlag::BlockLandMonsters) != UdmfLineFlag{})
 			ld->flags |= ML_BLOCKLANDMONSTERS;
 
-		if(mld->flags & UDMF_ML_BLOCKFLOATERS)
+		if((mld->flags & UdmfLineFlag::BlockFloaters) != UdmfLineFlag{})
 			ld->flags |= ML_BLOCKFLOATERS;
 
-		if(mld->flags & UDMF_ML_BLOCKSIGHT)
+		if((mld->flags & UdmfLineFlag::BlockSight) != UdmfLineFlag{})
 			ld->flags |= ML_BLOCKSIGHT;
 
-		if(mld->flags & UDMF_ML_BLOCKHITSCAN)
+		if((mld->flags & UdmfLineFlag::BlockHitscan) != UdmfLineFlag{})
 			ld->flags |= ML_BLOCKHITSCAN;
 
-		if(mld->flags & UDMF_ML_BLOCKPROJECTILES)
+		if((mld->flags & UdmfLineFlag::BlockProjectiles) != UdmfLineFlag{})
 			ld->flags |= ML_BLOCKPROJECTILES;
 
-		if(mld->flags & UDMF_ML_BLOCKUSE)
+		if((mld->flags & UdmfLineFlag::BlockUse) != UdmfLineFlag{})
 			ld->flags |= ML_BLOCKUSE;
 
-		if(mld->flags & UDMF_ML_CLIPMIDTEX)
+		if((mld->flags & UdmfLineFlag::ClipMidTex) != UdmfLineFlag{})
 			ld->flags |= ML_CLIPMIDTEX;
 
-		if(mld->flags & UDMF_ML_JUMPOVER)
+		if((mld->flags & UdmfLineFlag::JumpOver) != UdmfLineFlag{})
 			ld->flags |= ML_JUMPOVER;
 
-		if(mld->flags & UDMF_ML_MIDTEX3D)
+		if((mld->flags & UdmfLineFlag::MidTex3D) != UdmfLineFlag{})
 			ld->flags |= ML_3DMIDTEX;
 
-		if(mld->flags & UDMF_ML_MIDTEX3DIMPASSIBLE)
+		if((mld->flags & UdmfLineFlag::MidTex3DImpassible) != UdmfLineFlag{})
 			ld->flags |= ML_3DMIDTEXIMPASSIBLE;
 
-		if(mld->flags & UDMF_ML_FIRSTSIDEONLY)
+		if((mld->flags & UdmfLineFlag::FirstSideOnly) != UdmfLineFlag{})
 			ld->flags |= ML_FIRSTSIDEONLY;
 
-		if(mld->flags & UDMF_ML_REVEALED)
+		if((mld->flags & UdmfLineFlag::Revealed) != UdmfLineFlag{})
 			ld->flags |= ML_REVEALED;
 
-		if(mld->flags & UDMF_ML_CHECKSWITCHRANGE)
+		if((mld->flags & UdmfLineFlag::CheckSwitchRange) != UdmfLineFlag{})
 			ld->flags |= ML_CHECKSWITCHRANGE;
 
-		if(mld->flags & UDMF_ML_TRANSLUCENT)
+		if((mld->flags & UdmfLineFlag::Translucent) != UdmfLineFlag{})
 			ld->alpha = 0.75f;
 
-		if(mld->flags & UDMF_ML_TRANSPARENT)
+		if((mld->flags & UdmfLineFlag::Transparent) != UdmfLineFlag{})
 			ld->alpha = 0.25f;
 
-		if(mld->flags & UDMF_ML_WRAPMIDTEX)
+		if((mld->flags & UdmfLineFlag::WrapMidTex) != UdmfLineFlag{})
 			ld->flags |= ML_WRAPMIDTEX;
 
 		P_CalculateLineDefProperties(ld);
@@ -2548,7 +2548,7 @@ static void P_LoadUDMFSideDefs(int lump)
 		if(sd->scalex_top != FRACUNIT || sd->scaley_top != FRACUNIT ||
 			sd->scalex_mid != FRACUNIT || sd->scaley_mid != FRACUNIT ||
 			sd->scalex_bottom != FRACUNIT || sd->scaley_bottom != FRACUNIT ||
-			sd->flags & SF_WRAPMIDTEX)
+			(sd->flags & SideFlag::WrapMidTex) != SideFlag{})
 			dsda_PreferOpenGL();
 	}
 }
