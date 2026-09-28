@@ -2928,9 +2928,9 @@ void dsda_InterpretConsoleCommands(const char* str, dboolean noise, dboolean rai
 	Z_Free(entry);
 }
 
-void dsda_UpdateConsole(int action)
+void dsda_UpdateConsole(const MenuAction action)
 {
-	if(action == MENU_BACKSPACE && console_entry_index > 0)
+	if(action == MenuAction::Backspace && console_entry_index > 0)
 	{
 		int shift_i;
 
@@ -2941,33 +2941,33 @@ void dsda_UpdateConsole(int action)
 		--console_entry_index;
 		dsda_UpdateConsoleDisplay();
 	}
-	else if(action == MENU_ENTER)
+	else if(action == MenuAction::Enter)
 	{
 		dsda_InterpretConsoleCommands(console_entry->text, true, false);
 
 		dsda_UpdateConsoleHistory();
 		dsda_ResetConsoleEntry();
 	}
-	else if(action == MENU_UP)
+	else if(action == MenuAction::Up)
 	{
 		if(console_entry->prev)
 			console_entry = console_entry->prev;
 		console_entry_index = strlen(console_entry->text);
 		dsda_UpdateConsoleDisplay();
 	}
-	else if(action == MENU_DOWN)
+	else if(action == MenuAction::Down)
 	{
 		if(console_entry->next)
 			console_entry = console_entry->next;
 		console_entry_index = strlen(console_entry->text);
 		dsda_UpdateConsoleDisplay();
 	}
-	else if(action == MENU_RIGHT && console_entry->text[console_entry_index])
+	else if(action == MenuAction::Right && console_entry->text[console_entry_index])
 	{
 		++console_entry_index;
 		dsda_UpdateConsoleDisplay();
 	}
-	else if(action == MENU_LEFT && console_entry_index > 0)
+	else if(action == MenuAction::Left && console_entry_index > 0)
 	{
 		--console_entry_index;
 		dsda_UpdateConsoleDisplay();

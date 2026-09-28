@@ -4882,7 +4882,7 @@ void M_LeaveSetupMenu()
 // action based on the state of the system.
 //
 
-static dboolean M_KeyBndResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_KeyBndResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	// changing an entry
 	if(setup_select)
@@ -5010,7 +5010,7 @@ static dboolean M_KeyBndResponder(const std::optional<KeyCode> ch, int action, e
 	return false;
 }
 
-static dboolean M_WeaponResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_WeaponResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	// changing an entry
 	if(setup_select)
@@ -5018,7 +5018,7 @@ static dboolean M_WeaponResponder(const std::optional<KeyCode> ch, int action, e
 		setup_menu_t* ptr1 = current_setup_menu + set_menu_itemon;
 		setup_menu_t* ptr2 = nullptr;
 
-		if(action != MENU_ENTER)
+		if(action != MenuAction::Enter)
 		{
 			int old_value;
 
@@ -5051,12 +5051,12 @@ static dboolean M_WeaponResponder(const std::optional<KeyCode> ch, int action, e
 	return false;
 }
 
-static dboolean M_AutoResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_AutoResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	// changing an entry
 	if(setup_select)
 	{
-		if(action == MENU_DOWN)
+		if(action == MenuAction::Down)
 		{
 			if(++color_palette_y == 16)
 				color_palette_y = 0;
@@ -5064,7 +5064,7 @@ static dboolean M_AutoResponder(const std::optional<KeyCode> ch, int action, eve
 			return true;
 		}
 
-		if(action == MENU_UP)
+		if(action == MenuAction::Up)
 		{
 			if(--color_palette_y < 0)
 				color_palette_y = 15;
@@ -5072,7 +5072,7 @@ static dboolean M_AutoResponder(const std::optional<KeyCode> ch, int action, eve
 			return true;
 		}
 
-		if(action == MENU_LEFT)
+		if(action == MenuAction::Left)
 		{
 			if(--color_palette_x < 0)
 				color_palette_x = 15;
@@ -5080,7 +5080,7 @@ static dboolean M_AutoResponder(const std::optional<KeyCode> ch, int action, eve
 			return true;
 		}
 
-		if(action == MENU_RIGHT)
+		if(action == MenuAction::Right)
 		{
 			if(++color_palette_x == 16)
 				color_palette_x = 0;
@@ -5088,7 +5088,7 @@ static dboolean M_AutoResponder(const std::optional<KeyCode> ch, int action, eve
 			return true;
 		}
 
-		if(action == MENU_ENTER)
+		if(action == MenuAction::Enter)
 		{
 			setup_menu_t* ptr1 = current_setup_menu + set_menu_itemon;
 
@@ -5102,7 +5102,7 @@ static dboolean M_AutoResponder(const std::optional<KeyCode> ch, int action, eve
 	return false;
 }
 
-static dboolean M_StringResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_StringResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	// changing an entry
 	if(setup_select)
@@ -5111,7 +5111,7 @@ static dboolean M_StringResponder(const std::optional<KeyCode> ch, int action, e
 
 		if((ptr1->m_flags & SetupFlag::String) != SetupFlag{}) // creating/editing a string?
 		{
-			if(action == MENU_BACKSPACE) // backspace and DEL
+			if(action == MenuAction::Backspace) // backspace and DEL
 			{
 				if(entry_string_index[entry_index] == 0)
 				{
@@ -5128,17 +5128,17 @@ static dboolean M_StringResponder(const std::optional<KeyCode> ch, int action, e
 					entry_string_index[i] = '\0';
 				}
 			}
-			else if(action == MENU_LEFT) // move cursor left
+			else if(action == MenuAction::Left) // move cursor left
 			{
 				if(entry_index > 0)
 					entry_index--;
 			}
-			else if(action == MENU_RIGHT) // move cursor right
+			else if(action == MenuAction::Right) // move cursor right
 			{
 				if(entry_string_index[entry_index] != 0)
 					entry_index++;
 			}
-			else if((action == MENU_ENTER) || (action == MENU_ESCAPE))
+			else if((action == MenuAction::Enter) || (action == MenuAction::Escape))
 			{
 				dsda_UpdateStringConfig(ptr1->config_id, entry_string_index, true);
 				M_SelectDone(ptr1); // phares 4/17/98
@@ -5172,9 +5172,9 @@ static dboolean M_StringResponder(const std::optional<KeyCode> ch, int action, e
 	return false;
 }
 
-static dboolean M_LevelTableResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_LevelTableResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
-	if(action == MENU_ENTER)
+	if(action == MenuAction::Enter)
 	{
 		int skill;
 		int map_index;
@@ -5200,14 +5200,14 @@ static dboolean M_LevelTableResponder(const std::optional<KeyCode> ch, int actio
 	return false;
 }
 
-static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	// changing an entry
 	if(setup_select)
 	{
 		setup_menu_t* ptr1 = current_setup_menu + set_menu_itemon;
 
-		if(action == MENU_ESCAPE) // Exit key = no change
+		if(action == MenuAction::Escape) // Exit key = no change
 		{
 			M_SelectDone(ptr1);   // phares 4/17/98
 			setup_gather = false; // finished gathering keys, if any
@@ -5216,7 +5216,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 
 		if((ptr1->m_flags & SetupFlag::YesNo) != SetupFlag{}) // yes or no setting?
 		{
-			if(action == MENU_ENTER)
+			if(action == MenuAction::Enter)
 			{
 				dsda_ToggleConfig(ptr1->config_id, true);
 			}
@@ -5234,7 +5234,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 				* allow backspace, and return to original value if bad
 				* value is entered).
 				*/
-				if(action == MENU_ENTER)
+				if(action == MenuAction::Enter)
 				{
 					if(gather_count)
 					{
@@ -5251,7 +5251,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 					return true;
 				}
 
-				if(action == MENU_BACKSPACE && gather_count)
+				if(action == MenuAction::Backspace && gather_count)
 				{
 					gather_count--;
 					return true;
@@ -5276,7 +5276,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 
 		if((ptr1->m_flags & SetupFlag::Choice) != SetupFlag{}) // selection of choices?
 		{
-			if(action == MENU_LEFT)
+			if(action == MenuAction::Left)
 			{
 				if((ptr1->m_flags & SetupFlag::StringChoice) != SetupFlag{})
 				{
@@ -5309,7 +5309,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 					}
 				}
 			}
-			else if(action == MENU_RIGHT)
+			else if(action == MenuAction::Right)
 			{
 				if((ptr1->m_flags & SetupFlag::StringChoice) != SetupFlag{})
 				{
@@ -5342,7 +5342,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 					}
 				}
 			}
-			else if(action == MENU_ENTER)
+			else if(action == MenuAction::Enter)
 			{
 				if((ptr1->m_flags & SetupFlag::StringChoice) != SetupFlag{})
 				{
@@ -5359,7 +5359,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 
 		if((ptr1->m_flags & SetupFlag::Thermo) != SetupFlag{})
 		{
-			if(action == MENU_LEFT)
+			if(action == MenuAction::Left)
 			{
 				if(dsda_IntConfig(ptr1->config_id) > 0)
 				{
@@ -5367,7 +5367,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 					S_StartOptionalSound(g_sfx_mnusli, g_sfx_stnmov, true);
 				}
 			}
-			else if(action == MENU_RIGHT)
+			else if(action == MenuAction::Right)
 			{
 				if(dsda_IntConfig(ptr1->config_id) < 15)
 				{
@@ -5375,7 +5375,7 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 					S_StartOptionalSound(g_sfx_mnusli, g_sfx_stnmov, true);
 				}
 			}
-			else if(action == MENU_ENTER)
+			else if(action == MenuAction::Enter)
 			{
 				M_SelectDone(ptr1);
 			}
@@ -5386,12 +5386,12 @@ static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, in
 	return false;
 }
 
-static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	setup_menu_t* ptr1 = current_setup_menu + set_menu_itemon;
 	setup_menu_t* ptr2 = nullptr;
 
-	if(action == MENU_DOWN)
+	if(action == MenuAction::Down)
 	{
 		if((ptr1->m_flags & SetupFlag::NoSelect) != SetupFlag{})
 			return true;
@@ -5413,7 +5413,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 		return true;
 	}
 
-	if(action == MENU_UP)
+	if(action == MenuAction::Up)
 	{
 		if((ptr1->m_flags & SetupFlag::NoSelect) != SetupFlag{})
 			return true;
@@ -5432,7 +5432,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 		return true;
 	}
 
-	if(action == MENU_CLEAR)
+	if(action == MenuAction::Clear)
 	{
 		if((ptr1->m_flags & SetupFlag::Input) != SetupFlag{})
 		{
@@ -5450,7 +5450,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 		return true;
 	}
 
-	if(action == MENU_ENTER)
+	if(action == MenuAction::Enter)
 	{
 		const SetupFlag flags = ptr1->m_flags;
 
@@ -5505,12 +5505,12 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 		return true;
 	}
 
-	if((action == MENU_ESCAPE) || (action == MENU_BACKSPACE))
+	if((action == MenuAction::Escape) || (action == MenuAction::Backspace))
 	{
 		M_LeaveSetupMenu();
-		if(action == MENU_ESCAPE) // Clear all menus
+		if(action == MenuAction::Escape) // Clear all menus
 			M_ClearMenus();
-		else // MENU_BACKSPACE = return to Setup Menu
+		else // MenuAction::Backspace = return to Setup Menu
 			if(currentMenu->prevMenu)
 			{
 				M_ChangeMenu(currentMenu->prevMenu, static_cast<MenuActive>(MenuActive::NoChange));
@@ -5529,7 +5529,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 	// The m_var1 field contains a pointer to the appropriate screen
 	// to move to.
 
-	if(action == MENU_LEFT)
+	if(action == MenuAction::Left)
 	{
 		ptr2 = ptr1;
 		do
@@ -5549,7 +5549,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 		while((ptr2->m_flags & SetupFlag::End) == SetupFlag{});
 	}
 
-	if(action == MENU_RIGHT)
+	if(action == MenuAction::Right)
 	{
 		ptr2 = ptr1;
 		do
@@ -5572,7 +5572,7 @@ static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int 
 	return false;
 }
 
-static dboolean M_SetupResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_SetupResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	if(set_keybnd_active && setup_select && ev->type == EventType::Mouse)
 		if(M_KeyBndResponder(ch, action, ev))
@@ -5610,7 +5610,7 @@ static dboolean M_SetupResponder(const std::optional<KeyCode> ch, int action, ev
 	return false;
 }
 
-static dboolean M_InactiveMenuResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_InactiveMenuResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	if(dsda_InputActivated(InputId::Help)) // phares
 	{
@@ -5739,7 +5739,7 @@ static dboolean M_InactiveMenuResponder(const std::optional<KeyCode> ch, int act
 	}
 
 	// Pop-up Main menu?
-	if(ch == KeyCode::Escape || action == MENU_ESCAPE ||
+	if(ch == KeyCode::Escape || action == MenuAction::Escape ||
 		(!in_game && (ch == KeyCode::Enter || ch == KeyCode::Space || ch == KeyCode::KeypadEnter ||
 			dsda_InputActivated(InputId::Fire) || dsda_InputActivated(InputId::Use) || dsda_InputActivated(InputId::MenuEnter)))) // phares
 	{
@@ -5903,19 +5903,19 @@ enum struct Confirmation : int32_t
 	Yes  = 1,
 };
 
-static Confirmation M_EventToConfirmation(const std::optional<KeyCode> ch, int action, event_t* ev)
+static Confirmation M_EventToConfirmation(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
-	if(ch == KeyCode::Y || action == MENU_ENTER)
+	if(ch == KeyCode::Y || action == MenuAction::Enter)
 		return Confirmation::Yes;
-	else if(ch == KeyCode::Space || ch == KeyCode::Escape || ch == KeyCode::N || action == MENU_BACKSPACE)
+	else if(ch == KeyCode::Space || ch == KeyCode::Escape || ch == KeyCode::N || action == MenuAction::Backspace)
 		return Confirmation::No;
 	else
 		return Confirmation::Null;
 }
 
-static dboolean M_MainNavigationResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_MainNavigationResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
-	if(action == MENU_DOWN) // phares 3/7/98
+	if(action == MenuAction::Down) // phares 3/7/98
 	{
 		do
 		{
@@ -5929,7 +5929,7 @@ static dboolean M_MainNavigationResponder(const std::optional<KeyCode> ch, int a
 		return true;
 	}
 
-	if(action == MENU_UP) // phares 3/7/98
+	if(action == MenuAction::Up) // phares 3/7/98
 	{
 		do
 		{
@@ -5943,7 +5943,7 @@ static dboolean M_MainNavigationResponder(const std::optional<KeyCode> ch, int a
 		return true;
 	}
 
-	if(action == MENU_LEFT) // phares 3/7/98
+	if(action == MenuAction::Left) // phares 3/7/98
 	{
 		if(currentMenu->menuitems[itemOn].routine &&
 			currentMenu->menuitems[itemOn].status == MenuItemType::Thermo)
@@ -5954,7 +5954,7 @@ static dboolean M_MainNavigationResponder(const std::optional<KeyCode> ch, int a
 		return true;
 	}
 
-	if(action == MENU_RIGHT) // phares 3/7/98
+	if(action == MenuAction::Right) // phares 3/7/98
 	{
 		if(currentMenu->menuitems[itemOn].routine &&
 			currentMenu->menuitems[itemOn].status == MenuItemType::Thermo)
@@ -5965,7 +5965,7 @@ static dboolean M_MainNavigationResponder(const std::optional<KeyCode> ch, int a
 		return true;
 	}
 
-	if(action == MENU_ENTER) // phares 3/7/98
+	if(action == MenuAction::Enter) // phares 3/7/98
 	{
 		if(currentMenu->menuitems[itemOn].routine &&
 			currentMenu->menuitems[itemOn].status != MenuItemType::Inactive)
@@ -5987,7 +5987,7 @@ static dboolean M_MainNavigationResponder(const std::optional<KeyCode> ch, int a
 		return true;
 	}
 
-	if(action == MENU_ESCAPE) // phares 3/7/98
+	if(action == MenuAction::Escape) // phares 3/7/98
 	{
 		currentMenu->lastOn = itemOn;
 		M_ClearMenus();
@@ -5995,7 +5995,7 @@ static dboolean M_MainNavigationResponder(const std::optional<KeyCode> ch, int a
 		return true;
 	}
 
-	if(action == MENU_BACKSPACE) // phares 3/7/98
+	if(action == MenuAction::Backspace) // phares 3/7/98
 	{
 		currentMenu->lastOn = itemOn;
 
@@ -6051,16 +6051,16 @@ static dboolean M_MainNavigationResponder(const std::optional<KeyCode> ch, int a
 	return false;
 }
 
-static dboolean M_ConsoleResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_ConsoleResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	if(ev->type == EventType::Text)
 	{
 		dsda_UpdateConsoleText(ev->text);
 		return true;
 	}
-	else if(action != MENU_NULL)
+	else if(action)
 	{
-		dsda_UpdateConsole(action);
+		dsda_UpdateConsole(*action);
 		return true;
 	}
 	else if(ch)
@@ -6069,7 +6069,7 @@ static dboolean M_ConsoleResponder(const std::optional<KeyCode> ch, int action, 
 	return false;
 }
 
-static dboolean M_SaveResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_SaveResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	if(delete_verify) // [FG] delete a savegame
 	{
@@ -6091,9 +6091,9 @@ static dboolean M_SaveResponder(const std::optional<KeyCode> ch, int action, eve
 		return true;
 	}
 
-	if(saveStringEnter && (ch || action != MENU_NULL))
+	if(saveStringEnter && (ch || action))
 	{
-		if(ch == KeyCode::Backspace || action == MENU_BACKSPACE)
+		if(ch == KeyCode::Backspace || action == MenuAction::Backspace)
 		{
 			if(saveCharIndex > 0)
 			{
@@ -6108,12 +6108,12 @@ static dboolean M_SaveResponder(const std::optional<KeyCode> ch, int action, eve
 				savegamestrings[saveSlot][saveCharIndex] = 0;
 			}
 		}
-		else if(action == MENU_ESCAPE) // phares 3/7/98
+		else if(action == MenuAction::Escape) // phares 3/7/98
 		{
 			saveStringEnter = 0;
 			strcpy(&savegamestrings[saveSlot][0], saveOldString);
 		}
-		else if(action == MENU_ENTER) // phares 3/7/98
+		else if(action == MenuAction::Enter) // phares 3/7/98
 		{
 			if(ev && ev->type == EventType::Mouse &&
 				currentMenu == &SaveDef &&
@@ -6143,7 +6143,7 @@ static dboolean M_SaveResponder(const std::optional<KeyCode> ch, int action, eve
 	{
 		int diff = 0;
 
-		if(action == MENU_ENTER)
+		if(action == MenuAction::Enter)
 		{
 			if(currentMenu->menuitems[itemOn].routine &&
 				currentMenu->menuitems[itemOn].status != MenuItemType::Inactive)
@@ -6164,9 +6164,9 @@ static dboolean M_SaveResponder(const std::optional<KeyCode> ch, int action, eve
 			return true;
 		}
 
-		if(action == MENU_LEFT)
+		if(action == MenuAction::Left)
 			diff = -1;
-		else if(action == MENU_RIGHT)
+		else if(action == MenuAction::Right)
 			diff = 1;
 
 		if(diff)
@@ -6183,7 +6183,7 @@ static dboolean M_SaveResponder(const std::optional<KeyCode> ch, int action, eve
 		}
 	}
 
-	if(action == MENU_CLEAR) // [FG] delete a savegame
+	if(action == MenuAction::Clear) // [FG] delete a savegame
 	{
 		if(LoadMenue[itemOn].status != MenuItemType::Inactive)
 		{
@@ -6201,7 +6201,7 @@ static dboolean M_SaveResponder(const std::optional<KeyCode> ch, int action, eve
 	return false;
 }
 
-static dboolean M_MessageResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
+static dboolean M_MessageResponder(const std::optional<KeyCode> ch, const std::optional<MenuAction> action, event_t* ev)
 {
 	Confirmation confirmation = Confirmation::No;
 
@@ -6271,61 +6271,59 @@ static std::optional<KeyCode> M_EventToCharacter(event_t* ev)
 	return std::nullopt;
 }
 
-static int M_CurrentAction()
+static std::optional<MenuAction> M_CurrentAction()
 {
 	if(dsda_InputActivated(InputId::MenuLeft))
 	{
-		return MENU_LEFT;
+		return MenuAction::Left;
 	}
 	else if(dsda_InputActivated(InputId::MenuRight))
 	{
-		return MENU_RIGHT;
+		return MenuAction::Right;
 	}
 	else if(dsda_InputActivated(InputId::MenuUp))
 	{
-		return MENU_UP;
+		return MenuAction::Up;
 	}
 	else if(dsda_InputActivated(InputId::MenuDown))
 	{
-		return MENU_DOWN;
+		return MenuAction::Down;
 	}
 	else if(dsda_InputActivated(InputId::MenuBackspace))
 	{
-		return MENU_BACKSPACE;
+		return MenuAction::Backspace;
 	}
 	else if(dsda_InputActivated(InputId::MenuEnter))
 	{
-		return MENU_ENTER;
+		return MenuAction::Enter;
 	}
 	else if(dsda_InputActivated(InputId::MenuEscape))
 	{
-		return MENU_ESCAPE;
+		return MenuAction::Escape;
 	}
 	else if(dsda_InputActivated(InputId::MenuClear))
 	{
-		return MENU_CLEAR;
+		return MenuAction::Clear;
 	}
 
-	return MENU_NULL;
+	return std::nullopt;
 }
 
 #include "m_mouse.inl"
 
 dboolean M_Responder(event_t* ev)
 {
-	int action;
-
 	const std::optional<KeyCode> ch = M_EventToCharacter(ev);
-	action = M_CurrentAction();
+	const std::optional<MenuAction> action = M_CurrentAction();
 
-	if(M_ConsoleOpen() && action != MENU_ESCAPE)
+	if(M_ConsoleOpen() && action != MenuAction::Escape)
 		if(M_ConsoleResponder(ch, action, ev))
 			return true;
 
 	if(M_MouseResponder(ev))
 		return true;
 
-	if(ch || action != MENU_NULL)
+	if(ch || action)
 	{
 		if(setup_active)
 			menu_mouse_setup_scroll = KEYBOARD_NAV;
@@ -6355,7 +6353,7 @@ dboolean M_Responder(event_t* ev)
 		return false;
 	}
 
-	if(!ch && action == MENU_NULL)
+	if(!ch && !action)
 		return false; // we can't use the event here
 
 	if(setup_active)

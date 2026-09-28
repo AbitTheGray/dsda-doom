@@ -67,6 +67,20 @@ enum struct SetupFlag : uint32_t
 };
 ENUM_FLAGS_FUNC(SetupFlag)
 
+// What a menu input asks for, whichever key, mouse or controller button produced it.
+// "No action" is an empty std::optional<MenuAction>.
+enum struct MenuAction : uint8_t
+{
+	Left,
+	Right,
+	Up,
+	Down,
+	Backspace,
+	Enter,
+	Escape,
+	Clear,
+};
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -227,15 +241,6 @@ typedef struct menu_s
 
 #define SAVESTRINGSIZE 24
 
-#define MENU_NULL      -1
-#define MENU_LEFT      -2
-#define MENU_RIGHT     -3
-#define MENU_UP        -4
-#define MENU_DOWN      -5
-#define MENU_BACKSPACE -6
-#define MENU_ENTER     -7
-#define MENU_ESCAPE    -8
-#define MENU_CLEAR     -9
 
 void M_SetupNextMenu(menu_t* menudef);
 void M_DrawDelVerify();
