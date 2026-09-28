@@ -187,7 +187,7 @@ static int ParseStandardProperty(Scanner& scanner, MapEntry* mape)
 		ParseLumpName(scanner, mape->nextmap);
 		if(!G_ValidateMapName(mape->nextmap, nullptr, nullptr))
 		{
-			scanner.ErrorF("Invalid map name %s.", mape->nextmap);
+			scanner.ErrorF("Invalid map name {}.", std::string_view(mape->nextmap));
 			return 0;
 		}
 	}
@@ -196,7 +196,7 @@ static int ParseStandardProperty(Scanner& scanner, MapEntry* mape)
 		ParseLumpName(scanner, mape->nextsecret);
 		if(!G_ValidateMapName(mape->nextsecret, nullptr, nullptr))
 		{
-			scanner.ErrorF("Invalid map name %s", mape->nextsecret);
+			scanner.ErrorF("Invalid map name {}", std::string_view(mape->nextsecret));
 			return 0;
 		}
 	}
@@ -362,7 +362,7 @@ static int ParseStandardProperty(Scanner& scanner, MapEntry* mape)
 
 			if(type == NAME_NOT_FOUND)
 			{
-				scanner.ErrorF("Unknown thing type %s", scanner.string);
+				scanner.ErrorF("Unknown thing type {}", scanner.string);
 				return 0;
 			}
 
@@ -415,7 +415,7 @@ static int ParseMapEntry(Scanner& scanner, MapEntry* val)
 	scanner.MustGetToken(TokenType::Identifier);
 	if(!G_ValidateMapName(scanner.string, nullptr, nullptr))
 	{
-		scanner.ErrorF("Invalid map name %s", scanner.string);
+		scanner.ErrorF("Invalid map name {}", scanner.string);
 		return 0;
 	}
 

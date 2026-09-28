@@ -27,6 +27,7 @@
 
 #pragma once
 
+#include <format>
 #include <functional>
 #include <string_view>
 #include <utility>
@@ -100,7 +101,12 @@ public:
 	bool TokensLeft() const;
 	void Error(TokenType token);
 	void Error(const char* mustget);
-	void ErrorF(const char* msg, ...);
+	/// A parse error at the current position, reported as "line:position:message.".
+	template<typename... Args>
+	void ErrorF(const std::format_string<Args...> format, Args&&... args)
+	{
+		error(std::format("{}:{}:{}.", GetLine(), GetLinePos(), std::format(format, std::forward<Args>(args)...)));
+	}
 	void Unget() { needNext = true; }
 	/// Called with the finished message of a parse error; must not return.
 	using ErrorCallback = std::function<void(std::string_view message)>;

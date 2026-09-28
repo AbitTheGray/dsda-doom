@@ -488,16 +488,6 @@ void Scanner::Error(const char* mustget)
 		error(std::format("{}:{}:Expected '{}' but got '{}' instead.", GetLine(), GetLinePos(), mustget, static_cast<char>(std::to_underlying(this->token))));
 }
 
-void Scanner::ErrorF(const char* msg, ...)
-{
-	char buffer[1024];
-	va_list ap;
-	va_start(ap, msg);
-	vsnprintf(buffer, 1024, msg, ap);
-	va_end(ap);
-	error(std::format("{}:{}:{}.", GetLine(), GetLinePos(), std::string_view(buffer)));
-}
-
 void Scanner::MustGetToken(TokenType token)
 {
 	if(!CheckToken(token))

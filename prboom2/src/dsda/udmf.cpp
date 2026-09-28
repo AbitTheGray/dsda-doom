@@ -1026,7 +1026,7 @@ static void dsda_ParseUDMFIdentifier(Scanner& scanner)
 		}
 		else
 		{
-			scanner.ErrorF("Unsupported UDMF namespace \"%s\"", scanner.string);
+			scanner.ErrorF("Unsupported UDMF namespace \"{}\"", scanner.string);
 		}
 
 		scanner.MustGetToken(static_cast<TokenType>(';'));
