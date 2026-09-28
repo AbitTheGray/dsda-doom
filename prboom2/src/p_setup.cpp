@@ -1833,9 +1833,9 @@ extern "C" LineFlag P_TranslateZDoomLineFlags(const uint32_t raw_flags, LineActi
 		LineActivation::MonsterCross,
 		LineActivation::Impact,
 		LineActivation::Push,
-		LineActivation::MissileCross,
+		LineActivation::ProjectileCross,
 		LineActivation::Use,
-		LineActivation::Impact | LineActivation::MissileCross
+		LineActivation::Impact | LineActivation::ProjectileCross
 	};
 
 	const HexenLineFlag flags = static_cast<HexenLineFlag>(raw_flags);
@@ -1871,7 +1871,7 @@ extern "C" LineFlag P_TranslateHexenLineFlags(const uint32_t raw_flags, LineActi
 		LineActivation::MonsterCross,
 		LineActivation::Impact,
 		LineActivation::Push,
-		LineActivation::MissileCross,
+		LineActivation::ProjectileCross,
 		LineActivation::None,
 		LineActivation::None
 	};
@@ -2200,7 +2200,7 @@ static void P_LoadUDMFLineDefs(int lump)
 			ld->activation |= LineActivation::Push;
 
 		if((mld->flags & UdmfLineFlag::MissileCross) != UdmfLineFlag{})
-			ld->activation |= LineActivation::MissileCross;
+			ld->activation |= LineActivation::ProjectileCross;
 
 		if((mld->flags & UdmfLineFlag::AnyCross) != UdmfLineFlag{})
 			ld->activation |= LineActivation::AnyCross | LineActivation::Cross | LineActivation::MonsterCross;

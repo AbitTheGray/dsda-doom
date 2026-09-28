@@ -9675,7 +9675,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		10,                                                       // damage
 		SfxId::None,                                                 // activesound
 		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity,   // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::FireDamage // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -9731,7 +9731,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		8,                                                      // damage
 		SfxId::None,                                               // activesound
 		MobjFlag::Missile | MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::DropOff, // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross                // flags2
 	},
 
 	{
@@ -9815,7 +9815,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		5,                                                      // damage
 		SfxId::None,                                               // activesound
 		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity, // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross                // flags2
 	},
 
 	{
@@ -10011,7 +10011,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		8,                                                                       // damage
 		SfxId::None,                                                                // activesound
 		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity,                  // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::DontDraw | MobjFlag2::FireDamage // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross | MobjFlag2::DontDraw | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -10039,7 +10039,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		3,                                                                     // damage
 		SfxId::None,                                                              // activesound
 		MobjFlag::NoBlockmap | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::AltShadow | MobjFlag::Missile, // flags
-		MobjFlag2::NoTeleport | MobjFlag2::SeekerMissile | MobjFlag2::Rip | MobjFlag2::Impact | MobjFlag2::PCross // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::SeekerMissile | MobjFlag2::Rip | MobjFlag2::Impact | MobjFlag2::ProjectileCross // flags2
 	},
 
 	{
@@ -10235,7 +10235,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		2,                                                                                    // damage
 		SfxId::None,                                                                             // activesound
 		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity,                               // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Rip | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::NoDmgThrust | MobjFlag2::CannotPush // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Rip | MobjFlag2::Impact | MobjFlag2::ProjectileCross | MobjFlag2::NoDmgThrust | MobjFlag2::CannotPush // flags2
 	},
 
 	{
@@ -10291,7 +10291,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		8,                                                      // damage
 		SfxId::None,                                               // activesound
 		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Missile | MobjFlag::DropOff, // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross                // flags2
 	},
 
 	{
@@ -10319,7 +10319,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		8,                                                      // damage
 		SfxId::None,                                               // activesound
 		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::Missile | MobjFlag::DropOff, // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross                // flags2
 	},
 
 	{
@@ -10375,7 +10375,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		6,                                                                  // damage
 		SfxId::None,                                                           // activesound
 		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity,             // flags
-		MobjFlag2::NoTeleport | MobjFlag2::FireDamage | MobjFlag2::Rip | MobjFlag2::Impact | MobjFlag2::PCross // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage | MobjFlag2::Rip | MobjFlag2::Impact | MobjFlag2::ProjectileCross // flags2
 	},
 
 	{
@@ -10403,7 +10403,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		4,                                                                            // damage
 		SfxId::None,                                                                     // activesound
 		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity,                       // flags
-		MobjFlag2::NoTeleport | MobjFlag2::FireDamage | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::SeekerMissile // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::FireDamage | MobjFlag2::Impact | MobjFlag2::ProjectileCross | MobjFlag2::SeekerMissile // flags2
 	},
 
 	{
@@ -10739,7 +10739,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                                       // damage
 		SfxId::None,                                                // activesound
 		MobjFlag::NoBlockmap | MobjFlag::Missile | MobjFlag::DropOff | MobjFlag::NoGravity,  // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::IceDamage // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross | MobjFlag2::IceDamage // flags2
 	},
 
 	{
@@ -11075,7 +11075,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                      // damage
 		SfxId::HexenCentaurActive,                                               // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill,                                 // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::MonsterCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -11103,7 +11103,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                      // damage
 		SfxId::HexenCentaurActive,                                               // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill,                                 // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::MonsterCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -11131,7 +11131,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		4,                                                      // damage
 		SfxId::None,                                               // activesound
 		MobjFlag::Missile | MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::DropOff, // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross                // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross                // flags2
 	},
 
 	{
@@ -11215,7 +11215,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                       // damage
 		SfxId::HexenDemonActive,                                  // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill,                  // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MonsterCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -11383,7 +11383,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		5,                                                        // damage
 		SfxId::None,                                                 // activesound
 		MobjFlag::Missile | MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::DropOff,   // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::FireDamage // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -11411,7 +11411,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                       // damage
 		SfxId::HexenDemonActive,                                  // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill,                  // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MonsterCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -11579,7 +11579,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		5,                                                        // damage
 		SfxId::None,                                                 // activesound
 		MobjFlag::Missile | MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::DropOff,   // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::FireDamage // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -11663,7 +11663,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		5,                                                                       // damage
 		SfxId::None,                                                                // activesound
 		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::DropOff | MobjFlag::Missile,                  // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::FootClip | MobjFlag2::FireDamage // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross | MobjFlag2::FootClip | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -11971,7 +11971,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                  // damage
 		SfxId::None,                                                                           // activesound
 		MobjFlag::Solid | MobjFlag::CountKill | MobjFlag::NoBlood,                                               // flags
-		MobjFlag2::PassMobj | MobjFlag2::DontDraw | MobjFlag2::CantLeaveFloorpic | MobjFlag2::NonShootable | MobjFlag2::MCross // flags2
+		MobjFlag2::PassMobj | MobjFlag2::DontDraw | MobjFlag2::CantLeaveFloorpic | MobjFlag2::NonShootable | MobjFlag2::MonsterCross // flags2
 	},
 
 	{
@@ -11999,7 +11999,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                                  // damage
 		SfxId::None,                                                                           // activesound
 		MobjFlag::Solid | MobjFlag::CountKill | MobjFlag::NoBlood,                                               // flags
-		MobjFlag2::PassMobj | MobjFlag2::DontDraw | MobjFlag2::CantLeaveFloorpic | MobjFlag2::NonShootable | MobjFlag2::MCross // flags2
+		MobjFlag2::PassMobj | MobjFlag2::DontDraw | MobjFlag2::CantLeaveFloorpic | MobjFlag2::NonShootable | MobjFlag2::MonsterCross // flags2
 	},
 
 	{
@@ -12951,7 +12951,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		3,                                                       // damage
 		SfxId::HexenEttinActive,                                  // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill,                  // flags
-		MobjFlag2::FootClip | MobjFlag2::PushWall | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
+		MobjFlag2::FootClip | MobjFlag2::PushWall | MobjFlag2::MonsterCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -13007,7 +13007,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                                                                         // damage
 		SfxId::HexenFiredActive,                                                                    // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::DropOff | MobjFlag::NoGravity | MobjFlag::Float,             // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::Invulnerable | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::Invulnerable | MobjFlag2::MonsterCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -13231,7 +13231,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		1,                                                                       // damage
 		SfxId::None,                                                                // activesound
 		MobjFlag::NoBlockmap | MobjFlag::NoGravity | MobjFlag::DropOff | MobjFlag::Missile,                  // flags
-		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::PCross | MobjFlag2::FootClip | MobjFlag2::FireDamage // flags2
+		MobjFlag2::NoTeleport | MobjFlag2::Impact | MobjFlag2::ProjectileCross | MobjFlag2::FootClip | MobjFlag2::FireDamage // flags2
 	},
 
 	{
@@ -13259,7 +13259,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                       // damage
 		SfxId::HexenIceguyActive,                                                 // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::NoBlood,                     // flags
-		MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::IceDamage | MobjFlag2::MCross | MobjFlag2::TeleStomp // flags2
+		MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::IceDamage | MobjFlag2::MonsterCross | MobjFlag2::TeleStomp // flags2
 	},
 
 	{
@@ -13455,7 +13455,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                      // damage
 		SfxId::None,                                                               // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill,                                 // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall | MobjFlag2::MCross // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall | MobjFlag2::MonsterCross // flags2
 	},
 
 	{
@@ -13483,7 +13483,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                      // damage
 		SfxId::None,                                                               // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill,                                 // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall | MobjFlag2::MCross // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall | MobjFlag2::MonsterCross // flags2
 	},
 
 	{
@@ -13511,7 +13511,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                      // damage
 		SfxId::None,                                                               // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill,                                 // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall | MobjFlag2::MCross // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::TeleStomp | MobjFlag2::PushWall | MobjFlag2::MonsterCross // flags2
 	},
 
 	{
@@ -13539,7 +13539,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		9,                                                                 // damage
 		SfxId::HexenSorcererActive,                                         // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::NoBlood,               // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::Boss | MobjFlag2::MCross // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::PushWall | MobjFlag2::Boss | MobjFlag2::MonsterCross // flags2
 	},
 
 	{
@@ -13903,7 +13903,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		15,                                                                 // damage
 		SfxId::HexenKoraxActive,                                             // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill,                             // flags
-		MobjFlag2::FootClip | MobjFlag2::PushWall | MobjFlag2::MCross | MobjFlag2::TeleStomp | MobjFlag2::Boss // flags2
+		MobjFlag2::FootClip | MobjFlag2::PushWall | MobjFlag2::MonsterCross | MobjFlag2::TeleStomp | MobjFlag2::Boss // flags2
 	},
 
 	{
@@ -14099,7 +14099,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                    // damage
 		SfxId::HexenDemonActive,                                               // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::AltShadow | MobjFlag::NoBlood,   // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MonsterCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
 	},
 
 	{
@@ -14127,7 +14127,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                    // damage
 		SfxId::HexenDemonActive,                                               // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::AltShadow | MobjFlag::NoBlood,   // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MonsterCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
 	},
 
 	{
@@ -14155,7 +14155,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		3,                                                                    // damage
 		SfxId::HexenEttinActive,                                               // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::AltShadow | MobjFlag::NoBlood,   // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MonsterCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
 	},
 
 	{
@@ -14183,7 +14183,7 @@ raven_mobjinfo_t hexen_mobjinfo[std::to_underlying(MobjType::HexenCount)] = {
 		0,                                                                    // damage
 		SfxId::HexenCentaurActive,                                             // activesound
 		MobjFlag::Solid | MobjFlag::Shootable | MobjFlag::CountKill | MobjFlag::AltShadow | MobjFlag::NoBlood,   // flags
-		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
+		MobjFlag2::FootClip | MobjFlag2::PassMobj | MobjFlag2::MonsterCross | MobjFlag2::PushWall | MobjFlag2::Blasted // flags2
 	},
 
 	{

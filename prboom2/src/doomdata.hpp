@@ -166,7 +166,7 @@ enum struct LineActivation : uint16_t
 	MonsterCross = Bit<uint16_t>(2u),
 	Impact = Bit<uint16_t>(3u),
 	Push = Bit<uint16_t>(4u),
-	MissileCross = Bit<uint16_t>(5u),
+	ProjectileCross = Bit<uint16_t>(5u),
 	UseBack = Bit<uint16_t>(6u),
 	MonsterPush = Bit<uint16_t>(7u),
 	MonsterUse = Bit<uint16_t>(8u),

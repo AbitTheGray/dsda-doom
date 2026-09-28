@@ -196,15 +196,15 @@ static void dsda_MigrateMobjInfo()
 		for(i = mobj_types_zero; i < num_mobj_types; ++i)
 		{
 			if((mobjinfo[i].flags & MobjFlag::CountKill) != MobjFlag{})
-				mobjinfo[i].flags2 |= MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::CanUseWalls;
+				mobjinfo[i].flags2 |= MobjFlag2::MonsterCross | MobjFlag2::PushWall | MobjFlag2::CanUseWalls;
 
 			if((mobjinfo[i].flags & MobjFlag::Missile) != MobjFlag{})
-				mobjinfo[i].flags2 |= MobjFlag2::PCross | MobjFlag2::Impact;
+				mobjinfo[i].flags2 |= MobjFlag2::ProjectileCross | MobjFlag2::Impact;
 		}
 
 		if(!raven)
 		{
-			mobjinfo[std::to_underlying(MobjType::Skull)].flags2 |= MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::CanUseWalls;
+			mobjinfo[std::to_underlying(MobjType::Skull)].flags2 |= MobjFlag2::MonsterCross | MobjFlag2::PushWall | MobjFlag2::CanUseWalls;
 			mobjinfo[std::to_underlying(MobjType::Player)].flags2 |= MobjFlag2::WindThrust | MobjFlag2::PushWall | MobjFlag2::CanUseWalls;
 		}
 	}
@@ -215,15 +215,15 @@ static void dsda_MigrateMobjInfo()
 		for(i = mobj_types_zero; i < num_mobj_types; ++i)
 		{
 			if((mobjinfo[i].flags & MobjFlag::CountKill) != MobjFlag{})
-				mobjinfo[i].flags2 -= (MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::CanUseWalls);
+				mobjinfo[i].flags2 -= (MobjFlag2::MonsterCross | MobjFlag2::PushWall | MobjFlag2::CanUseWalls);
 
 			if((mobjinfo[i].flags & MobjFlag::Missile) != MobjFlag{})
-				mobjinfo[i].flags2 -= (MobjFlag2::PCross | MobjFlag2::Impact);
+				mobjinfo[i].flags2 -= (MobjFlag2::ProjectileCross | MobjFlag2::Impact);
 		}
 
 		if(!raven)
 		{
-			mobjinfo[std::to_underlying(MobjType::Skull)].flags2 -= (MobjFlag2::MCross | MobjFlag2::PushWall | MobjFlag2::CanUseWalls);
+			mobjinfo[std::to_underlying(MobjType::Skull)].flags2 -= (MobjFlag2::MonsterCross | MobjFlag2::PushWall | MobjFlag2::CanUseWalls);
 			mobjinfo[std::to_underlying(MobjType::Player)].flags2 -= (MobjFlag2::WindThrust | MobjFlag2::PushWall | MobjFlag2::CanUseWalls);
 		}
 	}

@@ -1546,13 +1546,13 @@ extern "C" void P_CrossHexenSpecialLine(line_t* line, int side, mobj_t* thing, d
 	{
 		P_ActivateLine(line, thing, side, LineActivation::Cross);
 	}
-	else if((thing->flags2 & MobjFlag2::MCross) != MobjFlag2{})
+	else if((thing->flags2 & MobjFlag2::MonsterCross) != MobjFlag2{})
 	{
 		P_ActivateLine(line, thing, side, LineActivation::MonsterCross);
 	}
-	else if((thing->flags2 & MobjFlag2::PCross) != MobjFlag2{})
+	else if((thing->flags2 & MobjFlag2::ProjectileCross) != MobjFlag2{})
 	{
-		P_ActivateLine(line, thing, side, LineActivation::MissileCross);
+		P_ActivateLine(line, thing, side, LineActivation::ProjectileCross);
 	}
 }
 
@@ -2493,13 +2493,13 @@ extern "C" void P_CrossZDoomSpecialLine(line_t* line, int side, mobj_t* thing, d
 	{
 		P_ActivateLine(line, thing, side, LineActivation::Cross);
 	}
-	else if((thing->flags2 & MobjFlag2::MCross) != MobjFlag2{})
+	else if((thing->flags2 & MobjFlag2::MonsterCross) != MobjFlag2{})
 	{
 		P_ActivateLine(line, thing, side, LineActivation::MonsterCross);
 	}
-	else if((thing->flags2 & MobjFlag2::PCross) != MobjFlag2{})
+	else if((thing->flags2 & MobjFlag2::ProjectileCross) != MobjFlag2{})
 	{
-		P_ActivateLine(line, thing, side, LineActivation::MissileCross);
+		P_ActivateLine(line, thing, side, LineActivation::ProjectileCross);
 	}
 	else if(line->special == std::to_underlying(ZDoomLineSpecial::Teleport) ||
 		line->special == std::to_underlying(ZDoomLineSpecial::TeleportNoFog) ||
@@ -5462,12 +5462,12 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 	if(
 		line->special == std::to_underlying(ZDoomLineSpecial::Teleport) &&
 		(lineActivation & LineActivation::Cross) != LineActivation{} &&
-		activationType == LineActivation::MissileCross &&
+		activationType == LineActivation::ProjectileCross &&
 		mo && (mo->flags & MobjFlag::Missile) != MobjFlag{}
 	)
 	{
 		// Let missiles use regular player teleports
-		lineActivation |= LineActivation::MissileCross;
+		lineActivation |= LineActivation::ProjectileCross;
 	}
 
 	if(activationType == LineActivation::Use || activationType == LineActivation::UseBack)
