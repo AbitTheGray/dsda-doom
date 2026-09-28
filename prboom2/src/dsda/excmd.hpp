@@ -5,21 +5,17 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "d_ticcmd.hpp"
+
+// `excmd_t::look` value that resets the view pitch instead of changing it.
+inline constexpr int16_t k_ExCmdLookReset = -32768;
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#define XC_JUMP   0x01
-#define XC_SAVE   0x02
-#define XC_LOAD   0x04
-#define XC_GOD    0x08
-#define XC_NOCLIP 0x10
-#define XC_LOOK   0x20
-
-#define XC_LOOK_RESET -32768
 
 void dsda_EnableExCmd();
 void dsda_DisableExCmd();

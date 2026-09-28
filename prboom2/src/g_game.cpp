@@ -789,7 +789,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 	}
 
 	if(players[consoleplayer].mo && players[consoleplayer].mo->pitch && !dsda_MouseLook())
-		dsda_QueueExCmdLook(XC_LOOK_RESET);
+		dsda_QueueExCmdLook(k_ExCmdLookReset);
 
 	if(dsda_FreeAim())
 	{
@@ -1616,13 +1616,13 @@ void G_Ticker()
 				{
 					excmd_t* ex = &players[i].cmd.ex;
 
-					if(ex->actions & XC_SAVE)
+					if((ex->actions & ExCmdAction::Save) != ExCmdAction{})
 					{
 						savegameslot = ex->save_slot;
 						G_DoSaveGame(true);
 					}
 
-					if(ex->actions & XC_LOAD)
+					if((ex->actions & ExCmdAction::Load) != ExCmdAction{})
 					{
 						savegameslot = ex->load_slot;
 						gameaction = GameAction::LoadGame;
@@ -1632,17 +1632,17 @@ void G_Ticker()
 						R_SmoothPlaying_Reset(nullptr);
 					}
 
-					if(ex->actions & XC_GOD)
+					if((ex->actions & ExCmdAction::God) != ExCmdAction{})
 					{
 						M_CheatGod();
 					}
 
-					if(ex->actions & XC_NOCLIP)
+					if((ex->actions & ExCmdAction::NoClip) != ExCmdAction{})
 					{
 						M_CheatNoClip();
 					}
 
-					if(ex->actions & XC_LOOK && ex->look != XC_LOOK_RESET && !dsda_MouseLook())
+					if((ex->actions & ExCmdAction::Look) != ExCmdAction{} && ex->look != k_ExCmdLookReset && !dsda_MouseLook())
 					{
 						dsda_UpdateIntConfig(ConfigId::Freelook, 1, false);
 					}

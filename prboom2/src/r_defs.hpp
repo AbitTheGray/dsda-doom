@@ -11,6 +11,19 @@
 #include "d_think.hpp"
 #include "p_mobj.hpp"
 
+#include "cpp/Util.hpp"
+
+// Silhouette, needed for clipping Segs (mainly)
+// and sprites representing things.
+enum struct Silhouette : uint8_t
+{
+	None = 0,
+	Bottom = Bit<uint8_t>(0u),
+	Top = Bit<uint8_t>(1u),
+	Both = Bottom | Top,
+};
+ENUM_FLAGS_FUNC(Silhouette)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -25,13 +38,6 @@ extern "C"
 // to handle sound origins in sectors.
 
 // SECTORS do store MObjs anyway.
-
-// Silhouette, needed for clipping Segs (mainly)
-// and sprites representing things.
-#define SIL_NONE    0
-#define SIL_BOTTOM  1
-#define SIL_TOP     2
-#define SIL_BOTH    3
 
 #define MAXDRAWSEGS   256
 
@@ -447,7 +453,7 @@ typedef struct drawseg_s
 	seg_t* curline;
 	short x1, x2;
 	fixed_t scale1, scale2, scalestep;
-	int silhouette;     // 0=none, 1=bottom, 2=top, 3=both
+	Silhouette silhouette;
 	fixed_t bsilheight; // do not clip sprites above this
 	fixed_t tsilheight; // do not clip sprites below this
 

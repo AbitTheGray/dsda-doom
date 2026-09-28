@@ -99,7 +99,7 @@ void gld_InitSky()
 
 void gld_InitFrameSky()
 {
-	SkyBox.type = SKY_NONE;
+	SkyBox.type = SkyCap::None;
 	SkyBox.wall.gltexture = nullptr;
 	SkyBox.x_offset = 0;
 	SkyBox.y_offset = 0;
@@ -138,7 +138,7 @@ void gld_DrawFakeSkyStrips()
 
 // Sky textures with a zero index should be forced
 // See third episode of requiem.wad
-void gld_AddSkyTexture(GLWall* wall, int sky1, int sky2, int skytype)
+void gld_AddSkyTexture(GLWall* wall, int sky1, int sky2, const SkyCap skytype)
 {
 	side_t* s = nullptr;
 	line_t* l = nullptr;
@@ -337,7 +337,7 @@ void gld_DrawStripsSky()
 
 void gld_DrawSkyCaps()
 {
-	if(SkyBox.type && SkyBox.wall.gltexture)
+	if(SkyBox.type != SkyCap::None && SkyBox.wall.gltexture)
 	{
 		if(dsda_MouseLook())
 		{
@@ -348,7 +348,7 @@ void gld_DrawSkyCaps()
 
 			gld_SkyTransform(&SkyBox.wall);
 
-			if(SkyBox.type & SKY_CEILING)
+			if((SkyBox.type & SkyCap::Ceiling) != SkyCap::None)
 			{
 				glBegin(GL_TRIANGLE_STRIP);
 				glVertex3f(-MAXCOORD, +MAXCOORD, +MAXCOORD);
@@ -358,7 +358,7 @@ void gld_DrawSkyCaps()
 				glEnd();
 			}
 
-			if(SkyBox.type & SKY_FLOOR)
+			if((SkyBox.type & SkyCap::Floor) != SkyCap::None)
 			{
 				glBegin(GL_TRIANGLE_STRIP);
 				glVertex3f(-MAXCOORD, -MAXCOORD, +MAXCOORD);

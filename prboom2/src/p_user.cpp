@@ -315,7 +315,7 @@ void P_HandleExCmdLook(player_t* player)
 	look = player->cmd.ex.look;
 	if(look)
 	{
-		if(look == XC_LOOK_RESET)
+		if(look == k_ExCmdLookReset)
 		{
 			player->mo->pitch = 0;
 		}
@@ -819,7 +819,7 @@ void P_PlayerThink(player_t* player)
 
 	if(dsda_AllowExCmd())
 	{
-		if(cmd->ex.actions & XC_JUMP && onground && !player->jumpTics)
+		if((cmd->ex.actions & ExCmdAction::Jump) != ExCmdAction{} && onground && !player->jumpTics)
 		{
 			player->mo->momz = g_jump * FRACUNIT;
 			player->mo->flags2 -= MobjFlag2::OnMobj;

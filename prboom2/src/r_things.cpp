@@ -1461,12 +1461,12 @@ static void R_DrawSprite(vissprite_t* spr)
 			// clip this piece of the sprite
 			// killough 3/27/98: optimized and made much shorter
 
-			if(ds->silhouette & SIL_BOTTOM && spr->gz < ds->bsilheight) //bottom sil
+			if((ds->silhouette & Silhouette::Bottom) != Silhouette::None && spr->gz < ds->bsilheight) //bottom sil
 				for(x = r1; x <= r2; x++)
 					if(clipbot[x] == -2)
 						clipbot[x] = ds->sprbottomclip[x];
 
-			if(ds->silhouette & SIL_TOP && spr->gzt > ds->tsilheight) // top sil
+			if((ds->silhouette & Silhouette::Top) != Silhouette::None && spr->gzt > ds->tsilheight) // top sil
 				for(x = r1; x <= r2; x++)
 					if(cliptop[x] == -2)
 						cliptop[x] = ds->sprtopclip[x];
@@ -1569,7 +1569,7 @@ void R_DrawMasked()
 		}
 		for(ds = ds_p; ds-- > drawsegs;)
 		{
-			if(ds->silhouette || ds->maskedtexturecol)
+			if(ds->silhouette != Silhouette::None || ds->maskedtexturecol)
 			{
 				drawsegs_xranges[0].items[drawsegs_xranges[0].count].x1 = ds->x1;
 				drawsegs_xranges[0].items[drawsegs_xranges[0].count].x2 = ds->x2;

@@ -797,7 +797,7 @@ void R_StoreWallRange(const int start, const int stop)
 		rw_midtexturemid += FixedMod(sidedef->rowoffset + sidedef->rowoffset_mid,
 			textureheight[midtexture]);
 
-		ds_p->silhouette = SIL_BOTH;
+		ds_p->silhouette = Silhouette::Both;
 		ds_p->sprtopclip = screenheightarray;
 		ds_p->sprbottomclip = negonearray;
 		ds_p->bsilheight = INT_MAX;
@@ -806,7 +806,7 @@ void R_StoreWallRange(const int start, const int stop)
 	else // two sided line
 	{
 		ds_p->sprtopclip = ds_p->sprbottomclip = nullptr;
-		ds_p->silhouette = 0;
+		ds_p->silhouette = Silhouette::None;
 
 		if(linedef->r_flags & RF_CLOSED)
 		{
@@ -819,7 +819,7 @@ void R_StoreWallRange(const int start, const int stop)
 			// fix prevents lines behind closed doors with dropoffs
 			// from being displayed on the automap.
 
-			ds_p->silhouette = SIL_BOTH;
+			ds_p->silhouette = Silhouette::Both;
 			ds_p->sprbottomclip = negonearray;
 			ds_p->bsilheight = INT_MAX;
 			ds_p->sprtopclip = screenheightarray;
@@ -830,23 +830,23 @@ void R_StoreWallRange(const int start, const int stop)
 			/* not solid - old code */
 			if(frontsector->floorheight > backsector->floorheight)
 			{
-				ds_p->silhouette = SIL_BOTTOM;
+				ds_p->silhouette = Silhouette::Bottom;
 				ds_p->bsilheight = frontsector->floorheight;
 			}
 			else if(backsector->floorheight > viewz)
 			{
-				ds_p->silhouette = SIL_BOTTOM;
+				ds_p->silhouette = Silhouette::Bottom;
 				ds_p->bsilheight = INT_MAX;
 			}
 
 			if(frontsector->ceilingheight < backsector->ceilingheight)
 			{
-				ds_p->silhouette |= SIL_TOP;
+				ds_p->silhouette |= Silhouette::Top;
 				ds_p->tsilheight = frontsector->ceilingheight;
 			}
 			else if(backsector->ceilingheight < viewz)
 			{
-				ds_p->silhouette |= SIL_TOP;
+				ds_p->silhouette |= Silhouette::Top;
 				ds_p->tsilheight = INT_MIN;
 			}
 		}
@@ -1014,39 +1014,39 @@ void R_StoreWallRange(const int start, const int stop)
 	/* cph - if a column was made solid by this wall, we _must_ save full clipping info */
 	if(backsector && didsolidcol)
 	{
-		if(!(ds_p->silhouette & SIL_BOTTOM))
+		if((ds_p->silhouette & Silhouette::Bottom) == Silhouette::None)
 		{
-			ds_p->silhouette |= SIL_BOTTOM;
+			ds_p->silhouette |= Silhouette::Bottom;
 			ds_p->bsilheight = backsector->floorheight;
 		}
-		if(!(ds_p->silhouette & SIL_TOP))
+		if((ds_p->silhouette & Silhouette::Top) == Silhouette::None)
 		{
-			ds_p->silhouette |= SIL_TOP;
+			ds_p->silhouette |= Silhouette::Top;
 			ds_p->tsilheight = backsector->ceilingheight;
 		}
 	}
 
 	// save sprite clipping info
-	if((ds_p->silhouette & SIL_TOP || maskedtexture) && !ds_p->sprtopclip)
+	if(((ds_p->silhouette & Silhouette::Top) != Silhouette::None || maskedtexture) && !ds_p->sprtopclip)
 	{
 		memcpy(lastopening, ceilingclip + start, sizeof(*lastopening) * (rw_stopx - start)); // dropoff overflow
 		ds_p->sprtopclip = lastopening - start;
 		lastopening += rw_stopx - start;
 	}
-	if((ds_p->silhouette & SIL_BOTTOM || maskedtexture) && !ds_p->sprbottomclip)
+	if(((ds_p->silhouette & Silhouette::Bottom) != Silhouette::None || maskedtexture) && !ds_p->sprbottomclip)
 	{
 		memcpy(lastopening, floorclip + start, sizeof(*lastopening) * (rw_stopx - start)); // dropoff overflow
 		ds_p->sprbottomclip = lastopening - start;
 		lastopening += rw_stopx - start;
 	}
-	if(maskedtexture && !(ds_p->silhouette & SIL_TOP))
+	if(maskedtexture && (ds_p->silhouette & Silhouette::Top) == Silhouette::None)
 	{
-		ds_p->silhouette |= SIL_TOP;
+		ds_p->silhouette |= Silhouette::Top;
 		ds_p->tsilheight = INT_MIN;
 	}
-	if(maskedtexture && !(ds_p->silhouette & SIL_BOTTOM))
+	if(maskedtexture && (ds_p->silhouette & Silhouette::Bottom) == Silhouette::None)
 	{
-		ds_p->silhouette |= SIL_BOTTOM;
+		ds_p->silhouette |= Silhouette::Bottom;
 		ds_p->bsilheight = INT_MAX;
 	}
 	ds_p++;

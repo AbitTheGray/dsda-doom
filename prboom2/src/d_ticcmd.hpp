@@ -13,6 +13,20 @@ enum struct ButtonCode : uint8_t;
 
 #include "doomtype.hpp"
 
+#include "cpp/Util.hpp"
+
+// Extended commands carried in a tic (`excmd_t::actions`), written to demos as one byte.
+enum struct ExCmdAction : uint8_t
+{
+	Jump = Bit<uint8_t>(0u),
+	Save = Bit<uint8_t>(1u),
+	Load = Bit<uint8_t>(2u),
+	God = Bit<uint8_t>(3u),
+	NoClip = Bit<uint8_t>(4u),
+	Look = Bit<uint8_t>(5u),
+};
+ENUM_FLAGS_FUNC(ExCmdAction)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -20,7 +34,7 @@ extern "C"
 
 typedef struct
 {
-	byte actions;
+	ExCmdAction actions;
 	byte save_slot;
 	byte load_slot;
 	signed short look;

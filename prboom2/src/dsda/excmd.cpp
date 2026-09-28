@@ -70,13 +70,13 @@ void dsda_ReadExCmd(ticcmd_t* cmd, const byte** p)
 
 	if(!dsda_AllowExCmd()) return;
 
-	cmd->ex.actions = *demo_p++;
-	if(cmd->ex.actions & XC_SAVE)
+	cmd->ex.actions = static_cast<ExCmdAction>(*demo_p++);
+	if((cmd->ex.actions & ExCmdAction::Save) != ExCmdAction{})
 		cmd->ex.save_slot = *demo_p++;
-	if(cmd->ex.actions & XC_LOAD)
+	if((cmd->ex.actions & ExCmdAction::Load) != ExCmdAction{})
 		cmd->ex.load_slot = *demo_p++;
 
-	if(cmd->ex.actions & XC_LOOK)
+	if((cmd->ex.actions & ExCmdAction::Look) != ExCmdAction{})
 	{
 		signed short lowbyte = *demo_p++;
 		cmd->ex.look = ((signed short)(*demo_p++) << 8) + lowbyte;
@@ -93,13 +93,13 @@ void dsda_WriteExCmd(char** p, ticcmd_t* cmd)
 
 	if(!dsda_AllowExCmd()) return;
 
-	*demo_p++ = cmd->ex.actions;
-	if(cmd->ex.actions & XC_SAVE)
+	*demo_p++ = std::to_underlying(cmd->ex.actions);
+	if((cmd->ex.actions & ExCmdAction::Save) != ExCmdAction{})
 		*demo_p++ = cmd->ex.save_slot;
-	if(cmd->ex.actions & XC_LOAD)
+	if((cmd->ex.actions & ExCmdAction::Load) != ExCmdAction{})
 		*demo_p++ = cmd->ex.load_slot;
 
-	if(cmd->ex.actions & XC_LOOK)
+	if((cmd->ex.actions & ExCmdAction::Look) != ExCmdAction{})
 	{
 		*demo_p++ = cmd->ex.look & 0xff;
 		*demo_p++ = (cmd->ex.look >> 8) & 0xff;
@@ -123,33 +123,33 @@ void dsda_PopExCmdQueue(ticcmd_t* cmd)
 
 void dsda_QueueExCmdJump()
 {
-	excmd_queue.actions |= XC_JUMP;
+	excmd_queue.actions |= ExCmdAction::Jump;
 }
 
 void dsda_QueueExCmdLook(short look)
 {
-	excmd_queue.actions |= XC_LOOK;
+	excmd_queue.actions |= ExCmdAction::Look;
 	excmd_queue.look = look;
 }
 
 void dsda_QueueExCmdSave(int slot)
 {
-	excmd_queue.actions |= XC_SAVE;
+	excmd_queue.actions |= ExCmdAction::Save;
 	excmd_queue.save_slot = slot;
 }
 
 void dsda_QueueExCmdLoad(int slot)
 {
-	excmd_queue.actions |= XC_LOAD;
+	excmd_queue.actions |= ExCmdAction::Load;
 	excmd_queue.load_slot = slot;
 }
 
 void dsda_QueueExCmdGod()
 {
-	excmd_queue.actions |= XC_GOD;
+	excmd_queue.actions |= ExCmdAction::God;
 }
 
 void dsda_QueueExCmdNoClip()
 {
-	excmd_queue.actions |= XC_NOCLIP;
+	excmd_queue.actions |= ExCmdAction::NoClip;
 }

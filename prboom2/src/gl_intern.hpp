@@ -31,6 +31,15 @@ enum struct GLFlatFlag : uint32_t
 };
 ENUM_FLAGS_FUNC(GLFlatFlag)
 
+// Which sky caps (the flat sky above and below the view) to draw.
+enum struct SkyCap : uint32_t
+{
+	None = 0,
+	Ceiling = Bit<uint32_t>(0u),
+	Floor = Bit<uint32_t>(1u),
+};
+ENUM_FLAGS_FUNC(SkyCap)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -409,10 +418,6 @@ float gld_CalcLightLevel(int lightlevel);
 float gld_Calc2DLightLevel(int lightlevel);
 
 // SkyBox
-#define SKY_NONE    0
-#define SKY_CEILING 1
-#define SKY_FLOOR   2
-
 typedef struct PalEntry_s
 {
 	unsigned char r, g, b;
@@ -421,7 +426,7 @@ typedef struct PalEntry_s
 typedef struct SkyBoxParams_s
 {
 	int index;
-	unsigned int type;
+	SkyCap type;
 	GLWall wall;
 	float x_offset, y_offset;
 	// 0 - no colormap; 1 - INVUL inverse colormap
@@ -432,7 +437,7 @@ typedef struct SkyBoxParams_s
 extern SkyBoxParams_t SkyBox;
 extern GLfloat gl_whitecolor[];
 void gld_InitSky();
-void gld_AddSkyTexture(GLWall* wall, int sky1, int sky2, int skytype);
+void gld_AddSkyTexture(GLWall* wall, int sky1, int sky2, SkyCap skytype);
 void gld_GetSkyCapColors();
 void gld_InitFrameSky();
 void gld_DrawStripsSky();
