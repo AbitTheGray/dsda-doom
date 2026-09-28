@@ -308,7 +308,7 @@ static void gld_AddPatchToTexture_UnTranslated(GLTexture* gltexture, unsigned ch
 #ifdef RANGECHECK
 		if(x >= patch->width)
 		{
-			lprintf(OutputLevels::Error, "gld_AddPatchToTexture_UnTranslated x>=patch->width (%i >= %i)\n", x, patch->width);
+			Log::Error("gld_AddPatchToTexture_UnTranslated x>=patch->width ({} >= {})\n", x, patch->width);
 			return;
 		}
 #endif
@@ -334,7 +334,7 @@ static void gld_AddPatchToTexture_UnTranslated(GLTexture* gltexture, unsigned ch
 #ifdef RANGECHECK
 				if((pos + bpp) > gltexture->buffer_size)
 				{
-					lprintf(OutputLevels::Error, "gld_AddPatchToTexture_UnTranslated pos+bpp>size (%i > %i)\n", pos + bpp, gltexture->buffer_size);
+					Log::Error("gld_AddPatchToTexture_UnTranslated pos+bpp>size ({} > {})\n", pos + bpp, gltexture->buffer_size);
 					return;
 				}
 #endif
@@ -415,7 +415,7 @@ void gld_AddPatchToTexture(GLTexture* gltexture, unsigned char* buffer, const rp
 #ifdef RANGECHECK
 		if(x >= patch->width)
 		{
-			lprintf(OutputLevels::Error, "gld_AddPatchToTexture x>=patch->width (%i >= %i)\n", x, patch->width);
+			Log::Error("gld_AddPatchToTexture x>=patch->width ({} >= {})\n", x, patch->width);
 			return;
 		}
 #endif
@@ -441,7 +441,7 @@ void gld_AddPatchToTexture(GLTexture* gltexture, unsigned char* buffer, const rp
 #ifdef RANGECHECK
 				if((pos + bpp) > gltexture->buffer_size)
 				{
-					lprintf(OutputLevels::Error, "gld_AddPatchToTexture pos+bpp>size (%i > %i)\n", pos + bpp, gltexture->buffer_size);
+					Log::Error("gld_AddPatchToTexture pos+bpp>size ({} > {})\n", pos + bpp, gltexture->buffer_size);
 					return;
 				}
 #endif
@@ -493,7 +493,7 @@ static void gld_AddRawToTexture(GLTexture* gltexture, unsigned char* buffer, con
 #ifdef RANGECHECK
 			if((pos + bpp) >= gltexture->buffer_size)
 			{
-				lprintf(OutputLevels::Error, "gld_AddRawToTexture pos+bpp>size (%i > %i)\n", pos + bpp, gltexture->buffer_size);
+				Log::Error("gld_AddRawToTexture pos+bpp>size ({} > {})\n", pos + bpp, gltexture->buffer_size);
 				return;
 			}
 #endif
@@ -561,7 +561,7 @@ static void gld_AddColormapToTexture(GLTexture* gltexture, unsigned char* buffer
 #ifdef RANGECHECK
 			if((pos + 3) >= gltexture->buffer_size)
 			{
-				lprintf(OutputLevels::Error, "gld_AddColormapToTexture pos+3>=size (%i >= %i)\n", pos + 3, gltexture->buffer_size);
+				Log::Error("gld_AddColormapToTexture pos+3>=size ({} >= {})\n", pos + 3, gltexture->buffer_size);
 				return;
 			}
 #endif
@@ -632,7 +632,7 @@ static void gld_AddIndexedSkyToTexture(GLTexture* gltexture, unsigned char* buff
 #ifdef RANGECHECK
 		if(x >= patch->width)
 		{
-			lprintf(OutputLevels::Error, "gld_AddIndexedSkyToTexture x>=patch->width (%i >= %i)\n", x, patch->width);
+			Log::Error("gld_AddIndexedSkyToTexture x>=patch->width ({} >= {})\n", x, patch->width);
 			return;
 		}
 #endif
@@ -658,7 +658,7 @@ static void gld_AddIndexedSkyToTexture(GLTexture* gltexture, unsigned char* buff
 #ifdef RANGECHECK
 				if((pos + 3) >= gltexture->buffer_size)
 				{
-					lprintf(OutputLevels::Error, "gld_AddIndexedSkyToTexture pos+3>=size (%i >= %i)\n", pos + 3, gltexture->buffer_size);
+					Log::Error("gld_AddIndexedSkyToTexture pos+3>=size ({} >= {})\n", pos + 3, gltexture->buffer_size);
 					return;
 				}
 #endif

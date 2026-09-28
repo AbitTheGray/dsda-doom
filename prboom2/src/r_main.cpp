@@ -762,20 +762,20 @@ void R_Init()
 	// CPhipps - R_DrawColumn isn't constant anymore, so must
 	//  initialise in code
 	// current column draw function
-	lprintf(OutputLevels::Debug, "\nR_LoadTrigTables: ");
+	Log::Debug("\nR_LoadTrigTables: ");
 	R_LoadTrigTables();
-	lprintf(OutputLevels::Debug, "\nR_InitData: ");
+	Log::Debug("\nR_InitData: ");
 	R_InitData();
 	R_SetViewSize();
-	lprintf(OutputLevels::Debug, "\nR_Init: R_InitPlanes ");
+	Log::Debug("\nR_Init: R_InitPlanes ");
 	R_InitPlanes();
-	lprintf(OutputLevels::Debug, "R_InitLightTables ");
+	Log::Debug("R_InitLightTables ");
 	R_InitLightTables();
-	lprintf(OutputLevels::Debug, "R_InitSkyMap ");
+	Log::Debug("R_InitSkyMap ");
 	R_InitSkyMap();
-	lprintf(OutputLevels::Debug, "R_InitTranslationsTables ");
+	Log::Debug("R_InitTranslationsTables ");
 	R_InitTranslationTables();
-	lprintf(OutputLevels::Debug, "R_InitPatches ");
+	Log::Debug("R_InitPatches ");
 	R_InitPatches();
 }
 
@@ -958,7 +958,7 @@ static void R_SetupFrame(player_t* player)
 	frame_fixedcolormap = player->fixedcolormap;
 	if(frame_fixedcolormap < 0 || frame_fixedcolormap > NUMCOLORMAPS)
 	{
-		I_Error("<fixedcolormap> value out of range: %d\n", player->fixedcolormap);
+		Log::Fatal("<fixedcolormap> value out of range: {}\n", player->fixedcolormap);
 	}
 
 	if(player->fixedcolormap)

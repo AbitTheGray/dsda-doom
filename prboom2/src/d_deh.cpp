@@ -1686,7 +1686,7 @@ void ProcessDehFile(const char* filename, const char* outfilename, int lumpnum)
 			deh_log_file = stdout;
 		else if(!(deh_log_file = M_OpenFile(outfilename, firstfile ? "wt" : "at")))
 		{
-			lprintf(OutputLevels::Warn, "Could not open -dehout file %s\n... using stdout.\n", outfilename);
+			Log::Warn("Could not open -dehout file {}\n... using stdout.\n", outfilename);
 			deh_log_file = stdout;
 		}
 		firstfile = false;
@@ -1698,7 +1698,7 @@ void ProcessDehFile(const char* filename, const char* outfilename, int lumpnum)
 	{
 		if(!(infile.f = M_OpenFile(filename, "rt")))
 		{
-			lprintf(OutputLevels::Warn, "-deh file %s not found\n", filename);
+			Log::Warn("-deh file {} not found\n", filename);
 			return; // should be checked up front anyway
 		}
 		infile.lump = nullptr;
@@ -1711,14 +1711,14 @@ void ProcessDehFile(const char* filename, const char* outfilename, int lumpnum)
 		// [FG] skip empty DEHACKED lumps
 		if(!infile.inp)
 		{
-			lprintf(OutputLevels::Warn, "skipping empty DEHACKED (%d) lump\n", lumpnum);
+			Log::Warn("skipping empty DEHACKED ({}) lump\n", lumpnum);
 			return;
 		}
 		filename = lumpinfo[lumpnum].wadfile->name;
 		file_or_lump = "lump from";
 	}
 
-	lprintf(OutputLevels::Info, "Loading DEH %s %s\n", file_or_lump, filename);
+	Log::Info("Loading DEH {} {}\n", file_or_lump, filename);
 	deh_log("\nLoading DEH %s %s\n\n", file_or_lump, filename);
 
 	// loop until end of file
@@ -2016,7 +2016,7 @@ static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint64_t value)
 			mi->infighting_group = (int)(value);
 			if(mi->infighting_group < 0)
 			{
-				I_Error("Infighting groups must be >= 0 (check your dehacked)");
+				Log::Fatal("Infighting groups must be >= 0 (check your dehacked)");
 				return;
 			}
 			mi->infighting_group = mi->infighting_group + std::to_underlying(InfightingGroup::End);
@@ -2032,7 +2032,7 @@ static void setMobjInfoValue(int mobjInfoIndex, int keyIndex, uint64_t value)
 			mi->splash_group = (int)(value);
 			if(mi->splash_group < 0)
 			{
-				I_Error("Splash groups must be >= 0 (check your dehacked)");
+				Log::Fatal("Splash groups must be >= 0 (check your dehacked)");
 				return;
 			}
 			mi->splash_group = mi->splash_group + std::to_underlying(SplashGroup::End);
@@ -3441,7 +3441,7 @@ void PostProcessDeh()
 		weaponinfo[std::to_underlying(WeaponType::Bfg)].intflags & WIF_ENABLEAPS &&
 		bfgcells != weaponinfo[std::to_underlying(WeaponType::Bfg)].ammopershot
 	)
-		I_Error("Mismatch between bfgcells and bfg ammo per shot modifications! Check your dehacked.");
+		Log::Fatal("Mismatch between bfgcells and bfg ammo per shot modifications! Check your dehacked.");
 
 	if(processed_dehacked)
 	{
@@ -3462,7 +3462,7 @@ void PostProcessDeh()
 			// action pointer expects, for future-proofing's sake
 			for(j = MAXSTATEARGS - 1; j >= bexptr_match->argcount; j--)
 				if(states[i].args[j] != 0)
-					I_Error("Action %s on state %d expects no more than %d nonzero args (%d found). Check your dehacked.",
+					Log::Fatal("Action {} on state {} expects no more than {} nonzero args ({} found). Check your dehacked.",
 						bexptr_match->lookup, i, bexptr_match->argcount, j + 1);
 
 			// replace unset fields with default values

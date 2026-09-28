@@ -161,7 +161,7 @@ static vertex_t* gld_FlatEdgeClipper(int* numpoints, vertex_t* points, int numcl
 				// Add the new vertex. Also modify the sidelist.
 				points = (vertex_t*)Z_Realloc(points, (++num) * sizeof(vertex_t));
 				if(num >= MAX_CC_SIDES)
-					I_Error("gld_FlatEdgeClipper: Too many points in carver");
+					Log::Fatal("gld_FlatEdgeClipper: Too many points in carver");
 
 				// Make room for the new vertex.
 				memmove(&points[endIdx + 1], &points[endIdx],
@@ -834,7 +834,7 @@ static void gld_PreprocessSectors()
 	{
 		sectorloops = static_cast<GLSector*>(Z_Malloc(sizeof(GLSector) * numsectors));
 		if(!sectorloops)
-			I_Error("gld_PreprocessSectors: Not enough memory for array sectorloops");
+			Log::Fatal("gld_PreprocessSectors: Not enough memory for array sectorloops");
 		memset(sectorloops, 0, sizeof(GLSector) * numsectors);
 	}
 
@@ -842,7 +842,7 @@ static void gld_PreprocessSectors()
 	{
 		subsectorloops = static_cast<GLMapSubsector*>(Z_Malloc(sizeof(GLMapSubsector) * numsubsectors));
 		if(!subsectorloops)
-			I_Error("gld_PreprocessSectors: Not enough memory for array subsectorloops");
+			Log::Fatal("gld_PreprocessSectors: Not enough memory for array subsectorloops");
 		memset(subsectorloops, 0, sizeof(GLMapSubsector) * numsubsectors);
 	}
 
@@ -850,7 +850,7 @@ static void gld_PreprocessSectors()
 	{
 		segrendered = static_cast<byte*>(Z_Calloc(numsegs, sizeof(byte)));
 		if(!segrendered)
-			I_Error("gld_PreprocessSectors: Not enough memory for array segrendered");
+			Log::Fatal("gld_PreprocessSectors: Not enough memory for array segrendered");
 	}
 
 	if(numlines)
@@ -858,7 +858,7 @@ static void gld_PreprocessSectors()
 		linerendered[0] = static_cast<int*>(Z_Calloc(numlines, sizeof(*linerendered[0])));
 		linerendered[1] = static_cast<int*>(Z_Calloc(numlines, sizeof(*linerendered[1])));
 		if(!linerendered[0] || !linerendered[1])
-			I_Error("gld_PreprocessSectors: Not enough memory for array linerendered");
+			Log::Fatal("gld_PreprocessSectors: Not enough memory for array linerendered");
 	}
 
 	flats_vbo = nullptr;
@@ -876,7 +876,7 @@ static void gld_PreprocessSectors()
 		if(!vertexcheck || !vertexcheck2)
 		{
 			if(levelinfo) fclose(levelinfo);
-			I_Error("gld_PreprocessSectors: Not enough memory for array vertexcheck");
+			Log::Fatal("gld_PreprocessSectors: Not enough memory for array vertexcheck");
 			return;
 		}
 	}
@@ -913,7 +913,7 @@ static void gld_PreprocessSectors()
 		if(sectors[i].linecount < 3)
 		{
 #ifdef PRBOOM_DEBUG
-			lprintf(OutputLevels::Error, "sector %i is not closed! %i lines in sector\n", i, sectors[i].linecount);
+			Log::Error("sector {} is not closed! {} lines in sector\n", i, sectors[i].linecount);
 #endif
 			if(levelinfo) fprintf(levelinfo, "sector %i is not closed! %i lines in sector\n", i, sectors[i].linecount);
 			sectors[i].flags &= ~SECTOR_IS_CLOSED;
@@ -926,7 +926,7 @@ static void gld_PreprocessSectors()
 				if((vertexcheck[j] == 1) || (vertexcheck[j] == 2))
 				{
 #ifdef PRBOOM_DEBUG
-					lprintf(OutputLevels::Error, "sector %i is not closed at vertex %i ! %i lines in sector\n", i, j, sectors[i].linecount);
+					Log::Error("sector {} is not closed at vertex {} ! {} lines in sector\n", i, j, sectors[i].linecount);
 #endif
 					if(levelinfo) fprintf(levelinfo, "sector %i is not closed at vertex %i ! %i lines in sector\n", i, j, sectors[i].linecount);
 					sectors[i].flags &= ~SECTOR_IS_CLOSED;

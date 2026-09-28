@@ -55,7 +55,7 @@ static wchar_t* ConvertMultiByteToWide(const char* str, UINT code_page)
 	if(!wlen)
 	{
 		errno = EINVAL;
-		lprintf(OutputLevels::Info, "Warning: Failed to convert path to wide encoding\n");
+		Log::Info("Warning: Failed to convert path to wide encoding\n");
 		return nullptr;
 	}
 
@@ -63,14 +63,14 @@ static wchar_t* ConvertMultiByteToWide(const char* str, UINT code_page)
 
 	if(!wstr)
 	{
-		lprintf(OutputLevels::Info, "ConvertMultiByteToWide: Failed to allocate new string\n");
+		Log::Info("ConvertMultiByteToWide: Failed to allocate new string\n");
 		return nullptr;
 	}
 
 	if(MultiByteToWideChar(code_page, 0, str, -1, wstr, wlen) == 0)
 	{
 		errno = EINVAL;
-		lprintf(OutputLevels::Info, "Warning: Failed to convert path to wide encoding\n");
+		Log::Info("Warning: Failed to convert path to wide encoding\n");
 		Z_Free(wstr);
 		return nullptr;
 	}
@@ -88,7 +88,7 @@ static char* ConvertWideToMultiByte(const wchar_t* wstr, UINT code_page)
 	if(!len)
 	{
 		errno = EINVAL;
-		lprintf(OutputLevels::Info, "Warning: Failed to convert path to multi byte encoding\n");
+		Log::Info("Warning: Failed to convert path to multi byte encoding\n");
 		return nullptr;
 	}
 
@@ -96,14 +96,14 @@ static char* ConvertWideToMultiByte(const wchar_t* wstr, UINT code_page)
 
 	if(!str)
 	{
-		lprintf(OutputLevels::Info, "ConvertWideToMultiByte: Failed to allocate new string\n");
+		Log::Info("ConvertWideToMultiByte: Failed to allocate new string\n");
 		return nullptr;
 	}
 
 	if(WideCharToMultiByte(code_page, 0, wstr, -1, str, len, nullptr, nullptr) == 0)
 	{
 		errno = EINVAL;
-		lprintf(OutputLevels::Info, "Warning: Failed to convert path to multi byte encoding\n");
+		Log::Info("Warning: Failed to convert path to multi byte encoding\n");
 		Z_Free(str);
 		return nullptr;
 	}
@@ -296,7 +296,7 @@ int M_MakeDir(const char* path, int require)
 	error = M_mkdir(path);
 
 	if(require && error)
-		I_Error("Unable to create directory %s (%d)", path, errno);
+		Log::Fatal("Unable to create directory {} ({})", path, errno);
 
 	return error;
 }
@@ -559,7 +559,7 @@ dboolean M_RemoveFilesAtPath(const char* path)
 
 		if(M_remove(filename) != 0)
 		{
-			lprintf(OutputLevels::Error, "M_RemoveFilesAtPath: unable to delete file %s\n", filename);
+			Log::Error("M_RemoveFilesAtPath: unable to delete file {}\n", filename);
 			success = false;
 			break;
 		}

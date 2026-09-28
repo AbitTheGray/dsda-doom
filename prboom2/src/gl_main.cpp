@@ -125,14 +125,24 @@ void gld_MultisamplingSet()
 	}
 }
 
+// A `glGetString` text for the log; null (no context, or an error) prints as `printf` did.
+static std::string_view gld_StringForLog(const GLenum name)
+{
+	const GLubyte* const text = glGetString(name);
+
+	if(text == nullptr)
+		return "(null)";
+	return reinterpret_cast<const char*>(text);
+}
+
 void gld_Init(int width, int height)
 {
 	GLfloat params[4] = {0.0f, 0.0f, 1.0f, 0.0f};
 
-	lprintf(OutputLevels::Debug, "GL_VENDOR: %s\n", glGetString(GL_VENDOR));
-	lprintf(OutputLevels::Debug, "GL_RENDERER: %s\n", glGetString(GL_RENDERER));
-	lprintf(OutputLevels::Debug, "GL_VERSION: %s\n", glGetString(GL_VERSION));
-	lprintf(OutputLevels::Debug, "GL_EXTENSIONS:\n");
+	Log::Debug("GL_VENDOR: {}\n", gld_StringForLog(GL_VENDOR));
+	Log::Debug("GL_RENDERER: {}\n", gld_StringForLog(GL_RENDERER));
+	Log::Debug("GL_VERSION: {}\n", gld_StringForLog(GL_VERSION));
+	Log::Debug("GL_EXTENSIONS:\n");
 	{
 		char ext_name[256];
 		const char* extensions = (const char*)glGetString(GL_EXTENSIONS);
@@ -153,7 +163,7 @@ void gld_Init(int width, int height)
 				len = MIN(len, sizeof(ext_name)-1);
 				memset(ext_name, 0, sizeof(ext_name));
 				strncpy(ext_name, rover, len);
-				lprintf(OutputLevels::Debug, "\t%s\n", ext_name);
+				Log::Debug("\t{}\n", std::string_view(ext_name));
 			}
 			rover = p;
 			while(*rover && *rover == ' ')
@@ -2222,18 +2232,18 @@ void gld_ProjectSprite(mobj_t* thing, int lightlevel)
 	// decide which patch to use for sprite relative to player
 #ifdef RANGECHECK
 	if((unsigned)thing->sprite >= (unsigned)num_sprites)
-		I_Error("R_ProjectSprite: Invalid sprite number %i", thing->sprite);
+		Log::Fatal("R_ProjectSprite: Invalid sprite number {}", std::to_underlying(thing->sprite));
 #endif
 
 	sprdef = &sprites[std::to_underlying(thing->sprite)];
 
 #ifdef RANGECHECK
 	if((thing->frame & FF_FRAMEMASK) >= sprdef->numframes)
-		I_Error("R_ProjectSprite: Invalid sprite frame %i : %i", thing->sprite, thing->frame);
+		Log::Fatal("R_ProjectSprite: Invalid sprite frame {} : {}", std::to_underlying(thing->sprite), thing->frame);
 #endif
 
 	if(!sprdef->spriteframes)
-		I_Error("R_ProjectSprite: Missing spriteframes %i : %i", thing->sprite, thing->frame);
+		Log::Fatal("R_ProjectSprite: Missing spriteframes {} : {}", std::to_underlying(thing->sprite), thing->frame);
 
 	sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
