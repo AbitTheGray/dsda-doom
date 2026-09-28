@@ -151,7 +151,8 @@ ENUM_FLAGS_FUNC(HexenLineFlag)
 // Bits 10 to 12 are not flags but a 3-bit number: the line's activation type.
 // The translate functions map it to SPAC_ values, each format in its own way.
 // Being a number, it has no enumerator and is read only through this function.
-uint32_t HexenLineSpacIndex(const HexenLineFlag flags)
+[[nodiscard]]
+inline constexpr uint32_t HexenLineSpacIndex(const HexenLineFlag flags)
 {
 	return (std::to_underlying(flags) >> 10u) & Bits<uint32_t>(3u);
 }

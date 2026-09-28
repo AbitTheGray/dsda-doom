@@ -127,3 +127,16 @@ It needs `<utility>`.
 ## Never include a header from inside `extern "C"`
 Every header here guards its own linkage, so the wrapper is redundant - and it gives the standard library C linkage, which fails to compile.
 Put the includes above the `extern "C"` block.
+
+## Mark functions `[[nodiscard]]` when the result is the point
+A function called for its return value gets `[[nodiscard]]`, so ignoring the result is a compile warning, not a silent bug.
+Put it on its own line above the declaration, as in `prboom2/src/cpp/Util.hpp`.
+
+## Functions defined in a header are `inline`
+Write `inline` explicitly, even where `constexpr` already implies it.
+
+## Make by-value parameters `const`
+A parameter passed by value that the function does not change is `const` (`HexenLineSpacIndex(const HexenLineFlag flags)`).
+
+## Make what we can `constexpr`
+Functions, constants and lookup tables that can be evaluated at compile time are `constexpr` (`static constexpr std::array` for a table of constants).

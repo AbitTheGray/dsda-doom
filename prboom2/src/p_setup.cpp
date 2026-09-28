@@ -1825,7 +1825,7 @@ static void P_LoadUDMFThings(int lump)
 //
 // killough 5/3/98: reformatted, cleaned up
 
-extern "C" LineFlag P_TranslateZDoomLineFlags(uint32_t raw_flags, line_activation_t* spac)
+extern "C" LineFlag P_TranslateZDoomLineFlags(const uint32_t raw_flags, line_activation_t* spac)
 {
 	static unsigned int spac_lookup[8] = {
 		SPAC_CROSS,
@@ -1863,7 +1863,7 @@ extern "C" LineFlag P_TranslateZDoomLineFlags(uint32_t raw_flags, line_activatio
 	return result;
 }
 
-extern "C" LineFlag P_TranslateHexenLineFlags(uint32_t raw_flags, line_activation_t* spac)
+extern "C" LineFlag P_TranslateHexenLineFlags(const uint32_t raw_flags, line_activation_t* spac)
 {
 	static unsigned int spac_lookup[8] = {
 		SPAC_CROSS,
@@ -1889,7 +1889,7 @@ extern "C" LineFlag P_TranslateHexenLineFlags(uint32_t raw_flags, line_activatio
 	return result;
 }
 
-extern "C" LineFlag P_TranslateCompatibleLineFlags(uint32_t raw_flags, line_activation_t* spac)
+extern "C" LineFlag P_TranslateCompatibleLineFlags(const uint32_t raw_flags, line_activation_t* spac)
 {
 	const LineFlag flags = static_cast<LineFlag>(raw_flags);
 	LineFlag filter;
@@ -2104,7 +2104,8 @@ static constexpr std::array k_udmfBoomLineFlags = {
 	std::pair{UdmfLineFlag::PassUse, LineFlag::PassUse},
 };
 
-static LineFlag P_UdmfBoomLineFlags(UdmfLineFlag udmf_flags)
+[[nodiscard]]
+static constexpr LineFlag P_UdmfBoomLineFlags(const UdmfLineFlag udmf_flags)
 {
 	LineFlag result{};
 
