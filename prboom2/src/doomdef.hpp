@@ -16,6 +16,183 @@
 #include "m_swap.hpp"
 #include "doomtype.hpp"
 
+// DOOM keyboard definition.
+// This is the stuff configured by Setup.Exe.
+//
+// A key code is what a key press puts in event_t::data1: the key's unshifted character for a printable key,
+// or one of the codes below. Keys without a name here (other layouts' characters, SDL's own codes)
+// pass through unnamed, so any int32_t is a valid KeyCode.
+enum struct KeyCode : int32_t
+{
+	None = 0,
+
+	Tab = 9,
+	Enter = 13,
+	Escape = 27,
+	Space = ' ',
+
+	// The printable characters (see IsPrintable). SDL reports letters in lowercase,
+	// so A to Z hold 'a' to 'z' and the uppercase codes have no name.
+	Exclamation = '!',
+	Quote = '"',
+	Hash = '#',
+	Dollar = '$',
+	Percent = '%',
+	Ampersand = '&',
+	Apostrophe = '\'',
+	LeftParen = '(',
+	RightParen = ')',
+	Asterisk = '*',
+	Plus = '+',
+	Comma = ',',
+	Minus = '-',
+	Period = '.',
+	Slash = '/',
+	Digit0 = '0',
+	Digit1 = '1',
+	Digit2 = '2',
+	Digit3 = '3',
+	Digit4 = '4',
+	Digit5 = '5',
+	Digit6 = '6',
+	Digit7 = '7',
+	Digit8 = '8',
+	Digit9 = '9',
+	Colon = ':',
+	Semicolon = ';',
+	Less = '<',
+	Equals = '=',
+	Greater = '>',
+	Question = '?',
+	At = '@',
+	LeftBracket = '[',
+	Backslash = '\\',
+	RightBracket = ']',
+	Caret = '^',
+	Underscore = '_',
+	Grave = '`',
+	A = 'a',
+	B = 'b',
+	C = 'c',
+	D = 'd',
+	E = 'e',
+	F = 'f',
+	G = 'g',
+	H = 'h',
+	I = 'i',
+	J = 'j',
+	K = 'k',
+	L = 'l',
+	M = 'm',
+	N = 'n',
+	O = 'o',
+	P = 'p',
+	Q = 'q',
+	R = 'r',
+	S = 's',
+	T = 't',
+	U = 'u',
+	V = 'v',
+	W = 'w',
+	X = 'x',
+	Y = 'y',
+	Z = 'z',
+	LeftBrace = '{',
+	Pipe = '|',
+	RightBrace = '}',
+	Tilde = '~',
+
+	Backspace = 127,
+
+	// Not a key: one past the ASCII range, the size of a table indexed by ASCII key codes.
+	AsciiCount = 0x80,
+
+	F1 = 0x80 + 0x3b,
+	F2 = 0x80 + 0x3c,
+	F3 = 0x80 + 0x3d,
+	F4 = 0x80 + 0x3e,
+	F5 = 0x80 + 0x3f,
+	F6 = 0x80 + 0x40,
+	F7 = 0x80 + 0x41,
+	F8 = 0x80 + 0x42,
+	F9 = 0x80 + 0x43,
+	F10 = 0x80 + 0x44,
+	F11 = 0x80 + 0x57,
+	F12 = 0x80 + 0x58,
+	// One code per modifier: left and right keys share it (vanilla's PC scancodes did not tell them apart).
+	Shift = 0x80 + 0x36,
+	Ctrl = 0x80 + 0x1d,
+	Alt = 0x80 + 0x38,
+	RightArrow = 0xae,
+	LeftArrow = 0xac,
+	UpArrow = 0xad,
+	DownArrow = 0xaf,
+	CapsLock = 0xba, // phares
+	PrintScreen = 0xfe,
+	Pause = 0xff,
+
+	// phares 3/2/98:
+	Insert = 0xd2,
+	Home = 0xc7,
+	PageUp = 0xc9,
+	PageDown = 0xd1,
+	Delete = 0xc8,
+	End = 0xcf,
+	ScrollLock = 0xc6,
+	// phares 3/2/98
+
+	NumLock = 0xc5, // killough 3/6/98
+
+	// cph - Add the numeric keypad keys, as suggested by krose 4/22/99:
+	// The way numbers are assigned to keys is a mess, but it's too late to
+	// change that easily. At least these additions are don neatly.
+	// Codes 0x100-0x200 are reserved for number pad
+	Keypad0 = 0x100 + '0',
+	Keypad1 = 0x100 + '1',
+	Keypad2 = 0x100 + '2',
+	Keypad3 = 0x100 + '3',
+	Keypad4 = 0x100 + '4',
+	Keypad5 = 0x100 + '5',
+	Keypad6 = 0x100 + '6',
+	Keypad7 = 0x100 + '7',
+	Keypad8 = 0x100 + '8',
+	Keypad9 = 0x100 + '9',
+	KeypadEnter = 0x100 + Enter,
+	KeypadDivide = 0x100 + '/',
+	KeypadMultiply = 0x100 + '*',
+	KeypadMinus = 0x100 + '-',
+	KeypadPlus = 0x100 + '+',
+	KeypadPeriod = 0x100 + '.',
+
+	// haleyjd: virtual keys
+	Mouse1 = 0x80 + 0x60,
+	Mouse2 = 0x80 + 0x61,
+	Mouse3 = 0x80 + 0x62,
+	MouseWheelUp = 0x80 + 0x6b,
+	MouseWheelDown = 0x80 + 0x6c,
+	MouseWheelLeft = 0x80 + 0x6d,
+	MouseWheelRight = 0x80 + 0x6e,
+
+	// Not a key: the number of key states tracked (dsda/input.cpp). Higher codes are ignored there.
+	Count = 512,
+};
+
+// Whether the key is a printable ASCII character, Space to Tilde.
+[[nodiscard]]
+inline constexpr bool IsPrintable(const KeyCode key)
+{
+	return key >= KeyCode::Space && key <= KeyCode::Tilde;
+}
+
+// The character of a printable key.
+// @pre IsPrintable(key)
+[[nodiscard]]
+inline constexpr char ToChar(const KeyCode key)
+{
+	assert(IsPrintable(key));
+	return static_cast<char>(std::to_underlying(key));
+}
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -275,84 +452,6 @@ enum struct PowerDuration : int32_t
 	Morphtics    = (40 * TICRATE),
 	Maulatortics = (25 * TICRATE)
 };
-
-// DOOM keyboard definition.
-// This is the stuff configured by Setup.Exe.
-// Most key data are simple ascii (uppercased).
-
-#define KEYD_RIGHTARROW 0xae
-#define KEYD_LEFTARROW  0xac
-#define KEYD_UPARROW    0xad
-#define KEYD_DOWNARROW  0xaf
-#define KEYD_ESCAPE     27
-#define KEYD_ENTER      13
-#define KEYD_TAB        9
-#define KEYD_F1         (0x80+0x3b)
-#define KEYD_F2         (0x80+0x3c)
-#define KEYD_F3         (0x80+0x3d)
-#define KEYD_F4         (0x80+0x3e)
-#define KEYD_F5         (0x80+0x3f)
-#define KEYD_F6         (0x80+0x40)
-#define KEYD_F7         (0x80+0x41)
-#define KEYD_F8         (0x80+0x42)
-#define KEYD_F9         (0x80+0x43)
-#define KEYD_F10        (0x80+0x44)
-#define KEYD_F11        (0x80+0x57)
-#define KEYD_F12        (0x80+0x58)
-#define KEYD_BACKSPACE  127
-#define KEYD_PAUSE      0xff
-#define KEYD_EQUALS     0x3d
-#define KEYD_MINUS      0x2d
-#define KEYD_RSHIFT     (0x80+0x36)
-#define KEYD_RCTRL      (0x80+0x1d)
-#define KEYD_RALT       (0x80+0x38)
-#define KEYD_LALT       KEYD_RALT
-#define KEYD_CAPSLOCK   0xba                                        // phares
-#define KEYD_PRINTSC    0xfe
-
-// phares 3/2/98:
-#define KEYD_INSERT     0xd2
-#define KEYD_HOME       0xc7
-#define KEYD_PAGEUP     0xc9
-#define KEYD_PAGEDOWN   0xd1
-#define KEYD_DEL        0xc8
-#define KEYD_END        0xcf
-#define KEYD_SCROLLLOCK 0xc6
-#define KEYD_SPACEBAR   0x20
-// phares 3/2/98
-
-#define KEYD_NUMLOCK    0xC5                 // killough 3/6/98
-
-// cph - Add the numeric keypad keys, as suggested by krose 4/22/99:
-// The way numbers are assigned to keys is a mess, but it's too late to
-// change that easily. At least these additions are don neatly.
-// Codes 0x100-0x200 are reserved for number pad
-
-#define KEYD_KEYPAD0      (0x100 + '0')
-#define KEYD_KEYPAD1      (0x100 + '1')
-#define KEYD_KEYPAD2      (0x100 + '2')
-#define KEYD_KEYPAD3      (0x100 + '3')
-#define KEYD_KEYPAD4      (0x100 + '4')
-#define KEYD_KEYPAD5      (0x100 + '5')
-#define KEYD_KEYPAD6      (0x100 + '6')
-#define KEYD_KEYPAD7      (0x100 + '7')
-#define KEYD_KEYPAD8      (0x100 + '8')
-#define KEYD_KEYPAD9      (0x100 + '9')
-#define KEYD_KEYPADENTER  (0x100 + KEYD_ENTER)
-#define KEYD_KEYPADDIVIDE (0x100 + '/')
-#define KEYD_KEYPADMULTIPLY (0x100 + '*')
-#define KEYD_KEYPADMINUS  (0x100 + '-')
-#define KEYD_KEYPADPLUS   (0x100 + '+')
-#define KEYD_KEYPADPERIOD (0x100 + '.')
-
-// haleyjd: virtual keys
-#define KEYD_MOUSE1     (0x80 + 0x60)
-#define KEYD_MOUSE2     (0x80 + 0x61)
-#define KEYD_MOUSE3     (0x80 + 0x62)
-#define KEYD_MWHEELUP   (0x80 + 0x6b)
-#define KEYD_MWHEELDOWN (0x80 + 0x6c)
-#define KEYD_MWHEELLEFT (0X80 + 0X6d)
-#define KEYD_MWHEELRIGHT (0X80 + 0X6e)
 
 // phares 3/20/98:
 //

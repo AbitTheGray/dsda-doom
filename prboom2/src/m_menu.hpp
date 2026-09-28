@@ -16,6 +16,9 @@ enum struct InputId : int32_t;
 // declared in v_video.hpp; the fixed underlying type makes this enough
 enum struct ColorRange : int32_t;
 
+// declared in doomdef.hpp; the fixed underlying type makes this enough
+enum struct KeyCode : int32_t;
+
 #include "d_event.hpp"
 #include "dsda/configuration.hpp"
 
@@ -156,7 +159,7 @@ typedef struct
 	// if status = M_ITEM_THERMO,
 	//   choice=0:leftarrow,1:rightarrow
 	void (*routine)(int choice);
-	char alphaKey; // hotkey in menu
+	KeyCode alphaKey; // hotkey in menu
 	const char* alttext;
 	ColorRange color;
 	byte flags;

@@ -981,7 +981,7 @@ static void cht_InitCheats()
 // Called in st_stuff module, which handles the input.
 // Returns a 1 if the cheat was successful, 0 if failed.
 //
-static int M_FindCheats(int key)
+static int M_FindCheats(const KeyCode key)
 {
 	int rc = 0;
 	cheatseq_t* cht;
@@ -989,7 +989,8 @@ static int M_FindCheats(int key)
 
 	cht_InitCheats();
 
-	char_key = (char)key;
+	// Truncates like upstream, so a keypad digit (0x100 + '1') types a cheat's '1'.
+	char_key = static_cast<char>(std::to_underlying(key));
 
 	for(cht = cheat; cht->cheat; cht++)
 	{
@@ -1094,7 +1095,7 @@ dboolean M_CheatResponder(event_t* ev)
 
 	if(dsda_ProcessCheatCodes() &&
 		ev->type == EventType::KeyDown &&
-		M_FindCheats(ev->data1.i))
+		M_FindCheats(static_cast<KeyCode>(ev->data1.i)))
 		return true;
 
 	for(cheat_i = cheat_input; cheat_i->input != InputId::Null; cheat_i++)

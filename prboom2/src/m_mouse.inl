@@ -145,15 +145,15 @@ static int M_MouseWheelAction(event_t* ev)
 	if(ev->type != EventType::KeyDown && ev->type != EventType::KeyUp)
 		return MENU_NULL;
 
-	switch(ev->data1.i)
+	switch(static_cast<KeyCode>(ev->data1.i))
 	{
-		case KEYD_MWHEELUP:
+		case KeyCode::MouseWheelUp:
 			return MENU_UP;
-		case KEYD_MWHEELDOWN:
+		case KeyCode::MouseWheelDown:
 			return MENU_DOWN;
-		case KEYD_MWHEELLEFT:
+		case KeyCode::MouseWheelLeft:
 			return MENU_LEFT;
-		case KEYD_MWHEELRIGHT:
+		case KeyCode::MouseWheelRight:
 			return MENU_RIGHT;
 		default:
 			return MENU_NULL;
@@ -1007,7 +1007,7 @@ static dboolean M_MouseActivateSetupItem(event_t* ev)
 			if(!M_MouseColorChipAtPointer())
 				return true;
 
-			return M_SetupResponder(MENU_NULL, MENU_ENTER, ev);
+			return M_SetupResponder(std::nullopt, MENU_ENTER, ev);
 		}
 
 		if(item->m_flags & S_THERMO)
@@ -1022,7 +1022,7 @@ static dboolean M_MouseActivateSetupItem(event_t* ev)
 		if(item->m_flags & S_CHOICE)
 			return true;
 
-		return M_SetupResponder(MENU_NULL, MENU_ENTER, ev);
+		return M_SetupResponder(std::nullopt, MENU_ENTER, ev);
 	}
 
 	if(!M_MouseSetupItemAtPointer(&index))
@@ -1042,16 +1042,16 @@ static dboolean M_MouseActivateSetupItem(event_t* ev)
 
 	if(item->m_flags & S_YESNO)
 	{
-		if(!M_SetupResponder(MENU_NULL, MENU_ENTER, ev))
+		if(!M_SetupResponder(std::nullopt, MENU_ENTER, ev))
 			return false;
 
-		return M_SetupResponder(MENU_NULL, MENU_ENTER, ev);
+		return M_SetupResponder(std::nullopt, MENU_ENTER, ev);
 	}
 
 	if(item->m_flags & S_CHOICE)
 		return M_MouseCycleSetupChoice(item);
 
-	return M_SetupResponder(MENU_NULL, MENU_ENTER, ev);
+	return M_SetupResponder(std::nullopt, MENU_ENTER, ev);
 }
 
 static dboolean M_MouseCancelSetupSelection(event_t* ev)
@@ -1062,7 +1062,7 @@ static dboolean M_MouseCancelSetupSelection(event_t* ev)
 	menu_mouse_drag_setup = -1;
 	menu_mouse_drag_main = -1;
 
-	return M_SetupResponder(MENU_NULL, MENU_ESCAPE, ev);
+	return M_SetupResponder(std::nullopt, MENU_ESCAPE, ev);
 }
 
 static dboolean M_MouseMenuAction(int action, event_t* ev)
@@ -1071,20 +1071,20 @@ static dboolean M_MouseMenuAction(int action, event_t* ev)
 		return false;
 
 	if(messageToPrint)
-		return M_MessageResponder(MENU_NULL, action, ev);
+		return M_MessageResponder(std::nullopt, action, ev);
 
 	if(menuactive == MenuActive::Inactive)
 		return false;
 
 	if(currentMenu == &LoadDef || currentMenu == &SaveDef)
-		if(M_SaveResponder(MENU_NULL, action, ev))
+		if(M_SaveResponder(std::nullopt, action, ev))
 			return true;
 
 	if(setup_active)
-		if(M_SetupResponder(MENU_NULL, action, ev))
+		if(M_SetupResponder(std::nullopt, action, ev))
 			return true;
 
-	if(M_MainNavigationResponder(MENU_NULL, action, ev))
+	if(M_MainNavigationResponder(std::nullopt, action, ev))
 		return true;
 
 	return false;

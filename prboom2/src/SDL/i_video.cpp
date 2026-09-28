@@ -4,6 +4,8 @@
  *  DOOM graphics stuff for SDL
  */
 
+#include <array>
+#include <iterator>
 #include <utility>
 
 #include <SDL_render.h>
@@ -126,43 +128,44 @@ int mouse_hide_timer = 0;
 // Keyboard handling
 
 // Vanilla keymap taken from chocolate-doom and adjusted for prboom-plus
-#define SCANCODE_TO_KEYS_ARRAY {                                          \
-  0,   0,   0,   0,   'a',                                  /* 0-9 */     \
-  'b', 'c', 'd', 'e', 'f',                                                \
-  'g', 'h', 'i', 'j', 'k',                                  /* 10-19 */   \
-  'l', 'm', 'n', 'o', 'p',                                                \
-  'q', 'r', 's', 't', 'u',                                  /* 20-29 */   \
-  'v', 'w', 'x', 'y', 'z',                                                \
-  '1', '2', '3', '4', '5',                                  /* 30-39 */   \
-  '6', '7', '8', '9', '0',                                                \
-  KEYD_ENTER, KEYD_ESCAPE, KEYD_BACKSPACE, KEYD_TAB, ' ',   /* 40-49 */   \
-  KEYD_MINUS, KEYD_EQUALS, '[', ']', '\\',                                \
-  '\\', ';', '\'', '`', ',',                                /* 50-59 */   \
-  '.', '/', KEYD_CAPSLOCK, KEYD_F1, KEYD_F2,                              \
-  KEYD_F3, KEYD_F4, KEYD_F5, KEYD_F6, KEYD_F7,              /* 60-69 */   \
-  KEYD_F8, KEYD_F9, KEYD_F10, KEYD_F11, KEYD_F12, KEYD_PRINTSC,           \
-  KEYD_SCROLLLOCK, KEYD_PAUSE, KEYD_INSERT, KEYD_HOME,      /* 70-79 */   \
-  KEYD_PAGEUP, KEYD_DEL, KEYD_END, KEYD_PAGEDOWN, KEYD_RIGHTARROW,        \
-  KEYD_LEFTARROW, KEYD_DOWNARROW, KEYD_UPARROW,             /* 80-89 */   \
-  KEYD_NUMLOCK, KEYD_KEYPADDIVIDE,                                        \
-  KEYD_KEYPADMULTIPLY, KEYD_KEYPADMINUS, KEYD_KEYPADPLUS,                 \
-  KEYD_KEYPADENTER, KEYD_KEYPAD1, KEYD_KEYPAD2, KEYD_KEYPAD3,             \
-  KEYD_KEYPAD4, KEYD_KEYPAD5, KEYD_KEYPAD6,                 /* 90-99 */   \
-  KEYD_KEYPAD7, KEYD_KEYPAD8, KEYD_KEYPAD9, KEYD_KEYPAD0,                 \
-  KEYD_KEYPADPERIOD, 0, 0, 0, KEYD_EQUALS                   /* 100-103 */ \
-}
+static constexpr std::array k_vanillaScancodeKeys =
+{
+	KeyCode::None, KeyCode::None, KeyCode::None, KeyCode::None, KeyCode::A, // 0-9
+	KeyCode::B, KeyCode::C, KeyCode::D, KeyCode::E, KeyCode::F,
+	KeyCode::G, KeyCode::H, KeyCode::I, KeyCode::J, KeyCode::K, // 10-19
+	KeyCode::L, KeyCode::M, KeyCode::N, KeyCode::O, KeyCode::P,
+	KeyCode::Q, KeyCode::R, KeyCode::S, KeyCode::T, KeyCode::U, // 20-29
+	KeyCode::V, KeyCode::W, KeyCode::X, KeyCode::Y, KeyCode::Z,
+	KeyCode::Digit1, KeyCode::Digit2, KeyCode::Digit3, KeyCode::Digit4, KeyCode::Digit5, // 30-39
+	KeyCode::Digit6, KeyCode::Digit7, KeyCode::Digit8, KeyCode::Digit9, KeyCode::Digit0,
+	KeyCode::Enter, KeyCode::Escape, KeyCode::Backspace, KeyCode::Tab, KeyCode::Space, // 40-49
+	KeyCode::Minus, KeyCode::Equals, KeyCode::LeftBracket, KeyCode::RightBracket, KeyCode::Backslash,
+	KeyCode::Backslash, KeyCode::Semicolon, KeyCode::Apostrophe, KeyCode::Grave, KeyCode::Comma, // 50-59
+	KeyCode::Period, KeyCode::Slash, KeyCode::CapsLock, KeyCode::F1, KeyCode::F2,
+	KeyCode::F3, KeyCode::F4, KeyCode::F5, KeyCode::F6, KeyCode::F7, // 60-69
+	KeyCode::F8, KeyCode::F9, KeyCode::F10, KeyCode::F11, KeyCode::F12, KeyCode::PrintScreen,
+	KeyCode::ScrollLock, KeyCode::Pause, KeyCode::Insert, KeyCode::Home, // 70-79
+	KeyCode::PageUp, KeyCode::Delete, KeyCode::End, KeyCode::PageDown, KeyCode::RightArrow,
+	KeyCode::LeftArrow, KeyCode::DownArrow, KeyCode::UpArrow, // 80-89
+	KeyCode::NumLock, KeyCode::KeypadDivide,
+	KeyCode::KeypadMultiply, KeyCode::KeypadMinus, KeyCode::KeypadPlus,
+	KeyCode::KeypadEnter, KeyCode::Keypad1, KeyCode::Keypad2, KeyCode::Keypad3,
+	KeyCode::Keypad4, KeyCode::Keypad5, KeyCode::Keypad6, // 90-99
+	KeyCode::Keypad7, KeyCode::Keypad8, KeyCode::Keypad9, KeyCode::Keypad0,
+	KeyCode::KeypadPeriod, KeyCode::None, KeyCode::None, KeyCode::None, KeyCode::Equals, // 100-103
+};
 
 // Map keys like vanilla doom
-static int VanillaTranslateKey(SDL_Keysym* key)
+static KeyCode VanillaTranslateKey(SDL_Keysym* key)
 {
-	static const int scancode_map[] = SCANCODE_TO_KEYS_ARRAY;
-	int rc = 0, sc = key->scancode;
+	KeyCode rc = KeyCode::None;
+	const int sc = key->scancode;
 
-	if(sc > 3 && sc < sizeof(scancode_map) / sizeof(scancode_map[0]))
-		rc = scancode_map[sc];
+	if(sc > 3 && sc < std::ssize(k_vanillaScancodeKeys))
+		rc = k_vanillaScancodeKeys[sc];
 
 	// Key is mapped..
-	if(rc)
+	if(rc != KeyCode::None)
 		return rc;
 
 	switch(sc)
@@ -170,21 +173,21 @@ static int VanillaTranslateKey(SDL_Keysym* key)
 		// Code (Ctrl/Shift/Alt) from scancode.
 		case SDL_SCANCODE_LSHIFT:
 		case SDL_SCANCODE_RSHIFT:
-			return KEYD_RSHIFT;
+			return KeyCode::Shift;
 
 		case SDL_SCANCODE_LCTRL:
 		case SDL_SCANCODE_RCTRL:
-			return KEYD_RCTRL;
+			return KeyCode::Ctrl;
 
 		case SDL_SCANCODE_LALT:
 		case SDL_SCANCODE_RALT:
 		case SDL_SCANCODE_LGUI:
 		case SDL_SCANCODE_RGUI:
-			return KEYD_RALT;
+			return KeyCode::Alt;
 
 		// Default to the symbolic key (outside of vanilla keys)
 		default:
-			return key->sym;
+			return static_cast<KeyCode>(key->sym);
 	}
 }
 
@@ -192,122 +195,70 @@ static int VanillaTranslateKey(SDL_Keysym* key)
 //  Translates the key currently in key
 //
 
-static int I_TranslateKey(SDL_Keysym* key)
+static KeyCode I_TranslateKey(SDL_Keysym* key)
 {
-	int rc = 0;
+	KeyCode rc = KeyCode::None;
 
 	if(dsda_IntConfig(ConfigId::VanillaKeymap))
 		return VanillaTranslateKey(key);
 
 	switch(key->sym)
 	{
-		case SDLK_LEFT: rc = KEYD_LEFTARROW;
-			break;
-		case SDLK_RIGHT: rc = KEYD_RIGHTARROW;
-			break;
-		case SDLK_DOWN: rc = KEYD_DOWNARROW;
-			break;
-		case SDLK_UP: rc = KEYD_UPARROW;
-			break;
-		case SDLK_ESCAPE: rc = KEYD_ESCAPE;
-			break;
-		case SDLK_RETURN: rc = KEYD_ENTER;
-			break;
-		case SDLK_TAB: rc = KEYD_TAB;
-			break;
-		case SDLK_F1: rc = KEYD_F1;
-			break;
-		case SDLK_F2: rc = KEYD_F2;
-			break;
-		case SDLK_F3: rc = KEYD_F3;
-			break;
-		case SDLK_F4: rc = KEYD_F4;
-			break;
-		case SDLK_F5: rc = KEYD_F5;
-			break;
-		case SDLK_F6: rc = KEYD_F6;
-			break;
-		case SDLK_F7: rc = KEYD_F7;
-			break;
-		case SDLK_F8: rc = KEYD_F8;
-			break;
-		case SDLK_F9: rc = KEYD_F9;
-			break;
-		case SDLK_F10: rc = KEYD_F10;
-			break;
-		case SDLK_F11: rc = KEYD_F11;
-			break;
-		case SDLK_F12: rc = KEYD_F12;
-			break;
-		case SDLK_BACKSPACE: rc = KEYD_BACKSPACE;
-			break;
-		case SDLK_DELETE: rc = KEYD_DEL;
-			break;
-		case SDLK_INSERT: rc = KEYD_INSERT;
-			break;
-		case SDLK_PAGEUP: rc = KEYD_PAGEUP;
-			break;
-		case SDLK_PAGEDOWN: rc = KEYD_PAGEDOWN;
-			break;
-		case SDLK_HOME: rc = KEYD_HOME;
-			break;
-		case SDLK_END: rc = KEYD_END;
-			break;
-		case SDLK_PAUSE: rc = KEYD_PAUSE;
-			break;
-		case SDLK_EQUALS: rc = KEYD_EQUALS;
-			break;
-		case SDLK_MINUS: rc = KEYD_MINUS;
-			break;
-		case SDLK_KP_0: rc = KEYD_KEYPAD0;
-			break;
-		case SDLK_KP_1: rc = KEYD_KEYPAD1;
-			break;
-		case SDLK_KP_2: rc = KEYD_KEYPAD2;
-			break;
-		case SDLK_KP_3: rc = KEYD_KEYPAD3;
-			break;
-		case SDLK_KP_4: rc = KEYD_KEYPAD4;
-			break;
-		case SDLK_KP_5: rc = KEYD_KEYPAD5;
-			break;
-		case SDLK_KP_6: rc = KEYD_KEYPAD6;
-			break;
-		case SDLK_KP_7: rc = KEYD_KEYPAD7;
-			break;
-		case SDLK_KP_8: rc = KEYD_KEYPAD8;
-			break;
-		case SDLK_KP_9: rc = KEYD_KEYPAD9;
-			break;
-		case SDLK_KP_PLUS: rc = KEYD_KEYPADPLUS;
-			break;
-		case SDLK_KP_MINUS: rc = KEYD_KEYPADMINUS;
-			break;
-		case SDLK_KP_DIVIDE: rc = KEYD_KEYPADDIVIDE;
-			break;
-		case SDLK_KP_MULTIPLY: rc = KEYD_KEYPADMULTIPLY;
-			break;
-		case SDLK_KP_ENTER: rc = KEYD_KEYPADENTER;
-			break;
-		case SDLK_KP_PERIOD: rc = KEYD_KEYPADPERIOD;
-			break;
+		case SDLK_LEFT: rc = KeyCode::LeftArrow; break;
+		case SDLK_RIGHT: rc = KeyCode::RightArrow; break;
+		case SDLK_DOWN: rc = KeyCode::DownArrow; break;
+		case SDLK_UP: rc = KeyCode::UpArrow; break;
+		case SDLK_ESCAPE: rc = KeyCode::Escape; break;
+		case SDLK_RETURN: rc = KeyCode::Enter; break;
+		case SDLK_TAB: rc = KeyCode::Tab; break;
+		case SDLK_F1: rc = KeyCode::F1; break;
+		case SDLK_F2: rc = KeyCode::F2; break;
+		case SDLK_F3: rc = KeyCode::F3; break;
+		case SDLK_F4: rc = KeyCode::F4; break;
+		case SDLK_F5: rc = KeyCode::F5; break;
+		case SDLK_F6: rc = KeyCode::F6; break;
+		case SDLK_F7: rc = KeyCode::F7; break;
+		case SDLK_F8: rc = KeyCode::F8; break;
+		case SDLK_F9: rc = KeyCode::F9; break;
+		case SDLK_F10: rc = KeyCode::F10; break;
+		case SDLK_F11: rc = KeyCode::F11; break;
+		case SDLK_F12: rc = KeyCode::F12; break;
+		case SDLK_BACKSPACE: rc = KeyCode::Backspace; break;
+		case SDLK_DELETE: rc = KeyCode::Delete; break;
+		case SDLK_INSERT: rc = KeyCode::Insert; break;
+		case SDLK_PAGEUP: rc = KeyCode::PageUp; break;
+		case SDLK_PAGEDOWN: rc = KeyCode::PageDown; break;
+		case SDLK_HOME: rc = KeyCode::Home; break;
+		case SDLK_END: rc = KeyCode::End; break;
+		case SDLK_PAUSE: rc = KeyCode::Pause; break;
+		case SDLK_EQUALS: rc = KeyCode::Equals; break;
+		case SDLK_MINUS: rc = KeyCode::Minus; break;
+		case SDLK_KP_0: rc = KeyCode::Keypad0; break;
+		case SDLK_KP_1: rc = KeyCode::Keypad1; break;
+		case SDLK_KP_2: rc = KeyCode::Keypad2; break;
+		case SDLK_KP_3: rc = KeyCode::Keypad3; break;
+		case SDLK_KP_4: rc = KeyCode::Keypad4; break;
+		case SDLK_KP_5: rc = KeyCode::Keypad5; break;
+		case SDLK_KP_6: rc = KeyCode::Keypad6; break;
+		case SDLK_KP_7: rc = KeyCode::Keypad7; break;
+		case SDLK_KP_8: rc = KeyCode::Keypad8; break;
+		case SDLK_KP_9: rc = KeyCode::Keypad9; break;
+		case SDLK_KP_PLUS: rc = KeyCode::KeypadPlus; break;
+		case SDLK_KP_MINUS: rc = KeyCode::KeypadMinus; break;
+		case SDLK_KP_DIVIDE: rc = KeyCode::KeypadDivide; break;
+		case SDLK_KP_MULTIPLY: rc = KeyCode::KeypadMultiply; break;
+		case SDLK_KP_ENTER: rc = KeyCode::KeypadEnter; break;
+		case SDLK_KP_PERIOD: rc = KeyCode::KeypadPeriod; break;
 		case SDLK_LSHIFT:
-		case SDLK_RSHIFT: rc = KEYD_RSHIFT;
-			break;
+		case SDLK_RSHIFT: rc = KeyCode::Shift; break;
 		case SDLK_LCTRL:
-		case SDLK_RCTRL: rc = KEYD_RCTRL;
-			break;
+		case SDLK_RCTRL: rc = KeyCode::Ctrl; break;
 		case SDLK_LALT:
-		case SDLK_RALT: rc = KEYD_RALT;
-			break;
-		case SDLK_CAPSLOCK: rc = KEYD_CAPSLOCK;
-			break;
-		case SDLK_PRINTSCREEN: rc = KEYD_PRINTSC;
-			break;
-		case SDLK_SCROLLLOCK: rc = KEYD_SCROLLLOCK;
-			break;
-		default: rc = key->sym;
-			break;
+		case SDLK_RALT: rc = KeyCode::Alt; break;
+		case SDLK_CAPSLOCK: rc = KeyCode::CapsLock; break;
+		case SDLK_PRINTSCREEN: rc = KeyCode::PrintScreen; break;
+		case SDLK_SCROLLLOCK: rc = KeyCode::ScrollLock; break;
+		default: rc = static_cast<KeyCode>(key->sym); break;
 	}
 
 	return rc;
@@ -382,14 +333,14 @@ static void I_GetEvent()
 				}
 #endif
 				event.type = EventType::KeyDown;
-				event.data1.i = I_TranslateKey(&Event->key.keysym);
+				event.data1.i = std::to_underlying(I_TranslateKey(&Event->key.keysym));
 				D_PostEvent(&event);
 				break;
 
 			case SDL_KEYUP:
 			{
 				event.type = EventType::KeyUp;
-				event.data1.i = I_TranslateKey(&Event->key.keysym);
+				event.data1.i = std::to_underlying(I_TranslateKey(&Event->key.keysym));
 				D_PostEvent(&event);
 			}
 			break;
@@ -407,22 +358,22 @@ static void I_GetEvent()
 			case SDL_MOUSEWHEEL:
 				if(mouse_enabled && window_focused)
 				{
-					int mouseb;
+					KeyCode mouseb;
 
 					if(Event->wheel.y > 0)
-						mouseb = KEYD_MWHEELUP;
+						mouseb = KeyCode::MouseWheelUp;
 					else if(Event->wheel.y < 0)
-						mouseb = KEYD_MWHEELDOWN;
+						mouseb = KeyCode::MouseWheelDown;
 					else if(Event->wheel.x < 0)
-						mouseb = KEYD_MWHEELLEFT;
+						mouseb = KeyCode::MouseWheelLeft;
 					else if(Event->wheel.x > 0)
-						mouseb = KEYD_MWHEELRIGHT;
+						mouseb = KeyCode::MouseWheelRight;
 					else
-						mouseb = 0;
+						mouseb = KeyCode::None;
 
-					if(mouseb)
+					if(mouseb != KeyCode::None)
 					{
-						event.data1.i = mouseb;
+						event.data1.i = std::to_underlying(mouseb);
 
 						event.type = EventType::KeyDown;
 						D_PostEvent(&event);

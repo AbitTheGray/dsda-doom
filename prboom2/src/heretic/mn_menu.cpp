@@ -103,10 +103,10 @@ enum struct InfoItem3 : int32_t{ Empty, End };
 
 enum struct InfoItem4 : int32_t{ Empty, End };
 
-menuitem_t InfoMenu1[] = {{MenuItemType::Action, "", MN_Info2, 0}};
-menuitem_t InfoMenu2[] = {{MenuItemType::Action, "", MN_Info3, 0}};
-menuitem_t InfoMenu3[] = {{MenuItemType::Action, "", MN_Info4, 0}};
-menuitem_t InfoMenu4[] = {{MenuItemType::Action, "", MN_FinishInfo, 0}};
+menuitem_t InfoMenu1[] = {{MenuItemType::Action, "", MN_Info2, KeyCode::None}};
+menuitem_t InfoMenu2[] = {{MenuItemType::Action, "", MN_Info3, KeyCode::None}};
+menuitem_t InfoMenu3[] = {{MenuItemType::Action, "", MN_Info4, KeyCode::None}};
+menuitem_t InfoMenu4[] = {{MenuItemType::Action, "", MN_FinishInfo, KeyCode::None}};
 
 menu_t InfoDef1 =
 {
@@ -222,11 +222,11 @@ enum struct RavenMainItem : int32_t
 
 menuitem_t RavenMainMenu[] =
 {
-	{static_cast<MenuItemType>(1), "", M_NewGame, 'n', "NEW GAME"},
-	{static_cast<MenuItemType>(1), "", M_Options, 'o', "OPTIONS"},
-	{static_cast<MenuItemType>(1), "", MN_GameFiles, 'g', "GAME FILES"},
-	{static_cast<MenuItemType>(1), "", MN_Info, 'i', "INFO"},
-	{static_cast<MenuItemType>(1), "", M_QuitDOOM, 'q', "QUIT GAME"}
+	{static_cast<MenuItemType>(1), "", M_NewGame, KeyCode::N, "NEW GAME"},
+	{static_cast<MenuItemType>(1), "", M_Options, KeyCode::O, "OPTIONS"},
+	{static_cast<MenuItemType>(1), "", MN_GameFiles, KeyCode::G, "GAME FILES"},
+	{static_cast<MenuItemType>(1), "", MN_Info, KeyCode::I, "INFO"},
+	{static_cast<MenuItemType>(1), "", M_QuitDOOM, KeyCode::Q, "QUIT GAME"}
 };
 
 
@@ -245,8 +245,8 @@ enum struct SaveLoadItem : int32_t
 
 menuitem_t SaveLoadMenu[] =
 {
-	{static_cast<MenuItemType>(1), "", M_LoadGame, 'l', "LOAD GAME"},
-	{static_cast<MenuItemType>(1), "", M_SaveGame, 's', "SAVE GAME"},
+	{static_cast<MenuItemType>(1), "", M_LoadGame, KeyCode::L, "LOAD GAME"},
+	{static_cast<MenuItemType>(1), "", M_SaveGame, KeyCode::S, "SAVE GAME"},
 };
 
 menu_t SaveLoadDef =

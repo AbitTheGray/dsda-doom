@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "doomdef.hpp"
 #include "doomtype.hpp"
 #include "d_event.hpp"
 
@@ -14,7 +15,6 @@ extern "C"
 #endif
 
 #define DSDA_INPUT_PROFILE_COUNT 3
-#define NUMKEYS 512
 #define MAX_MOUSE_BUTTONS 8
 #define MAX_JOY_BUTTONS 23
 
@@ -206,7 +206,7 @@ enum struct InputId : int32_t
 
 typedef struct
 {
-	int* key;
+	KeyCode* key;
 	int num_keys;
 	int mouseb;
 	int joyb;
@@ -214,7 +214,7 @@ typedef struct
 
 typedef struct
 {
-	int key;
+	KeyCode key;
 	int mouseb;
 	int joyb;
 } dsda_input_default_t;
@@ -228,20 +228,20 @@ dboolean dsda_InputDeactivated(InputId identifier);
 dsda_input_t* dsda_Input(InputId identifier);
 void dsda_InputFlush();
 void dsda_InputCopy(InputId identifier, dsda_input_t* input[DSDA_INPUT_PROFILE_COUNT]);
-int dsda_InputMatchKey(InputId identifier, int value);
+int dsda_InputMatchKey(InputId identifier, KeyCode value);
 int dsda_InputMatchMouseB(InputId identifier, int value);
 int dsda_InputMatchJoyB(InputId identifier, int value);
 void dsda_InputReset(InputId identifier);
 void dsda_InputResetSpecific(int config_index, InputId identifier);
 void dsda_InputSet(InputId identifier, dsda_input_default_t input);
 void dsda_InputSetSpecific(int config_index, InputId identifier, dsda_input_default_t input);
-void dsda_InputAddKey(InputId identifier, int value);
-void dsda_InputAddSpecificKey(int config_index, InputId identifier, int value);
+void dsda_InputAddKey(InputId identifier, KeyCode value);
+void dsda_InputAddSpecificKey(int config_index, InputId identifier, KeyCode value);
 void dsda_InputAddMouseB(InputId identifier, int value);
 void dsda_InputAddSpecificMouseB(int config_index, InputId identifier, int value);
 void dsda_InputAddJoyB(InputId identifier, int value);
 void dsda_InputAddSpecificJoyB(int config_index, InputId identifier, int value);
-void dsda_InputRemoveKey(InputId identifier, int value);
+void dsda_InputRemoveKey(InputId identifier, KeyCode value);
 void dsda_InputRemoveMouseB(InputId identifier, int value);
 void dsda_InputRemoveJoyB(InputId identifier, int value);
 dboolean dsda_InputActive(InputId identifer);

@@ -55,6 +55,16 @@ Demos ending in `.lmp` (in any case) never took this path.
 
 Code: `dsda_TextFileName` in `prboom2/src/dsda/text_file.cpp`.
 
+## Forcing a mismatched savegame load works again
+
+Loading a savegame that fails its consistency check (made with other WADs, for example) asks whether to load it anyway.
+Upstream's answer handler, `M_VerifyForcedLoadGame`, still tests `ch == 'y'`, but since v0.27.0 (commit `0e510b2bb`, "Allow non-keyboard confirmations") message handlers receive the confirmation (1 for yes) instead of the key.
+The test can never pass, so every answer acted as "no" and the savegame was never loaded.
+It now takes the confirmation like the other three handlers (`M_VerifySkill`, `M_QuitResponse`, `M_EndGameResponse`), so "yes" loads the savegame as it did before v0.27.0.
+Demos are not affected.
+
+Code: `M_VerifyForcedLoadGame` in `prboom2/src/m_menu.cpp`.
+
 # To report upstream
 
 Behaviour that looks like an upstream bug, kept as it is here for compatibility.

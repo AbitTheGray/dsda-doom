@@ -1046,6 +1046,7 @@ dboolean AM_Responder
 (event_t* ev)
 {
 	static int bigstate = 0;
+	const KeyCode key = static_cast<KeyCode>(ev->data1.i); // only a key for key events
 
 	if(dsda_InputActivated(InputId::MapOverlay) && (automap_input || dsda_ShowMinimap()))
 	{
@@ -1126,7 +1127,7 @@ dboolean AM_Responder
 	}
 	else if(
 		dsda_InputActivated(InputId::MapZoomout) ||
-		(map_wheel_zoom && ev->type == EventType::KeyDown && ev->data1.i == KEYD_MWHEELDOWN)
+		(map_wheel_zoom && ev->type == EventType::KeyDown && key == KeyCode::MouseWheelDown)
 	)
 	{
 		mtof_zoommul = M_ZOOMOUT;
@@ -1138,7 +1139,7 @@ dboolean AM_Responder
 	}
 	else if(
 		dsda_InputActivated(InputId::MapZoomin) ||
-		(map_wheel_zoom && ev->type == EventType::KeyDown && ev->data1.i == KEYD_MWHEELUP)
+		(map_wheel_zoom && ev->type == EventType::KeyDown && key == KeyCode::MouseWheelUp)
 	)
 	{
 		mtof_zoommul = M_ZOOMIN;
@@ -1216,7 +1217,7 @@ dboolean AM_Responder
 		dsda_InputDeactivated(InputId::MapZoomin) ||
 		(
 			map_wheel_zoom && ev->type == EventType::KeyUp &&
-			(ev->data1.i == KEYD_MWHEELDOWN || ev->data1.i == KEYD_MWHEELUP)
+			(key == KeyCode::MouseWheelDown || key == KeyCode::MouseWheelUp)
 		)
 	)
 	{

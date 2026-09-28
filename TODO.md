@@ -63,9 +63,18 @@ Convert a few groups per batch, then build and run the spec suite.
 Candidates found by scanning for 3+ adjacent numeric `#define`s with a shared prefix; check each one, some may turn out to be plain constants:
 - **Flags:** `SCROLL_` (`dsda/scroll.hpp`: two flag sets and the untracked `THRUST_` group share `scroll_t::flags`, which is part of the savegame layout, so one enum cannot type that field), `RDC_` (`r_draw.cpp`: only used in `#if` inside `r_drawcolumn.inl`/`r_drawflush.inl`, which `r_draw.cpp` includes once per pipeline - it needs those files turned into templates with `if constexpr`, not just an enum), `S_` menu item flags (`m_menu.cpp`, ~1800 uses).
 - **Flags with a packed field** (need extractor functions): `AFLAG_` (`doomdef.hpp`: `ticcmd_t::arti` holds an artifact id, these two flags around it, or the sentinels `0xff`/`HexenCount`, and it is a demo byte, so it needs a design first).
-- **Plain enumerations:** `PRB_MB_` (`e6y.hpp`), `KEYD_` (`doomdef.hpp`).
+- **Plain enumerations:** `PRB_MB_` (`e6y.hpp`; really a packed Windows `MessageBox` type - a button set plus `DEFBUTTON` bits - and only `PRB_MB_OK` is used).
 
 The scan misses two-entry groups like the old `SKILL4`/`SKILL5`, so expect a few more.
+
+## Review keypad digits in typed input
+
+Keypad keys are `0x100 +` their character (`KeyCode::Keypad1` is `0x100 + '1'`), and three places treat them differently, all kept exactly as upstream for now:
+- **Cheats** (`M_FindCheats`, `m_cheat.cpp`): the key is truncated to a `char`, so keypad digits type digits (`idclev` on the keypad works).
+- **Numeric setup entry** (`M_SetupCommonSelectResponder`, `m_menu.cpp`): only the low byte is tested with `isdigit` and stored, so keypad digits are accepted. The keypad minus is not, because the `'-'` test compares the whole code.
+- **Weapon-number entry** (`M_WeaponResponder`, `m_menu.cpp`): the whole code minus `'0'` must be 1 to 9, so keypad digits are rejected.
+
+Decide whether the inconsistency is a bug. If it is, fix it (probably one helper that maps keypad digits and minus to their characters) and log the change in `Compatibility.md`.
 
 ## Old PKZIP compression methods in zip loading
 

@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <optional>
 #include <utility>
 
 #include "SDL.h"
@@ -37,6 +38,7 @@
 #include "s_sound.hpp"
 #include "sounds.hpp"
 #include "m_menu.hpp"
+#include "cpp/EnumArray.hpp"
 #include "d_deh.hpp"
 #include "m_file.hpp"
 #include "m_misc.hpp"
@@ -302,7 +304,7 @@ static void M_DrawStringCentered(int, int, ColorRange, const char*);
 static void M_InitExtendedHelp();
 static void M_ExtHelpNextScreen(int);
 static void M_ExtHelp(int);
-static int M_GetKeyString(int, int);
+static int M_GetKeyString(KeyCode, int);
 
 extern "C" void M_ChangeDemoSmoothTurns();
 extern "C" void M_ChangeFullScreen();
@@ -314,7 +316,7 @@ extern menu_t SkillDef; // phares 5/04/98
 
 // end of prototypes added to support Setup Menus and Extended HELP screens
 
-static const char shiftxform[] =
+static constexpr EnumArray<char, KeyCode, KeyCode::AsciiCount> shiftxform =
 {
 	0,
 	1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
@@ -434,12 +436,12 @@ enum struct MainItem : int32_t
 
 static menuitem_t MainMenu[] =
 {
-	{MenuItemType::Action, "M_NGAME", M_NewGame, 'n', "NEW GAME"},
-	{MenuItemType::Action, "M_OPTION", M_Options, 'o', "OPTIONS"},
-	{MenuItemType::Action, "M_LOADG", M_LoadGame, 'l', "LOAD GAME"},
-	{MenuItemType::Action, "M_SAVEG", M_SaveGame, 's', "SAVE GAME"},
-	{MenuItemType::Action, "M_RDTHIS", M_ReadThis, 'r', "READ THIS"},
-	{MenuItemType::Action, "M_QUITG", M_QuitDOOM, 'q', "QUIT GAME"}
+	{MenuItemType::Action, "M_NGAME", M_NewGame, KeyCode::N, "NEW GAME"},
+	{MenuItemType::Action, "M_OPTION", M_Options, KeyCode::O, "OPTIONS"},
+	{MenuItemType::Action, "M_LOADG", M_LoadGame, KeyCode::L, "LOAD GAME"},
+	{MenuItemType::Action, "M_SAVEG", M_SaveGame, KeyCode::S, "SAVE GAME"},
+	{MenuItemType::Action, "M_RDTHIS", M_ReadThis, KeyCode::R, "READ THIS"},
+	{MenuItemType::Action, "M_QUITG", M_QuitDOOM, KeyCode::Q, "QUIT GAME"}
 };
 
 menu_t MainDef =
@@ -495,17 +497,17 @@ enum struct HelpItem : int32_t // killough 10/98
 
 static menuitem_t ReadMenu1[] =
 {
-	{MenuItemType::Action, "", M_ReadThis2, 0}
+	{MenuItemType::Action, "", M_ReadThis2, KeyCode::None}
 };
 
 static menuitem_t ReadMenu2[] =
 {
-	{MenuItemType::Action, "", M_FinishReadThis, 0}
+	{MenuItemType::Action, "", M_FinishReadThis, KeyCode::None}
 };
 
 static menuitem_t HelpMenu[] = // killough 10/98
 {
-	{MenuItemType::Action, "", M_FinishHelp, 0}
+	{MenuItemType::Action, "", M_FinishHelp, KeyCode::None}
 };
 
 static menu_t ReadDef1 =
@@ -796,14 +798,14 @@ const char* saves_pages[] =
 
 menuitem_t LoadMenue[] =
 {
-	{MenuItemType::Action, "", M_LoadSelect, '1'},
-	{MenuItemType::Action, "", M_LoadSelect, '2'},
-	{MenuItemType::Action, "", M_LoadSelect, '3'},
-	{MenuItemType::Action, "", M_LoadSelect, '4'},
-	{MenuItemType::Action, "", M_LoadSelect, '5'},
-	{MenuItemType::Action, "", M_LoadSelect, '6'},
-	{MenuItemType::Action, "", M_LoadSelect, '7'}, //jff 3/15/98 extend number of slots
-	{MenuItemType::Action, "", M_LoadSelect, '8'},
+	{MenuItemType::Action, "", M_LoadSelect, KeyCode::Digit1},
+	{MenuItemType::Action, "", M_LoadSelect, KeyCode::Digit2},
+	{MenuItemType::Action, "", M_LoadSelect, KeyCode::Digit3},
+	{MenuItemType::Action, "", M_LoadSelect, KeyCode::Digit4},
+	{MenuItemType::Action, "", M_LoadSelect, KeyCode::Digit5},
+	{MenuItemType::Action, "", M_LoadSelect, KeyCode::Digit6},
+	{MenuItemType::Action, "", M_LoadSelect, KeyCode::Digit7}, //jff 3/15/98 extend number of slots
+	{MenuItemType::Action, "", M_LoadSelect, KeyCode::Digit8},
 };
 
 menu_t LoadDef =
@@ -969,9 +971,9 @@ void M_LoadSelect(int choice)
 
 static char* forced_loadgame_message;
 
-static void M_VerifyForcedLoadGame(int ch)
+static void M_VerifyForcedLoadGame(dboolean affirmative)
 {
-	if(ch == 'y')
+	if(affirmative)
 		G_ForcedLoadGame();
 	Z_Free(forced_loadgame_message); // free the message Z_Strdup()'ed below
 	M_ClearMenus();
@@ -1015,14 +1017,14 @@ extern "C" void M_LoadGame(int choice)
 
 static menuitem_t SaveMenu[] =
 {
-	{MenuItemType::Action, "", M_SaveSelect, '1'},
-	{MenuItemType::Action, "", M_SaveSelect, '2'},
-	{MenuItemType::Action, "", M_SaveSelect, '3'},
-	{MenuItemType::Action, "", M_SaveSelect, '4'},
-	{MenuItemType::Action, "", M_SaveSelect, '5'},
-	{MenuItemType::Action, "", M_SaveSelect, '6'},
-	{MenuItemType::Action, "", M_SaveSelect, '7'}, //jff 3/15/98 extend number of slots
-	{MenuItemType::Action, "", M_SaveSelect, '8'},
+	{MenuItemType::Action, "", M_SaveSelect, KeyCode::Digit1},
+	{MenuItemType::Action, "", M_SaveSelect, KeyCode::Digit2},
+	{MenuItemType::Action, "", M_SaveSelect, KeyCode::Digit3},
+	{MenuItemType::Action, "", M_SaveSelect, KeyCode::Digit4},
+	{MenuItemType::Action, "", M_SaveSelect, KeyCode::Digit5},
+	{MenuItemType::Action, "", M_SaveSelect, KeyCode::Digit6},
+	{MenuItemType::Action, "", M_SaveSelect, KeyCode::Digit7}, //jff 3/15/98 extend number of slots
+	{MenuItemType::Action, "", M_SaveSelect, KeyCode::Digit8},
 };
 
 menu_t SaveDef =
@@ -1272,15 +1274,15 @@ enum struct OptionsItem : int32_t
 
 static menuitem_t OptionsMenu[] =
 {
-	{MenuItemType::Action, "M_GENERL", M_General, 'g', "GENERAL"}, // killough 10/98
-	{MenuItemType::Action, "M_KEYBND", M_KeyBindings, 'k', "KEY BINDINGS"},
-	{MenuItemType::Action, "M_DSPLAY", M_Display, 'd', "DISPLAY"},
-	{MenuItemType::Action, "M_DEMOS", M_Demos, 'm', "DEMOS"},
-	{MenuItemType::Action, "M_COMP", M_Compatibility, 'c', "COMPATIBILITY"},
-	{MenuItemType::Action, "M_WEAP", M_Weapons, 'w', "WEAPONS"},
-	{MenuItemType::Action, "M_AUTO", M_Automap, 'a', "AUTOMAP"},
-	// { M_ITEM_ACTION, "M_SVOL", M_Sound, 's', "SOUND VOLUME" }, only available using the keybind
-	{MenuItemType::Action, "M_LVLTBL", M_LevelTable, 'l', "LEVEL TABLE"},
+	{MenuItemType::Action, "M_GENERL", M_General, KeyCode::G, "GENERAL"}, // killough 10/98
+	{MenuItemType::Action, "M_KEYBND", M_KeyBindings, KeyCode::K, "KEY BINDINGS"},
+	{MenuItemType::Action, "M_DSPLAY", M_Display, KeyCode::D, "DISPLAY"},
+	{MenuItemType::Action, "M_DEMOS", M_Demos, KeyCode::M, "DEMOS"},
+	{MenuItemType::Action, "M_COMP", M_Compatibility, KeyCode::C, "COMPATIBILITY"},
+	{MenuItemType::Action, "M_WEAP", M_Weapons, KeyCode::W, "WEAPONS"},
+	{MenuItemType::Action, "M_AUTO", M_Automap, KeyCode::A, "AUTOMAP"},
+	// { M_ITEM_ACTION, "M_SVOL", M_Sound, KeyCode::S, "SOUND VOLUME" }, only available using the keybind
+	{MenuItemType::Action, "M_LVLTBL", M_LevelTable, KeyCode::L, "LEVEL TABLE"},
 };
 
 menu_t OptionsDef =
@@ -1411,9 +1413,9 @@ enum struct SoundItem : int32_t
 
 menuitem_t SoundMenu[] =
 {
-	{MenuItemType::Thermo, "M_SFXVOL", M_SfxVol, 's'},
+	{MenuItemType::Thermo, "M_SFXVOL", M_SfxVol, KeyCode::S},
 	{MenuItemType::Skip, "", nullptr},
-	{MenuItemType::Thermo, "M_MUSVOL", M_MusicVol, 'm'},
+	{MenuItemType::Thermo, "M_MUSVOL", M_MusicVol, KeyCode::M},
 	{MenuItemType::Skip, "", nullptr}
 };
 
@@ -1783,7 +1785,7 @@ enum struct GenericSetupItem : int32_t
 
 static menuitem_t Generic_Setup[] =
 {
-	{MenuItemType::Action, "", M_DoNothing, 0}
+	{MenuItemType::Action, "", M_DoNothing, KeyCode::None}
 };
 
 static menu_t GeneralDef = // killough 10/98
@@ -2088,7 +2090,7 @@ static void M_SetupInputText(const setup_menu_t* s,
 	}
 
 	if(!any_input)
-		M_GetKeyString(0, 0);
+		M_GetKeyString(KeyCode::None, 0);
 
 	M_CopyText(text, text_size, menu_buffer);
 }
@@ -4434,7 +4436,7 @@ int extended_help_index; // index of current extended help screen
 
 menuitem_t ExtHelpMenu[] =
 {
-	{MenuItemType::Action, "", M_ExtHelpNextScreen, 0}
+	{MenuItemType::Action, "", M_ExtHelpNextScreen, KeyCode::None}
 };
 
 menu_t ExtHelpDef =
@@ -4541,12 +4543,14 @@ static void M_DrawExtHelp()
 //
 ////////////////////////////////////////////////////////////////////////////
 
-static int M_GetKeyString(int c, int offset)
+static int M_GetKeyString(const KeyCode key, int offset)
 {
 	const char* s;
 
-	if(c >= 33 && c <= 126)
+	if(IsPrintable(key) && key != KeyCode::Space)
 	{
+		char c = ToChar(key);
+
 		// The '=', ',', and '.' keys originally meant the shifted
 		// versions of those keys, but w/o having to shift them in
 		// the game. Any actions that are mapped to these keys will
@@ -4565,12 +4569,13 @@ static int M_GetKeyString(int c, int offset)
 	else
 	{
 		// Retrieve 4-letter (max) string representing the key
+		const int32_t code = std::to_underlying(key);
 
 		// cph - Keypad keys, general code reorganisation to
 		//  make this smaller and neater.
-		if((0x100 <= c) && (c < 0x200))
+		if((0x100 <= code) && (code < 0x200))
 		{
-			if(c == KEYD_KEYPADENTER)
+			if(key == KeyCode::KeypadEnter)
 			{
 				s = "PADE";
 				strcpy(&menu_buffer[offset], s);
@@ -4580,79 +4585,79 @@ static int M_GetKeyString(int c, int offset)
 			{
 				strcpy(&menu_buffer[offset], "PAD");
 				offset += 4;
-				menu_buffer[offset - 1] = c & 0xff;
+				menu_buffer[offset - 1] = code & 0xff;
 				menu_buffer[offset] = 0;
 			}
 		}
-		else if((KEYD_F1 <= c) && (c < KEYD_F10))
+		else if((KeyCode::F1 <= key) && (key < KeyCode::F10))
 		{
 			menu_buffer[offset++] = 'F';
-			menu_buffer[offset++] = '1' + c - KEYD_F1;
+			menu_buffer[offset++] = '1' + (code - std::to_underlying(KeyCode::F1));
 			menu_buffer[offset] = 0;
 		}
 		else
 		{
-			switch(c)
+			switch(key)
 			{
-				case KEYD_TAB: s = "TAB";
+				case KeyCode::Tab: s = "TAB";
 					break;
-				case KEYD_ENTER: s = "ENTR";
+				case KeyCode::Enter: s = "ENTR";
 					break;
-				case KEYD_ESCAPE: s = "ESC";
+				case KeyCode::Escape: s = "ESC";
 					break;
-				case KEYD_SPACEBAR: s = "SPAC";
+				case KeyCode::Space: s = "SPAC";
 					break;
-				case KEYD_BACKSPACE: s = "BACK";
+				case KeyCode::Backspace: s = "BACK";
 					break;
-				case KEYD_RCTRL: s = "CTRL";
+				case KeyCode::Ctrl: s = "CTRL";
 					break;
-				case KEYD_LEFTARROW: s = "LARR";
+				case KeyCode::LeftArrow: s = "LARR";
 					break;
-				case KEYD_UPARROW: s = "UARR";
+				case KeyCode::UpArrow: s = "UARR";
 					break;
-				case KEYD_RIGHTARROW: s = "RARR";
+				case KeyCode::RightArrow: s = "RARR";
 					break;
-				case KEYD_DOWNARROW: s = "DARR";
+				case KeyCode::DownArrow: s = "DARR";
 					break;
-				case KEYD_RSHIFT: s = "SHFT";
+				case KeyCode::Shift: s = "SHFT";
 					break;
-				case KEYD_RALT: s = "ALT";
+				case KeyCode::Alt: s = "ALT";
 					break;
-				case KEYD_CAPSLOCK: s = "CAPS";
+				case KeyCode::CapsLock: s = "CAPS";
 					break;
-				case KEYD_SCROLLLOCK: s = "SCRL";
+				case KeyCode::ScrollLock: s = "SCRL";
 					break;
-				case KEYD_HOME: s = "HOME";
+				case KeyCode::Home: s = "HOME";
 					break;
-				case KEYD_PAGEUP: s = "PGUP";
+				case KeyCode::PageUp: s = "PGUP";
 					break;
-				case KEYD_END: s = "END";
+				case KeyCode::End: s = "END";
 					break;
-				case KEYD_PAGEDOWN: s = "PGDN";
+				case KeyCode::PageDown: s = "PGDN";
 					break;
-				case KEYD_INSERT: s = "INST";
+				case KeyCode::Insert: s = "INST";
 					break;
-				case KEYD_DEL: s = "DEL";
+				case KeyCode::Delete: s = "DEL";
 					break;
-				case KEYD_F10: s = "F10";
+				case KeyCode::F10: s = "F10";
 					break;
-				case KEYD_F11: s = "F11";
+				case KeyCode::F11: s = "F11";
 					break;
-				case KEYD_F12: s = "F12";
+				case KeyCode::F12: s = "F12";
 					break;
-				case KEYD_PAUSE: s = "PAUS";
+				case KeyCode::Pause: s = "PAUS";
 					break;
-				case KEYD_MWHEELDOWN: s = "MWDN";
+				case KeyCode::MouseWheelDown: s = "MWDN";
 					break;
-				case KEYD_MWHEELUP: s = "MWUP";
+				case KeyCode::MouseWheelUp: s = "MWUP";
 					break;
-				case KEYD_MWHEELLEFT: s = "MWLT";
+				case KeyCode::MouseWheelLeft: s = "MWLT";
 					break;
-				case KEYD_MWHEELRIGHT: s = "MWRT";
+				case KeyCode::MouseWheelRight: s = "MWRT";
 					break;
-				case KEYD_PRINTSC: s = "PRSC";
+				case KeyCode::PrintScreen: s = "PRSC";
 					break;
-				case 0: s = "NONE";
+				case KeyCode::None: s = "NONE";
 					break;
 				default: s = "JUNK";
 					break;
@@ -4929,7 +4934,7 @@ void M_LeaveSetupMenu()
 // action based on the state of the system.
 //
 
-static dboolean M_KeyBndResponder(int ch, int action, event_t* ev)
+static dboolean M_KeyBndResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	// changing an entry
 	if(setup_select)
@@ -4956,7 +4961,8 @@ static dboolean M_KeyBndResponder(int ch, int action, event_t* ev)
 			// that belong to the same group as the one you're changing.
 
 			group = ptr1->m_group;
-			if((ch = GetButtons(MAX_JOY_BUTTONS, ev->data1.i)) == -1)
+			const int button = GetButtons(MAX_JOY_BUTTONS, ev->data1.i);
+			if(button == -1)
 				return true;
 
 			for(i = 0; keys_settings[i] && search; i++)
@@ -4964,15 +4970,15 @@ static dboolean M_KeyBndResponder(int ch, int action, event_t* ev)
 					if(ptr2->m_group == group && ptr1 != ptr2)
 					{
 						if(ptr2->m_flags & S_INPUT)
-							if(dsda_InputMatchJoyB(ptr2->input, ch))
+							if(dsda_InputMatchJoyB(ptr2->input, button))
 							{
-								dsda_InputRemoveJoyB(ptr2->input, ch);
+								dsda_InputRemoveJoyB(ptr2->input, button);
 								search = false;
 								break;
 							}
 					}
 
-			dsda_InputAddJoyB(s_input, ch);
+			dsda_InputAddJoyB(s_input, button);
 		}
 		else if(ev->type == EventType::Mouse)
 		{
@@ -4991,7 +4997,8 @@ static dboolean M_KeyBndResponder(int ch, int action, event_t* ev)
 			// that belong to the same group as the one you're changing.
 
 			group = ptr1->m_group;
-			if((ch = GetButtons(MAX_MOUSE_BUTTONS, ev->data1.i)) == -1)
+			const int button = GetButtons(MAX_MOUSE_BUTTONS, ev->data1.i);
+			if(button == -1)
 				return true;
 
 			for(i = 0; keys_settings[i] && search; i++)
@@ -4999,15 +5006,15 @@ static dboolean M_KeyBndResponder(int ch, int action, event_t* ev)
 					if(ptr2->m_group == group && ptr1 != ptr2)
 					{
 						if(ptr2->m_flags & S_INPUT)
-							if(dsda_InputMatchMouseB(ptr2->input, ch))
+							if(dsda_InputMatchMouseB(ptr2->input, button))
 							{
-								dsda_InputRemoveMouseB(ptr2->input, ch);
+								dsda_InputRemoveMouseB(ptr2->input, button);
 								search = false;
 								break;
 							}
 					}
 
-			dsda_InputAddMouseB(s_input, ch);
+			dsda_InputAddMouseB(s_input, button);
 		}
 		else // keyboard key
 		{
@@ -5033,18 +5040,19 @@ static dboolean M_KeyBndResponder(int ch, int action, event_t* ev)
 					if(ptr2->m_group == group && ptr1 != ptr2)
 					{
 						if(ptr2->m_flags & (S_INPUT | S_KEEP))
-							if(dsda_InputMatchKey(ptr2->input, ch))
+							if(ch && dsda_InputMatchKey(ptr2->input, *ch))
 							{
 								if(ptr2->m_flags & S_KEEP)
 									return true; // can't have it!
 
-								dsda_InputRemoveKey(ptr2->input, ch);
+								dsda_InputRemoveKey(ptr2->input, *ch);
 								search = false;
 								break;
 							}
 					}
 
-			dsda_InputAddKey(s_input, ch);
+			if(ch)
+				dsda_InputAddKey(s_input, *ch);
 		}
 
 		M_SelectDone(ptr1); // phares 4/17/98
@@ -5054,7 +5062,7 @@ static dboolean M_KeyBndResponder(int ch, int action, event_t* ev)
 	return false;
 }
 
-static dboolean M_WeaponResponder(int ch, int action, event_t* ev)
+static dboolean M_WeaponResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	// changing an entry
 	if(setup_select)
@@ -5066,23 +5074,26 @@ static dboolean M_WeaponResponder(int ch, int action, event_t* ev)
 		{
 			int old_value;
 
-			ch -= '0'; // out of ascii
-			if(ch < 1 || ch > 9)
+			if(!ch)
 				return true; // ignore
 
-			// see if 'ch' is already assigned elsewhere. if so,
+			const int32_t number = std::to_underlying(*ch) - '0'; // out of ascii
+			if(number < 1 || number > 9)
+				return true; // ignore
+
+			// see if 'number' is already assigned elsewhere. if so,
 			// you have to swap assignments.
 			ptr2 = weap_priority_settings;
 			old_value = dsda_IntConfig(ptr1->config_id);
 			for(; !(ptr2->m_flags & S_END); ptr2++)
 				if(ptr2->m_flags & S_WEAP && ptr1 != ptr2 &&
-					dsda_IntConfig(ptr2->config_id) == ch)
+					dsda_IntConfig(ptr2->config_id) == number)
 				{
 					dsda_UpdateIntConfig(ptr2->config_id, old_value, true);
 					break;
 				}
 
-			dsda_UpdateIntConfig(ptr1->config_id, ch, true);
+			dsda_UpdateIntConfig(ptr1->config_id, number, true);
 		}
 
 		M_SelectDone(ptr1); // phares 4/17/98
@@ -5092,7 +5103,7 @@ static dboolean M_WeaponResponder(int ch, int action, event_t* ev)
 	return false;
 }
 
-static dboolean M_AutoResponder(int ch, int action, event_t* ev)
+static dboolean M_AutoResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	// changing an entry
 	if(setup_select)
@@ -5143,7 +5154,7 @@ static dboolean M_AutoResponder(int ch, int action, event_t* ev)
 	return false;
 }
 
-static dboolean M_StringResponder(int ch, int action, event_t* ev)
+static dboolean M_StringResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	// changing an entry
 	if(setup_select)
@@ -5190,18 +5201,17 @@ static dboolean M_StringResponder(int ch, int action, event_t* ev)
 			// string gets larger than what the screen can hold,
 			// it is dealt with when the string is drawn (above).
 
-			else if((ch >= 32) && (ch <= 126))
+			else if(ch && IsPrintable(*ch))
 				if((entry_index + 1) < ENTRY_STRING_BFR_SIZE)
 				{
-					if(shiftdown)
-						ch = shiftxform[ch];
+					const char c = shiftdown ? shiftxform[*ch] : ToChar(*ch);
 					if(entry_string_index[entry_index] == 0)
 					{
-						entry_string_index[entry_index++] = ch;
+						entry_string_index[entry_index++] = c;
 						entry_string_index[entry_index] = 0;
 					}
 					else
-						entry_string_index[entry_index++] = ch;
+						entry_string_index[entry_index++] = c;
 				}
 
 			return true;
@@ -5214,7 +5224,7 @@ static dboolean M_StringResponder(int ch, int action, event_t* ev)
 	return false;
 }
 
-static dboolean M_LevelTableResponder(int ch, int action, event_t* ev)
+static dboolean M_LevelTableResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	if(action == MENU_ENTER)
 	{
@@ -5242,7 +5252,7 @@ static dboolean M_LevelTableResponder(int ch, int action, event_t* ev)
 	return false;
 }
 
-static dboolean M_SetupCommonSelectResponder(int ch, int action, event_t* ev)
+static dboolean M_SetupCommonSelectResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	// changing an entry
 	if(setup_select)
@@ -5302,11 +5312,16 @@ static dboolean M_SetupCommonSelectResponder(int ch, int action, event_t* ev)
 				if(gather_count >= MAXGATHER)
 					return true;
 
-				if(!isdigit((unsigned char) ch) && ch != '-')
+				if(!ch)
+					return true; // ignore
+
+				// Only the low byte is tested and stored, like upstream, so a keypad digit (0x100 + '1') types a '1'.
+				const char c = static_cast<char>(std::to_underlying(*ch));
+				if(!isdigit(static_cast<unsigned char>(c)) && ch != KeyCode::Minus)
 					return true; // ignore
 
 				/* killough 10/98: character-based numerical input */
-				gather_buffer[gather_count++] = ch;
+				gather_buffer[gather_count++] = c;
 			}
 			return true;
 		}
@@ -5423,7 +5438,7 @@ static dboolean M_SetupCommonSelectResponder(int ch, int action, event_t* ev)
 	return false;
 }
 
-static dboolean M_SetupNavigationResponder(int ch, int action, event_t* ev)
+static dboolean M_SetupNavigationResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	setup_menu_t* ptr1 = current_setup_menu + set_menu_itemon;
 	setup_menu_t* ptr2 = nullptr;
@@ -5609,7 +5624,7 @@ static dboolean M_SetupNavigationResponder(int ch, int action, event_t* ev)
 	return false;
 }
 
-static dboolean M_SetupResponder(int ch, int action, event_t* ev)
+static dboolean M_SetupResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	if(set_keybnd_active && setup_select && ev->type == EventType::Mouse)
 		if(M_KeyBndResponder(ch, action, ev))
@@ -5647,7 +5662,7 @@ static dboolean M_SetupResponder(int ch, int action, event_t* ev)
 	return false;
 }
 
-static dboolean M_InactiveMenuResponder(int ch, int action, event_t* ev)
+static dboolean M_InactiveMenuResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	if(dsda_InputActivated(InputId::Help)) // phares
 	{
@@ -5776,8 +5791,8 @@ static dboolean M_InactiveMenuResponder(int ch, int action, event_t* ev)
 	}
 
 	// Pop-up Main menu?
-	if(ch == KEYD_ESCAPE || action == MENU_ESCAPE ||
-		(!in_game && (ch == KEYD_ENTER || ch == KEYD_SPACEBAR || ch == KEYD_KEYPADENTER ||
+	if(ch == KeyCode::Escape || action == MENU_ESCAPE ||
+		(!in_game && (ch == KeyCode::Enter || ch == KeyCode::Space || ch == KeyCode::KeypadEnter ||
 			dsda_InputActivated(InputId::Fire) || dsda_InputActivated(InputId::Use) || dsda_InputActivated(InputId::MenuEnter)))) // phares
 	{
 		M_StartControlPanel();
@@ -5940,17 +5955,17 @@ enum struct Confirmation : int32_t
 	Yes  = 1,
 };
 
-static Confirmation M_EventToConfirmation(int ch, int action, event_t* ev)
+static Confirmation M_EventToConfirmation(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
-	if(ch == 'y' || action == MENU_ENTER)
+	if(ch == KeyCode::Y || action == MENU_ENTER)
 		return Confirmation::Yes;
-	else if(ch == ' ' || ch == KEYD_ESCAPE || ch == 'n' || action == MENU_BACKSPACE)
+	else if(ch == KeyCode::Space || ch == KeyCode::Escape || ch == KeyCode::N || action == MENU_BACKSPACE)
 		return Confirmation::No;
 	else
 		return Confirmation::Null;
 }
 
-static dboolean M_MainNavigationResponder(int ch, int action, event_t* ev)
+static dboolean M_MainNavigationResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	if(action == MENU_DOWN) // phares 3/7/98
 	{
@@ -6069,7 +6084,7 @@ static dboolean M_MainNavigationResponder(int ch, int action, event_t* ev)
 		int i;
 
 		for(i = itemOn + 1; i < currentMenu->numitems; i++)
-			if(ch && currentMenu->menuitems[i].alphaKey == ch)
+			if(ch != KeyCode::None && currentMenu->menuitems[i].alphaKey == ch)
 			{
 				itemOn = i;
 				S_StartOptionalSound(g_sfx_mnumov, g_sfx_menu, true);
@@ -6077,7 +6092,7 @@ static dboolean M_MainNavigationResponder(int ch, int action, event_t* ev)
 			}
 
 		for(i = 0; i <= itemOn; i++)
-			if(ch && currentMenu->menuitems[i].alphaKey == ch)
+			if(ch != KeyCode::None && currentMenu->menuitems[i].alphaKey == ch)
 			{
 				itemOn = i;
 				S_StartOptionalSound(g_sfx_mnumov, g_sfx_menu, true);
@@ -6088,7 +6103,7 @@ static dboolean M_MainNavigationResponder(int ch, int action, event_t* ev)
 	return false;
 }
 
-static dboolean M_ConsoleResponder(int ch, int action, event_t* ev)
+static dboolean M_ConsoleResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	if(ev->type == EventType::Text)
 	{
@@ -6100,13 +6115,13 @@ static dboolean M_ConsoleResponder(int ch, int action, event_t* ev)
 		dsda_UpdateConsole(action);
 		return true;
 	}
-	else if(ch != MENU_NULL)
+	else if(ch)
 		return true;
 
 	return false;
 }
 
-static dboolean M_SaveResponder(int ch, int action, event_t* ev)
+static dboolean M_SaveResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	if(delete_verify) // [FG] delete a savegame
 	{
@@ -6128,9 +6143,9 @@ static dboolean M_SaveResponder(int ch, int action, event_t* ev)
 		return true;
 	}
 
-	if(saveStringEnter && (ch != MENU_NULL || action != MENU_NULL))
+	if(saveStringEnter && (ch || action != MENU_NULL))
 	{
-		if(ch == KEYD_BACKSPACE || action == MENU_BACKSPACE)
+		if(ch == KeyCode::Backspace || action == MENU_BACKSPACE)
 		{
 			if(saveCharIndex > 0)
 			{
@@ -6161,18 +6176,15 @@ static dboolean M_SaveResponder(int ch, int action, event_t* ev)
 			if(savegamestrings[saveSlot][0])
 				M_DoSave(saveSlot);
 		}
-		else if(ch > 0)
+		else if(ch && *ch > KeyCode::None)
 		{
-			if(ch >= 32 && ch <= 127 &&
+			if((IsPrintable(*ch) || *ch == KeyCode::Backspace) &&
 				saveCharIndex < SAVESTRINGSIZE - 1 &&
 				M_StringWidth(savegamestrings[saveSlot]) < (SAVESTRINGSIZE - 2) * 8)
 			{
-				if(!raven && shiftdown)
-					ch = shiftxform[ch];
-				else
-					ch = toupper(ch);
+				const char c = (!raven && shiftdown) ? shiftxform[*ch] : static_cast<char>(toupper(std::to_underlying(*ch)));
 
-				savegamestrings[saveSlot][saveCharIndex++] = ch;
+				savegamestrings[saveSlot][saveCharIndex++] = c;
 				savegamestrings[saveSlot][saveCharIndex] = 0;
 			}
 		}
@@ -6241,7 +6253,7 @@ static dboolean M_SaveResponder(int ch, int action, event_t* ev)
 	return false;
 }
 
-static dboolean M_MessageResponder(int ch, int action, event_t* ev)
+static dboolean M_MessageResponder(const std::optional<KeyCode> ch, int action, event_t* ev)
 {
 	Confirmation confirmation = Confirmation::No;
 
@@ -6263,7 +6275,7 @@ static dboolean M_MessageResponder(int ch, int action, event_t* ev)
 	return true;
 }
 
-static int M_EventToCharacter(event_t* ev)
+static std::optional<KeyCode> M_EventToCharacter(event_t* ev)
 {
 	if(ev->type == EventType::Joystick)
 	{
@@ -6275,7 +6287,7 @@ static int M_EventToCharacter(event_t* ev)
 			{
 				wait = dsda_GetTick() + 5;
 
-				return 0; // lets the input reach the binding responder
+				return KeyCode::None; // lets the input reach the binding responder
 			}
 		}
 	}
@@ -6289,24 +6301,26 @@ static int M_EventToCharacter(event_t* ev)
 			{
 				wait = dsda_GetTick() + 5;
 
-				return 0; // lets the input reach the binding responder
+				return KeyCode::None; // lets the input reach the binding responder
 			}
 		}
 	}
 	else if(ev->type == EventType::KeyDown)
 	{
-		if(ev->data1.i == KEYD_RSHIFT) // phares 4/11/98
+		const KeyCode key = static_cast<KeyCode>(ev->data1.i);
+
+		if(key == KeyCode::Shift) // phares 4/11/98
 			shiftdown = true;
 
-		return ev->data1.i;
+		return key;
 	}
 	else if(ev->type == EventType::KeyUp)
 	{
-		if(ev->data1.i == KEYD_RSHIFT) // phares 4/11/98
+		if(static_cast<KeyCode>(ev->data1.i) == KeyCode::Shift) // phares 4/11/98
 			shiftdown = false;
 	}
 
-	return MENU_NULL;
+	return std::nullopt;
 }
 
 static int M_CurrentAction()
@@ -6351,9 +6365,9 @@ static int M_CurrentAction()
 
 dboolean M_Responder(event_t* ev)
 {
-	int ch, action;
+	int action;
 
-	ch = M_EventToCharacter(ev);
+	const std::optional<KeyCode> ch = M_EventToCharacter(ev);
 	action = M_CurrentAction();
 
 	if(M_ConsoleOpen() && action != MENU_ESCAPE)
@@ -6363,7 +6377,7 @@ dboolean M_Responder(event_t* ev)
 	if(M_MouseResponder(ev))
 		return true;
 
-	if(ch != MENU_NULL || action != MENU_NULL)
+	if(ch || action != MENU_NULL)
 	{
 		if(setup_active)
 			menu_mouse_setup_scroll = KEYBOARD_NAV;
@@ -6376,7 +6390,7 @@ dboolean M_Responder(event_t* ev)
 		if(M_SaveResponder(ch, action, ev))
 			return true;
 
-	if(messageToPrint && ch != MENU_NULL)
+	if(messageToPrint && ch)
 		if(M_MessageResponder(ch, action, ev))
 			return true;
 
@@ -6393,7 +6407,7 @@ dboolean M_Responder(event_t* ev)
 		return false;
 	}
 
-	if(ch == MENU_NULL && action == MENU_NULL)
+	if(!ch && action == MENU_NULL)
 		return false; // we can't use the event here
 
 	if(setup_active)
@@ -6442,7 +6456,7 @@ static void M_InitializeSkillMenu()
 		SkillDef.menuitems[i].color = static_cast<ColorRange>(skill_infos[i].text_color);
 
 		SkillDef.menuitems[i].routine = M_ChooseSkill;
-		SkillDef.menuitems[i].alphaKey = skill_infos[i].key;
+		SkillDef.menuitems[i].alphaKey = static_cast<KeyCode>(skill_infos[i].key);
 
 		if((skill_infos[i].flags & SkillFlag::DefaultSkill) != SkillFlag{})
 			SkillDef.lastOn = i;
@@ -6469,7 +6483,7 @@ static void M_InitializeEpisodeMenu()
 		EpiDef.menuitems[i].alttext = episodes[i].name;
 
 		EpiDef.menuitems[i].routine = M_Episode;
-		EpiDef.menuitems[i].alphaKey = episodes[i].key;
+		EpiDef.menuitems[i].alphaKey = static_cast<KeyCode>(episodes[i].key);
 	}
 
 	if(!raven)
@@ -6745,7 +6759,6 @@ static void M_StartMessage(const char* string, void (*routine)(int response), db
 	messageRoutine = routine;
 	messageNeedsInput = input;
 	M_ChangeMenu(nullptr, static_cast<MenuActive>(MenuActive::Float));
-	return;
 }
 
 static void M_StopMessage()

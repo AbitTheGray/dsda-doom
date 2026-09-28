@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "cpp/EnumArray.hpp"
+
 #include "input.hpp"
 
 int dsda_input_profile;
@@ -25,7 +27,7 @@ typedef struct
 
 static int dsda_input_counter;      // +1 for each event
 static int dsda_input_tick_counter; // +1 for each game tick
-static dsda_input_state_t gamekeys[NUMKEYS];
+static EnumArray<dsda_input_state_t, KeyCode> gamekeys;
 static dsda_input_state_t mousearray[MAX_MOUSE_BUTTONS + 1];
 static dsda_input_state_t* mousebuttons = &mousearray[1]; // allow [-1]
 static dsda_input_state_t joyarray[MAX_JOY_BUTTONS + 1];
@@ -51,9 +53,9 @@ static void dsda_InputTrackButtons(dsda_input_state_t* buttons, int max, event_t
 
 static void dsda_InputTrackKeyDown(event_t* ev)
 {
-	int key = ev->data1.i;
+	const KeyCode key = static_cast<KeyCode>(ev->data1.i);
 
-	if(key >= NUMKEYS) return;
+	if(key >= KeyCode::Count) return;
 
 	gamekeys[key].activated_at = dsda_input_counter;
 	gamekeys[key].on = true;
@@ -61,9 +63,9 @@ static void dsda_InputTrackKeyDown(event_t* ev)
 
 static void dsda_InputTrackKeyUp(event_t* ev)
 {
-	int key = ev->data1.i;
+	const KeyCode key = static_cast<KeyCode>(ev->data1.i);
 
-	if(key >= NUMKEYS) return;
+	if(key >= KeyCode::Count) return;
 
 	gamekeys[key].deactivated_at = dsda_input_counter;
 	gamekeys[key].on = false;
@@ -117,9 +119,9 @@ static void dsda_InputTrackGameButtons(dsda_input_state_t* buttons, int max, eve
 
 static void dsda_InputTrackGameKeyDown(event_t* ev)
 {
-	int key = ev->data1.i;
+	const KeyCode key = static_cast<KeyCode>(ev->data1.i);
 
-	if(key >= NUMKEYS) return;
+	if(key >= KeyCode::Count) return;
 
 	gamekeys[key].game_activated_at = dsda_input_counter;
 	gamekeys[key].game_on = true;
@@ -127,9 +129,9 @@ static void dsda_InputTrackGameKeyDown(event_t* ev)
 
 static void dsda_InputTrackGameKeyUp(event_t* ev)
 {
-	int key = ev->data1.i;
+	const KeyCode key = static_cast<KeyCode>(ev->data1.i);
 
-	if(key >= NUMKEYS) return;
+	if(key >= KeyCode::Count) return;
 
 	gamekeys[key].game_deactivated_at = dsda_input_counter;
 	gamekeys[key].game_on = false;
@@ -211,7 +213,7 @@ dboolean dsda_InputDeactivated(InputId identifier)
 
 void dsda_InputFlush()
 {
-	memset(gamekeys, 0, sizeof(gamekeys));
+	gamekeys = {};
 	memset(mousearray, 0, sizeof(mousearray));
 	memset(joyarray, 0, sizeof(joyarray));
 	dsda_input_tick_counter = 0;
@@ -233,7 +235,7 @@ void dsda_InputCopy(InputId identifier, dsda_input_t* input[DSDA_INPUT_PROFILE_C
 	}
 }
 
-int dsda_InputMatchKey(InputId identifier, int value)
+int dsda_InputMatchKey(InputId identifier, const KeyCode value)
 {
 	int i;
 	dsda_input_t* p = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
@@ -280,7 +282,7 @@ void dsda_InputSetSpecific(int config_index, InputId identifier, dsda_input_defa
 
 	if(p->num_keys == 0)
 		p->key = static_cast<decltype(p->key)>(realloc(p->key, sizeof(*p->key)));
-	if(input.key > 0)
+	if(input.key > KeyCode::None)
 	{
 		p->key[0] = input.key;
 		p->num_keys = 1;
@@ -291,7 +293,7 @@ void dsda_InputSetSpecific(int config_index, InputId identifier, dsda_input_defa
 	p->joyb = input.joyb;
 }
 
-static void dsda_InputAddThing(int** list, int* count, int value)
+static void dsda_InputAddThing(KeyCode** list, int* count, const KeyCode value)
 {
 	int i;
 
@@ -299,20 +301,20 @@ static void dsda_InputAddThing(int** list, int* count, int value)
 		if((*list)[i] == value) return;
 
 	(*count)++;
-	(*list) = (int*)realloc((*list), (*count) * sizeof(**list));
+	(*list) = static_cast<KeyCode*>(realloc((*list), (*count) * sizeof(**list)));
 	(*list)[(*count) - 1] = value;
 }
 
-void dsda_InputAddSpecificKey(int config_index, InputId identifier, int value)
+void dsda_InputAddSpecificKey(int config_index, InputId identifier, const KeyCode value)
 {
 	dsda_input_t* p = &dsda_input[config_index][std::to_underlying(identifier)];
 
-	if(value < 1 || value >= NUMKEYS) return;
+	if(value <= KeyCode::None || value >= KeyCode::Count) return;
 
 	dsda_InputAddThing(&p->key, &p->num_keys, value);
 }
 
-void dsda_InputAddKey(InputId identifier, int value)
+void dsda_InputAddKey(InputId identifier, const KeyCode value)
 {
 	dsda_InputAddSpecificKey(dsda_input_profile, identifier, value);
 }
@@ -341,7 +343,7 @@ void dsda_InputAddJoyB(InputId identifier, int value)
 	dsda_InputAddSpecificJoyB(dsda_input_profile, identifier, value);
 }
 
-static void dsda_InputRemoveThing(int* list, int* count, int value)
+static void dsda_InputRemoveThing(KeyCode* list, int* count, const KeyCode value)
 {
 	int i;
 	dboolean found = false;
@@ -362,7 +364,7 @@ static void dsda_InputRemoveThing(int* list, int* count, int value)
 	(*count)--;
 }
 
-void dsda_InputRemoveKey(InputId identifier, int value)
+void dsda_InputRemoveKey(InputId identifier, const KeyCode value)
 {
 	dsda_input_t* p = &dsda_input[dsda_input_profile][std::to_underlying(identifier)];
 
