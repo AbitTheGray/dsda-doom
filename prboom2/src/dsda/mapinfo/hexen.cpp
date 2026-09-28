@@ -19,6 +19,7 @@
 
 #include "dsda/map_format.hpp"
 #include "dsda/mapinfo.hpp"
+#include "dsda/messenger.hpp"
 #include "dsda/sndinfo.hpp"
 
 #include "hexen.hpp"
@@ -242,7 +243,7 @@ int dsda_HexenResolveCLEV(int* clev, int* episode, int* map)
 	next = VANILLA_MAP_LUMP_NAME(*episode, P_TranslateMap(*map));
 	if(!W_LumpNameExists(next))
 	{
-		doom_printf("IDCLEV target not found: %s", next);
+		Message::Add("IDCLEV target not found: {}", next);
 		*clev = false;
 	}
 	else

@@ -266,7 +266,7 @@ static void cheat_mus(char buf[3])
 
 	if(W_LumpNameExists(mapname))
 	{
-		doom_printf("%s: %s", s_STSTR_MUS, mapname);
+		Message::Add("{}: {}", s_STSTR_MUS, mapname);
 
 		if(muslump != -1)
 		{
@@ -486,9 +486,9 @@ static void cheat_clev0()
 	next = VANILLA_MAP_LUMP_NAME(epsd, map);
 
 	if(W_LumpNameExists(next))
-		doom_printf("Current: %s, next: %s", cur, next);
+		Message::Add("Current: {}, next: {}", cur, next);
 	else
-		doom_printf("Current: %s", cur);
+		Message::Add("Current: {}", cur);
 
 	Z_Free(cur);
 }
@@ -533,9 +533,9 @@ static void cheat_rate()
 static void cheat_comp0()
 {
 	if(raven)
-		return doom_printf("Cheat disabled for %s", heretic ? "Heretic" : "Hexen");
+		return Message::Add("Cheat disabled for {}", heretic ? "Heretic" : "Hexen");
 
-	doom_printf("Complevel: %i - %s", compatibility_level, comp_lev_str[std::to_underlying(compatibility_level)]);
+	Message::Add("Complevel: {} - {}", std::to_underlying(compatibility_level), comp_lev_str[std::to_underlying(compatibility_level)]);
 }
 
 // compatibility cheat
@@ -555,7 +555,7 @@ static void cheat_comp(char buf[3])
 	{
 		compatibility_level = static_cast<CompLevel>(compinput);
 		G_Compatibility(); // this is missing options checking
-		doom_printf("New Complevel: %i - %s", compatibility_level, comp_lev_str[std::to_underlying(compatibility_level)]);
+		Message::Add("New Complevel: {} - {}", std::to_underlying(compatibility_level), comp_lev_str[std::to_underlying(compatibility_level)]);
 	}
 }
 
@@ -579,9 +579,9 @@ static const char* dsda_skill_str()
 static void cheat_skill0()
 {
 	if(!tc_game)
-		doom_printf("Skill: %i - %s", gameskill + 1, dsda_skill_str());
+		Message::Add("Skill: {} - {}", gameskill + 1, dsda_skill_str());
 	else
-		doom_printf("Skill: %i", gameskill + 1);
+		Message::Add("Skill: {}", gameskill + 1);
 }
 
 // Skill cheat
@@ -594,9 +594,9 @@ static void cheat_skill(char buf[1])
 		gameskill = skill - 1;
 
 		if(!tc_game)
-			doom_printf("Next Level Skill: %i - %s", gameskill + 1, dsda_skill_str());
+			Message::Add("Next Level Skill: {} - {}", gameskill + 1, dsda_skill_str());
 		else
-			doom_printf("Next Level Skill: %i", gameskill + 1);
+			Message::Add("Next Level Skill: {}", gameskill + 1);
 
 		dsda_UpdateGameSkill(gameskill);
 	}
@@ -654,7 +654,7 @@ static void cheat_massacre() // jff 2/01/98 kill all monsters
 	P_MapEnd();
 	// killough 3/22/98: make more intelligent about plural
 	// Ty 03/27/98 - string(s) *not* externalized
-	doom_printf("%d Monster%s Killed", killcount, killcount == 1 ? "" : "s");
+	Message::Add("{} Monster{} Killed", killcount, killcount == 1 ? "" : "s");
 }
 
 void M_CheatIDDT()

@@ -965,7 +965,7 @@ static void AM_HighlightByTag()
 		highlight.line = nullptr;
 		highlight.tag = sec->tag;
 
-		doom_printf("Highlight sector %d, tag %d\n", highlight.sec->iSectorID, sec->tag);
+		Message::Add("Highlight sector {}, tag {}\n", highlight.sec->iSectorID, sec->tag);
 	}
 	else if(highlight.sec)
 	{
@@ -973,14 +973,14 @@ static void AM_HighlightByTag()
 		highlight.line = line;
 		highlight.tag = line->special_args[0];
 
-		doom_printf("Highlight line %d, tag %d\n", highlight.line->iLineID, line->special_args[0]);
+		Message::Add("Highlight line {}, tag {}\n", highlight.line->iLineID, line->special_args[0]);
 	}
 	else
 	{
 		highlight.line = nullptr;
 		highlight.tag = 0;
 
-		doom_printf("Highlight nothing\n");
+		Message::Add("Highlight nothing\n");
 	}
 
 	Z_Free(highlight.connections);
@@ -1178,8 +1178,8 @@ dboolean AM_Responder
 	else if(dsda_InputActivated(InputId::MapMark))
 	{
 		/* Ty 03/27/98 - *not* externalized
-		* cph 2001/11/20 - use doom_printf so we don't have our own buffer */
-		doom_printf("%s %d", s_AMSTR_MARKEDSPOT, markpointnum);
+		* cph 2001/11/20 - use doom_printf (now Message::Add) so we don't have our own buffer */
+		Message::Add("{} {}", s_AMSTR_MARKEDSPOT, markpointnum);
 		AM_addMark();
 
 		return true;
@@ -1191,7 +1191,7 @@ dboolean AM_Responder
 			AM_clearLastMark();
 
 		if(markpointnum)
-			doom_printf("Cleared spot %d", markpointnum);
+			Message::Add("Cleared spot {}", markpointnum);
 		else
 			dsda_AddMessage(s_AMSTR_MARKSCLEARED);
 
@@ -1228,7 +1228,7 @@ dboolean AM_Responder
 	else if(dsda_InputActivated(InputId::MapHighlightByTag))
 	{
 		if(!dsda_RevealAutomap())
-			doom_printf("Highlight requires iddt");
+			Message::Add("Highlight requires iddt");
 		else
 			AM_HighlightByTag();
 

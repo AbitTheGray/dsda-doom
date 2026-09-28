@@ -5,6 +5,11 @@
 
 #pragma once
 
+#include <format>
+#include <utility>
+
+#include "d_player.hpp"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -22,3 +27,14 @@ void dsda_ReplayMessage();
 #ifdef __cplusplus
 }
 #endif
+
+/// On-screen messages formatted with `std::format`, e.g. `Message::Add("Game Speed {}", value)`.
+namespace Message
+{
+	/// Show a message, as `dsda_AddMessage` does; the text is not cut to any length.
+	template<typename... Args>
+	void Add(const std::format_string<Args...> format, Args&&... args)
+	{
+		dsda_AddMessage(std::format(format, std::forward<Args>(args)...).c_str());
+	}
+}

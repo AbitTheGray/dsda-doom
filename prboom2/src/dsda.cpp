@@ -25,6 +25,7 @@
 #include "dsda/features.hpp"
 #include "dsda/ghost.hpp"
 #include "dsda/key_frame.hpp"
+#include "dsda/messenger.hpp"
 #include "dsda/mouse.hpp"
 #include "dsda/settings.hpp"
 #include "dsda/split_tracker.hpp"
@@ -201,7 +202,7 @@ void dsda_DisplayNotifications()
 {
 	if(dsda_ShowDemoAttempts() && dsda_session_attempts > dsda_shown_attempt)
 	{
-		doom_printf("Attempt %d / %d", dsda_session_attempts, dsda_DemoAttempts());
+		Message::Add("Attempt {} / {}", dsda_session_attempts, dsda_DemoAttempts());
 
 		dsda_shown_attempt = dsda_session_attempts;
 	}
@@ -254,7 +255,7 @@ void dsda_DecomposeMovieTime(dsda_movie_time_t* total_time)
 extern "C" void dsda_DisplayNotification(const char* msg)
 {
 	S_StartVoidSound(gamemode == GameMode::Commercial ? SfxId::Radio : SfxId::Itmbk);
-	doom_printf("%s", msg);
+	Message::Add("{}", msg);
 }
 
 void dsda_WatchReborn(int playernum)
@@ -483,8 +484,7 @@ void dsda_WatchLedgeImpact(mobj_t* thing, int target_z)
 		old_gametic = gametic;
 
 		if(dsda_CoordinateDisplay())
-			doom_printf(
-				"Missed ledge by %d\n",
+			Message::Add("Missed ledge by {}\n",
 				((target_z - thing->z) >> FRACBITS) - 24
 			);
 	}

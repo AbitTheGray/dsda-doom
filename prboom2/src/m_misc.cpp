@@ -28,6 +28,7 @@
 
 #include "dsda/args.hpp"
 #include "dsda/game_controller.hpp"
+#include "dsda/messenger.hpp"
 #include "dsda/settings.hpp"
 
 // NSM
@@ -821,7 +822,7 @@ void M_LoadDefaults()
 void M_DoScreenShot(const char* fname)
 {
 	if(I_ScreenShot(fname) != 0)
-		doom_printf("M_ScreenShot: Error writing screenshot\n");
+		Message::Add("M_ScreenShot: Error writing screenshot\n");
 }
 
 #ifndef SCREENSHOT_DIR
@@ -914,7 +915,7 @@ void M_ScreenShot()
 		if(success) return;
 	}
 
-	doom_printf("M_ScreenShot: Couldn't create screenshot");
+	Message::Add("M_ScreenShot: Couldn't create screenshot");
 	return;
 }
 

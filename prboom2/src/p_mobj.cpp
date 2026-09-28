@@ -34,6 +34,7 @@
 #include "dsda/excmd.hpp"
 #include "dsda/map_format.hpp"
 #include "dsda/line_special.hpp"
+#include "dsda/messenger.hpp"
 #include "dsda/settings.hpp"
 #include "dsda/skill_info.hpp"
 #include "dsda/spawn_number.hpp"
@@ -104,7 +105,7 @@ dboolean P_SetMobjState(mobj_t* mobj, StateId state)
 	while(!mobj->tics && seenstate[std::to_underlying(state)] == StateId::Null); // killough 4/9/98
 
 	if(ret && !mobj->tics) // killough 4/9/98: detect state cycles
-		doom_printf("Warning: State Cycle Detected");
+		Message::Add("Warning: State Cycle Detected");
 
 	if(!--recursion)
 		for(; (state = seenstate[std::to_underlying(i)]) != StateId::Null;
@@ -2477,7 +2478,7 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index)
 				}
 				else
 				{
-					doom_printf("Invalid value %i for helper, ignored.", HelperThing);
+					Message::Add("Invalid value {} for helper, ignored.", HelperThing);
 					i = MobjType::Dogs;
 				}
 			}

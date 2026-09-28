@@ -1135,7 +1135,7 @@ extern "C" void M_AutoSave()
 
 	slot = M_AutoSaveSlot(target_name);
 	G_SaveGame(slot, target_name);
-	doom_printf("autosave");
+	Message::Add("autosave");
 }
 
 //
@@ -1535,7 +1535,7 @@ static void M_QuickSave()
 	strftime(description, sizeof(description), "%x %X", timeinfo);
 
 	G_SaveGame(QUICKSAVESLOT, description);
-	doom_printf("%s", description);
+	Message::Add("{}", std::string_view(description));
 
 	M_ReadSaveStrings();
 }
@@ -1572,11 +1572,11 @@ static void M_QuickLoad()
 	if(M_FileExists(name))
 	{
 		G_LoadGame(QUICKSAVESLOT, false);
-		doom_printf("quickload");
+		Message::Add("quickload");
 	}
 	else
 	{
-		doom_printf("no save file");
+		Message::Add("no save file");
 	}
 
 	Z_Free(name);
@@ -4884,7 +4884,7 @@ static void M_HandleToggles()
 			int value;
 
 			value = dsda_ToggleConfig(toggle->config_id, toggle->persist);
-			doom_printf("%s %s", toggle->message, value
+			Message::Add("{} {}", toggle->message, value
 				? toggle->invert_message
 				? "off"
 				: "on"
@@ -5734,7 +5734,7 @@ static dboolean M_InactiveMenuResponder(int ch, int action, event_t* ev)
 	if(dsda_InputActivated(InputId::CycleProfile))
 	{
 		int value = dsda_CycleConfig(ConfigId::InputProfile, true);
-		doom_printf("Input Profile %d", value);
+		Message::Add("Input Profile {}", value);
 		S_StartOptionalSound(g_sfx_mnuopn, g_sfx_swtchn, true);
 		return true;
 	}
@@ -5742,7 +5742,7 @@ static dboolean M_InactiveMenuResponder(int ch, int action, event_t* ev)
 	if(dsda_InputActivated(InputId::CyclePalette))
 	{
 		dsda_CyclePlayPal();
-		doom_printf("Palette %s", dsda_PlayPalData(playpal_index)->lump_name);
+		Message::Add("Palette {}", dsda_PlayPalData(playpal_index)->lump_name);
 		S_StartOptionalSound(g_sfx_mnuopn, g_sfx_swtchn, true);
 		return true;
 	}
@@ -5752,7 +5752,7 @@ static dboolean M_InactiveMenuResponder(int ch, int action, event_t* ev)
 	{
 		int value = StepwiseSum(dsda_GameSpeed(), 0, 3, 10000, 100);
 		dsda_UpdateGameSpeed(value);
-		doom_printf("Game Speed %d", value);
+		Message::Add("Game Speed {}", value);
 		// Don't eat the keypress in this case.
 		// return true;
 	}
@@ -5761,7 +5761,7 @@ static dboolean M_InactiveMenuResponder(int ch, int action, event_t* ev)
 	{
 		int value = StepwiseSum(dsda_GameSpeed(), 1, 3, 10000, 100);
 		dsda_UpdateGameSpeed(value);
-		doom_printf("Game Speed %d", value);
+		Message::Add("Game Speed {}", value);
 		// Don't eat the keypress in this case.
 		// return true;
 	}
@@ -5770,7 +5770,7 @@ static dboolean M_InactiveMenuResponder(int ch, int action, event_t* ev)
 	{
 		int value = StepwiseSum(dsda_GameSpeed(), -1, 3, 10000, 100);
 		dsda_UpdateGameSpeed(value);
-		doom_printf("Game Speed %d", value);
+		Message::Add("Game Speed {}", value);
 		// Don't eat the keypress in this case.
 		// return true;
 	}
@@ -5911,12 +5911,12 @@ static dboolean M_InactiveMenuResponder(int ch, int action, event_t* ev)
 			int show_alive = dsda_CycleConfig(ConfigId::ShowAliveMonsters, false);
 
 			if(show_alive >= 0 && show_alive < 3)
-				doom_printf("Show Alive Monsters %s", show_alive_message[show_alive]);
+				Message::Add("Show Alive Monsters {}", show_alive_message[show_alive]);
 		}
 		else
 		{
 			dsda_UpdateIntConfig(ConfigId::ShowAliveMonsters, 0,false);
-			doom_printf("Action Only Supported in OpenGL");
+			Message::Add("Action Only Supported in OpenGL");
 		}
 	}
 

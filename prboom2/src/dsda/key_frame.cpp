@@ -31,6 +31,7 @@
 #include "dsda/demo.hpp"
 #include "dsda/features.hpp"
 #include "dsda/mapinfo.hpp"
+#include "dsda/messenger.hpp"
 #include "dsda/options.hpp"
 #include "dsda/pause.hpp"
 #include "dsda/playback.hpp"
@@ -270,7 +271,7 @@ void dsda_StoreKeyFrame(dsda_key_frame_t* key_frame, byte complete, byte export_
 		if(demorecording && export_)
 			dsda_ExportKeyFrame(key_frame->buffer, key_frame->buffer_length);
 
-		doom_printf("Stored key frame");
+		Message::Add("Stored key frame");
 	}
 }
 
@@ -283,7 +284,7 @@ void dsda_RestoreKeyFrame(dsda_key_frame_t* key_frame, dboolean skip_wipe)
 
 	if(key_frame->buffer == nullptr)
 	{
-		doom_printf("No key frame found");
+		Message::Add("No key frame found");
 		return;
 	}
 
@@ -315,7 +316,7 @@ void dsda_RestoreKeyFrame(dsda_key_frame_t* key_frame, dboolean skip_wipe)
 
 	dsda_ResolveParentKF(key_frame);
 
-	doom_printf("Restored key frame");
+	Message::Add("Restored key frame");
 }
 
 void dsda_StoreTempKeyFrame()
@@ -381,7 +382,7 @@ void dsda_RewindAutoKeyFrame()
 	if(load_kf)
 		dsda_RestoreKeyFrame(&load_kf->kf, true);
 	else
-		doom_printf("No key frame found"); // rewind past the depth limit
+		Message::Add("No key frame found"); // rewind past the depth limit
 }
 
 void dsda_ResetAutoKeyFrameTimeout()
@@ -442,7 +443,7 @@ void dsda_UpdateAutoKeyFrames()
 					if(auto_kf_timeout_count > TIMEOUT_LIMIT)
 					{
 						auto_kf_timed_out = true;
-						doom_printf("Slow key framing: rewind disabled");
+						Message::Add("Slow key framing: rewind disabled");
 					}
 				}
 				else

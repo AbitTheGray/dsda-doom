@@ -15,6 +15,7 @@
 
 #include "dsda/map_format.hpp"
 #include "dsda/mapinfo.hpp"
+#include "dsda/messenger.hpp"
 
 #include "legacy.hpp"
 
@@ -335,7 +336,7 @@ static int dsda_CannotCLEV(int episode, int map)
 	next = VANILLA_MAP_LUMP_NAME(episode, map);
 	if(!W_LumpNameExists(next))
 	{
-		doom_printf("IDCLEV target not found: %s", next);
+		Message::Add("IDCLEV target not found: {}", next);
 		return true;
 	}
 

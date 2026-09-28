@@ -43,20 +43,6 @@ Most of its 22 callers need a zero-terminated string: `sscanf` (resolutions in `
 Plan: store the value as a `std::string` (replacing the union), return a `std::string_view` that is valid until that config is updated, and convert the callers step by step.
 Where a C API needs a zero-terminated string, the caller makes a `std::string` from the view; these are read at startup or when a setting changes, so the copies are cheap.
 
-## `printf`-style formatting left
-
-All logging goes through `Log::` (`lprintf.hpp`), formatted with `std::format`.
-Two `printf`-style entry points remain:
-- `doom_printf` (on-screen messages, about 50 calls, defined in `g_game.cpp`), which hands its text to `dsda_AddMessage`;
-- `Scanner::ErrorF` (`scanner.cpp`, 13 calls), which formats into a 1024-byte buffer before calling the error callback.
-
-Conversion traps:
-- `%02d` becomes `{:02}`; `%.8s` on a lump name becomes `{}` with `W_LumpNameView(name)`, because such names may fill 8 bytes without a terminating zero and `{:.8}` would still measure the whole string;
-- `%p` needs the pointer cast to `void*`;
-- a `bool` needs `{:d}`, and a `char` printed with `%d` needs converting to a number;
-- an `enum struct` needs `std::to_underlying` (passing one to `%i` through `...` is UB today, e.g. `compatibility_level` in `m_cheat.cpp`);
-- output that something parses must stay identical, e.g. `FINISHED: <map>` for lmpwatch.
-
 ## Buffers as `std::span`
 
 Functions that take a buffer as a pointer plus a separate length should take one `std::span` (or `std::string_view` for text), so the two cannot disagree and callers pass what they hold.

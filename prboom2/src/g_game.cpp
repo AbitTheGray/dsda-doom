@@ -533,7 +533,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 		if(!strafe)
 		{
 			if(strict_input)
-				doom_printf("180 key disabled by strict mode");
+				Message::Add("180 key disabled by strict mode");
 			else
 				cmd->angleturn += QUICKREVERSE;
 		}
@@ -2598,7 +2598,7 @@ static void G_DoSaveGame(dboolean via_cmd)
 
 	P_SAVE_BYTE(0xe6); // consistency marker
 
-	doom_printf("%s", M_WriteFile(name, savebuffer, save_p - savebuffer)
+	Message::Add("{}", M_WriteFile(name, savebuffer, save_p - savebuffer)
 		? s_GGSAVED             /* Ty - externalised */
 		: "Game save failed!"); // CPhipps - not externalised
 
@@ -4110,26 +4110,6 @@ dboolean G_CheckDemoStatus()
 		return true;
 	}
 	return false;
-}
-
-// killough 1/22/98: this is a "Doom printf" for messages. I've gotten
-// tired of using players->message=... and so I've added this dprintf.
-//
-// killough 3/6/98: Made limit static to allow z_zone functions to call
-// this function, without calling realloc(), which seems to cause problems.
-
-#define MAX_MESSAGE_SIZE 1024
-
-// CPhipps - renamed to doom_printf to avoid name collision with glibc
-void doom_printf(const char* s, ...)
-{
-	static char msg[MAX_MESSAGE_SIZE];
-	va_list v;
-	va_start(v, s);
-	vsnprintf(msg, sizeof(msg), s, v); /* print message in buffer */
-	va_end(v);
-
-	dsda_AddMessage(msg);
 }
 
 //e6y

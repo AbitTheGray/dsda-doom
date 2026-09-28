@@ -15,6 +15,7 @@
 #include "dsda/features.hpp"
 #include "dsda/input.hpp"
 #include "dsda/key_frame.hpp"
+#include "dsda/messenger.hpp"
 #include "dsda/pause.hpp"
 #include "dsda/playback.hpp"
 #include "dsda/settings.hpp"
@@ -593,7 +594,7 @@ dboolean dsda_BuildResponder(event_t* ev)
 	{
 		if(!demorecording)
 		{
-			doom_printf("Cannot reverse outside demo");
+			Message::Add("Cannot reverse outside demo");
 			return true;
 		}
 

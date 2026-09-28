@@ -2987,10 +2987,10 @@ void dsda_ExecuteConsoleScript(int i)
 	for(line = 0; dsda_console_script_lines[i][line]; ++line)
 		if(!console_ScriptRunLine(dsda_console_script_lines[i][line]))
 		{
-			doom_printf("Script %d failed", i);
+			Message::Add("Script {} failed", i);
 
 			return;
 		}
 
-	doom_printf("Script %d executed", i);
+	Message::Add("Script {} executed", i);
 }

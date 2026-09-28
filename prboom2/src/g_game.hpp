@@ -67,10 +67,6 @@ void G_SetSpeed(dboolean force);
 const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int params);
 void G_CalculateDemoParams(const byte* demo_p);
 
-// killough 1/18/98: Doom-style printf;   killough 4/25/98: add gcc attributes
-// CPhipps - renames to doom_printf to avoid name collision with glibc
-void doom_printf(const char*, ...) __attribute__((format(printf,1,2)));
-
 // killough 5/2/98: moved from m_misc.c:
 
 extern int key_forward;
