@@ -83,13 +83,13 @@ void S_ParseMusInfo(const char* mapid)
 						}
 						else
 						{
-							lprintf(OutputLevels::Error, "S_ParseMusInfo: Unknown MUS lump %s", sc_String);
+							Log::Error("S_ParseMusInfo: Unknown MUS lump {}", sc_String);
 						}
 					}
 				}
 				else
 				{
-					lprintf(OutputLevels::Error, "S_ParseMusInfo: Number not in range 0 to %d", MAX_MUS_ENTRIES - 1);
+					Log::Error("S_ParseMusInfo: Number not in range 0 to {}", MAX_MUS_ENTRIES - 1);
 				}
 			}
 		}
@@ -144,7 +144,7 @@ void T_MAPMusic()
 				}
 				else // missing musinfo entry -> silence
 				{
-					lprintf(OutputLevels::Warn, "T_MAPMusic: MUSINFO entry %d not defined\n", arraypt);
+					Log::Warn("T_MAPMusic: MUSINFO entry {} not defined\n", arraypt);
 					S_StopMusic();
 					musinfo.current_item = -1;
 				}

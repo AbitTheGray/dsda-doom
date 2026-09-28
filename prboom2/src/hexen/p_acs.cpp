@@ -303,7 +303,7 @@ static void ACSAssert(int condition, const char* fmt, ...)
 	va_start(args, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, args);
 	va_end(args);
-	I_Error("ACS assertion failure: in %s: %s", EvalContext, buf);
+	Log::Fatal("ACS assertion failure: in {}: {}", std::string_view(EvalContext), std::string_view(buf));
 }
 
 static int ReadCodeInt()
@@ -548,7 +548,7 @@ static dboolean AddToACSStore(int map, int number, byte* args)
 		// Append required
 		if(i == MAX_ACS_STORE)
 		{
-			I_Error("AddToACSStore: MAX_ACS_STORE (%d) exceeded.",
+			Log::Fatal("AddToACSStore: MAX_ACS_STORE ({}) exceeded.",
 				MAX_ACS_STORE);
 		}
 		index = i;
@@ -774,7 +774,7 @@ void CheckACSPresent(int number)
 {
 	if(GetACSIndex(number) == -1)
 	{
-		I_Error("Required ACS script %d not initialized", number);
+		Log::Fatal("Required ACS script {} not initialized", number);
 	}
 }
 

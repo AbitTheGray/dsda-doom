@@ -2008,7 +2008,7 @@ dboolean PTR_SlideTraverse(intercept_t* in)
 	line_t* li;
 
 	if(!in->isaline)
-		I_Error("PTR_SlideTraverse: not a line?");
+		Log::Fatal("PTR_SlideTraverse: not a line?");
 
 	li = in->d.line;
 
@@ -3503,7 +3503,7 @@ void P_CreateSecNodeList(mobj_t* thing, fixed_t x, fixed_t y)
  * Must clear tmthing at tic end, as it might contain a pointer to a removed thinker, or the level might have ended/been ended and we clear the objects it was pointing too. Hopefully we don't need to carry this between tics for sync. */
 void P_MapStart()
 {
-	if(tmthing) I_Error("P_MapStart: tmthing set!");
+	if(tmthing) Log::Fatal("P_MapStart: tmthing set!");
 }
 void P_MapEnd()
 {
@@ -3757,7 +3757,7 @@ dboolean PTR_BounceTraverse(intercept_t* in)
 	line_t* li;
 
 	if(!in->isaline)
-		I_Error("PTR_BounceTraverse: not a line?");
+		Log::Fatal("PTR_BounceTraverse: not a line?");
 
 	li = in->d.line;
 

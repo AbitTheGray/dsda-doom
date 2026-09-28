@@ -121,13 +121,13 @@ void P_InitSwitchList()
 			// Warn if either one is missing, but only add if both are valid.
 			texture1 = R_CheckTextureNumForName(alphSwitchList[i].name1);
 			if(texture1 == LUMP_NOT_FOUND)
-				lprintf(OutputLevels::Warn, "P_InitSwitchList: unknown texture %s\n",
-					alphSwitchList[i].name1);
+				Log::Warn("P_InitSwitchList: unknown texture {}\n",
+					std::string_view(alphSwitchList[i].name1));
 
 			texture2 = R_CheckTextureNumForName(alphSwitchList[i].name2);
 			if(texture2 == LUMP_NOT_FOUND)
-				lprintf(OutputLevels::Warn, "P_InitSwitchList: unknown texture %s\n",
-					alphSwitchList[i].name2);
+				Log::Warn("P_InitSwitchList: unknown texture {}\n",
+					std::string_view(alphSwitchList[i].name2));
 
 			if(texture1 != LUMP_NOT_FOUND && texture2 != LUMP_NOT_FOUND)
 			{
@@ -178,7 +178,7 @@ void P_StartButton
 			return;
 		}
 
-	I_Error("P_StartButton: no button slots left!");
+	Log::Fatal("P_StartButton: no button slots left!");
 }
 
 //

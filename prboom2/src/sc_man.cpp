@@ -281,8 +281,8 @@ dboolean SC_GetNumber()
 		sc_Number = strtol(sc_String, &stopper, 0);
 		if(*stopper != 0)
 		{
-			I_Error("SC_GetNumber: Bad numeric constant \"%s\".\n"
-				"Script %s, Line %d", sc_String, ScriptName, sc_Line);
+			Log::Fatal("SC_GetNumber: Bad numeric constant \"{}\".\n"
+				"Script {}, Line {}", sc_String, std::string_view(ScriptName), sc_Line);
 		}
 		return true;
 	}
@@ -426,7 +426,7 @@ void SC_ScriptError(const char* message)
 	{
 		message = "Bad syntax.";
 	}
-	I_Error("Script error, \"%s\" line %d: %s", ScriptName, sc_Line, message);
+	Log::Fatal("Script error, \"{}\" line {}: {}", std::string_view(ScriptName), sc_Line, message);
 }
 
 //==========================================================================
@@ -439,6 +439,6 @@ static void CheckOpen()
 {
 	if(ScriptOpen == false)
 	{
-		I_Error("SC_ call before SC_Open*().");
+		Log::Fatal("SC_ call before SC_Open*().");
 	}
 }

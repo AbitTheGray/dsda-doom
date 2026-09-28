@@ -73,7 +73,7 @@ static void* Z_MallocTag(size_t size, ZoneTag tag)
 
 	if(!(block = static_cast<memblock_t*>(malloc(size + HEADER_SIZE))))
 	{
-		I_Error("Z_Malloc: Failure trying to allocate %lu bytes", (unsigned long)size);
+		Log::Fatal("Z_Malloc: Failure trying to allocate {} bytes", size);
 	}
 
 	if(!blockbytag[std::to_underlying(tag)])
@@ -105,7 +105,7 @@ void Z_Free(void* p)
 		return;
 
 	if(block->signature != ZONE_SIGNATURE)
-		I_Error("Z_Free: freed a non-zone pointer");
+		Log::Fatal("Z_Free: freed a non-zone pointer");
 	block->signature = 0; // Nullify signature so another free fails
 
 	if(block == block->next)
@@ -123,7 +123,7 @@ static void Z_FreeTag(ZoneTag tag)
 	memblock_t *block, *end_block;
 
 	if(tag < ZoneTag::Static || tag >= ZoneTag::Max)
-		I_Error("Z_FreeTag: Tag %i does not exist", std::to_underlying(tag));
+		Log::Fatal("Z_FreeTag: Tag {} does not exist", std::to_underlying(tag));
 
 	block = blockbytag[std::to_underlying(tag)];
 	if(!block)

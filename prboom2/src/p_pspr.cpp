@@ -42,7 +42,7 @@
 #ifdef PRBOOM_DEBUG
 #define CHECK_WEAPON_CODEPOINTER(codepointer, player)\
     if (!player->mo->player) {\
-      I_Error("%s: Weapon codepointers cannot be used with player/monster states (incorrect DEH).", codepointer);\
+      Log::Fatal("{}: Weapon codepointers cannot be used with player/monster states (incorrect DEH).", codepointer);\
       return;\
     }
 #else
@@ -147,7 +147,7 @@ static void P_BringUpWeapon(player_t* player)
 		S_StartMobjSound(player->mo, g_sfx_sawup);
 
 	if(player->pendingweapon >= WeaponType::Count)
-		lprintf(OutputLevels::Warn, "P_BringUpWeapon: weaponinfo overrun has occurred.\n");
+		Log::Warn("P_BringUpWeapon: weaponinfo overrun has occurred.\n");
 
 	if(player->pclass != PClass::Null)
 	{
@@ -2548,7 +2548,7 @@ void P_AddMaceSpot(const mapthing_t* mthing)
 {
 	if(MaceSpotCount == MAX_MACE_SPOTS)
 	{
-		I_Error("Too many mace spots.");
+		Log::Fatal("Too many mace spots.");
 	}
 	MaceSpots[MaceSpotCount].x = mthing->x;
 	MaceSpots[MaceSpotCount].y = mthing->y;

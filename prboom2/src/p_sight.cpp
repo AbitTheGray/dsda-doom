@@ -521,7 +521,7 @@ dboolean P_CrossSubsector_PrBoom(int num)
 
 #ifdef RANGECHECK
 	if(num >= numsubsectors)
-		I_Error("P_CrossSubsector: ss %i with numss = %i", num, numsubsectors);
+		Log::Fatal("P_CrossSubsector: ss {} with numss = {}", num, numsubsectors);
 #endif
 
 	// check lines
@@ -630,7 +630,7 @@ dboolean P_CrossSubsector_Doom(int num)
 
 #ifdef RANGECHECK
 	if(num >= numsubsectors)
-		I_Error("P_CrossSubsector: ss %i with numss = %i", num, numsubsectors);
+		Log::Fatal("P_CrossSubsector: ss {} with numss = {}", num, numsubsectors);
 #endif
 
 	for(; ssline < ssline_last; ssline++)
@@ -723,7 +723,7 @@ dboolean P_CrossSubsector_Boom(int num)
 
 #ifdef RANGECHECK
 	if(num >= numsubsectors)
-		I_Error("P_CrossSubsector: ss %i with numss = %i", num, numsubsectors);
+		Log::Fatal("P_CrossSubsector: ss {} with numss = {}", num, numsubsectors);
 #endif
 
 	for(; ssline < ssline_last; ssline++)

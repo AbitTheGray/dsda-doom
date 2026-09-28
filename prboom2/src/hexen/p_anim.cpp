@@ -349,7 +349,7 @@ void P_InitFTAnims()
 	{
 		if(AnimDefCount == MAX_ANIM_DEFS)
 		{
-			I_Error("P_InitFTAnims: too many AnimDefs.");
+			Log::Fatal("P_InitFTAnims: too many AnimDefs.");
 		}
 		if(SC_Compare(SCI_FLAT))
 		{
@@ -398,7 +398,7 @@ void P_InitFTAnims()
 				{
 					if(fd == MAX_FRAME_DEFS)
 					{
-						I_Error("P_InitFTAnims: too many FrameDefs.");
+						Log::Fatal("P_InitFTAnims: too many FrameDefs.");
 					}
 					SC_MustGetNumber();
 					if(ignore == false)
@@ -445,7 +445,7 @@ void P_InitFTAnims()
 		}
 		if((ignore == false) && (fd - ad->startFrameDef < 2))
 		{
-			I_Error("P_InitFTAnims: AnimDef has framecount < 2.");
+			Log::Fatal("P_InitFTAnims: AnimDef has framecount < 2.");
 		}
 		if(ignore == false)
 		{

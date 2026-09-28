@@ -59,7 +59,7 @@ void* Z_BMalloc(struct block_memory_alloc_s* pzone)
 			int n = p - (*pool)->used;
 #ifdef SIMPLECHECKS
 			if((n < 0) || ((size_t)n >= (*pool)->blocks))
-				I_Error("Z_BMalloc: memchr returned pointer outside of array");
+				Log::Fatal("Z_BMalloc: memchr returned pointer outside of array");
 #endif
 			(*pool)->used[n] = std::to_underlying(BlockState::Used);
 			return getelem(*pool, pzone->size, n);
@@ -95,7 +95,7 @@ void Z_BFree(struct block_memory_alloc_s* pzone, void* p)
 		{
 #ifdef SIMPLECHECKS
 			if((*pool)->used[n] == std::to_underlying(BlockState::Unused))
-				I_Error("Z_BFree: Refree in zone %s", pzone->desc);
+				Log::Fatal("Z_BFree: Refree in zone {}", pzone->desc);
 #endif
 			(*pool)->used[n] = std::to_underlying(BlockState::Unused);
 			if(memchr(((*pool)->used), std::to_underlying(BlockState::Used), (*pool)->blocks) == nullptr)
@@ -109,5 +109,5 @@ void Z_BFree(struct block_memory_alloc_s* pzone, void* p)
 		}
 		else pool = &((*pool)->nextpool);
 	}
-	I_Error("Z_BFree: Free not in zone %s", pzone->desc);
+	Log::Fatal("Z_BFree: Free not in zone {}", pzone->desc);
 }

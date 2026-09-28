@@ -128,9 +128,9 @@ static void gld_PrepareSectorSpecialEffects()
 		}
 #ifdef PRBOOM_DEBUG
 		if(sectors[num].flags & NO_TOPTEXTURES)
-			lprintf(OutputLevels::Info, "Sector %i has no toptextures\n", num);
+			Log::Info("Sector {} has no toptextures\n", num);
 		if(sectors[num].flags & NO_BOTTOMTEXTURES)
-			lprintf(OutputLevels::Info, "Sector %i has no bottomtextures\n", num);
+			Log::Info("Sector {} has no bottomtextures\n", num);
 #endif
 	}
 }
@@ -151,7 +151,7 @@ static void gld_RegisterBleedthroughSector(sector_t* source, sector_t* target, B
 	{
 		/* allocate memory for new sector */
 		bleedsectors = (bleedthrough_t*)Z_Realloc(bleedsectors, (numbleedsectors + 1) * sizeof(bleedthrough_t));
-		if(!bleedsectors) I_Error("gld_RegisterBleedthroughSector: Out of memory");
+		if(!bleedsectors) Log::Fatal("gld_RegisterBleedthroughSector: Out of memory");
 		memset(&bleedsectors[numbleedsectors], 0, sizeof(bleedthrough_t));
 		numbleedsectors++;
 
