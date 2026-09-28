@@ -1264,7 +1264,7 @@ extern "C" void A_Chase(mobj_t* actor)
 		}
 	}
 
-	if(raven && skill_info.flags & SI_FAST_MONSTERS)
+	if(raven && (skill_info.flags & SkillFlag::FastMonsters) != SkillFlag{})
 	{
 		// Monsters move faster in nightmare mode
 		actor->tics -= actor->tics / 2;
@@ -1300,7 +1300,7 @@ extern "C" void A_Chase(mobj_t* actor)
 	if((actor->flags & MobjFlag::JustAttacked) != MobjFlag{})
 	{
 		actor->flags -= MobjFlag::JustAttacked;
-		if(!(skill_info.flags & SI_FAST_MONSTERS))
+		if((skill_info.flags & SkillFlag::FastMonsters) == SkillFlag{})
 			P_NewChaseDir(actor);
 		return;
 	}
@@ -1320,7 +1320,7 @@ extern "C" void A_Chase(mobj_t* actor)
 
 	// check for missile attack
 	if(actor->info->missilestate != StateId::Null)
-		if(!(!(skill_info.flags & SI_FAST_MONSTERS) && actor->movecount))
+		if(!((skill_info.flags & SkillFlag::FastMonsters) == SkillFlag{} && actor->movecount))
 			if(P_CheckMissileRange(actor))
 			{
 				P_SetMobjState(actor, actor->info->missilestate);
@@ -2937,7 +2937,7 @@ extern "C" void A_BrainSpit(mobj_t* mo)
 		return;
 
 	brain.easy ^= 1; // killough 3/26/98: use brain struct
-	if(skill_info.flags & SI_EASY_BOSS_BRAIN && !brain.easy)
+	if((skill_info.flags & SkillFlag::EasyBossBrain) != SkillFlag{} && !brain.easy)
 		return;
 
 	// shoot a cube at current target
@@ -5893,7 +5893,7 @@ extern "C" void A_SerpentChase(mobj_t* actor)
 		actor->threshold--;
 	}
 
-	if(skill_info.flags & SI_FAST_MONSTERS)
+	if((skill_info.flags & SkillFlag::FastMonsters) != SkillFlag{})
 	{
 		// Monsters move faster in nightmare mode
 		actor->tics -= actor->tics / 2;
@@ -5938,7 +5938,7 @@ extern "C" void A_SerpentChase(mobj_t* actor)
 	if((actor->flags & MobjFlag::JustAttacked) != MobjFlag{})
 	{
 		actor->flags -= MobjFlag::JustAttacked;
-		if(!(skill_info.flags & SI_FAST_MONSTERS))
+		if((skill_info.flags & SkillFlag::FastMonsters) == SkillFlag{})
 			P_NewChaseDir(actor);
 		return;
 	}
@@ -6059,7 +6059,7 @@ extern "C" void A_SerpentWalk(mobj_t* actor)
 		actor->threshold--;
 	}
 
-	if(skill_info.flags & SI_FAST_MONSTERS)
+	if((skill_info.flags & SkillFlag::FastMonsters) != SkillFlag{})
 	{
 		// Monsters move faster in nightmare mode
 		actor->tics -= actor->tics / 2;
@@ -6104,7 +6104,7 @@ extern "C" void A_SerpentWalk(mobj_t* actor)
 	if((actor->flags & MobjFlag::JustAttacked) != MobjFlag{})
 	{
 		actor->flags -= MobjFlag::JustAttacked;
-		if(!(skill_info.flags & SI_FAST_MONSTERS))
+		if((skill_info.flags & SkillFlag::FastMonsters) == SkillFlag{})
 			P_NewChaseDir(actor);
 		return;
 	}
@@ -8198,7 +8198,7 @@ extern "C" void A_FastChase(mobj_t* actor)
 		actor->threshold--;
 	}
 
-	if(skill_info.flags & SI_FAST_MONSTERS)
+	if((skill_info.flags & SkillFlag::FastMonsters) != SkillFlag{})
 	{
 		// Monsters move faster in nightmare mode
 		actor->tics -= actor->tics / 2;
@@ -8243,7 +8243,7 @@ extern "C" void A_FastChase(mobj_t* actor)
 	if((actor->flags & MobjFlag::JustAttacked) != MobjFlag{})
 	{
 		actor->flags -= MobjFlag::JustAttacked;
-		if(!(skill_info.flags & SI_FAST_MONSTERS))
+		if((skill_info.flags & SkillFlag::FastMonsters) == SkillFlag{})
 			P_NewChaseDir(actor);
 		return;
 	}
@@ -8282,7 +8282,7 @@ extern "C" void A_FastChase(mobj_t* actor)
 	//
 	if(actor->info->missilestate != StateId::Null)
 	{
-		if(!(skill_info.flags & SI_FAST_MONSTERS) && actor->movecount)
+		if((skill_info.flags & SkillFlag::FastMonsters) == SkillFlag{} && actor->movecount)
 			goto nomissile;
 		if(!P_CheckMissileRange(actor))
 			goto nomissile;

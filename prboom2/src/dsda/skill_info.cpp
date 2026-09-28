@@ -21,28 +21,28 @@ const skill_info_t doom_skill_infos[5] = {
 		.key = 'i',
 		.name = "I'm too young to die.",
 		.pic_name = "M_JKILL",
-		.flags = SI_EASY_BOSS_BRAIN
+		.flags = SkillFlag::EasyBossBrain
 	},
 	{
 		.spawn_filter = 2,
 		.key = 'h',
 		.name = "Hey, not too rough.",
 		.pic_name = "M_ROUGH",
-		.flags = SI_EASY_BOSS_BRAIN
+		.flags = SkillFlag::EasyBossBrain
 	},
 	{
 		.spawn_filter = 3,
 		.key = 'h',
 		.name = "Hurt me plenty.",
 		.pic_name = "M_HURT",
-		.flags = 0
+		.flags = {}
 	},
 	{
 		.spawn_filter = 4,
 		.key = 'u',
 		.name = "Ultra-Violence.",
 		.pic_name = "M_ULTRA",
-		.flags = 0
+		.flags = {}
 	},
 	{
 		.ammo_factor = FRACUNIT * 2,
@@ -51,7 +51,7 @@ const skill_info_t doom_skill_infos[5] = {
 		.key = 'n',
 		.name = "Nightmare!",
 		.pic_name = "M_NMARE",
-		.flags = SI_FAST_MONSTERS | SI_INSTANT_REACTION | SI_MUST_CONFIRM
+		.flags = SkillFlag::FastMonsters | SkillFlag::InstantReaction | SkillFlag::MustConfirm
 	},
 };
 
@@ -61,28 +61,28 @@ const skill_info_t heretic_skill_infos[5] = {
 		.damage_factor = FRACUNIT / 2,
 		.spawn_filter = 1,
 		.name = "THOU NEEDETH A WET-NURSE",
-		.flags = SI_AUTO_USE_HEALTH
+		.flags = SkillFlag::AutoUseHealth
 	},
 	{
 		.spawn_filter = 2,
 		.name = "YELLOWBELLIES-R-US",
-		.flags = 0
+		.flags = {}
 	},
 	{
 		.spawn_filter = 3,
 		.name = "BRINGEST THEM ONETH",
-		.flags = 0
+		.flags = {}
 	},
 	{
 		.spawn_filter = 4,
 		.name = "THOU ART A SMITE-MEISTER",
-		.flags = 0
+		.flags = {}
 	},
 	{
 		.ammo_factor = FRACUNIT * 3 / 2,
 		.spawn_filter = 5,
 		.name = "BLACK PLAGUE POSSESSES THEE",
-		.flags = SI_FAST_MONSTERS | SI_INSTANT_REACTION
+		.flags = SkillFlag::FastMonsters | SkillFlag::InstantReaction
 	},
 };
 
@@ -91,24 +91,24 @@ const skill_info_t hexen_skill_infos[5] = {
 		.ammo_factor = FRACUNIT * 3 / 2,
 		.damage_factor = FRACUNIT / 2,
 		.spawn_filter = 1,
-		.flags = SI_AUTO_USE_HEALTH
+		.flags = SkillFlag::AutoUseHealth
 	},
 	{
 		.spawn_filter = 2,
-		.flags = 0
+		.flags = {}
 	},
 	{
 		.spawn_filter = 3,
-		.flags = 0
+		.flags = {}
 	},
 	{
 		.spawn_filter = 4,
-		.flags = 0
+		.flags = {}
 	},
 	{
 		.ammo_factor = FRACUNIT * 3 / 2,
 		.spawn_filter = 5,
-		.flags = SI_FAST_MONSTERS | SI_INSTANT_REACTION
+		.flags = SkillFlag::FastMonsters | SkillFlag::InstantReaction
 	},
 };
 
@@ -214,10 +214,10 @@ void dsda_RefreshGameSkill()
 		skill_info.respawn_time = 12;
 
 	if(fastparm)
-		skill_info.flags |= SI_FAST_MONSTERS;
+		skill_info.flags |= SkillFlag::FastMonsters;
 
 	if(coop_spawns)
-		skill_info.flags |= SI_SPAWN_MULTI;
+		skill_info.flags |= SkillFlag::SpawnMulti;
 
 	G_RefreshFastMonsters();
 }

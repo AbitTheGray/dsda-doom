@@ -2078,7 +2078,7 @@ void G_DoReborn(int playernum)
 		return Hexen_G_DoReborn(playernum);
 
 	// TODO: possible "allow respawn" mapinfo flag
-	if(!netgame && !(skill_info.flags & SI_PLAYER_RESPAWN))
+	if(!netgame && (skill_info.flags & SkillFlag::PlayerRespawn) == SkillFlag{})
 		gameaction = GameAction::LoadLevel; // reload the level from scratch
 	else
 	{
@@ -2910,7 +2910,7 @@ void G_RefreshFastMonsters()
 	int i;
 	int fast_pending;
 
-	fast_pending = !!(skill_info.flags & SI_FAST_MONSTERS);
+	fast_pending = (skill_info.flags & SkillFlag::FastMonsters) != SkillFlag{};
 
 	if(hexen)
 	{

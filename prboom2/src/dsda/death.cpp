@@ -32,7 +32,7 @@ enum struct DeathUseAction : int32_t
 static DeathUseAction dsda_DeathUseAction()
 {
 	// TODO: possible "allow respawn" mapinfo flag
-	dboolean mapinfo_respawn = skill_info.flags & SI_PLAYER_RESPAWN;
+	dboolean mapinfo_respawn = (skill_info.flags & SkillFlag::PlayerRespawn) != SkillFlag{};
 
 	if(demoplayback || demorecording || mapinfo_respawn)
 		return DeathUseAction::Default;

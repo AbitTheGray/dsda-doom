@@ -1747,7 +1747,7 @@ mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, MobjType type)
 
 	mobj->health = P_MobjSpawnHealth(mobj);
 
-	if(!(skill_info.flags & SI_INSTANT_REACTION))
+	if((skill_info.flags & SkillFlag::InstantReaction) == SkillFlag{})
 		mobj->reactiontime = info->reactiontime;
 
 	if(type != ZMT_AMBIENTSOUND)
@@ -2239,7 +2239,7 @@ static dboolean P_ShouldSpawnMapThing(MapThingFlag options)
 	MapThingFlag spawnMask;
 	dboolean spawn_multi;
 
-	spawn_multi = skill_info.flags & SI_SPAWN_MULTI;
+	spawn_multi = (skill_info.flags & SkillFlag::SpawnMulti) != SkillFlag{};
 
 	if(map_format.hexen)
 	{

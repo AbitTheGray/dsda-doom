@@ -1613,7 +1613,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		if(
 			raven &&
 			damage >= player->health &&
-			(skill_info.flags & SI_AUTO_USE_HEALTH || deathmatch) &&
+			((skill_info.flags & SkillFlag::AutoUseHealth) != SkillFlag{} || deathmatch) &&
 			!player->chickenTics && !player->morphTics
 		)
 		{
@@ -1732,7 +1732,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		}
 	}
 
-	if(!(skill_info.flags & SI_NO_PAIN) &&
+	if((skill_info.flags & SkillFlag::NoPain) == SkillFlag{} &&
 		P_Random(RandomClass::Painchance) < target->info->painchance &&
 		(target->flags & MobjFlag::SkullFly) == MobjFlag{}) //killough 11/98: see below
 	{
@@ -2566,7 +2566,7 @@ void P_AutoUseHealth(player_t* player, int saveHealth)
 			superCount = player->inventory[i].count;
 		}
 	}
-	if(skill_info.flags & SI_AUTO_USE_HEALTH && (normalCount * 25 >= saveHealth))
+	if((skill_info.flags & SkillFlag::AutoUseHealth) != SkillFlag{} && (normalCount * 25 >= saveHealth))
 	{
 		// Use quartz flasks
 		count = (saveHealth + 24) / 25;
@@ -2586,7 +2586,7 @@ void P_AutoUseHealth(player_t* player, int saveHealth)
 			P_PlayerRemoveArtifact(player, superSlot);
 		}
 	}
-	else if(skill_info.flags & SI_AUTO_USE_HEALTH
+	else if((skill_info.flags & SkillFlag::AutoUseHealth) != SkillFlag{}
 		&& (superCount * 100 + normalCount * 25 >= saveHealth))
 	{
 		// Use mystic urns and quartz flasks
@@ -2733,7 +2733,7 @@ void P_PoisonDamage(player_t* player, mobj_t* source, int damage,
 		return;
 	}
 	if(damage >= player->health
-		&& (skill_info.flags & SI_AUTO_USE_HEALTH || deathmatch) && !player->morphTics)
+		&& ((skill_info.flags & SkillFlag::AutoUseHealth) != SkillFlag{} || deathmatch) && !player->morphTics)
 	{
 		// Try to use some inventory health
 		P_AutoUseHealth(player, damage - player->health + 1);

@@ -8,23 +8,29 @@
 #include "doomdef.hpp"
 #include "m_fixed.hpp"
 
+#include "cpp/Util.hpp"
+
+// Properties of a skill level (bit 6 is unused, as upstream).
+enum struct SkillFlag : uint16_t
+{
+	SpawnMulti = Bit<uint16_t>(0u),
+	FastMonsters = Bit<uint16_t>(1u),
+	InstantReaction = Bit<uint16_t>(2u),
+	DisableCheats = Bit<uint16_t>(3u),
+	NoPain = Bit<uint16_t>(4u),
+	DefaultSkill = Bit<uint16_t>(5u),
+	PlayerRespawn = Bit<uint16_t>(7u),
+	EasyBossBrain = Bit<uint16_t>(8u),
+	MustConfirm = Bit<uint16_t>(9u),
+	AutoUseHealth = Bit<uint16_t>(10u),
+};
+ENUM_FLAGS_FUNC(SkillFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#define SI_SPAWN_MULTI      0x0001
-#define SI_FAST_MONSTERS    0x0002
-#define SI_INSTANT_REACTION 0x0004
-#define SI_DISABLE_CHEATS   0x0008
-#define SI_NO_PAIN          0x0010
-#define SI_DEFAULT_SKILL    0x0020
-#define SI_PLAYER_RESPAWN   0x0080
-#define SI_EASY_BOSS_BRAIN  0x0100
-#define SI_MUST_CONFIRM     0x0200
-#define SI_AUTO_USE_HEALTH  0x0400
-
-typedef uint16_t skill_info_flags_t;
 
 typedef struct
 {
@@ -41,7 +47,7 @@ typedef struct
 	const char* name;
 	const char* pic_name;
 	int text_color;
-	skill_info_flags_t flags;
+	SkillFlag flags;
 } skill_info_t;
 
 extern skill_info_t skill_info;

@@ -742,7 +742,7 @@ extern "C" void M_ChooseSkill(int choice)
 
 	chosen_skill = choice;
 
-	if(choice < num_skills && skill_infos[choice].flags & SI_MUST_CONFIRM)
+	if(choice < num_skills && (skill_infos[choice].flags & SkillFlag::MustConfirm) != SkillFlag{})
 	{
 		const char* message;
 
@@ -6444,7 +6444,7 @@ static void M_InitializeSkillMenu()
 		SkillDef.menuitems[i].routine = M_ChooseSkill;
 		SkillDef.menuitems[i].alphaKey = skill_infos[i].key;
 
-		if(skill_infos[i].flags & SI_DEFAULT_SKILL)
+		if((skill_infos[i].flags & SkillFlag::DefaultSkill) != SkillFlag{})
 			SkillDef.lastOn = i;
 	}
 
