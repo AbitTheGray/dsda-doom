@@ -1301,7 +1301,7 @@ static void ArchiveWorld()
 	}
 	for(i = 0, li = lines; i < numlines; i++, li++)
 	{
-		SV_WriteLong(li->flags);
+		SV_WriteLong(std::to_underlying(li->flags));
 		// TODO: how does this work? it's a short
 		SV_WriteByte(li->special);
 		SV_WriteLong(li->special_args[0]);
@@ -1351,7 +1351,7 @@ static void UnarchiveWorld()
 	}
 	for(i = 0, li = lines; i < numlines; i++, li++)
 	{
-		li->flags = SV_ReadLong();
+		li->flags = static_cast<LineFlag>(SV_ReadLong());
 		li->special = SV_ReadByte();
 		li->special_args[0] = SV_ReadLong();
 		li->special_args[1] = SV_ReadLong();

@@ -852,7 +852,7 @@ int EV_BuildStairs
 				{
 					sector_t* tsec = (sec->lines[i])->frontsector;
 					int newsecnum;
-					if(!((sec->lines[i])->flags & ML_TWOSIDED))
+					if(((sec->lines[i])->flags & LineFlag::TwoSided) == LineFlag{})
 						continue;
 
 					newsecnum = tsec->iSectorID;
@@ -1005,7 +1005,8 @@ int P_SpawnDonut(int secnum, line_t* line, fixed_t pillarspeed, fixed_t slimespe
 			// original code:   !s2->lines[i]->flags & ML_TWOSIDED
 			// equivalent to:   (!s2->lines[i]->flags) & ML_TWOSIDED , i.e. 0
 			// should be:       !(s2->lines[i]->flags & ML_TWOSIDED)
-			if(((!s2->lines[i]->flags) & ML_TWOSIDED) || (s2->lines[i]->backsector == s1))
+			// Only the backsector test remains, as the flag test was always 0.
+			if(s2->lines[i]->backsector == s1)
 				continue;
 		}
 		else if(!s2->lines[i]->backsector || s2->lines[i]->backsector == s1)
@@ -1667,7 +1668,7 @@ static void ProcessStairSector(sector_t* sec, int type, int height,
 	//
 	for(i = 0; i < sec->linecount; i++)
 	{
-		if(!((sec->lines[i])->flags & ML_TWOSIDED))
+		if(((sec->lines[i])->flags & LineFlag::TwoSided) == LineFlag{})
 		{
 			continue;
 		}
@@ -1697,7 +1698,7 @@ static sector_t* P_NextSpecialSector(sector_t* sec, ZDoomSectorSpecial special)
 
 	for(i = 0; i < sec->linecount; i++)
 	{
-		if(!((sec->lines[i])->flags & ML_TWOSIDED))
+		if(((sec->lines[i])->flags & LineFlag::TwoSided) == LineFlag{})
 		{
 			continue;
 		}
@@ -1846,7 +1847,7 @@ int EV_BuildZDoomStairs(int tag, StairType type, line_t* line, fixed_t stairsize
 
 				for(i = 0; i < sec->linecount; i++)
 				{
-					if(!(sec->lines[i]->flags & ML_TWOSIDED))
+					if((sec->lines[i]->flags & LineFlag::TwoSided) == LineFlag{})
 						continue;
 
 					tsec = sec->lines[i]->frontsector;

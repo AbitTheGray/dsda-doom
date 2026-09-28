@@ -566,7 +566,7 @@ dboolean P_CrossSubsector_PrBoom(int num)
 		ssline->linedef->validcount = validcount;
 
 		// cph - do what we can before forced to check intersection
-		if(ssline->linedef->flags & ML_TWOSIDED)
+		if((ssline->linedef->flags & LineFlag::TwoSided) != LineFlag{})
 		{
 			// crosses a two sided line
 			front = ssline->seg->frontsector;
@@ -591,7 +591,7 @@ dboolean P_CrossSubsector_PrBoom(int num)
 
 		// cph - if bottom >= top or top < minz or bottom > maxz then it must be
 		// solid wrt this LOS
-		if(!(ssline->linedef->flags & ML_TWOSIDED) || (openbottom >= opentop) ||
+		if((ssline->linedef->flags & LineFlag::TwoSided) == LineFlag{} || (openbottom >= opentop) ||
 			(prboom_comp[std::to_underlying(PrboomComp::ForceLxdoomDemoCompatibility)].state ? (opentop <= los.minz) || (openbottom >= los.maxz) : (opentop < los.minz) || (openbottom > los.maxz)))
 			return false;
 
@@ -664,7 +664,7 @@ dboolean P_CrossSubsector_Doom(int num)
 		ssline->linedef->validcount = validcount;
 
 		// stop because it is not two sided anyway
-		if(!(ssline->linedef->flags & ML_TWOSIDED))
+		if((ssline->linedef->flags & LineFlag::TwoSided) == LineFlag{})
 			return false;
 
 		// crosses a two sided line
@@ -768,8 +768,8 @@ dboolean P_CrossSubsector_Boom(int num)
 		ssline->linedef->validcount = validcount;
 
 		// stop because it is not two sided anyway
-		if(!(ssline->linedef->flags & ML_TWOSIDED) ||
-			ssline->linedef->flags & (ML_BLOCKEVERYTHING | ML_BLOCKSIGHT))
+		if((ssline->linedef->flags & LineFlag::TwoSided) == LineFlag{} ||
+			(ssline->linedef->flags & (LineFlag::BlockEverything | LineFlag::BlockSight)) != LineFlag{})
 			return false;
 
 		// crosses a two sided line

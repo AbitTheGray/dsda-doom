@@ -1761,15 +1761,15 @@ static int CmdSetLineBlocking()
 {
 	line_t* line;
 	int lineTag;
-	dboolean blocking;
+	LineFlag blocking;
 	int searcher;
 
-	blocking = Pop() ? ML_BLOCKING : 0;
+	blocking = Pop() ? LineFlag::Blocking : LineFlag{};
 	lineTag = Pop();
 	searcher = -1;
 	while((line = P_FindLine(lineTag, &searcher)) != nullptr)
 	{
-		line->flags = (line->flags & ~ML_BLOCKING) | blocking;
+		line->flags = (line->flags - LineFlag::Blocking) | blocking;
 	}
 	return SCRIPT_CONTINUE;
 }

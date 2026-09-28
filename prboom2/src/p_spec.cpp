@@ -305,7 +305,7 @@ int twoSided
 	//has two sidedefs, rather than whether the 2S flag is set
 
 	return (comp[std::to_underlying(CompOption::Model)])
-		? (sectors[sector].lines[line])->flags & ML_TWOSIDED
+		? ((sectors[sector].lines[line])->flags & LineFlag::TwoSided) != LineFlag{}
 		: (sectors[sector].lines[line])->sidenum[1] != NO_INDEX;
 }
 
@@ -327,7 +327,7 @@ sector_t* getNextSector
 
 	if(comp[std::to_underlying(CompOption::Model)])
 	{
-		if(!(line->flags & ML_TWOSIDED))
+		if((line->flags & LineFlag::TwoSided) == LineFlag{})
 			return nullptr;
 	}
 
@@ -1650,7 +1650,7 @@ extern "C" void P_CrossCompatibleSpecialLine(line_t* line, int side, mobj_t* thi
 			{
 				if(!(line->special & DoorMonster))
 					return;                 // monsters disallowed from this door
-				if(line->flags & ML_SECRET) // they can't open secret doors either
+				if((line->flags & LineFlag::Secret) != LineFlag{}) // they can't open secret doors either
 					return;
 			}
 			if(!line->special_args[0]) //3/2/98 move outside the monster check
@@ -2564,7 +2564,7 @@ extern "C" void P_ShootCompatibleSpecialLine(mobj_t* thing, line_t* line)
 			{
 				if(!(line->special & DoorMonster))
 					return;                 // monsters disallowed from this door
-				if(line->flags & ML_SECRET) // they can't open secret doors either
+				if((line->flags & LineFlag::Secret) != LineFlag{}) // they can't open secret doors either
 					return;
 			}
 			if(!line->special_args[0]) //jff 3/2/98 all gun generalized types require tag
@@ -5456,7 +5456,7 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 
 	lineActivation = line->activation;
 
-	if(line->flags & ML_FIRSTSIDEONLY && side)
+	if((line->flags & LineFlag::FirstSideOnly) != LineFlag{} && side)
 	{
 		return false;
 	}
@@ -5475,7 +5475,7 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 	if(activationType == SPAC_USE || activationType == SPAC_USEBACK)
 	{
 		// TODO: possible "check switch range" mapinfo flag
-		if((line->flags & ML_CHECKSWITCHRANGE) && !P_CheckSwitchRange(line, mo, side))
+		if((line->flags & LineFlag::CheckSwitchRange) != LineFlag{} && !P_CheckSwitchRange(line, mo, side))
 		{
 			return false;
 		}
@@ -5511,7 +5511,7 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 	if(
 		mo && !mo->player &&
 		(mo->flags & MobjFlag::Missile) == MobjFlag{} &&
-		!(line->flags & ML_MONSTERSCANACTIVATE) &&
+		(line->flags & LineFlag::MonstersCanActivate) == LineFlag{} &&
 		(activationType != SPAC_MCROSS || !(lineActivation & SPAC_MCROSS))
 	)
 	{
@@ -5524,7 +5524,7 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 		// the default for non-Hexen maps in Hexen format.
 		// TODO: possible "check switch range" mapinfo flag
 
-		if((activationType == SPAC_USE || activationType == SPAC_PUSH) && line->flags & ML_SECRET)
+		if((activationType == SPAC_USE || activationType == SPAC_PUSH) && (line->flags & LineFlag::Secret) != LineFlag{})
 			return false; // never open secret doors
 
 		switch(activationType)
@@ -5572,7 +5572,7 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 	if(
 		activationType == SPAC_MCROSS &&
 		!(lineActivation & SPAC_MCROSS) &&
-		!(line->flags & ML_MONSTERSCANACTIVATE)
+		(line->flags & LineFlag::MonstersCanActivate) == LineFlag{}
 	)
 	{
 		return false;
@@ -5599,7 +5599,7 @@ extern "C" dboolean P_TestActivateHexenLine(line_t* line, mobj_t* mo, int side, 
 			// currently, monsters can only activate the MCROSS activation type
 			return false;
 		}
-		if(line->flags & ML_SECRET)
+		if((line->flags & LineFlag::Secret) != LineFlag{})
 			return false; // never open secret doors
 	}
 
@@ -5642,7 +5642,7 @@ dboolean P_ActivateLine(line_t* line, mobj_t* mo, int side, line_activation_t ac
 		}
 	}
 
-	repeat = (line->flags & ML_REPEATSPECIAL) != 0;
+	repeat = (line->flags & LineFlag::RepeatSpecial) != LineFlag{};
 
 	buttonSuccess =
 		map_format.execute_line_special(line->special, line->special_args, line, side, mo);
@@ -6381,7 +6381,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 
 			// Toggle direction of next activation of repeatable stairs
 			if(buttonSuccess && line &&
-				line->flags & ML_REPEATSPECIAL &&
+				(line->flags & LineFlag::RepeatSpecial) != LineFlag{} &&
 				line->special == std::to_underlying(ZDoomLineSpecial::GenericStairs))
 			{
 				line->special_args[3] ^= 1;
@@ -6499,37 +6499,37 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		case std::to_underlying(ZDoomLineSpecial::LineSetBlocking):
 			if(args[0])
 			{
-				int i;
 				const int* id_p;
-				static const int flags[] =
+				static constexpr std::array flags =
 				{
-					ML_BLOCKING,
-					ML_BLOCKMONSTERS,
-					ML_BLOCKPLAYERS,
-					ML_BLOCKFLOATERS,
-					ML_BLOCKPROJECTILES,
-					ML_BLOCKEVERYTHING,
-					ML_JUMPOVER,
-					ML_BLOCKUSE,
-					ML_BLOCKSIGHT,
-					ML_BLOCKHITSCAN,
-					ML_SOUNDBLOCK,
-					ML_BLOCKLANDMONSTERS,
-					-1
+					LineFlag::Blocking,
+					LineFlag::BlockMonsters,
+					LineFlag::BlockPlayers,
+					LineFlag::BlockFloaters,
+					LineFlag::BlockProjectiles,
+					LineFlag::BlockEverything,
+					LineFlag::JumpOver,
+					LineFlag::BlockUse,
+					LineFlag::BlockSight,
+					LineFlag::BlockHitscan,
+					LineFlag::SoundBlock,
+					LineFlag::BlockLandMonsters,
 				};
 
-				int setflags = 0;
-				int clearflags = 0;
+				LineFlag setflags{};
+				LineFlag clearflags{};
 
-				for(i = 0; flags[i] != -1; i++, args[1] >>= 1, args[2] >>= 1)
+				for(const LineFlag flag : flags)
 				{
-					if(args[1] & 1) setflags |= flags[i];
-					if(args[2] & 1) clearflags |= flags[i];
+					if(args[1] & 1) setflags |= flag;
+					if(args[2] & 1) clearflags |= flag;
+					args[1] >>= 1;
+					args[2] >>= 1;
 				}
 
 				FIND_LINES(id_p, args[0])
 				{
-					lines[*id_p].flags = (lines[*id_p].flags & ~clearflags) | setflags;
+					lines[*id_p].flags = (lines[*id_p].flags - clearflags) | setflags;
 				}
 
 				buttonSuccess = 1;
@@ -6575,29 +6575,29 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		case std::to_underlying(ZDoomLineSpecial::LineSetAutomapFlags):
 			if(args[0])
 			{
-				int i;
 				const int* id_p;
-				static const int flags[] =
+				static constexpr std::array flags =
 				{
-					ML_SECRET,
-					ML_DONTDRAW,
-					ML_MAPPED,
-					ML_REVEALED,
-					-1
+					LineFlag::Secret,
+					LineFlag::DontDraw,
+					LineFlag::Mapped,
+					LineFlag::Revealed,
 				};
 
-				int setflags = 0;
-				int clearflags = 0;
+				LineFlag setflags{};
+				LineFlag clearflags{};
 
-				for(i = 0; flags[i] != -1; i++, args[1] >>= 1, args[2] >>= 1)
+				for(const LineFlag flag : flags)
 				{
-					if(args[1] & 1) setflags |= flags[i];
-					if(args[2] & 1) clearflags |= flags[i];
+					if(args[1] & 1) setflags |= flag;
+					if(args[2] & 1) clearflags |= flag;
+					args[1] >>= 1;
+					args[2] >>= 1;
 				}
 
 				FIND_LINES(id_p, args[0])
 				{
-					lines[*id_p].flags = (lines[*id_p].flags & ~clearflags) | setflags;
+					lines[*id_p].flags = (lines[*id_p].flags - clearflags) | setflags;
 				}
 
 				buttonSuccess = 1;
@@ -7052,7 +7052,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 
 					if(line->backsector && line->special == std::to_underlying(ZDoomLineSpecial::ForceField))
 					{
-						line->flags &= ~(ML_BLOCKING | ML_BLOCKEVERYTHING);
+						line->flags -= (LineFlag::Blocking | LineFlag::BlockEverything);
 						line->special = 0;
 						sides[line->sidenum[0]].midtexture = NO_TEXTURE;
 						sides[line->sidenum[1]].midtexture = NO_TEXTURE;

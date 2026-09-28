@@ -91,7 +91,7 @@ static void P_RecursiveSound(sector_t* sec, int soundblocks, mobj_t* soundtarget
 		sector_t* other;
 		line_t* check = sec->lines[i];
 
-		if(!(check->flags & ML_TWOSIDED))
+		if((check->flags & LineFlag::TwoSided) == LineFlag{})
 			continue;
 
 		P_LineOpening(check, nullptr);
@@ -101,7 +101,7 @@ static void P_RecursiveSound(sector_t* sec, int soundblocks, mobj_t* soundtarget
 
 		other = sides[check->sidenum[sides[check->sidenum[0]].sector == sec]].sector;
 
-		if(!(check->flags & ML_SOUNDBLOCK))
+		if((check->flags & LineFlag::SoundBlock) == LineFlag{})
 			P_RecursiveSound(other, soundblocks, soundtarget);
 		else if(!soundblocks)
 			P_RecursiveSound(other, 1, soundtarget);

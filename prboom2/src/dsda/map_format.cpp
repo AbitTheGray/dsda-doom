@@ -279,9 +279,9 @@ extern "C" void P_CheckCompatibleImpact(mobj_t*);
 extern "C" void P_CheckHereticImpact(mobj_t*);
 extern "C" void P_CheckZDoomImpact(mobj_t*);
 
-extern "C" void P_TranslateHexenLineFlags(unsigned int*, line_activation_t*);
-extern "C" void P_TranslateZDoomLineFlags(unsigned int*, line_activation_t*);
-extern "C" void P_TranslateCompatibleLineFlags(unsigned int*, line_activation_t*);
+extern "C" LineFlag P_TranslateHexenLineFlags(uint32_t raw_flags, line_activation_t* activation);
+extern "C" LineFlag P_TranslateZDoomLineFlags(uint32_t raw_flags, line_activation_t* activation);
+extern "C" LineFlag P_TranslateCompatibleLineFlags(uint32_t raw_flags, line_activation_t* activation);
 
 extern "C" void P_ApplyCompatibleSectorMovementSpecial(mobj_t*, int);
 extern "C" void P_ApplyHereticSectorMovementSpecial(mobj_t*, int);

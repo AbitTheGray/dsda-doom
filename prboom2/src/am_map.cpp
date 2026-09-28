@@ -1697,14 +1697,14 @@ static AutomapStyle AM_wallStyle(int i)
 	}
 
 	// if line has been seen or IDDT has been used
-	if(dsda_RevealAutomap() || (lines[i].flags & ML_MAPPED))
+	if(dsda_RevealAutomap() || (lines[i].flags & LineFlag::Mapped) != LineFlag{})
 	{
-		if((lines[i].flags & ML_DONTDRAW) && !dsda_RevealAutomap())
+		if((lines[i].flags & LineFlag::DontDraw) != LineFlag{} && !dsda_RevealAutomap())
 			return AutomapStyle::Invisible;
 
 		if(
 			(mapcolor_p->bdor || mapcolor_p->ydor || mapcolor_p->rdor) &&
-			!(lines[i].flags & ML_SECRET) && dsda_DoorType(i) != DoorType::None
+			(lines[i].flags & LineFlag::Secret) == LineFlag{} && dsda_DoorType(i) != DoorType::None
 		)
 			return AutomapStyle::Locked;
 
@@ -1731,17 +1731,17 @@ static AutomapStyle AM_wallStyle(int i)
 		}
 		else // 2-sided
 		{
-			if(mapcolor_p->tele && !(lines[i].flags & ML_SECRET) && dsda_IsTeleportLine(i))
+			if(mapcolor_p->tele && (lines[i].flags & LineFlag::Secret) == LineFlag{} && dsda_IsTeleportLine(i))
 			{
 				return AutomapStyle::Teleport;
 			}
-			else if(lines[i].flags & ML_SECRET)
+			else if((lines[i].flags & LineFlag::Secret) != LineFlag{})
 			{
 				return AutomapStyle::OneSided;
 			}
 			else if(
 				mapcolor_p->clsd &&
-				!(lines[i].flags & ML_SECRET) &&
+				(lines[i].flags & LineFlag::Secret) == LineFlag{} &&
 				((lines[i].backsector->floorheight == lines[i].backsector->ceilingheight) ||
 					(lines[i].frontsector->floorheight == lines[i].frontsector->ceilingheight))
 			)
@@ -1792,9 +1792,9 @@ static AutomapStyle AM_wallStyle(int i)
 			}
 		}
 	}
-	else if(plr->powers[std::to_underlying(PowerType::AllMap)] || (lines[i].flags & ML_REVEALED))
+	else if(plr->powers[std::to_underlying(PowerType::AllMap)] || (lines[i].flags & LineFlag::Revealed) != LineFlag{})
 	{
-		if(!(lines[i].flags & ML_DONTDRAW))
+		if((lines[i].flags & LineFlag::DontDraw) == LineFlag{})
 		{
 			if
 			(

@@ -311,7 +311,6 @@ enum struct AutomapStyle : int32_t
 };
 
 typedef unsigned short line_activation_t;
-typedef unsigned int line_flags_t;
 
 typedef struct line_s
 {
@@ -319,7 +318,7 @@ typedef struct line_s
 	vertex_t *v1, *v2; // Vertices, from v1 to v2.
 	fixed_t dx, dy;    // Precalculated v2 - v1 for side checking.
 	float texel_length;
-	line_flags_t flags; // Animation related.
+	LineFlag flags; // Animation related.
 	short special;
 	short id;
 	int32_t sidenum[2];    // Visual appearance: SideDefs.

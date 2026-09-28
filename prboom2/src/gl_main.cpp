@@ -1347,7 +1347,7 @@ void gld_AddWall(seg_t* seg)
 			wall.flag = GLWallType::M1S;
 			gld_CalculateWallY(&wall, &lineheight, frontsector->floorheight, frontsector->ceilingheight);
 			gld_CalculateWallU(&wall, seg, backseg, linelength, seg->sidedef->textureoffset_mid);
-			gld_CalculateWallV(&wall, seg, seg->linedef->flags & ML_DONTPEGBOTTOM, lineheight,
+			gld_CalculateWallV(&wall, seg, (seg->linedef->flags & LineFlag::DontPegBottom) != LineFlag{}, lineheight,
 				seg->sidedef->rowoffset_mid);
 			gld_AddDrawWallItem(GLDrawItemType::Wall, &wall);
 		}
@@ -1494,7 +1494,7 @@ void gld_AddWall(seg_t* seg)
 					wall.flag = GLWallType::Top;
 					gld_CalculateWallY(&wall, &lineheight, floor_height, ceiling_height);
 					gld_CalculateWallU(&wall, seg, backseg, linelength, seg->sidedef->textureoffset_top);
-					gld_CalculateWallV(&wall, seg, !(seg->linedef->flags & ML_DONTPEGTOP), lineheight,
+					gld_CalculateWallV(&wall, seg, (seg->linedef->flags & LineFlag::DontPegTop) == LineFlag{}, lineheight,
 						seg->sidedef->rowoffset_top);
 					gld_AddDrawWallItem(GLDrawItemType::Wall, &wall);
 				}
@@ -1526,7 +1526,7 @@ void gld_AddWall(seg_t* seg)
 			scaled_texheight = (fixed_t)((wall.gltexture->realtexheight << FRACBITS) / wall.yscale);
 			scaled_rowoffset = (fixed_t)((seg->sidedef->rowoffset + seg->sidedef->rowoffset_mid) / wall.yscale);
 
-			wrapmidtex = (seg->sidedef->flags & SideFlag::WrapMidTex) != SideFlag{} || seg->linedef->flags & ML_WRAPMIDTEX;
+			wrapmidtex = (seg->sidedef->flags & SideFlag::WrapMidTex) != SideFlag{} || (seg->linedef->flags & LineFlag::WrapMidTex) != LineFlag{};
 
 			if(wrapmidtex)
 			{
@@ -1535,7 +1535,7 @@ void gld_AddWall(seg_t* seg)
 				floor_height = MAX(seg->frontsector->floorheight, seg->backsector->floorheight);
 				real_ceiling_height = MIN(seg->frontsector->ceilingheight, seg->backsector->ceilingheight);
 
-				if(seg->linedef->flags & ML_DONTPEGBOTTOM)
+				if((seg->linedef->flags & LineFlag::DontPegBottom) != LineFlag{})
 				{
 					ceiling_height = floor_height + scaled_rowoffset;
 				}
@@ -1549,7 +1549,7 @@ void gld_AddWall(seg_t* seg)
 			}
 			else
 			{
-				if(seg->linedef->flags & ML_DONTPEGBOTTOM)
+				if((seg->linedef->flags & LineFlag::DontPegBottom) != LineFlag{})
 				{
 					floor_height = MAX(seg->frontsector->floorheight, seg->backsector->floorheight) +
 						scaled_rowoffset;
@@ -1707,19 +1707,19 @@ void gld_AddWall(seg_t* seg)
 				}
 
 				specific_rowoffset = seg->sidedef->rowoffset_bottom;
-				if(seg->linedef->flags & ML_DONTPEGBOTTOM)
+				if((seg->linedef->flags & LineFlag::DontPegBottom) != LineFlag{})
 					specific_rowoffset += frontsector->ceilingheight - floor_height;
 
 				if(ceiling_height > backsector->ceilingheight)
 				{
-					if(!(seg->linedef->flags & ML_DONTPEGBOTTOM))
+					if((seg->linedef->flags & LineFlag::DontPegBottom) == LineFlag{})
 						specific_rowoffset -= backsector->ceilingheight - ceiling_height;
 					ceiling_height = backsector->ceilingheight;
 				}
 
 				gld_CalculateWallY(&wall, &lineheight, floor_height, ceiling_height);
 				gld_CalculateWallU(&wall, seg, backseg, linelength, seg->sidedef->textureoffset_bottom);
-				gld_CalculateWallV(&wall, seg, seg->linedef->flags & ML_DONTPEGBOTTOM, lineheight,
+				gld_CalculateWallV(&wall, seg, (seg->linedef->flags & LineFlag::DontPegBottom) != LineFlag{}, lineheight,
 					specific_rowoffset);
 				gld_AddDrawWallItem(GLDrawItemType::Wall, &wall);
 				seg->sidedef->rowoffset = rowoffset;

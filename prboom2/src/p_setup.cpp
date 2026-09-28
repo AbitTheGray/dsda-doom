@@ -5,6 +5,7 @@
  *  set up initial state and misc. LUTs.
  */
 
+#include <array>
 #include <utility>
 
 #include <math.h>
@@ -499,7 +500,7 @@ static void P_LoadSegs(int lump)
 			Log::Debug("P_LoadSegs: front of seg {} has no sidedef\n", i);
 		}
 
-		if(ldef->flags & ML_TWOSIDED)
+		if((ldef->flags & LineFlag::TwoSided) != LineFlag{})
 		{
 			int sidenum = ldef->sidenum[side ^ 1];
 
@@ -631,7 +632,7 @@ static void P_LoadSegs_V4(int lump)
 			Log::Debug("P_LoadSegs_V4: front of seg {} has no sidedef\n", i);
 		}
 
-		if(ldef->flags & ML_TWOSIDED && ldef->sidenum[side ^ 1] != NO_INDEX)
+		if((ldef->flags & LineFlag::TwoSided) != LineFlag{} && ldef->sidenum[side ^ 1] != NO_INDEX)
 			li->backsector = sides[ldef->sidenum[side ^ 1]].sector;
 		else
 			li->backsector = nullptr;
@@ -1168,7 +1169,7 @@ static void P_LoadZSegs(const byte* data)
 			Log::Debug("P_LoadZSegs: front of seg {} has no sidedef\n", i);
 		}
 
-		if((ldef->flags & ML_TWOSIDED) && (ldef->sidenum[side ^ 1] != NO_INDEX))
+		if((ldef->flags & LineFlag::TwoSided) != LineFlag{} && (ldef->sidenum[side ^ 1] != NO_INDEX))
 			li->backsector = sides[ldef->sidenum[side ^ 1]].sector;
 		else
 			li->backsector = nullptr;
@@ -1272,7 +1273,7 @@ static void P_LoadGLZSegs(const byte* data, int type)
 					Log::Debug("P_LoadGLZSegs: front of seg {}, {} has no sidedef\n", i, j);
 				}
 
-				if((ldef->flags & ML_TWOSIDED) && (ldef->sidenum[side ^ 1] != NO_INDEX))
+				if((ldef->flags & LineFlag::TwoSided) != LineFlag{} && (ldef->sidenum[side ^ 1] != NO_INDEX))
 					seg->backsector = sides[ldef->sidenum[side ^ 1]].sector;
 				else
 					seg->backsector = nullptr;
@@ -1824,9 +1825,8 @@ static void P_LoadUDMFThings(int lump)
 //
 // killough 5/3/98: reformatted, cleaned up
 
-extern "C" void P_TranslateZDoomLineFlags(unsigned int* flags, line_activation_t* spac)
+extern "C" LineFlag P_TranslateZDoomLineFlags(uint32_t raw_flags, line_activation_t* spac)
 {
-	unsigned int result;
 	static unsigned int spac_lookup[8] = {
 		SPAC_CROSS,
 		SPAC_USE,
@@ -1838,33 +1838,32 @@ extern "C" void P_TranslateZDoomLineFlags(unsigned int* flags, line_activation_t
 		SPAC_IMPACT | SPAC_PCROSS
 	};
 
-	result = *flags & 0x1ff;
+	LineFlag result = static_cast<LineFlag>(raw_flags) & LineFlag::Vanilla;
 
 	// from zdoom-in-hexen to dsda-doom
 
-	*spac = spac_lookup[GET_SPAC_INDEX(*flags)];
+	*spac = spac_lookup[GET_SPAC_INDEX(raw_flags)];
 
-	if(GET_SPAC_INDEX(*flags) == 6)
-		result |= ML_PASSUSE;
+	if(GET_SPAC_INDEX(raw_flags) == 6)
+		result |= LineFlag::PassUse;
 
-	if(*flags & HML_REPEATSPECIAL)
-		result |= ML_REPEATSPECIAL;
+	if(raw_flags & HML_REPEATSPECIAL)
+		result |= LineFlag::RepeatSpecial;
 
-	if(*flags & ZML_BLOCKPLAYERS)
-		result |= ML_BLOCKPLAYERS;
+	if(raw_flags & ZML_BLOCKPLAYERS)
+		result |= LineFlag::BlockPlayers;
 
-	if(*flags & ZML_MONSTERSCANACTIVATE)
-		result |= ML_MONSTERSCANACTIVATE;
+	if(raw_flags & ZML_MONSTERSCANACTIVATE)
+		result |= LineFlag::MonstersCanActivate;
 
-	if(*flags & ZML_BLOCKEVERYTHING)
-		result |= ML_BLOCKING | ML_BLOCKEVERYTHING;
+	if(raw_flags & ZML_BLOCKEVERYTHING)
+		result |= LineFlag::Blocking | LineFlag::BlockEverything;
 
-	*flags = result;
+	return result;
 }
 
-extern "C" void P_TranslateHexenLineFlags(unsigned int* flags, line_activation_t* spac)
+extern "C" LineFlag P_TranslateHexenLineFlags(uint32_t raw_flags, line_activation_t* spac)
 {
-	unsigned int result;
 	static unsigned int spac_lookup[8] = {
 		SPAC_CROSS,
 		SPAC_USE,
@@ -1876,29 +1875,30 @@ extern "C" void P_TranslateHexenLineFlags(unsigned int* flags, line_activation_t
 		SPAC_NONE
 	};
 
-	result = *flags & 0x1ff;
+	LineFlag result = static_cast<LineFlag>(raw_flags) & LineFlag::Vanilla;
 
 	// from hexen to dsda-doom
 
-	*spac = spac_lookup[GET_SPAC_INDEX(*flags)];
+	*spac = spac_lookup[GET_SPAC_INDEX(raw_flags)];
 
-	if(*flags & HML_REPEATSPECIAL)
-		result |= ML_REPEATSPECIAL;
+	if(raw_flags & HML_REPEATSPECIAL)
+		result |= LineFlag::RepeatSpecial;
 
-	*flags = result;
+	return result;
 }
 
-extern "C" void P_TranslateCompatibleLineFlags(unsigned int* flags, line_activation_t* spac)
+extern "C" LineFlag P_TranslateCompatibleLineFlags(uint32_t raw_flags, line_activation_t* spac)
 {
-	int filter;
+	const LineFlag flags = static_cast<LineFlag>(raw_flags);
+	LineFlag filter;
 
 	if(mbf21)
-		filter = (*flags & ML_RESERVED && comp[std::to_underlying(CompOption::ReservedLineFlag)]) ? ML_VANILLA : ML_MBF21;
+		filter = ((flags & LineFlag::Reserved) != LineFlag{} && comp[std::to_underlying(CompOption::ReservedLineFlag)]) ? LineFlag::Vanilla : LineFlag::MBF21;
 	else
-		filter = ML_BOOM;
+		filter = LineFlag::Boom;
 
-	*flags = *flags & filter;
 	*spac = SPAC_NONE;
+	return flags & filter;
 }
 
 static void P_SetLineID(line_t* ld)
@@ -1995,15 +1995,15 @@ static void P_CalculateLineDefProperties(line_t* ld)
 			ld->sidenum[0] = 0; // Substitute dummy sidedef for missing right side
 		}
 
-		if((ld->sidenum[1] == NO_INDEX) && (ld->flags & ML_TWOSIDED))
+		if((ld->sidenum[1] == NO_INDEX) && (ld->flags & LineFlag::TwoSided) != LineFlag{})
 		{
 			// e6y
-			// ML_TWOSIDED flag shouldn't be cleared for compatibility purposes
+			// LineFlag::TwoSided flag shouldn't be cleared for compatibility purposes
 			// see CLNJ-506.LMP at https://dsdarchive.com/wads/challenj
 			MissedBackSideOverrun(ld);
 			if(!demo_compatibility || !EMULATE(OverrunList::Missedbackside))
 			{
-				ld->flags &= ~ML_TWOSIDED; // Clear 2s flag for missing left side
+				ld->flags -= LineFlag::TwoSided; // Clear 2s flag for missing left side
 			}
 
 			// cph - print a warning about the bug
@@ -2035,11 +2035,14 @@ static void P_LoadLineDefs(int lump)
 		ld->iLineID = i; // proff 04/05/2000: needed for OpenGL
 		ld->alpha = 1.f;
 
+		// The map's own flag bits, translated to LineFlag below.
+		uint32_t raw_flags = 0;
+
 		if(map_format.hexen)
 		{
 			const hexen_maplinedef_t* mld = (const hexen_maplinedef_t*)data + i;
 
-			ld->flags = (unsigned short)LittleShort(mld->flags);
+			raw_flags = static_cast<uint16_t>(LittleShort(mld->flags));
 			ld->special = mld->special; // just a byte in hexen
 			ld->id = 0;
 			ld->special_args[0] = mld->arg1;
@@ -2057,7 +2060,7 @@ static void P_LoadLineDefs(int lump)
 		{
 			const doom_maplinedef_t* mld = (const doom_maplinedef_t*)data + i;
 
-			ld->flags = (unsigned short)LittleShort(mld->flags);
+			raw_flags = static_cast<uint16_t>(LittleShort(mld->flags));
 			ld->special = LittleShort(mld->special);
 			ld->id = LittleShort(mld->tag);
 			ld->special_args[0] = ld->id; // UDMF: tag -> arg0/id split
@@ -2077,12 +2080,37 @@ static void P_LoadLineDefs(int lump)
 		if((unsigned short)-1 == ld->sidenum[1])
 			ld->sidenum[1] = NO_INDEX;
 
-		map_format.translate_line_flags(&ld->flags, &ld->activation);
+		ld->flags = map_format.translate_line_flags(raw_flags, &ld->activation);
 
 		P_CalculateLineDefProperties(ld);
 
 		dsda_AddLineID(ld->id, i);
 	}
+}
+
+// The UDMF line flags that mean the same as a Boom line flag.
+static constexpr std::array k_udmfBoomLineFlags = {
+	std::pair{UdmfLineFlag::Blocking, LineFlag::Blocking},
+	std::pair{UdmfLineFlag::BlockMonsters, LineFlag::BlockMonsters},
+	std::pair{UdmfLineFlag::TwoSided, LineFlag::TwoSided},
+	std::pair{UdmfLineFlag::DontPegTop, LineFlag::DontPegTop},
+	std::pair{UdmfLineFlag::DontPegBottom, LineFlag::DontPegBottom},
+	std::pair{UdmfLineFlag::Secret, LineFlag::Secret},
+	std::pair{UdmfLineFlag::SoundBlock, LineFlag::SoundBlock},
+	std::pair{UdmfLineFlag::DontDraw, LineFlag::DontDraw},
+	std::pair{UdmfLineFlag::Mapped, LineFlag::Mapped},
+	std::pair{UdmfLineFlag::PassUse, LineFlag::PassUse},
+};
+
+static LineFlag P_UdmfBoomLineFlags(UdmfLineFlag udmf_flags)
+{
+	LineFlag result{};
+
+	for(const auto& [udmf_flag, line_flag] : k_udmfBoomLineFlags)
+		if((udmf_flags & udmf_flag) != UdmfLineFlag{})
+			result |= line_flag;
+
+	return result;
 }
 
 static void P_LoadUDMFLineDefs(int lump)
@@ -2101,7 +2129,7 @@ static void P_LoadUDMFLineDefs(int lump)
 
 		ld->iLineID = i; // proff 04/05/2000: needed for OpenGL
 
-		ld->flags = (std::to_underlying(mld->flags) & ML_BOOM);
+		ld->flags = P_UdmfBoomLineFlags(mld->flags);
 		ld->special = mld->special;
 		ld->id = (mld->id >= 0 ? mld->id : 0);
 		ld->special_args[0] = mld->arg0;
@@ -2190,55 +2218,55 @@ static void P_LoadUDMFLineDefs(int lump)
 			ld->activation |= SPAC_DEATH;
 
 		if((mld->flags & UdmfLineFlag::RepeatSpecial) != UdmfLineFlag{})
-			ld->flags |= ML_REPEATSPECIAL;
+			ld->flags |= LineFlag::RepeatSpecial;
 
 		if((mld->flags & UdmfLineFlag::MonsterActivate) != UdmfLineFlag{})
-			ld->flags |= ML_MONSTERSCANACTIVATE;
+			ld->flags |= LineFlag::MonstersCanActivate;
 
 		if((mld->flags & UdmfLineFlag::BlockPlayers) != UdmfLineFlag{})
-			ld->flags |= ML_BLOCKPLAYERS;
+			ld->flags |= LineFlag::BlockPlayers;
 
 		if((mld->flags & UdmfLineFlag::BlockEverything) != UdmfLineFlag{})
-			ld->flags |= ML_BLOCKING | ML_BLOCKEVERYTHING;
+			ld->flags |= LineFlag::Blocking | LineFlag::BlockEverything;
 
 		if((mld->flags & UdmfLineFlag::BlockLandMonsters) != UdmfLineFlag{})
-			ld->flags |= ML_BLOCKLANDMONSTERS;
+			ld->flags |= LineFlag::BlockLandMonsters;
 
 		if((mld->flags & UdmfLineFlag::BlockFloaters) != UdmfLineFlag{})
-			ld->flags |= ML_BLOCKFLOATERS;
+			ld->flags |= LineFlag::BlockFloaters;
 
 		if((mld->flags & UdmfLineFlag::BlockSight) != UdmfLineFlag{})
-			ld->flags |= ML_BLOCKSIGHT;
+			ld->flags |= LineFlag::BlockSight;
 
 		if((mld->flags & UdmfLineFlag::BlockHitscan) != UdmfLineFlag{})
-			ld->flags |= ML_BLOCKHITSCAN;
+			ld->flags |= LineFlag::BlockHitscan;
 
 		if((mld->flags & UdmfLineFlag::BlockProjectiles) != UdmfLineFlag{})
-			ld->flags |= ML_BLOCKPROJECTILES;
+			ld->flags |= LineFlag::BlockProjectiles;
 
 		if((mld->flags & UdmfLineFlag::BlockUse) != UdmfLineFlag{})
-			ld->flags |= ML_BLOCKUSE;
+			ld->flags |= LineFlag::BlockUse;
 
 		if((mld->flags & UdmfLineFlag::ClipMidTex) != UdmfLineFlag{})
-			ld->flags |= ML_CLIPMIDTEX;
+			ld->flags |= LineFlag::ClipMidTex;
 
 		if((mld->flags & UdmfLineFlag::JumpOver) != UdmfLineFlag{})
-			ld->flags |= ML_JUMPOVER;
+			ld->flags |= LineFlag::JumpOver;
 
 		if((mld->flags & UdmfLineFlag::MidTex3D) != UdmfLineFlag{})
-			ld->flags |= ML_3DMIDTEX;
+			ld->flags |= LineFlag::MidTex3D;
 
 		if((mld->flags & UdmfLineFlag::MidTex3DImpassible) != UdmfLineFlag{})
-			ld->flags |= ML_3DMIDTEXIMPASSIBLE;
+			ld->flags |= LineFlag::MidTex3DImpassible;
 
 		if((mld->flags & UdmfLineFlag::FirstSideOnly) != UdmfLineFlag{})
-			ld->flags |= ML_FIRSTSIDEONLY;
+			ld->flags |= LineFlag::FirstSideOnly;
 
 		if((mld->flags & UdmfLineFlag::Revealed) != UdmfLineFlag{})
-			ld->flags |= ML_REVEALED;
+			ld->flags |= LineFlag::Revealed;
 
 		if((mld->flags & UdmfLineFlag::CheckSwitchRange) != UdmfLineFlag{})
-			ld->flags |= ML_CHECKSWITCHRANGE;
+			ld->flags |= LineFlag::CheckSwitchRange;
 
 		if((mld->flags & UdmfLineFlag::Translucent) != UdmfLineFlag{})
 			ld->alpha = 0.75f;
@@ -2247,7 +2275,7 @@ static void P_LoadUDMFLineDefs(int lump)
 			ld->alpha = 0.25f;
 
 		if((mld->flags & UdmfLineFlag::WrapMidTex) != UdmfLineFlag{})
-			ld->flags |= ML_WRAPMIDTEX;
+			ld->flags |= LineFlag::WrapMidTex;
 
 		P_CalculateLineDefProperties(ld);
 
@@ -2278,7 +2306,7 @@ static void P_LoadUDMFLineDefs(int lump)
 			}
 		}
 
-		if(ld->flags & ML_WRAPMIDTEX)
+		if((ld->flags & LineFlag::WrapMidTex) != LineFlag{})
 			dsda_PreferOpenGL();
 	}
 }

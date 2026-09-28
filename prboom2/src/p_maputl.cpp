@@ -196,7 +196,7 @@ dboolean P_GetMidTexturePosition(const line_t* line, int sideno, fixed_t* top, f
 	texnum = side->midtexture;
 	texnum = texturetranslation[texnum];
 
-	if(line->flags & ML_DONTPEGBOTTOM)
+	if((line->flags & LineFlag::DontPegBottom) != LineFlag{})
 	{
 		*bottom = side->rowoffset + side->rowoffset_mid +
 			MAX(line->frontsector->floorheight, line->backsector->floorheight);
@@ -216,7 +216,7 @@ void P_LineOpening_3dMidtex(const line_t* line, const mobj_t* actor)
 {
 	fixed_t bottom3d, top3d;
 
-	if(line->flags & ML_3DMIDTEXIMPASSIBLE && (actor->flags & (MobjFlag::Missile | MobjFlag::Bounces)) != MobjFlag{})
+	if((line->flags & LineFlag::MidTex3DImpassible) != LineFlag{} && (actor->flags & (MobjFlag::Missile | MobjFlag::Bounces)) != MobjFlag{})
 	{
 		return;
 	}
@@ -275,7 +275,7 @@ void P_LineOpening(const line_t* linedef, const mobj_t* actor)
 	line_opening.abovemidtex = false;
 	line_opening.touchmidtex = false;
 
-	if(actor && linedef->frontsector && linedef->backsector && linedef->flags & ML_3DMIDTEX)
+	if(actor && linedef->frontsector && linedef->backsector && (linedef->flags & LineFlag::MidTex3D) != LineFlag{})
 	{
 		P_LineOpening_3dMidtex(linedef, actor);
 	}

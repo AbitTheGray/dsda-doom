@@ -383,7 +383,7 @@ void R_RenderMaskedSegRange(drawseg_t* ds, int x1, int x2)
 	mceilingclip = ds->sprtopclip;
 
 	// find positioning
-	if(curline->linedef->flags & ML_DONTPEGBOTTOM)
+	if((curline->linedef->flags & LineFlag::DontPegBottom) != LineFlag{})
 	{
 		dcvars.texturemid = frontsector->floorheight > backsector->floorheight
 			? frontsector->floorheight
@@ -677,7 +677,7 @@ void R_StoreWallRange(const int start, const int stop)
 	}
 
 	if(curline->linedef)
-		curline->linedef->flags |= ML_MAPPED;
+		curline->linedef->flags |= LineFlag::Mapped;
 
 	if(V_IsOpenGLMode())
 	{
@@ -697,7 +697,7 @@ void R_StoreWallRange(const int start, const int stop)
 	linedef = curline->linedef;
 
 	// mark the segment as visible for auto map
-	linedef->flags |= ML_MAPPED;
+	linedef->flags |= LineFlag::Mapped;
 
 	// calculate rw_distance for scale calculation
 	rw_normalangle = curline->pangle + ANG90; // [crispy] use re-calculated angle
@@ -784,7 +784,7 @@ void R_StoreWallRange(const int start, const int stop)
 		// a single sided line is terminal, so it must mark ends
 		markfloor = markceiling = true;
 
-		if(linedef->flags & ML_DONTPEGBOTTOM)
+		if((linedef->flags & LineFlag::DontPegBottom) != LineFlag{})
 		{
 			// bottom of texture at bottom
 			fixed_t vtop = frontsector->floorheight +
@@ -866,7 +866,7 @@ void R_StoreWallRange(const int start, const int stop)
 			// from bleeding through deep water
 			|| frontsector->heightsec != -1
 
-			|| (sidedef->midtexture && ((sidedef->flags & SideFlag::ClipMidTex) != SideFlag{} || linedef->flags & ML_CLIPMIDTEX));
+			|| (sidedef->midtexture && ((sidedef->flags & SideFlag::ClipMidTex) != SideFlag{} || (linedef->flags & LineFlag::ClipMidTex) != LineFlag{}));
 
 		markceiling = worldhigh != worldtop
 			|| P_CeilingPlanesDiffer(frontsector, backsector)
@@ -876,7 +876,7 @@ void R_StoreWallRange(const int start, const int stop)
 			|| (frontsector->heightsec != -1 &&
 				frontsector->ceilingpic != skyflatnum)
 
-			|| (sidedef->midtexture && ((sidedef->flags & SideFlag::ClipMidTex) != SideFlag{} || linedef->flags & ML_CLIPMIDTEX));
+			|| (sidedef->midtexture && ((sidedef->flags & SideFlag::ClipMidTex) != SideFlag{} || (linedef->flags & LineFlag::ClipMidTex) != LineFlag{}));
 
 		if(backsector->ceilingheight <= frontsector->floorheight
 			|| backsector->floorheight >= frontsector->ceilingheight)
@@ -886,7 +886,7 @@ void R_StoreWallRange(const int start, const int stop)
 		{
 			toptexture = texturetranslation[sidedef->toptexture];
 			toptexheight = ((linedef->r_flags & LineRenderFlag::TopTile) != LineRenderFlag{}) ? 0 : textureheight[toptexture] >> FRACBITS;
-			rw_toptexturemid = linedef->flags & ML_DONTPEGTOP ? worldtop : backsector->ceilingheight + textureheight[sidedef->toptexture] - viewz;
+			rw_toptexturemid = (linedef->flags & LineFlag::DontPegTop) != LineFlag{} ? worldtop : backsector->ceilingheight + textureheight[sidedef->toptexture] - viewz;
 			rw_toptexturemid += FixedMod(sidedef->rowoffset + sidedef->rowoffset_top,
 				textureheight[toptexture]);
 		}
@@ -895,7 +895,7 @@ void R_StoreWallRange(const int start, const int stop)
 		{
 			bottomtexture = texturetranslation[sidedef->bottomtexture];
 			bottomtexheight = ((linedef->r_flags & LineRenderFlag::BotTile) != LineRenderFlag{}) ? 0 : textureheight[bottomtexture] >> FRACBITS;
-			rw_bottomtexturemid = linedef->flags & ML_DONTPEGBOTTOM ? worldtop : worldlow;
+			rw_bottomtexturemid = (linedef->flags & LineFlag::DontPegBottom) != LineFlag{} ? worldtop : worldlow;
 			rw_bottomtexturemid += FixedMod(sidedef->rowoffset + sidedef->rowoffset_bottom,
 				textureheight[bottomtexture]);
 		}

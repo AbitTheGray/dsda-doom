@@ -44,7 +44,7 @@ typedef struct
 	void (*post_process_sidedef_special)(side_t*, const char*, const char*, const char*, sector_t*, int);
 	void (*animate_surfaces)();
 	void (*check_impact)(mobj_t*);
-	void (*translate_line_flags)(unsigned int*, line_activation_t*);
+	LineFlag (*translate_line_flags)(uint32_t raw_flags, line_activation_t* activation);
 	void (*apply_sector_movement_special)(mobj_t*, int);
 	void (*t_vertical_door)(vldoor_t*);
 	void (*t_move_floor)(floormove_t*);

@@ -478,7 +478,7 @@ P_UseSpecialLine
 			{
 				if(!(line->special & DoorMonster))
 					return false;           // monsters disallowed from this door
-				if(line->flags & ML_SECRET) // they can't open secret doors either
+				if((line->flags & LineFlag::Secret) != LineFlag{}) // they can't open secret doors either
 					return false;
 			}
 			if(!line->special_args[0] && ((line->special & 6) != 6)) //jff 3/2/98 all non-manual
@@ -553,7 +553,7 @@ P_UseSpecialLine
 	if(!thing->player && !bossaction)
 	{
 		// never open secret doors
-		if(line->flags & ML_SECRET)
+		if((line->flags & LineFlag::Secret) != LineFlag{})
 			return false;
 
 		switch(line->special)
@@ -1390,7 +1390,7 @@ dboolean Heretic_P_UseSpecialLine(mobj_t* thing, line_t* line, int side, dboolea
 	//
 	if(!thing->player && !bossaction)
 	{
-		if(line->flags & ML_SECRET)
+		if((line->flags & LineFlag::Secret) != LineFlag{})
 			return false; // never open secret doors
 		switch(line->special)
 		{

@@ -463,8 +463,8 @@ dboolean P_TeleportMove(mobj_t* thing, fixed_t x, fixed_t y, dboolean boss)
 static // killough 3/26/98: make static
 dboolean PIT_CrossLine(line_t* ld)
 {
-	if(!(ld->flags & ML_TWOSIDED) ||
-		(ld->flags & (ML_BLOCKING | ML_BLOCKMONSTERS)))
+	if((ld->flags & LineFlag::TwoSided) == LineFlag{} ||
+		(ld->flags & (LineFlag::Blocking | LineFlag::BlockMonsters)) != LineFlag{})
 		if(!(tmbbox[std::to_underlying(BoxEdge::Left)] > ld->bbox[std::to_underlying(BoxEdge::Right)] ||
 			tmbbox[std::to_underlying(BoxEdge::Right)] < ld->bbox[std::to_underlying(BoxEdge::Left)] ||
 			tmbbox[std::to_underlying(BoxEdge::Top)] < ld->bbox[std::to_underlying(BoxEdge::Bottom)] ||
@@ -570,9 +570,9 @@ dboolean PIT_CheckLine(line_t* ld)
 
 	// killough 8/10/98: allow bouncing objects to pass through as missiles
 	if((tmthing->flags & (MobjFlag::Missile | MobjFlag::Bounces)) == MobjFlag{} ||
-		ld->flags & (ML_BLOCKPROJECTILES | ML_BLOCKEVERYTHING))
+		(ld->flags & (LineFlag::BlockProjectiles | LineFlag::BlockEverything)) != LineFlag{})
 	{
-		if(ld->flags & ML_JUMPOVER)
+		if((ld->flags & LineFlag::JumpOver) != LineFlag{})
 		{
 			rail = true;
 		}
@@ -582,8 +582,8 @@ dboolean PIT_CheckLine(line_t* ld)
 			// or blocking player
 			// or blocking projectile
 			if(
-				ld->flags & ML_BLOCKING ||
-				(mbf21 && tmthing->player && ld->flags & ML_BLOCKPLAYERS) ||
+				(ld->flags & LineFlag::Blocking) != LineFlag{} ||
+				(mbf21 && tmthing->player && (ld->flags & LineFlag::BlockPlayers) != LineFlag{}) ||
 				(tmthing->flags & (MobjFlag::Missile | MobjFlag::Bounces)) != MobjFlag{}
 			)
 			{
@@ -603,9 +603,9 @@ dboolean PIT_CheckLine(line_t* ld)
 			if(
 				!((tmthing->flags & MobjFlag::Friend) != MobjFlag{} || tmthing->player) &&
 				(
-					ld->flags & ML_BLOCKMONSTERS ||
-					(mbf21 && ld->flags & ML_BLOCKLANDMONSTERS && (tmthing->flags & MobjFlag::Float) == MobjFlag{}) ||
-					(ld->flags & ML_BLOCKFLOATERS && (tmthing->flags & MobjFlag::Float) != MobjFlag{})
+					(ld->flags & LineFlag::BlockMonsters) != LineFlag{} ||
+					(mbf21 && (ld->flags & LineFlag::BlockLandMonsters) != LineFlag{} && (tmthing->flags & MobjFlag::Float) == MobjFlag{}) ||
+					((ld->flags & LineFlag::BlockFloaters) != LineFlag{} && (tmthing->flags & MobjFlag::Float) != MobjFlag{})
 				) &&
 				(!heretic || tmthing->type != MobjType::HereticPod)
 			)
@@ -1390,7 +1390,7 @@ void P_AdjustZLimits(mobj_t* thing)
 				if(P_BoxOnLineSide(bbox, ld) != -1)
 					continue; // didn't hit it
 
-				if(!ld->backsector || !ld->frontsector || !(ld->flags & ML_3DMIDTEX))
+				if(!ld->backsector || !ld->frontsector || (ld->flags & LineFlag::MidTex3D) == LineFlag{})
 					continue; // not relevant
 
 				P_LineOpening(ld, thing);
@@ -2012,7 +2012,7 @@ dboolean PTR_SlideTraverse(intercept_t* in)
 
 	li = in->d.line;
 
-	if(!(li->flags & ML_TWOSIDED))
+	if((li->flags & LineFlag::TwoSided) == LineFlag{})
 	{
 		if(P_PointOnLineSide(slidemo->x, slidemo->y, li))
 			return true; // don't hit the back side
@@ -2210,7 +2210,7 @@ dboolean PTR_AimTraverse(intercept_t* in)
 	{
 		li = in->d.line;
 
-		if(!(li->flags & (ML_TWOSIDED | ML_BLOCKEVERYTHING)))
+		if((li->flags & (LineFlag::TwoSided | LineFlag::BlockEverything)) == LineFlag{})
 			return false; // stop
 
 		// Crosses a two sided line.
@@ -2328,8 +2328,8 @@ dboolean PTR_ShootTraverse(intercept_t* in)
 		if(map_format.zdoom && li->special == std::to_underlying(ZDoomLineSpecial::LineHorizon))
 			return false;
 
-		if(li->flags & ML_TWOSIDED &&
-			!(li->flags & (ML_BLOCKEVERYTHING | ML_BLOCKHITSCAN)))
+		if((li->flags & LineFlag::TwoSided) != LineFlag{} &&
+			(li->flags & (LineFlag::BlockEverything | LineFlag::BlockHitscan)) == LineFlag{})
 		{
 			// crosses a two sided (really 2s) line
 			P_LineOpening(li, nullptr);
@@ -2626,7 +2626,7 @@ dboolean PTR_UseTraverse(intercept_t* in)
 	{
 		SfxId sound;
 
-		if(in->d.line->flags & (ML_BLOCKEVERYTHING | ML_BLOCKUSE))
+		if((in->d.line->flags & (LineFlag::BlockEverything | LineFlag::BlockUse)) != LineFlag{})
 		{
 			line_opening.range = 0;
 		}
@@ -2711,7 +2711,7 @@ dboolean PTR_UseTraverse(intercept_t* in)
 	//WAS can't use for than one special line in a row
 	//jff 3/21/98 NOW multiple use allowed with enabling line flag
 
-	return (!demo_compatibility && ((in->d.line->flags & ML_PASSUSE) || comperr(CompError::PassUse)))
+	return (!demo_compatibility && ((in->d.line->flags & LineFlag::PassUse) != LineFlag{} || comperr(CompError::PassUse)))
 		? //e6y
 		true
 		: false;
@@ -2732,7 +2732,7 @@ dboolean PTR_NoWayTraverse(intercept_t* in)
 	line_t* ld = in->d.line;
 	// This linedef
 	return ld->special || !(                                     // Ignore specials
-		ld->flags & ML_BLOCKING || (                             // Always blocking
+		(ld->flags & LineFlag::Blocking) != LineFlag{} || (                             // Always blocking
 			P_LineOpening(ld, nullptr),                             // Find openings
 			line_opening.range <= 0 ||                           // No opening
 			line_opening.bottom > usething->z + 24 * FRACUNIT || // Too high it blocks
@@ -3761,10 +3761,10 @@ dboolean PTR_BounceTraverse(intercept_t* in)
 
 	li = in->d.line;
 
-	if(li->flags & ML_BLOCKEVERYTHING)
+	if((li->flags & LineFlag::BlockEverything) != LineFlag{})
 		goto bounceblocking;
 
-	if(!(li->flags & ML_TWOSIDED))
+	if((li->flags & LineFlag::TwoSided) == LineFlag{})
 	{
 		if(P_PointOnLineSide(slidemo->x, slidemo->y, li))
 			return true; // don't hit the back side

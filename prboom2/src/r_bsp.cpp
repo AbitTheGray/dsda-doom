@@ -117,7 +117,7 @@ static void R_RecalcLineFlags(line_t* linedef)
 	linedef->r_validcount = gametic;
 
 	/* First decide if the line is closed, normal, or invisible */
-	if(!(linedef->flags & ML_TWOSIDED)
+	if((linedef->flags & LineFlag::TwoSided) == LineFlag{}
 		|| backsector->ceilingheight <= frontsector->floorheight
 		|| backsector->floorheight >= frontsector->ceilingheight
 		|| (
@@ -164,7 +164,7 @@ static void R_RecalcLineFlags(line_t* linedef)
 		return;
 
 	/* Now decide on texture tiling */
-	if(linedef->flags & ML_TWOSIDED)
+	if((linedef->flags & LineFlag::TwoSided) != LineFlag{})
 	{
 		int c;
 
@@ -439,7 +439,7 @@ static void R_AddLine(seg_t* line)
 			maxdrawsegs = newmax;
 		}
 
-		curline->linedef->flags |= ML_MAPPED;
+		curline->linedef->flags |= LineFlag::Mapped;
 
 		// proff 11/99: the rest of the calculations is not needed for OpenGL
 		ds_p++->curline = curline;

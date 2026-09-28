@@ -2409,7 +2409,7 @@ const char* hexen_skill_mage[5] = {"APPRENTICE", "ENCHANTER", "SORCERER", "WARLO
 // RecalculateDrawnSubsectors
 //
 // In case the subsector data is unusable this function tries to reconstruct
-// if from the linedefs' ML_MAPPED info.
+// if from the linedefs' LineFlag::Mapped info.
 //
 //==========================================================================
 
@@ -2423,7 +2423,7 @@ void RecalculateDrawnSubsectors()
 		seg_t* seg = &segs[sub->firstline];
 		for(j = 0; j < sub->numlines; j++, seg++)
 		{
-			if(seg->linedef && seg->linedef->flags & ML_MAPPED)
+			if(seg->linedef && (seg->linedef->flags & LineFlag::Mapped) != LineFlag{})
 			{
 				map_subsectors[i] = 1;
 			}
@@ -2720,7 +2720,7 @@ void G_Compatibility()
 		{CompLevel::Prboom1, CompLevel::Mbf21},
 		// comp_voodooscroller - Voodoo dolls on slow scrollers move too slowly
 		{CompLevel::Mbf21, CompLevel::Mbf21},
-		// comp_reservedlineflag - ML_RESERVED clears extended flags
+		// comp_reservedlineflag - LineFlag::Reserved clears extended flags
 		{CompLevel::Mbf21, CompLevel::Mbf21}
 	};
 	unsigned int i;

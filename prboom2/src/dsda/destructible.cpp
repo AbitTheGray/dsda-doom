@@ -164,7 +164,7 @@ static dboolean dsda_RadiusAttackLine(line_t* line)
 
 	sighted = false;
 
-	if(!backsector || line->flags & ML_BLOCKEVERYTHING)
+	if(!backsector || (line->flags & LineFlag::BlockEverything) != LineFlag{})
 	{
 		if(frontsector->ceilingheight > frontsector->floorheight)
 		{

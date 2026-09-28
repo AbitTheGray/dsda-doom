@@ -53,6 +53,85 @@ enum struct MapThingFlag : uint32_t
 };
 ENUM_FLAGS_FUNC(MapThingFlag)
 
+// line_t::flags - LineDef attributes.
+enum struct LineFlag : uint32_t
+{
+	// Solid, is an obstacle.
+	Blocking = Bit<uint32_t>(0u),
+	// Blocks monsters only.
+	BlockMonsters = Bit<uint32_t>(1u),
+	// Backside will not be drawn if not two sided.
+	TwoSided = Bit<uint32_t>(2u),
+
+	// If a texture is pegged, the texture will have
+	// the end exposed to air held constant at the
+	// top or bottom of the texture (stairs or pulled
+	// down things) and will move with a height change
+	// of one of the neighbor sectors.
+	// Unpegged textures always have the first row of
+	// the texture at the top pixel of the line for both
+	// top and bottom textures (use next to windows).
+
+	// upper texture unpegged
+	DontPegTop = Bit<uint32_t>(3u),
+	// lower texture unpegged
+	DontPegBottom = Bit<uint32_t>(4u),
+	// In AutoMap: don't map as two sided: IT'S A SECRET!
+	Secret = Bit<uint32_t>(5u),
+	// Sound rendering: don't let sound cross two of these.
+	SoundBlock = Bit<uint32_t>(6u),
+	// Don't draw on the automap at all.
+	DontDraw = Bit<uint32_t>(7u),
+	// Set if already seen, thus drawn in automap.
+	Mapped = Bit<uint32_t>(8u),
+	//jff 3/21/98 Set if line absorbs use by player
+	//allow multiple push/switch triggers to be used on one push
+	PassUse = Bit<uint32_t>(9u),
+
+	// Reserved by EE
+	// SoM 9/02/02: 3D Middletexture flag!
+	Eternity = Bit<uint32_t>(10u),
+
+	// haleyjd 05/02/06: Although it was believed until now that a reserved line
+	// flag was unnecessary, a problem with Ultimate DOOM E2M7 has disproven this
+	// theory. It has roughly 1000 linedefs with 0xFE00 masked into the flags, so
+	// making the next line flag reserved and using it to toggle off ALL extended
+	// flags will preserve compatibility for such maps. I have been told this map
+	// is one of the first ever created, so it may have something to do with that.
+	Reserved = Bit<uint32_t>(11u),
+
+	// mbf21
+	BlockLandMonsters = Bit<uint32_t>(12u),
+	BlockPlayers = Bit<uint32_t>(13u),
+
+	// extensions
+	MonstersCanActivate = Bit<uint32_t>(14u), // zdoom
+	BlockEverything = Bit<uint32_t>(15u), // zdoom
+
+	RepeatSpecial = Bit<uint32_t>(16u), // hexen
+
+	// udmf
+	ClipMidTex = Bit<uint32_t>(17u),
+	BlockSight = Bit<uint32_t>(18u),
+	BlockHitscan = Bit<uint32_t>(19u),
+	BlockProjectiles = Bit<uint32_t>(20u),
+	BlockUse = Bit<uint32_t>(21u),
+	BlockFloaters = Bit<uint32_t>(22u),
+	JumpOver = Bit<uint32_t>(23u),
+	MidTex3D = Bit<uint32_t>(24u),
+	MidTex3DImpassible = Bit<uint32_t>(25u),
+	FirstSideOnly = Bit<uint32_t>(26u),
+	Revealed = Bit<uint32_t>(27u),
+	CheckSwitchRange = Bit<uint32_t>(28u),
+	WrapMidTex = Bit<uint32_t>(29u),
+
+	// The flags each format knows about.
+	Vanilla = 0x01ffu, // Blocking to Mapped
+	Boom = 0x03ffu, // Vanilla plus PassUse
+	MBF21 = 0x3fffu, // Boom plus BlockLandMonsters and BlockPlayers (and the reserved bits)
+};
+ENUM_FLAGS_FUNC(LineFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -144,91 +223,6 @@ typedef struct
 
 // Updated to 32-bit
 #define NO_INDEX ((unsigned int)-1)
-
-//
-// LineDef attributes.
-//
-
-// Solid, is an obstacle.
-#define ML_BLOCKING      0x0001
-
-// Blocks monsters only.
-#define ML_BLOCKMONSTERS 0x0002
-
-// Backside will not be drawn if not two sided.
-#define ML_TWOSIDED      0x0004
-
-// If a texture is pegged, the texture will have
-// the end exposed to air held constant at the
-// top or bottom of the texture (stairs or pulled
-// down things) and will move with a height change
-// of one of the neighbor sectors.
-// Unpegged textures always have the first row of
-// the texture at the top pixel of the line for both
-// top and bottom textures (use next to windows).
-
-// upper texture unpegged
-#define ML_DONTPEGTOP    0x0008
-
-// lower texture unpegged
-#define ML_DONTPEGBOTTOM 0x0010
-
-// In AutoMap: don't map as two sided: IT'S A SECRET!
-#define ML_SECRET        0x0020
-
-// Sound rendering: don't let sound cross two of these.
-#define ML_SOUNDBLOCK    0x0040
-
-// Don't draw on the automap at all.
-#define ML_DONTDRAW      0x0080
-
-// Set if already seen, thus drawn in automap.
-#define ML_MAPPED        0x0100
-
-//jff 3/21/98 Set if line absorbs use by player
-//allow multiple push/switch triggers to be used on one push
-#define ML_PASSUSE 0x0200
-
-// Reserved by EE
-// SoM 9/02/02: 3D Middletexture flag!
-#define ML_ETERNITY 0x0400
-
-// haleyjd 05/02/06: Although it was believed until now that a reserved line
-// flag was unnecessary, a problem with Ultimate DOOM E2M7 has disproven this
-// theory. It has roughly 1000 linedefs with 0xFE00 masked into the flags, so
-// making the next line flag reserved and using it to toggle off ALL extended
-// flags will preserve compatibility for such maps. I have been told this map
-// is one of the first ever created, so it may have something to do with that.
-#define ML_RESERVED 0x0800
-
-// mbf21
-#define ML_BLOCKLANDMONSTERS 0x1000
-#define ML_BLOCKPLAYERS      0x2000
-
-#define ML_VANILLA 0x01ff
-#define ML_BOOM    0x03ff
-#define ML_MBF21   0x3fff
-
-// extensions
-#define ML_MONSTERSCANACTIVATE 0x4000 // zdoom
-#define ML_BLOCKEVERYTHING     0x8000 // zdoom
-
-#define ML_REPEATSPECIAL       0x00010000 // hexen
-
-// udmf
-#define ML_CLIPMIDTEX          0x00020000
-#define ML_BLOCKSIGHT          0x00040000
-#define ML_BLOCKHITSCAN        0x00080000
-#define ML_BLOCKPROJECTILES    0x00100000
-#define ML_BLOCKUSE            0x00200000
-#define ML_BLOCKFLOATERS       0x00400000
-#define ML_JUMPOVER            0x00800000
-#define ML_3DMIDTEX            0x01000000
-#define ML_3DMIDTEXIMPASSIBLE  0x02000000
-#define ML_FIRSTSIDEONLY       0x04000000
-#define ML_REVEALED            0x08000000
-#define ML_CHECKSWITCHRANGE    0x10000000
-#define ML_WRAPMIDTEX          0x20000000
 
 // Sector definition, from editing.
 typedef struct
