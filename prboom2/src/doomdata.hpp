@@ -132,6 +132,30 @@ enum struct LineFlag : uint32_t
 };
 ENUM_FLAGS_FUNC(LineFlag)
 
+// hexen_maplinedef_t::flags - the line flags as a Hexen-format map stores them.
+// Bits 0 to 8 are the same as in LineFlag, bits 10 to 12 hold the activation type.
+enum struct HexenLineFlag : uint32_t
+{
+	// hexen
+	RepeatSpecial = Bit<uint32_t>(9u), // special is repeatable
+
+	// zdoom
+	// ZDoom extends the Hexen map format with bits Hexen leaves unused, in this same field.
+	// They stay here so one type describes the field. P_TranslateHexenLineFlags ignores them.
+	MonstersCanActivate = Bit<uint32_t>(13u), // Monsters and players can activate
+	BlockPlayers = Bit<uint32_t>(14u), // Blocks players
+	BlockEverything = Bit<uint32_t>(15u), // Blocks everything
+};
+ENUM_FLAGS_FUNC(HexenLineFlag)
+
+// Bits 10 to 12 are not flags but a 3-bit number: the line's activation type.
+// The translate functions map it to SPAC_ values, each format in its own way.
+// Being a number, it has no enumerator and is read only through this function.
+uint32_t HexenLineSpacIndex(const HexenLineFlag flags)
+{
+	return (std::to_underlying(flags) >> 10u) & Bits<uint32_t>(3u);
+}
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -402,17 +426,6 @@ typedef struct
 	short options;
 }
 	PACKEDATTR doom_mapthing_t;
-
-// hexen
-#define HML_REPEATSPECIAL 0x0200  // special is repeatable
-#define HML_SPAC_SHIFT 10
-#define HML_SPAC_MASK 0x1c00
-#define GET_SPAC_INDEX(flags) ((flags&HML_SPAC_MASK)>>HML_SPAC_SHIFT)
-
-// zdoom
-#define ZML_MONSTERSCANACTIVATE 0x2000 // Monsters and players can activate
-#define ZML_BLOCKPLAYERS        0x4000 // Blocks players
-#define ZML_BLOCKEVERYTHING     0x8000 // Blocks everything
 
 // line activation
 #define SPAC_NONE     0x0000

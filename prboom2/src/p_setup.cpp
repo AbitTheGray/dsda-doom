@@ -1838,25 +1838,26 @@ extern "C" LineFlag P_TranslateZDoomLineFlags(uint32_t raw_flags, line_activatio
 		SPAC_IMPACT | SPAC_PCROSS
 	};
 
+	const HexenLineFlag flags = static_cast<HexenLineFlag>(raw_flags);
 	LineFlag result = static_cast<LineFlag>(raw_flags) & LineFlag::Vanilla;
 
 	// from zdoom-in-hexen to dsda-doom
 
-	*spac = spac_lookup[GET_SPAC_INDEX(raw_flags)];
+	*spac = spac_lookup[HexenLineSpacIndex(flags)];
 
-	if(GET_SPAC_INDEX(raw_flags) == 6)
+	if(HexenLineSpacIndex(flags) == 6)
 		result |= LineFlag::PassUse;
 
-	if(raw_flags & HML_REPEATSPECIAL)
+	if((flags & HexenLineFlag::RepeatSpecial) != HexenLineFlag{})
 		result |= LineFlag::RepeatSpecial;
 
-	if(raw_flags & ZML_BLOCKPLAYERS)
+	if((flags & HexenLineFlag::BlockPlayers) != HexenLineFlag{})
 		result |= LineFlag::BlockPlayers;
 
-	if(raw_flags & ZML_MONSTERSCANACTIVATE)
+	if((flags & HexenLineFlag::MonstersCanActivate) != HexenLineFlag{})
 		result |= LineFlag::MonstersCanActivate;
 
-	if(raw_flags & ZML_BLOCKEVERYTHING)
+	if((flags & HexenLineFlag::BlockEverything) != HexenLineFlag{})
 		result |= LineFlag::Blocking | LineFlag::BlockEverything;
 
 	return result;
@@ -1875,13 +1876,14 @@ extern "C" LineFlag P_TranslateHexenLineFlags(uint32_t raw_flags, line_activatio
 		SPAC_NONE
 	};
 
+	const HexenLineFlag flags = static_cast<HexenLineFlag>(raw_flags);
 	LineFlag result = static_cast<LineFlag>(raw_flags) & LineFlag::Vanilla;
 
 	// from hexen to dsda-doom
 
-	*spac = spac_lookup[GET_SPAC_INDEX(raw_flags)];
+	*spac = spac_lookup[HexenLineSpacIndex(flags)];
 
-	if(raw_flags & HML_REPEATSPECIAL)
+	if((flags & HexenLineFlag::RepeatSpecial) != HexenLineFlag{})
 		result |= LineFlag::RepeatSpecial;
 
 	return result;
