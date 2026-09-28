@@ -168,7 +168,7 @@ static void SV_Read(void* buffer, size_t size)
 {
 	if(buffer_p - ma_p->buffer + size > ma_p->size)
 	{
-		I_Error("Invalid map archive in SV_Read");
+		Log::Fatal("Invalid map archive in SV_Read");
 	}
 
 	memcpy(buffer, buffer_p, size);
@@ -271,7 +271,7 @@ static void SetMobjPtr(mobj_t** ptr, unsigned int archiveNum)
 	{
 		if(TargetPlayerCount == MAX_TARGET_PLAYERS)
 		{
-			I_Error("RestoreMobj: exceeded MAX_TARGET_PLAYERS");
+			Log::Fatal("RestoreMobj: exceeded MAX_TARGET_PLAYERS");
 		}
 		TargetPlayerAddrs[TargetPlayerCount++] = ptr;
 		*ptr = nullptr;
@@ -1274,7 +1274,7 @@ static void AssertSegment(GameArchiveSegment segType)
 {
 	if(SV_ReadLong() != std::to_underlying(segType))
 	{
-		I_Error("Corrupt save game: Segment [%d] failed alignment check",
+		Log::Fatal("Corrupt save game: Segment [{}] failed alignment check",
 			std::to_underlying(segType));
 	}
 }
@@ -1422,7 +1422,7 @@ static void ArchiveMobjs()
 	}
 	if(count != MobjCount)
 	{
-		I_Error("ArchiveMobjs: bad mobj count");
+		Log::Fatal("ArchiveMobjs: bad mobj count");
 	}
 }
 
@@ -1666,8 +1666,8 @@ static void UnarchiveThinkers()
 		}
 		if(info->tClass == ThinkClass::Null)
 		{
-			I_Error("UnarchiveThinkers: Unknown tClass %d in "
-				"savegame", tClass);
+			Log::Fatal("UnarchiveThinkers: Unknown tClass {} in "
+				"savegame", std::to_underlying(tClass));
 		}
 	}
 }
@@ -1860,13 +1860,13 @@ static void UnarchivePolyobjs()
 	AssertSegment(GameArchiveSegment::Polyobjs);
 	if(SV_ReadLong() != po_NumPolyobjs)
 	{
-		I_Error("UnarchivePolyobjs: Bad polyobj count");
+		Log::Fatal("UnarchivePolyobjs: Bad polyobj count");
 	}
 	for(i = 0; i < po_NumPolyobjs; i++)
 	{
 		if(SV_ReadLong() != polyobjs[i].tag)
 		{
-			I_Error("UnarchivePolyobjs: Invalid polyobj tag");
+			Log::Fatal("UnarchivePolyobjs: Invalid polyobj tag");
 		}
 		PO_RotatePolyobj(polyobjs[i].tag, (angle_t)SV_ReadLong());
 		deltaX = SV_ReadLong() - polyobjs[i].startSpot.x;

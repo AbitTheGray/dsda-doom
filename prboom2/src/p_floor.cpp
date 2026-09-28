@@ -126,8 +126,8 @@ MoveResult T_MoveFloorPlane
 						//e6y: warning about potential desynch
 						if(crush == STAIRS_UNINITIALIZED_CRUSH_FIELD_VALUE)
 						{
-							lprintf(OutputLevels::Warn, "T_MoveFloorPlane: Stairs which can potentially crush may lead to desynch in compatibility mode.\n");
-							lprintf(OutputLevels::Warn, " gametic: %d, sector: %d, complevel: %d\n", gametic, sector->iSectorID, compatibility_level);
+							Log::Warn("T_MoveFloorPlane: Stairs which can potentially crush may lead to desynch in compatibility mode.\n");
+							Log::Warn(" gametic: {}, sector: {}, complevel: {}\n", gametic, sector->iSectorID, std::to_underlying(compatibility_level));
 						}
 
 						if(crush >= 0)
@@ -978,9 +978,8 @@ int P_SpawnDonut(int secnum, line_t* line, fixed_t pillarspeed, fixed_t slimespe
 	{
 		if(demo_compatibility)
 		{
-			lprintf(OutputLevels::Error,
-				"EV_DoDonut: lowest numbered line (linedef: %d) "
-				"around pillar (sector: %d) must be two-sided. "
+			Log::Error("EV_DoDonut: lowest numbered line (linedef: {}) "
+				"around pillar (sector: {}) must be two-sided. "
 				"Unexpected behavior may occur in Vanilla Doom.\n",
 				s1->lines[0]->iLineID, s1->iSectorID);
 			return 0;
@@ -1022,18 +1021,17 @@ int P_SpawnDonut(int secnum, line_t* line, fixed_t pillarspeed, fixed_t slimespe
 			// s3->floorheight is an int at 0000:0000
 			// s3->floorpic is a short at 0000:0008
 			// Trying to emulate
-			lprintf(OutputLevels::Error,
-				"EV_DoDonut: Access violation at linedef %d, sector %d. "
+			Log::Error("EV_DoDonut: Access violation at linedef {}, sector {}. "
 				"Unexpected behavior may occur in Vanilla Doom.\n",
 				line->iLineID, s1->iSectorID);
 			if(DonutOverrun(&s3_floorheight, &s3_floorpic))
 			{
-				lprintf(OutputLevels::Warn, "EV_DoDonut: Emulated with floorheight %d, floor pic %d.\n",
+				Log::Warn("EV_DoDonut: Emulated with floorheight {}, floor pic {}.\n",
 					s3_floorheight >> FRACBITS, s3_floorpic);
 			}
 			else
 			{
-				lprintf(OutputLevels::Warn, "EV_DoDonut: Not emulated.\n");
+				Log::Warn("EV_DoDonut: Not emulated.\n");
 				break;
 			}
 		}
@@ -1591,7 +1589,7 @@ static void QueueStairSector(sector_t* sec, int type, int height)
 {
 	if((QueueTail + 1) % STAIR_QUEUE_SIZE == QueueHead)
 	{
-		I_Error("BuildStairs:  Too many branches located.\n");
+		Log::Fatal("BuildStairs:  Too many branches located.\n");
 	}
 	StairQueue[QueueTail].sector = sec;
 	StairQueue[QueueTail].type = type;

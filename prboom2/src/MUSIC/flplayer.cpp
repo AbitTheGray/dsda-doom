@@ -171,14 +171,14 @@ static int fl_init(int samplerate)
 		int minor;
 		int micro;
 		fluid_version(&major, &minor, &micro);
-		lprintf(OutputLevels::Debug, "Fluidplayer: Fluidsynth version %i.%i.%i\n", major, minor, micro);
+		Log::Debug("Fluidplayer: Fluidsynth version {}.{}.{}\n", major, minor, micro);
 		if(major >= 2 || (minor >= 1 && micro >= 4))
 			sratemin = 8000;
 		else
 			sratemin = 22050;
 		if(f_soundrate < sratemin)
 		{
-			lprintf(OutputLevels::Warn, "Fluidplayer: samplerates under %i are not supported\n", sratemin);
+			Log::Warn("Fluidplayer: samplerates under {} are not supported\n", sratemin);
 			return 0;
 		}
 	}
@@ -188,10 +188,10 @@ static int fl_init(int samplerate)
 
 #if FLUIDSYNTH_VERSION_MAJOR == 1
 #define FSET(a,b,c) if (!fluid_settings_set##a(f_set,b,c))\
-    lprintf (OutputLevels::Warn, "fl_init: Couldn't set " b "\n")
+    Log::Warn("fl_init: Couldn't set {}\n", b)
 #else
 #define FSET(a,b,c) if (fluid_settings_set##a(f_set,b,c) == FLUID_FAILED)\
-    lprintf (OutputLevels::Warn, "fl_init: Couldn't set " b "\n")
+    Log::Warn("fl_init: Couldn't set {}\n", b)
 #endif
 
 	FSET(num, "synth.sample-rate", f_soundrate);
@@ -235,7 +235,7 @@ static int fl_init(int samplerate)
 	f_syn = new_fluid_synth(f_set);
 	if(!f_syn)
 	{
-		lprintf(OutputLevels::Warn, "fl_init: error creating fluidsynth object\n");
+		Log::Warn("fl_init: error creating fluidsynth object\n");
 		delete_fluid_settings(f_set);
 		return 0;
 	}
@@ -278,7 +278,7 @@ static int fl_init(int samplerate)
 
 		if(!checked_f_font)
 		{
-			lprintf(OutputLevels::Warn, "fl_init: no soundfont detected!\n");
+			Log::Warn("fl_init: no soundfont detected!\n");
 			delete_fluid_synth(f_syn);
 			delete_fluid_settings(f_set);
 			return 0;
@@ -286,7 +286,7 @@ static int fl_init(int samplerate)
 
 		if(f_font == FLUID_FAILED)
 		{
-			lprintf(OutputLevels::Warn, "fl_init: error loading soundfont %s\n", checked_f_font);
+			Log::Warn("fl_init: error loading soundfont {}\n", checked_f_font);
 			delete_fluid_synth(f_syn);
 			delete_fluid_settings(f_set);
 			return 0;

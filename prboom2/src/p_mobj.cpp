@@ -2082,7 +2082,7 @@ void P_SpawnPlayer(int n, const mapthing_t* mthing)
 	* indicate whether the start really exists in the level.
 	*/
 	if(mthing->options == MapThingFlag{})
-		I_Error("P_SpawnPlayer: attempt to spawn player at unavailable start point");
+		Log::Fatal("P_SpawnPlayer: attempt to spawn player at unavailable start point");
 
 	x = mthing->x;
 	y = mthing->y;
@@ -2116,7 +2116,7 @@ void P_SpawnPlayer(int n, const mapthing_t* mthing)
 				mobj = P_SpawnMobj(x, y, z, MobjType::HexenPlayerMage);
 				break;
 			default:
-				I_Error("P_SpawnPlayer: Unknown class type");
+				Log::Fatal("P_SpawnPlayer: Unknown class type");
 				return;
 		}
 	}
@@ -2410,7 +2410,7 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index)
 	)
 	{
 		if(!demo_compatibility) // cph - Add warning about bad thing flags
-			lprintf(OutputLevels::Warn, "P_SpawnMapThing: correcting bad flags (%u) (thing type %d)\n", std::to_underlying(options), thingtype);
+			Log::Warn("P_SpawnMapThing: correcting bad flags ({}) (thing type {})\n", std::to_underlying(options), thingtype);
 		options = options & (MapThingFlag::Skill1 | MapThingFlag::Skill2 | MapThingFlag::Skill3 | MapThingFlag::Skill4 | MapThingFlag::Skill5 | MapThingFlag::Ambush | MapThingFlag::NotSingle);
 	}
 
@@ -2561,7 +2561,7 @@ mobj_t* P_SpawnMapThing(const mapthing_t* mthing, int index)
 
 	if(std::to_underlying(i) == num_mobj_types)
 	{
-		lprintf(OutputLevels::Info, "P_SpawnMapThing: Unknown Thing type %i at (%i, %i)\n", thingtype, mthing->x, mthing->y);
+		Log::Info("P_SpawnMapThing: Unknown Thing type {} at ({}, {})\n", thingtype, mthing->x, mthing->y);
 		return nullptr;
 	}
 
@@ -3689,7 +3689,7 @@ extern "C" void P_CreateTIDList()
 			// Add to list
 			if(i == MAX_TID_COUNT)
 			{
-				I_Error("P_CreateTIDList: MAX_TID_COUNT (%d) exceeded.",
+				Log::Fatal("P_CreateTIDList: MAX_TID_COUNT ({}) exceeded.",
 					MAX_TID_COUNT);
 			}
 			TIDList[i] = mobj->tid;
@@ -3720,7 +3720,7 @@ extern "C" void P_InsertMobjIntoTIDList(mobj_t* mobj, short tid)
 		// Append required
 		if(i == MAX_TID_COUNT)
 		{
-			I_Error("P_InsertMobjIntoTIDList: MAX_TID_COUNT (%d)"
+			Log::Fatal("P_InsertMobjIntoTIDList: MAX_TID_COUNT ({})"
 				"exceeded.", MAX_TID_COUNT);
 		}
 		index = i;

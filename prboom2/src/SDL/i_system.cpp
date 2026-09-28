@@ -170,7 +170,7 @@ void I_Read(int fd, void* vbuf, size_t sz)
 		int rc = read(fd, buf, sz);
 		if(rc <= 0)
 		{
-			I_Error("I_Read: read failed: %s", rc ? strerror(errno) : "EOF");
+			Log::Fatal("I_Read: read failed: {}", rc ? strerror(errno) : "EOF");
 		}
 		sz -= rc;
 		buf += rc;
@@ -187,7 +187,7 @@ int I_Filelength(int handle)
 {
 	struct stat fileinfo;
 	if(fstat(handle, &fileinfo) == -1)
-		I_Error("I_Filelength: %s", strerror(errno));
+		Log::Fatal("I_Filelength: {}", strerror(errno));
 	return fileinfo.st_size;
 }
 
@@ -261,7 +261,7 @@ const char* I_GetTempDir()
 		result = GetTempPathW(PATH_MAX, wpath);
 
 		if(result == 0 || result > MAX_PATH)
-			I_Error("I_GetTempDir: GetTempPathW failed");
+			Log::Fatal("I_GetTempDir: GetTempPathW failed");
 		else
 			tmp_path = ConvertWideToUtf8(wpath);
 	}
@@ -593,7 +593,7 @@ char* I_FindFileInternal(const char* wfname, const char* ext, dboolean isStatic)
 		if(M_FileExists(p))
 		{
 			if(!isStatic)
-				lprintf(OutputLevels::Debug, " found %s\n", p);
+				Log::Debug(" found {}\n", p);
 			return p;
 		}
 		if(!isStatic)
@@ -607,7 +607,7 @@ char* I_RequireFile(const char* wfname, const char* ext)
 	char* result = I_FindFileInternal(wfname, ext, false);
 
 	if(!result)
-		I_Error("Unable to find required file \"%s\"", wfname);
+		Log::Fatal("Unable to find required file \"{}\"", wfname);
 
 	return result;
 }
@@ -633,7 +633,7 @@ char* I_RequireAnyFile(const char* wfname, const char** ext)
 			return result;
 	}
 
-	I_Error("Unable to find required file \"%s\"", wfname);
+	Log::Fatal("Unable to find required file \"{}\"", wfname);
 }
 
 char* I_RequireWad(const char* wfname)

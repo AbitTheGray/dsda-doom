@@ -215,7 +215,7 @@ static int pm_init(int samplerate)
 
 	if(Pm_Initialize() != pmNoError)
 	{
-		lprintf(OutputLevels::Warn, "portmidiplayer: Pm_Initialize () failed\n");
+		Log::Warn("portmidiplayer: Pm_Initialize () failed\n");
 		return 0;
 	}
 
@@ -223,7 +223,7 @@ static int pm_init(int samplerate)
 
 	if(outputdevice == pmNoDevice)
 	{
-		lprintf(OutputLevels::Warn, "portmidiplayer: No output devices available\n");
+		Log::Warn("portmidiplayer: No output devices available\n");
 		Pm_Terminate();
 		return 0;
 	}
@@ -232,7 +232,7 @@ static int pm_init(int samplerate)
 
 	snd_mididev = dsda_StringConfig(ConfigId::SndMididev);
 
-	lprintf(OutputLevels::Debug, "portmidiplayer device list:\n");
+	Log::Debug("portmidiplayer device list:\n");
 	for(i = 0; i < Pm_CountDevices(); i++)
 	{
 		oinfo = Pm_GetDeviceInfo(i);
@@ -242,21 +242,21 @@ static int pm_init(int samplerate)
 		if(strlen(snd_mididev) && strstr(devname, snd_mididev))
 		{
 			outputdevice = i;
-			lprintf(OutputLevels::Debug, ">>%s\n", devname);
+			Log::Debug(">>{}\n", std::string_view(devname));
 		}
 		else
 		{
-			lprintf(OutputLevels::Debug, "  %s\n", devname);
+			Log::Debug("  {}\n", std::string_view(devname));
 		}
 	}
 
 	oinfo = Pm_GetDeviceInfo(outputdevice);
 
-	lprintf(OutputLevels::Debug, "portmidiplayer: Opening device %s:%s for output\n", oinfo->interf, oinfo->name);
+	Log::Debug("portmidiplayer: Opening device {}:{} for output\n", oinfo->interf, oinfo->name);
 
 	if(Pm_OpenOutput(&pm_stream, outputdevice, nullptr, DRIVER_BUFFER, nullptr, nullptr, DRIVER_LATENCY) != pmNoError)
 	{
-		lprintf(OutputLevels::Warn, "portmidiplayer: Pm_OpenOutput () failed\n");
+		Log::Warn("portmidiplayer: Pm_OpenOutput () failed\n");
 		Pm_Terminate();
 		return 0;
 	}
