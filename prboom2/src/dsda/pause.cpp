@@ -8,11 +8,11 @@
 
 #include "pause.hpp"
 
-static dboolean paused;
+static PauseMode paused;
 
 dboolean dsda_Paused()
 {
-	return paused != 0;
+	return paused != PauseMode{};
 }
 
 dboolean dsda_PausedViaMenu()
@@ -22,50 +22,48 @@ dboolean dsda_PausedViaMenu()
 
 dboolean dsda_PausedOutsideDemo()
 {
-	return dsda_PauseMode(PAUSE_PLAYBACK | PAUSE_BUILDMODE) || dsda_PausedViaMenu();
+	return dsda_PauseMode(PauseMode::Playback | PauseMode::BuildMode) || dsda_PausedViaMenu();
 }
 
 dboolean dsda_CameraPaused()
 {
-	return paused && !walkcamera.type;
+	return paused != PauseMode{} && !walkcamera.type;
 }
 
-dboolean dsda_PauseMode(int mode)
+dboolean dsda_PauseMode(const PauseMode mode)
 {
-	return (paused & mode) != 0;
+	return (paused & mode) != PauseMode{};
 }
 
-void dsda_RemovePauseMode(int mode)
+void dsda_RemovePauseMode(const PauseMode mode)
 {
-	paused &= ~mode;
+	paused -= mode;
 }
 
-void dsda_ApplyPauseMode(int mode)
+void dsda_ApplyPauseMode(const PauseMode mode)
 {
 	paused |= mode;
 }
 
-void dsda_TogglePauseMode(int mode)
+void dsda_TogglePauseMode(const PauseMode mode)
 {
-	paused ^= mode;
+	paused = paused ^ mode;
 }
 
 void dsda_ResetPauseMode()
 {
-	paused = 0;
+	paused = {};
 }
 
-int dsda_MaskPause()
+PauseMode dsda_MaskPause()
 {
-	int mask;
-
-	mask = paused & ~PAUSE_COMMAND;
-	paused &= PAUSE_COMMAND;
+	const PauseMode mask = paused - PauseMode::Command;
+	paused = paused & PauseMode::Command;
 
 	return mask;
 }
 
-void dsda_UnmaskPause(int mask)
+void dsda_UnmaskPause(const PauseMode mask)
 {
 	paused |= mask;
 }

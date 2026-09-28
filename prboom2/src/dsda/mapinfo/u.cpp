@@ -115,12 +115,12 @@ int dsda_UPrevMap(int* episode, int* map)
 	return dsda_NameToMap(gamemapinfo->lumpname, episode, map);
 }
 
-int dsda_UShowNextLocBehaviour(int* behaviour)
+int dsda_UShowNextLocBehaviour(ShowNextLocFlag* behaviour)
 {
 	if(!gamemapinfo)
 		return false;
 
-	// WI_SHOW_NEXT_DONE means something different for Heretic
+	// ShowNextLocFlag::Done means something different for Heretic
 	//
 	// Heretic: "finalintermission -> endgame"
 	// Doom:    "intermission -> next map or endgame"
@@ -130,9 +130,9 @@ int dsda_UShowNextLocBehaviour(int* behaviour)
 		: (gamemapinfo->flags & (UMapinfoFlags::EndGameAny | UMapinfoFlags::EndGameClear));
 
 	if(intermission_end != UMapinfoFlags{})
-		*behaviour = WI_SHOW_NEXT_DONE;
+		*behaviour = ShowNextLocFlag::Done;
 	else
-		*behaviour = WI_SHOW_NEXT_LOC | WI_SHOW_NEXT_EPISODAL;
+		*behaviour = ShowNextLocFlag::Location | ShowNextLocFlag::Episodal;
 
 	return true;
 }

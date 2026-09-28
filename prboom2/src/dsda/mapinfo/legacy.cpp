@@ -277,18 +277,18 @@ int dsda_LegacyPrevMap(int* episode, int* map)
 	return true;
 }
 
-int dsda_LegacyShowNextLocBehaviour(int* behaviour)
+int dsda_LegacyShowNextLocBehaviour(ShowNextLocFlag* behaviour)
 {
 	if(
 		gamemode != GameMode::Commercial &&
 		(gamemap == 8 || (gamemission == GameMission::TcChex && gamemap == 5))
 	)
-		*behaviour = WI_SHOW_NEXT_DONE;
+		*behaviour = ShowNextLocFlag::Done;
 	else
-		*behaviour = WI_SHOW_NEXT_LOC;
+		*behaviour = ShowNextLocFlag::Location;
 
 	if(dsda_FinaleShortcut())
-		*behaviour = WI_SHOW_NEXT_DONE;
+		*behaviour = ShowNextLocFlag::Done;
 
 	return true;
 }

@@ -322,7 +322,7 @@ extern dboolean setsizeneeded;
 
 static void D_DrawPause()
 {
-	if(dsda_PauseMode(PAUSE_BUILDMODE))
+	if(dsda_PauseMode(PauseMode::BuildMode))
 		return;
 
 	V_BeginUIDraw();

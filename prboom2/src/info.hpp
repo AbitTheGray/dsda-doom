@@ -214,6 +214,16 @@ enum struct MobjFlag2 : uint64_t
 };
 ENUM_FLAGS_FUNC(MobjFlag2)
 
+// Map formats a thing type belongs to; things that do not match the current format are not spawned.
+enum struct ThingVisibility : uint32_t
+{
+	Doom = Bit<uint32_t>(0u),
+	Heretic = Bit<uint32_t>(1u),
+	Hexen = Bit<uint32_t>(2u),
+	ZDoom = Bit<uint32_t>(3u),
+};
+ENUM_FLAGS_FUNC(ThingVisibility)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -6780,7 +6790,7 @@ typedef struct
 
 	// misc
 	int bloodcolor;
-	int visibility;
+	ThingVisibility visibility;
 } mobjinfo_t;
 
 #define NO_ALTSPEED -1

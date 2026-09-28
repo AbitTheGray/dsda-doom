@@ -497,7 +497,7 @@ void dsda_EnterBuildMode()
 		advance_frame = true;
 
 	build_mode = true;
-	dsda_ApplyPauseMode(PAUSE_BUILDMODE);
+	dsda_ApplyPauseMode(PauseMode::BuildMode);
 
 	dsda_RefreshExHudCommandDisplay();
 }
@@ -505,7 +505,7 @@ void dsda_EnterBuildMode()
 void dsda_ExitBuildMode()
 {
 	build_mode = false;
-	dsda_RemovePauseMode(PAUSE_BUILDMODE);
+	dsda_RemovePauseMode(PauseMode::BuildMode);
 
 	dsda_RefreshExHudCommandDisplay();
 }

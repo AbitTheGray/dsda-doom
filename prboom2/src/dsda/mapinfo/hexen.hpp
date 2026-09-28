@@ -6,6 +6,7 @@
 #pragma once
 
 #include "p_mobj.hpp"
+#include "dsda/mapinfo.hpp"
 #include "dsda/utility.hpp"
 
 #ifdef __cplusplus
@@ -19,7 +20,7 @@ int dsda_HexenNewGameMap(int* episode, int* map);
 int dsda_HexenResolveWarp(int* args, int arg_count, int* episode, int* map);
 int dsda_HexenNextMap(int* episode, int* map);
 int dsda_HexenPrevMap(int* episode, int* map);
-int dsda_HexenShowNextLocBehaviour(int* behaviour);
+int dsda_HexenShowNextLocBehaviour(ShowNextLocFlag* behaviour);
 int dsda_HexenSkipDrawShowNextLoc(int* skip);
 void dsda_HexenUpdateMapInfo();
 void dsda_HexenUpdateLastMapInfo();

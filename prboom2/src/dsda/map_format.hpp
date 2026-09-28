@@ -9,17 +9,12 @@
 #include "r_defs.hpp"
 #include "p_maputl.hpp"
 #include "p_spec.hpp"
+#include "info.hpp"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-// visibility flags - hide things that don't match
-#define VF_DOOM    0x01
-#define VF_HERETIC 0x02
-#define VF_HEXEN   0x04
-#define VF_ZDOOM   0x08
 
 typedef struct
 {
@@ -70,7 +65,7 @@ typedef struct
 	int dn_polyspawn_start;
 	int dn_polyspawn_hurt;
 	int dn_polyspawn_end;
-	int visibility;
+	ThingVisibility visibility;
 } map_format_t;
 
 extern map_format_t map_format;

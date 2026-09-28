@@ -8,6 +8,17 @@
 
 #include "r_defs.hpp"
 
+#include "cpp/Util.hpp"
+
+// What P_PathTraverse collects along its line.
+enum struct PathTraverseFlag : uint8_t
+{
+	AddLines = Bit<uint8_t>(0u),
+	AddThings = Bit<uint8_t>(1u),
+	EarlyOut = Bit<uint8_t>(2u),
+};
+ENUM_FLAGS_FUNC(PathTraverseFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -19,10 +30,6 @@ extern "C"
 #define MAPBLOCKSHIFT   (FRACBITS+7)
 #define MAPBMASK        (MAPBLOCKSIZE-1)
 #define MAPBTOFRAC      (MAPBLOCKSHIFT-FRACBITS)
-
-#define PT_ADDLINES     1
-#define PT_ADDTHINGS    2
-#define PT_EARLYOUT     4
 
 typedef struct
 {
@@ -86,7 +93,7 @@ dboolean P_BlockLinesIterator(int x, int y, dboolean func(line_t*));
 dboolean P_BlockLinesIterator2(int x, int y, dboolean func(line_t*));
 dboolean P_BlockThingsIterator(int x, int y, dboolean func(mobj_t*));
 dboolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
-	int flags, dboolean trav(intercept_t*));
+	PathTraverseFlag flags, dboolean trav(intercept_t*));
 
 angle_t P_PointToAngle(fixed_t xo, fixed_t yo, fixed_t x, fixed_t y);
 mobj_t* P_RoughTargetSearch(mobj_t* mo, angle_t fov, int distance);

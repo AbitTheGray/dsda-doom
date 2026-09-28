@@ -8,16 +8,22 @@
 #include <string_view>
 
 #include "p_mobj.hpp"
+#include "cpp/Util.hpp"
 #include "dsda/utility.hpp"
+
+// What the intermission does after the stats screen.
+enum struct ShowNextLocFlag : uint8_t
+{
+	Location = Bit<uint8_t>(0u), // show where the next map is
+	Done = Bit<uint8_t>(1u),     // no next location: go on at once (Heretic: final intermission)
+	Episodal = Bit<uint8_t>(2u), // the next map may be in another episode
+};
+ENUM_FLAGS_FUNC(ShowNextLocFlag)
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#define WI_SHOW_NEXT_LOC      0x01
-#define WI_SHOW_NEXT_DONE     0x02
-#define WI_SHOW_NEXT_EPISODAL 0x04
 
 #define DC_VICTORY 0x01
 
@@ -30,7 +36,7 @@ void dsda_ResolveWarp(int* args, int arg_count, int* episode, int* map);
 int dsda_NameToMap(const char* name, int* episode, int* map);
 void dsda_NextMap(int* episode, int* map);
 void dsda_PrevMap(int* episode, int* map);
-void dsda_ShowNextLocBehaviour(int* behaviour);
+void dsda_ShowNextLocBehaviour(ShowNextLocFlag* behaviour);
 int dsda_SkipDrawShowNextLoc();
 void dsda_UpdateGameMap(int episode, int map);
 void dsda_ResetLeaveData();

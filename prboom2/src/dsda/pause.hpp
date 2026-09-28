@@ -7,26 +7,33 @@
 
 #include "doomtype.hpp"
 
+#include "cpp/Util.hpp"
+
+// Why the game is paused; several reasons can apply at once.
+enum struct PauseMode : uint8_t
+{
+	Command = Bit<uint8_t>(0u),
+	Playback = Bit<uint8_t>(1u),
+	BuildMode = Bit<uint8_t>(2u),
+};
+ENUM_FLAGS_FUNC(PauseMode)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#define PAUSE_COMMAND   1
-#define PAUSE_PLAYBACK  2
-#define PAUSE_BUILDMODE 4
-
 dboolean dsda_Paused();
 dboolean dsda_PausedViaMenu();
 dboolean dsda_PausedOutsideDemo();
 dboolean dsda_CameraPaused();
-dboolean dsda_PauseMode(int mode);
-void dsda_RemovePauseMode(int mode);
-void dsda_ApplyPauseMode(int mode);
-void dsda_TogglePauseMode(int mode);
+dboolean dsda_PauseMode(PauseMode mode);
+void dsda_RemovePauseMode(PauseMode mode);
+void dsda_ApplyPauseMode(PauseMode mode);
+void dsda_TogglePauseMode(PauseMode mode);
 void dsda_ResetPauseMode();
-int dsda_MaskPause();
-void dsda_UnmaskPause(int mask);
+PauseMode dsda_MaskPause();
+void dsda_UnmaskPause(PauseMode mask);
 
 #ifdef __cplusplus
 }

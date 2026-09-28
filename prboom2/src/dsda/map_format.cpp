@@ -377,7 +377,7 @@ static const map_format_t zdoom_map_format = {
 	.dn_polyspawn_start = 9301,
 	.dn_polyspawn_hurt = 9303,
 	.dn_polyspawn_end = 9303,
-	.visibility = VF_ZDOOM | VF_DOOM,
+	.visibility = ThingVisibility::ZDoom | ThingVisibility::Doom,
 };
 
 static const map_format_t hexen_map_format = {
@@ -428,7 +428,7 @@ static const map_format_t hexen_map_format = {
 	.dn_polyspawn_start = 3001,
 	.dn_polyspawn_hurt = -1,
 	.dn_polyspawn_end = 3002,
-	.visibility = VF_HEXEN,
+	.visibility = ThingVisibility::Hexen,
 };
 
 static const map_format_t heretic_map_format = {
@@ -479,7 +479,7 @@ static const map_format_t heretic_map_format = {
 	.dn_polyspawn_start = -1,
 	.dn_polyspawn_hurt = -1,
 	.dn_polyspawn_end = -1,
-	.visibility = VF_HERETIC,
+	.visibility = ThingVisibility::Heretic,
 };
 
 static const map_format_t doom_map_format = {
@@ -530,7 +530,7 @@ static const map_format_t doom_map_format = {
 	.dn_polyspawn_start = -1,
 	.dn_polyspawn_hurt = -1,
 	.dn_polyspawn_end = -1,
-	.visibility = VF_DOOM,
+	.visibility = ThingVisibility::Doom,
 };
 
 static void dsda_ApplyHighPrecision()

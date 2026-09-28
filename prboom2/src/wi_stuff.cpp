@@ -1043,22 +1043,22 @@ static dboolean snl_pointeron = false;
 extern "C" void WI_loadData();
 void WI_initShowNextLoc()
 {
-	int behaviour;
+	ShowNextLocFlag behaviour;
 
 	dsda_ShowNextLocBehaviour(&behaviour);
 
-	if(behaviour & WI_SHOW_NEXT_DONE)
+	if((behaviour & ShowNextLocFlag::Done) != ShowNextLocFlag{})
 	{
 		G_WorldDone();
 		return;
 	}
 
-	if(behaviour & WI_SHOW_NEXT_LOC)
+	if((behaviour & ShowNextLocFlag::Location) != ShowNextLocFlag{})
 	{
 		state = WiState::ShowNextLoc;
 	}
 
-	if(behaviour & WI_SHOW_NEXT_EPISODAL)
+	if((behaviour & ShowNextLocFlag::Episodal) != ShowNextLocFlag{})
 	{
 		// episode change possible
 		if(wbs->epsd != wbs->nextep)

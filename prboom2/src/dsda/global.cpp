@@ -271,7 +271,7 @@ static void dsda_InitDoom()
 
 		// misc
 		mobjinfo[i].bloodcolor = 0; // default
-		mobjinfo[i].visibility = VF_DOOM;
+		mobjinfo[i].visibility = ThingVisibility::Doom;
 	}
 
 	// don't want to reorganize info.c structure for a few tweaks...
@@ -462,7 +462,7 @@ static void dsda_InitHeretic()
 
 		// misc
 		mobjinfo[j].bloodcolor = 0; // default
-		mobjinfo[j].visibility = VF_HERETIC;
+		mobjinfo[j].visibility = ThingVisibility::Heretic;
 	}
 
 	// heretic doesn't use "clip" concept
@@ -630,7 +630,7 @@ static void dsda_InitHexen()
 
 		// misc
 		mobjinfo[j].bloodcolor = 0; // default
-		mobjinfo[j].visibility = VF_HEXEN;
+		mobjinfo[j].visibility = ThingVisibility::Hexen;
 	}
 
 	{

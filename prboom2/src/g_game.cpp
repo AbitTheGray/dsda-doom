@@ -1349,7 +1349,7 @@ dboolean G_Responder(event_t* ev)
 		// killough 9/29/98: allow user to pause demos during playback
 		if(dsda_InputActivated(InputId::Pause))
 		{
-			dsda_TogglePauseMode(PAUSE_PLAYBACK);
+			dsda_TogglePauseMode(PauseMode::Playback);
 			if(dsda_Paused())
 				S_PauseSound();
 			else
@@ -1455,7 +1455,7 @@ void G_Ticker()
 {
 	int i;
 	int entry_leveltime;
-	int pause_mask;
+	PauseMode pause_mask;
 	dboolean advance_frame = false;
 	static GameState prevgamestate;
 
@@ -1564,7 +1564,7 @@ void G_Ticker()
 		if(dsda_BruteForce())
 		{
 			dsda_UpdateBruteForce();
-			dsda_RemovePauseMode(PAUSE_BUILDMODE);
+			dsda_RemovePauseMode(PauseMode::BuildMode);
 		}
 
 		for(i = 0; i < g_maxplayers; i++)
@@ -1602,7 +1602,7 @@ void G_Ticker()
 					switch(ButtonSpecial(players[i].cmd.buttons))
 					{
 						case ButtonCode::Pause:
-							dsda_TogglePauseMode(PAUSE_COMMAND);
+							dsda_TogglePauseMode(PauseMode::Command);
 							if(dsda_Paused())
 								S_PauseSound();
 							else

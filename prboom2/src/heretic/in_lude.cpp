@@ -258,10 +258,10 @@ static void IN_InitLumps()
 
 static void IN_InitVariables(wbstartstruct_t* wbstartstruct)
 {
-	int behaviour;
+	ShowNextLocFlag behaviour;
 
 	dsda_ShowNextLocBehaviour(&behaviour);
-	finalintermission = (behaviour & WI_SHOW_NEXT_DONE);
+	finalintermission = (behaviour & ShowNextLocFlag::Done) != ShowNextLocFlag{};
 
 	wbs = wbstartstruct;
 	prevmap = wbs->last + 1;

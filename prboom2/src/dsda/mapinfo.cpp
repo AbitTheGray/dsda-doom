@@ -84,7 +84,7 @@ void dsda_PrevMap(int* episode, int* map)
 	dsda_LegacyPrevMap(episode, map);
 }
 
-void dsda_ShowNextLocBehaviour(int* behaviour)
+void dsda_ShowNextLocBehaviour(ShowNextLocFlag* behaviour)
 {
 	if(dsda_HexenShowNextLocBehaviour(behaviour))
 		return;

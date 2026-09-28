@@ -2090,11 +2090,11 @@ void P_SlideMove(mobj_t* mo)
 		bestslidefrac = FRACUNIT + 1;
 
 		P_PathTraverse(leadx, leady, leadx + mo->momx, leady + mo->momy,
-			PT_ADDLINES, PTR_SlideTraverse);
+			PathTraverseFlag::AddLines, PTR_SlideTraverse);
 		P_PathTraverse(trailx, leady, trailx + mo->momx, leady + mo->momy,
-			PT_ADDLINES, PTR_SlideTraverse);
+			PathTraverseFlag::AddLines, PTR_SlideTraverse);
 		P_PathTraverse(leadx, traily, leadx + mo->momx, traily + mo->momy,
-			PT_ADDLINES, PTR_SlideTraverse);
+			PathTraverseFlag::AddLines, PTR_SlideTraverse);
 
 		// move up to the wall
 
@@ -2549,7 +2549,7 @@ fixed_t P_AimLineAttack(mobj_t* t1, angle_t angle, fixed_t distance, MobjFlag ma
 	/* killough 8/2/98: prevent friends from aiming at friends */
 	aim_flags_mask = mask;
 
-	P_PathTraverse(t1->x, t1->y, x2, y2,PT_ADDLINES | PT_ADDTHINGS, PTR_AimTraverse);
+	P_PathTraverse(t1->x, t1->y, x2, y2,PathTraverseFlag::AddLines | PathTraverseFlag::AddThings, PTR_AimTraverse);
 
 	if(linetarget)
 		return aimslope;
@@ -2587,7 +2587,7 @@ void P_LineAttack(mobj_t* t1, angle_t angle, fixed_t distance, fixed_t slope,
 	attackrange = distance;
 	aimslope = slope;
 
-	if(P_PathTraverse(t1->x, t1->y, x2, y2,PT_ADDLINES | PT_ADDTHINGS, PTR_ShootTraverse))
+	if(P_PathTraverse(t1->x, t1->y, x2, y2,PathTraverseFlag::AddLines | PathTraverseFlag::AddThings, PTR_ShootTraverse))
 	{
 		if(hexen)
 		{
@@ -2764,12 +2764,12 @@ void P_UseLines(player_t* player)
 
 	// old code:
 	//
-	// P_PathTraverse ( x1, y1, x2, y2, PT_ADDLINES, PTR_UseTraverse );
+	// P_PathTraverse ( x1, y1, x2, y2, PathTraverseFlag::AddLines, PTR_UseTraverse );
 	//
 	// This added test makes the "oof" sound work on 2s lines -- killough:
 
-	if(P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES, PTR_UseTraverse))
-		if(!comp[std::to_underlying(CompOption::Sound)] && !P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES, PTR_NoWayTraverse))
+	if(P_PathTraverse(x1, y1, x2, y2, PathTraverseFlag::AddLines, PTR_UseTraverse))
+		if(!comp[std::to_underlying(CompOption::Sound)] && !P_PathTraverse(x1, y1, x2, y2, PathTraverseFlag::AddLines, PTR_NoWayTraverse))
 			S_StartSound(usething, SfxId::Noway);
 }
 
@@ -3819,7 +3819,7 @@ void P_BounceWall(mobj_t* mo)
 	}
 	bestslidefrac = FRACUNIT + 1;
 	P_PathTraverse(leadx, leady, leadx + mo->momx, leady + mo->momy,
-		PT_ADDLINES, PTR_BounceTraverse);
+		PathTraverseFlag::AddLines, PTR_BounceTraverse);
 
 	side = P_PointOnLineSide(mo->x, mo->y, bestslideline);
 	lineangle = R_PointToAngle2(0, 0, bestslideline->dx, bestslideline->dy);
@@ -4165,7 +4165,7 @@ dboolean P_UsePuzzleItem(player_t* player, int itemType)
 	y1 = player->mo->y;
 	x2 = x1 + (USERANGE >> FRACBITS) * finecosine[angle];
 	y2 = y1 + (USERANGE >> FRACBITS) * finesine[angle];
-	P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES | PT_ADDTHINGS,
+	P_PathTraverse(x1, y1, x2, y2, PathTraverseFlag::AddLines | PathTraverseFlag::AddThings,
 		PTR_PuzzleItemTraverse);
 	return PuzzleActivated;
 }

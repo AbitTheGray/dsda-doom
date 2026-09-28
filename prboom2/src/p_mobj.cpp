@@ -1499,7 +1499,7 @@ mobj_t* P_SubstNullMobj(mobj_t* mobj)
 static dboolean P_IsTypeMatch(unsigned doomednum, int type)
 {
 	return (unsigned)mobjinfo[type].doomednum == doomednum &&
-		mobjinfo[type].visibility & map_format.visibility;
+		(mobjinfo[type].visibility & map_format.visibility) != ThingVisibility{};
 }
 
 static PUREFUNC MobjType P_FindDoomedNum(unsigned type)

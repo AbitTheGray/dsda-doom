@@ -81,7 +81,7 @@ void dsda_EnterSkipMode()
 	I_Init2();
 
 	if(dsda_BuildMode())
-		dsda_ApplyPauseMode(PAUSE_BUILDMODE);
+		dsda_ApplyPauseMode(PauseMode::BuildMode);
 }
 
 void dsda_ExitSkipMode()

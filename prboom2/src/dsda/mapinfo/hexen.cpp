@@ -207,7 +207,7 @@ int dsda_HexenPrevMap(int* episode, int* map)
 	return true;
 }
 
-int dsda_HexenShowNextLocBehaviour(int* behaviour)
+int dsda_HexenShowNextLocBehaviour(ShowNextLocFlag* behaviour)
 {
 	return false; // TODO
 }

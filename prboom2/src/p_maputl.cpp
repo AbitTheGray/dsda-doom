@@ -775,7 +775,7 @@ unsigned int cur_amlinetrace = 0;
 // killough 5/3/98: reformatted, cleaned up
 
 dboolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
-	int flags, dboolean trav(intercept_t*))
+	const PathTraverseFlag flags, dboolean trav(intercept_t*))
 {
 	fixed_t xt1, yt1;
 	fixed_t xt2, yt2;
@@ -900,11 +900,11 @@ dboolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
 
 	for(count = 0; count < 64; count++)
 	{
-		if(flags & PT_ADDLINES)
+		if((flags & PathTraverseFlag::AddLines) != PathTraverseFlag{})
 			if(!P_BlockLinesIterator(mapx, mapy, PIT_AddLineIntercepts))
 				return false; // early out
 
-		if(flags & PT_ADDTHINGS)
+		if((flags & PathTraverseFlag::AddThings) != PathTraverseFlag{})
 			if(!P_BlockThingsIterator(mapx, mapy, PIT_AddThingIntercepts))
 				return false; // early out
 
