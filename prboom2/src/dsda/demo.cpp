@@ -20,6 +20,8 @@
 #include "p_saveg.hpp"
 
 #include "dsda.hpp"
+#include "cpp/Util.hpp"
+
 #include "dsda/args.hpp"
 #include "dsda/configuration.hpp"
 #include "dsda/data_organizer.hpp"
@@ -53,11 +55,19 @@ static int compatibility_level_unspecified;
 
 const int dsda_demo_header_data_size[DSDA_DEMO_VERSION + 1] = {0, 8, 9, 10};
 
+// Flags in the DSDA demo header (byte 8 of the extra header data).
+enum struct DsdaDemoFlag : uint8_t
+{
+	FromKeyFrame = Bit<uint8_t>(0u),
+	CasualFeatures = Bit<uint8_t>(1u),
+};
+ENUM_FLAGS_FUNC(DsdaDemoFlag)
+
 typedef struct
 {
 	int end_marker_location;
 	int demo_tics;
-	byte flags;
+	DsdaDemoFlag flags;
 	byte udmf_version;
 } dsda_demo_header_data_t;
 
@@ -65,8 +75,6 @@ static dsda_demo_header_data_t dsda_demo_header_data;
 
 #define DEMOMARKER 0x80
 
-#define DF_FROM_KEYFRAME   0x01
-#define DF_CASUAL_FEATURES 0x02
 
 static dboolean join_queued;
 static int dsda_demo_version;
@@ -411,13 +419,13 @@ static void dsda_WriteExtraDemoHeaderData(int end_marker_location)
 	dsda_WriteIntToHeader(&header_p, demo_tics);
 }
 
-static void dsda_SetExtraDemoHeaderFlag(byte flag)
+static void dsda_SetExtraDemoHeaderFlag(const DsdaDemoFlag flag)
 {
 	byte* header_p;
 
 	header_p = dsda_demo_write_buffer + dsda_extra_demo_header_data_offset;
 	header_p += 8; // skip other fields
-	*header_p |= flag;
+	*header_p |= std::to_underlying(flag);
 }
 
 dboolean dsda_StartDemoSegment(const char* demo_name)
@@ -429,7 +437,7 @@ dboolean dsda_StartDemoSegment(const char* demo_name)
 	dsda_SetDemoBaseName(demo_name);
 	dsda_InitDemoRecording();
 	G_BeginRecording();
-	dsda_SetExtraDemoHeaderFlag(DF_FROM_KEYFRAME);
+	dsda_SetExtraDemoHeaderFlag(DsdaDemoFlag::FromKeyFrame);
 
 	{
 		dsda_key_frame_t key_frame;
@@ -448,7 +456,7 @@ dboolean dsda_StartDemoSegment(const char* demo_name)
 
 const byte* dsda_EvaluateDemoStartPoint(const byte* demo_p)
 {
-	if(dsda_demo_version && dsda_demo_header_data.flags & DF_FROM_KEYFRAME)
+	if(dsda_demo_version && (dsda_demo_header_data.flags & DsdaDemoFlag::FromKeyFrame) != DsdaDemoFlag{})
 	{
 		dsda_key_frame_t key_frame;
 		union
@@ -741,9 +749,9 @@ static const byte* dsda_ReadDSDADemoHeader(const byte* demo_p, const byte* heade
 	demo_p += 4;
 
 	if(dsda_demo_version >= 2)
-		dsda_demo_header_data.flags = *demo_p++;
+		dsda_demo_header_data.flags = static_cast<DsdaDemoFlag>(*demo_p++);
 	else
-		dsda_demo_header_data.flags = 0;
+		dsda_demo_header_data.flags = {};
 
 	if(dsda_demo_version >= 3)
 		dsda_demo_header_data.udmf_version = *demo_p++;
@@ -752,7 +760,7 @@ static const byte* dsda_ReadDSDADemoHeader(const byte* demo_p, const byte* heade
 
 	dsda_EnableExCmd();
 
-	if(dsda_demo_header_data.flags & DF_CASUAL_FEATURES)
+	if((dsda_demo_header_data.flags & DsdaDemoFlag::CasualFeatures) != DsdaDemoFlag{})
 		dsda_EnableCasualExCmdFeatures();
 
 	return demo_p;
@@ -834,7 +842,7 @@ void dsda_WriteDSDADemoHeader(byte** p)
 	memset(demo_p, 0, dsda_demo_header_data_size[dsda_demo_version]);
 
 	if(dsda_AllowCasualExCmdFeatures())
-		demo_p[8] |= DF_CASUAL_FEATURES;
+		demo_p[8] |= std::to_underlying(DsdaDemoFlag::CasualFeatures);
 
 	demo_p[9] = DSDA_UDMF_VERSION;
 

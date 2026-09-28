@@ -1363,10 +1363,6 @@ typedef struct
 	int base;
 } phase_t;
 
-#define LIGHT_SEQUENCE_START    2
-#define LIGHT_SEQUENCE          3
-#define LIGHT_SEQUENCE_ALT      4
-
 void T_Phase(phase_t* phase);
 void T_Light(light_t* light);
 void P_SpawnPhasedLight(sector_t* sector, int base, int index);
@@ -1410,6 +1406,14 @@ enum struct PillarType : int32_t
 	Open,
 };
 
+// Phase of a Hexen floor or ceiling waggle.
+enum struct WaggleState : int32_t
+{
+	Expand = 1,
+	Stable = 2,
+	Reduce = 3,
+};
+
 typedef struct
 {
 	thinker_t thinker;
@@ -1421,7 +1425,7 @@ typedef struct
 	fixed_t scale;
 	fixed_t scaleDelta;
 	int ticker;
-	int state;
+	WaggleState state;
 } planeWaggle_t;
 
 enum struct StairsMode : int32_t

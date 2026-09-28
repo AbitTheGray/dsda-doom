@@ -64,6 +64,8 @@
 #include "e6y.hpp"//e6y
 
 #include "dsda.hpp"
+#include "cpp/Util.hpp"
+
 #include "dsda/aim.hpp"
 #include "dsda/args.hpp"
 #include "dsda/brute_force.hpp"
@@ -3112,9 +3114,15 @@ void G_InitNew(int skill, int episode, int map, dboolean prepare)
 // DEMO RECORDING
 //
 
-#define DEMOHEADER_RESPAWN    0x20
-#define DEMOHEADER_LONGTICS   0x10
-#define DEMOHEADER_NOMONSTERS 0x02
+// The first byte of a Heretic or Hexen demo header, as vvHeretic uses it.
+enum struct RavenDemoFlag : uint8_t
+{
+	PlayerOne = Bit<uint8_t>(0u),
+	NoMonsters = Bit<uint8_t>(1u),
+	LongTics = Bit<uint8_t>(4u),
+	Respawn = Bit<uint8_t>(5u),
+};
+ENUM_FLAGS_FUNC(RavenDemoFlag)
 
 void G_ReadOneTick(ticcmd_t* cmd, const byte** data_p)
 {
@@ -3547,13 +3555,14 @@ void G_BeginRecording()
 		//   0x20 = -respawn
 		//   0x10 = -longtics
 		//   0x02 = -nomonsters
-		*demo_p = 1; // assume player one exists
+		RavenDemoFlag flags = RavenDemoFlag::PlayerOne; // assume player one exists
 		if(respawnparm)
-			*demo_p |= DEMOHEADER_RESPAWN;
+			flags |= RavenDemoFlag::Respawn;
 		if(longtics)
-			*demo_p |= DEMOHEADER_LONGTICS;
+			flags |= RavenDemoFlag::LongTics;
 		if(nomonsters)
-			*demo_p |= DEMOHEADER_NOMONSTERS;
+			flags |= RavenDemoFlag::NoMonsters;
+		*demo_p = std::to_underlying(flags);
 		demo_p++;
 
 		if(heretic)
@@ -3762,11 +3771,13 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 			//   0x02 = -nomonsters
 			if(raven)
 			{
-				if(*demo_p & DEMOHEADER_RESPAWN)
+				const RavenDemoFlag flags = static_cast<RavenDemoFlag>(*demo_p);
+
+				if((flags & RavenDemoFlag::Respawn) != RavenDemoFlag{})
 					respawnparm = true;
-				if(*demo_p & DEMOHEADER_LONGTICS || dsda_Flag(ArgId::Longtics))
+				if((flags & RavenDemoFlag::LongTics) != RavenDemoFlag{} || dsda_Flag(ArgId::Longtics))
 					longtics = true;
-				if(*demo_p & DEMOHEADER_NOMONSTERS)
+				if((flags & RavenDemoFlag::NoMonsters) != RavenDemoFlag{})
 					nomonsters = true;
 			}
 

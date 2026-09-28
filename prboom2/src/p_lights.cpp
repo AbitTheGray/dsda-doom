@@ -17,6 +17,12 @@
 
 #include "dsda/id_list.hpp"
 
+// Sector specials of Hexen's light sequences.
+// `sector_t::special` holds every sector special, so these are numbers in that list, not an enum.
+constexpr int32_t k_LightSequenceStart = 2;
+constexpr int32_t k_LightSequence = 3;
+constexpr int32_t k_LightSequenceAlt = 4;
+
 //////////////////////////////////////////////////////////
 //
 // Lighting action routines, called once per tick
@@ -940,13 +946,13 @@ void P_SpawnLightSequence(sector_t* sector, int indexStep)
 	fixed_t indexDelta;
 	int base;
 
-	seqSpecial = LIGHT_SEQUENCE; // look for Light_Sequence, first
+	seqSpecial = k_LightSequence; // look for Light_Sequence, first
 	sec = sector;
 	count = 1;
 	do
 	{
 		nextSec = nullptr;
-		sec->special = LIGHT_SEQUENCE_START; // make sure that the search doesn't back up.
+		sec->special = k_LightSequenceStart; // make sure that the search doesn't back up.
 		for(i = 0; i < sec->linecount; i++)
 		{
 			tempSec = getNextSector(sec->lines[i], sec);
@@ -956,13 +962,13 @@ void P_SpawnLightSequence(sector_t* sector, int indexStep)
 			}
 			if(tempSec->special == seqSpecial)
 			{
-				if(seqSpecial == LIGHT_SEQUENCE)
+				if(seqSpecial == k_LightSequence)
 				{
-					seqSpecial = LIGHT_SEQUENCE_ALT;
+					seqSpecial = k_LightSequenceAlt;
 				}
 				else
 				{
-					seqSpecial = LIGHT_SEQUENCE;
+					seqSpecial = k_LightSequence;
 				}
 				nextSec = tempSec;
 				count++;
@@ -993,7 +999,7 @@ void P_SpawnLightSequence(sector_t* sector, int indexStep)
 			{
 				continue;
 			}
-			if(tempSec->special == LIGHT_SEQUENCE_START)
+			if(tempSec->special == k_LightSequenceStart)
 			{
 				nextSec = tempSec;
 			}

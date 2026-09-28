@@ -2312,24 +2312,20 @@ int EV_FloorCrushStop(line_t* line, byte* args)
 	return rtn;
 }
 
-#define WGLSTATE_EXPAND 1
-#define WGLSTATE_STABLE 2
-#define WGLSTATE_REDUCE 3
-
 extern fixed_t FloatBobOffsets[64];
 
 static void T_PlaneWaggle(planeWaggle_t* waggle, fixed_t* planeheight, void** planedata)
 {
 	switch(waggle->state)
 	{
-		case WGLSTATE_EXPAND:
+		case WaggleState::Expand:
 			if((waggle->scale += waggle->scaleDelta) >= waggle->targetScale)
 			{
 				waggle->scale = waggle->targetScale;
-				waggle->state = WGLSTATE_STABLE;
+				waggle->state = WaggleState::Stable;
 			}
 			break;
-		case WGLSTATE_REDUCE:
+		case WaggleState::Reduce:
 			if((waggle->scale -= waggle->scaleDelta) <= 0)
 			{
 				// Remove
@@ -2341,12 +2337,12 @@ static void T_PlaneWaggle(planeWaggle_t* waggle, fixed_t* planeheight, void** pl
 				return;
 			}
 			break;
-		case WGLSTATE_STABLE:
+		case WaggleState::Stable:
 			if(waggle->ticker != -1)
 			{
 				if(!--waggle->ticker)
 				{
-					waggle->state = WGLSTATE_REDUCE;
+					waggle->state = WaggleState::Reduce;
 				}
 			}
 			break;
@@ -2393,7 +2389,7 @@ static void P_SpawnPlaneWaggle(sector_t* sector, int height, int speed,
 	waggle->targetScale = height << 10;
 	waggle->scaleDelta = waggle->targetScale / (TICRATE + ((3 * TICRATE) * height) / 255);
 	waggle->ticker = timer ? timer * TICRATE : -1;
-	waggle->state = WGLSTATE_EXPAND;
+	waggle->state = WaggleState::Expand;
 	P_AddThinker(&waggle->thinker);
 }
 

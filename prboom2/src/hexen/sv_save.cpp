@@ -1232,7 +1232,7 @@ static void StreamIn_planeWaggle_t(planeWaggle_t* str)
 	str->ticker = SV_ReadLong();
 
 	// int state;
-	str->state = SV_ReadLong();
+	str->state = static_cast<WaggleState>(SV_ReadLong());
 }
 
 static void StreamOut_planeWaggle_t(planeWaggle_t* str)
@@ -1262,7 +1262,7 @@ static void StreamOut_planeWaggle_t(planeWaggle_t* str)
 	SV_WriteLong(str->ticker);
 
 	// int state;
-	SV_WriteLong(str->state);
+	SV_WriteLong(std::to_underlying(str->state));
 }
 
 void SV_Init()

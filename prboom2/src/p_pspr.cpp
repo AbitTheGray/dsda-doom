@@ -27,6 +27,8 @@
 #include "e6y.hpp"//e6y
 
 #include "dsda.hpp"
+#include "cpp/Util.hpp"
+
 #include "dsda/aim.hpp"
 #include "dsda/excmd.hpp"
 
@@ -3886,10 +3888,15 @@ extern "C" void A_CHolySpawnPuff(mobj_t* actor)
 	P_SpawnMobj(actor->x, actor->y, actor->z, MobjType::HexenHolyMissilePuff);
 }
 
-#define SHARDSPAWN_LEFT  1
-#define SHARDSPAWN_RIGHT 2
-#define SHARDSPAWN_UP    4
-#define SHARDSPAWN_DOWN  8
+// Directions a Hexen frost shard spawns its children in, kept in `mobj_t::special1`.
+enum struct ShardSpawn : uint8_t
+{
+	Left = Bit<uint8_t>(0u),
+	Right = Bit<uint8_t>(1u),
+	Up = Bit<uint8_t>(2u),
+	Down = Bit<uint8_t>(3u),
+};
+ENUM_FLAGS_FUNC(ShardSpawn)
 
 extern "C" void A_FireConePL1(player_t* player, pspdef_t* psp)
 {
@@ -3924,8 +3931,8 @@ extern "C" void A_FireConePL1(player_t* player, pspdef_t* psp)
 		mo = P_SpawnPlayerMissile(pmo, MobjType::HexenShardfx1);
 		if(mo)
 		{
-			mo->special1.i = SHARDSPAWN_LEFT | SHARDSPAWN_DOWN | SHARDSPAWN_UP
-				| SHARDSPAWN_RIGHT;
+			mo->special1.i = std::to_underlying(ShardSpawn::Left | ShardSpawn::Down | ShardSpawn::Up
+				| ShardSpawn::Right);
 			mo->special2.i = 3; // Set sperm count (levels of reproductivity)
 			P_SetTarget(&mo->target, pmo);
 			mo->special_args[0] = 3; // Mark Initial shard as super damage
@@ -3936,7 +3943,7 @@ extern "C" void A_FireConePL1(player_t* player, pspdef_t* psp)
 extern "C" void A_ShedShard(mobj_t* actor)
 {
 	mobj_t* mo;
-	int spawndir = actor->special1.i;
+	const ShardSpawn spawndir = static_cast<ShardSpawn>(actor->special1.i);
 	int spermcount = actor->special2.i;
 
 	if(spermcount <= 0)
@@ -3945,35 +3952,35 @@ extern "C" void A_ShedShard(mobj_t* actor)
 	spermcount--;
 
 	// every so many calls, spawn a new missile in it's set directions
-	if(spawndir & SHARDSPAWN_LEFT)
+	if((spawndir & ShardSpawn::Left) != ShardSpawn{})
 	{
 		mo = P_SpawnMissileAngleSpeed(actor, MobjType::HexenShardfx1,
 			actor->angle + (ANG45 / 9), 0,
 			(20 + 2 * spermcount) << FRACBITS);
 		if(mo)
 		{
-			mo->special1.i = SHARDSPAWN_LEFT;
+			mo->special1.i = std::to_underlying(ShardSpawn::Left);
 			mo->special2.i = spermcount;
 			mo->momz = actor->momz;
 			P_SetTarget(&mo->target, actor->target);
 			mo->special_args[0] = (spermcount == 3) ? 2 : 0;
 		}
 	}
-	if(spawndir & SHARDSPAWN_RIGHT)
+	if((spawndir & ShardSpawn::Right) != ShardSpawn{})
 	{
 		mo = P_SpawnMissileAngleSpeed(actor, MobjType::HexenShardfx1,
 			actor->angle - (ANG45 / 9), 0,
 			(20 + 2 * spermcount) << FRACBITS);
 		if(mo)
 		{
-			mo->special1.i = SHARDSPAWN_RIGHT;
+			mo->special1.i = std::to_underlying(ShardSpawn::Right);
 			mo->special2.i = spermcount;
 			mo->momz = actor->momz;
 			P_SetTarget(&mo->target, actor->target);
 			mo->special_args[0] = (spermcount == 3) ? 2 : 0;
 		}
 	}
-	if(spawndir & SHARDSPAWN_UP)
+	if((spawndir & ShardSpawn::Up) != ShardSpawn{})
 	{
 		mo = P_SpawnMissileAngleSpeed(actor, MobjType::HexenShardfx1, actor->angle,
 			0, (15 + 2 * spermcount) << FRACBITS);
@@ -3983,15 +3990,15 @@ extern "C" void A_ShedShard(mobj_t* actor)
 			mo->z += 8 * FRACUNIT;
 			if(spermcount & 1) // Every other reproduction
 				mo->special1.i =
-					SHARDSPAWN_UP | SHARDSPAWN_LEFT | SHARDSPAWN_RIGHT;
+					std::to_underlying(ShardSpawn::Up | ShardSpawn::Left | ShardSpawn::Right);
 			else
-				mo->special1.i = SHARDSPAWN_UP;
+				mo->special1.i = std::to_underlying(ShardSpawn::Up);
 			mo->special2.i = spermcount;
 			P_SetTarget(&mo->target, actor->target);
 			mo->special_args[0] = (spermcount == 3) ? 2 : 0;
 		}
 	}
-	if(spawndir & SHARDSPAWN_DOWN)
+	if((spawndir & ShardSpawn::Down) != ShardSpawn{})
 	{
 		mo = P_SpawnMissileAngleSpeed(actor, MobjType::HexenShardfx1, actor->angle,
 			0, (15 + 2 * spermcount) << FRACBITS);
@@ -4001,9 +4008,9 @@ extern "C" void A_ShedShard(mobj_t* actor)
 			mo->z -= 4 * FRACUNIT;
 			if(spermcount & 1) // Every other reproduction
 				mo->special1.i =
-					SHARDSPAWN_DOWN | SHARDSPAWN_LEFT | SHARDSPAWN_RIGHT;
+					std::to_underlying(ShardSpawn::Down | ShardSpawn::Left | ShardSpawn::Right);
 			else
-				mo->special1.i = SHARDSPAWN_DOWN;
+				mo->special1.i = std::to_underlying(ShardSpawn::Down);
 			mo->special2.i = spermcount;
 			P_SetTarget(&mo->target, actor->target);
 			mo->special_args[0] = (spermcount == 3) ? 2 : 0;
