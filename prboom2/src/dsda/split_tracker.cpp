@@ -208,7 +208,7 @@ void dsda_WriteSplits()
 	}
 
 	if(!M_WriteFile(path, buffer, p - buffer))
-		I_Warn("dsda_WriteSplits: Failed to write splits file \"%s\". (%d)", path, errno);
+		Log::Alert("dsda_WriteSplits: Failed to write splits file \"{}\". ({})", path, errno);
 
 	Z_Free(buffer);
 }

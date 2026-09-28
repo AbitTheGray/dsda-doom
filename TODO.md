@@ -46,9 +46,9 @@ Where a C API needs a zero-terminated string, the caller makes a `std::string` f
 ## Convert logging to `Log::`
 
 `Log::Print`, `Info`, `Warn`, `Error`, `Debug` and `Fatal` (`lprintf.hpp`) format with `std::format`.
-Every `lprintf` and `I_Error` call is converted. Left to do:
-1. `I_Warn` (1 call, in `dsda/split_tracker.cpp`: `Warn` level plus a message box) needs a `Log::` counterpart.
-2. Then remove `lprintf`, `I_Error` and `I_Warn` from `lprintf.hpp` and `lprintf.cpp`; `I_Error` and `I_Warn` still format through `lprintf` inside `lprintf.cpp`.
+Every call is converted (`I_Warn` became `Log::Alert`), and `lprintf` and `I_Warn` are removed.
+`I_Error` is left only as the `printf`-style error callback of `Scanner` (`scanner.hpp`), passed in by `dsda/gameinfo.cpp`, `dsda/ambient.cpp`, `ParseUMapInfo` (`umapinfo.hpp`) and `dsda_ParseUDMF` (`dsda/udmf.hpp`).
+To remove it: make the callback take the finished message (`std::string_view`), format `Scanner`'s 8 messages with `std::format` (its `%c` arguments are token values that need a `char`), move the two callback typedefs out of `extern "C"`, and pass a lambda that calls `Log::Fatal`.
 
 Conversion traps:
 - `%02d` becomes `{:02}`; `%.8s` on a lump name becomes `{}` with `W_LumpNameView(name)`, because such names may fill 8 bytes without a terminating zero and `{:.8}` would still measure the whole string;
@@ -57,7 +57,7 @@ Conversion traps:
 - an `enum struct` needs `std::to_underlying` (passing one to `%i` through `...` is UB today, e.g. `compatibility_level` in `m_cheat.cpp`);
 - output that something parses must stay identical, e.g. `FINISHED: <map>` for lmpwatch.
 
-`lprintf` still cuts a message at 2047 characters; `Log::` does so only when the build enables `LIMIT_LOG_MESSAGES`.
+`I_Error` still cuts a message at 2047 characters; `Log::` does so only when the build enables `LIMIT_LOG_MESSAGES`.
 
 `doom_printf` (on-screen messages, about 50 calls, defined in `g_game.cpp`) is `printf`-style as well and gets the same treatment; it hands its text to `dsda_AddMessage`.
 

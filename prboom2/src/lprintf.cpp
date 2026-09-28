@@ -47,10 +47,8 @@ int cons_stderr_mask = std::to_underlying(OutputLevels::Warn) | std::to_underlyi
 #define MAX_MESSAGE_SIZE 2048
 
 // Write `text` as it is to the console streams that show `level`.
-// Returns what the last write returned, as `lprintf` always has.
-static int32_t WriteText(const OutputLevels level, const std::string_view text)
+static void WriteText(const OutputLevels level, const std::string_view text)
 {
-	int32_t r = 0;
 	const int32_t lvl = std::to_underlying(level);
 
 #ifdef _WIN32
@@ -58,28 +56,14 @@ static int32_t WriteText(const OutputLevels level, const std::string_view text)
 	if(fileno(stdout) != -1)
 #endif
 	if(lvl & cons_stdout_mask)
-		r = static_cast<int32_t>(std::fwrite(text.data(), 1, text.size(), stdout));
+		std::fwrite(text.data(), 1, text.size(), stdout);
 
 #ifdef _WIN32
 	// do not crash with unicode dirs
 	if(fileno(stderr) != -1)
 #endif
 	if(lvl & cons_stderr_mask)
-		r = static_cast<int32_t>(std::fwrite(text.data(), 1, text.size(), stderr));
-
-	return r;
-}
-
-int lprintf(OutputLevels pri, const char* s, ...)
-{
-	char msg[MAX_MESSAGE_SIZE];
-
-	va_list v;
-	va_start(v, s);
-	vsnprintf(msg, sizeof(msg), s, v); /* print message in buffer  */
-	va_end(v);
-
-	return WriteText(pri, msg);
+		std::fwrite(text.data(), 1, text.size(), stderr);
 }
 
 void I_EnableVerboseLogging()
@@ -125,28 +109,15 @@ void I_Error(const char* error, ...)
 	va_start(argptr, error);
 	vsnprintf(errmsg, sizeof(errmsg), error, argptr);
 	va_end(argptr);
-	lprintf(OutputLevels::Error, "%s\n", errmsg);
+
+	// As upstream's `lprintf("%s\n", errmsg)` printed it: its buffer held 2047 characters, the newline included.
+	const std::string line = std::string(errmsg) + "\n";
+	WriteText(OutputLevels::Error, std::string_view(line).substr(0, MAX_MESSAGE_SIZE - 1));
 	ShowErrorBox(errmsg);
 	I_SafeExit(-1);
 }
 
-void I_Warn(const char* error, ...)
-{
-	char errmsg[MAX_MESSAGE_SIZE];
-	va_list argptr;
-	va_start(argptr, error);
-	vsnprintf(errmsg, sizeof(errmsg), error, argptr);
-	va_end(argptr);
-	lprintf(OutputLevels::Warn, "%s\n", errmsg);
-#ifdef _WIN32
-	if(!dsda_Flag(ArgId::Nodraw) && !capturing_video)
-	{
-		I_MessageBox(errmsg, PRB_MB_OK);
-	}
-#endif
-}
-
-// A `Log` message as it is printed: cut where `lprintf` cuts if the build enables `LIMIT_LOG_MESSAGES`, otherwise whole.
+// A `Log` message as it is printed: cut where upstream's `lprintf` cut if the build enables `LIMIT_LOG_MESSAGES`, otherwise whole.
 static std::string_view LimitMessage(const std::string_view text)
 {
 #ifdef LIMIT_LOG_MESSAGES
@@ -168,4 +139,18 @@ void Log::Detail::Fatal(const std::string_view text)
 	WriteText(OutputLevels::Error, message + "\n");
 	ShowErrorBox(message.c_str());
 	I_SafeExit(-1);
+}
+
+void Log::Detail::Alert(const std::string_view text)
+{
+	const std::string message(LimitMessage(text));
+
+	WriteText(OutputLevels::Warn, message + "\n");
+#ifdef _WIN32
+	// Unlike a fatal error, upstream's `I_Warn` showed its box even with message boxes disabled.
+	if(!dsda_Flag(ArgId::Nodraw) && !capturing_video)
+	{
+		I_MessageBox(message.c_str(), PRB_MB_OK);
+	}
+#endif
 }

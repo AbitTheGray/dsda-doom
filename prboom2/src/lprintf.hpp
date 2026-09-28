@@ -32,8 +32,6 @@ enum struct OutputLevels : int32_t
 #define __attribute__(x)
 #endif
 
-extern int lprintf(OutputLevels pri, const char* fmt, ...) __attribute__((format(printf,2,3)));
-
 void I_EnableVerboseLogging();
 void I_DisableAllLogging();
 void I_DisableMessageBoxes();
@@ -42,7 +40,6 @@ void I_DisableMessageBoxes();
  * killough 4/25/98: add gcc attributes
  * cphipps 01/11- moved from i_system.h */
 NORETURNC11 void I_Error(const char* error, ...) __attribute__((format(printf,1,2))) NORETURN;
-void I_Warn(const char* error, ...) __attribute__((format(printf,1,2)));
 
 #ifdef __cplusplus
 }
@@ -50,8 +47,8 @@ void I_Warn(const char* error, ...) __attribute__((format(printf,1,2)));
 
 /**
  * Console output formatted with `std::format`, e.g. `Log::Info("FINISHED: {}\n", map)`.
- * Like `lprintf`, no newline is added, so a line can be printed in parts.
- * A message is never cut, unless the build enables `LIMIT_LOG_MESSAGES`, which cuts it where `lprintf` does.
+ * No newline is added (as upstream's `lprintf` did not add one), so a line can be printed in parts.
+ * A message is never cut, unless the build enables `LIMIT_LOG_MESSAGES`, which cuts it at 2047 characters as upstream's `lprintf` did.
  */
 namespace Log
 {
@@ -59,6 +56,7 @@ namespace Log
 	{
 		void Print(OutputLevels level, std::string_view text);
 		[[noreturn]] void Fatal(std::string_view text);
+		void Alert(std::string_view text);
 	}
 
 	template<typename... Args>
@@ -99,5 +97,15 @@ namespace Log
 	[[noreturn]] void Fatal(const std::format_string<Args...> format, Args&&... args)
 	{
 		Detail::Fatal(std::format(format, std::forward<Args>(args)...));
+	}
+
+	/**
+	 * Print a warning and show it in a message box on Windows, as upstream's `I_Warn` did.
+	 * A newline is added.
+	 */
+	template<typename... Args>
+	void Alert(const std::format_string<Args...> format, Args&&... args)
+	{
+		Detail::Alert(std::format(format, std::forward<Args>(args)...));
 	}
 }
