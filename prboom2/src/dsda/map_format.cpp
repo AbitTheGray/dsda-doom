@@ -110,9 +110,9 @@ dboolean dsda_IsDeathExitLine(int index)
 	{
 		return (sec->special == 11);
 	}
-	else if(mbf21 && sec->special & DEATH_MASK)
+	else if(mbf21 && SectorSpecialHas(sec->special, BoomSectorFlag::Death))
 	{
-		const int i = (sec->special & DAMAGE_MASK) >> DAMAGE_SHIFT;
+		const int i = BoomSectorDamageLevel(sec->special);
 
 		return (i == 2);
 	}
@@ -130,9 +130,9 @@ dboolean dsda_IsDeathSecretExitLine(int index)
 	{
 		return (sec->special == 11);
 	}
-	else if(mbf21 && sec->special & DEATH_MASK)
+	else if(mbf21 && SectorSpecialHas(sec->special, BoomSectorFlag::Death))
 	{
-		const int i = (sec->special & DAMAGE_MASK) >> DAMAGE_SHIFT;
+		const int i = BoomSectorDamageLevel(sec->special);
 
 		return (i == 3);
 	}

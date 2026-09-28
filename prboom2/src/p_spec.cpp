@@ -1472,7 +1472,7 @@ static void P_CollectSecretVanilla(sector_t* sector, player_t* player)
 
 static void P_CollectSecretBoom(sector_t* sector, player_t* player)
 {
-	sector->special &= ~SECRET_MASK;
+	sector->special &= ~std::to_underlying(BoomSectorFlag::Secret);
 
 	if(sector->special < 32) // if all extended bits clear,
 		sector->special = 0; // sector is not special anymore
@@ -1510,9 +1510,9 @@ dboolean PUREFUNC P_IsDeathExit(const sector_t* sec)
 	{
 		return (sec->special == 11);
 	}
-	else if(mbf21 && sec->special & DEATH_MASK)
+	else if(mbf21 && SectorSpecialHas(sec->special, BoomSectorFlag::Death))
 	{
-		const int i = (sec->special & DAMAGE_MASK) >> DAMAGE_SHIFT;
+		const int i = BoomSectorDamageLevel(sec->special);
 
 		return (i == 2 || i == 3);
 	}
@@ -2722,9 +2722,9 @@ static void P_ApplySectorDamageEndLevel(player_t* player)
 		G_ExitLevel(0);
 }
 
-static void P_ApplyGeneralizedSectorDamage(player_t* player, int bits)
+static void P_ApplyGeneralizedSectorDamage(player_t* player, int level)
 {
-	switch(bits & 3)
+	switch(level & 3)
 	{
 		case 0:
 			break;
@@ -2769,11 +2769,11 @@ extern "C" void P_PlayerInCompatibleSector(player_t* player, sector_t* sector)
 	}
 	else //jff 3/14/98 handle extended sector damage
 	{
-		if(mbf21 && sector->special & DEATH_MASK)
+		if(mbf21 && SectorSpecialHas(sector->special, BoomSectorFlag::Death))
 		{
 			int i;
 
-			switch((sector->special & DAMAGE_MASK) >> DAMAGE_SHIFT)
+			switch(BoomSectorDamageLevel(sector->special))
 			{
 				case 0:
 					if(!player->powers[std::to_underlying(PowerType::Invulnerability)] && !player->powers[std::to_underlying(PowerType::IronFeet)])
@@ -2798,7 +2798,7 @@ extern "C" void P_PlayerInCompatibleSector(player_t* player, sector_t* sector)
 		}
 		else
 		{
-			P_ApplyGeneralizedSectorDamage(player, (sector->special & DAMAGE_MASK) >> DAMAGE_SHIFT);
+			P_ApplyGeneralizedSectorDamage(player, BoomSectorDamageLevel(sector->special));
 		}
 	}
 
@@ -2994,7 +2994,7 @@ extern "C" dboolean P_MobjInCompatibleSector(mobj_t* mobj)
 		sector_t* sector = mobj->subsector->sector;
 
 		if(
-			sector->special & KILL_MONSTERS_MASK &&
+			SectorSpecialHas(sector->special, BoomSectorFlag::KillMonsters) &&
 			mobj->z == mobj->floorz &&
 			mobj->player == nullptr &&
 			(mobj->flags & MobjFlag::Shootable) != MobjFlag{} &&
@@ -3155,13 +3155,13 @@ void P_UpdateSpecials()
 
 extern "C" void P_SpawnCompatibleSectorSpecial(sector_t* sector, int i)
 {
-	if(sector->special & SECRET_MASK) //jff 3/15/98 count extended
+	if(SectorSpecialHas(sector->special, BoomSectorFlag::Secret)) //jff 3/15/98 count extended
 		P_AddSectorSecret(sector);
 
-	if(sector->special & FRICTION_MASK)
+	if(SectorSpecialHas(sector->special, BoomSectorFlag::Friction))
 		sector->flags |= SectorFlag::Friction;
 
-	if(sector->special & PUSH_MASK)
+	if(SectorSpecialHas(sector->special, BoomSectorFlag::Push))
 		sector->flags |= SectorFlag::Push;
 
 	switch((demo_compatibility && !prboom_comp[std::to_underlying(PrboomComp::TruncatedSectorSpecials)].state) ? sector->special : sector->special & 31)
@@ -3187,7 +3187,7 @@ extern "C" void P_SpawnCompatibleSectorSpecial(sector_t* sector, int i)
 			if(heretic)
 				sector->special = 4;
 			else
-				sector->special |= 3 << DAMAGE_SHIFT; //jff 3/14/98 put damage bits in
+				sector->special |= 3 << k_boomSectorDamageLevelShift; //jff 3/14/98 put damage bits in
 			break;
 
 		case 8:
@@ -3290,9 +3290,7 @@ void P_SetupSectorDamage(sector_t* sector, short amount,
 
 static void P_SpawnZDoomGeneralizedSpecials(sector_t* sector)
 {
-	int damage_bits = (sector->special & ZDOOM_DAMAGE_MASK) >> 8;
-
-	switch(damage_bits & 3)
+	switch(ZDoomSectorDamageLevel(sector->special))
 	{
 		case 0:
 			break;
@@ -3307,13 +3305,13 @@ static void P_SpawnZDoomGeneralizedSpecials(sector_t* sector)
 			break;
 	}
 
-	if(sector->special & ZDOOM_SECRET_MASK)
+	if(SectorSpecialHas(sector->special, ZDoomSectorFlag::Secret))
 		P_AddSectorSecret(sector);
 
-	if(sector->special & ZDOOM_FRICTION_MASK)
+	if(SectorSpecialHas(sector->special, ZDoomSectorFlag::Friction))
 		sector->flags |= SectorFlag::Friction;
 
-	if(sector->special & ZDOOM_PUSH_MASK)
+	if(SectorSpecialHas(sector->special, ZDoomSectorFlag::Push))
 		sector->flags |= SectorFlag::Push;
 }
 
@@ -4295,7 +4293,7 @@ static void P_SpawnFriction()
 // of the linedef, and is constant.
 //
 // For each sector where these effects occur, the sector special type has
-// to have the PUSH_MASK bit set. If this bit is turned off by a switch
+// to have the BoomSectorFlag::Push bit set. If this bit is turned off by a switch
 // at run-time, the effect will not occur. The controlling sector for
 // types 1 & 2 is the sector containing the MT_PUSH/MT_PULL Thing.
 

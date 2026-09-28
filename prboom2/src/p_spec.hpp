@@ -34,6 +34,71 @@ enum struct TeleportFlag : uint8_t
 };
 ENUM_FLAGS_FUNC(TeleportFlag)
 
+//jff 3/14/98 add bits and shifts for generalized sector types
+// sector_t::special in Boom's generalized format.
+// Bits 0 to 4 hold the classic sector type, bits 5 and 6 the damage level (BoomSectorDamageLevel).
+// The bits above are flags.
+enum struct BoomSectorFlag : uint32_t
+{
+	Secret = Bit<uint32_t>(7u),
+	Friction = Bit<uint32_t>(8u),
+	Push = Bit<uint32_t>(9u),
+
+	// reserved by boom spec - not implemented?
+	// bit 10: suppress all sounds within the sector
+	// bit 11: disable any sounds due to floor or ceiling motion by the sector
+
+	// mbf21
+	Death = Bit<uint32_t>(12u),
+	KillMonsters = Bit<uint32_t>(13u),
+};
+ENUM_FLAGS_FUNC(BoomSectorFlag)
+
+// Where the damage level starts in a Boom sector special.
+inline constexpr uint32_t k_boomSectorDamageLevelShift = 5u;
+
+// The damage level is a 2-bit number, not a flag, so it has no enumerator and is read through here.
+// Levels 1 to 3 deal 5, 10 and 20 damage. With BoomSectorFlag::Death it picks the kind of death instead:
+// 0 kills unless protected, 1 always kills, 2 exits the level, 3 exits to the secret level.
+[[nodiscard]]
+inline constexpr int32_t BoomSectorDamageLevel(const int32_t special)
+{
+	return static_cast<int32_t>((static_cast<uint32_t>(special) >> k_boomSectorDamageLevelShift) & Bits<uint32_t>(2u));
+}
+
+// sector_t::special in ZDoom's generalized format.
+// Bits 0 to 7 hold the sector type, bits 8 and 9 the damage level (ZDoomSectorDamageLevel).
+// The bits above are flags.
+enum struct ZDoomSectorFlag : uint32_t
+{
+	Secret = Bit<uint32_t>(10u),
+	Friction = Bit<uint32_t>(11u),
+	Push = Bit<uint32_t>(12u),
+};
+ENUM_FLAGS_FUNC(ZDoomSectorFlag)
+
+// The damage level is a 2-bit number, not a flag, so it has no enumerator and is read through here.
+// Levels 1 to 3 deal 5, 10 and 20 damage.
+[[nodiscard]]
+inline constexpr int32_t ZDoomSectorDamageLevel(const int32_t special)
+{
+	return static_cast<int32_t>((static_cast<uint32_t>(special) >> 8u) & Bits<uint32_t>(2u));
+}
+
+// Whether a sector special has a flag set.
+// The special itself stays an int, as it is mostly a number (the sector type).
+[[nodiscard]]
+inline constexpr bool SectorSpecialHas(const int32_t special, const BoomSectorFlag flag)
+{
+	return (static_cast<uint32_t>(special) & std::to_underlying(flag)) != 0u;
+}
+
+[[nodiscard]]
+inline constexpr bool SectorSpecialHas(const int32_t special, const ZDoomSectorFlag flag)
+{
+	return (static_cast<uint32_t>(special) & std::to_underlying(flag)) != 0u;
+}
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -77,25 +142,6 @@ extern "C"
 #define STROBEBRIGHT    5
 #define FASTDARK        15
 #define SLOWDARK        35
-
-//jff 3/14/98 add bits and shifts for generalized sector types
-
-#define DAMAGE_MASK     0x60
-#define DAMAGE_SHIFT    5
-#define SECRET_MASK     0x80
-#define SECRET_SHIFT    7
-#define FRICTION_MASK   0x100
-#define FRICTION_SHIFT  8
-#define PUSH_MASK       0x200
-#define PUSH_SHIFT      9
-
-// reserved by boom spec - not implemented?
-// bit 10: suppress all sounds within the sector
-// bit 11: disable any sounds due to floor or ceiling motion by the sector
-
-// mbf21
-#define DEATH_MASK 0x1000 // bit 12
-#define KILL_MONSTERS_MASK 0x2000 // bit 13
 
 //jff 02/04/98 Define masks, shifts, for fields in
 // generalized linedef types
@@ -1616,11 +1662,6 @@ enum struct ZDoomSectorSpecial : int32_t
 	CarryWest30  = 243,
 	CarryWest35  = 244
 };
-
-#define ZDOOM_DAMAGE_MASK   0x0300
-#define ZDOOM_SECRET_MASK   0x0400
-#define ZDOOM_FRICTION_MASK 0x0800
-#define ZDOOM_PUSH_MASK     0x1000
 
 enum struct ZDoomLock : int32_t
 {
