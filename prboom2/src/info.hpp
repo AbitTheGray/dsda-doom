@@ -196,7 +196,7 @@ enum struct MobjFlag2 : uint64_t
 
 	// hexen
 	Blasted = Bit<uint64_t>(37u), // missile will pass through ghosts
-	Impact = Bit<uint64_t>(38u), // an MF_MISSILE mobj can activate SPAC_IMPACT
+	Impact = Bit<uint64_t>(38u), // an MF_MISSILE mobj can activate LineActivation::Impact
 	PushWall = Bit<uint64_t>(39u), // mobj can push walls
 	MCross = Bit<uint64_t>(40u), // can activate monster cross lines
 	PCross = Bit<uint64_t>(41u), // can activate projectile cross lines

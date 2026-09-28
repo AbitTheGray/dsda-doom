@@ -3890,7 +3890,7 @@ static void CheckForPushSpecial(line_t* line, int side, mobj_t* mobj)
 	{
 		if((mobj->flags2 & MobjFlag2::PushWall) != MobjFlag2{})
 		{
-			P_ActivateLine(line, mobj, side, SPAC_PUSH);
+			P_ActivateLine(line, mobj, side, LineActivation::Push);
 		}
 		else if((mobj->flags2 & MobjFlag2::Impact) != MobjFlag2{})
 		{
@@ -3899,11 +3899,11 @@ static void CheckForPushSpecial(line_t* line, int side, mobj_t* mobj)
 			if(hexen || (mobj->flags & MobjFlag::Missile) == MobjFlag{} ||
 				!mobj->target)
 			{
-				P_ActivateLine(line, mobj, side, SPAC_IMPACT);
+				P_ActivateLine(line, mobj, side, LineActivation::Impact);
 			}
 			else
 			{
-				P_ActivateLine(line, mobj->target, side, SPAC_IMPACT);
+				P_ActivateLine(line, mobj->target, side, LineActivation::Impact);
 			}
 		}
 	}

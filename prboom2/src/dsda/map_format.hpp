@@ -28,7 +28,7 @@ typedef struct
 	dboolean doublesky;
 	dboolean map99;
 	short generalized_mask;
-	line_activation_t switch_activation;
+	LineActivation switch_activation;
 	void (*init_sector_special)(sector_t*, int);
 	void (*player_in_special_sector)(player_t*, sector_t*);
 	dboolean (*mobj_in_special_sector)(mobj_t*);
@@ -38,13 +38,13 @@ typedef struct
 	void (*spawn_extra)(line_t*, int);
 	void (*cross_special_line)(line_t*, int, mobj_t*, dboolean);
 	void (*shoot_special_line)(mobj_t*, line_t*);
-	dboolean (*test_activate_line)(line_t*, mobj_t*, int, line_activation_t);
+	dboolean (*test_activate_line)(line_t*, mobj_t*, int, LineActivation);
 	dboolean (*execute_line_special)(int, int*, line_t*, int, mobj_t*);
 	void (*post_process_line_special)(line_t*);
 	void (*post_process_sidedef_special)(side_t*, const char*, const char*, const char*, sector_t*, int);
 	void (*animate_surfaces)();
 	void (*check_impact)(mobj_t*);
-	LineFlag (*translate_line_flags)(uint32_t raw_flags, line_activation_t* activation);
+	LineFlag (*translate_line_flags)(uint32_t raw_flags, LineActivation* activation);
 	void (*apply_sector_movement_special)(mobj_t*, int);
 	void (*t_vertical_door)(vldoor_t*);
 	void (*t_move_floor)(floormove_t*);

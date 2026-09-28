@@ -423,15 +423,15 @@ P_UseSpecialLine
 	{
 		if(side)
 		{
-			if(line->activation & SPAC_USEBACK)
+			if((line->activation & LineActivation::UseBack) != LineActivation{})
 			{
-				return P_ActivateLine(line, thing, side, SPAC_USEBACK);
+				return P_ActivateLine(line, thing, side, LineActivation::UseBack);
 			}
 
 			return false;
 		}
 
-		return P_ActivateLine(line, thing, side, SPAC_USE);
+		return P_ActivateLine(line, thing, side, LineActivation::Use);
 	}
 
 	// e6y

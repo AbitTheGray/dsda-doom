@@ -1544,15 +1544,15 @@ extern "C" void P_CrossHexenSpecialLine(line_t* line, int side, mobj_t* thing, d
 {
 	if(thing->player)
 	{
-		P_ActivateLine(line, thing, side, SPAC_CROSS);
+		P_ActivateLine(line, thing, side, LineActivation::Cross);
 	}
 	else if((thing->flags2 & MobjFlag2::MCross) != MobjFlag2{})
 	{
-		P_ActivateLine(line, thing, side, SPAC_MCROSS);
+		P_ActivateLine(line, thing, side, LineActivation::MonsterCross);
 	}
 	else if((thing->flags2 & MobjFlag2::PCross) != MobjFlag2{})
 	{
-		P_ActivateLine(line, thing, side, SPAC_PCROSS);
+		P_ActivateLine(line, thing, side, LineActivation::MissileCross);
 	}
 }
 
@@ -2491,26 +2491,26 @@ extern "C" void P_CrossZDoomSpecialLine(line_t* line, int side, mobj_t* thing, d
 {
 	if(thing->player)
 	{
-		P_ActivateLine(line, thing, side, SPAC_CROSS);
+		P_ActivateLine(line, thing, side, LineActivation::Cross);
 	}
 	else if((thing->flags2 & MobjFlag2::MCross) != MobjFlag2{})
 	{
-		P_ActivateLine(line, thing, side, SPAC_MCROSS);
+		P_ActivateLine(line, thing, side, LineActivation::MonsterCross);
 	}
 	else if((thing->flags2 & MobjFlag2::PCross) != MobjFlag2{})
 	{
-		P_ActivateLine(line, thing, side, SPAC_PCROSS);
+		P_ActivateLine(line, thing, side, LineActivation::MissileCross);
 	}
 	else if(line->special == std::to_underlying(ZDoomLineSpecial::Teleport) ||
 		line->special == std::to_underlying(ZDoomLineSpecial::TeleportNoFog) ||
 		line->special == std::to_underlying(ZDoomLineSpecial::TeleportLine))
 	{
 		// [RH] Just a little hack for BOOM compatibility
-		P_ActivateLine(line, thing, side, SPAC_MCROSS);
+		P_ActivateLine(line, thing, side, LineActivation::MonsterCross);
 	}
 	else
 	{
-		P_ActivateLine(line, thing, side, SPAC_ANYCROSS);
+		P_ActivateLine(line, thing, side, LineActivation::AnyCross);
 	}
 }
 
@@ -2700,7 +2700,7 @@ extern "C" void P_ShootCompatibleSpecialLine(mobj_t* thing, line_t* line)
 
 extern "C" void P_ShootHexenSpecialLine(mobj_t* thing, line_t* line)
 {
-	P_ActivateLine(line, thing, 0, SPAC_IMPACT);
+	P_ActivateLine(line, thing, 0, LineActivation::Impact);
 }
 
 static void P_ApplySectorDamage(player_t* player, int damage, int leak)
@@ -5448,9 +5448,9 @@ dboolean EV_LineSearchForPuzzleItem(line_t* line, byte* args, mobj_t* mo)
 	return false;
 }
 
-extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, line_activation_t activationType)
+extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, LineActivation activationType)
 {
-	line_activation_t lineActivation;
+	LineActivation lineActivation;
 
 	lineActivation = line->activation;
 
@@ -5461,16 +5461,16 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 
 	if(
 		line->special == std::to_underlying(ZDoomLineSpecial::Teleport) &&
-		lineActivation & SPAC_CROSS &&
-		activationType == SPAC_PCROSS &&
+		(lineActivation & LineActivation::Cross) != LineActivation{} &&
+		activationType == LineActivation::MissileCross &&
 		mo && (mo->flags & MobjFlag::Missile) != MobjFlag{}
 	)
 	{
 		// Let missiles use regular player teleports
-		lineActivation |= SPAC_PCROSS;
+		lineActivation |= LineActivation::MissileCross;
 	}
 
-	if(activationType == SPAC_USE || activationType == SPAC_USEBACK)
+	if(activationType == LineActivation::Use || activationType == LineActivation::UseBack)
 	{
 		// TODO: possible "check switch range" mapinfo flag
 		if((line->flags & LineFlag::CheckSwitchRange) != LineFlag{} && !P_CheckSwitchRange(line, mo, side))
@@ -5479,29 +5479,29 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 		}
 	}
 
-	if(activationType == SPAC_USE &&
-		lineActivation & SPAC_MUSE &&
+	if(activationType == LineActivation::Use &&
+		(lineActivation & LineActivation::MonsterUse) != LineActivation{} &&
 		mo && !mo->player && (mo->flags2 & MobjFlag2::CanUseWalls) != MobjFlag2{})
 	{
 		return true;
 	}
 
-	if(activationType == SPAC_PUSH &&
-		lineActivation & SPAC_MPUSH &&
+	if(activationType == LineActivation::Push &&
+		(lineActivation & LineActivation::MonsterPush) != LineActivation{} &&
 		mo && !mo->player && (mo->flags2 & MobjFlag2::PushWall) != MobjFlag2{})
 	{
 		return true;
 	}
 
-	if(!(lineActivation & activationType))
+	if((lineActivation & activationType) == LineActivation{})
 	{
-		if(activationType != SPAC_MCROSS || lineActivation != SPAC_CROSS)
+		if(activationType != LineActivation::MonsterCross || lineActivation != LineActivation::Cross)
 		{
 			return false;
 		}
 	}
 
-	if(activationType == SPAC_ANYCROSS)
+	if(activationType == LineActivation::AnyCross)
 	{
 		return true;
 	}
@@ -5510,7 +5510,7 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 		mo && !mo->player &&
 		(mo->flags & MobjFlag::Missile) == MobjFlag{} &&
 		(line->flags & LineFlag::MonstersCanActivate) == LineFlag{} &&
-		(activationType != SPAC_MCROSS || !(lineActivation & SPAC_MCROSS))
+		(activationType != LineActivation::MonsterCross || (lineActivation & LineActivation::MonsterCross) == LineActivation{})
 	)
 	{
 		dboolean noway = true;
@@ -5522,13 +5522,13 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 		// the default for non-Hexen maps in Hexen format.
 		// TODO: possible "check switch range" mapinfo flag
 
-		if((activationType == SPAC_USE || activationType == SPAC_PUSH) && (line->flags & LineFlag::Secret) != LineFlag{})
+		if((activationType == LineActivation::Use || activationType == LineActivation::Push) && (line->flags & LineFlag::Secret) != LineFlag{})
 			return false; // never open secret doors
 
 		switch(activationType)
 		{
-			case SPAC_USE:
-			case SPAC_PUSH:
+			case LineActivation::Use:
+			case LineActivation::Push:
 				switch(line->special)
 				{
 					case std::to_underlying(ZDoomLineSpecial::DoorRaise):
@@ -5541,8 +5541,8 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 				}
 				break;
 
-			case SPAC_MCROSS:
-				if(!(lineActivation & SPAC_MCROSS))
+			case LineActivation::MonsterCross:
+				if((lineActivation & LineActivation::MonsterCross) == LineActivation{})
 				{
 					switch(line->special)
 					{
@@ -5568,8 +5568,8 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 	}
 
 	if(
-		activationType == SPAC_MCROSS &&
-		!(lineActivation & SPAC_MCROSS) &&
+		activationType == LineActivation::MonsterCross &&
+		(lineActivation & LineActivation::MonsterCross) == LineActivation{} &&
 		(line->flags & LineFlag::MonstersCanActivate) == LineFlag{}
 	)
 	{
@@ -5579,9 +5579,9 @@ extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, 
 	return true;
 }
 
-extern "C" dboolean P_TestActivateHexenLine(line_t* line, mobj_t* mo, int side, line_activation_t activationType)
+extern "C" dboolean P_TestActivateHexenLine(line_t* line, mobj_t* mo, int side, LineActivation activationType)
 {
-	line_activation_t lineActivation;
+	LineActivation lineActivation;
 
 	lineActivation = line->activation;
 
@@ -5592,7 +5592,7 @@ extern "C" dboolean P_TestActivateHexenLine(line_t* line, mobj_t* mo, int side, 
 
 	if(!mo->player && (mo->flags & MobjFlag::Missile) == MobjFlag{})
 	{
-		if(lineActivation != SPAC_MCROSS)
+		if(lineActivation != LineActivation::MonsterCross)
 		{
 			// currently, monsters can only activate the MCROSS activation type
 			return false;
@@ -5604,7 +5604,7 @@ extern "C" dboolean P_TestActivateHexenLine(line_t* line, mobj_t* mo, int side, 
 	return true;
 }
 
-dboolean P_ActivateLine(line_t* line, mobj_t* mo, int side, line_activation_t activationType)
+dboolean P_ActivateLine(line_t* line, mobj_t* mo, int side, LineActivation activationType)
 {
 	dboolean repeat;
 	dboolean buttonSuccess;
@@ -5651,7 +5651,7 @@ dboolean P_ActivateLine(line_t* line, mobj_t* mo, int side, line_activation_t ac
 		line->special = 0;
 	}
 
-	if(buttonSuccess && line->activation & map_format.switch_activation)
+	if(buttonSuccess && (line->activation & map_format.switch_activation) != LineActivation{})
 	{
 		P_ChangeSwitchTexture(line, repeat);
 	}

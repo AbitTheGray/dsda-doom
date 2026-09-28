@@ -310,7 +310,6 @@ enum struct AutomapStyle : int32_t
 	CountExt = ClosedDoor + 1,
 };
 
-typedef unsigned short line_activation_t;
 
 typedef struct line_s
 {
@@ -341,7 +340,7 @@ typedef struct line_s
 	int special_args[5];
 
 	// zdoom
-	line_activation_t activation;
+	LineActivation activation;
 	byte locknumber;
 	AutomapStyle automap_style;
 	int health;

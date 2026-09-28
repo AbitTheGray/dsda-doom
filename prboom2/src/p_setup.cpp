@@ -1825,17 +1825,17 @@ static void P_LoadUDMFThings(int lump)
 //
 // killough 5/3/98: reformatted, cleaned up
 
-extern "C" LineFlag P_TranslateZDoomLineFlags(const uint32_t raw_flags, line_activation_t* spac)
+extern "C" LineFlag P_TranslateZDoomLineFlags(const uint32_t raw_flags, LineActivation* spac)
 {
-	static unsigned int spac_lookup[8] = {
-		SPAC_CROSS,
-		SPAC_USE,
-		SPAC_MCROSS,
-		SPAC_IMPACT,
-		SPAC_PUSH,
-		SPAC_PCROSS,
-		SPAC_USE,
-		SPAC_IMPACT | SPAC_PCROSS
+	static constexpr std::array<LineActivation, 8> spac_lookup = {
+		LineActivation::Cross,
+		LineActivation::Use,
+		LineActivation::MonsterCross,
+		LineActivation::Impact,
+		LineActivation::Push,
+		LineActivation::MissileCross,
+		LineActivation::Use,
+		LineActivation::Impact | LineActivation::MissileCross
 	};
 
 	const HexenLineFlag flags = static_cast<HexenLineFlag>(raw_flags);
@@ -1863,17 +1863,17 @@ extern "C" LineFlag P_TranslateZDoomLineFlags(const uint32_t raw_flags, line_act
 	return result;
 }
 
-extern "C" LineFlag P_TranslateHexenLineFlags(const uint32_t raw_flags, line_activation_t* spac)
+extern "C" LineFlag P_TranslateHexenLineFlags(const uint32_t raw_flags, LineActivation* spac)
 {
-	static unsigned int spac_lookup[8] = {
-		SPAC_CROSS,
-		SPAC_USE,
-		SPAC_MCROSS,
-		SPAC_IMPACT,
-		SPAC_PUSH,
-		SPAC_PCROSS,
-		SPAC_NONE,
-		SPAC_NONE
+	static constexpr std::array<LineActivation, 8> spac_lookup = {
+		LineActivation::Cross,
+		LineActivation::Use,
+		LineActivation::MonsterCross,
+		LineActivation::Impact,
+		LineActivation::Push,
+		LineActivation::MissileCross,
+		LineActivation::None,
+		LineActivation::None
 	};
 
 	const HexenLineFlag flags = static_cast<HexenLineFlag>(raw_flags);
@@ -1889,7 +1889,7 @@ extern "C" LineFlag P_TranslateHexenLineFlags(const uint32_t raw_flags, line_act
 	return result;
 }
 
-extern "C" LineFlag P_TranslateCompatibleLineFlags(const uint32_t raw_flags, line_activation_t* spac)
+extern "C" LineFlag P_TranslateCompatibleLineFlags(const uint32_t raw_flags, LineActivation* spac)
 {
 	const LineFlag flags = static_cast<LineFlag>(raw_flags);
 	LineFlag filter;
@@ -1899,7 +1899,7 @@ extern "C" LineFlag P_TranslateCompatibleLineFlags(const uint32_t raw_flags, lin
 	else
 		filter = LineFlag::Boom;
 
-	*spac = SPAC_NONE;
+	*spac = LineActivation::None;
 	return flags & filter;
 }
 
@@ -2185,40 +2185,40 @@ static void P_LoadUDMFLineDefs(int lump)
 		}
 
 		if((mld->flags & UdmfLineFlag::PlayerCross) != UdmfLineFlag{})
-			ld->activation |= SPAC_CROSS;
+			ld->activation |= LineActivation::Cross;
 
 		if((mld->flags & UdmfLineFlag::PlayerUse) != UdmfLineFlag{})
-			ld->activation |= SPAC_USE;
+			ld->activation |= LineActivation::Use;
 
 		if((mld->flags & UdmfLineFlag::MonsterCross) != UdmfLineFlag{})
-			ld->activation |= SPAC_MCROSS;
+			ld->activation |= LineActivation::MonsterCross;
 
 		if((mld->flags & UdmfLineFlag::Impact) != UdmfLineFlag{})
-			ld->activation |= SPAC_IMPACT;
+			ld->activation |= LineActivation::Impact;
 
 		if((mld->flags & UdmfLineFlag::PlayerPush) != UdmfLineFlag{})
-			ld->activation |= SPAC_PUSH;
+			ld->activation |= LineActivation::Push;
 
 		if((mld->flags & UdmfLineFlag::MissileCross) != UdmfLineFlag{})
-			ld->activation |= SPAC_PCROSS;
+			ld->activation |= LineActivation::MissileCross;
 
 		if((mld->flags & UdmfLineFlag::AnyCross) != UdmfLineFlag{})
-			ld->activation |= SPAC_ANYCROSS | SPAC_CROSS | SPAC_MCROSS;
+			ld->activation |= LineActivation::AnyCross | LineActivation::Cross | LineActivation::MonsterCross;
 
 		if((mld->flags & UdmfLineFlag::PlayerUseBack) != UdmfLineFlag{})
-			ld->activation |= SPAC_USEBACK;
+			ld->activation |= LineActivation::UseBack;
 
 		if((mld->flags & UdmfLineFlag::MonsterPush) != UdmfLineFlag{})
-			ld->activation |= SPAC_MPUSH;
+			ld->activation |= LineActivation::MonsterPush;
 
 		if((mld->flags & UdmfLineFlag::MonsterUse) != UdmfLineFlag{})
-			ld->activation |= SPAC_MUSE;
+			ld->activation |= LineActivation::MonsterUse;
 
 		if((mld->flags & UdmfLineFlag::DamageSpecial) != UdmfLineFlag{})
-			ld->activation |= SPAC_DAMAGE;
+			ld->activation |= LineActivation::Damage;
 
 		if((mld->flags & UdmfLineFlag::DeathSpecial) != UdmfLineFlag{})
-			ld->activation |= SPAC_DEATH;
+			ld->activation |= LineActivation::Death;
 
 		if((mld->flags & UdmfLineFlag::RepeatSpecial) != UdmfLineFlag{})
 			ld->flags |= LineFlag::RepeatSpecial;

@@ -1101,7 +1101,7 @@ int EV_DoZDoomDoor(VerticalDoorType type, line_t* line, mobj_t* mo, int tag, fix
 						S_StartSectorSound(door->sector, g_sfx_doropn);
 						return 1;
 					}
-					else if(!(line->activation & (SPAC_PUSH | SPAC_MPUSH)))
+					else if((line->activation & (LineActivation::Push | LineActivation::MonsterPush)) == LineActivation{})
 					// [RH] activate push doors don't go back down when you
 					//    run into them (otherwise opening them would be
 					//    a real pain).

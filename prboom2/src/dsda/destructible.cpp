@@ -94,7 +94,7 @@ static void dsda_DamageHealthGroup(int id, mobj_t* source, int damage)
 
 		line = &lines[group->line_ids[i]];
 		line->health = group->health;
-		P_ActivateLine(line, source, 0, SPAC_DAMAGE | (line->health ? 0 : SPAC_DEATH));
+		P_ActivateLine(line, source, 0, LineActivation::Damage | (line->health ? LineActivation::None : LineActivation::Death));
 	}
 }
 
@@ -113,7 +113,7 @@ void dsda_DamageLinedef(line_t* line, mobj_t* source, int damage)
 		if(line->health < 0)
 			line->health = 0;
 
-		P_ActivateLine(line, source, 0, SPAC_DAMAGE | (line->health ? 0 : SPAC_DEATH));
+		P_ActivateLine(line, source, 0, LineActivation::Damage | (line->health ? LineActivation::None : LineActivation::Death));
 	}
 }
 

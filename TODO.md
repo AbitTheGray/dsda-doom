@@ -67,6 +67,10 @@ Candidates found by scanning for 3+ adjacent numeric `#define`s with a shared pr
 
 The scan misses two-entry groups like the old `SKILL4`/`SKILL5`, so expect a few more.
 
+Found by a later scan that also counts 2-entry groups; not yet checked:
+- **Larger groups:** `MENU_` actions (`m_menu.hpp`, the `action` half of the menu responders), `MENU_MOUSE_` (`m_mouse.inl`), `USE_` (`doomdef.hpp`), `AMMO_` (`p_mobj.hpp`), `UDMF_` (`dsda/udmf.hpp`), `WPF_` (`d_items.hpp`), `DM_` and `SP_` (`wi_stuff.cpp`), `SORC_`/`SORCBALL_`/`KORAX_` (`p_enemy.cpp`), `TALLY_` (`hexen/in_lude.cpp`), `CONF_` (`dsda/configuration.cpp`), `OPL_` (`MUSIC/opl.hpp`, probably register constants).
+- **Two-entry groups:** `MENUF_` (`m_menu.hpp`), `GLOB_FLAG_` (`i_glob.hpp`), `BF_` (`p_map.hpp`), `LUMP_` (`w_wad.hpp`), `PL_SKYFLAT_` (`r_plane.hpp`), `STAIR_` (`p_floor.cpp`), `WD_` (`dsda/mapinfo.hpp`), `PLAYBACK_` (`dsda/playback.hpp`), and a few more in `st_stuff.cpp`, `MUSIC/` and `hexen/`.
+
 ## Review keypad digits in typed input
 
 Keypad keys are `0x100 +` their character (`KeyCode::Keypad1` is `0x100 + '1'`), and three places treat them differently, all kept exactly as upstream for now:

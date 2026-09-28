@@ -257,8 +257,8 @@ extern "C" void P_CrossHexenSpecialLine(line_t* line, int side, mobj_t* thing, d
 extern "C" void P_ShootCompatibleSpecialLine(mobj_t* thing, line_t* line);
 extern "C" void P_ShootHexenSpecialLine(mobj_t* thing, line_t* line);
 
-extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, line_activation_t activationType);
-extern "C" dboolean P_TestActivateHexenLine(line_t* line, mobj_t* mo, int side, line_activation_t activationType);
+extern "C" dboolean P_TestActivateZDoomLine(line_t* line, mobj_t* mo, int side, LineActivation activationType);
+extern "C" dboolean P_TestActivateHexenLine(line_t* line, mobj_t* mo, int side, LineActivation activationType);
 
 extern "C" void P_PostProcessCompatibleLineSpecial(line_t* ld);
 extern "C" void P_PostProcessHereticLineSpecial(line_t* ld);
@@ -279,9 +279,9 @@ extern "C" void P_CheckCompatibleImpact(mobj_t*);
 extern "C" void P_CheckHereticImpact(mobj_t*);
 extern "C" void P_CheckZDoomImpact(mobj_t*);
 
-extern "C" LineFlag P_TranslateHexenLineFlags(uint32_t raw_flags, line_activation_t* activation);
-extern "C" LineFlag P_TranslateZDoomLineFlags(uint32_t raw_flags, line_activation_t* activation);
-extern "C" LineFlag P_TranslateCompatibleLineFlags(uint32_t raw_flags, line_activation_t* activation);
+extern "C" LineFlag P_TranslateHexenLineFlags(uint32_t raw_flags, LineActivation* activation);
+extern "C" LineFlag P_TranslateZDoomLineFlags(uint32_t raw_flags, LineActivation* activation);
+extern "C" LineFlag P_TranslateCompatibleLineFlags(uint32_t raw_flags, LineActivation* activation);
 
 extern "C" void P_ApplyCompatibleSectorMovementSpecial(mobj_t*, int);
 extern "C" void P_ApplyHereticSectorMovementSpecial(mobj_t*, int);
@@ -340,7 +340,7 @@ static const map_format_t zdoom_map_format = {
 	.doublesky = false,
 	.map99 = false,
 	.generalized_mask = ~0xff,
-	.switch_activation = SPAC_USE | SPAC_IMPACT | SPAC_PUSH,
+	.switch_activation = LineActivation::Use | LineActivation::Impact | LineActivation::Push,
 	.init_sector_special = P_SpawnZDoomSectorSpecial,
 	.player_in_special_sector = P_PlayerInZDoomSector,
 	.mobj_in_special_sector = P_MobjInZDoomSector,
@@ -391,7 +391,7 @@ static const map_format_t hexen_map_format = {
 	.doublesky = true,
 	.map99 = true,
 	.generalized_mask = 0, // not used
-	.switch_activation = SPAC_USE | SPAC_IMPACT,
+	.switch_activation = LineActivation::Use | LineActivation::Impact,
 	.init_sector_special = nullptr, // not used
 	.player_in_special_sector = P_PlayerInHexenSector,
 	.mobj_in_special_sector = P_MobjInHexenSector,
@@ -442,7 +442,7 @@ static const map_format_t heretic_map_format = {
 	.doublesky = false,
 	.map99 = false,
 	.generalized_mask = 0,
-	.switch_activation = 0, // not used
+	.switch_activation = LineActivation::None, // not used
 	.init_sector_special = P_SpawnCompatibleSectorSpecial,
 	.player_in_special_sector = P_PlayerInHereticSector,
 	.mobj_in_special_sector = P_MobjInHereticSector,
@@ -493,7 +493,7 @@ static const map_format_t doom_map_format = {
 	.doublesky = false,
 	.map99 = false,
 	.generalized_mask = ~31,
-	.switch_activation = 0, // not used
+	.switch_activation = LineActivation::None, // not used
 	.init_sector_special = P_SpawnCompatibleSectorSpecial,
 	.player_in_special_sector = P_PlayerInCompatibleSector,
 	.mobj_in_special_sector = P_MobjInCompatibleSector,

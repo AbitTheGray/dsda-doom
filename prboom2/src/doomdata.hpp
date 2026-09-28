@@ -157,6 +157,25 @@ inline constexpr uint32_t HexenLineSpacIndex(const HexenLineFlag flags)
 	return (std::to_underlying(flags) >> 10u) & Bits<uint32_t>(3u);
 }
 
+// line_t::activation - what can activate a line's special, and how a line is being activated.
+enum struct LineActivation : uint16_t
+{
+	None = 0,
+	Cross = Bit<uint16_t>(0u),
+	Use = Bit<uint16_t>(1u),
+	MonsterCross = Bit<uint16_t>(2u),
+	Impact = Bit<uint16_t>(3u),
+	Push = Bit<uint16_t>(4u),
+	MissileCross = Bit<uint16_t>(5u),
+	UseBack = Bit<uint16_t>(6u),
+	MonsterPush = Bit<uint16_t>(7u),
+	MonsterUse = Bit<uint16_t>(8u),
+	AnyCross = Bit<uint16_t>(9u),
+	Damage = Bit<uint16_t>(10u),
+	Death = Bit<uint16_t>(11u),
+};
+ENUM_FLAGS_FUNC(LineActivation)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -427,21 +446,6 @@ typedef struct
 	short options;
 }
 	PACKEDATTR doom_mapthing_t;
-
-// line activation
-#define SPAC_NONE     0x0000
-#define SPAC_CROSS    0x0001
-#define SPAC_USE      0x0002
-#define SPAC_MCROSS   0x0004
-#define SPAC_IMPACT   0x0008
-#define SPAC_PUSH     0x0010
-#define SPAC_PCROSS   0x0020
-#define SPAC_USEBACK  0x0040
-#define SPAC_MPUSH    0x0080
-#define SPAC_MUSE     0x0100
-#define SPAC_ANYCROSS 0x0200
-#define SPAC_DAMAGE   0x0400
-#define SPAC_DEATH    0x0800
 
 #ifdef _MSC_VER
 #pragma pack(pop)
