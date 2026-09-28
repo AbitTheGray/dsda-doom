@@ -135,17 +135,17 @@ dboolean R_StatusBarVisible()
 
 static void R_FlushWholeError()
 {
-	I_Error("R_FlushWholeColumns called without being initialized.\n");
+	Log::Fatal("R_FlushWholeColumns called without being initialized.\n");
 }
 
 static void R_FlushHTError()
 {
-	I_Error("R_FlushHTColumns called without being initialized.\n");
+	Log::Fatal("R_FlushHTColumns called without being initialized.\n");
 }
 
 static void R_QuadFlushError()
 {
-	I_Error("R_FlushQuadColumn called without being initialized.\n");
+	Log::Fatal("R_FlushQuadColumn called without being initialized.\n");
 }
 
 static void (*R_FlushWholeColumns)() = R_FlushWholeError;
@@ -312,7 +312,7 @@ R_DrawColumn_f R_GetDrawColumnFunc(ColumnPipeline type, DrawFilterType filterz)
 {
 	R_DrawColumn_f result = drawcolumnfuncs[std::to_underlying(filterz)][std::to_underlying(type)];
 	if(result == nullptr)
-		I_Error("R_GetDrawColumnFunc: undefined function (%d, %d)", std::to_underlying(type), std::to_underlying(filterz));
+		Log::Fatal("R_GetDrawColumnFunc: undefined function ({}, {})", std::to_underlying(type), std::to_underlying(filterz));
 	return result;
 }
 

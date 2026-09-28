@@ -143,7 +143,7 @@ static dboolean P_GiveAmmo(player_t* player, AmmoType ammo, int num)
 
 #ifdef RANGECHECK
 	if(ammo < 0 || ammo > std::to_underlying(AmmoType::Count))
-		I_Error("P_GiveAmmo: bad type %i", ammo);
+		Log::Fatal("P_GiveAmmo: bad type {}", std::to_underlying(ammo));
 #endif
 
 	if(player->ammo[std::to_underlying(ammo)] == player->maxammo[std::to_underlying(ammo)])
@@ -779,7 +779,7 @@ void P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			break;
 
 		default:
-			I_Error("P_SpecialThing: Unknown gettable thing");
+			Log::Fatal("P_SpecialThing: Unknown gettable thing");
 	}
 
 	if(special->special)
@@ -2192,7 +2192,7 @@ static void Heretic_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			sound = SfxId::HereticWpnup;
 			break;
 		default:
-			I_Error("Heretic_P_TouchSpecialThing: Unknown gettable thing");
+			Log::Fatal("Heretic_P_TouchSpecialThing: Unknown gettable thing");
 	}
 	if((special->flags & MobjFlag::CountItem) != MobjFlag{})
 	{
@@ -2785,7 +2785,7 @@ dboolean P_GiveMana(player_t* player, manatype_t mana, int count)
 	}
 	if((unsigned int)mana > std::to_underlying(AmmoType::ManaCount))
 	{
-		I_Error("P_GiveMana: bad type %i", mana);
+		Log::Fatal("P_GiveMana: bad type {}", std::to_underlying(mana));
 	}
 	if(player->ammo[std::to_underlying(mana)] == MAX_MANA)
 	{
@@ -3494,7 +3494,7 @@ static void Hexen_P_TouchSpecialThing(mobj_t* special, mobj_t* toucher)
 			return;
 
 		default:
-			I_Error("P_SpecialThing: Unknown gettable thing");
+			Log::Fatal("P_SpecialThing: Unknown gettable thing");
 	}
 	if(special->special)
 	{

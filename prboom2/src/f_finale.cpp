@@ -478,7 +478,7 @@ static void F_StartCastMusic(const char* music, dboolean loop_music)
 	if(music)
 	{
 		if(!S_ChangeMusicByName(music, loop_music))
-			lprintf(OutputLevels::Warn, "Finale cast music not found: %s\n", music);
+			Log::Warn("Finale cast music not found: {}\n", music);
 	}
 	else if(gamemode == GameMode::Commercial)
 	{
@@ -486,7 +486,7 @@ static void F_StartCastMusic(const char* music, dboolean loop_music)
 	}
 	else
 	{
-		lprintf(OutputLevels::Warn, "Finale cast music unspecified\n");
+		Log::Warn("Finale cast music unspecified\n");
 		S_StopMusic();
 	}
 }
@@ -753,13 +753,13 @@ static void F_StartScrollMusic(const char* music, dboolean loop_music)
 	if(music)
 	{
 		if(!S_ChangeMusicByName(music, loop_music))
-			lprintf(OutputLevels::Warn, "Finale scroll music not found: %s\n", music);
+			Log::Warn("Finale scroll music not found: {}\n", music);
 	}
 	else if(W_LumpNameExists("D_BUNNY"))
 		S_ChangeMusic(MusicId::Bunny, loop_music);
 	else
 	{
-		lprintf(OutputLevels::Warn, "Finale scroll music unspecified\n");
+		Log::Warn("Finale scroll music unspecified\n");
 		S_StopMusic();
 	}
 }

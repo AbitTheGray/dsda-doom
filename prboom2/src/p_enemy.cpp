@@ -372,7 +372,7 @@ static dboolean P_Move(mobj_t* actor, dboolean dropoff) /* killough 9/12/98 */
 
 #ifdef RANGECHECK
 	if((unsigned)actor->movedir >= 8)
-		I_Error("P_Move: Weird actor->movedir!");
+		Log::Fatal("P_Move: Weird actor->movedir!");
 #endif
 
 	// killough 10/98: make monsters get affected by ice and sludge too:
@@ -2949,7 +2949,7 @@ extern "C" void A_BrainSpit(mobj_t* mo)
 
 	// e6y: do not crash with 'incorrect' DEHs
 	if(!newmobj || !newmobj->state || newmobj->momy == 0 || newmobj->state->tics == 0)
-		I_Error("A_BrainSpit: can't spawn brain missile (incorrect DEH)");
+		Log::Fatal("A_BrainSpit: can't spawn brain missile (incorrect DEH)");
 
 	P_SetTarget(&newmobj->target, targ);
 	newmobj->reactiontime = (short)(((targ->y - mo->y) / newmobj->momy) / newmobj->state->tics);
@@ -3748,7 +3748,7 @@ void P_AddBossSpot(fixed_t x, fixed_t y, angle_t angle)
 {
 	if(BossSpotCount == MAX_BOSS_SPOTS)
 	{
-		I_Error("Too many boss spots.");
+		Log::Fatal("Too many boss spots.");
 	}
 	BossSpots[BossSpotCount].x = x;
 	BossSpots[BossSpotCount].y = y;
@@ -6612,7 +6612,7 @@ static void DragonSeek(mobj_t* actor, angle_t thresh, angle_t turnMax)
 				// [crispy] fix wyvern + porkalator bug
 				if(mo == nullptr)
 				{
-					lprintf(OutputLevels::Warn, "DragonSeek: P_FindMobjFromTID() returned NULL mobj!\n");
+					Log::Warn("DragonSeek: P_FindMobjFromTID() returned NULL mobj!\n");
 					mo_x = 0;
 					mo_y = 0;
 				}
@@ -7677,7 +7677,7 @@ extern "C" void A_SorcBallOrbit(mobj_t* actor)
 			angle = baseangle + BALL3_ANGLEOFFSET;
 			break;
 		default:
-			I_Error("corrupted sorcerer");
+			Log::Fatal("corrupted sorcerer");
 			return;
 	}
 	actor->angle = angle;

@@ -1211,7 +1211,7 @@ static void ControllerEvent(opl_track_data_t* track, midi_event_t* event)
 
 		default:
 #ifdef OPL_MIDI_DEBUG
-			lprintf(OutputLevels::Warn, "Unknown MIDI controller type: %i\n", controller);
+			Log::Warn("Unknown MIDI controller type: {}\n", controller);
 #endif
 			break;
 	}
@@ -1304,7 +1304,7 @@ static void MetaEvent(opl_track_data_t* track, midi_event_t* event)
 
 		default:
 #ifdef OPL_MIDI_DEBUG
-			lprintf(OutputLevels::Warn, "Unknown MIDI meta event type: %i\n",
+			Log::Warn("Unknown MIDI meta event type: {}\n",
 				event->data.meta.type);
 #endif
 			break;
@@ -1349,7 +1349,7 @@ static void ProcessEvent(opl_track_data_t* track, midi_event_t* event)
 
 		default:
 #ifdef OPL_MIDI_DEBUG
-			lprintf(OutputLevels::Warn, "Unknown MIDI event type %i\n", event->event_type);
+			Log::Warn("Unknown MIDI event type {}\n", std::to_underlying(event->event_type));
 #endif
 			break;
 	}
@@ -1640,7 +1640,7 @@ static const void* I_OPL_RegisterSong(const void* data, unsigned len)
 	// time numbers we have to traverse the tracks and everything
 	if(mf.len < 100)
 	{
-		lprintf(OutputLevels::Warn, "I_OPL_RegisterSong: Very short MIDI (%llu bytes)\n", (unsigned long long)mf.len);
+		Log::Warn("I_OPL_RegisterSong: Very short MIDI ({} bytes)\n", mf.len);
 		return nullptr;
 	}
 
@@ -1648,7 +1648,7 @@ static const void* I_OPL_RegisterSong(const void* data, unsigned len)
 
 	if(result == nullptr)
 	{
-		lprintf(OutputLevels::Warn, "I_OPL_RegisterSong: Failed to load MID.\n");
+		Log::Warn("I_OPL_RegisterSong: Failed to load MID.\n");
 	}
 
 

@@ -369,7 +369,7 @@ extern "C" int P_GetMobj(mobj_t* mi, size_t s)
 {
 	size_t i = (size_t)mi;
 	if(i >= s)
-		I_Error("Corrupt savegame");
+		Log::Fatal("Corrupt savegame");
 	return i;
 }
 
@@ -529,7 +529,7 @@ void P_UnArchiveThinkerSubclass(ThinkerClass class_, mobj_t** mobj_p, int mobj_c
 		}
 		else
 		{
-			I_Error("P_UnArchiveThinkerSubclass: mobj does not exist!\n");
+			Log::Fatal("P_UnArchiveThinkerSubclass: mobj does not exist!\n");
 		}
 	}
 }
@@ -605,7 +605,7 @@ void P_UnArchiveBlockLinks(mobj_t** mobj_p, int mobj_count)
 			}
 			else
 			{
-				I_Error("P_UnArchiveBlockLinks: mobj does not exist!\n");
+				Log::Fatal("P_UnArchiveBlockLinks: mobj does not exist!\n");
 			}
 		}
 	}
@@ -1173,7 +1173,7 @@ void P_UnArchiveThinkers()
 		}
 
 		if(*--save_p != std::to_underlying(TrueThinkerClass::End))
-			I_Error("P_UnArchiveThinkers: Unknown tc %i in size calculation", *save_p);
+			Log::Fatal("P_UnArchiveThinkers: Unknown tc {} in size calculation", *save_p);
 
 		// first table entry special: 0 maps to NULL
 		*(mobj_p = static_cast<mobj_t**>(Z_Malloc((mobj_count + 1) * sizeof *mobj_p))) = nullptr; // table of pointers
@@ -1621,7 +1621,7 @@ void P_UnArchiveThinkers()
 			}
 
 			default:
-				I_Error("P_UnarchiveSpecials: Unknown tc %i in extraction", tc);
+				Log::Fatal("P_UnarchiveSpecials: Unknown tc {} in extraction", std::to_underlying(tc));
 		}
 	}
 

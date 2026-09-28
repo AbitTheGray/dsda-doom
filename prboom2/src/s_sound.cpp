@@ -180,9 +180,9 @@ void S_Init()
 
 			dsda_CacheSoundLumps();
 
-			lprintf(OutputLevels::Debug, " Precaching all sound effects... ");
+			Log::Debug(" Precaching all sound effects... ");
 			I_CacheSounds();
-			lprintf(OutputLevels::Debug, "done\n");
+			Log::Debug("done\n");
 
 			// {
 			//   int i;
@@ -338,7 +338,7 @@ void S_StartSoundAtVolume(void* origin_p, SfxId sfx_id, int volume, dboolean imp
 
 	// check for bogus sound #
 	if(std::to_underlying(sfx_id) < 1 || std::to_underlying(sfx_id) > num_sfx)
-		I_Error("S_StartSoundAtVolume: Bad sfx #: %d", std::to_underlying(sfx_id));
+		Log::Fatal("S_StartSoundAtVolume: Bad sfx #: {}", std::to_underlying(sfx_id));
 
 	sfx = &S_sfx[std::to_underlying(sfx_id)];
 
@@ -667,7 +667,7 @@ void S_ChangeMusic(MusicId musicnum, int looping)
 		return;
 
 	if(musicnum <= MusicId::None || std::to_underlying(musicnum) >= num_music)
-		I_Error("S_ChangeMusic: Bad music number %d", std::to_underlying(musicnum));
+		Log::Fatal("S_ChangeMusic: Bad music number {}", std::to_underlying(musicnum));
 
 	music = &S_music[std::to_underlying(musicnum)];
 

@@ -140,7 +140,7 @@ void ParamsMatchingCheck()
 		dsda_Flag(ArgId::Fastdemo);
 
 	if(recording_attempt && playbacking_attempt)
-		I_Error("Params are not matching: Can not being played back and recorded at the same time.");
+		Log::Fatal("Params are not matching: Can not being played back and recorded at the same time.");
 }
 
 prboom_comp_t prboom_comp[std::to_underlying(PrboomComp::Max)] = {
@@ -392,7 +392,7 @@ void I_vWarning(const char* message, va_list argList)
 {
 	char msg[1024];
 	vsnprintf(msg, sizeof(msg), message, argList);
-	lprintf(OutputLevels::Error, "%s\n", msg);
+	Log::Error("{}\n", std::string_view(msg));
 #ifdef _WIN32
 	I_MessageBox(msg, PRB_MB_OK);
 #endif
@@ -497,7 +497,7 @@ void e6y_WriteStats()
 
 	if(f == nullptr)
 	{
-		lprintf(OutputLevels::Error, "Unable to open levelstat.txt for writing\n");
+		Log::Error("Unable to open levelstat.txt for writing\n");
 		return;
 	}
 
@@ -644,7 +644,7 @@ void e6y_G_Compatibility()
 			{
 #ifdef RANGECHECK
 				if(b[i] >= 256)
-					I_Error("Wrong version number of package: %s", PROJECT_VERSION);
+					Log::Fatal("Wrong version number of package: {}", PROJECT_VERSION);
 #endif
 				emulated_version += b[i] * k;
 			}
