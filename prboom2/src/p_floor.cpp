@@ -1721,7 +1721,7 @@ static sector_t* P_NextSpecialSector(sector_t* sec, ZDoomSectorSpecial special)
 }
 
 static void P_SpawnZDoomStair(sector_t* sec, StairType type, fixed_t stairstep,
-	fixed_t speed, fixed_t height, int delay, int reset, int usespecials)
+	fixed_t speed, fixed_t height, int delay, int reset, const StairFlag usespecials)
 {
 	floormove_t* floor;
 
@@ -1735,14 +1735,14 @@ static void P_SpawnZDoomStair(sector_t* sec, StairType type, fixed_t stairstep,
 	floor->type = FloorKind::FloorBuildStair;
 
 	floor->crush = (
-			(!(usespecials & STAIR_USE_SPECIALS) && speed == 4 * FRACUNIT) ||
-			usespecials & STAIR_CRUSH
+			((usespecials & StairFlag::UseSpecials) == StairFlag{} && speed == 4 * FRACUNIT) ||
+			(usespecials & StairFlag::Crush) != StairFlag{}
 		)
 		? DOOM_CRUSH
 		: NO_CRUSH;
 	floor->hexencrush = false;
 
-	if(usespecials & STAIR_SYNC)
+	if((usespecials & StairFlag::Sync) != StairFlag{})
 	{
 		floor->speed = FixedMul(speed, FixedDiv(height - sec->floorheight, stairstep));
 	}
@@ -1763,7 +1763,7 @@ static void P_SpawnZDoomStair(sector_t* sec, StairType type, fixed_t stairstep,
 }
 
 int EV_BuildZDoomStairs(int tag, StairType type, line_t* line, fixed_t stairsize,
-	fixed_t speed, int delay, int reset, int igntxt, int usespecials)
+	fixed_t speed, int delay, int reset, int igntxt, const StairFlag usespecials)
 {
 	const int* id_p;
 	int oldsecnum;
@@ -1800,7 +1800,7 @@ int EV_BuildZDoomStairs(int tag, StairType type, line_t* line, fixed_t stairsize
 		stairstep = (type == StairType::BuildUp) ? stairsize : -stairsize;
 		height = sec->floorheight + stairstep;
 
-		P_SpawnZDoomStair(sec, type, stairstep, speed, height, delay, reset, usespecials & ~STAIR_SYNC);
+		P_SpawnZDoomStair(sec, type, stairstep, speed, height, delay, reset, usespecials - StairFlag::Sync);
 
 		// jff 2/26/98 set up lock on current sector
 		sec->stairlock = -2;
@@ -1818,7 +1818,7 @@ int EV_BuildZDoomStairs(int tag, StairType type, line_t* line, fixed_t stairsize
 		{
 			ok = false;
 
-			if(usespecials & STAIR_USE_SPECIALS)
+			if((usespecials & StairFlag::UseSpecials) != StairFlag{})
 			{
 				// [RH] Find the next sector by scanning for special
 				tsec = P_NextSpecialSector(sec,

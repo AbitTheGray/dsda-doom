@@ -8,6 +8,17 @@
 #include "r_defs.hpp"
 #include "d_player.hpp"
 
+#include "cpp/Util.hpp"
+
+// How EV_BuildZDoomStairs builds its stairs.
+enum struct StairFlag : uint8_t
+{
+	UseSpecials = Bit<uint8_t>(0u),
+	Sync = Bit<uint8_t>(1u),
+	Crush = Bit<uint8_t>(2u),
+};
+ENUM_FLAGS_FUNC(StairFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -608,9 +619,6 @@ enum struct StairType : int32_t
 	BuildUp,
 };
 
-#define STAIR_USE_SPECIALS 1
-#define STAIR_SYNC         2
-#define STAIR_CRUSH        4
 
 enum struct ElevatorType : int32_t
 {
@@ -1638,7 +1646,7 @@ int EV_DoZDoomPlat(int tag, line_t* line, PlatType type, fixed_t height,
 	fixed_t speed, int delay, fixed_t lip, int change);
 void EV_StopZDoomPlat(int tag, dboolean remove);
 int EV_BuildZDoomStairs(int tag, StairType type, line_t* line, fixed_t stairsize,
-	fixed_t speed, int delay, int reset, int igntxt, int usespecials);
+	fixed_t speed, int delay, int reset, int igntxt, StairFlag usespecials);
 dboolean EV_StartPlaneWaggle(int tag, line_t* line, int height,
 	int speed, int offset, int timer, dboolean ceiling);
 int EV_DoZDoomPillar(PillarType type, line_t* line, int tag, fixed_t speed,

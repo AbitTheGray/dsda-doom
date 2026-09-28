@@ -25,6 +25,11 @@
 
 #include "po_man.hpp"
 
+// Line specials that mark a polyobject's lines.
+// `line_t::special` holds every line special, so these are numbers in that list, not an enum.
+constexpr int32_t k_PolyLineStart = 1;
+constexpr int32_t k_PolyLineExplicit = 5;
+
 #define PO_MAXPOLYSEGS 64
 
 static polyobj_t* GetPolyobj(int polyNum);
@@ -1228,7 +1233,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 	for(i = 0; i < numsegs; i++)
 	{
 		if(segs[i].linedef &&
-			segs[i].linedef->special == PO_LINE_START &&
+			segs[i].linedef->special == k_PolyLineStart &&
 			segs[i].linedef->special_args[0] == tag)
 		{
 			if(polyobjs[index].segs)
@@ -1261,7 +1266,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 	}
 	if(!polyobjs[index].segs)
 	{
-		// didn't find a polyobj through PO_LINE_START
+		// didn't find a polyobj through k_PolyLineStart
 		psIndex = 0;
 		polyobjs[index].numsegs = 0;
 		for(j = 1; j < PO_MAXPOLYSEGS; j++)
@@ -1270,7 +1275,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 			for(i = 0; i < numsegs; i++)
 			{
 				if(segs[i].linedef &&
-					segs[i].linedef->special == PO_LINE_EXPLICIT &&
+					segs[i].linedef->special == k_PolyLineExplicit &&
 					segs[i].linedef->special_args[0] == tag)
 				{
 					if(!segs[i].linedef->special_args[1])
@@ -1296,7 +1301,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 			for(i = 0; i < numsegs; i++)
 			{
 				if(segs[i].linedef &&
-					segs[i].linedef->special == PO_LINE_EXPLICIT &&
+					segs[i].linedef->special == k_PolyLineExplicit &&
 					segs[i].linedef->special_args[0] == tag
 					&& segs[i].linedef->special_args[1] == j)
 				{
@@ -1312,7 +1317,7 @@ static void SpawnPolyobj(int index, int tag, dboolean crush, dboolean hurt)
 				for(i = 0; i < numsegs; i++)
 				{
 					if(segs[i].linedef &&
-						segs[i].linedef->special == PO_LINE_EXPLICIT &&
+						segs[i].linedef->special == k_PolyLineExplicit &&
 						segs[i].linedef->special_args[0] == tag)
 					{
 						Log::Fatal("SpawnPolyobj:  Missing explicit line {} for poly {}\n",

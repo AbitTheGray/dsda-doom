@@ -40,6 +40,18 @@ enum struct SideFlag : uint16_t
 };
 ENUM_FLAGS_FUNC(SideFlag)
 
+// line_t::r_flags: what the renderer found out about a line this frame.
+enum struct LineRenderFlag : uint8_t
+{
+	TopTile = Bit<uint8_t>(0u),  // Upper texture needs tiling
+	MidTile = Bit<uint8_t>(1u),  // Mid texture needs tiling
+	BotTile = Bit<uint8_t>(2u),  // Lower texture needs tiling
+	Ignore = Bit<uint8_t>(3u),   // Renderer can skip this line
+	Closed = Bit<uint8_t>(4u),   // Line blocks view
+	Isolated = Bit<uint8_t>(5u), // Isolated line
+};
+ENUM_FLAGS_FUNC(LineRenderFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -263,13 +275,6 @@ enum struct SlopeType : int32_t
 	Negative
 };
 
-typedef byte r_flags_t;
-#define RF_TOP_TILE 0x01 // Upper texture needs tiling
-#define RF_MID_TILE 0x02 // Mid texture needs tiling
-#define RF_BOT_TILE 0x04 // Lower texture needs tiling
-#define RF_IGNORE   0x08 // Renderer can skip this line
-#define RF_CLOSED   0x10 // Line blocks view
-#define RF_ISOLATED 0x20 // Isolated line
 
 enum struct AutomapStyle : int32_t
 {
@@ -320,7 +325,7 @@ typedef struct line_s
 	int validcount2;
 	void* specialdata;    // thinker_t for reversable actions
 	int r_validcount;     // cph: if == gametic, r_flags already done
-	r_flags_t r_flags;    // cph
+	LineRenderFlag r_flags; // cph
 	degenmobj_t soundorg; // sound origin for switches/buttons
 
 	// dsda
@@ -605,8 +610,6 @@ typedef struct polyblock_s
 	struct polyblock_s* next;
 } polyblock_t;
 
-#define PO_LINE_START 1         // polyobj line start special
-#define PO_LINE_EXPLICIT 5
 
 extern polyobj_t* polyobjs; // list of all poly-objects on the level
 extern int po_NumPolyobjs;

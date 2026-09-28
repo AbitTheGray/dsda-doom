@@ -6327,47 +6327,47 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 		case std::to_underlying(ZDoomLineSpecial::StairsBuildDown):
 			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildDown, line,
 				args[2], P_ArgToSpeed(args[1]), args[3],
-				args[4], 0, STAIR_USE_SPECIALS);
+				args[4], 0, StairFlag::UseSpecials);
 			break;
 		case std::to_underlying(ZDoomLineSpecial::StairsBuildUp):
 			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildUp, line,
 				args[2], P_ArgToSpeed(args[1]), args[3],
-				args[4], 0, STAIR_USE_SPECIALS);
+				args[4], 0, StairFlag::UseSpecials);
 			break;
 		case std::to_underlying(ZDoomLineSpecial::StairsBuildDownSync):
 			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildDown, line,
 				args[2], P_ArgToSpeed(args[1]), 0,
-				args[3], 0, STAIR_USE_SPECIALS | STAIR_SYNC);
+				args[3], 0, StairFlag::UseSpecials | StairFlag::Sync);
 			break;
 		case std::to_underlying(ZDoomLineSpecial::StairsBuildUpSync):
 			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildUp, line,
 				args[2], P_ArgToSpeed(args[1]), 0,
-				args[3], 0, STAIR_USE_SPECIALS | STAIR_SYNC);
+				args[3], 0, StairFlag::UseSpecials | StairFlag::Sync);
 			break;
 		case std::to_underlying(ZDoomLineSpecial::StairsBuildDownDoom):
 			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildDown, line,
 				args[2], P_ArgToSpeed(args[1]), args[3],
-				args[4], 0, 0);
+				args[4], 0, StairFlag{});
 			break;
 		case std::to_underlying(ZDoomLineSpecial::StairsBuildUpDoom):
 			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildUp, line,
 				args[2], P_ArgToSpeed(args[1]), args[3],
-				args[4], 0, 0);
+				args[4], 0, StairFlag{});
 			break;
 		case std::to_underlying(ZDoomLineSpecial::StairsBuildDownDoomSync):
 			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildDown, line,
 				args[2], P_ArgToSpeed(args[1]), 0,
-				args[3], 0, STAIR_SYNC);
+				args[3], 0, StairFlag::Sync);
 			break;
 		case std::to_underlying(ZDoomLineSpecial::StairsBuildUpDoomSync):
 			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildUp, line,
 				args[2], P_ArgToSpeed(args[1]), 0,
-				args[3], 0, STAIR_SYNC);
+				args[3], 0, StairFlag::Sync);
 			break;
 		case std::to_underlying(ZDoomLineSpecial::StairsBuildUpDoomCrush):
 			buttonSuccess = EV_BuildZDoomStairs(args[0], StairType::BuildUp, line,
 				args[2], P_ArgToSpeed(args[1]), args[3],
-				args[4], 0, STAIR_CRUSH);
+				args[4], 0, StairFlag::Crush);
 			break;
 		case std::to_underlying(ZDoomLineSpecial::GenericStairs):
 		{
@@ -6376,7 +6376,7 @@ extern "C" dboolean P_ExecuteZDoomLineSpecial(int special, int* args, line_t* li
 			type = (args[3] & 1) ? StairType::BuildUp : StairType::BuildDown;
 			buttonSuccess = EV_BuildZDoomStairs(args[0], type, line,
 				args[2], P_ArgToSpeed(args[1]), 0,
-				args[4], args[3] & 2, 0);
+				args[4], args[3] & 2, StairFlag{});
 
 			// Toggle direction of next activation of repeatable stairs
 			if(buttonSuccess && line &&

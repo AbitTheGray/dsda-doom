@@ -136,7 +136,7 @@ static void R_RecalcLineFlags(line_t* linedef)
 				frontsector->ceilingpic != skyflatnum)
 		)
 	)
-		linedef->r_flags = RF_CLOSED;
+		linedef->r_flags = LineRenderFlag::Closed;
 	else
 	{
 		// Reject empty lines used for triggers
@@ -152,11 +152,11 @@ static void R_RecalcLineFlags(line_t* linedef)
 			|| P_CeilingPlanesDiffer(frontsector, backsector)
 		)
 		{
-			linedef->r_flags = 0;
+			linedef->r_flags = {};
 			return;
 		}
 		else
-			linedef->r_flags = RF_IGNORE;
+			linedef->r_flags = LineRenderFlag::Ignore;
 	}
 
 	/* cph - I'm too lazy to try and work with offsets in this */
@@ -174,7 +174,7 @@ static void R_RecalcLineFlags(line_t* linedef)
 				(c = frontsector->ceilingheight - backsector->ceilingheight) > 0 &&
 				(textureheight[texturetranslation[curline->sidedef->toptexture]] > c)
 			)
-				linedef->r_flags |= RF_TOP_TILE;
+				linedef->r_flags |= LineRenderFlag::TopTile;
 
 		/* Does bottom texture need tiling */
 		if(!curline->sidedef->rowoffset_bottom)
@@ -182,7 +182,7 @@ static void R_RecalcLineFlags(line_t* linedef)
 				(c = frontsector->floorheight - backsector->floorheight) > 0 &&
 				(textureheight[texturetranslation[curline->sidedef->bottomtexture]] > c)
 			)
-				linedef->r_flags |= RF_BOT_TILE;
+				linedef->r_flags |= LineRenderFlag::BotTile;
 	}
 	else
 	{
@@ -194,7 +194,7 @@ static void R_RecalcLineFlags(line_t* linedef)
 				(c = frontsector->ceilingheight - frontsector->floorheight) > 0 &&
 				(textureheight[texturetranslation[curline->sidedef->midtexture]] > c)
 			)
-				linedef->r_flags |= RF_MID_TILE;
+				linedef->r_flags |= LineRenderFlag::MidTile;
 	}
 }
 
@@ -511,12 +511,12 @@ static void R_AddLine(seg_t* line)
 	if((linedef = curline->linedef)->r_validcount != gametic)
 		R_RecalcLineFlags(linedef);
 
-	if(linedef->r_flags & RF_IGNORE)
+	if((linedef->r_flags & LineRenderFlag::Ignore) != LineRenderFlag{})
 	{
 		return;
 	}
 	else
-		R_ClipWallSegment(x1, x2, linedef->r_flags & RF_CLOSED);
+		R_ClipWallSegment(x1, x2, (linedef->r_flags & LineRenderFlag::Closed) != LineRenderFlag{});
 }
 
 //

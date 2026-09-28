@@ -779,7 +779,7 @@ void R_StoreWallRange(const int start, const int stop)
 	{
 		// single sided line
 		midtexture = texturetranslation[sidedef->midtexture];
-		midtexheight = (linedef->r_flags & RF_MID_TILE) ? 0 : textureheight[midtexture] >> FRACBITS;
+		midtexheight = ((linedef->r_flags & LineRenderFlag::MidTile) != LineRenderFlag{}) ? 0 : textureheight[midtexture] >> FRACBITS;
 
 		// a single sided line is terminal, so it must mark ends
 		markfloor = markceiling = true;
@@ -808,7 +808,7 @@ void R_StoreWallRange(const int start, const int stop)
 		ds_p->sprtopclip = ds_p->sprbottomclip = nullptr;
 		ds_p->silhouette = Silhouette::None;
 
-		if(linedef->r_flags & RF_CLOSED)
+		if((linedef->r_flags & LineRenderFlag::Closed) != LineRenderFlag{})
 		{
 			/* cph - closed 2S line e.g. door */
 			// cph - killough's (outdated) comment follows - this deals with both
@@ -885,7 +885,7 @@ void R_StoreWallRange(const int start, const int stop)
 		if(worldhigh < worldtop) // top texture
 		{
 			toptexture = texturetranslation[sidedef->toptexture];
-			toptexheight = (linedef->r_flags & RF_TOP_TILE) ? 0 : textureheight[toptexture] >> FRACBITS;
+			toptexheight = ((linedef->r_flags & LineRenderFlag::TopTile) != LineRenderFlag{}) ? 0 : textureheight[toptexture] >> FRACBITS;
 			rw_toptexturemid = linedef->flags & ML_DONTPEGTOP ? worldtop : backsector->ceilingheight + textureheight[sidedef->toptexture] - viewz;
 			rw_toptexturemid += FixedMod(sidedef->rowoffset + sidedef->rowoffset_top,
 				textureheight[toptexture]);
@@ -894,7 +894,7 @@ void R_StoreWallRange(const int start, const int stop)
 		if(worldlow > worldbottom) // bottom texture
 		{
 			bottomtexture = texturetranslation[sidedef->bottomtexture];
-			bottomtexheight = (linedef->r_flags & RF_BOT_TILE) ? 0 : textureheight[bottomtexture] >> FRACBITS;
+			bottomtexheight = ((linedef->r_flags & LineRenderFlag::BotTile) != LineRenderFlag{}) ? 0 : textureheight[bottomtexture] >> FRACBITS;
 			rw_bottomtexturemid = linedef->flags & ML_DONTPEGBOTTOM ? worldtop : worldlow;
 			rw_bottomtexturemid += FixedMod(sidedef->rowoffset + sidedef->rowoffset_bottom,
 				textureheight[bottomtexture]);

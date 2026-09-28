@@ -941,7 +941,7 @@ static void gld_PreprocessSectors()
 			v2num = ((intptr_t)sectors[i].lines[j]->v2 - (intptr_t)vertexes) / sizeof(vertex_t);
 			if(vertexcheck2[v1num] < 2 && vertexcheck2[v2num] < 2)
 			{
-				sectors[i].lines[j]->r_flags |= RF_ISOLATED;
+				sectors[i].lines[j]->r_flags |= LineRenderFlag::Isolated;
 			}
 		}
 

@@ -1470,7 +1470,7 @@ void gld_AddWall(seg_t* seg)
 			{
 				temptex = gld_RegisterTexture(toptexture, true, false, true, false);
 				if(!temptex && gl_use_stencil && backsector &&
-					!(seg->linedef->r_flags & RF_ISOLATED) &&
+					(seg->linedef->r_flags & LineRenderFlag::Isolated) == LineRenderFlag{} &&
 					/*frontsector->ceilingpic != skyflatnum && */backsector->ceilingpic != skyflatnum &&
 					!(backsector->flags & NULL_SECTOR) &&
 					backsector->floorheight < backsector->ceilingheight)
@@ -1676,7 +1676,7 @@ void gld_AddWall(seg_t* seg)
 		{
 			temptex = gld_RegisterTexture(bottomtexture, true, false, true, false);
 			if(!temptex && gl_use_stencil && backsector &&
-				!(seg->linedef->r_flags & RF_ISOLATED) &&
+				(seg->linedef->r_flags & LineRenderFlag::Isolated) == LineRenderFlag{} &&
 				/*frontsector->floorpic != skyflatnum && */backsector->floorpic != skyflatnum &&
 				!(backsector->flags & NULL_SECTOR) &&
 				backsector->floorheight < backsector->ceilingheight)
