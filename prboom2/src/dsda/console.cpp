@@ -103,7 +103,7 @@ menu_t dsda_ConsoleDef = {
 	nullptr,
 	dsda_DrawConsole,
 	0, 0,
-	0, MENUF_TEXTINPUT
+	0, MenuFlag::TextInput
 };
 
 static dboolean dsda_ExecuteConsole(const char* command_line, dboolean noise);

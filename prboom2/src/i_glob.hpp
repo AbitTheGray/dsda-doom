@@ -5,23 +5,31 @@
 
 #pragma once
 
+#include <cstdint>
+
+#include "cpp/Util.hpp"
+
+enum struct GlobFlag : uint8_t
+{
+	NoCase = Bit<uint8_t>(0u),
+	Sorted = Bit<uint8_t>(1u),
+};
+ENUM_FLAGS_FUNC(GlobFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#define GLOB_FLAG_NOCASE  0x01
-#define GLOB_FLAG_SORTED  0x02
-
 typedef struct glob_s glob_t;
 
 // Start reading a list of file paths from the given directory which match
 // the given glob pattern. I_EndGlob() must be called on completion.
-glob_t* I_StartGlob(const char* directory, const char* glob, int flags);
+glob_t* I_StartGlob(const char* directory, const char* glob, GlobFlag flags);
 
 // Same as I_StartGlob but multiple glob patterns can be provided. The list
 // of patterns must be terminated with NULL.
-glob_t* I_StartMultiGlob(const char* directory, int flags,
+glob_t* I_StartMultiGlob(const char* directory, GlobFlag flags,
 	const char* glob, ...);
 
 // Finish reading file list.

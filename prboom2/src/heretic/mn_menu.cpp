@@ -434,7 +434,7 @@ void MN_Drawer()
 	for(i = 0; i < max; i++)
 	{
 		const char* text = currentMenu->menuitems[i].alttext;
-		int custom_skill_text = text && (currentMenu->menuitems[i].flags == MENUF_OPTLUMP);
+		int custom_skill_text = text && (currentMenu->menuitems[i].flags == MenuFlag::OptLump);
 		ColorRange color = M_HighlightColor(M_MouseHovered(i), ColorRange::Default);
 
 		if(custom_skill_text)

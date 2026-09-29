@@ -625,7 +625,7 @@ extern "C" void dsda_LegacyParTime(int* partime, dboolean* modified)
 	}
 }
 
-int dsda_LegacyPrepareIntermission(int* result)
+int dsda_LegacyPrepareIntermission(DoCompletedFlag* result)
 {
 	if(gamemode != GameMode::Commercial)
 		if(gamemap == 9)
@@ -719,14 +719,14 @@ int dsda_LegacyPrepareIntermission(int* result)
 		if(leave_data.map > 0)
 			wminfo.next = leave_data.map - 1;
 
-	*result = 0;
+	*result = DoCompletedFlag{};
 
 	return true;
 }
 
-int dsda_LegacyPrepareFinale(int* result)
+int dsda_LegacyPrepareFinale(WorldDoneFlag* result)
 {
-	*result = 0;
+	*result = WorldDoneFlag{};
 
 	if(gamemode == GameMode::Commercial && gamemission != GameMission::PackNerve)
 	{
@@ -741,19 +741,19 @@ int dsda_LegacyPrepareFinale(int* result)
 			case 11:
 			case 20:
 			case 30:
-				*result = WD_START_FINALE;
+				*result = WorldDoneFlag::StartFinale;
 				break;
 		}
 	}
 	else if(gamemission == GameMission::PackNerve && allow_incompatibility && gamemap == 8)
-		*result = WD_START_FINALE;
+		*result = WorldDoneFlag::StartFinale;
 	else if(gamemap == 8)
-		*result = WD_VICTORY;
+		*result = WorldDoneFlag::Victory;
 	else if(gamemap == 5 && gamemission == GameMission::TcChex)
-		*result = WD_VICTORY;
+		*result = WorldDoneFlag::Victory;
 
 	if(dsda_FinaleShortcut())
-		*result = WD_START_FINALE;
+		*result = WorldDoneFlag::StartFinale;
 
 	return true;
 }

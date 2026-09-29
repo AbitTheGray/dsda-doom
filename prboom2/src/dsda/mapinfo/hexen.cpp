@@ -388,20 +388,20 @@ int dsda_HexenPrepareInitNew()
 	return true;
 }
 
-int dsda_HexenPrepareIntermission(int* result)
+int dsda_HexenPrepareIntermission(DoCompletedFlag* result)
 {
 	if(!hexen)
 		return false;
 
 	if(leave_data.map == LEAVE_VICTORY && leave_data.position == LEAVE_VICTORY)
-		*result = DC_VICTORY;
+		*result = DoCompletedFlag::Victory;
 	else
-		*result = 0;
+		*result = DoCompletedFlag{};
 
 	return true;
 }
 
-int dsda_HexenPrepareFinale(int* result)
+int dsda_HexenPrepareFinale(WorldDoneFlag* result)
 {
 	return false; // TODO
 }

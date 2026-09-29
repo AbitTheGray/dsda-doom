@@ -2162,7 +2162,7 @@ void G_SecretExitLevel(int position)
 void G_DoCompleted()
 {
 	int i;
-	int completed_behaviour;
+	DoCompletedFlag completed_behaviour;
 
 	R_ResetColorMap();
 
@@ -2190,7 +2190,7 @@ void G_DoCompleted()
 
 	dsda_PrepareIntermission(&completed_behaviour);
 
-	if(completed_behaviour & DC_VICTORY)
+	if((completed_behaviour & DoCompletedFlag::Victory) != DoCompletedFlag{})
 	{
 		gameaction = GameAction::Victory;
 		return;
@@ -2236,7 +2236,7 @@ void G_DoCompleted()
 
 void G_WorldDone()
 {
-	int done_behaviour;
+	WorldDoneFlag done_behaviour;
 
 	gameaction = GameAction::WorldDone;
 
@@ -2245,7 +2245,7 @@ void G_WorldDone()
 
 	dsda_PrepareFinale(&done_behaviour);
 
-	if(done_behaviour & WD_VICTORY)
+	if((done_behaviour & WorldDoneFlag::Victory) != WorldDoneFlag{})
 	{
 		if(dsda_Flag(ArgId::ChainEpisodes))
 		{
@@ -2273,7 +2273,7 @@ void G_WorldDone()
 		return;
 	}
 
-	if(done_behaviour & WD_START_FINALE)
+	if((done_behaviour & WorldDoneFlag::StartFinale) != WorldDoneFlag{})
 	{
 		F_StartFinale();
 
@@ -3983,7 +3983,7 @@ const byte* G_ReadDemoHeaderEx(const byte* demo_p, size_t size, unsigned int par
 	return demo_p;
 }
 
-void G_StartDemoPlayback(const byte* buffer, int length, int behaviour)
+void G_StartDemoPlayback(const byte* buffer, int length, const PlaybackBehaviour behaviour)
 {
 	const byte* demo_p;
 
@@ -4038,7 +4038,7 @@ void G_DoPlayDemo()
 {
 	if(LoadDemo(defdemoname, &demobuffer, &demolength))
 	{
-		G_StartDemoPlayback(demobuffer, demolength, PLAYBACK_NORMAL);
+		G_StartDemoPlayback(demobuffer, demolength, PlaybackBehaviour::Normal);
 
 		if(dsda_Flag(ArgId::TrackPlayback))
 			dsda_ResetSplits();
@@ -4276,7 +4276,7 @@ void G_ContinueDemo(const char* playback_name)
 {
 	if(LoadDemo(playback_name, &demobuffer, &demolength))
 	{
-		G_StartDemoPlayback(demobuffer, demolength, PLAYBACK_JOIN_ON_END);
+		G_StartDemoPlayback(demobuffer, demolength, PlaybackBehaviour::JoinOnEnd);
 
 		dsda_InitDemoRecording();
 		G_BeginRecording();

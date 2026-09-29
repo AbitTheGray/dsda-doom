@@ -2176,7 +2176,7 @@ extern "C" void A_VileAttack(mobj_t* actor)
 	// move the fire between the vile and the player
 	fire->x = actor->target->x - FixedMul(24 * FRACUNIT, finecosine[an]);
 	fire->y = actor->target->y - FixedMul(24 * FRACUNIT, finesine[an]);
-	P_RadiusAttack(fire, actor, 70, 70, BF_DAMAGESOURCE | BF_HORIZONTAL);
+	P_RadiusAttack(fire, actor, 70, 70, BombFlag::DamageSource | BombFlag::Horizontal);
 }
 
 //
@@ -2524,11 +2524,11 @@ extern "C" void A_Explode(mobj_t* thingy)
 {
 	int damage;
 	int distance;
-	int flags;
+	BombFlag flags;
 
 	damage = 128;
 	distance = 128;
-	flags = BF_DAMAGESOURCE;
+	flags = BombFlag::DamageSource;
 
 	if(raven)
 	{
@@ -2555,15 +2555,15 @@ extern "C" void A_Explode(mobj_t* thingy)
 				break;
 			case MobjType::HexenHammerMissile: // Fighter Hammer
 				damage = 128;
-				flags &= ~BF_DAMAGESOURCE;
+				flags -= BombFlag::DamageSource;
 				break;
 			case MobjType::HexenFswordMissile: // Fighter Runesword
 				damage = 64;
-				flags &= ~BF_DAMAGESOURCE;
+				flags -= BombFlag::DamageSource;
 				break;
 			case MobjType::HexenCircleflame: // Cleric Flame secondary flames
 				damage = 20;
-				flags &= ~BF_DAMAGESOURCE;
+				flags -= BombFlag::DamageSource;
 				break;
 			case MobjType::HexenSorcball1: // Sorcerer balls
 			case MobjType::HexenSorcball2:
@@ -2583,17 +2583,17 @@ extern "C" void A_Explode(mobj_t* thingy)
 				break;
 			case MobjType::HexenDragonFx2:
 				damage = 80;
-				flags &= ~BF_DAMAGESOURCE;
+				flags -= BombFlag::DamageSource;
 				break;
 			case MobjType::HexenMstaffFx:
 				damage = 64;
 				distance = 192;
-				flags &= ~BF_DAMAGESOURCE;
+				flags -= BombFlag::DamageSource;
 				break;
 			case MobjType::HexenMstaffFx2:
 				damage = 80;
 				distance = 192;
-				flags &= ~BF_DAMAGESOURCE;
+				flags -= BombFlag::DamageSource;
 				break;
 			case MobjType::HexenPoisoncloud:
 				damage = 4;
@@ -3068,7 +3068,7 @@ extern "C" void A_Detonate(mobj_t* mo)
 		!prboom_comp[std::to_underlying(PrboomComp::ApplyMbfCodepointersToAnyComplevel)].state)
 		return;
 
-	P_RadiusAttack(mo, mo->target, mo->info->damage, mo->info->damage, BF_DAMAGESOURCE);
+	P_RadiusAttack(mo, mo->target, mo->info->damage, mo->info->damage, BombFlag::DamageSource);
 }
 
 //
@@ -3432,7 +3432,7 @@ extern "C" void A_RadiusDamage(mobj_t* actor)
 	if(!mbf21 || !actor->state)
 		return;
 
-	P_RadiusAttack(actor, actor->target, actor->state->args[0], actor->state->args[1], BF_DAMAGESOURCE);
+	P_RadiusAttack(actor, actor->target, actor->state->args[0], actor->state->args[1], BombFlag::DamageSource);
 }
 
 //
@@ -4921,7 +4921,7 @@ extern "C" void A_VolcBallImpact(mobj_t* ball)
 		ball->z += 28 * FRACUNIT;
 		//ball->momz = 3*FRACUNIT;
 	}
-	P_RadiusAttack(ball, ball->target, 25, 25, BF_DAMAGESOURCE);
+	P_RadiusAttack(ball, ball->target, 25, 25, BombFlag::DamageSource);
 	for(i = 0; i < 4; i++)
 	{
 		tiny = P_SpawnMobj(ball->x, ball->y, ball->z, MobjType::HereticVolcanotblast);

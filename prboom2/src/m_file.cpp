@@ -549,7 +549,7 @@ dboolean M_RemoveFilesAtPath(const char* path)
 	const char* filename;
 	dboolean success = true;
 
-	glob = I_StartGlob(path, "*.*", GLOB_FLAG_NOCASE | GLOB_FLAG_SORTED);
+	glob = I_StartGlob(path, "*.*", GlobFlag::NoCase | GlobFlag::Sorted);
 
 	for(;;)
 	{

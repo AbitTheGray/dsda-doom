@@ -10,6 +10,8 @@
 #include "d_ticcmd.hpp"
 #include "tables.hpp"
 
+enum struct PlaybackBehaviour : uint8_t;
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -41,7 +43,7 @@ void G_ReloadDefaults();      // killough 3/1/98: loads game defaults
 void G_RefreshFastMonsters(); // killough 4/10/98: sets -fast parameters
 void G_DoNewGame();
 void G_DoReborn(int playernum);
-void G_StartDemoPlayback(const byte* buffer, int length, int behaviour);
+void G_StartDemoPlayback(const byte* buffer, int length, PlaybackBehaviour behaviour);
 void G_DoPlayDemo();
 void G_DoCompleted();
 void G_WriteDemoTiccmd(ticcmd_t* cmd);

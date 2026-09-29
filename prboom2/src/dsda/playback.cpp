@@ -22,7 +22,7 @@
 static const byte* playback_origin_p;
 static const byte* playback_p;
 static int playback_length;
-static int playback_behaviour;
+static PlaybackBehaviour playback_behaviour;
 
 static dsda_arg_t* playdemo_arg;
 static dsda_arg_t* playlump_arg;
@@ -195,7 +195,7 @@ void dsda_InitDemoPlayback()
 	demoplayback = true;
 }
 
-void dsda_AttachPlaybackStream(const byte* demo_p, int length, int behaviour)
+void dsda_AttachPlaybackStream(const byte* demo_p, int length, const PlaybackBehaviour behaviour)
 {
 	playback_origin_p = demo_p;
 	playback_p = demo_p;
@@ -221,7 +221,7 @@ void dsda_ClearPlaybackStream()
 	playback_origin_p = nullptr;
 	playback_p = nullptr;
 	playback_length = 0;
-	playback_behaviour = 0;
+	playback_behaviour = PlaybackBehaviour::Normal;
 	demo_tics = 0;
 
 	demoplayback = false;
@@ -273,7 +273,7 @@ void dsda_TryPlaybackOneTick(ticcmd_t* cmd)
 
 	if(ended)
 	{
-		if(playback_behaviour & PLAYBACK_JOIN_ON_END)
+		if(playback_behaviour == PlaybackBehaviour::JoinOnEnd)
 			dsda_JoinDemo(cmd);
 		else
 			G_CheckDemoStatus();

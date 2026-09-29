@@ -1040,7 +1040,7 @@ static int M_AutoSaveSlot(const char* target_name)
 	for(i = 0; i < g_menu_save_page_size; i++)
 		slots[i] = 1;
 
-	glob = I_StartGlob(dsda_SaveDir(), "*savegame*.dsg", 0);
+	glob = I_StartGlob(dsda_SaveDir(), "*savegame*.dsg", GlobFlag{});
 	while(return_slot < 0)
 	{
 		file_name = I_NextGlob(glob);
@@ -6491,7 +6491,7 @@ void M_ShadedScreen(int scrn)
 static dboolean M_OptionalLumpMissing(const menuitem_t* item)
 {
 	// if not optional, return
-	if(!(item->flags & MENUF_OPTLUMP))
+	if((item->flags & MenuFlag::OptLump) == MenuFlag{})
 		return false;
 
 	return item->name[0] && !W_LumpNameExists(item->name);
@@ -6509,7 +6509,7 @@ static dboolean M_MenuHasMissingRequiredLumps(const menu_t* menu)
 		const menuitem_t* item = &menu->menuitems[i];
 
 		if(item->status != MenuItemType::Skip &&
-			!(item->flags & MENUF_OPTLUMP) &&
+			(item->flags & MenuFlag::OptLump) == MenuFlag{} &&
 			(!item->name[0] || !W_LumpNameExists(item->name)))
 			return true;
 	}
@@ -6639,10 +6639,10 @@ extern "C" void M_ChangeMenu(menu_t* menudef, MenuActive mnact)
 
 	if(SDL_IsTextInputActive())
 	{
-		if(!(currentMenu && currentMenu->flags & MENUF_TEXTINPUT))
+		if(!(currentMenu && (currentMenu->flags & MenuFlag::TextInput) != MenuFlag{}))
 			SDL_StopTextInput();
 	}
-	else if(currentMenu && currentMenu->flags & MENUF_TEXTINPUT)
+	else if(currentMenu && (currentMenu->flags & MenuFlag::TextInput) != MenuFlag{})
 		SDL_StartTextInput();
 }
 

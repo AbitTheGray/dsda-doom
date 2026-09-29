@@ -10,13 +10,17 @@
 
 #include "doomtype.hpp"
 
+// What happens when the demo being played back ends.
+enum struct PlaybackBehaviour : uint8_t
+{
+	Normal,
+	JoinOnEnd,
+};
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#define PLAYBACK_NORMAL      0
-#define PLAYBACK_JOIN_ON_END 1
 
 void dsda_RestartPlayback();
 dboolean dsda_JumpToLogicTic(int tic);
@@ -25,7 +29,7 @@ void dsda_ExecutePlaybackOptions();
 const char* dsda_ParsePlaybackOptions();
 void dsda_ClearPlaybackStream();
 void dsda_InitDemoPlayback();
-void dsda_AttachPlaybackStream(const byte* demo_p, int length, int behaviour);
+void dsda_AttachPlaybackStream(const byte* demo_p, int length, PlaybackBehaviour behaviour);
 void dsda_StorePlaybackPosition();
 void dsda_RestorePlaybackPosition();
 void dsda_JoinDemo(ticcmd_t* cmd);

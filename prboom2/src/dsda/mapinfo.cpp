@@ -439,7 +439,7 @@ void dsda_PrepareInitNew()
 	dsda_LegacyPrepareInitNew();
 }
 
-void dsda_PrepareIntermission(int* behaviour)
+void dsda_PrepareIntermission(DoCompletedFlag* behaviour)
 {
 	if(dsda_HexenPrepareIntermission(behaviour))
 		return;
@@ -450,7 +450,7 @@ void dsda_PrepareIntermission(int* behaviour)
 	dsda_LegacyPrepareIntermission(behaviour);
 }
 
-void dsda_PrepareFinale(int* behaviour)
+void dsda_PrepareFinale(WorldDoneFlag* behaviour)
 {
 	if(dsda_HexenPrepareFinale(behaviour))
 		return;

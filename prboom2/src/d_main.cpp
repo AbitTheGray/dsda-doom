@@ -1412,7 +1412,7 @@ static void LoadWADsAtPath(const char* path, WadSource source)
 	glob_t* glob;
 	const char* filename;
 
-	glob = I_StartMultiGlob(path, GLOB_FLAG_NOCASE | GLOB_FLAG_SORTED,
+	glob = I_StartMultiGlob(path, GlobFlag::NoCase | GlobFlag::Sorted,
 		"*.wad", "*.lmp", nullptr);
 	for(;;)
 	{
@@ -1436,7 +1436,7 @@ static void LoadDehackedFilesAtPath(const char* path, dboolean defer_loading, de
 	const char* filename;
 	glob_t* glob;
 
-	glob = I_StartMultiGlob(path, GLOB_FLAG_NOCASE | GLOB_FLAG_SORTED,
+	glob = I_StartMultiGlob(path, GlobFlag::NoCase | GlobFlag::Sorted,
 		"*.deh", "*.bex", nullptr);
 	for(;;)
 	{
@@ -1497,7 +1497,7 @@ static void LoadZIPsAtPath(const char* path, WadSource source, deh_queue_t* deh_
 	glob_t* glob;
 	const char* filename;
 
-	glob = I_StartMultiGlob(path, GLOB_FLAG_NOCASE | GLOB_FLAG_SORTED,
+	glob = I_StartMultiGlob(path, GlobFlag::NoCase | GlobFlag::Sorted,
 		"*.zip", nullptr);
 	for(;;)
 	{

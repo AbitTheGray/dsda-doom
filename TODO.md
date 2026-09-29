@@ -70,8 +70,8 @@ The scan misses two-entry groups like the old `SKILL4`/`SKILL5`, so expect a few
 Found by a later scan that also counts 2-entry groups; not yet checked:
 - **Larger groups:** `UDMF_SCROLL_`/`UDMF_THRUST_` (`dsda/udmf.hpp`: the UDMF side of the `SCROLL_`/`THRUST_` flags above, best done together with them), `OPL_` (`MUSIC/opl.hpp`, probably register constants).
 - **Single-player intermission states** (`wi_stuff.cpp`): the `SP_KILLS`...`SP_PAUSE` `#define`s are unused; `sp_state` is stepped with `++` and odd values are the pauses between counters (`sp_state & 1`), so it needs a design first, not just an enum.
-- **Checked, plain constants:** `USE_*_AMMO_*` (`doomdef.hpp`) and `AMMO_*_WIMPY`/`_HEFTY` (`p_mobj.hpp`) are ammo amounts, the rest of `MENU_MOUSE_` (`m_mouse.inl`), `DM_`/`SP_` coordinates (`wi_stuff.cpp`) and `TALLY_` (`hexen/in_lude.cpp`) are layout sizes, and `SORCBALL_`/`SORC_DEFENSE_`/`KORAX_` (`p_enemy.cpp`) are speeds, heights, times and TIDs; none of them is an enum.
-- **Two-entry groups:** `MENUF_` (`m_menu.hpp`), `GLOB_FLAG_` (`i_glob.hpp`), `BF_` (`p_map.hpp`), `LUMP_` (`w_wad.hpp`), `PL_SKYFLAT_` (`r_plane.hpp`), `STAIR_` (`p_floor.cpp`), `WD_` (`dsda/mapinfo.hpp`), `PLAYBACK_` (`dsda/playback.hpp`), and a few more in `st_stuff.cpp`, `MUSIC/` and `hexen/`.
+- **Checked, plain constants:** `USE_*_AMMO_*` (`doomdef.hpp`) and `AMMO_*_WIMPY`/`_HEFTY` (`p_mobj.hpp`) are ammo amounts, the rest of `MENU_MOUSE_` (`m_mouse.inl`), `DM_`/`SP_` coordinates (`wi_stuff.cpp`) and `TALLY_` (`hexen/in_lude.cpp`) are layout sizes, `SORCBALL_`/`SORC_DEFENSE_`/`KORAX_` (`p_enemy.cpp`) are speeds, heights, times and TIDs, and `STAIR_` (`p_floor.cpp`) and `LUMP_NOT_FOUND` (`w_wad.hpp`) are a sector type, a queue size and a sentinel index; none of them is an enum.
+- **Two-entry groups:** `LUMP_STATIC`/`LUMP_PRBOOM` (`w_wad.hpp`, lump flags), `BF_FAILURE`/`BF_SUCCESS` (`dsda/brute_force.cpp`, a success result), `PL_SKYFLAT_` (`r_plane.hpp`: two flag bits packed with a sky index in one `int`, so it needs extractor functions), and a few more in `st_stuff.cpp`, `MUSIC/` and `hexen/`.
 
 ## Remaining `#define`s
 

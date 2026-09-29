@@ -20,15 +20,25 @@ enum struct ShowNextLocFlag : uint8_t
 };
 ENUM_FLAGS_FUNC(ShowNextLocFlag)
 
+// What G_DoCompleted does once a map is completed.
+enum struct DoCompletedFlag : uint8_t
+{
+	Victory = Bit<uint8_t>(0u),
+};
+ENUM_FLAGS_FUNC(DoCompletedFlag)
+
+// What G_WorldDone does once the intermission is over.
+enum struct WorldDoneFlag : uint8_t
+{
+	Victory = Bit<uint8_t>(0u),
+	StartFinale = Bit<uint8_t>(1u),
+};
+ENUM_FLAGS_FUNC(WorldDoneFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#define DC_VICTORY 0x01
-
-#define WD_VICTORY      0x01
-#define WD_START_FINALE 0x02
 
 void dsda_FirstMap(int* episode, int* map);
 void dsda_NewGameMap(int* episode, int* map);
@@ -58,8 +68,8 @@ const char* dsda_MapAuthor();
 void dsda_HUTitle(dsda_string_t* str);
 int dsda_SkyTexture();
 void dsda_PrepareInitNew();
-void dsda_PrepareIntermission(int* behaviour);
-void dsda_PrepareFinale(int* behaviour);
+void dsda_PrepareIntermission(DoCompletedFlag* behaviour);
+void dsda_PrepareFinale(WorldDoneFlag* behaviour);
 void dsda_LoadMapInfo();
 const char* dsda_ExitPic();
 const char* dsda_EnterPic();

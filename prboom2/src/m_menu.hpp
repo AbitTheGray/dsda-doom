@@ -81,6 +81,14 @@ enum struct MenuAction : uint8_t
 	Clear,
 };
 
+// Flags of a menu (menu_t) or of one of its items (menuitem_t).
+enum struct MenuFlag : uint8_t
+{
+	TextInput = Bit<uint8_t>(0u),
+	OptLump = Bit<uint8_t>(1u), // [Nugget] Optional graphic lump
+};
+ENUM_FLAGS_FUNC(MenuFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -221,11 +229,8 @@ typedef struct
 	KeyCode alphaKey; // hotkey in menu
 	const char* alttext;
 	ColorRange color;
-	byte flags;
+	MenuFlag flags;
 } menuitem_t;
-
-#define MENUF_TEXTINPUT 0x01
-#define MENUF_OPTLUMP   0x02 // [Nugget] Optional graphic lump
 
 typedef struct menu_s
 {
@@ -236,7 +241,7 @@ typedef struct menu_s
 	short x;
 	short y;      // x,y of menu
 	short lastOn; // last item user was on in menu
-	byte flags;
+	MenuFlag flags;
 } menu_t;
 
 #define SAVESTRINGSIZE 24

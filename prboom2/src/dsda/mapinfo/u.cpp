@@ -480,7 +480,7 @@ int dsda_UPrepareInitNew()
 	return false;
 }
 extern "C" void dsda_LegacyParTime(int* partime, dboolean* modified);
-int dsda_UPrepareIntermission(int* result)
+int dsda_UPrepareIntermission(DoCompletedFlag* result)
 {
 	const char* next = "";
 
@@ -490,7 +490,7 @@ int dsda_UPrepareIntermission(int* result)
 	if((gamemapinfo->flags & UMapinfoFlags::EndGameAny) != UMapinfoFlags{}
 		&& (gamemapinfo->flags & UMapinfoFlags::NoIntermission) != UMapinfoFlags{})
 	{
-		*result = DC_VICTORY;
+		*result = DoCompletedFlag::Victory;
 
 		return true;
 	}
@@ -527,7 +527,7 @@ int dsda_UPrepareIntermission(int* result)
 
 		wminfo.didsecret = players[consoleplayer].didsecret;
 
-		*result = 0;
+		*result = DoCompletedFlag{};
 
 		return true;
 	}
@@ -535,7 +535,7 @@ int dsda_UPrepareIntermission(int* result)
 	return false;
 }
 
-int dsda_UPrepareFinale(int* result)
+int dsda_UPrepareFinale(WorldDoneFlag* result)
 {
 	if(!gamemapinfo)
 		return false;
@@ -543,20 +543,20 @@ int dsda_UPrepareFinale(int* result)
 	if(secretexit && (gamemapinfo->intertextsecret || (gamemapinfo->flags & UMapinfoFlags::InterTextSecretClear) != UMapinfoFlags{}))
 	{
 		*result = (gamemapinfo->flags & UMapinfoFlags::InterTextSecretClear) == UMapinfoFlags{}
-			? WD_START_FINALE
-			: 0;
+			? WorldDoneFlag::StartFinale
+			: WorldDoneFlag{};
 		return true;
 	}
 	else if(!secretexit && (gamemapinfo->intertext || (gamemapinfo->flags & UMapinfoFlags::InterTextClear) != UMapinfoFlags{}))
 	{
 		*result = (gamemapinfo->flags & UMapinfoFlags::InterTextClear) == UMapinfoFlags{}
-			? WD_START_FINALE
-			: 0;
+			? WorldDoneFlag::StartFinale
+			: WorldDoneFlag{};
 		return true;
 	}
 	else if((gamemapinfo->flags & UMapinfoFlags::EndGameAny) != UMapinfoFlags{} && !secretexit)
 	{
-		*result = WD_VICTORY;
+		*result = WorldDoneFlag::Victory;
 
 		return true;
 	}

@@ -2826,7 +2826,7 @@ dboolean PIT_RadiusAttack(mobj_t* thing)
 
 	if(hexen)
 	{
-		if(!(bomb.flags & BF_DAMAGESOURCE) && thing == bomb.source)
+		if((bomb.flags & BombFlag::DamageSource) == BombFlag{} && thing == bomb.source)
 		{
 			// don't damage the source of the explosion
 			return true;
@@ -2909,7 +2909,7 @@ dboolean PIT_RadiusAttack(mobj_t* thing)
 		P_DamageMobj(thing, bomb.spot, bomb.source, damage);
 
 		// TODO: possible "vertical explosion thrust" mapinfo flag
-		if(map_format.zdoom && !(bomb.flags & BF_HORIZONTAL))
+		if(map_format.zdoom && (bomb.flags & BombFlag::Horizontal) == BombFlag{})
 		{
 			fixed_t thrust;
 			fixed_t dxy, dz;
@@ -2932,7 +2932,7 @@ dboolean PIT_RadiusAttack(mobj_t* thing)
 // P_RadiusAttack
 // Source is the creature that caused the explosion at spot.
 //
-void P_RadiusAttack(mobj_t* spot, mobj_t* source, int damage, int distance, int flags)
+void P_RadiusAttack(mobj_t* spot, mobj_t* source, int damage, int distance, const BombFlag flags)
 {
 	int x;
 	int y;

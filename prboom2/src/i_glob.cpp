@@ -64,11 +64,11 @@ struct glob_s
 {
 	char** globs;
 	int num_globs;
-	int flags;
+	GlobFlag flags;
 	DIR* dir;
 	char* directory;
 	char* last_filename;
-	// These fields are only used when the GLOB_FLAG_SORTED flag is set:
+	// These fields are only used when the GlobFlag::Sorted flag is set:
 	char** filenames;
 	int filenames_len;
 	int next_index;
@@ -84,7 +84,7 @@ static void FreeStringList(char** globs, int num_globs)
 	Z_Free(globs);
 }
 
-glob_t* I_StartMultiGlob(const char* directory, int flags,
+glob_t* I_StartMultiGlob(const char* directory, GlobFlag flags,
 	const char* glob, ...)
 {
 	char** globs;
@@ -152,7 +152,7 @@ glob_t* I_StartMultiGlob(const char* directory, int flags,
 	return result;
 }
 
-glob_t* I_StartGlob(const char* directory, const char* glob, int flags)
+glob_t* I_StartGlob(const char* directory, const char* glob, GlobFlag flags)
 {
 	return I_StartMultiGlob(directory, flags, glob, nullptr);
 }
@@ -173,7 +173,7 @@ void I_EndGlob(glob_t* glob)
 	Z_Free(glob);
 }
 
-static dboolean MatchesGlob(const char* name, const char* glob, int flags)
+static dboolean MatchesGlob(const char* name, const char* glob, GlobFlag flags)
 {
 	int n, g;
 
@@ -182,7 +182,7 @@ static dboolean MatchesGlob(const char* name, const char* glob, int flags)
 		n = *name;
 		g = *glob;
 
-		if((flags & GLOB_FLAG_NOCASE) != 0)
+		if((flags & GlobFlag::NoCase) != GlobFlag{})
 		{
 			n = tolower(n);
 			g = tolower(g);
@@ -279,7 +279,7 @@ static void ReadAllFilenames(glob_t* glob)
 	}
 }
 
-static void SortFilenames(char** filenames, int len, int flags)
+static void SortFilenames(char** filenames, int len, GlobFlag flags)
 {
 	char *pivot, *tmp;
 	int i, left_len, cmp;
@@ -292,7 +292,7 @@ static void SortFilenames(char** filenames, int len, int flags)
 	left_len = 0;
 	for(i = 0; i < len - 1; ++i)
 	{
-		if((flags & GLOB_FLAG_NOCASE) != 0)
+		if((flags & GlobFlag::NoCase) != GlobFlag{})
 		{
 			cmp = strcasecmp(filenames[i], pivot);
 		}
@@ -327,7 +327,7 @@ const char* I_NextGlob(glob_t* glob)
 
 	// In unsorted mode we just return the filenames as we read
 	// them back from the system API.
-	if((glob->flags & GLOB_FLAG_SORTED) == 0)
+	if((glob->flags & GlobFlag::Sorted) == GlobFlag{})
 	{
 		Z_Free(glob->last_filename);
 		glob->last_filename = NextGlob(glob);
@@ -354,7 +354,7 @@ const char* I_NextGlob(glob_t* glob)
 
 #warning No native implementation of file globbing.
 
-glob_t* I_StartGlob(const char* directory, const char* glob, int flags)
+glob_t* I_StartGlob(const char* directory, const char* glob, GlobFlag flags)
 {
 	return nullptr;
 }
