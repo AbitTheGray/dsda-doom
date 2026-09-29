@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "cpp/EnumArray.hpp"
+#include "cpp/Util.hpp"
 
 #include "am_map.hpp"
 #include "d_deh.hpp"
@@ -50,6 +51,15 @@ typedef union
 	const char* v_string;
 } dsda_config_default_t;
 
+enum struct ConfigFlag : uint8_t
+{
+	Strict = Bit<uint8_t>(0u),
+	StrictRange = Bit<uint8_t>(1u),
+	Even = Bit<uint8_t>(2u),
+	Feature = Bit<uint8_t>(3u),
+};
+ENUM_FLAGS_FUNC(ConfigFlag)
+
 typedef struct
 {
 	const char* name;
@@ -59,18 +69,13 @@ typedef struct
 	int upper_limit;
 	dsda_config_default_t default_value;
 	int* int_binding;
-	int flags;
+	ConfigFlag flags;
 	int strict_lower_limit;
 	int strict_upper_limit;
 	void (*onUpdate)();
 	dsda_config_value_t transient_value;
 	dsda_config_value_t persistent_value;
 } dsda_config_t;
-
-#define CONF_STRICT       0x01
-#define CONF_STRICT_RANGE 0x02
-#define CONF_EVEN         0x04
-#define CONF_FEATURE      0x08
 
 #define CONF_BOOL(x) ConfigType::Int, 0, 1, { x }
 #define CONF_COLOR(x) ConfigType::Int, 0, 255, { x }
@@ -79,9 +84,9 @@ typedef struct
 #define CONF_CR(x) ConfigType::Int, 0, std::to_underlying(ColorRange::HudLimit) - 1, { x }
 #define CONF_WEAPON(x) ConfigType::Int, 0, 9, { x }
 
-#define NOT_STRICT 0, 0, 0
-#define STRICT_INT(x) CONF_FEATURE | CONF_STRICT, x, x
-#define STRICT_RANGE(min, max) CONF_FEATURE | CONF_STRICT_RANGE, min, max
+#define NOT_STRICT ConfigFlag{}, 0, 0
+#define STRICT_INT(x) ConfigFlag::Feature | ConfigFlag::Strict, x, x
+#define STRICT_RANGE(min, max) ConfigFlag::Feature | ConfigFlag::StrictRange, min, max
 
 extern int dsda_input_profile;
 extern int weapon_preferences[2][std::to_underlying(WeaponType::Count) + 1];
@@ -372,7 +377,7 @@ constinit EnumArray<dsda_config_t, ConfigId> dsda_config = {
 	}},
 	{At(ConfigId::Exhud), {
 		"dsda_exhud", ConfigId::Exhud,
-		CONF_BOOL(0), nullptr, CONF_FEATURE | NOT_STRICT, dsda_InitExHud
+		CONF_BOOL(0), nullptr, ConfigFlag::Feature | NOT_STRICT, dsda_InitExHud
 	}},
 	{At(ConfigId::FreeText), {
 		"dsda_free_text", ConfigId::FreeText,
@@ -625,7 +630,7 @@ constinit EnumArray<dsda_config_t, ConfigId> dsda_config = {
 	}},
 	{At(ConfigId::GlRenderMultisampling), {
 		"gl_render_multisampling", ConfigId::GlRenderMultisampling,
-		ConfigType::Int, 0, 8, {0}, nullptr, CONF_EVEN, 0, 0, gld_MultisamplingInit
+		ConfigType::Int, 0, 8, {0}, nullptr, ConfigFlag::Even, 0, 0, gld_MultisamplingInit
 	}},
 	{At(ConfigId::GlRenderFov), {
 		"gl_render_fov", ConfigId::GlRenderFov,
@@ -861,7 +866,7 @@ constinit EnumArray<dsda_config_t, ConfigId> dsda_config = {
 	}},
 	{At(ConfigId::HudDisplayed), {
 		"hud_displayed", ConfigId::HudDisplayed,
-		CONF_BOOL(0), nullptr, CONF_FEATURE | NOT_STRICT, R_SetViewSize
+		CONF_BOOL(0), nullptr, ConfigFlag::Feature | NOT_STRICT, R_SetViewSize
 	}},
 	{At(ConfigId::HudaddSecretarea), {
 		"hudadd_secretarea", ConfigId::HudaddSecretarea,
@@ -889,7 +894,7 @@ constinit EnumArray<dsda_config_t, ConfigId> dsda_config = {
 	}},
 	{At(ConfigId::HudaddCrosshair), {
 		"hudadd_crosshair", ConfigId::HudaddCrosshair,
-		ConfigType::Int, 0, HU_CROSSHAIRS - 1, {0}, nullptr, CONF_FEATURE | NOT_STRICT, HU_InitCrosshair
+		ConfigType::Int, 0, HU_CROSSHAIRS - 1, {0}, nullptr, ConfigFlag::Feature | NOT_STRICT, HU_InitCrosshair
 	}},
 	{At(ConfigId::HudHealthRed), {
 		"hud_health_red", ConfigId::HudHealthRed,
@@ -1194,7 +1199,7 @@ constinit EnumArray<dsda_config_t, ConfigId> dsda_config = {
 	}},
 	{At(ConfigId::Screenblocks), {
 		"screenblocks", ConfigId::Screenblocks,
-		ConfigType::Int, 10, 11, {10}, nullptr, CONF_FEATURE | NOT_STRICT, R_SetViewSize
+		ConfigType::Int, 10, 11, {10}, nullptr, ConfigFlag::Feature | NOT_STRICT, R_SetViewSize
 	}},
 	{At(ConfigId::SdlVideoWindowPos), {
 		"sdl_video_window_pos", ConfigId::SdlVideoWindowPos,
@@ -1382,7 +1387,7 @@ static void dsda_ConstrainIntConfig(dsda_config_t* conf)
 			conf->transient_value.v_int = conf->lower_limit;
 	}
 
-	if(conf->flags & CONF_EVEN && (conf->transient_value.v_int % 2))
+	if((conf->flags & ConfigFlag::Even) != ConfigFlag{} && (conf->transient_value.v_int % 2))
 		conf->transient_value.v_int = conf->default_value.v_int;
 }
 
@@ -1593,7 +1598,7 @@ int dsda_UpdateIntConfig(ConfigId id, int value, dboolean persist)
 	if(dsda_config[id].onUpdate)
 		dsda_config[id].onUpdate();
 
-	if(dsda_config[id].flags & CONF_FEATURE)
+	if((dsda_config[id].flags & ConfigFlag::Feature) != ConfigFlag{})
 		dsda_TrackConfigFeatures();
 
 	return dsda_IntConfig(id);
@@ -1633,10 +1638,10 @@ extern "C" dboolean dsda_StrictMode();
 int dsda_IntConfig(ConfigId id)
 {
 
-	if(dsda_config[id].flags & CONF_STRICT && dsda_StrictMode())
+	if((dsda_config[id].flags & ConfigFlag::Strict) != ConfigFlag{} && dsda_StrictMode())
 		return dsda_config[id].strict_lower_limit;
 
-	if(dsda_config[id].flags & CONF_STRICT_RANGE && dsda_StrictMode())
+	if((dsda_config[id].flags & ConfigFlag::StrictRange) != ConfigFlag{} && dsda_StrictMode())
 	{
 		if(dsda_config[id].transient_value.v_int < dsda_config[id].strict_lower_limit)
 			return dsda_config[id].strict_lower_limit;
@@ -1650,7 +1655,7 @@ int dsda_IntConfig(ConfigId id)
 
 dboolean dsda_IsStrictConfig(ConfigId id)
 {
-	return dsda_config[id].flags & CONF_STRICT;
+	return (dsda_config[id].flags & ConfigFlag::Strict) != ConfigFlag{};
 }
 
 int dsda_TransientIntConfig(ConfigId id)

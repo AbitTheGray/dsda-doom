@@ -68,8 +68,9 @@ Candidates found by scanning for 3+ adjacent numeric `#define`s with a shared pr
 The scan misses two-entry groups like the old `SKILL4`/`SKILL5`, so expect a few more.
 
 Found by a later scan that also counts 2-entry groups; not yet checked:
-- **Larger groups:** `UDMF_` (`dsda/udmf.hpp`), `DM_` and `SP_` (`wi_stuff.cpp`), `SORC_`/`SORCBALL_`/`KORAX_` (`p_enemy.cpp`), `TALLY_` (`hexen/in_lude.cpp`), `CONF_` (`dsda/configuration.cpp`), `OPL_` (`MUSIC/opl.hpp`, probably register constants).
-- **Checked, plain constants:** `USE_*_AMMO_*` (`doomdef.hpp`) and `AMMO_*_WIMPY`/`_HEFTY` (`p_mobj.hpp`) are ammo amounts, and the rest of `MENU_MOUSE_` (`m_mouse.inl`) are layout sizes; none of them is an enum.
+- **Larger groups:** `UDMF_SCROLL_`/`UDMF_THRUST_` (`dsda/udmf.hpp`: the UDMF side of the `SCROLL_`/`THRUST_` flags above, best done together with them), `OPL_` (`MUSIC/opl.hpp`, probably register constants).
+- **Single-player intermission states** (`wi_stuff.cpp`): the `SP_KILLS`...`SP_PAUSE` `#define`s are unused; `sp_state` is stepped with `++` and odd values are the pauses between counters (`sp_state & 1`), so it needs a design first, not just an enum.
+- **Checked, plain constants:** `USE_*_AMMO_*` (`doomdef.hpp`) and `AMMO_*_WIMPY`/`_HEFTY` (`p_mobj.hpp`) are ammo amounts, the rest of `MENU_MOUSE_` (`m_mouse.inl`), `DM_`/`SP_` coordinates (`wi_stuff.cpp`) and `TALLY_` (`hexen/in_lude.cpp`) are layout sizes, and `SORCBALL_`/`SORC_DEFENSE_`/`KORAX_` (`p_enemy.cpp`) are speeds, heights, times and TIDs; none of them is an enum.
 - **Two-entry groups:** `MENUF_` (`m_menu.hpp`), `GLOB_FLAG_` (`i_glob.hpp`), `BF_` (`p_map.hpp`), `LUMP_` (`w_wad.hpp`), `PL_SKYFLAT_` (`r_plane.hpp`), `STAIR_` (`p_floor.cpp`), `WD_` (`dsda/mapinfo.hpp`), `PLAYBACK_` (`dsda/playback.hpp`), and a few more in `st_stuff.cpp`, `MUSIC/` and `hexen/`.
 
 ## Review keypad digits in typed input

@@ -7598,13 +7598,17 @@ extern "C" void A_IceGuyMissileExplode(mobj_t* actor)
 #define SORCFX4_RAPIDFIRE_TIME		(6*3)   // 3 seconds
 #define SORCFX4_SPREAD_ANGLE		20
 
-#define SORC_DECELERATE		0
-#define SORC_ACCELERATE 	1
-#define SORC_STOPPING		2
-#define SORC_FIRESPELL		3
-#define SORC_STOPPED		4
-#define SORC_NORMAL			5
-#define SORC_FIRING_SPELL	6
+// How the Sorcerer's balls orbit; the Sorcerer keeps it in special_args[3].
+enum struct SorcererBallMode : int32_t
+{
+	Decelerate = 0,
+	Accelerate = 1,
+	Stopping = 2,
+	FireSpell = 3,
+	Stopped = 4,
+	Normal = 5,
+	FiringSpell = 6,
+};
 
 #define BALL1_ANGLEOFFSET	0
 #define BALL2_ANGLEOFFSET	(ANGLE_MAX/3)
@@ -7633,7 +7637,7 @@ extern "C" void A_SorcSpinBalls(mobj_t* actor)
 
 	A_SlowBalls(actor);
 	actor->special_args[0] = 0; // Currently no defense
-	actor->special_args[3] = SORC_NORMAL;
+	actor->special_args[3] = std::to_underlying(SorcererBallMode::Normal);
 	actor->special_args[4] = SORCBALL_INITIAL_SPEED; // Initial orbit speed
 	actor->special1.i = ANG1;
 	z = actor->z - actor->floorclip + actor->info->height;
@@ -7656,7 +7660,7 @@ extern "C" void A_SorcBallOrbit(mobj_t* actor)
 {
 	int x, y;
 	angle_t angle, baseangle;
-	int mode = actor->target->special_args[3];
+	const SorcererBallMode mode = static_cast<SorcererBallMode>(actor->target->special_args[3]);
 	mobj_t* parent = (mobj_t*)actor->target;
 	int dist = parent->radius - (actor->radius << 1);
 	angle_t prevangle = actor->special1.i;
@@ -7685,25 +7689,25 @@ extern "C" void A_SorcBallOrbit(mobj_t* actor)
 
 	switch(mode)
 	{
-		case SORC_NORMAL: // Balls rotating normally
+		case SorcererBallMode::Normal: // Balls rotating normally
 			A_SorcUpdateBallAngle(actor);
 			break;
-		case SORC_DECELERATE: // Balls decelerating
+		case SorcererBallMode::Decelerate: // Balls decelerating
 			A_DecelBalls(actor);
 			A_SorcUpdateBallAngle(actor);
 			break;
-		case SORC_ACCELERATE: // Balls accelerating
+		case SorcererBallMode::Accelerate: // Balls accelerating
 			A_AccelBalls(actor);
 			A_SorcUpdateBallAngle(actor);
 			break;
-		case SORC_STOPPING: // Balls stopping
+		case SorcererBallMode::Stopping: // Balls stopping
 			if((parent->special2.i == std::to_underlying(actor->type)) &&
 				(parent->special_args[1] > SORCBALL_SPEED_ROTATIONS) &&
 				(abs((int)angle - (int)(parent->angle >> ANGLETOFINESHIFT)) <
 					(30 << 5)))
 			{
 				// Can stop now
-				actor->target->special_args[3] = SORC_FIRESPELL;
+				actor->target->special_args[3] = std::to_underlying(SorcererBallMode::FireSpell);
 				actor->target->special_args[4] = 0;
 				// Set angle so ball angle == sorcerer angle
 				switch(actor->type)
@@ -7729,7 +7733,7 @@ extern "C" void A_SorcBallOrbit(mobj_t* actor)
 				A_SorcUpdateBallAngle(actor);
 			}
 			break;
-		case SORC_FIRESPELL: // Casting spell
+		case SorcererBallMode::FireSpell: // Casting spell
 			if(parent->special2.i == std::to_underlying(actor->type))
 			{
 				// Put sorcerer into special throw spell anim
@@ -7741,22 +7745,22 @@ extern "C" void A_SorcBallOrbit(mobj_t* actor)
 					S_StartVoidSound(SfxId::HexenSorcererSpellcast);
 					actor->special2.i = SORCFX4_RAPIDFIRE_TIME;
 					actor->special_args[4] = 128;
-					parent->special_args[3] = SORC_FIRING_SPELL;
+					parent->special_args[3] = std::to_underlying(SorcererBallMode::FiringSpell);
 				}
 				else
 				{
 					A_CastSorcererSpell(actor);
-					parent->special_args[3] = SORC_STOPPED;
+					parent->special_args[3] = std::to_underlying(SorcererBallMode::Stopped);
 				}
 			}
 			break;
-		case SORC_FIRING_SPELL:
+		case SorcererBallMode::FiringSpell:
 			if(parent->special2.i == std::to_underlying(actor->type))
 			{
 				if(actor->special2.i-- <= 0)
 				{
 					// Done rapid firing
-					parent->special_args[3] = SORC_STOPPED;
+					parent->special_args[3] = std::to_underlying(SorcererBallMode::Stopped);
 					// Back to orbit balls
 					if(parent->health > 0)
 						P_SetMobjStateNF(parent, StateId::HexenSorcAttack4);
@@ -7768,7 +7772,7 @@ extern "C" void A_SorcBallOrbit(mobj_t* actor)
 				}
 			}
 			break;
-		case SORC_STOPPED: // Balls stopped
+		case SorcererBallMode::Stopped: // Balls stopped
 		default:
 			break;
 	}
@@ -7789,20 +7793,20 @@ extern "C" void A_SorcBallOrbit(mobj_t* actor)
 
 extern "C" void A_SpeedBalls(mobj_t* actor)
 {
-	actor->special_args[3] = SORC_ACCELERATE;         // speed mode
+	actor->special_args[3] = std::to_underlying(SorcererBallMode::Accelerate);         // speed mode
 	actor->special_args[2] = SORCBALL_TERMINAL_SPEED; // target speed
 }
 
 extern "C" void A_SlowBalls(mobj_t* actor)
 {
-	actor->special_args[3] = SORC_DECELERATE;        // slow mode
+	actor->special_args[3] = std::to_underlying(SorcererBallMode::Decelerate);        // slow mode
 	actor->special_args[2] = SORCBALL_INITIAL_SPEED; // target speed
 }
 
 extern "C" void A_StopBalls(mobj_t* actor)
 {
 	int chance = P_Random(RandomClass::Hexen);
-	actor->special_args[3] = SORC_STOPPING; // stopping mode
+	actor->special_args[3] = std::to_underlying(SorcererBallMode::Stopping); // stopping mode
 	actor->special_args[1] = 0;             // Reset rotation counter
 
 	if((actor->special_args[0] <= 0) && (chance < 200))
@@ -7830,7 +7834,7 @@ extern "C" void A_AccelBalls(mobj_t* actor)
 	}
 	else
 	{
-		sorc->special_args[3] = SORC_NORMAL;
+		sorc->special_args[3] = std::to_underlying(SorcererBallMode::Normal);
 		if(sorc->special_args[4] >= SORCBALL_TERMINAL_SPEED)
 		{
 			// Reached terminal velocity - stop balls
@@ -7849,7 +7853,7 @@ extern "C" void A_DecelBalls(mobj_t* actor)
 	}
 	else
 	{
-		sorc->special_args[3] = SORC_NORMAL;
+		sorc->special_args[3] = std::to_underlying(SorcererBallMode::Normal);
 	}
 }
 
@@ -7974,7 +7978,7 @@ extern "C" void A_SorcOffense2(mobj_t* actor)
 
 extern "C" void A_SorcBossAttack(mobj_t* actor)
 {
-	actor->special_args[3] = SORC_ACCELERATE;
+	actor->special_args[3] = std::to_underlying(SorcererBallMode::Accelerate);
 	actor->special_args[2] = SORCBALL_INITIAL_SPEED;
 }
 
