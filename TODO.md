@@ -71,7 +71,6 @@ Found by a later scan that also counts 2-entry groups; not yet checked:
 - **Larger groups:** `UDMF_SCROLL_`/`UDMF_THRUST_` (`dsda/udmf.hpp`: the UDMF side of the `SCROLL_`/`THRUST_` flags above, best done together with them).
 - **Single-player intermission states** (`wi_stuff.cpp`): the `SP_KILLS`...`SP_PAUSE` `#define`s are unused; `sp_state` is stepped with `++` and odd values are the pauses between counters (`sp_state & 1`), so it needs a design first, not just an enum.
 - **Checked, plain constants:** `USE_*_AMMO_*` (`doomdef.hpp`) and `AMMO_*_WIMPY`/`_HEFTY` (`p_mobj.hpp`) are ammo amounts, the rest of `MENU_MOUSE_` (`m_mouse.inl`), `DM_`/`SP_` coordinates (`wi_stuff.cpp`) and `TALLY_` (`hexen/in_lude.cpp`) are layout sizes, `SORCBALL_`/`SORC_DEFENSE_`/`KORAX_` (`p_enemy.cpp`) are speeds, heights, times and TIDs, `STAIR_` (`p_floor.cpp`) and `LUMP_NOT_FOUND` (`w_wad.hpp`) are a sector type, a queue size and a sentinel index, `OPL_` (`MUSIC/opl.hpp`) are OPL register addresses and sizes, and the `ST_` sizes (`st_stuff.cpp`), `GENMIDI_NUM_` (`MUSIC/oplplayer.cpp`), `SS_` (`hexen/sn_sonix.cpp`), `MAX_ACS_` (`hexen/p_acs.hpp`) and `LIGHTNING_SPECIAL`/`LIGHTNING_SPECIAL2` (`hexen/p_anim.cpp`, line specials) are counts and ids; none of them is an enum.
-- **Two-entry groups:** `PL_SKYFLAT_` (`r_plane.hpp`: the top two bits of `visplane_t::picnum` and `sector_t::floorsky`/`ceilingsky` tag an `int` that otherwise holds a line or texture number, so it needs extractor functions; used in 7 files).
 
 ## Remaining `#define`s
 

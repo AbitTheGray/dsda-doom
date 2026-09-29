@@ -287,7 +287,7 @@ visplane_t* R_FindPlane(fixed_t height, int picnum, int lightlevel, int special,
 		special = 0;
 	}
 
-	if(picnum == skyflatnum || picnum & PL_SKYFLAT)
+	if(picnum == skyflatnum || SkyFlatHasTag(picnum, SkyFlatTag::Any))
 		height = lightlevel = 0; // killough 7/19/98: most skies map together
 
 	// New visplane algorithm uses hash table -- killough
@@ -506,7 +506,7 @@ static void R_DoDrawPlane(visplane_t* pl)
 		//     }
 		// }
 
-		if(pl->picnum == skyflatnum || pl->picnum & PL_SKYFLAT)
+		if(pl->picnum == skyflatnum || SkyFlatHasTag(pl->picnum, SkyFlatTag::Any))
 		{
 			// sky flat
 			int texture;
@@ -520,10 +520,10 @@ static void R_DoDrawPlane(visplane_t* pl)
 
 			an = viewangle;
 
-			if(pl->picnum & PL_SKYFLAT_LINE)
+			if(SkyFlatHasTag(pl->picnum, SkyFlatTag::Line))
 			{
 				// Sky Linedef
-				const line_t* l = &lines[pl->picnum & ~PL_SKYFLAT_LINE];
+				const line_t* l = &lines[SkyFlatUntagged(pl->picnum, SkyFlatTag::Line)];
 
 				// Sky transferred from first sidedef
 				const side_t* s = *l->sidenum + sides;
@@ -556,10 +556,10 @@ static void R_DoDrawPlane(visplane_t* pl)
 					dcvars.texturemid = (int)((int64_t)dcvars.texturemid * skyheight / SKYSTRETCH_HEIGHT);
 				}
 			}
-			else if(pl->picnum & PL_SKYFLAT_SECTOR)
+			else if(SkyFlatHasTag(pl->picnum, SkyFlatTag::Sector))
 			{
 				dcvars.texturemid = skytexturemid;
-				texture = pl->picnum & ~PL_SKYFLAT_SECTOR;
+				texture = SkyFlatUntagged(pl->picnum, SkyFlatTag::Sector);
 				flip = 0;
 			}
 			else

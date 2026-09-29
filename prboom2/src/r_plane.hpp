@@ -6,16 +6,48 @@
 
 #pragma once
 
+#include <cstdint>
+#include <utility>
+
 #include "r_data.hpp"
+
+#include "cpp/Util.hpp"
+
+// A flat number (visplane_t::picnum, sector_t::floorsky/ceilingsky) can carry a sky tag in its top two bits.
+// The rest of the number is then what the tag refers to.
+enum struct SkyFlatTag : uint32_t
+{
+	Line = Bit<uint32_t>(31u),   // a line whose first sidedef's upper texture is the sky; the rest is the line index
+	Sector = Bit<uint32_t>(30u), // a sky texture given to the sector; the rest is the texture number
+	Any = Line | Sector,
+};
+ENUM_FLAGS_FUNC(SkyFlatTag)
+
+// Whether `picnum` carries `tag` (with `SkyFlatTag::Any`, either tag).
+[[nodiscard]]
+inline constexpr bool SkyFlatHasTag(const int32_t picnum, const SkyFlatTag tag)
+{
+	return (static_cast<uint32_t>(picnum) & std::to_underlying(tag)) != 0u;
+}
+
+// `picnum` with `tag` removed: the line index or texture number that was tagged.
+[[nodiscard]]
+inline constexpr int32_t SkyFlatUntagged(const int32_t picnum, const SkyFlatTag tag)
+{
+	return static_cast<int32_t>(static_cast<uint32_t>(picnum) & ~std::to_underlying(tag));
+}
+
+// `value` (a line index or texture number) with `tag` added.
+[[nodiscard]]
+inline constexpr int32_t SkyFlatTagged(const int32_t value, const SkyFlatTag tag)
+{
+	return static_cast<int32_t>(static_cast<uint32_t>(value) | std::to_underlying(tag));
+}
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#define PL_SKYFLAT_LINE (0x80000000)
-#define PL_SKYFLAT_SECTOR (0x40000000)
-#define PL_SKYFLAT (PL_SKYFLAT_LINE|PL_SKYFLAT_SECTOR)
 
 /* Visplane related. */
 extern int* lastopening; // dropoff overflow

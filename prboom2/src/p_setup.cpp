@@ -874,12 +874,12 @@ static void P_LoadUDMFSectors(int lump)
 
 		if(ms->skyfloor)
 		{
-			ss->floorsky = R_TextureNumForName(ms->skyfloor) | PL_SKYFLAT_SECTOR;
+			ss->floorsky = SkyFlatTagged(R_TextureNumForName(ms->skyfloor), SkyFlatTag::Sector);
 		}
 
 		if(ms->skyceiling)
 		{
-			ss->ceilingsky = R_TextureNumForName(ms->skyceiling) | PL_SKYFLAT_SECTOR;
+			ss->ceilingsky = SkyFlatTagged(R_TextureNumForName(ms->skyceiling), SkyFlatTag::Sector);
 		}
 
 		if((ms->xscrollfloor || ms->yscrollfloor) && ms->scrollfloormode)

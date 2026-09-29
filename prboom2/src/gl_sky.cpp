@@ -146,22 +146,22 @@ void gld_AddSkyTexture(GLWall* wall, int sky1, int sky2, const SkyCap skytype)
 
 	wall->gltexture = nullptr;
 
-	if(sky1 & PL_SKYFLAT_LINE)
+	if(SkyFlatHasTag(sky1, SkyFlatTag::Line))
 	{
-		l = &lines[sky1 & ~PL_SKYFLAT_LINE];
+		l = &lines[SkyFlatUntagged(sky1, SkyFlatTag::Line)];
 	}
-	else if(sky2 & PL_SKYFLAT_LINE)
+	else if(SkyFlatHasTag(sky2, SkyFlatTag::Line))
 	{
-		l = &lines[sky2 & ~PL_SKYFLAT_LINE];
+		l = &lines[SkyFlatUntagged(sky2, SkyFlatTag::Line)];
 	}
 
-	if(sky1 & PL_SKYFLAT_SECTOR)
+	if(SkyFlatHasTag(sky1, SkyFlatTag::Sector))
 	{
-		sky = sky1 & ~PL_SKYFLAT_SECTOR;
+		sky = SkyFlatUntagged(sky1, SkyFlatTag::Sector);
 	}
-	else if(sky2 & PL_SKYFLAT_SECTOR)
+	else if(SkyFlatHasTag(sky2, SkyFlatTag::Sector))
 	{
-		sky = sky2 & ~PL_SKYFLAT_SECTOR;
+		sky = SkyFlatUntagged(sky2, SkyFlatTag::Sector);
 	}
 
 	if(l)

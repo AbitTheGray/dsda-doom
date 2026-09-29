@@ -1801,7 +1801,7 @@ static void gld_AddFlat(int sectornum, dboolean ceiling, visplane_t* plane)
 	sector = R_FakeFlat(sector, &tempsec, &floorlightlevel, &ceilinglightlevel, false); // for boom effects
 	flat.flags = (ceiling ? GLFlatFlag::Ceiling : static_cast<GLFlatFlag>(0));
 
-	if(plane->picnum & PL_SKYFLAT || plane->picnum == skyflatnum) // don't draw if sky
+	if(SkyFlatHasTag(plane->picnum, SkyFlatTag::Any) || plane->picnum == skyflatnum) // don't draw if sky
 		return;
 
 	if(!ceiling) // if it is a floor ...
