@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <utility>
+
 #include "doomdef.hpp"
 #include "doomstat.hpp"
 #include "m_misc.hpp"
@@ -23,17 +25,32 @@
 #include "p_acs.hpp"
 
 #define MAX_SCRIPT_ARGS 3
-#define SCRIPT_CONTINUE 0
-#define SCRIPT_STOP 1
-#define SCRIPT_TERMINATE 2
 #define OPEN_SCRIPTS_BASE 1000
 #define PRINT_BUFFER_SIZE 256
-#define GAME_SINGLE_PLAYER 0
-#define GAME_NET_COOPERATIVE 1
-#define GAME_NET_DEATHMATCH 2
-#define TEXTURE_TOP 0
-#define TEXTURE_MIDDLE 1
-#define TEXTURE_BOTTOM 2
+
+// What the interpreter does after a p-code command.
+enum struct AcsScriptAction : uint8_t
+{
+	Continue,
+	Stop,
+	Terminate,
+};
+
+// The game type ACS's GameType() returns to the script.
+enum struct AcsGameType : int32_t
+{
+	SinglePlayer = 0,
+	NetCooperative = 1,
+	NetDeathmatch = 2,
+};
+
+// Which texture of a side ACS's SetLineTexture() replaces.
+enum struct AcsLineTexture : int32_t
+{
+	Top = 0,
+	Middle = 1,
+	Bottom = 2,
+};
 
 #ifdef _MSC_VER // proff: This is the same as __attribute__ ((packed)) in GNUC
 #pragma pack(push)
@@ -62,108 +79,108 @@ static int Pop();
 static int Top();
 static void Drop();
 
-static int CmdNOP();
-static int CmdTerminate();
-static int CmdSuspend();
-static int CmdPushNumber();
-static int CmdLSpec1();
-static int CmdLSpec2();
-static int CmdLSpec3();
-static int CmdLSpec4();
-static int CmdLSpec5();
-static int CmdLSpec1Direct();
-static int CmdLSpec2Direct();
-static int CmdLSpec3Direct();
-static int CmdLSpec4Direct();
-static int CmdLSpec5Direct();
-static int CmdAdd();
-static int CmdSubtract();
-static int CmdMultiply();
-static int CmdDivide();
-static int CmdModulus();
-static int CmdEQ();
-static int CmdNE();
-static int CmdLT();
-static int CmdGT();
-static int CmdLE();
-static int CmdGE();
-static int CmdAssignScriptVar();
-static int CmdAssignMapVar();
-static int CmdAssignWorldVar();
-static int CmdPushScriptVar();
-static int CmdPushMapVar();
-static int CmdPushWorldVar();
-static int CmdAddScriptVar();
-static int CmdAddMapVar();
-static int CmdAddWorldVar();
-static int CmdSubScriptVar();
-static int CmdSubMapVar();
-static int CmdSubWorldVar();
-static int CmdMulScriptVar();
-static int CmdMulMapVar();
-static int CmdMulWorldVar();
-static int CmdDivScriptVar();
-static int CmdDivMapVar();
-static int CmdDivWorldVar();
-static int CmdModScriptVar();
-static int CmdModMapVar();
-static int CmdModWorldVar();
-static int CmdIncScriptVar();
-static int CmdIncMapVar();
-static int CmdIncWorldVar();
-static int CmdDecScriptVar();
-static int CmdDecMapVar();
-static int CmdDecWorldVar();
-static int CmdGoto();
-static int CmdIfGoto();
-static int CmdDrop();
-static int CmdDelay();
-static int CmdDelayDirect();
-static int CmdRandom();
-static int CmdRandomDirect();
-static int CmdThingCount();
-static int CmdThingCountDirect();
-static int CmdTagWait();
-static int CmdTagWaitDirect();
-static int CmdPolyWait();
-static int CmdPolyWaitDirect();
-static int CmdChangeFloor();
-static int CmdChangeFloorDirect();
-static int CmdChangeCeiling();
-static int CmdChangeCeilingDirect();
-static int CmdRestart();
-static int CmdAndLogical();
-static int CmdOrLogical();
-static int CmdAndBitwise();
-static int CmdOrBitwise();
-static int CmdEorBitwise();
-static int CmdNegateLogical();
-static int CmdLShift();
-static int CmdRShift();
-static int CmdUnaryMinus();
-static int CmdIfNotGoto();
-static int CmdLineSide();
-static int CmdScriptWait();
-static int CmdScriptWaitDirect();
-static int CmdClearLineSpecial();
-static int CmdCaseGoto();
-static int CmdBeginPrint();
-static int CmdEndPrint();
-static int CmdPrintString();
-static int CmdPrintNumber();
-static int CmdPrintCharacter();
-static int CmdPlayerCount();
-static int CmdGameType();
-static int CmdGameSkill();
-static int CmdTimer();
-static int CmdSectorSound();
-static int CmdAmbientSound();
-static int CmdSoundSequence();
-static int CmdSetLineTexture();
-static int CmdSetLineBlocking();
-static int CmdSetLineSpecial();
-static int CmdThingSound();
-static int CmdEndPrintBold();
+static AcsScriptAction CmdNOP();
+static AcsScriptAction CmdTerminate();
+static AcsScriptAction CmdSuspend();
+static AcsScriptAction CmdPushNumber();
+static AcsScriptAction CmdLSpec1();
+static AcsScriptAction CmdLSpec2();
+static AcsScriptAction CmdLSpec3();
+static AcsScriptAction CmdLSpec4();
+static AcsScriptAction CmdLSpec5();
+static AcsScriptAction CmdLSpec1Direct();
+static AcsScriptAction CmdLSpec2Direct();
+static AcsScriptAction CmdLSpec3Direct();
+static AcsScriptAction CmdLSpec4Direct();
+static AcsScriptAction CmdLSpec5Direct();
+static AcsScriptAction CmdAdd();
+static AcsScriptAction CmdSubtract();
+static AcsScriptAction CmdMultiply();
+static AcsScriptAction CmdDivide();
+static AcsScriptAction CmdModulus();
+static AcsScriptAction CmdEQ();
+static AcsScriptAction CmdNE();
+static AcsScriptAction CmdLT();
+static AcsScriptAction CmdGT();
+static AcsScriptAction CmdLE();
+static AcsScriptAction CmdGE();
+static AcsScriptAction CmdAssignScriptVar();
+static AcsScriptAction CmdAssignMapVar();
+static AcsScriptAction CmdAssignWorldVar();
+static AcsScriptAction CmdPushScriptVar();
+static AcsScriptAction CmdPushMapVar();
+static AcsScriptAction CmdPushWorldVar();
+static AcsScriptAction CmdAddScriptVar();
+static AcsScriptAction CmdAddMapVar();
+static AcsScriptAction CmdAddWorldVar();
+static AcsScriptAction CmdSubScriptVar();
+static AcsScriptAction CmdSubMapVar();
+static AcsScriptAction CmdSubWorldVar();
+static AcsScriptAction CmdMulScriptVar();
+static AcsScriptAction CmdMulMapVar();
+static AcsScriptAction CmdMulWorldVar();
+static AcsScriptAction CmdDivScriptVar();
+static AcsScriptAction CmdDivMapVar();
+static AcsScriptAction CmdDivWorldVar();
+static AcsScriptAction CmdModScriptVar();
+static AcsScriptAction CmdModMapVar();
+static AcsScriptAction CmdModWorldVar();
+static AcsScriptAction CmdIncScriptVar();
+static AcsScriptAction CmdIncMapVar();
+static AcsScriptAction CmdIncWorldVar();
+static AcsScriptAction CmdDecScriptVar();
+static AcsScriptAction CmdDecMapVar();
+static AcsScriptAction CmdDecWorldVar();
+static AcsScriptAction CmdGoto();
+static AcsScriptAction CmdIfGoto();
+static AcsScriptAction CmdDrop();
+static AcsScriptAction CmdDelay();
+static AcsScriptAction CmdDelayDirect();
+static AcsScriptAction CmdRandom();
+static AcsScriptAction CmdRandomDirect();
+static AcsScriptAction CmdThingCount();
+static AcsScriptAction CmdThingCountDirect();
+static AcsScriptAction CmdTagWait();
+static AcsScriptAction CmdTagWaitDirect();
+static AcsScriptAction CmdPolyWait();
+static AcsScriptAction CmdPolyWaitDirect();
+static AcsScriptAction CmdChangeFloor();
+static AcsScriptAction CmdChangeFloorDirect();
+static AcsScriptAction CmdChangeCeiling();
+static AcsScriptAction CmdChangeCeilingDirect();
+static AcsScriptAction CmdRestart();
+static AcsScriptAction CmdAndLogical();
+static AcsScriptAction CmdOrLogical();
+static AcsScriptAction CmdAndBitwise();
+static AcsScriptAction CmdOrBitwise();
+static AcsScriptAction CmdEorBitwise();
+static AcsScriptAction CmdNegateLogical();
+static AcsScriptAction CmdLShift();
+static AcsScriptAction CmdRShift();
+static AcsScriptAction CmdUnaryMinus();
+static AcsScriptAction CmdIfNotGoto();
+static AcsScriptAction CmdLineSide();
+static AcsScriptAction CmdScriptWait();
+static AcsScriptAction CmdScriptWaitDirect();
+static AcsScriptAction CmdClearLineSpecial();
+static AcsScriptAction CmdCaseGoto();
+static AcsScriptAction CmdBeginPrint();
+static AcsScriptAction CmdEndPrint();
+static AcsScriptAction CmdPrintString();
+static AcsScriptAction CmdPrintNumber();
+static AcsScriptAction CmdPrintCharacter();
+static AcsScriptAction CmdPlayerCount();
+static AcsScriptAction CmdGameType();
+static AcsScriptAction CmdGameSkill();
+static AcsScriptAction CmdTimer();
+static AcsScriptAction CmdSectorSound();
+static AcsScriptAction CmdAmbientSound();
+static AcsScriptAction CmdSoundSequence();
+static AcsScriptAction CmdSetLineTexture();
+static AcsScriptAction CmdSetLineBlocking();
+static AcsScriptAction CmdSetLineSpecial();
+static AcsScriptAction CmdThingSound();
+static AcsScriptAction CmdEndPrintBold();
 
 static void ThingCount(int type, int tid);
 
@@ -184,7 +201,7 @@ static const char** ACStrings;
 static char PrintBuffer[PRINT_BUFFER_SIZE];
 static acs_t* NewScript;
 
-static int (*PCodeCmds[])() =
+static AcsScriptAction (*PCodeCmds[])() =
 {
 	CmdNOP,
 	CmdTerminate,
@@ -643,7 +660,7 @@ void P_ACSInitNewGame()
 void T_InterpretACS(acs_t* script)
 {
 	int cmd;
-	int action;
+	AcsScriptAction action;
 
 	if(ACSInfo[script->infoIndex].state == AcsState::Terminating)
 	{
@@ -678,11 +695,11 @@ void T_InterpretACS(acs_t* script)
 			"compatible)", cmd);
 		action = PCodeCmds[cmd]();
 	}
-	while(action == SCRIPT_CONTINUE);
+	while(action == AcsScriptAction::Continue);
 
 	ACScript->ip = PCodeOffset;
 
-	if(action == SCRIPT_TERMINATE)
+	if(action == AcsScriptAction::Terminate)
 	{
 		ACSInfo[script->infoIndex].state = AcsState::Inactive;
 		ScriptFinished(ACScript->number);
@@ -804,29 +821,29 @@ static void Drop()
 	ACScript->stackPtr--;
 }
 
-static int CmdNOP()
+static AcsScriptAction CmdNOP()
 {
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdTerminate()
+static AcsScriptAction CmdTerminate()
 {
-	return SCRIPT_TERMINATE;
+	return AcsScriptAction::Terminate;
 }
 
-static int CmdSuspend()
+static AcsScriptAction CmdSuspend()
 {
 	ACSInfo[ACScript->infoIndex].state = AcsState::Suspended;
-	return SCRIPT_STOP;
+	return AcsScriptAction::Stop;
 }
 
-static int CmdPushNumber()
+static AcsScriptAction CmdPushNumber()
 {
 	Push(ReadCodeInt());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLSpec1()
+static AcsScriptAction CmdLSpec1()
 {
 	int special;
 
@@ -834,10 +851,10 @@ static int CmdLSpec1()
 	SpecArgs[0] = Pop();
 	map_format.execute_line_special(special, SpecArgs, ACScript->line,
 		ACScript->side, ACScript->activator);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLSpec2()
+static AcsScriptAction CmdLSpec2()
 {
 	int special;
 
@@ -846,10 +863,10 @@ static int CmdLSpec2()
 	SpecArgs[0] = Pop();
 	map_format.execute_line_special(special, SpecArgs, ACScript->line,
 		ACScript->side, ACScript->activator);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLSpec3()
+static AcsScriptAction CmdLSpec3()
 {
 	int special;
 
@@ -859,10 +876,10 @@ static int CmdLSpec3()
 	SpecArgs[0] = Pop();
 	map_format.execute_line_special(special, SpecArgs, ACScript->line,
 		ACScript->side, ACScript->activator);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLSpec4()
+static AcsScriptAction CmdLSpec4()
 {
 	int special;
 
@@ -873,10 +890,10 @@ static int CmdLSpec4()
 	SpecArgs[0] = Pop();
 	map_format.execute_line_special(special, SpecArgs, ACScript->line,
 		ACScript->side, ACScript->activator);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLSpec5()
+static AcsScriptAction CmdLSpec5()
 {
 	int special;
 
@@ -888,10 +905,10 @@ static int CmdLSpec5()
 	SpecArgs[0] = Pop();
 	map_format.execute_line_special(special, SpecArgs, ACScript->line,
 		ACScript->side, ACScript->activator);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLSpec1Direct()
+static AcsScriptAction CmdLSpec1Direct()
 {
 	int special;
 
@@ -899,10 +916,10 @@ static int CmdLSpec1Direct()
 	SpecArgs[0] = ReadCodeInt();
 	map_format.execute_line_special(special, SpecArgs, ACScript->line,
 		ACScript->side, ACScript->activator);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLSpec2Direct()
+static AcsScriptAction CmdLSpec2Direct()
 {
 	int special;
 
@@ -911,10 +928,10 @@ static int CmdLSpec2Direct()
 	SpecArgs[1] = ReadCodeInt();
 	map_format.execute_line_special(special, SpecArgs, ACScript->line,
 		ACScript->side, ACScript->activator);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLSpec3Direct()
+static AcsScriptAction CmdLSpec3Direct()
 {
 	int special;
 
@@ -924,10 +941,10 @@ static int CmdLSpec3Direct()
 	SpecArgs[2] = ReadCodeInt();
 	map_format.execute_line_special(special, SpecArgs, ACScript->line,
 		ACScript->side, ACScript->activator);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLSpec4Direct()
+static AcsScriptAction CmdLSpec4Direct()
 {
 	int special;
 
@@ -938,10 +955,10 @@ static int CmdLSpec4Direct()
 	SpecArgs[3] = ReadCodeInt();
 	map_format.execute_line_special(special, SpecArgs, ACScript->line,
 		ACScript->side, ACScript->activator);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLSpec5Direct()
+static AcsScriptAction CmdLSpec5Direct()
 {
 	int special;
 
@@ -953,265 +970,265 @@ static int CmdLSpec5Direct()
 	SpecArgs[4] = ReadCodeInt();
 	map_format.execute_line_special(special, SpecArgs, ACScript->line,
 		ACScript->side, ACScript->activator);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdAdd()
+static AcsScriptAction CmdAdd()
 {
 	Push(Pop() + Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdSubtract()
+static AcsScriptAction CmdSubtract()
 {
 	int operand2;
 
 	operand2 = Pop();
 	Push(Pop() - operand2);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdMultiply()
+static AcsScriptAction CmdMultiply()
 {
 	Push(Pop() * Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdDivide()
+static AcsScriptAction CmdDivide()
 {
 	int operand2;
 
 	operand2 = Pop();
 	Push(Pop() / operand2);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdModulus()
+static AcsScriptAction CmdModulus()
 {
 	int operand2;
 
 	operand2 = Pop();
 	Push(Pop() % operand2);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdEQ()
+static AcsScriptAction CmdEQ()
 {
 	Push(Pop() == Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdNE()
+static AcsScriptAction CmdNE()
 {
 	Push(Pop() != Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLT()
+static AcsScriptAction CmdLT()
 {
 	int operand2;
 
 	operand2 = Pop();
 	Push(Pop() < operand2);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdGT()
+static AcsScriptAction CmdGT()
 {
 	int operand2;
 
 	operand2 = Pop();
 	Push(Pop() > operand2);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLE()
+static AcsScriptAction CmdLE()
 {
 	int operand2;
 
 	operand2 = Pop();
 	Push(Pop() <= operand2);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdGE()
+static AcsScriptAction CmdGE()
 {
 	int operand2;
 
 	operand2 = Pop();
 	Push(Pop() >= operand2);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdAssignScriptVar()
+static AcsScriptAction CmdAssignScriptVar()
 {
 	ACScript->vars[ReadScriptVar()] = Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdAssignMapVar()
+static AcsScriptAction CmdAssignMapVar()
 {
 	MapVars[ReadMapVar()] = Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdAssignWorldVar()
+static AcsScriptAction CmdAssignWorldVar()
 {
 	WorldVars[ReadWorldVar()] = Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdPushScriptVar()
+static AcsScriptAction CmdPushScriptVar()
 {
 	Push(ACScript->vars[ReadScriptVar()]);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdPushMapVar()
+static AcsScriptAction CmdPushMapVar()
 {
 	Push(MapVars[ReadMapVar()]);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdPushWorldVar()
+static AcsScriptAction CmdPushWorldVar()
 {
 	Push(WorldVars[ReadWorldVar()]);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdAddScriptVar()
+static AcsScriptAction CmdAddScriptVar()
 {
 	ACScript->vars[ReadScriptVar()] += Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdAddMapVar()
+static AcsScriptAction CmdAddMapVar()
 {
 	MapVars[ReadMapVar()] += Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdAddWorldVar()
+static AcsScriptAction CmdAddWorldVar()
 {
 	WorldVars[ReadWorldVar()] += Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdSubScriptVar()
+static AcsScriptAction CmdSubScriptVar()
 {
 	ACScript->vars[ReadScriptVar()] -= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdSubMapVar()
+static AcsScriptAction CmdSubMapVar()
 {
 	MapVars[ReadMapVar()] -= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdSubWorldVar()
+static AcsScriptAction CmdSubWorldVar()
 {
 	WorldVars[ReadWorldVar()] -= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdMulScriptVar()
+static AcsScriptAction CmdMulScriptVar()
 {
 	ACScript->vars[ReadScriptVar()] *= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdMulMapVar()
+static AcsScriptAction CmdMulMapVar()
 {
 	MapVars[ReadMapVar()] *= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdMulWorldVar()
+static AcsScriptAction CmdMulWorldVar()
 {
 	WorldVars[ReadWorldVar()] *= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdDivScriptVar()
+static AcsScriptAction CmdDivScriptVar()
 {
 	ACScript->vars[ReadScriptVar()] /= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdDivMapVar()
+static AcsScriptAction CmdDivMapVar()
 {
 	MapVars[ReadMapVar()] /= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdDivWorldVar()
+static AcsScriptAction CmdDivWorldVar()
 {
 	WorldVars[ReadWorldVar()] /= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdModScriptVar()
+static AcsScriptAction CmdModScriptVar()
 {
 	ACScript->vars[ReadScriptVar()] %= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdModMapVar()
+static AcsScriptAction CmdModMapVar()
 {
 	MapVars[ReadMapVar()] %= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdModWorldVar()
+static AcsScriptAction CmdModWorldVar()
 {
 	WorldVars[ReadWorldVar()] %= Pop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdIncScriptVar()
+static AcsScriptAction CmdIncScriptVar()
 {
 	++ACScript->vars[ReadScriptVar()];
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdIncMapVar()
+static AcsScriptAction CmdIncMapVar()
 {
 	++MapVars[ReadMapVar()];
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdIncWorldVar()
+static AcsScriptAction CmdIncWorldVar()
 {
 	++WorldVars[ReadWorldVar()];
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdDecScriptVar()
+static AcsScriptAction CmdDecScriptVar()
 {
 	--ACScript->vars[ReadScriptVar()];
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdDecMapVar()
+static AcsScriptAction CmdDecMapVar()
 {
 	--MapVars[ReadMapVar()];
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdDecWorldVar()
+static AcsScriptAction CmdDecWorldVar()
 {
 	--WorldVars[ReadWorldVar()];
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdGoto()
+static AcsScriptAction CmdGoto()
 {
 	PCodeOffset = ReadOffset();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdIfGoto()
+static AcsScriptAction CmdIfGoto()
 {
 	int offset;
 
@@ -1221,28 +1238,28 @@ static int CmdIfGoto()
 	{
 		PCodeOffset = offset;
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdDrop()
+static AcsScriptAction CmdDrop()
 {
 	Drop();
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdDelay()
+static AcsScriptAction CmdDelay()
 {
 	ACScript->delayCount = Pop();
-	return SCRIPT_STOP;
+	return AcsScriptAction::Stop;
 }
 
-static int CmdDelayDirect()
+static AcsScriptAction CmdDelayDirect()
 {
 	ACScript->delayCount = ReadCodeInt();
-	return SCRIPT_STOP;
+	return AcsScriptAction::Stop;
 }
 
-static int CmdRandom()
+static AcsScriptAction CmdRandom()
 {
 	int low;
 	int high;
@@ -1250,10 +1267,10 @@ static int CmdRandom()
 	high = Pop();
 	low = Pop();
 	Push(low + (P_Random(RandomClass::Hexen) % (high - low + 1)));
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdRandomDirect()
+static AcsScriptAction CmdRandomDirect()
 {
 	int low;
 	int high;
@@ -1261,25 +1278,25 @@ static int CmdRandomDirect()
 	low = ReadCodeInt();
 	high = ReadCodeInt();
 	Push(low + (P_Random(RandomClass::Hexen) % (high - low + 1)));
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdThingCount()
+static AcsScriptAction CmdThingCount()
 {
 	int tid;
 
 	tid = Pop();
 	ThingCount(Pop(), tid);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdThingCountDirect()
+static AcsScriptAction CmdThingCountDirect()
 {
 	int type;
 
 	type = ReadCodeInt();
 	ThingCount(type, ReadCodeInt());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
 static void ThingCount(int type, int tid)
@@ -1347,35 +1364,35 @@ static void ThingCount(int type, int tid)
 	Push(count);
 }
 
-static int CmdTagWait()
+static AcsScriptAction CmdTagWait()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = Pop();
 	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForTag;
-	return SCRIPT_STOP;
+	return AcsScriptAction::Stop;
 }
 
-static int CmdTagWaitDirect()
+static AcsScriptAction CmdTagWaitDirect()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = ReadCodeInt();
 	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForTag;
-	return SCRIPT_STOP;
+	return AcsScriptAction::Stop;
 }
 
-static int CmdPolyWait()
+static AcsScriptAction CmdPolyWait()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = Pop();
 	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForPoly;
-	return SCRIPT_STOP;
+	return AcsScriptAction::Stop;
 }
 
-static int CmdPolyWaitDirect()
+static AcsScriptAction CmdPolyWaitDirect()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = ReadCodeInt();
 	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForPoly;
-	return SCRIPT_STOP;
+	return AcsScriptAction::Stop;
 }
 
-static int CmdChangeFloor()
+static AcsScriptAction CmdChangeFloor()
 {
 	int tag;
 	int flat;
@@ -1387,10 +1404,10 @@ static int CmdChangeFloor()
 	{
 		sectors[*id_p].floorpic = flat;
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdChangeFloorDirect()
+static AcsScriptAction CmdChangeFloorDirect()
 {
 	int tag;
 	int flat;
@@ -1402,10 +1419,10 @@ static int CmdChangeFloorDirect()
 	{
 		sectors[*id_p].floorpic = flat;
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdChangeCeiling()
+static AcsScriptAction CmdChangeCeiling()
 {
 	int tag;
 	int flat;
@@ -1417,10 +1434,10 @@ static int CmdChangeCeiling()
 	{
 		sectors[*id_p].ceilingpic = flat;
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdChangeCeilingDirect()
+static AcsScriptAction CmdChangeCeilingDirect()
 {
 	int tag;
 	int flat;
@@ -1432,76 +1449,76 @@ static int CmdChangeCeilingDirect()
 	{
 		sectors[*id_p].ceilingpic = flat;
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdRestart()
+static AcsScriptAction CmdRestart()
 {
 	PCodeOffset = ACSInfo[ACScript->infoIndex].offset;
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdAndLogical()
+static AcsScriptAction CmdAndLogical()
 {
 	Push(Pop() && Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdOrLogical()
+static AcsScriptAction CmdOrLogical()
 {
 	Push(Pop() || Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdAndBitwise()
+static AcsScriptAction CmdAndBitwise()
 {
 	Push(Pop() & Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdOrBitwise()
+static AcsScriptAction CmdOrBitwise()
 {
 	Push(Pop() | Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdEorBitwise()
+static AcsScriptAction CmdEorBitwise()
 {
 	Push(Pop() ^ Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdNegateLogical()
+static AcsScriptAction CmdNegateLogical()
 {
 	Push(!Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLShift()
+static AcsScriptAction CmdLShift()
 {
 	int operand2;
 
 	operand2 = Pop();
 	Push(Pop() << operand2);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdRShift()
+static AcsScriptAction CmdRShift()
 {
 	int operand2;
 
 	operand2 = Pop();
 	Push(Pop() >> operand2);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdUnaryMinus()
+static AcsScriptAction CmdUnaryMinus()
 {
 	Push(-Pop());
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdIfNotGoto()
+static AcsScriptAction CmdIfNotGoto()
 {
 	int offset;
 
@@ -1511,39 +1528,39 @@ static int CmdIfNotGoto()
 	{
 		PCodeOffset = offset;
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdLineSide()
+static AcsScriptAction CmdLineSide()
 {
 	Push(ACScript->side);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdScriptWait()
+static AcsScriptAction CmdScriptWait()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = Pop();
 	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForScript;
-	return SCRIPT_STOP;
+	return AcsScriptAction::Stop;
 }
 
-static int CmdScriptWaitDirect()
+static AcsScriptAction CmdScriptWaitDirect()
 {
 	ACSInfo[ACScript->infoIndex].waitValue = ReadCodeInt();
 	ACSInfo[ACScript->infoIndex].state = AcsState::WaitingForScript;
-	return SCRIPT_STOP;
+	return AcsScriptAction::Stop;
 }
 
-static int CmdClearLineSpecial()
+static AcsScriptAction CmdClearLineSpecial()
 {
 	if(ACScript->line)
 	{
 		ACScript->line->special = 0;
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdCaseGoto()
+static AcsScriptAction CmdCaseGoto()
 {
 	int value;
 	int offset;
@@ -1557,16 +1574,16 @@ static int CmdCaseGoto()
 		Drop();
 	}
 
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdBeginPrint()
+static AcsScriptAction CmdBeginPrint()
 {
 	*PrintBuffer = 0;
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdEndPrint()
+static AcsScriptAction CmdEndPrint()
 {
 	player_t* player;
 
@@ -1579,10 +1596,10 @@ static int CmdEndPrint()
 		player = &players[consoleplayer];
 	}
 	P_SetMessage(player, PrintBuffer, true);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdEndPrintBold()
+static AcsScriptAction CmdEndPrintBold()
 {
 	int i;
 
@@ -1593,25 +1610,25 @@ static int CmdEndPrintBold()
 			P_SetYellowMessage(&players[i], PrintBuffer, true);
 		}
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdPrintString()
+static AcsScriptAction CmdPrintString()
 {
 	M_StringConcat(PrintBuffer, StringLookup(Pop()), sizeof(PrintBuffer));
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdPrintNumber()
+static AcsScriptAction CmdPrintNumber()
 {
 	char tempStr[16];
 
 	snprintf(tempStr, sizeof(tempStr), "%d", Pop());
 	M_StringConcat(PrintBuffer, tempStr, sizeof(PrintBuffer));
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdPrintCharacter()
+static AcsScriptAction CmdPrintCharacter()
 {
 	char tempStr[2];
 
@@ -1619,10 +1636,10 @@ static int CmdPrintCharacter()
 	tempStr[1] = '\0';
 	M_StringConcat(PrintBuffer, tempStr, sizeof(PrintBuffer));
 
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdPlayerCount()
+static AcsScriptAction CmdPlayerCount()
 {
 	int i;
 	int count;
@@ -1633,42 +1650,42 @@ static int CmdPlayerCount()
 		count += playeringame[i];
 	}
 	Push(count);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdGameType()
+static AcsScriptAction CmdGameType()
 {
-	int gametype;
+	AcsGameType gametype;
 
 	if(netgame == false)
 	{
-		gametype = GAME_SINGLE_PLAYER;
+		gametype = AcsGameType::SinglePlayer;
 	}
 	else if(deathmatch)
 	{
-		gametype = GAME_NET_DEATHMATCH;
+		gametype = AcsGameType::NetDeathmatch;
 	}
 	else
 	{
-		gametype = GAME_NET_COOPERATIVE;
+		gametype = AcsGameType::NetCooperative;
 	}
-	Push(gametype);
-	return SCRIPT_CONTINUE;
+	Push(std::to_underlying(gametype));
+	return AcsScriptAction::Continue;
 }
 
-static int CmdGameSkill()
+static AcsScriptAction CmdGameSkill()
 {
 	Push(gameskill);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdTimer()
+static AcsScriptAction CmdTimer()
 {
 	Push(leveltime);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdSectorSound()
+static AcsScriptAction CmdSectorSound()
 {
 	int volume;
 	mobj_t* mobj;
@@ -1680,10 +1697,10 @@ static int CmdSectorSound()
 	}
 	volume = Pop();
 	S_StartSoundAtVolume(mobj, S_GetSoundID(StringLookup(Pop())), volume, false, 0);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdThingSound()
+static AcsScriptAction CmdThingSound()
 {
 	int tid;
 	SfxId sound;
@@ -1699,19 +1716,19 @@ static int CmdThingSound()
 	{
 		S_StartSoundAtVolume(mobj, sound, volume, false, 0);
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdAmbientSound()
+static AcsScriptAction CmdAmbientSound()
 {
 	int volume;
 
 	volume = Pop();
 	S_StartSoundAtVolume(nullptr, S_GetSoundID(StringLookup(Pop())), volume, false, 0);
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdSoundSequence()
+static AcsScriptAction CmdSoundSequence()
 {
 	mobj_t* mobj;
 
@@ -1721,43 +1738,43 @@ static int CmdSoundSequence()
 		mobj = (mobj_t*)&ACScript->line->frontsector->soundorg;
 	}
 	SN_StartSequenceName(mobj, StringLookup(Pop()));
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdSetLineTexture()
+static AcsScriptAction CmdSetLineTexture()
 {
 	line_t* line;
 	int lineTag;
 	int side;
-	int position;
+	AcsLineTexture position;
 	int texture;
 	int searcher;
 
 	texture = R_TextureNumForName(StringLookup(Pop()));
-	position = Pop();
+	position = static_cast<AcsLineTexture>(Pop());
 	side = Pop();
 	lineTag = Pop();
 	searcher = -1;
 	while((line = P_FindLine(lineTag, &searcher)) != nullptr)
 	{
-		if(position == TEXTURE_MIDDLE)
+		if(position == AcsLineTexture::Middle)
 		{
 			sides[line->sidenum[side]].midtexture = texture;
 		}
-		else if(position == TEXTURE_BOTTOM)
+		else if(position == AcsLineTexture::Bottom)
 		{
 			sides[line->sidenum[side]].bottomtexture = texture;
 		}
 		else
 		{
-			// TEXTURE_TOP
+			// AcsLineTexture::Top
 			sides[line->sidenum[side]].toptexture = texture;
 		}
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdSetLineBlocking()
+static AcsScriptAction CmdSetLineBlocking()
 {
 	line_t* line;
 	int lineTag;
@@ -1771,10 +1788,10 @@ static int CmdSetLineBlocking()
 	{
 		line->flags = (line->flags - LineFlag::Blocking) | blocking;
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }
 
-static int CmdSetLineSpecial()
+static AcsScriptAction CmdSetLineSpecial()
 {
 	line_t* line;
 	int lineTag;
@@ -1798,5 +1815,5 @@ static int CmdSetLineSpecial()
 		line->special_args[3] = arg4;
 		line->special_args[4] = arg5;
 	}
-	return SCRIPT_CONTINUE;
+	return AcsScriptAction::Continue;
 }

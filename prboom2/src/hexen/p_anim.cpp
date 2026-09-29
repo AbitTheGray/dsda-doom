@@ -19,8 +19,6 @@
 
 #define ANIM_SCRIPT_NAME "ANIMDEFS"
 #define MAX_FRAME_DEFS 96
-#define ANIM_FLAT 0
-#define ANIM_TEXTURE 1
 #define SCI_FLAT    "flat"
 #define SCI_TEXTURE "texture"
 #define SCI_PIC     "pic"
@@ -118,7 +116,7 @@ extern "C" void P_AnimateHexenSurfaces()
 				ad->tics = (ad->tics >> 16)
 					+ P_Random(RandomClass::Hexen) % ((ad->tics & 0xff00) >> 8);
 			}
-			if(ad->type == ANIM_FLAT)
+			if(ad->type == AnimType::Flat)
 			{
 				flattranslation[ad->index] =
 					FrameDefs[ad->currentFrameDef].index;
@@ -353,11 +351,11 @@ void P_InitFTAnims()
 		}
 		if(SC_Compare(SCI_FLAT))
 		{
-			ad->type = ANIM_FLAT;
+			ad->type = AnimType::Flat;
 		}
 		else if(SC_Compare(SCI_TEXTURE))
 		{
-			ad->type = ANIM_TEXTURE;
+			ad->type = AnimType::Texture;
 		}
 		else
 		{
@@ -365,7 +363,7 @@ void P_InitFTAnims()
 		}
 		SC_MustGetString(); // Name
 		ignore = false;
-		if(ad->type == ANIM_FLAT)
+		if(ad->type == AnimType::Flat)
 		{
 			if(!W_LumpNameExists2(sc_String, LumpNamespace::Flats))
 			{

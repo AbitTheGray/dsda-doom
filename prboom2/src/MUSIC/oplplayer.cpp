@@ -19,6 +19,8 @@
 #include "w_wad.hpp"
 #include "z_zone.hpp"
 
+#include "cpp/Util.hpp"
+
 #include "opl.hpp"
 #include "midifile.hpp"
 
@@ -37,8 +39,14 @@ static int opl_opl3mode;
 #define GENMIDI_NUM_PERCUSSION 47
 
 #define GENMIDI_HEADER          "#OPL_II#"
-#define GENMIDI_FLAG_FIXED      0x0001         /* fixed pitch */
-#define GENMIDI_FLAG_2VOICE     0x0004         /* double voice (OPL3) */
+
+// Flags of a GENMIDI instrument; the lump stores them as a little-endian 16-bit field.
+enum struct GenmidiFlag : uint16_t
+{
+	Fixed = Bit<uint16_t>(0u),       // fixed pitch
+	DoubleVoice = Bit<uint16_t>(2u), // double voice (OPL3)
+};
+ENUM_FLAGS_FUNC(GenmidiFlag)
 
 typedef struct
 {
@@ -819,7 +827,7 @@ static unsigned int FrequencyForVoice(opl_voice_t* voice)
 
 	gm_voice = &voice->current_instr->voices[voice->current_instr_voice];
 
-	if((LittleShort(voice->current_instr->flags) & GENMIDI_FLAG_FIXED) == 0)
+	if((static_cast<GenmidiFlag>(LittleShort(voice->current_instr->flags)) & GenmidiFlag::Fixed) == GenmidiFlag{})
 	{
 		note += (signed short)LittleShort(gm_voice->base_note_offset);
 	}
@@ -903,7 +911,7 @@ static void UpdateVoiceFrequency(opl_voice_t* voice)
 }
 
 // Program a single voice for an instrument.  For a double voice
-// instrument (GENMIDI_FLAG_2VOICE), this is called twice for each
+// instrument (GenmidiFlag::DoubleVoice), this is called twice for each
 // key on event.
 
 static void VoiceKeyOn(opl_channel_data_t* channel,
@@ -935,7 +943,7 @@ static void VoiceKeyOn(opl_channel_data_t* channel,
 	// Work out the note to use.  This is normally the same as
 	// the key, unless it is a fixed pitch instrument.
 
-	if((LittleShort(instrument->flags) & GENMIDI_FLAG_FIXED) != 0)
+	if((static_cast<GenmidiFlag>(LittleShort(instrument->flags)) & GenmidiFlag::Fixed) != GenmidiFlag{})
 	{
 		voice->note = instrument->fixed_note;
 	}
@@ -1007,7 +1015,7 @@ static void KeyOnEvent(opl_track_data_t* track, midi_event_t* event)
 		instrument = channel->instrument;
 	}
 
-	double_voice = (LittleShort(instrument->flags) & GENMIDI_FLAG_2VOICE) != 0;
+	double_voice = (static_cast<GenmidiFlag>(LittleShort(instrument->flags)) & GenmidiFlag::DoubleVoice) != GenmidiFlag{};
 
 	switch(opl_drv_ver)
 	{

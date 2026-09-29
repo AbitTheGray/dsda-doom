@@ -2,6 +2,16 @@
 
 #pragma once
 
+#include <cstdint>
+
+// What an ANIMDEFS animation cycles through.
+// Part of the savegame (AnimDefs is saved as raw bytes), so it keeps the width of the old int.
+enum struct AnimType : int32_t
+{
+	Flat = 0,
+	Texture = 1,
+};
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -11,7 +21,7 @@ extern "C"
 
 typedef struct
 {
-	int type;
+	AnimType type;
 	int index;
 	int tics;
 	int currentFrameDef;
