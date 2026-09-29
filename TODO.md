@@ -73,6 +73,13 @@ Found by a later scan that also counts 2-entry groups; not yet checked:
 - **Checked, plain constants:** `USE_*_AMMO_*` (`doomdef.hpp`) and `AMMO_*_WIMPY`/`_HEFTY` (`p_mobj.hpp`) are ammo amounts, the rest of `MENU_MOUSE_` (`m_mouse.inl`), `DM_`/`SP_` coordinates (`wi_stuff.cpp`) and `TALLY_` (`hexen/in_lude.cpp`) are layout sizes, and `SORCBALL_`/`SORC_DEFENSE_`/`KORAX_` (`p_enemy.cpp`) are speeds, heights, times and TIDs; none of them is an enum.
 - **Two-entry groups:** `MENUF_` (`m_menu.hpp`), `GLOB_FLAG_` (`i_glob.hpp`), `BF_` (`p_map.hpp`), `LUMP_` (`w_wad.hpp`), `PL_SKYFLAT_` (`r_plane.hpp`), `STAIR_` (`p_floor.cpp`), `WD_` (`dsda/mapinfo.hpp`), `PLAYBACK_` (`dsda/playback.hpp`), and a few more in `st_stuff.cpp`, `MUSIC/` and `hexen/`.
 
+## Remaining `#define`s
+
+Go through all `#define`s and convert each one to either a variable or a function.
+A `#define` that only names a value (a size, a speed, a coordinate, like the `TALLY_` or `KORAX_` constants) becomes a `constexpr` variable.
+A function-like `#define` becomes an `inline` (or `constexpr`) function.
+Only what really has to be a macro (e.g. build configuration tested in `#if`, or text pasting) stays one.
+
 ## Review keypad digits in typed input
 
 Keypad keys are `0x100 +` their character (`KeyCode::Keypad1` is `0x100 + '1'`), and three places treat them differently, all kept exactly as upstream for now:
