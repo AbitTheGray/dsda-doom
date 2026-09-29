@@ -12,6 +12,16 @@
 
 #include <string_view>
 
+#include "cpp/Util.hpp"
+
+// e6y: lump flags
+enum struct LumpFlag : uint8_t
+{
+	Static = Bit<uint8_t>(0u), // assigned gltexture should be static
+	PrBoom = Bit<uint8_t>(1u), // from internal resource
+};
+ENUM_FLAGS_FUNC(LumpFlag)
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -109,12 +119,8 @@ typedef struct
 	wadfile_info_t* wadfile;
 	int position;
 	WadSource source;
-	int flags; //e6y
+	LumpFlag flags; //e6y
 } lumpinfo_t;
-
-// e6y: lump flags
-#define LUMP_STATIC 0x00000001 /* assigned gltexture should be static */
-#define LUMP_PRBOOM 0x00000002 /* from internal resource */
 
 extern lumpinfo_t* lumpinfo;
 extern int numlumps;

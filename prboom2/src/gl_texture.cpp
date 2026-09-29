@@ -204,7 +204,7 @@ static GLTexture* gld_AddNewGLTexture(int texture_num, dboolean indexed)
 
 static GLTexture* gld_AddNewGLPatchTexture(int lump, dboolean indexed)
 {
-	if(lumpinfo[lump].flags & LUMP_STATIC)
+	if((lumpinfo[lump].flags & LumpFlag::Static) != LumpFlag{})
 		return gld_AddNewGLTexItem(lump, numlumps, indexed ? &gld_GLIndexedStaticPatchTextures : &gld_GLStaticPatchTextures);
 	else
 		return gld_AddNewGLTexItem(lump, numlumps, indexed ? &gld_GLIndexedPatchTextures : &gld_GLPatchTextures);

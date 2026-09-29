@@ -63,7 +63,7 @@ Convert a few groups per batch, then build and run the spec suite.
 Candidates found by scanning for 3+ adjacent numeric `#define`s with a shared prefix; check each one, some may turn out to be plain constants:
 - **Flags:** `SCROLL_` (`dsda/scroll.hpp`: two flag sets and the untracked `THRUST_` group share `scroll_t::flags`, which is part of the savegame layout, so one enum cannot type that field), `RDC_` (`r_draw.cpp`: only used in `#if` inside `r_drawcolumn.inl`/`r_drawflush.inl`, which `r_draw.cpp` includes once per pipeline - it needs those files turned into templates with `if constexpr`, not just an enum).
 - **Flags with a packed field** (need extractor functions): `AFLAG_` (`doomdef.hpp`: `ticcmd_t::arti` holds an artifact id, these two flags around it, or the sentinels `0xff`/`HexenCount`, and it is a demo byte, so it needs a design first).
-- **Plain enumerations:** `PRB_MB_` (`e6y.hpp`; really a packed Windows `MessageBox` type - a button set plus `DEFBUTTON` bits - and only `PRB_MB_OK` is used).
+- **Plain enumerations:** `PRB_MB_` (`e6y.hpp`; really a packed Windows `MessageBox` type - a button set plus `DEFBUTTON` bits - and only `PRB_MB_OK` is used). The `PRB_ID*` return codes next to it are never read by a caller, and `I_MessageBox` only does something on Windows, so a change there cannot be checked by a Linux build.
 
 The scan misses two-entry groups like the old `SKILL4`/`SKILL5`, so expect a few more.
 
@@ -71,13 +71,14 @@ Found by a later scan that also counts 2-entry groups; not yet checked:
 - **Larger groups:** `UDMF_SCROLL_`/`UDMF_THRUST_` (`dsda/udmf.hpp`: the UDMF side of the `SCROLL_`/`THRUST_` flags above, best done together with them).
 - **Single-player intermission states** (`wi_stuff.cpp`): the `SP_KILLS`...`SP_PAUSE` `#define`s are unused; `sp_state` is stepped with `++` and odd values are the pauses between counters (`sp_state & 1`), so it needs a design first, not just an enum.
 - **Checked, plain constants:** `USE_*_AMMO_*` (`doomdef.hpp`) and `AMMO_*_WIMPY`/`_HEFTY` (`p_mobj.hpp`) are ammo amounts, the rest of `MENU_MOUSE_` (`m_mouse.inl`), `DM_`/`SP_` coordinates (`wi_stuff.cpp`) and `TALLY_` (`hexen/in_lude.cpp`) are layout sizes, `SORCBALL_`/`SORC_DEFENSE_`/`KORAX_` (`p_enemy.cpp`) are speeds, heights, times and TIDs, `STAIR_` (`p_floor.cpp`) and `LUMP_NOT_FOUND` (`w_wad.hpp`) are a sector type, a queue size and a sentinel index, `OPL_` (`MUSIC/opl.hpp`) are OPL register addresses and sizes, and the `ST_` sizes (`st_stuff.cpp`), `GENMIDI_NUM_` (`MUSIC/oplplayer.cpp`), `SS_` (`hexen/sn_sonix.cpp`), `MAX_ACS_` (`hexen/p_acs.hpp`) and `LIGHTNING_SPECIAL`/`LIGHTNING_SPECIAL2` (`hexen/p_anim.cpp`, line specials) are counts and ids; none of them is an enum.
-- **Two-entry groups:** `LUMP_STATIC`/`LUMP_PRBOOM` (`w_wad.hpp`, lump flags), `BF_FAILURE`/`BF_SUCCESS` (`dsda/brute_force.cpp`, a success result), `PL_SKYFLAT_` (`r_plane.hpp`: two flag bits packed with a sky index in one `int`, so it needs extractor functions), `MOBJ_NULL`/`MOBJ_XX_PLAYER` (`hexen/sv_save.cpp`: negative sentinels in the saved mobj index, so the savegame format is involved).
+- **Two-entry groups:** `PL_SKYFLAT_` (`r_plane.hpp`: the top two bits of `visplane_t::picnum` and `sector_t::floorsky`/`ceilingsky` tag an `int` that otherwise holds a line or texture number, so it needs extractor functions; used in 7 files).
 
 ## Remaining `#define`s
 
 Go through all `#define`s and convert each one to either a variable or a function.
 A `#define` that only names a value (a size, a speed, a coordinate, like the `TALLY_` or `KORAX_` constants) becomes a `constexpr` variable.
 A function-like `#define` becomes an `inline` (or `constexpr`) function.
+Sentinel values that share an `int` with real indices stay integers, e.g. `MOBJ_NULL`/`MOBJ_XX_PLAYER` (`hexen/sv_save.cpp`, written into the savegame's mobj references) and `LUMP_NOT_FOUND` (`w_wad.hpp`).
 Only what really has to be a macro (e.g. build configuration tested in `#if`, or text pasting) stays one.
 
 ## Review keypad digits in typed input

@@ -112,7 +112,7 @@ static void W_AddFile(wadfile_info_t* wadfile)
 	int startlump;
 	filelump_t *fileinfo, *fileinfo2free = nullptr; //killough
 	filelump_t singleinfo;
-	int flags = 0;
+	LumpFlag flags = LumpFlag{};
 
 	if(wadfile->src == WadSource::Skip)
 	{
@@ -150,7 +150,7 @@ static void W_AddFile(wadfile_info_t* wadfile)
 		{
 			if(!strcasecmp(wadfile->name + len_file - len, WAD_DATA))
 			{
-				flags = LUMP_PRBOOM;
+				flags = LumpFlag::PrBoom;
 			}
 		}
 	}
@@ -423,7 +423,7 @@ int W_CheckNumForNameInternal(const char* name)
 	int p;
 	for(p = LUMP_NOT_FOUND; (p = W_ListNumFromName(name, p)) != LUMP_NOT_FOUND;)
 	{
-		if(lumpinfo[p].flags == LUMP_PRBOOM)
+		if(lumpinfo[p].flags == LumpFlag::PrBoom)
 		{
 			return p;
 		}

@@ -235,8 +235,11 @@ static void dsda_PrintBFProgress()
 		bf_volume, bf_volume_max, percent, static_cast<float>(elapsed_time) / 1000);
 }
 
-#define BF_FAILURE 0
-#define BF_SUCCESS 1
+enum struct BruteForceResult : uint8_t
+{
+	Failure,
+	Success,
+};
 
 static const char* bf_result_text[2] = {"FAILURE", "SUCCESS"};
 static dboolean brute_force_ended;
@@ -246,11 +249,11 @@ dboolean dsda_BruteForceEnded()
 	return brute_force_ended;
 }
 
-static void dsda_EndBF(int result)
+static void dsda_EndBF(const BruteForceResult result)
 {
 	brute_force_ended = true;
 
-	Log::Info("Brute force complete ({})!\n", bf_result_text[result]);
+	Log::Info("Brute force complete ({})!\n", bf_result_text[std::to_underlying(result)]);
 	dsda_PrintBFProgress();
 
 	if(bf_nomonsters)
@@ -260,7 +263,7 @@ static void dsda_EndBF(int result)
 
 	bf_mode = false;
 
-	if(result == BF_SUCCESS)
+	if(result == BruteForceResult::Success)
 		dsda_QueueBuildCommands(bf_result, bf_depth);
 	else
 		dsda_ExitSkipMode();
@@ -728,14 +731,14 @@ void dsda_EvaluateBruteForce()
 	if(dsda_BFConditionsReached())
 	{
 		dsda_CopyBFResult(brute_force, bf_depth);
-		dsda_EndBF(BF_SUCCESS);
+		dsda_EndBF(BruteForceResult::Success);
 	}
 	else if(bf_volume >= bf_volume_max)
 	{
 		if(bf_target.enabled && bf_target.evaluated)
-			dsda_EndBF(BF_SUCCESS);
+			dsda_EndBF(BruteForceResult::Success);
 		else
-			dsda_EndBF(BF_FAILURE);
+			dsda_EndBF(BruteForceResult::Failure);
 	}
 }
 
