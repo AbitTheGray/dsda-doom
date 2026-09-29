@@ -773,7 +773,7 @@ static void P_NewChaseDir(mobj_t* actor)
 						(target->info->missilestate == StateId::Null && dist < target->info->meleerange * 2) ||
 						(
 							target->player && dist < target->player->mo->info->meleerange * 3 &&
-							weaponinfo[std::to_underlying(target->player->readyweapon)].flags & WPF_FLEEMELEE
+							(weaponinfo[std::to_underlying(target->player->readyweapon)].flags & WeaponFlag::FleeMelee) != WeaponFlag{}
 						)
 					)
 				)

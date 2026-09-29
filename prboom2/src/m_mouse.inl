@@ -3,9 +3,16 @@
 // DESCRIPTION:
 //	DSDA Menu Mouse Functions
 
-#define MENU_MOUSE_LEFT        1
-#define MENU_MOUSE_RIGHT       2
-#define MENU_MOUSE_MIDDLE      4
+// Mouse button bits of a mouse event's `data1.i`, as `I_SDLtoDoomMouseState` packs them.
+// Only the buttons the menu reacts to are named.
+enum struct MenuMouseButton : uint8_t
+{
+	Left = Bit<uint8_t>(0u),
+	Right = Bit<uint8_t>(1u),
+	Middle = Bit<uint8_t>(2u),
+};
+ENUM_FLAGS_FUNC(MenuMouseButton)
+
 #define MENU_MOUSE_HEIGHT      200
 #define MENU_MOUSE_TAB_Y_PAD   4
 #define MENU_MOUSE_TAB_X_PAD   6
@@ -22,7 +29,7 @@ typedef struct
 	int bottom;
 } menu_mouse_rect_t;
 
-static int menu_mouse_buttons;
+static MenuMouseButton menu_mouse_buttons;
 static int menu_mouse_x = BASE_WIDTH / 2;
 static int menu_mouse_y = MENU_MOUSE_HEIGHT / 2;
 static dboolean menu_mouse_in_viewport;
@@ -80,7 +87,7 @@ static void M_MouseClearTabHover()
 
 static void M_MouseResetButtons()
 {
-	menu_mouse_buttons = 0;
+	menu_mouse_buttons = MenuMouseButton{};
 	menu_mouse_drag_setup = -1;
 	menu_mouse_drag_main = -1;
 }
@@ -1115,11 +1122,11 @@ static dboolean M_MouseBindingCaptureResponder(event_t* ev)
 {
 	if(ev->type == EventType::Mouse)
 	{
-		int buttons = ev->data1.i;
+		const MenuMouseButton buttons = static_cast<MenuMouseButton>(ev->data1.i);
 
 		menu_mouse_buttons = buttons;
 
-		return buttons == 0;
+		return buttons == MenuMouseButton{};
 	}
 
 	return true;
@@ -1132,10 +1139,10 @@ static dboolean M_MouseSoundSliderTitleAtPointer()
 
 static dboolean M_MouseMotionResponder()
 {
-	if(menu_mouse_drag_setup >= 0 && (menu_mouse_buttons & MENU_MOUSE_LEFT))
+	if(menu_mouse_drag_setup >= 0 && (menu_mouse_buttons & MenuMouseButton::Left) != MenuMouseButton{})
 		return M_MouseSetSetupThermo(menu_mouse_drag_setup);
 
-	if(menu_mouse_drag_main >= 0 && (menu_mouse_buttons & MENU_MOUSE_LEFT))
+	if(menu_mouse_drag_main >= 0 && (menu_mouse_buttons & MenuMouseButton::Left) != MenuMouseButton{})
 		return M_MouseSetSoundSlider(menu_mouse_drag_main);
 
 	if(M_MouseColorChipAtPointer())
@@ -1198,38 +1205,38 @@ static dboolean M_MouseLeftPressResponder(event_t* ev)
 
 static dboolean M_MouseButtonResponder(event_t* ev)
 {
-	int buttons = ev->data1.i;
-	int pressed = buttons & ~menu_mouse_buttons;
-	int released = menu_mouse_buttons & ~buttons;
+	const MenuMouseButton buttons = static_cast<MenuMouseButton>(ev->data1.i);
+	const MenuMouseButton pressed = buttons - menu_mouse_buttons;
+	const MenuMouseButton released = menu_mouse_buttons - buttons;
 
 	menu_mouse_buttons = buttons;
 
-	if(released & MENU_MOUSE_LEFT)
+	if((released & MenuMouseButton::Left) != MenuMouseButton{})
 	{
 		menu_mouse_drag_setup = -1;
 		menu_mouse_drag_main = -1;
 	}
 
-	if((buttons & MENU_MOUSE_LEFT) && menu_mouse_drag_setup >= 0)
+	if((buttons & MenuMouseButton::Left) != MenuMouseButton{} && menu_mouse_drag_setup >= 0)
 		return M_MouseSetSetupThermo(menu_mouse_drag_setup);
 
-	if((buttons & MENU_MOUSE_LEFT) && menu_mouse_drag_main >= 0)
+	if((buttons & MenuMouseButton::Left) != MenuMouseButton{} && menu_mouse_drag_main >= 0)
 		return M_MouseSetSoundSlider(menu_mouse_drag_main);
 
-	if((pressed & MENU_MOUSE_RIGHT) && M_MouseCancelSetupSelection(ev))
+	if((pressed & MenuMouseButton::Right) != MenuMouseButton{} && M_MouseCancelSetupSelection(ev))
 		return true;
 
-	if((pressed & MENU_MOUSE_RIGHT) && saveStringEnter &&
+	if((pressed & MenuMouseButton::Right) != MenuMouseButton{} && saveStringEnter &&
 		currentMenu == &SaveDef)
 		return M_MouseMenuAction(MenuAction::Escape, ev);
 
-	if(pressed & MENU_MOUSE_RIGHT)
+	if((pressed & MenuMouseButton::Right) != MenuMouseButton{})
 		return M_MouseMenuAction(MenuAction::Backspace, ev);
 
-	if(pressed & MENU_MOUSE_MIDDLE)
+	if((pressed & MenuMouseButton::Middle) != MenuMouseButton{})
 		return M_MouseMenuAction(MenuAction::Clear, ev);
 
-	if(pressed & MENU_MOUSE_LEFT)
+	if((pressed & MenuMouseButton::Left) != MenuMouseButton{})
 		return M_MouseLeftPressResponder(ev);
 
 	return false;
@@ -1245,7 +1252,7 @@ static dboolean M_MouseResponder(event_t* ev)
 			reelplayback);
 
 		if(click_to_open_menu && ev->type == EventType::Mouse &&
-			(ev->data1.i & MENU_MOUSE_LEFT))
+			(static_cast<MenuMouseButton>(ev->data1.i) & MenuMouseButton::Left) != MenuMouseButton{})
 		{
 			M_MouseReadPosition();
 

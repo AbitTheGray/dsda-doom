@@ -1265,12 +1265,12 @@ static const struct deh_flag_s deh_mobjflags_mbf21[] = {
 };
 
 static const struct deh_flag_s deh_weaponflags_mbf21[] = {
-	{"NOTHRUST", WPF_NOTHRUST},             // doesn't thrust Mobj's
-	{"SILENT", WPF_SILENT},                 // weapon is silent
-	{"NOAUTOFIRE", WPF_NOAUTOFIRE},         // weapon won't autofire in A_WeaponReady
-	{"FLEEMELEE", WPF_FLEEMELEE},           // monsters consider it a melee weapon
-	{"AUTOSWITCHFROM", WPF_AUTOSWITCHFROM}, // can be switched away from when ammo is picked up
-	{"NOAUTOSWITCHTO", WPF_NOAUTOSWITCHTO}, // cannot be switched to when ammo is picked up
+	{"NOTHRUST", std::to_underlying(WeaponFlag::NoThrust)},             // doesn't thrust Mobj's
+	{"SILENT", std::to_underlying(WeaponFlag::Silent)},                 // weapon is silent
+	{"NOAUTOFIRE", std::to_underlying(WeaponFlag::NoAutoFire)},         // weapon won't autofire in A_WeaponReady
+	{"FLEEMELEE", std::to_underlying(WeaponFlag::FleeMelee)},           // monsters consider it a melee weapon
+	{"AUTOSWITCHFROM", std::to_underlying(WeaponFlag::AutoSwitchFrom)}, // can be switched away from when ammo is picked up
+	{"NOAUTOSWITCHTO", std::to_underlying(WeaponFlag::NoAutoSwitchTo)}, // cannot be switched to when ammo is picked up
 	{nullptr}
 };
 
@@ -2589,7 +2589,7 @@ static void deh_procWeapon(DEHFILE* fpin, char* line)
 				}
 			}
 
-			weaponinfo[indexnum].flags = value;
+			weaponinfo[indexnum].flags = static_cast<WeaponFlag>(value);
 		}
 		else
 			deh_log("Invalid weapon string index for '%s'\n", key);

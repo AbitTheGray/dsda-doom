@@ -111,7 +111,7 @@ static dboolean P_GiveAmmoAutoSwitch(player_t* player, AmmoType ammo, int oldamm
 	int i;
 
 	if(
-		weaponinfo[std::to_underlying(player->readyweapon)].flags & WPF_AUTOSWITCHFROM &&
+		(weaponinfo[std::to_underlying(player->readyweapon)].flags & WeaponFlag::AutoSwitchFrom) != WeaponFlag{} &&
 		weaponinfo[std::to_underlying(player->readyweapon)].ammo != ammo
 	)
 	{
@@ -119,7 +119,7 @@ static dboolean P_GiveAmmoAutoSwitch(player_t* player, AmmoType ammo, int oldamm
 		{
 			if(
 				player->weaponowned[i] &&
-				!(weaponinfo[i].flags & WPF_NOAUTOSWITCHTO) &&
+				(weaponinfo[i].flags & WeaponFlag::NoAutoSwitchTo) == WeaponFlag{} &&
 				weaponinfo[i].ammo == ammo &&
 				weaponinfo[i].ammopershot > oldammo &&
 				weaponinfo[i].ammopershot <= player->ammo[std::to_underlying(ammo)]
@@ -1485,7 +1485,7 @@ void P_DamageMobj(mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage)
 		!(
 			source &&
 			source->player &&
-			(hexen || weaponinfo[std::to_underlying(source->player->readyweapon)].flags & WPF_NOTHRUST)
+			(hexen || (weaponinfo[std::to_underlying(source->player->readyweapon)].flags & WeaponFlag::NoThrust) != WeaponFlag{})
 		) &&
 		(inflictor->flags2 & MobjFlag2::NoDmgThrust) == MobjFlag2{}
 	)

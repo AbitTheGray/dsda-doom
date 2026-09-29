@@ -20,26 +20,24 @@ enum struct WeaponIntFlag : uint32_t
 };
 ENUM_FLAGS_FUNC(WeaponIntFlag)
 
+// haleyjd 09/11/07: weapon flags
+enum struct WeaponFlag : uint32_t
+{
+	NoThrust = Bit<uint32_t>(0u),       // doesn't thrust Mobj's
+	Silent = Bit<uint32_t>(1u),         // weapon is silent
+	NoAutoFire = Bit<uint32_t>(2u),     // weapon won't autofire in A_WeaponReady
+	FleeMelee = Bit<uint32_t>(3u),      // monsters consider it a melee weapon
+	AutoSwitchFrom = Bit<uint32_t>(4u), // can be switched away from when ammo is picked up
+	NoAutoSwitchTo = Bit<uint32_t>(5u), // cannot be switched to when ammo is picked up
+};
+ENUM_FLAGS_FUNC(WeaponFlag)
+
 enum struct StateId : int32_t;
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-//
-// Internal weapon flags
-//
-
-// haleyjd 09/11/07: weapon flags
-//
-#define WPF_NOFLAG         0x00000000 // no flag
-#define WPF_NOTHRUST       0x00000001 // doesn't thrust Mobj's
-#define WPF_SILENT         0x00000002 // weapon is silent
-#define WPF_NOAUTOFIRE     0x00000004 // weapon won't autofire in A_WeaponReady
-#define WPF_FLEEMELEE      0x00000008 // monsters consider it a melee weapon
-#define WPF_AUTOSWITCHFROM 0x00000010 // can be switched away from when ammo is picked up
-#define WPF_NOAUTOSWITCHTO   0x00000020 // cannot be switched to when ammo is picked up
 
 /* Weapon info: sprite frames, ammunition use. */
 typedef struct
@@ -53,7 +51,7 @@ typedef struct
 	StateId flashstate;
 	int ammopershot;
 	WeaponIntFlag intflags;
-	int flags;
+	WeaponFlag flags;
 } weaponinfo_t;
 
 extern weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2];

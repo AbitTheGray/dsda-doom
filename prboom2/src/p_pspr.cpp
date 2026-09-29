@@ -499,7 +499,7 @@ static void P_FireWeapon(player_t* player)
 	}
 
 	P_SetPsprite(player, PspNum::Weapon, static_cast<StateId>(newstate));
-	if(hexen || !(weaponinfo[std::to_underlying(player->readyweapon)].flags & WPF_SILENT))
+	if(hexen || (weaponinfo[std::to_underlying(player->readyweapon)].flags & WeaponFlag::Silent) == WeaponFlag{})
 		P_NoiseAlert(player->mo, player->mo);
 
 	// heretic_note: does the order matter? can we move it up?
@@ -601,7 +601,7 @@ extern "C" void A_WeaponReady(player_t* player, pspdef_t* psp)
 		if(
 			hexen || // hexen_note: why is this different?
 			!player->attackdown ||
-			!(weaponinfo[std::to_underlying(player->readyweapon)].flags & WPF_NOAUTOFIRE)
+			(weaponinfo[std::to_underlying(player->readyweapon)].flags & WeaponFlag::NoAutoFire) == WeaponFlag{}
 		)
 		{
 			player->attackdown = true;
@@ -1374,7 +1374,7 @@ extern "C" void A_WeaponSound(player_t* player, pspdef_t* psp)
 
 //
 // A_WeaponAlert
-// Alerts monsters to the player's presence. Handy when combined with WPF_SILENT.
+// Alerts monsters to the player's presence. Handy when combined with WeaponFlag::Silent.
 //
 extern "C" void A_WeaponAlert(player_t* player, pspdef_t* psp)
 {

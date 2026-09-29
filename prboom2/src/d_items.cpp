@@ -38,7 +38,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		1,
 		WeaponIntFlag{},
-		WPF_FLEEMELEE | WPF_AUTOSWITCHFROM | WPF_NOAUTOSWITCHTO
+		WeaponFlag::FleeMelee | WeaponFlag::AutoSwitchFrom | WeaponFlag::NoAutoSwitchTo
 	},
 	{
 		// pistol
@@ -51,7 +51,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Pistolflash,
 		1,
 		WeaponIntFlag{},
-		WPF_AUTOSWITCHFROM
+		WeaponFlag::AutoSwitchFrom
 	},
 	{
 		// shotgun
@@ -64,7 +64,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Sgunflash1,
 		1,
 		WeaponIntFlag{},
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// chaingun
@@ -77,7 +77,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Chainflash1,
 		1,
 		WeaponIntFlag{},
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// missile launcher
@@ -90,7 +90,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Missileflash1,
 		1,
 		WeaponIntFlag{},
-		WPF_NOAUTOFIRE
+		WeaponFlag::NoAutoFire
 	},
 	{
 		// plasma rifle
@@ -103,7 +103,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Plasmaflash1,
 		1,
 		WeaponIntFlag{},
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// bfg 9000
@@ -116,7 +116,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Bfgflash1,
 		40,
 		WeaponIntFlag{},
-		WPF_NOAUTOFIRE
+		WeaponFlag::NoAutoFire
 	},
 	{
 		// chainsaw
@@ -129,7 +129,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		1,
 		WeaponIntFlag{},
-		WPF_NOTHRUST | WPF_FLEEMELEE | WPF_NOAUTOSWITCHTO
+		WeaponFlag::NoThrust | WeaponFlag::FleeMelee | WeaponFlag::NoAutoSwitchTo
 	},
 	{
 		// super shotgun
@@ -142,7 +142,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Dsgunflash1,
 		2,
 		WeaponIntFlag{},
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 
 	// dseg03:00082D90                 weaponinfo_t <5, 46h, 45h, 43h, 47h, 0>
@@ -163,7 +163,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		0,
 		WeaponIntFlag{},
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// preved medved weapon
@@ -176,7 +176,7 @@ weaponinfo_t doom_weaponinfo[std::to_underlying(WeaponType::Count) + 2] =
 		StateId::Null,
 		0,
 		WeaponIntFlag{},
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 };
 
@@ -196,7 +196,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,        // flashstate
 		0,                     // ammopershot
 		WeaponIntFlag{},                     // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Gold wand
@@ -209,7 +209,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,           // flashstate
 		USE_GWND_AMMO_1,          // ammopershot
 		WeaponIntFlag{},                        // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Crossbow
@@ -222,7 +222,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,        // flashstate
 		USE_CBOW_AMMO_1,       // ammopershot
 		WeaponIntFlag{},                     // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Blaster
@@ -235,7 +235,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,          // flashstate
 		USE_BLSR_AMMO_1,         // ammopershot
 		WeaponIntFlag{},                       // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Skull rod
@@ -248,7 +248,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,          // flashstate
 		USE_SKRD_AMMO_1,         // ammopershot
 		WeaponIntFlag{},                       // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Phoenix rod
@@ -261,7 +261,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,          // flashstate
 		USE_PHRD_AMMO_1,         // ammopershot
 		WeaponIntFlag{},                       // intflags
-		WPF_NOAUTOFIRE
+		WeaponFlag::NoAutoFire
 	},
 	{
 		// Mace
@@ -274,7 +274,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,       // flashstate
 		USE_MACE_AMMO_1,      // ammopershot
 		WeaponIntFlag{},                    // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Gauntlets
@@ -287,7 +287,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,           // flashstate
 		0,                        // ammopershot
 		WeaponIntFlag{},                        // intflags
-		WPF_NOTHRUST
+		WeaponFlag::NoThrust
 	},
 	{
 		// Beak
@@ -300,7 +300,7 @@ weaponinfo_t wpnlev1info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,       // flashstate
 		0,                    // ammopershot
 		WeaponIntFlag{},                    // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	}
 };
 
@@ -316,7 +316,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,          // flashstate
 		0,                       // ammopershot
 		WeaponIntFlag{},                       // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Gold wand
@@ -329,7 +329,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,           // flashstate
 		USE_GWND_AMMO_2,          // ammopershot
 		WeaponIntFlag{},                        // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Crossbow
@@ -342,7 +342,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,        // flashstate
 		USE_CBOW_AMMO_2,       // ammopershot
 		WeaponIntFlag{},                     // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Blaster
@@ -355,7 +355,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,          // flashstate
 		USE_BLSR_AMMO_2,         // ammopershot
 		WeaponIntFlag{},                       // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Skull rod
@@ -368,7 +368,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,          // flashstate
 		USE_SKRD_AMMO_2,         // ammopershot
 		WeaponIntFlag{},                       // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Phoenix rod
@@ -381,7 +381,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,          // flashstate
 		USE_PHRD_AMMO_2,         // ammopershot
 		WeaponIntFlag{},                       // intflags
-		WPF_NOAUTOFIRE
+		WeaponFlag::NoAutoFire
 	},
 	{
 		// Mace
@@ -394,7 +394,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,       // flashstate
 		USE_MACE_AMMO_2,      // ammopershot
 		WeaponIntFlag{},                    // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	},
 	{
 		// Gauntlets
@@ -407,7 +407,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,             // flashstate
 		0,                          // ammopershot
 		WeaponIntFlag{},                          // intflags
-		WPF_NOTHRUST
+		WeaponFlag::NoThrust
 	},
 	{
 		// Beak
@@ -420,7 +420,7 @@ weaponinfo_t wpnlev2info[std::to_underlying(WeaponType::Count)] = {
 		StateId::HereticNull,       // flashstate
 		0,                    // ammopershot
 		WeaponIntFlag{},                    // intflags
-		WPF_NOFLAG
+		WeaponFlag{}
 	}
 };
 
@@ -440,7 +440,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,        // flashstate
 			0,                   // ammopershot
 			WeaponIntFlag{},                   // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		}},
 		{
 			// Cleric First Weapon - Mace
@@ -453,7 +453,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			WeaponIntFlag{},                  // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		},
 		{
 			// Mage First Weapon - Wand
@@ -466,7 +466,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			WeaponIntFlag{},                  // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		},
 		{
 			// Pig - Snout
@@ -479,7 +479,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			WeaponIntFlag{},                  // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		}
 	}},
 	{At(WeaponType::Second), {
@@ -495,7 +495,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,      // flashstate
 			2,                 // ammopershot
 			WeaponIntFlag{},                 // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		}},
 		{
 			// Cleric - Serpent Staff
@@ -508,7 +508,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,        // flashstate
 			1,                   // ammopershot
 			WeaponIntFlag{},                   // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		},
 		{
 			// Mage - Cone of shards
@@ -521,7 +521,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,       // flashstate
 			3,                  // ammopershot
 			WeaponIntFlag{},                  // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		},
 		{
 			// Pig - Snout
@@ -534,7 +534,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			WeaponIntFlag{},                  // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		}
 	}},
 	{At(WeaponType::Third), {
@@ -550,7 +550,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,         // flashstate
 			3,                    // ammopershot
 			WeaponIntFlag{},                    // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		}},
 		{
 			// Cleric - Flame Strike
@@ -563,7 +563,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,         // flashstate
 			4,                    // ammopershot
 			WeaponIntFlag{},                    // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		},
 		{
 			// Mage - Lightning
@@ -576,7 +576,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,            // flashstate
 			5,                       // ammopershot
 			WeaponIntFlag{},                       // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		},
 		{
 			// Pig - Snout
@@ -589,7 +589,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			WeaponIntFlag{},                  // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		}
 	}},
 	{At(WeaponType::Fourth), {
@@ -605,7 +605,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,        // flashstate
 			14,                  // ammopershot
 			WeaponIntFlag{},                   // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		}},
 		{
 			// Cleric - Holy Symbol
@@ -618,7 +618,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,       // flashstate
 			18,                 // ammopershot
 			WeaponIntFlag{},                  // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		},
 		{
 			// Mage - Staff
@@ -631,7 +631,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,        // flashstate
 			15,                  // ammopershot
 			WeaponIntFlag{},                   // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		},
 		{
 			// Pig - Snout
@@ -644,7 +644,7 @@ constinit EnumArray<EnumArray<weaponinfo_t, PClass>, WeaponType, WeaponType::Hex
 			StateId::HexenNull,       // flashstate
 			0,                  // ammopershot
 			WeaponIntFlag{},                  // intflags
-			WPF_NOFLAG
+			WeaponFlag{}
 		}
 	}}
 };
